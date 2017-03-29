@@ -1,6 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def test_org_counts_detail_admin(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
     external_admin = user('admin', True)
     response = get(reverse('api:organization_detail',
-                   args=[resourced_organization.pk]), external_admin)
+                   kwargs={'pk': resourced_organization.pk}), external_admin)
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
@@ -82,7 +82,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
     # Check that a non-admin org member can only see users / admin in detail view
     member_user = resourced_organization.member_role.members.get(username='org-member 1')
     response = get(reverse('api:organization_detail',
-                   args=[resourced_organization.pk]), member_user)
+                   kwargs={'pk': resourced_organization.pk}), member_user)
     assert response.status_code == 200
 
     counts = response.data['summary_fields']['related_field_counts']
@@ -100,7 +100,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
 def test_org_counts_list_admin(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
     external_admin = user('admin', True)
-    response = get(reverse('api:organization_list', args=[]), external_admin)
+    response = get(reverse('api:organization_list'), external_admin)
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
@@ -112,7 +112,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
     # Check that a non-admin user can only see the full project and
     #   user count, consistent with the RBAC rules
     member_user = resourced_organization.member_role.members.get(username='org-member 1')
-    response = get(reverse('api:organization_list', args=[]), member_user)
+    response = get(reverse('api:organization_list'), member_user)
     assert response.status_code == 200
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
@@ -131,7 +131,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
 def test_new_org_zero_counts(user, post):
     # Check that a POST to the organization list endpoint returns
     #   correct counts, including the new record
-    org_list_url = reverse('api:organization_list', args=[])
+    org_list_url = reverse('api:organization_list')
     post_response = post(url=org_list_url, data={'name': 'test organization',
                          'description': ''}, user=user('admin', True))
     assert post_response.status_code == 201
@@ -146,7 +146,7 @@ def test_two_organizations(resourced_organization, organizations, user, get):
     # Check correct results for two organizations are returned
     external_admin = user('admin', True)
     organization_zero = organizations(1)[0]
-    response = get(reverse('api:organization_list', args=[]), external_admin)
+    response = get(reverse('api:organization_list'), external_admin)
     assert response.status_code == 200
 
     org_id_full = resourced_organization.id
@@ -171,12 +171,12 @@ def test_scan_JT_counted(resourced_organization, user, get):
     counts_dict['job_templates'] += 1
 
     # Test list view
-    list_response = get(reverse('api:organization_list', args=[]), admin_user)
+    list_response = get(reverse('api:organization_list'), admin_user)
     assert list_response.status_code == 200
     assert list_response.data['results'][0]['summary_fields']['related_field_counts'] == counts_dict
 
     # Test detail view
-    detail_response = get(reverse('api:organization_detail', args=[resourced_organization.pk]), admin_user)
+    detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
     assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
 
@@ -194,12 +194,12 @@ def test_JT_not_double_counted(resourced_organization, user, get):
     counts_dict['job_templates'] += 1
 
     # Test list view
-    list_response = get(reverse('api:organization_list', args=[]), admin_user)
+    list_response = get(reverse('api:organization_list'), admin_user)
     assert list_response.status_code == 200
     assert list_response.data['results'][0]['summary_fields']['related_field_counts'] == counts_dict
 
     # Test detail view
-    detail_response = get(reverse('api:organization_detail', args=[resourced_organization.pk]), admin_user)
+    detail_response = get(reverse('api:organization_detail', kwargs={'pk': resourced_organization.pk}), admin_user)
     assert detail_response.status_code == 200
     assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
 
@@ -220,7 +220,7 @@ def test_JT_associated_with_project(organizations, project, user, get):
                                 inventory=unrelated_inv,
                                 playbook="test_playbook.yml")
 
-    response = get(reverse('api:organization_list', args=[]), external_admin)
+    response = get(reverse('api:organization_list'), external_admin)
     assert response.status_code == 200
 
     org_id = organization.id

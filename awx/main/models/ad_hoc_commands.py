@@ -16,9 +16,9 @@ from django.utils.text import Truncator
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
@@ -143,8 +143,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         from awx.main.tasks import RunAdHocCommand
         return RunAdHocCommand
 
-    def get_absolute_url(self):
-        return reverse('api:ad_hoc_command_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:ad_hoc_command_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
@@ -318,8 +318,8 @@ class AdHocCommandEvent(CreatedModifiedModel):
         editable=False,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:ad_hoc_command_event_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:ad_hoc_command_event_detail', kwargs={'pk': self.pk}, request=request)
 
     def __unicode__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())

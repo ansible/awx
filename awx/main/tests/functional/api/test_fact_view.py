@@ -2,8 +2,8 @@ import mock
 import pytest
 import json
 
+from awx.api.versioning import reverse
 from awx.main.utils import timestamp_apiformat
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 
@@ -27,7 +27,7 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), module_name
     hosts = hosts(host_count=1)
     facts = fact_scans(fact_scans=1, timestamp_epoch=epoch)
 
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True), data=get_params)
 
     fact_known = find_fact(facts, hosts[0].id, module_name, epoch)
@@ -44,7 +44,7 @@ def check_system_tracking_feature_forbidden(response):
 @pytest.mark.license_feature
 def test_system_tracking_license_get(hosts, get, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True))
 
     check_system_tracking_feature_forbidden(response)
@@ -55,7 +55,7 @@ def test_system_tracking_license_get(hosts, get, user):
 @pytest.mark.license_feature
 def test_system_tracking_license_options(hosts, options, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = options(url, None, user('admin', True))
 
     check_system_tracking_feature_forbidden(response)
@@ -65,7 +65,7 @@ def test_system_tracking_license_options(hosts, options, user):
 @pytest.mark.django_db
 def test_no_fact_found(hosts, get, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True))
 
     expected_response = {
@@ -81,7 +81,7 @@ def test_basic_fields(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_d
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True))
 
     assert 'related' in response.data
@@ -95,7 +95,7 @@ def test_basic_fields(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_d
     assert 'name' in response.data['summary_fields']['host']
     assert 'description' in response.data['summary_fields']['host']
     assert 'host' in response.data['related']
-    assert reverse('api:host_detail', args=(hosts[0].pk,)) == response.data['related']['host']
+    assert reverse('api:host_detail', kwargs={'pk': hosts[0].pk}) == response.data['related']['host']
 
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
@@ -149,7 +149,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
 
     team_obj.member_role.members.add(user_obj)
 
-    url = reverse('api:host_fact_compare_view', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_compare_view', kwargs={'pk': hosts[0].pk})
     response = get(url, user_obj)
     return response
 

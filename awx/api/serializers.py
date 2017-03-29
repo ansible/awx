@@ -4,9 +4,10 @@
 # Python
 import copy
 import json
+import logging
 import re
 import six
-import logging
+import urllib
 from collections import OrderedDict
 from dateutil import rrule
 
@@ -18,7 +19,6 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -43,11 +43,12 @@ from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
-    get_type_for_model, get_model_for_type, build_url, timestamp_apiformat,
+    get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json)
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
+from awx.api.versioning import reverse
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
 
 logger = logging.getLogger('awx.api.serializers')
@@ -103,7 +104,7 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 
-def reverse_gfk(content_object):
+def reverse_gfk(content_object, request):
     '''
     Computes a reverse for a GenericForeignKey field.
 
@@ -116,7 +117,7 @@ def reverse_gfk(content_object):
         return {}
 
     return {
-        camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url()
+        camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url(request=request)
     }
 
 
@@ -268,9 +269,9 @@ class BaseSerializer(serializers.ModelSerializer):
         if obj is None or not hasattr(obj, 'get_absolute_url'):
             return ''
         elif isinstance(obj, User):
-            return reverse('api:user_detail', args=(obj.pk,))
+            return self.reverse('api:user_detail', kwargs={'pk': obj.pk})
         else:
-            return obj.get_absolute_url()
+            return obj.get_absolute_url(request=self.context.get('request'))
 
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
@@ -278,9 +279,9 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_related(self, obj):
         res = OrderedDict()
         if getattr(obj, 'created_by', None):
-            res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
+            res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):
-            res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
+            res['modified_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.modified_by.pk})
         return res
 
     def _get_summary_fields(self, obj):
@@ -496,6 +497,10 @@ class BaseSerializer(serializers.ModelSerializer):
             raise ValidationError(d)
         return attrs
 
+    def reverse(self, *args, **kwargs):
+        kwargs['request'] = self.context.get('request')
+        return reverse(*args, **kwargs)
+
 
 class EmptySerializer(serializers.Serializer):
     pass
@@ -525,11 +530,11 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
         if obj.current_job:
-            res['current_job'] = obj.current_job.get_absolute_url()
+            res['current_job'] = obj.current_job.get_absolute_url(request=self.context.get('request'))
         if obj.last_job:
-            res['last_job'] = obj.last_job.get_absolute_url()
+            res['last_job'] = obj.last_job.get_absolute_url(request=self.context.get('request'))
         if obj.next_schedule:
-            res['next_schedule'] = obj.next_schedule.get_absolute_url()
+            res['next_schedule'] = obj.next_schedule.get_absolute_url(request=self.context.get('request'))
         return res
 
     def get_types(self):
@@ -589,19 +594,19 @@ class UnifiedJobSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(UnifiedJobSerializer, self).get_related(obj)
         if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url(request=self.context.get('request'))
         if obj.schedule:
-            res['schedule'] = obj.schedule.get_absolute_url()
+            res['schedule'] = obj.schedule.get_absolute_url(request=self.context.get('request'))
         if isinstance(obj, ProjectUpdate):
-            res['stdout'] = reverse('api:project_update_stdout', args=(obj.pk,))
+            res['stdout'] = self.reverse('api:project_update_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, InventoryUpdate):
-            res['stdout'] = reverse('api:inventory_update_stdout', args=(obj.pk,))
+            res['stdout'] = self.reverse('api:inventory_update_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, Job):
-            res['stdout'] = reverse('api:job_stdout', args=(obj.pk,))
+            res['stdout'] = self.reverse('api:job_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, AdHocCommand):
-            res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
+            res['stdout'] = self.reverse('api:ad_hoc_command_stdout', kwargs={'pk': obj.pk})
         if obj.workflow_job_id:
-            res['source_workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job_id,))
+            res['source_workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job_id})
         return res
 
     def get_summary_fields(self, obj):
@@ -811,14 +816,14 @@ class UserSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(UserSerializer, self).get_related(obj)
         res.update(dict(
-            teams                  = reverse('api:user_teams_list',               args=(obj.pk,)),
-            organizations          = reverse('api:user_organizations_list',       args=(obj.pk,)),
-            admin_of_organizations = reverse('api:user_admin_of_organizations_list', args=(obj.pk,)),
-            projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
-            credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
-            roles                  = reverse('api:user_roles_list',               args=(obj.pk,)),
-            activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
-            access_list            = reverse('api:user_access_list',              args=(obj.pk,)),
+            teams                  = self.reverse('api:user_teams_list',               kwargs={'pk': obj.pk}),
+            organizations          = self.reverse('api:user_organizations_list',       kwargs={'pk': obj.pk}),
+            admin_of_organizations = self.reverse('api:user_admin_of_organizations_list', kwargs={'pk': obj.pk}),
+            projects               = self.reverse('api:user_projects_list',            kwargs={'pk': obj.pk}),
+            credentials            = self.reverse('api:user_credentials_list',         kwargs={'pk': obj.pk}),
+            roles                  = self.reverse('api:user_roles_list',               kwargs={'pk': obj.pk}),
+            activity_stream        = self.reverse('api:user_activity_stream_list',     kwargs={'pk': obj.pk}),
+            access_list            = self.reverse('api:user_access_list',              kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -864,20 +869,20 @@ class OrganizationSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
         res.update(dict(
-            projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
-            inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
-            workflow_job_templates = reverse('api:organization_workflow_job_templates_list', args=(obj.pk,)),
-            users       = reverse('api:organization_users_list',          args=(obj.pk,)),
-            admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
-            teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
-            credentials = reverse('api:organization_credential_list',     args=(obj.pk,)),
-            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,)),
-            notification_templates = reverse('api:organization_notification_templates_list', args=(obj.pk,)),
-            notification_templates_any = reverse('api:organization_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:organization_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:organization_notification_templates_error_list', args=(obj.pk,)),
-            object_roles = reverse('api:organization_object_roles_list', args=(obj.pk,)),
-            access_list = reverse('api:organization_access_list', args=(obj.pk,)),
+            projects    = self.reverse('api:organization_projects_list',       kwargs={'pk': obj.pk}),
+            inventories = self.reverse('api:organization_inventories_list',    kwargs={'pk': obj.pk}),
+            workflow_job_templates = self.reverse('api:organization_workflow_job_templates_list', kwargs={'pk': obj.pk}),
+            users       = self.reverse('api:organization_users_list',          kwargs={'pk': obj.pk}),
+            admins      = self.reverse('api:organization_admins_list',         kwargs={'pk': obj.pk}),
+            teams       = self.reverse('api:organization_teams_list',          kwargs={'pk': obj.pk}),
+            credentials = self.reverse('api:organization_credential_list',     kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
+            notification_templates = self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:organization_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:organization_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -903,8 +908,8 @@ class ProjectOptionsSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
         if obj.credential:
-            res['credential'] = reverse('api:credential_detail',
-                                        args=(obj.credential.pk,))
+            res['credential'] = self.reverse('api:credential_detail',
+                                             kwargs={'pk': obj.credential.pk})
         return res
 
     def validate(self, attrs):
@@ -953,28 +958,28 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
-            teams = reverse('api:project_teams_list', args=(obj.pk,)),
-            playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
-            update = reverse('api:project_update_view', args=(obj.pk,)),
-            project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
-            schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
-            activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
-            notification_templates_any = reverse('api:project_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:project_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:project_notification_templates_error_list', args=(obj.pk,)),
-            access_list = reverse('api:project_access_list', args=(obj.pk,)),
-            object_roles = reverse('api:project_object_roles_list', args=(obj.pk,)),
+            teams = self.reverse('api:project_teams_list', kwargs={'pk': obj.pk}),
+            playbooks = self.reverse('api:project_playbooks', kwargs={'pk': obj.pk}),
+            update = self.reverse('api:project_update_view', kwargs={'pk': obj.pk}),
+            project_updates = self.reverse('api:project_updates_list', kwargs={'pk': obj.pk}),
+            schedules = self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:project_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:project_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail',
-                                          args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail',
+                                               kwargs={'pk': obj.organization.pk})
         # Backwards compatibility.
         if obj.current_update:
-            res['current_update'] = reverse('api:project_update_detail',
-                                            args=(obj.current_update.pk,))
+            res['current_update'] = self.reverse('api:project_update_detail',
+                                                 kwargs={'pk': obj.current_update.pk})
         if obj.last_update:
-            res['last_update'] = reverse('api:project_update_detail',
-                                         args=(obj.last_update.pk,))
+            res['last_update'] = self.reverse('api:project_update_detail',
+                                              kwargs={'pk': obj.last_update.pk})
         return res
 
     def to_representation(self, obj):
@@ -1039,9 +1044,9 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
         res.update(dict(
-            project = reverse('api:project_detail', args=(obj.project.pk,)),
-            cancel = reverse('api:project_update_cancel', args=(obj.pk,)),
-            notifications = reverse('api:project_update_notifications_list', args=(obj.pk,)),
+            project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
+            cancel = self.reverse('api:project_update_cancel', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:project_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -1078,23 +1083,22 @@ class InventorySerializer(BaseSerializerWithVariables):
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
         res.update(dict(
-            hosts         = reverse('api:inventory_hosts_list',        args=(obj.pk,)),
-            groups        = reverse('api:inventory_groups_list',       args=(obj.pk,)),
-            root_groups   = reverse('api:inventory_root_groups_list',  args=(obj.pk,)),
-            variable_data = reverse('api:inventory_variable_data',     args=(obj.pk,)),
-            script        = reverse('api:inventory_script_view',       args=(obj.pk,)),
-            tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
-            inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
-            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
-            job_templates = reverse('api:inventory_job_template_list', args=(obj.pk,)),
-            scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
-            ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
-            access_list = reverse('api:inventory_access_list',         args=(obj.pk,)),
-            object_roles = reverse('api:inventory_object_roles_list', args=(obj.pk,)),
-            #single_fact = reverse('api:inventory_single_fact_view', args=(obj.pk,)),
+            hosts         = self.reverse('api:inventory_hosts_list',        kwargs={'pk': obj.pk}),
+            groups        = self.reverse('api:inventory_groups_list',       kwargs={'pk': obj.pk}),
+            root_groups   = self.reverse('api:inventory_root_groups_list',  kwargs={'pk': obj.pk}),
+            variable_data = self.reverse('api:inventory_variable_data',     kwargs={'pk': obj.pk}),
+            script        = self.reverse('api:inventory_script_view',       kwargs={'pk': obj.pk}),
+            tree          = self.reverse('api:inventory_tree_view',         kwargs={'pk': obj.pk}),
+            inventory_sources = self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
+            job_templates = self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
+            scan_job_templates = self.reverse('api:inventory_scan_job_template_list', kwargs={'pk': obj.pk}),
+            ad_hoc_commands = self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
 
     def to_representation(self, obj):
@@ -1143,24 +1147,23 @@ class HostSerializer(BaseSerializerWithVariables):
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('api:host_variable_data',   args=(obj.pk,)),
-            groups        = reverse('api:host_groups_list',     args=(obj.pk,)),
-            all_groups    = reverse('api:host_all_groups_list', args=(obj.pk,)),
-            job_events    = reverse('api:host_job_events_list',  args=(obj.pk,)),
-            job_host_summaries = reverse('api:host_job_host_summaries_list', args=(obj.pk,)),
-            activity_stream = reverse('api:host_activity_stream_list', args=(obj.pk,)),
-            inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
-            ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
-            ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
-            fact_versions = reverse('api:host_fact_versions_list', args=(obj.pk,)),
-            #single_fact = reverse('api:host_single_fact_view', args=(obj.pk,)),
+            variable_data = self.reverse('api:host_variable_data',   kwargs={'pk': obj.pk}),
+            groups        = self.reverse('api:host_groups_list',     kwargs={'pk': obj.pk}),
+            all_groups    = self.reverse('api:host_all_groups_list', kwargs={'pk': obj.pk}),
+            job_events    = self.reverse('api:host_job_events_list',  kwargs={'pk': obj.pk}),
+            job_host_summaries = self.reverse('api:host_job_host_summaries_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:host_activity_stream_list', kwargs={'pk': obj.pk}),
+            inventory_sources = self.reverse('api:host_inventory_sources_list', kwargs={'pk': obj.pk}),
+            ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
+            ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
+            fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:
-            res['last_job'] = reverse('api:job_detail', args=(obj.last_job.pk,))
+            res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': obj.last_job.pk})
         if obj.last_job_host_summary:
-            res['last_job_host_summary'] = reverse('api:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
+            res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': obj.last_job_host_summary.pk})
         return res
 
     def get_summary_fields(self, obj):
@@ -1253,22 +1256,21 @@ class GroupSerializer(BaseSerializerWithVariables):
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('api:group_variable_data',   args=(obj.pk,)),
-            hosts         = reverse('api:group_hosts_list',      args=(obj.pk,)),
-            potential_children = reverse('api:group_potential_children_list',   args=(obj.pk,)),
-            children      = reverse('api:group_children_list',   args=(obj.pk,)),
-            all_hosts     = reverse('api:group_all_hosts_list',  args=(obj.pk,)),
-            job_events    = reverse('api:group_job_events_list',   args=(obj.pk,)),
-            job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
-            activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
-            inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
-            ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
-            #single_fact = reverse('api:group_single_fact_view', args=(obj.pk,)),
+            variable_data = self.reverse('api:group_variable_data',   kwargs={'pk': obj.pk}),
+            hosts         = self.reverse('api:group_hosts_list',      kwargs={'pk': obj.pk}),
+            potential_children = self.reverse('api:group_potential_children_list',   kwargs={'pk': obj.pk}),
+            children      = self.reverse('api:group_children_list',   kwargs={'pk': obj.pk}),
+            all_hosts     = self.reverse('api:group_all_hosts_list',  kwargs={'pk': obj.pk}),
+            job_events    = self.reverse('api:group_job_events_list',   kwargs={'pk': obj.pk}),
+            job_host_summaries = self.reverse('api:group_job_host_summaries_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:group_activity_stream_list', kwargs={'pk': obj.pk}),
+            inventory_sources = self.reverse('api:group_inventory_sources_list', kwargs={'pk': obj.pk}),
+            ad_hoc_commands = self.reverse('api:group_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.inventory_source:
-            res['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,))
+            res['inventory_source'] = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk})
         return res
 
     def validate_name(self, value):
@@ -1363,11 +1365,11 @@ class CustomInventoryScriptSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
-            object_roles = reverse('api:inventory_script_object_roles_list', args=(obj.pk,)),
+            object_roles = self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
         ))
 
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
 
 
@@ -1381,10 +1383,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
         if obj.credential:
-            res['credential'] = reverse('api:credential_detail',
-                                        args=(obj.credential.pk,))
+            res['credential'] = self.reverse('api:credential_detail',
+                                             kwargs={'pk': obj.credential.pk})
         if obj.source_script:
-            res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
+            res['source_script'] = self.reverse('api:inventory_script_detail', kwargs={'pk': obj.source_script.pk})
         return res
 
     def validate_source_vars(self, value):
@@ -1437,27 +1439,27 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def get_related(self, obj):
         res = super(InventorySourceSerializer, self).get_related(obj)
         res.update(dict(
-            update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
-            inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
-            schedules = reverse('api:inventory_source_schedules_list', args=(obj.pk,)),
-            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
-            hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
-            groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
-            notification_templates_any = reverse('api:inventory_source_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:inventory_source_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:inventory_source_notification_templates_error_list', args=(obj.pk,)),
+            update = self.reverse('api:inventory_source_update_view', kwargs={'pk': obj.pk}),
+            inventory_updates = self.reverse('api:inventory_source_updates_list', kwargs={'pk': obj.pk}),
+            schedules = self.reverse('api:inventory_source_schedules_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
+            hosts = self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
+            groups = self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:inventory_source_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:inventory_source_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:inventory_source_notification_templates_error_list', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.group:
-            res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
+            res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.group.pk})
         # Backwards compatibility.
         if obj.current_update:
-            res['current_update'] = reverse('api:inventory_update_detail',
-                                            args=(obj.current_update.pk,))
+            res['current_update'] = self.reverse('api:inventory_update_detail',
+                                                 kwargs={'pk': obj.current_update.pk})
         if obj.last_update:
-            res['last_update'] = reverse('api:inventory_update_detail',
-                                         args=(obj.last_update.pk,))
+            res['last_update'] = self.reverse('api:inventory_update_detail',
+                                              kwargs={'pk': obj.last_update.pk})
         return res
 
     def to_representation(self, obj):
@@ -1488,9 +1490,9 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
         res.update(dict(
-            inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
-            cancel = reverse('api:inventory_update_cancel', args=(obj.pk,)),
-            notifications = reverse('api:inventory_update_notifications_list', args=(obj.pk,)),
+            inventory_source = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk}),
+            cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -1518,16 +1520,16 @@ class TeamSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(TeamSerializer, self).get_related(obj)
         res.update(dict(
-            projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
-            users        = reverse('api:team_users_list',       args=(obj.pk,)),
-            credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
-            roles        = reverse('api:team_roles_list',       args=(obj.pk,)),
-            object_roles        = reverse('api:team_object_roles_list',       args=(obj.pk,)),
-            activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
-            access_list  = reverse('api:team_access_list',      args=(obj.pk,)),
+            projects     = self.reverse('api:team_projects_list',    kwargs={'pk': obj.pk}),
+            users        = self.reverse('api:team_users_list',       kwargs={'pk': obj.pk}),
+            credentials  = self.reverse('api:team_credentials_list', kwargs={'pk': obj.pk}),
+            roles        = self.reverse('api:team_roles_list',       kwargs={'pk': obj.pk}),
+            object_roles        = self.reverse('api:team_object_roles_list',       kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:team_activity_stream_list', kwargs={'pk': obj.pk}),
+            access_list  = self.reverse('api:team_access_list',      kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         return res
 
     def to_representation(self, obj):
@@ -1564,11 +1566,11 @@ class RoleSerializer(BaseSerializer):
 
     def get_related(self, obj):
         ret = super(RoleSerializer, self).get_related(obj)
-        ret['users'] = reverse('api:role_users_list', args=(obj.pk,))
-        ret['teams'] = reverse('api:role_teams_list', args=(obj.pk,))
+        ret['users'] = self.reverse('api:role_users_list', kwargs={'pk': obj.pk})
+        ret['teams'] = self.reverse('api:role_teams_list', kwargs={'pk': obj.pk})
         try:
             if obj.content_object:
-                ret.update(reverse_gfk(obj.content_object))
+                ret.update(reverse_gfk(obj.content_object, self.context.get('request')))
         except AttributeError:
             # AttributeError's happen if our content_object is pointing at
             # a model that no longer exists. This is dirty data and ideally
@@ -1610,7 +1612,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
-                role_dict['related'] = reverse_gfk(role.content_object)
+                role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
             except AttributeError:
                 pass
             if role.content_type is not None:
@@ -1638,7 +1640,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
                     role_dict['resource_type'] = role.content_type.name
-                    role_dict['related'] = reverse_gfk(role.content_object)
+                    role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
                     role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                         Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
                 else:
@@ -1717,22 +1719,22 @@ class CredentialSerializer(BaseSerializer):
         res = super(CredentialSerializer, self).get_related(obj)
 
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
 
         res.update(dict(
-            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,)),
-            access_list = reverse('api:credential_access_list', args=(obj.pk,)),
-            object_roles = reverse('api:credential_object_roles_list', args=(obj.pk,)),
-            owner_users = reverse('api:credential_owner_users_list', args=(obj.pk,)),
-            owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
+            activity_stream = self.reverse('api:credential_activity_stream_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:credential_access_list', kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:credential_object_roles_list', kwargs={'pk': obj.pk}),
+            owner_users = self.reverse('api:credential_owner_users_list', kwargs={'pk': obj.pk}),
+            owner_teams = self.reverse('api:credential_owner_teams_list', kwargs={'pk': obj.pk}),
         ))
 
         parents = [role for role in obj.admin_role.parents.all() if role.object_id is not None]
         if parents:
-            res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url()})
+            res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url(self.context.get('request'))})
         elif len(obj.admin_role.members.all()) > 0:
             user = obj.admin_role.members.all()[0]
-            res.update({'user': reverse('api:user_detail', args=(user.pk,))})
+            res.update({'user': self.reverse('api:user_detail', kwargs={'pk': user.pk})})
 
         return res
 
@@ -1746,7 +1748,7 @@ class CredentialSerializer(BaseSerializer):
                 'type': 'user',
                 'name': user.username,
                 'description': ' '.join([user.first_name, user.last_name]),
-                'url': reverse('api:user_detail', args=(user.pk,)),
+                'url': self.reverse('api:user_detail', kwargs={'pk': user.pk}),
             })
 
         for parent in [role for role in obj.admin_role.parents.all() if role.object_id is not None]:
@@ -1755,7 +1757,7 @@ class CredentialSerializer(BaseSerializer):
                 'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
                 'name': parent.content_object.name,
                 'description': parent.content_object.description,
-                'url': parent.content_object.get_absolute_url(),
+                'url': parent.content_object.get_absolute_url(self.context.get('request')),
             })
 
         return summary_dict
@@ -1862,19 +1864,19 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
-        res['labels'] = reverse('api:job_template_label_list', args=(obj.pk,))
+        res['labels'] = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk})
         if obj.inventory:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.project:
-            res['project'] = reverse('api:project_detail', args=(obj.project.pk,))
+            res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
         if obj.credential:
-            res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
         if obj.cloud_credential:
-            res['cloud_credential'] = reverse('api:credential_detail',
-                                              args=(obj.cloud_credential.pk,))
+            res['cloud_credential'] = self.reverse('api:credential_detail',
+                                                   kwargs={'pk': obj.cloud_credential.pk})
         if obj.network_credential:
-            res['network_credential'] = reverse('api:credential_detail',
-                                                args=(obj.network_credential.pk,))
+            res['network_credential'] = self.reverse('api:credential_detail',
+                                                     kwargs={'pk': obj.network_credential.pk})
         return res
 
     def to_representation(self, obj):
@@ -1947,20 +1949,20 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
-            schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
-            activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
-            launch = reverse('api:job_template_launch', args=(obj.pk,)),
-            notification_templates_any = reverse('api:job_template_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:job_template_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:job_template_notification_templates_error_list', args=(obj.pk,)),
-            access_list = reverse('api:job_template_access_list',      args=(obj.pk,)),
-            survey_spec = reverse('api:job_template_survey_spec', args=(obj.pk,)),
-            labels = reverse('api:job_template_label_list', args=(obj.pk,)),
-            object_roles = reverse('api:job_template_object_roles_list', args=(obj.pk,)),
+            jobs = self.reverse('api:job_template_jobs_list', kwargs={'pk': obj.pk}),
+            schedules = self.reverse('api:job_template_schedules_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:job_template_activity_stream_list', kwargs={'pk': obj.pk}),
+            launch = self.reverse('api:job_template_launch', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
+            survey_spec = self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
+            labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
         ))
         if obj.host_config_key:
-            res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
+            res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
         return res
 
     def validate(self, attrs):
@@ -2015,22 +2017,22 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
-            job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
-            job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
-            activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
-            notifications = reverse('api:job_notifications_list', args=(obj.pk,)),
-            labels = reverse('api:job_label_list', args=(obj.pk,)),
+            job_events  = self.reverse('api:job_job_events_list', kwargs={'pk': obj.pk}),
+            job_host_summaries = self.reverse('api:job_job_host_summaries_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:job_activity_stream_list', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:job_notifications_list', kwargs={'pk': obj.pk}),
+            labels = self.reverse('api:job_label_list', kwargs={'pk': obj.pk}),
         ))
         if obj.job_template:
-            res['job_template'] = reverse('api:job_template_detail',
-                                          args=(obj.job_template.pk,))
+            res['job_template'] = self.reverse('api:job_template_detail',
+                                               kwargs={'pk': obj.job_template.pk})
         if obj.can_start or True:
-            res['start'] = reverse('api:job_start', args=(obj.pk,))
+            res['start'] = self.reverse('api:job_start', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
-            res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
+            res['cancel'] = self.reverse('api:job_cancel', kwargs={'pk': obj.pk})
         if obj.project_update:
-            res['project_update'] = reverse('api:project_update_detail', args=(obj.project_update.pk,))
-        res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
+            res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
+        res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
 
     def get_artifacts(self, obj):
@@ -2175,16 +2177,16 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
     def get_related(self, obj):
         res = super(AdHocCommandSerializer, self).get_related(obj)
         if obj.inventory:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.credential:
-            res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
         res.update(dict(
-            events  = reverse('api:ad_hoc_command_ad_hoc_command_events_list', args=(obj.pk,)),
-            activity_stream = reverse('api:ad_hoc_command_activity_stream_list', args=(obj.pk,)),
-            notifications = reverse('api:ad_hoc_command_notifications_list', args=(obj.pk,)),
+            events  = self.reverse('api:ad_hoc_command_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:ad_hoc_command_activity_stream_list', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:ad_hoc_command_notifications_list', kwargs={'pk': obj.pk}),
         ))
-        res['cancel'] = reverse('api:ad_hoc_command_cancel', args=(obj.pk,))
-        res['relaunch'] = reverse('api:ad_hoc_command_relaunch', args=(obj.pk,))
+        res['cancel'] = self.reverse('api:ad_hoc_command_cancel', kwargs={'pk': obj.pk})
+        res['relaunch'] = self.reverse('api:ad_hoc_command_relaunch', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
@@ -2229,12 +2231,12 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
     def get_related(self, obj):
         res = super(SystemJobTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            jobs = reverse('api:system_job_template_jobs_list', args=(obj.pk,)),
-            schedules = reverse('api:system_job_template_schedules_list', args=(obj.pk,)),
-            launch = reverse('api:system_job_template_launch', args=(obj.pk,)),
-            notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
+            jobs = self.reverse('api:system_job_template_jobs_list', kwargs={'pk': obj.pk}),
+            schedules = self.reverse('api:system_job_template_schedules_list', kwargs={'pk': obj.pk}),
+            launch = self.reverse('api:system_job_template_launch', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:system_job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:system_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:system_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
 
         ))
         return res
@@ -2249,11 +2251,11 @@ class SystemJobSerializer(UnifiedJobSerializer):
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
         if obj.system_job_template:
-            res['system_job_template'] = reverse('api:system_job_template_detail',
-                                                 args=(obj.system_job_template.pk,))
-            res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
+            res['system_job_template'] = self.reverse('api:system_job_template_detail',
+                                                      kwargs={'pk': obj.system_job_template.pk})
+            res['notifications'] = self.reverse('api:system_job_notifications_list', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
-            res['cancel'] = reverse('api:system_job_cancel', args=(obj.pk,))
+            res['cancel'] = self.reverse('api:system_job_cancel', kwargs={'pk': obj.pk})
         return res
 
 
@@ -2275,22 +2277,22 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            workflow_jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
-            schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
-            launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
-            copy = reverse('api:workflow_job_template_copy', args=(obj.pk,)),
-            workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
-            labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),
-            activity_stream = reverse('api:workflow_job_template_activity_stream_list', args=(obj.pk,)),
-            notification_templates_any = reverse('api:workflow_job_template_notification_templates_any_list', args=(obj.pk,)),
-            notification_templates_success = reverse('api:workflow_job_template_notification_templates_success_list', args=(obj.pk,)),
-            notification_templates_error = reverse('api:workflow_job_template_notification_templates_error_list', args=(obj.pk,)),
-            access_list = reverse('api:workflow_job_template_access_list', args=(obj.pk,)),
-            object_roles = reverse('api:workflow_job_template_object_roles_list', args=(obj.pk,)),
-            survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
+            workflow_jobs = self.reverse('api:workflow_job_template_jobs_list', kwargs={'pk': obj.pk}),
+            schedules = self.reverse('api:workflow_job_template_schedules_list', kwargs={'pk': obj.pk}),
+            launch = self.reverse('api:workflow_job_template_launch', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:workflow_job_template_copy', kwargs={'pk': obj.pk}),
+            workflow_nodes = self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
+            labels = self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
+            notification_templates_any = self.reverse('api:workflow_job_template_notification_templates_any_list', kwargs={'pk': obj.pk}),
+            notification_templates_success = self.reverse('api:workflow_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
+            notification_templates_error = self.reverse('api:workflow_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
+            access_list = self.reverse('api:workflow_job_template_access_list', kwargs={'pk': obj.pk}),
+            object_roles = self.reverse('api:workflow_job_template_object_roles_list', kwargs={'pk': obj.pk}),
+            survey_spec = self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail',   kwargs={'pk': obj.organization.pk})
         return res
 
     def validate_extra_vars(self, value):
@@ -2312,15 +2314,15 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
         if obj.workflow_job_template:
-            res['workflow_job_template'] = reverse('api:workflow_job_template_detail',
-                                                   args=(obj.workflow_job_template.pk,))
-            res['notifications'] = reverse('api:workflow_job_notifications_list', args=(obj.pk,))
-        res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
-        res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
-        res['activity_stream'] = reverse('api:workflow_job_activity_stream_list', args=(obj.pk,))
-        res['relaunch'] = reverse('api:workflow_job_relaunch', args=(obj.pk,))
+            res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail',
+                                                        kwargs={'pk': obj.workflow_job_template.pk})
+            res['notifications'] = self.reverse('api:workflow_job_notifications_list', kwargs={'pk': obj.pk})
+        res['workflow_nodes'] = self.reverse('api:workflow_job_workflow_nodes_list', kwargs={'pk': obj.pk})
+        res['labels'] = self.reverse('api:workflow_job_label_list', kwargs={'pk': obj.pk})
+        res['activity_stream'] = self.reverse('api:workflow_job_activity_stream_list', kwargs={'pk': obj.pk})
+        res['relaunch'] = self.reverse('api:workflow_job_relaunch', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
-            res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
+            res['cancel'] = self.reverse('api:workflow_job_cancel', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
@@ -2362,7 +2364,7 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
         if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
         return res
 
     def validate(self, attrs):
@@ -2380,11 +2382,11 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateNodeSerializer, self).get_related(obj)
-        res['success_nodes'] = reverse('api:workflow_job_template_node_success_nodes_list', args=(obj.pk,))
-        res['failure_nodes'] = reverse('api:workflow_job_template_node_failure_nodes_list', args=(obj.pk,))
-        res['always_nodes'] = reverse('api:workflow_job_template_node_always_nodes_list', args=(obj.pk,))
+        res['success_nodes'] = self.reverse('api:workflow_job_template_node_success_nodes_list', kwargs={'pk': obj.pk})
+        res['failure_nodes'] = self.reverse('api:workflow_job_template_node_failure_nodes_list', kwargs={'pk': obj.pk})
+        res['always_nodes'] = self.reverse('api:workflow_job_template_node_always_nodes_list', kwargs={'pk': obj.pk})
         if obj.workflow_job_template:
-            res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
+            res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail', kwargs={'pk': obj.workflow_job_template.pk})
         return res
 
     def to_internal_value(self, data):
@@ -2440,13 +2442,13 @@ class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
 
     def get_related(self, obj):
         res = super(WorkflowJobNodeSerializer, self).get_related(obj)
-        res['success_nodes'] = reverse('api:workflow_job_node_success_nodes_list', args=(obj.pk,))
-        res['failure_nodes'] = reverse('api:workflow_job_node_failure_nodes_list', args=(obj.pk,))
-        res['always_nodes'] = reverse('api:workflow_job_node_always_nodes_list', args=(obj.pk,))
+        res['success_nodes'] = self.reverse('api:workflow_job_node_success_nodes_list', kwargs={'pk': obj.pk})
+        res['failure_nodes'] = self.reverse('api:workflow_job_node_failure_nodes_list', kwargs={'pk': obj.pk})
+        res['always_nodes'] = self.reverse('api:workflow_job_node_always_nodes_list', kwargs={'pk': obj.pk})
         if obj.job:
-            res['job'] = obj.job.get_absolute_url()
+            res['job'] = obj.job.get_absolute_url(self.context.get('request'))
         if obj.workflow_job:
-            res['workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job.pk,))
+            res['workflow_job'] = self.reverse('api:workflow_job_detail', kwargs={'pk': obj.workflow_job.pk})
         return res
 
 
@@ -2500,10 +2502,10 @@ class JobHostSummarySerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(JobHostSummarySerializer, self).get_related(obj)
         res.update(dict(
-            job=reverse('api:job_detail', args=(obj.job.pk,))))
+            job=self.reverse('api:job_detail', kwargs={'pk': obj.job.pk})))
         if obj.host is not None:
             res.update(dict(
-                host=reverse('api:host_detail', args=(obj.host.pk,))
+                host=self.reverse('api:host_detail', kwargs={'pk': obj.host.pk})
             ))
         return res
 
@@ -2533,16 +2535,16 @@ class JobEventSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
-            job = reverse('api:job_detail', args=(obj.job_id,)),
+            job = self.reverse('api:job_detail', kwargs={'pk': obj.job_id}),
         ))
         if obj.parent_id:
-            res['parent'] = reverse('api:job_event_detail', args=(obj.parent_id,))
+            res['parent'] = self.reverse('api:job_event_detail', kwargs={'pk': obj.parent_id})
         if obj.children.exists():
-            res['children'] = reverse('api:job_event_children_list', args=(obj.pk,))
+            res['children'] = self.reverse('api:job_event_children_list', kwargs={'pk': obj.pk})
         if obj.host_id:
-            res['host'] = reverse('api:host_detail', args=(obj.host_id,))
+            res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host_id})
         if obj.hosts.exists():
-            res['hosts'] = reverse('api:job_event_hosts_list', args=(obj.pk,))
+            res['hosts'] = self.reverse('api:job_event_hosts_list', kwargs={'pk': obj.pk})
         return res
 
     def get_summary_fields(self, obj):
@@ -2582,10 +2584,10 @@ class AdHocCommandEventSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(AdHocCommandEventSerializer, self).get_related(obj)
         res.update(dict(
-            ad_hoc_command = reverse('api:ad_hoc_command_detail', args=(obj.ad_hoc_command_id,)),
+            ad_hoc_command = self.reverse('api:ad_hoc_command_detail', kwargs={'pk': obj.ad_hoc_command_id}),
         ))
         if obj.host:
-            res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
+            res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host.pk})
         return res
 
     def to_representation(self, obj):
@@ -2809,11 +2811,11 @@ class NotificationTemplateSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(NotificationTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            test = reverse('api:notification_template_test', args=(obj.pk,)),
-            notifications = reverse('api:notification_template_notification_list', args=(obj.pk,)),
+            test = self.reverse('api:notification_template_test', kwargs={'pk': obj.pk}),
+            notifications = self.reverse('api:notification_template_notification_list', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
 
     def _recent_notifications(self, obj):
@@ -2883,7 +2885,7 @@ class NotificationSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(NotificationSerializer, self).get_related(obj)
         res.update(dict(
-            notification_template = reverse('api:notification_template_detail', args=(obj.notification_template.pk,)),
+            notification_template = self.reverse('api:notification_template_detail', kwargs={'pk': obj.notification_template.pk}),
         ))
         return res
 
@@ -2897,7 +2899,7 @@ class LabelSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(LabelSerializer, self).get_related(obj)
         if obj.organization:
-            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+            res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
 
 
@@ -2911,10 +2913,10 @@ class ScheduleSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
         res.update(dict(
-            unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
+            unified_jobs = self.reverse('api:schedule_unified_jobs_list', kwargs={'pk': obj.pk}),
         ))
         if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
         return res
 
     def validate_unified_job_template(self, value):
@@ -3038,7 +3040,7 @@ class ActivityStreamSerializer(BaseSerializer):
     def get_related(self, obj):
         rel = {}
         if obj.actor is not None:
-            rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
+            rel['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
         for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
@@ -3051,12 +3053,12 @@ class ActivityStreamSerializer(BaseSerializer):
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
                     if fk == 'custom_inventory_script':
-                        rel[fk].append(reverse('api:inventory_script_detail', args=(thisItem.id,)))
+                        rel[fk].append(self.reverse('api:inventory_script_detail', kwargs={'pk': thisItem.id}))
                     else:
-                        rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+                        rel[fk].append(self.reverse('api:' + fk + '_detail', kwargs={'pk': thisItem.id}))
 
                     if fk == 'schedule':
-                        rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url()
+                        rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
         return rel
 
     def get_summary_fields(self, obj):
@@ -3137,7 +3139,10 @@ class FactVersionSerializer(BaseFactSerializer):
             'datetime': timestamp_apiformat(obj.timestamp),
             'module': obj.module,
         }
-        res['fact_view'] = build_url('api:host_fact_compare_view', args=(obj.host.pk,), get=params)
+        res['fact_view'] = '%s?%s' % (
+            reverse('api:host_fact_compare_view', kwargs={'pk': obj.host.pk}, request=self.context.get('request')),
+            urllib.urlencode(params)
+        )
         return res
 
 
@@ -3151,7 +3156,7 @@ class FactSerializer(BaseFactSerializer):
 
     def get_related(self, obj):
         res = super(FactSerializer, self).get_related(obj)
-        res['host'] = obj.host.get_absolute_url()
+        res['host'] = obj.host.get_absolute_url(self.context.get('request'))
         return res
 
     def to_representation(self, obj):

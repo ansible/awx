@@ -14,10 +14,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, smart_text
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -401,8 +401,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
-    def get_absolute_url(self):
-        return reverse('api:project_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
@@ -470,8 +470,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
     def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=True):
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive=redact_sensitive, escape_ascii=True)
 
-    def get_absolute_url(self):
-        return reverse('api:project_update_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:project_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))

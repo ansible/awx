@@ -68,7 +68,7 @@ class TestJobSerializerGetRelated():
     def test_job_template_present(self, get_related_mock_and_run, job):
         related = get_related_mock_and_run(JobSerializer, job)
         assert 'job_template' in related
-        assert related['job_template'] == '/api/v1/%s/%d/' % ('job_templates', job.job_template.pk)
+        assert related['job_template'] == '/api/v2/%s/%d/' % ('job_templates', job.job_template.pk)
 
 
 @mock.patch('awx.api.serializers.BaseSerializer.to_representation', lambda self,obj: {

@@ -153,10 +153,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         related_name='%(class)s_labels'
     )
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
         if real_instance != self:
-            return real_instance.get_absolute_url()
+            return real_instance.get_absolute_url(request=request)
         else:
             return ''
 

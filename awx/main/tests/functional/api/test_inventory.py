@@ -1,6 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
@@ -12,10 +12,10 @@ def test_inventory_source_notification_on_cloud_only(get, post, group_factory, u
     not_is = g_not.inventory_source
     cloud_is.source = 'ec2'
     cloud_is.save()
-    url = reverse('api:inventory_source_notification_templates_any_list', args=(cloud_is.id,))
+    url = reverse('api:inventory_source_notification_templates_any_list', kwargs={'pk': cloud_is.id})
     response = post(url, dict(id=notification_template.id), u)
     assert response.status_code == 204
-    url = reverse('api:inventory_source_notification_templates_success_list', args=(not_is.id,))
+    url = reverse('api:inventory_source_notification_templates_success_list', kwargs={'pk': not_is.id})
     response = post(url, dict(id=notification_template.id), u)
     assert response.status_code == 400
 
@@ -32,7 +32,7 @@ def test_edit_inventory(put, inventory, alice, role_field, expected_status_code)
     data = { 'organization': inventory.organization.id, 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(inventory, role_field).members.add(alice)
-    put(reverse('api:inventory_detail', args=(inventory.id,)), data, alice, expect=expected_status_code)
+    put(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
@@ -62,7 +62,7 @@ def test_create_inventory_group(post, inventory, alice, role_field, expected_sta
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(inventory, role_field).members.add(alice)
-    post(reverse('api:inventory_groups_list', args=(inventory.id,)), data, alice, expect=expected_status_code)
+    post(reverse('api:inventory_groups_list', kwargs={'pk': inventory.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -77,7 +77,7 @@ def test_create_inventory_group_child(post, group, alice, role_field, expected_s
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
-    post(reverse('api:group_children_list', args=(group.id,)), data, alice, expect=expected_status_code)
+    post(reverse('api:group_children_list', kwargs={'pk': group.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -92,7 +92,7 @@ def test_edit_inventory_group(put, group, alice, role_field, expected_status_cod
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
-    put(reverse('api:group_detail', args=(group.id,)), data, alice, expect=expected_status_code)
+    put(reverse('api:group_detail', kwargs={'pk': group.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -106,7 +106,7 @@ def test_edit_inventory_group(put, group, alice, role_field, expected_status_cod
 def test_delete_inventory_group(delete, group, alice, role_field, expected_status_code):
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
-    delete(reverse('api:group_detail', args=(group.id,)), alice, expect=expected_status_code)
+    delete(reverse('api:group_detail', kwargs={'pk': group.id}), alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -121,7 +121,7 @@ def test_create_inventory_host(post, inventory, alice, role_field, expected_stat
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(inventory, role_field).members.add(alice)
-    post(reverse('api:inventory_hosts_list', args=(inventory.id,)), data, alice, expect=expected_status_code)
+    post(reverse('api:inventory_hosts_list', kwargs={'pk': inventory.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -136,7 +136,7 @@ def test_create_inventory_group_host(post, group, alice, role_field, expected_st
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
-    post(reverse('api:group_hosts_list', args=(group.id,)), data, alice, expect=expected_status_code)
+    post(reverse('api:group_hosts_list', kwargs={'pk': group.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -151,7 +151,7 @@ def test_edit_inventory_host(put, host, alice, role_field, expected_status_code)
     data = { 'name': 'New name', 'description': 'Hello world', }
     if role_field:
         getattr(host.inventory, role_field).members.add(alice)
-    put(reverse('api:host_detail', args=(host.id,)), data, alice, expect=expected_status_code)
+    put(reverse('api:host_detail', kwargs={'pk': host.id}), data, alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -165,7 +165,7 @@ def test_edit_inventory_host(put, host, alice, role_field, expected_status_code)
 def test_delete_inventory_host(delete, host, alice, role_field, expected_status_code):
     if role_field:
         getattr(host.inventory, role_field).members.add(alice)
-    delete(reverse('api:host_detail', args=(host.id,)), alice, expect=expected_status_code)
+    delete(reverse('api:host_detail', kwargs={'pk': host.id}), alice, expect=expected_status_code)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -179,4 +179,4 @@ def test_delete_inventory_host(delete, host, alice, role_field, expected_status_
 def test_inventory_source_update(post, inventory_source, alice, role_field, expected_status_code):
     if role_field:
         getattr(inventory_source.group.inventory, role_field).members.add(alice)
-    post(reverse('api:inventory_source_update_view', args=(inventory_source.id,)), {}, alice, expect=expected_status_code)
+    post(reverse('api:inventory_source_update_view', kwargs={'pk': inventory_source.id}), {}, alice, expect=expected_status_code)

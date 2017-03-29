@@ -7,7 +7,6 @@ import sys
 
 # Django
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
@@ -20,6 +19,7 @@ from rest_framework import status
 # Tower
 from awx.api.generics import *  # noqa
 from awx.api.permissions import IsSuperUser
+from awx.api.versioning import reverse
 from awx.main.utils import *  # noqa
 from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
 from awx.conf.license import get_licensed_features
@@ -49,7 +49,7 @@ class SettingCategoryList(ListAPIView):
         else:
             categories = {}
         for category_slug in sorted(categories.keys()):
-            url = reverse('api:setting_singleton_detail', args=(category_slug,))
+            url = reverse('api:setting_singleton_detail', kwargs={'category_slug': category_slug}, request=self.request)
             setting_categories.append(SettingCategory(url, category_slug, categories[category_slug]))
         return setting_categories
 

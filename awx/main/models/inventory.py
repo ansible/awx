@@ -14,10 +14,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
@@ -117,9 +117,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         'admin_role',
     ])
 
-    def get_absolute_url(self):
-        return reverse('api:inventory_detail', args=(self.pk,))
-
+    def get_absolute_url(self, request=None):
+        return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
 
@@ -389,8 +388,8 @@ class Host(CommonModelNameNotUnique):
     def __unicode__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('api:host_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
         '''
@@ -520,8 +519,8 @@ class Group(CommonModelNameNotUnique):
     def __unicode__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('api:group_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:group_detail', kwargs={'pk': self.pk}, request=request)
 
     @transaction.atomic
     def delete_recursive(self):
@@ -1137,8 +1136,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         else:
             return 'none'
 
-    def get_absolute_url(self):
-        return reverse('api:inventory_source_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:inventory_source_detail', kwargs={'pk': self.pk}, request=request)
 
     def _can_update(self):
         if self.source == 'custom':
@@ -1246,8 +1245,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
                 update_fields.append('name')
         super(InventoryUpdate, self).save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        return reverse('api:inventory_update_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:inventory_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
@@ -1322,5 +1321,5 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         parent_role=['organization.auditor_role', 'organization.member_role', 'admin_role'],
     )
 
-    def get_absolute_url(self):
-        return reverse('api:inventory_script_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)

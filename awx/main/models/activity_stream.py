@@ -1,9 +1,11 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Tower
+from awx.api.versioning import reverse
+
 # Django
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 __all__ = ['ActivityStream']
@@ -63,8 +65,8 @@ class ActivityStream(models.Model):
     label = models.ManyToManyField("Label", blank=True)
     role = models.ManyToManyField("Role", blank=True)
 
-    def get_absolute_url(self):
-        return reverse('api:activity_stream_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)
 
     def save(self, *args, **kwargs):
         # For compatibility with Django 1.4.x, attempt to handle any calls to

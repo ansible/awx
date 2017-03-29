@@ -56,7 +56,7 @@ class TestWorkflowNodeBaseSerializerGetRelated():
     def test_workflow_unified_job_template_present(self, get_related_mock_and_run, workflow_job_template_node_related):
         related = get_related_mock_and_run(WorkflowNodeBaseSerializer, workflow_job_template_node_related)
         assert 'unified_job_template' in related
-        assert related['unified_job_template'] == '/api/v1/%s/%d/' % ('job_templates', workflow_job_template_node_related.unified_job_template.pk)
+        assert related['unified_job_template'] == '/api/v2/%s/%d/' % ('job_templates', workflow_job_template_node_related.unified_job_template.pk)
 
     def test_workflow_unified_job_template_absent(self, workflow_job_template_node):
         related = WorkflowJobTemplateNodeSerializer().get_related(workflow_job_template_node)
@@ -100,7 +100,7 @@ class TestWorkflowJobTemplateNodeSerializerGetRelated():
     def test_workflow_job_template_present(self, get_related_mock_and_run, workflow_job_template_node_related):
         related = get_related_mock_and_run(WorkflowJobTemplateNodeSerializer, workflow_job_template_node_related)
         assert 'workflow_job_template' in related
-        assert related['workflow_job_template'] == '/api/v1/%s/%d/' % ('workflow_job_templates', workflow_job_template_node_related.workflow_job_template.pk)
+        assert related['workflow_job_template'] == '/api/v2/%s/%d/' % ('workflow_job_templates', workflow_job_template_node_related.workflow_job_template.pk)
 
     def test_workflow_job_template_absent(self, workflow_job_template_node):
         related = WorkflowJobTemplateNodeSerializer().get_related(workflow_job_template_node)
@@ -179,7 +179,7 @@ class TestWorkflowJobNodeSerializerGetRelated():
     def test_workflow_job_present(self, get_related_mock_and_run, workflow_job_node_related):
         related = get_related_mock_and_run(WorkflowJobNodeSerializer, workflow_job_node_related)
         assert 'workflow_job' in related
-        assert related['workflow_job'] == '/api/v1/%s/%d/' % ('workflow_jobs', workflow_job_node_related.workflow_job.pk)
+        assert related['workflow_job'] == '/api/v2/%s/%d/' % ('workflow_jobs', workflow_job_node_related.workflow_job.pk)
 
     def test_workflow_job_absent(self, workflow_job_node):
         related = WorkflowJobNodeSerializer().get_related(workflow_job_node)
@@ -188,7 +188,7 @@ class TestWorkflowJobNodeSerializerGetRelated():
     def test_job_present(self, get_related_mock_and_run, workflow_job_node_related):
         related = get_related_mock_and_run(WorkflowJobNodeSerializer, workflow_job_node_related)
         assert 'job' in related
-        assert related['job'] == '/api/v1/%s/%d/' % ('jobs', workflow_job_node_related.job.pk)
+        assert related['job'] == '/api/v2/%s/%d/' % ('jobs', workflow_job_node_related.job.pk)
 
     def test_job_absent(self, workflow_job_node):
         related = WorkflowJobNodeSerializer().get_related(workflow_job_node)
