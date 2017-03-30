@@ -229,10 +229,8 @@ class PasswordFieldsModel(BaseModel):
                 setattr(self, field, '')
             else:
                 ask = self._password_field_allows_ask(field)
-                encrypted = encrypt_field(self, field, ask)
-                setattr(self, field, encrypted)
-                if field not in update_fields:
-                    update_fields.append(field)
+                self.encrypt_field(field, ask)
+                self.mark_field_for_save(update_fields, field)
         super(PasswordFieldsModel, self).save(*args, **kwargs)
         # After saving a new instance for the first time, set the password
         # fields and save again.
@@ -241,8 +239,16 @@ class PasswordFieldsModel(BaseModel):
             for field in self.PASSWORD_FIELDS:
                 saved_value = getattr(self, '_saved_%s' % field, '')
                 setattr(self, field, saved_value)
-                update_fields.append(field)
+                self.mark_field_for_save(update_fields, field)
             self.save(update_fields=update_fields)
+
+    def encrypt_field(self, field, ask):
+        encrypted = encrypt_field(self, field, ask)
+        setattr(self, field, encrypted)
+
+    def mark_field_for_save(self, update_fields, field):
+        if field not in update_fields:
+            update_fields.append(field)
 
 
 class PrimordialModel(CreatedModifiedModel):

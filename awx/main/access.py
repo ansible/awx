@@ -824,6 +824,36 @@ class InventoryUpdateAccess(BaseAccess):
         return self.user in obj.inventory_source.inventory.admin_role
 
 
+class CredentialTypeAccess(BaseAccess):
+    '''
+    I can see credentials types when:
+     - I'm authenticated
+    I can create when:
+     - I'm a superuser:
+    I can change when:
+     - I'm a superuser and the type is not "managed by Tower"
+    I can change/delete when:
+     - I'm a superuser and the type is not "managed by Tower"
+    '''
+
+    model = CredentialType
+
+    def can_read(self, obj):
+        return True
+
+    def can_use(self, obj):
+        return True
+
+    def can_add(self, data):
+        return self.user.is_superuser
+
+    def can_change(self, obj, data):
+        return self.user.is_superuser and not obj.managed_by_tower
+
+    def can_delete(self, obj):
+        return self.user.is_superuser and not obj.managed_by_tower
+
+
 class CredentialAccess(BaseAccess):
     '''
     I can see credentials when:
@@ -2282,6 +2312,7 @@ register_access(Group, GroupAccess)
 register_access(InventorySource, InventorySourceAccess)
 register_access(InventoryUpdate, InventoryUpdateAccess)
 register_access(Credential, CredentialAccess)
+register_access(CredentialType, CredentialTypeAccess)
 register_access(Team, TeamAccess)
 register_access(Project, ProjectAccess)
 register_access(ProjectUpdate, ProjectUpdateAccess)

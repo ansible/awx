@@ -1,7 +1,7 @@
 import pytest
 
 from awx.main.models.jobs import JobTemplate
-from awx.main.models import Inventory, Credential, Project
+from awx.main.models import Inventory, CredentialType, Credential, Project
 from awx.main.models.workflow import (
     WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobOptions,
     WorkflowJob, WorkflowJobNode
@@ -125,7 +125,12 @@ def job_node_no_prompts(workflow_job_unit, jt_ask):
 def job_node_with_prompts(job_node_no_prompts):
     job_node_no_prompts.char_prompts = example_prompts
     job_node_no_prompts.inventory = Inventory(name='example-inv')
-    job_node_no_prompts.credential = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
+    ssh_type = CredentialType.defaults['ssh']()
+    job_node_no_prompts.credential = Credential(
+        name='example-inv',
+        credential_type=ssh_type,
+        inputs={'username': 'asdf', 'password': 'asdf'}
+    )
     return job_node_no_prompts
 
 
@@ -138,7 +143,12 @@ def wfjt_node_no_prompts(workflow_job_template_unit, jt_ask):
 def wfjt_node_with_prompts(wfjt_node_no_prompts):
     wfjt_node_no_prompts.char_prompts = example_prompts
     wfjt_node_no_prompts.inventory = Inventory(name='example-inv')
-    wfjt_node_no_prompts.credential = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
+    ssh_type = CredentialType.defaults['ssh']()
+    wfjt_node_no_prompts.credential = Credential(
+        name='example-inv',
+        credential_type=ssh_type,
+        inputs={'username': 'asdf', 'password': 'asdf'}
+    )
     return wfjt_node_no_prompts
 
 

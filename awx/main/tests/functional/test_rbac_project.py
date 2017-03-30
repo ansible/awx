@@ -8,7 +8,7 @@ from awx.main.migrations import _old_access as old_access
 
 
 @pytest.mark.django_db
-def test_project_migration():
+def test_project_migration(credentialtype_ssh):
     '''
 
         o1  o2  o3       with   o1 -- i1    o2 -- i2
@@ -59,7 +59,7 @@ def test_project_migration():
     o2 = Organization.objects.create(name='o2')
     o3 = Organization.objects.create(name='o3')
 
-    c1 = Credential.objects.create(name='c1')
+    c1 = Credential.objects.create(name='c1', credential_type=credentialtype_ssh)
 
     project_name = unicode("\xc3\xb4", "utf-8")
     p1 = Project.objects.create(name=project_name, credential=c1)

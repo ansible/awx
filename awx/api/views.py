@@ -64,7 +64,7 @@ from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.versioning import reverse
+from awx.api.versioning import reverse, get_request_version
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
@@ -155,7 +155,6 @@ class ApiVersionRootView(APIView):
 
     def get(self, request, format=None):
         ''' list top level resources '''
-
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
@@ -169,6 +168,8 @@ class ApiVersionRootView(APIView):
         data['project_updates'] = reverse('api:project_update_list', request=request)
         data['teams'] = reverse('api:team_list', request=request)
         data['credentials'] = reverse('api:credential_list', request=request)
+        if get_request_version(request) > 1:
+            data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
@@ -1474,6 +1475,20 @@ class UserAccessList(ResourceAccessList):
     model = User # needs to be User for AccessLists's
     parent_model = User
     new_in_300 = True
+
+
+class CredentialTypeList(ListCreateAPIView):
+
+    model = CredentialType
+    serializer_class = CredentialTypeSerializer
+    new_in_320 = True
+
+
+class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
+
+    model = CredentialType
+    serializer_class = CredentialTypeSerializer
+    new_in_320 = True
 
 
 class CredentialList(ListCreateAPIView):

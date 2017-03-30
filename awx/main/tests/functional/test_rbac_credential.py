@@ -21,12 +21,12 @@ def test_credential_migration_user(credential, user, permissions):
 
 
 @pytest.mark.django_db
-def test_two_teams_same_cred_name(organization_factory):
+def test_two_teams_same_cred_name(organization_factory, credentialtype_net):
     objects = organization_factory("test",
                                    teams=["team1", "team2"])
 
-    cred1 = Credential.objects.create(name="test", kind="net", deprecated_team=objects.teams.team1)
-    cred2 = Credential.objects.create(name="test", kind="net", deprecated_team=objects.teams.team2)
+    cred1 = Credential.objects.create(name="test", credential_type=credentialtype_net, deprecated_team=objects.teams.team1)
+    cred2 = Credential.objects.create(name="test", credential_type=credentialtype_net, deprecated_team=objects.teams.team2)
 
     rbac.migrate_credential(apps, None)
 
@@ -119,7 +119,7 @@ def test_credential_access_auditor(credential, organization_factory):
 
 
 @pytest.mark.django_db
-def test_credential_access_admin(user, team, credential):
+def test_credential_access_admin(user, team, credential, credentialtype_aws):
     u = user('org-admin', False)
     team.organization.admin_role.members.add(u)
 
@@ -137,7 +137,7 @@ def test_credential_access_admin(user, team, credential):
     credential.admin_role.parents.add(team.admin_role)
     credential.save()
 
-    cred = Credential.objects.create(kind='aws', name='test-cred')
+    cred = Credential.objects.create(credential_type=credentialtype_aws, name='test-cred')
     cred.deprecated_team = team
     cred.save()
 

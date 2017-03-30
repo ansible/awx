@@ -48,8 +48,8 @@ from awx.main.utils import (
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
-from awx.api.versioning import reverse
-from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
+from awx.api.versioning import reverse, get_request_version
+from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -243,6 +243,12 @@ class BaseSerializer(serializers.ModelSerializer):
     created       = serializers.SerializerMethodField()
     modified      = serializers.SerializerMethodField()
 
+    @property
+    def version(self):
+        """
+        The request version component of the URL as an integer i.e., 1 or 2
+        """
+        return get_request_version(self.context.get('request'))
 
     def get_type(self, obj):
         return get_type_for_model(self.Meta.model)
@@ -309,7 +315,18 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
+
                     fval = getattr(fkval, field, None)
+
+                    # TODO: remove when API v1 is removed
+                    if all([
+                        self.version == 1,
+                        'credential' in fk,
+                        field == 'kind',
+                        fval == 'machine'
+                    ]):
+                        fval = 'ssh'
+
                     if fval is None and field == 'type':
                         if isinstance(fkval, PolymorphicModel):
                             fkval = fkval.get_real_instance()
@@ -1819,25 +1836,76 @@ class ResourceAccessListElementSerializer(UserSerializer):
         return ret
 
 
-class CredentialSerializer(BaseSerializer):
+class CredentialTypeSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
+
+    class Meta:
+        model = CredentialType
+        fields = ('*', 'kind', 'name', 'managed_by_tower', 'inputs',
+                  'injectors')
+
+
+# TODO: remove when API v1 is removed
+@six.add_metaclass(BaseSerializerMetaclass)
+class V1CredentialFields(BaseSerializer):
 
     class Meta:
         model = Credential
         fields = ('*', 'kind', 'cloud', 'host', 'username',
                   'password', 'security_token', 'project', 'domain',
-                  'ssh_key_data', 'ssh_key_unlock', 'organization',
-                  'become_method', 'become_username', 'become_password',
-                  'vault_password', 'subscription', 'tenant', 'secret', 'client',
-                  'authorize', 'authorize_password')
+                  'ssh_key_data', 'ssh_key_unlock', 'become_method',
+                  'become_username', 'become_password', 'vault_password',
+                  'subscription', 'tenant', 'secret', 'client', 'authorize',
+                  'authorize_password')
 
-    def build_standard_field(self, field_name, model_field):
-        field_class, field_kwargs = super(CredentialSerializer, self).build_standard_field(field_name, model_field)
-        if field_name in Credential.PASSWORD_FIELDS:
-            field_class = EncryptedPasswordField
-            field_kwargs['required'] = False
-            field_kwargs['default'] = ''
-        return field_class, field_kwargs
+    def build_field(self, field_name, info, model_class, nested_depth):
+        if field_name in V1Credential.FIELDS:
+            return self.build_standard_field(field_name,
+                                             V1Credential.FIELDS[field_name])
+        return super(V1CredentialFields, self).build_field(field_name, info, model_class, nested_depth)
+
+
+@six.add_metaclass(BaseSerializerMetaclass)
+class V2CredentialFields(BaseSerializer):
+
+    class Meta:
+        model = Credential
+        fields = ('*', 'credential_type', 'inputs')
+
+
+class CredentialSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
+
+    class Meta:
+        model = Credential
+        fields = ('*', 'organization')
+
+    def get_fields(self):
+        fields = super(CredentialSerializer, self).get_fields()
+
+        # TODO: remove when API v1 is removed
+        if self.version == 1:
+            fields.update(V1CredentialFields().get_fields())
+        else:
+            fields.update(V2CredentialFields().get_fields())
+        return fields
+
+    def to_representation(self, data):
+        value = super(CredentialSerializer, self).to_representation(data)
+
+        # TODO: remove when API v1 is removed
+        if self.version == 1:
+            if value.get('kind') == 'machine':
+                value['kind'] = 'ssh'
+
+            for field in V1Credential.PASSWORD_FIELDS:
+                if field in value and force_text(value[field]).startswith('$encrypted$'):
+                    value[field] = '$encrypted$'
+
+        for k, v in value.get('inputs', {}).items():
+            if force_text(v).startswith('$encrypted$'):
+                value['inputs'][k] = '$encrypted$'
+        return value
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
@@ -1852,6 +1920,12 @@ class CredentialSerializer(BaseSerializer):
             owner_users = self.reverse('api:credential_owner_users_list', kwargs={'pk': obj.pk}),
             owner_teams = self.reverse('api:credential_owner_teams_list', kwargs={'pk': obj.pk}),
         ))
+
+        # TODO: remove when API v1 is removed
+        if self.version > 1:
+            res.update(dict(
+                credential_type = self.reverse('api:credential_type_detail', kwargs={'pk': obj.credential_type.pk}),
+            ))
 
         parents = [role for role in obj.admin_role.parents.all() if role.object_id is not None]
         if parents:
@@ -1885,6 +1959,35 @@ class CredentialSerializer(BaseSerializer):
             })
 
         return summary_dict
+
+    def get_validation_exclusions(self, obj=None):
+        # CredentialType is now part of validation; legacy v1 fields (e.g.,
+        # 'username', 'password') in JSON POST payloads use the
+        # CredentialType's inputs definition to determine their validity
+        ret = super(CredentialSerializer, self).get_validation_exclusions(obj)
+        for field in ('credential_type', 'inputs'):
+            if field in ret:
+                ret.remove(field)
+        return ret
+
+    def to_internal_value(self, data):
+        if 'credential_type' not in data:
+            # If `credential_type` is not provided, assume the payload is a
+            # v1 credential payload that specifies a `kind` and a flat list
+            # of field values
+            #
+            # In this scenario, we should automatically detect the proper
+            # CredentialType based on the provided values
+            kind = data.get('kind', 'ssh')
+            credential_type = CredentialType.from_v1_kind(kind, data)
+            data['credential_type'] = credential_type.pk
+            value = OrderedDict(
+                {'credential_type': credential_type}.items() +
+                super(CredentialSerializer, self).to_internal_value(data).items()
+            )
+            value.pop('kind', None)
+            return value
+        return super(CredentialSerializer, self).to_internal_value(data)
 
 
 class CredentialSerializerCreate(CredentialSerializer):
@@ -1926,7 +2029,20 @@ class CredentialSerializerCreate(CredentialSerializer):
         team = validated_data.pop('team', None)
         if team:
             validated_data['organization'] = team.organization
+
+        # If our payload contains v1 credential fields, translate to the new
+        # model
+        # TODO: remove when API v1 is removed
+        if self.version == 1:
+            for attr in (
+                set(V1Credential.FIELDS) & set(validated_data.keys())  # set intersection
+            ):
+                validated_data.setdefault('inputs', {})
+                value = validated_data.pop(attr)
+                if value:
+                    validated_data['inputs'][attr] = value
         credential = super(CredentialSerializerCreate, self).create(validated_data)
+
         if user:
             credential.admin_role.members.add(user)
         if team:

@@ -1,13 +1,11 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
-# Django
-from django.utils.encoding import force_text
 
 # Django REST Framework
 from rest_framework import serializers
 
-__all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'EncryptedPasswordField', 'VerbatimField']
+__all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'VerbatimField']
 
 
 class NullFieldMixin(object):
@@ -56,25 +54,6 @@ class ChoiceNullField(NullFieldMixin, serializers.ChoiceField):
 
     def to_internal_value(self, data):
         return super(ChoiceNullField, self).to_internal_value(data or u'')
-
-
-class EncryptedPasswordField(CharNullField):
-    '''
-    Custom field to handle encrypted password values (on credentials).
-    '''
-
-    def to_internal_value(self, data):
-        value = super(EncryptedPasswordField, self).to_internal_value(data or u'')
-        # If user submits a value starting with $encrypted$, ignore it.
-        if force_text(value).startswith('$encrypted$'):
-            raise serializers.SkipField
-        return value
-
-    def to_representation(self, value):
-        # Replace the actual encrypted value with the string $encrypted$.
-        if force_text(value).startswith('$encrypted$'):
-            return '$encrypted$'
-        return value
 
 
 class VerbatimField(serializers.Field):

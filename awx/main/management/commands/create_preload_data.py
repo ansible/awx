@@ -3,7 +3,7 @@
 
 from django.core.management.base import BaseCommand
 from crum import impersonate
-from awx.main.models import User, Organization, Project, Inventory, Credential, Host, JobTemplate
+from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate
 
 
 class Command(BaseCommand):
@@ -30,8 +30,12 @@ class Command(BaseCommand):
                         scm_update_cache_timeout=0,
                         organization=o)
             p.save(skip_update=True)
-            c = Credential.objects.create(name='Demo Credential',
-                                          username=superuser.username,
+            ssh_type = CredentialType.from_v1_kind('ssh')
+            c = Credential.objects.create(credential_type=ssh_type,
+                                          name='Demo Credential',
+                                          inputs={
+                                              'username': superuser.username
+                                          },
                                           created_by=superuser)
             c.admin_role.members.add(superuser)
             i = Inventory.objects.create(name='Demo Inventory',

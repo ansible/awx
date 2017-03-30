@@ -164,6 +164,11 @@ inventory_script_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'inventory_script_object_roles_list'),
 )
 
+credential_type_urls = patterns('awx.api.views',
+    url(r'^$',                                          'credential_type_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'credential_type_detail'),
+)
+
 credential_urls = patterns('awx.api.views',
     url(r'^$',                                          'credential_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'credential_activity_stream_list'),
@@ -378,7 +383,13 @@ v1_urls = patterns('awx.api.views',
     url(r'^activity_stream/',       include(activity_stream_urls)),
 )
 
+v2_urls = patterns('awx.api.views',
+    url(r'^$',                      'api_version_root_view'),
+    url(r'^credential_types/',     include(credential_type_urls)),
+)
+
 urlpatterns = patterns('awx.api.views',
     url(r'^$', 'api_root_view'),
+    url(r'^(?P<version>(v2))/', include(v2_urls)),
     url(r'^(?P<version>(v1|v2))/', include(v1_urls))
 )

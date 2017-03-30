@@ -6,7 +6,7 @@ import re
 import json
 
 # Django
-from django.core.exceptions import FieldError, ValidationError
+from django.core.exceptions import FieldError, ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
@@ -22,6 +22,7 @@ from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
 from awx.main.utils import get_type_for_model, to_python_boolean
+from awx.main.models.credential import CredentialType
 from awx.main.models.rbac import RoleAncestorEntry
 
 
@@ -160,6 +161,18 @@ class FieldLookupBackend(BaseFilterBackend):
             lookup = lookup.encode("ascii")
         except UnicodeEncodeError:
             raise ValueError("%r is not an allowed field name. Must be ascii encodable." % lookup)
+
+        # Make legacy v1 Credential fields work for backwards compatability
+        # TODO: remove after API v1 deprecation period
+        if model._meta.object_name == 'Credential' and lookup == 'kind':
+            try:
+                type_ = CredentialType.from_v1_kind(value)
+                if type_ is None:
+                    raise ParseError(_('cannot filter on kind %s') % value)
+                value = type_.pk
+                lookup = 'credential_type'
+            except ObjectDoesNotExist as e:
+                raise ParseError(_('cannot filter on kind %s') % value)
 
         field, new_lookup = self.get_field_from_lookup(model, lookup)
 

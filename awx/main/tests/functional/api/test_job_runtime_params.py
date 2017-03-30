@@ -10,8 +10,15 @@ from awx.api.versioning import reverse
 
 
 @pytest.fixture
-def runtime_data(organization):
-    cred_obj = Credential.objects.create(name='runtime-cred', kind='ssh', username='test_user2', password='pas4word2')
+def runtime_data(organization, credentialtype_ssh):
+    cred_obj = Credential.objects.create(
+        name='runtime-cred',
+        credential_type=credentialtype_ssh,
+        inputs={
+            'username': 'test_user2',
+            'password': 'pas4word2'
+        }
+    )
     inv_obj = organization.inventories.create(name="runtime-inv")
     return dict(
         extra_vars='{"job_launch_var": 4}',
