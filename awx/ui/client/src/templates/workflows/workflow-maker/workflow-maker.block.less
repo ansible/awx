@@ -151,9 +151,7 @@
     color: @default-interface-txt;
 }
 .WorkflowLegend-maker--left {
-    display: flex;
     flex: 1 0 auto;
-    padding-left: 20px;
 }
 .WorkflowLegend-maker--right {
     flex: 0 0 215px;
@@ -213,16 +211,20 @@
     padding-right: 20px;
     position:relative;
 }
+
+.Key-menuIcon,
 .WorkflowMaker-manualControlsIcon {
     color: @default-icon;
     vertical-align: middle;
     font-size: 1.2em;
     margin-left: 10px;
 }
+.Key-menuIcon:hover,
 .WorkflowMaker-manualControlsIcon:hover {
     color: @default-link-hov;
     cursor: pointer;
 }
+.Key-menuIcon--active,
 .WorkflowMaker-manualControlsIcon--active {
     color: @default-link-hov;
 }
@@ -247,4 +249,68 @@
 }
 .WorkflowMaker-formTab {
     margin-right: 10px;
+}
+
+.Key-list {
+    margin: 0;
+    padding: 20px;
+    position: absolute;
+    background-color: @default-bg;
+    border: 1px solid @default-list-header-bg;
+}
+.Key-listItem {
+    display: flex;
+    padding: 0;
+    margin: 5px 0 0 0;
+}
+.Key-listItemContent {
+    margin: 0;
+    line-height: 20px;
+}
+.Key-listItemContent--circle {
+    line-height: 28px;
+}
+
+.Key-icon {
+    height: 3px;
+    width: 20px;
+    margin: 9px 5px 9px 0px;
+}
+.Key-heading {
+    font-weight: 700;
+    margin: 0 0 10px;
+    line-height: 0;
+    padding: 0;
+}
+.Key-icon--success {
+    background-color: @submit-button-bg;
+}
+.Key-icon--fail {
+    background-color: @default-err;
+}
+.Key-icon--always {
+    background-color: @default-link;
+}
+.Key-icon--warning {
+    background: @default-warning;
+}
+.Key-icon--default {
+    background: @default-icon;
+}
+.Key-icon--circle {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    color: @default-bg;
+    text-align: center;
+    line-height: 20px;
+    margin: 4px 5px 5px 0px;
+}
+.Key-details {
+    display: flex;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 20px;
+    border: 1px solid @default-no-items-bord;
+    margin-top:10px;
 }

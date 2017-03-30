@@ -35,6 +35,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
          $scope.associateRequests = [];
          $scope.disassociateRequests = [];
 
+        $scope.showKey = false;
+        $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
+        $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
+
         function init() {
 
             let allNodes = [];
