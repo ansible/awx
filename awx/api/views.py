@@ -78,6 +78,7 @@ from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
+from awx.main.fields import DynamicFilterField
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1700,6 +1701,14 @@ class HostList(ListCreateAPIView):
     model = Host
     serializer_class = HostSerializer
     capabilities_prefetch = ['inventory.admin']
+
+    def get_queryset(self):
+        qs = super(HostList, self).get_queryset()
+        filter_string = self.request.query_params.get('host_filter', None)
+        if filter_string:
+            filter_q = DynamicFilterField.filter_string_to_q(filter_string)
+            qs = qs.filter(filter_q)
+        return qs
 
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
