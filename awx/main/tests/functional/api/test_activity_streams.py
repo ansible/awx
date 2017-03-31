@@ -1,11 +1,10 @@
 import mock
 import pytest
 
+from awx.api.versioning import reverse
 from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.access import ActivityStreamAccess
-
-from django.core.urlresolvers import reverse
 
 
 def mock_feature_enabled(feature):
@@ -37,7 +36,7 @@ def test_basic_fields(monkeypatch, organization, get, user, settings):
     activity_stream.save()
 
     aspk = activity_stream.pk
-    url = reverse('api:activity_stream_detail', args=(aspk,))
+    url = reverse('api:activity_stream_detail', kwargs={'pk': aspk})
     response = get(url, user('admin', True))
 
     assert response.status_code == 200
@@ -64,7 +63,7 @@ def test_middleware_actor_added(monkeypatch, post, get, user, settings):
     org_id = response.data['id']
     activity_stream = ActivityStream.objects.filter(organization__pk=org_id).first()
 
-    url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
+    url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
     response = get(url, u)
 
     assert response.status_code == 200
@@ -147,14 +146,14 @@ def test_stream_user_direct_role_updates(get, post, organization_factory):
                                    users=['test'],
                                    inventories=['inv1'])
 
-    url = reverse('api:user_roles_list', args=(objects.users.test.pk,))
+    url = reverse('api:user_roles_list', kwargs={'pk': objects.users.test.pk})
     post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
 
     activity_stream = ActivityStream.objects.filter(
         inventory__pk=objects.inventories.inv1.pk,
         user__pk=objects.users.test.pk,
         role__pk=objects.inventories.inv1.read_role.pk).first()
-    url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
+    url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
     response = get(url, objects.users.test)
 
     assert response.data['object1'] == 'user'

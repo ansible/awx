@@ -9,13 +9,12 @@ import re
 
 # Django
 from django.db import models, transaction, connection
-from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import ugettext_lazy as _
 
-
 # AWX
+from awx.api.versioning import reverse
 from django.contrib.auth.models import User # noqa
 from awx.main.models.base import * # noqa
 
@@ -145,8 +144,8 @@ class Role(models.Model):
         super(Role, self).save(*args, **kwargs)
         self.rebuild_role_ancestor_list([self.id], [])
 
-    def get_absolute_url(self):
-        return reverse('api:role_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:role_detail', kwargs={'pk': self.pk}, request=request)
 
     def __contains__(self, accessor):
         if type(accessor) == User:

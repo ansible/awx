@@ -1,6 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 #
@@ -39,7 +39,7 @@ def test_create_delete_create_user(post, delete, admin):
     response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
     assert response.status_code == 201
 
-    response = delete(reverse('api:user_detail', args=(response.data['id'],)), admin)
+    response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin)
     assert response.status_code == 204
 
     response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)

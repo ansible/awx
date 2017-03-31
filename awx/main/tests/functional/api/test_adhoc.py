@@ -1,7 +1,7 @@
 import mock # noqa
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 """
@@ -108,8 +108,8 @@ def test_user_post_ad_hoc_command_list_without_inventory(alice, post_adhoc, inve
 
 @pytest.mark.django_db
 def test_admin_post_inventory_ad_hoc_command_list(admin, post_adhoc, inventory):
-    post_adhoc(reverse('api:inventory_ad_hoc_commands_list', args=(inventory.id,)), {'inventory': None}, admin, expect=201)
-    post_adhoc(reverse('api:inventory_ad_hoc_commands_list', args=(inventory.id,)), {}, admin, expect=201)
+    post_adhoc(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inventory.id}), {'inventory': None}, admin, expect=201)
+    post_adhoc(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inventory.id}), {}, admin, expect=201)
 
 
 @pytest.mark.django_db
@@ -121,19 +121,19 @@ def test_get_inventory_ad_hoc_command_list(admin, alice, post_adhoc, get, invent
     post_adhoc(reverse('api:ad_hoc_command_list'), {'inventory': inv2.id}, admin, expect=201)
     res = get(reverse('api:ad_hoc_command_list'), admin, expect=200)
     assert res.data['count'] == 2
-    res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv1.id,)), admin, expect=200)
+    res = get(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inv1.id}), admin, expect=200)
     assert res.data['count'] == 1
-    res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv2.id,)), admin, expect=200)
+    res = get(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inv2.id}), admin, expect=200)
     assert res.data['count'] == 1
 
     inv1.adhoc_role.members.add(alice)
-    res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv1.id,)), alice, expect=200)
+    res = get(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inv1.id}), alice, expect=200)
     assert res.data['count'] == 1
 
     machine_credential.use_role.members.add(alice)
-    res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv1.id,)), alice, expect=200)
+    res = get(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inv1.id}), alice, expect=200)
     assert res.data['count'] == 1
-    res = get(reverse('api:inventory_ad_hoc_commands_list', args=(inv2.id,)), alice, expect=403)
+    res = get(reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': inv2.id}), alice, expect=403)
 
 
 @pytest.mark.django_db

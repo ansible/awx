@@ -20,7 +20,6 @@ from collections import OrderedDict
 from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction, connection
@@ -65,6 +64,7 @@ from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
+from awx.api.versioning import reverse
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
@@ -128,17 +128,17 @@ class ApiRootView(APIView):
     authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = _('REST API')
+    versioning_class = None
 
     def get(self, request, format=None):
         ''' list supported API versions '''
 
-        current = reverse('api:api_v1_root_view', args=[])
+        v1 = reverse('api:api_version_root_view', kwargs={'version': 'v1'})
+        v2 = reverse('api:api_version_root_view', kwargs={'version': 'v2'})
         data = dict(
             description = _('Ansible Tower REST API'),
-            current_version = current,
-            available_versions = dict(
-                v1 = current
-            ),
+            current_version = v2,
+            available_versions = dict(v1 = v1, v2 = v2),
         )
         if feature_enabled('rebranding'):
             data['custom_logo'] = settings.CUSTOM_LOGO
@@ -146,52 +146,52 @@ class ApiRootView(APIView):
         return Response(data)
 
 
-class ApiV1RootView(APIView):
+class ApiVersionRootView(APIView):
 
     authentication_classes = []
+    view_name = _('Version')
     permission_classes = (AllowAny,)
-    view_name = _('Version 1')
 
     def get(self, request, format=None):
         ''' list top level resources '''
 
         data = OrderedDict()
-        data['authtoken'] = reverse('api:auth_token_view')
-        data['ping'] = reverse('api:api_v1_ping_view')
-        data['config'] = reverse('api:api_v1_config_view')
-        data['settings'] = reverse('api:setting_category_list')
-        data['me'] = reverse('api:user_me_list')
-        data['dashboard'] = reverse('api:dashboard_view')
-        data['organizations'] = reverse('api:organization_list')
-        data['users'] = reverse('api:user_list')
-        data['projects'] = reverse('api:project_list')
-        data['project_updates'] = reverse('api:project_update_list')
-        data['teams'] = reverse('api:team_list')
-        data['credentials'] = reverse('api:credential_list')
-        data['inventory'] = reverse('api:inventory_list')
-        data['inventory_scripts'] = reverse('api:inventory_script_list')
-        data['inventory_sources'] = reverse('api:inventory_source_list')
-        data['inventory_updates'] = reverse('api:inventory_update_list')
-        data['groups'] = reverse('api:group_list')
-        data['hosts'] = reverse('api:host_list')
-        data['job_templates'] = reverse('api:job_template_list')
-        data['jobs'] = reverse('api:job_list')
-        data['job_events'] = reverse('api:job_event_list')
-        data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list')
-        data['system_job_templates'] = reverse('api:system_job_template_list')
-        data['system_jobs'] = reverse('api:system_job_list')
-        data['schedules'] = reverse('api:schedule_list')
-        data['roles'] = reverse('api:role_list')
-        data['notification_templates'] = reverse('api:notification_template_list')
-        data['notifications'] = reverse('api:notification_list')
-        data['labels'] = reverse('api:label_list')
-        data['unified_job_templates'] = reverse('api:unified_job_template_list')
-        data['unified_jobs'] = reverse('api:unified_job_list')
-        data['activity_stream'] = reverse('api:activity_stream_list')
-        data['workflow_job_templates'] = reverse('api:workflow_job_template_list')
-        data['workflow_jobs'] = reverse('api:workflow_job_list')
-        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list')
-        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list')
+        data['authtoken'] = reverse('api:auth_token_view', request=request)
+        data['ping'] = reverse('api:api_v1_ping_view', request=request)
+        data['config'] = reverse('api:api_v1_config_view', request=request)
+        data['settings'] = reverse('api:setting_category_list', request=request)
+        data['me'] = reverse('api:user_me_list', request=request)
+        data['dashboard'] = reverse('api:dashboard_view', request=request)
+        data['organizations'] = reverse('api:organization_list', request=request)
+        data['users'] = reverse('api:user_list', request=request)
+        data['projects'] = reverse('api:project_list', request=request)
+        data['project_updates'] = reverse('api:project_update_list', request=request)
+        data['teams'] = reverse('api:team_list', request=request)
+        data['credentials'] = reverse('api:credential_list', request=request)
+        data['inventory'] = reverse('api:inventory_list', request=request)
+        data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
+        data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
+        data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
+        data['groups'] = reverse('api:group_list', request=request)
+        data['hosts'] = reverse('api:host_list', request=request)
+        data['job_templates'] = reverse('api:job_template_list', request=request)
+        data['jobs'] = reverse('api:job_list', request=request)
+        data['job_events'] = reverse('api:job_event_list', request=request)
+        data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list', request=request)
+        data['system_job_templates'] = reverse('api:system_job_template_list', request=request)
+        data['system_jobs'] = reverse('api:system_job_list', request=request)
+        data['schedules'] = reverse('api:schedule_list', request=request)
+        data['roles'] = reverse('api:role_list', request=request)
+        data['notification_templates'] = reverse('api:notification_template_list', request=request)
+        data['notifications'] = reverse('api:notification_list', request=request)
+        data['labels'] = reverse('api:label_list', request=request)
+        data['unified_job_templates'] = reverse('api:unified_job_template_list', request=request)
+        data['unified_jobs'] = reverse('api:unified_job_list', request=request)
+        data['activity_stream'] = reverse('api:activity_stream_list', request=request)
+        data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
+        data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
+        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
+        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)
 
 
@@ -336,12 +336,12 @@ class DashboardView(APIView):
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
         data = OrderedDict()
-        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view')}
+        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view', request=request)}
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
         failed_inventory = sum(i.inventory_sources_with_failures for i in user_inventory)
-        data['inventories'] = {'url': reverse('api:inventory_list'),
+        data['inventories'] = {'url': reverse('api:inventory_list', request=request),
                                'total': user_inventory.count(),
                                'total_with_inventory_source': user_inventory_external.count(),
                                'job_failed': inventory_with_failed_hosts.count(),
@@ -352,13 +352,13 @@ class DashboardView(APIView):
         ec2_inventory_sources = user_inventory_sources.filter(source='ec2')
         ec2_inventory_failed = ec2_inventory_sources.filter(status='failed')
         data['inventory_sources'] = {}
-        data['inventory_sources']['rax'] = {'url': reverse('api:inventory_source_list') + "?source=rax",
+        data['inventory_sources']['rax'] = {'url': reverse('api:inventory_source_list', request=request) + "?source=rax",
                                             'label': 'Rackspace',
-                                            'failures_url': reverse('api:inventory_source_list') + "?source=rax&status=failed",
+                                            'failures_url': reverse('api:inventory_source_list', request=request) + "?source=rax&status=failed",
                                             'total': rax_inventory_sources.count(),
                                             'failed': rax_inventory_failed.count()}
-        data['inventory_sources']['ec2'] = {'url': reverse('api:inventory_source_list') + "?source=ec2",
-                                            'failures_url': reverse('api:inventory_source_list') + "?source=ec2&status=failed",
+        data['inventory_sources']['ec2'] = {'url': reverse('api:inventory_source_list', request=request) + "?source=ec2",
+                                            'failures_url': reverse('api:inventory_source_list', request=request) + "?source=ec2&status=failed",
                                             'label': 'Amazon EC2',
                                             'total': ec2_inventory_sources.count(),
                                             'failed': ec2_inventory_failed.count()}
@@ -366,23 +366,23 @@ class DashboardView(APIView):
         user_groups = get_user_queryset(request.user, Group)
         groups_job_failed = (Group.objects.filter(hosts_with_active_failures__gt=0) | Group.objects.filter(groups_with_active_failures__gt=0)).count()
         groups_inventory_failed = Group.objects.filter(inventory_sources__last_job_failed=True).count()
-        data['groups'] = {'url': reverse('api:group_list'),
-                          'failures_url': reverse('api:group_list') + "?has_active_failures=True",
+        data['groups'] = {'url': reverse('api:group_list', request=request),
+                          'failures_url': reverse('api:group_list', request=request) + "?has_active_failures=True",
                           'total': user_groups.count(),
                           'job_failed': groups_job_failed,
                           'inventory_failed': groups_inventory_failed}
 
         user_hosts = get_user_queryset(request.user, Host)
         user_hosts_failed = user_hosts.filter(has_active_failures=True)
-        data['hosts'] = {'url': reverse('api:host_list'),
-                         'failures_url': reverse('api:host_list') + "?has_active_failures=True",
+        data['hosts'] = {'url': reverse('api:host_list', request=request),
+                         'failures_url': reverse('api:host_list', request=request) + "?has_active_failures=True",
                          'total': user_hosts.count(),
                          'failed': user_hosts_failed.count()}
 
         user_projects = get_user_queryset(request.user, Project)
         user_projects_failed = user_projects.filter(last_job_failed=True)
-        data['projects'] = {'url': reverse('api:project_list'),
-                            'failures_url': reverse('api:project_list') + "?last_job_failed=True",
+        data['projects'] = {'url': reverse('api:project_list', request=request),
+                            'failures_url': reverse('api:project_list', request=request) + "?last_job_failed=True",
                             'total': user_projects.count(),
                             'failed': user_projects_failed.count()}
 
@@ -393,26 +393,26 @@ class DashboardView(APIView):
         hg_projects = user_projects.filter(scm_type='hg')
         hg_failed_projects = hg_projects.filter(last_job_failed=True)
         data['scm_types'] = {}
-        data['scm_types']['git'] = {'url': reverse('api:project_list') + "?scm_type=git",
+        data['scm_types']['git'] = {'url': reverse('api:project_list', request=request) + "?scm_type=git",
                                     'label': 'Git',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=git&last_job_failed=True",
+                                    'failures_url': reverse('api:project_list', request=request) + "?scm_type=git&last_job_failed=True",
                                     'total': git_projects.count(),
                                     'failed': git_failed_projects.count()}
-        data['scm_types']['svn'] = {'url': reverse('api:project_list') + "?scm_type=svn",
+        data['scm_types']['svn'] = {'url': reverse('api:project_list', request=request) + "?scm_type=svn",
                                     'label': 'Subversion',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=svn&last_job_failed=True",
+                                    'failures_url': reverse('api:project_list', request=request) + "?scm_type=svn&last_job_failed=True",
                                     'total': svn_projects.count(),
                                     'failed': svn_failed_projects.count()}
-        data['scm_types']['hg'] = {'url': reverse('api:project_list') + "?scm_type=hg",
+        data['scm_types']['hg'] = {'url': reverse('api:project_list', request=request) + "?scm_type=hg",
                                    'label': 'Mercurial',
-                                   'failures_url': reverse('api:project_list') + "?scm_type=hg&last_job_failed=True",
+                                   'failures_url': reverse('api:project_list', request=request) + "?scm_type=hg&last_job_failed=True",
                                    'total': hg_projects.count(),
                                    'failed': hg_failed_projects.count()}
 
         user_jobs = get_user_queryset(request.user, Job)
         user_failed_jobs = user_jobs.filter(failed=True)
-        data['jobs'] = {'url': reverse('api:job_list'),
-                        'failure_url': reverse('api:job_list') + "?failed=True",
+        data['jobs'] = {'url': reverse('api:job_list', request=request),
+                        'failure_url': reverse('api:job_list', request=request) + "?failed=True",
                         'total': user_jobs.count(),
                         'failed': user_failed_jobs.count()}
 
@@ -421,15 +421,15 @@ class DashboardView(APIView):
         credential_list = get_user_queryset(request.user, Credential)
         job_template_list = get_user_queryset(request.user, JobTemplate)
         organization_list = get_user_queryset(request.user, Organization)
-        data['users'] = {'url': reverse('api:user_list'),
+        data['users'] = {'url': reverse('api:user_list', request=request),
                          'total': user_list.count()}
-        data['organizations'] = {'url': reverse('api:organization_list'),
+        data['organizations'] = {'url': reverse('api:organization_list', request=request),
                                  'total': organization_list.count()}
-        data['teams'] = {'url': reverse('api:team_list'),
+        data['teams'] = {'url': reverse('api:team_list', request=request),
                          'total': team_list.count()}
-        data['credentials'] = {'url': reverse('api:credential_list'),
+        data['credentials'] = {'url': reverse('api:credential_list', request=request),
                                'total': credential_list.count()}
-        data['job_templates'] = {'url': reverse('api:job_template_list'),
+        data['job_templates'] = {'url': reverse('api:job_template_list', request=request),
                                  'total': job_template_list.count()}
         return Response(data)
 
@@ -516,6 +516,7 @@ class AuthView(APIView):
     new_in_240 = True
 
     def get(self, request):
+        from rest_framework.reverse import reverse
         data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
         auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items()
@@ -527,6 +528,7 @@ class AuthView(APIView):
                 (not feature_enabled('enterprise_auth') and
                  name in ['saml', 'radius']):
                     continue
+
             login_url = reverse('social:begin', args=(name,))
             complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
             backend_data = {
@@ -1167,7 +1169,7 @@ class ProjectUpdateView(RetrieveAPIView):
             if not project_update:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                headers = {'Location': project_update.get_absolute_url()}
+                headers = {'Location': project_update.get_absolute_url(request=request)}
                 return Response({'project_update': project_update.id},
                                 headers=headers,
                                 status=status.HTTP_202_ACCEPTED)
@@ -2273,7 +2275,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
             if not inventory_update:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                headers = {'Location': inventory_update.get_absolute_url()}
+                headers = {'Location': inventory_update.get_absolute_url(request=request)}
                 return Response(dict(inventory_update=inventory_update.id), status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
@@ -2741,7 +2743,7 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Return the location of the new job.
-        headers = {'Location': job.get_absolute_url()}
+        headers = {'Location': job.get_absolute_url(request=request)}
         return Response(status=status.HTTP_201_CREATED, headers=headers)
 
 
@@ -3035,7 +3037,7 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
         new_workflow_job.signal_start()
 
         data = WorkflowJobSerializer(new_workflow_job, context=self.get_serializer_context()).data
-        headers = {'Location': new_workflow_job.get_absolute_url()}
+        headers = {'Location': new_workflow_job.get_absolute_url(request=request)}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
@@ -3419,7 +3421,7 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data = JobSerializer(new_job, context=self.get_serializer_context()).data
             # Add job key to match what old relaunch returned.
             data['job'] = new_job.id
-            headers = {'Location': new_job.get_absolute_url()}
+            headers = {'Location': new_job.get_absolute_url(request=request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
@@ -3693,7 +3695,7 @@ class AdHocCommandRelaunch(GenericAPIView):
             data = AdHocCommandSerializer(new_ad_hoc_command, context=self.get_serializer_context()).data
             # Add ad_hoc_command key to match what was previously returned.
             data['ad_hoc_command'] = new_ad_hoc_command.id
-            headers = {'Location': new_ad_hoc_command.get_absolute_url()}
+            headers = {'Location': new_ad_hoc_command.get_absolute_url(request=request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
@@ -3994,7 +3996,7 @@ class NotificationTemplateTest(GenericAPIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
             send_notifications.delay([notification.id])
-            headers = {'Location': notification.get_absolute_url()}
+            headers = {'Location': notification.get_absolute_url(request=request)}
             return Response({"notification": notification.id},
                             headers=headers,
                             status=status.HTTP_202_ACCEPTED)

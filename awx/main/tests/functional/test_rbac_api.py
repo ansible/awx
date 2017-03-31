@@ -2,7 +2,7 @@ import mock # noqa
 import pytest
 
 from django.db import transaction
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
 
 
@@ -78,14 +78,14 @@ def test_roles_filter_visibility(get, organization, project, admin, alice, bob):
     Role.singleton('system_auditor').members.add(alice)
     project.update_role.members.add(admin)
 
-    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
-    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
-    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
+    assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
+    assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
+    assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
     organization.auditor_role.members.add(bob)
-    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+    assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
     organization.auditor_role.members.remove(bob)
     project.use_role.members.add(bob) # sibling role should still grant visibility
-    assert get(reverse('api:user_roles_list', args=(admin.id,)) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
+    assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=bob).data['count'] == 1
 
 
 @pytest.mark.django_db
@@ -104,7 +104,7 @@ def test_cant_delete_role(delete, admin):
     # Some day we might want to do this, but until that is speced out, lets
     # ensure we don't slip up and allow this implicitly through some helper or
     # another
-    response = delete(reverse('api:role_detail', args=(admin.admin_role.id,)), admin)
+    response = delete(reverse('api:role_detail', kwargs={'pk': admin.admin_role.id}), admin)
     assert response.status_code == 405
 
 
@@ -115,7 +115,7 @@ def test_cant_delete_role(delete, admin):
 
 @pytest.mark.django_db
 def test_get_user_roles_list(get, admin):
-    url = reverse('api:user_roles_list', args=(admin.id,))
+    url = reverse('api:user_roles_list', kwargs={'pk': admin.id})
     response = get(url, admin)
     assert response.status_code == 200
     roles = response.data
@@ -136,7 +136,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     # Bob is an org admin, alice can see this.
     # Bob is in a team that alice is not, alice cannot see that bob is a member of that team.
 
-    url = reverse('api:user_roles_list', args=(bob.id,))
+    url = reverse('api:user_roles_list', kwargs={'pk': bob.id})
     response = get(url, alice)
     assert response.status_code == 200
     roles = response.data
@@ -171,7 +171,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
 @pytest.mark.django_db
 def test_add_role_to_user(role, post, admin):
     assert admin.roles.filter(id=role.id).count() == 0
-    url = reverse('api:user_roles_list', args=(admin.id,))
+    url = reverse('api:user_roles_list', kwargs={'pk': admin.id})
 
     response = post(url, {'id': role.id}, admin)
     assert response.status_code == 204
@@ -189,7 +189,7 @@ def test_add_role_to_user(role, post, admin):
 @pytest.mark.django_db
 def test_remove_role_from_user(role, post, admin):
     assert admin.roles.filter(id=role.id).count() == 0
-    url = reverse('api:user_roles_list', args=(admin.id,))
+    url = reverse('api:user_roles_list', kwargs={'pk': admin.id})
     response = post(url, {'id': role.id}, admin)
     assert response.status_code == 204
     assert admin.roles.filter(id=role.id).count() == 1
@@ -207,7 +207,7 @@ def test_remove_role_from_user(role, post, admin):
 @pytest.mark.django_db
 def test_get_teams_roles_list(get, team, organization, admin):
     team.member_role.children.add(organization.admin_role)
-    url = reverse('api:team_roles_list', args=(team.id,))
+    url = reverse('api:team_roles_list', kwargs={'pk': team.id})
     response = get(url, admin)
     assert response.status_code == 200
     roles = response.data
@@ -219,7 +219,7 @@ def test_get_teams_roles_list(get, team, organization, admin):
 @pytest.mark.django_db
 def test_add_role_to_teams(team, post, admin):
     assert team.member_role.children.filter(id=team.member_role.id).count() == 0
-    url = reverse('api:team_roles_list', args=(team.id,))
+    url = reverse('api:team_roles_list', kwargs={'pk': team.id})
 
     response = post(url, {'id': team.member_role.id}, admin)
     assert response.status_code == 204
@@ -237,7 +237,7 @@ def test_add_role_to_teams(team, post, admin):
 @pytest.mark.django_db
 def test_remove_role_from_teams(team, post, admin):
     assert team.member_role.children.filter(id=team.member_role.id).count() == 0
-    url = reverse('api:team_roles_list', args=(team.id,))
+    url = reverse('api:team_roles_list', kwargs={'pk': team.id})
     response = post(url, {'id': team.member_role.id}, admin)
     assert response.status_code == 204
     assert team.member_role.children.filter(id=team.member_role.id).count() == 1
@@ -254,7 +254,7 @@ def test_remove_role_from_teams(team, post, admin):
 
 @pytest.mark.django_db
 def test_get_role(get, admin, role):
-    url = reverse('api:role_detail', args=(role.id,))
+    url = reverse('api:role_detail', kwargs={'pk': role.id})
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['id'] == role.id
@@ -262,7 +262,7 @@ def test_get_role(get, admin, role):
 
 @pytest.mark.django_db
 def test_put_role_405(put, admin, role):
-    url = reverse('api:role_detail', args=(role.id,))
+    url = reverse('api:role_detail', kwargs={'pk': role.id})
     response = put(url, {'name': 'Some new name'}, admin)
     assert response.status_code == 405
     #r = Role.objects.get(id=role.id)
@@ -271,7 +271,7 @@ def test_put_role_405(put, admin, role):
 
 @pytest.mark.django_db
 def test_put_role_access_denied(put, alice, role):
-    url = reverse('api:role_detail', args=(role.id,))
+    url = reverse('api:role_detail', kwargs={'pk': role.id})
     response = put(url, {'name': 'Some new name'}, alice)
     assert response.status_code == 403 or response.status_code == 405
 
@@ -284,7 +284,7 @@ def test_put_role_access_denied(put, alice, role):
 @pytest.mark.django_db
 def test_get_role_users(get, admin, role):
     role.members.add(admin)
-    url = reverse('api:role_users_list', args=(role.id,))
+    url = reverse('api:role_users_list', kwargs={'pk': role.id})
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['count'] == 1
@@ -293,7 +293,7 @@ def test_get_role_users(get, admin, role):
 
 @pytest.mark.django_db
 def test_add_user_to_role(post, admin, role):
-    url = reverse('api:role_users_list', args=(role.id,))
+    url = reverse('api:role_users_list', kwargs={'pk': role.id})
     assert role.members.filter(id=admin.id).count() == 0
     post(url, {'id': admin.id}, admin)
     assert role.members.filter(id=admin.id).count() == 1
@@ -302,7 +302,7 @@ def test_add_user_to_role(post, admin, role):
 @pytest.mark.django_db
 def test_remove_user_to_role(post, admin, role):
     role.members.add(admin)
-    url = reverse('api:role_users_list', args=(role.id,))
+    url = reverse('api:role_users_list', kwargs={'pk': role.id})
     assert role.members.filter(id=admin.id).count() == 1
     post(url, {'disassociate': True, 'id': admin.id}, admin)
     assert role.members.filter(id=admin.id).count() == 0
@@ -318,7 +318,7 @@ def test_org_admin_add_user_to_job_template(post, organization, check_jobtemplat
     assert org_admin in check_jobtemplate.admin_role
     assert joe not in check_jobtemplate.execute_role
 
-    post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, org_admin)
+    post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'id': joe.id}, org_admin)
     assert joe in check_jobtemplate.execute_role
 
 
@@ -333,7 +333,7 @@ def test_org_admin_remove_user_from_job_template(post, organization, check_jobte
     assert org_admin in check_jobtemplate.admin_role
     assert joe in check_jobtemplate.execute_role
 
-    post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, org_admin)
+    post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'disassociate': True, 'id': joe.id}, org_admin)
     assert joe not in check_jobtemplate.execute_role
 
 
@@ -347,7 +347,7 @@ def test_user_fail_to_add_user_to_job_template(post, organization, check_jobtemp
     assert joe not in check_jobtemplate.execute_role
 
     with transaction.atomic():
-        res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'id': joe.id}, rando)
+        res = post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'id': joe.id}, rando)
     assert res.status_code == 403
 
     assert joe not in check_jobtemplate.execute_role
@@ -364,7 +364,7 @@ def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobt
     assert joe in check_jobtemplate.execute_role
 
     with transaction.atomic():
-        res = post(reverse('api:role_users_list', args=(check_jobtemplate.execute_role.id,)), {'disassociate': True, 'id': joe.id}, rando)
+        res = post(reverse('api:role_users_list', kwargs={'pk': check_jobtemplate.execute_role.id}), {'disassociate': True, 'id': joe.id}, rando)
     assert res.status_code == 403
 
     assert joe in check_jobtemplate.execute_role
@@ -378,7 +378,7 @@ def test_user_fail_to_remove_user_to_job_template(post, organization, check_jobt
 @pytest.mark.django_db
 def test_get_role_teams(get, team, admin, role):
     role.parents.add(team.member_role)
-    url = reverse('api:role_teams_list', args=(role.id,))
+    url = reverse('api:role_teams_list', kwargs={'pk': role.id})
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['count'] == 1
@@ -387,7 +387,7 @@ def test_get_role_teams(get, team, admin, role):
 
 @pytest.mark.django_db
 def test_add_team_to_role(post, team, admin, role):
-    url = reverse('api:role_teams_list', args=(role.id,))
+    url = reverse('api:role_teams_list', kwargs={'pk': role.id})
     assert role.members.filter(id=admin.id).count() == 0
     res = post(url, {'id': team.id}, admin)
     assert res.status_code == 204
@@ -397,7 +397,7 @@ def test_add_team_to_role(post, team, admin, role):
 @pytest.mark.django_db
 def test_remove_team_from_role(post, team, admin, role):
     role.members.add(admin)
-    url = reverse('api:role_teams_list', args=(role.id,))
+    url = reverse('api:role_teams_list', kwargs={'pk': role.id})
     assert role.members.filter(id=admin.id).count() == 1
     res = post(url, {'disassociate': True, 'id': team.id}, admin)
     assert res.status_code == 204
@@ -412,7 +412,7 @@ def test_remove_team_from_role(post, team, admin, role):
 @pytest.mark.django_db
 def test_role_parents(get, team, admin, role):
     role.parents.add(team.member_role)
-    url = reverse('api:role_parents_list', args=(role.id,))
+    url = reverse('api:role_parents_list', kwargs={'pk': role.id})
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['count'] == 1
@@ -427,7 +427,7 @@ def test_role_parents(get, team, admin, role):
 @pytest.mark.django_db
 def test_role_children(get, team, admin, role):
     role.parents.add(team.member_role)
-    url = reverse('api:role_children_list', args=(team.member_role.id,))
+    url = reverse('api:role_children_list', kwargs={'pk': team.member_role.id})
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['count'] == 2
@@ -441,7 +441,7 @@ def test_role_children(get, team, admin, role):
 
 @pytest.mark.django_db
 def test_ensure_rbac_fields_are_present(organization, get, admin):
-    url = reverse('api:organization_detail', args=(organization.id,))
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     response = get(url, admin)
     assert response.status_code == 200
     org = response.data
@@ -450,7 +450,7 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     assert 'object_roles' in org['summary_fields']
 
     role_pk = org['summary_fields']['object_roles']['admin_role']['id']
-    role_url = reverse('api:role_detail', args=(role_pk,))
+    role_url = reverse('api:role_detail', kwargs={'pk': role_pk})
     org_role_response = get(role_url, admin)
 
     assert org_role_response.status_code == 200
@@ -460,7 +460,7 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):
-    url = reverse('api:organization_detail', args=(organization.id,))
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     response = get(url, user('admin', True))
     assert response.status_code == 200
     org = response.data

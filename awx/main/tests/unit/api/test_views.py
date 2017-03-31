@@ -4,7 +4,7 @@ import pytest
 from collections import namedtuple
 
 from awx.api.views import (
-    ApiV1RootView,
+    ApiVersionRootView,
     JobTemplateLabelList,
     JobTemplateSurveySpec,
 )
@@ -17,7 +17,7 @@ def mock_response_new(mocker):
     return m
 
 
-class TestApiV1RootView:
+class TestApiRootView:
     def test_get_endpoints(self, mocker, mock_response_new):
         endpoints = [
             'authtoken',
@@ -51,7 +51,7 @@ class TestApiV1RootView:
             'workflow_job_templates',
             'workflow_jobs',
         ]
-        view = ApiV1RootView()
+        view = ApiVersionRootView()
         ret = view.get(mocker.MagicMock())
 
         assert ret == mock_response_new

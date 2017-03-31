@@ -2,8 +2,8 @@ import mock
 import pytest
 import json
 
-from django.core.urlresolvers import reverse
 
+from awx.api.versioning import reverse
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.activity_stream import ActivityStream
 from awx.conf.license import LicenseForbids
@@ -30,7 +30,7 @@ def job_template_with_survey(job_template_factory):
 def test_survey_spec_view_denied(job_template_with_survey, get, admin_user):
     # TODO: Test non-enterprise license
     response = get(reverse('api:job_template_survey_spec',
-                   args=(job_template_with_survey.id,)), admin_user, expect=402)
+                   kwargs={'pk': job_template_with_survey.id}), admin_user, expect=402)
     assert response.data['detail'] == 'Your license does not allow adding surveys.'
 
 
@@ -76,7 +76,7 @@ def test_deny_creating_with_survey(project, post, admin_user):
 @pytest.mark.django_db
 @pytest.mark.survey
 def test_survey_spec_view_allowed(deploy_jobtemplate, get, admin_user):
-    get(reverse('api:job_template_survey_spec', args=(deploy_jobtemplate.id,)),
+    get(reverse('api:job_template_survey_spec', kwargs={'pk': deploy_jobtemplate.id}),
         admin_user, expect=200)
 
 
@@ -85,7 +85,7 @@ def test_survey_spec_view_allowed(deploy_jobtemplate, get, admin_user):
 @pytest.mark.survey
 def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post, admin_user):
     survey_input_data = survey_spec_factory('new_question')
-    post(url=reverse('api:job_template_survey_spec', args=(job_template.id,)),
+    post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
          data=survey_input_data, user=admin_user, expect=200)
     updated_jt = JobTemplate.objects.get(pk=job_template.pk)
     assert updated_jt.survey_spec == survey_input_data
@@ -98,10 +98,14 @@ def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post,
 def test_survey_spec_non_dict_error(deploy_jobtemplate, post, admin_user):
     """When a question doesn't follow the standard format, verify error thrown."""
     response = post(
-        url=reverse('api:job_template_survey_spec', args=(deploy_jobtemplate.id,)),
-        data={"description": "Email of the submitter",
-              "spec": ["What is your email?"], "name": "Email survey"},
-        user=admin_user, expect=400)
+        url=reverse('api:job_template_survey_spec', kwargs={'pk': deploy_jobtemplate.id}),
+        data={
+            "description": "Email of the submitter",
+            "spec": ["What is your email?"], "name": "Email survey"
+        },
+        user=admin_user,
+        expect=400
+    )
     assert response.data['error'] == "Survey question 0 is not a json object."
 
 
@@ -110,9 +114,11 @@ def test_survey_spec_non_dict_error(deploy_jobtemplate, post, admin_user):
 @pytest.mark.survey
 def test_survey_spec_dual_names_error(survey_spec_factory, deploy_jobtemplate, post, user):
     response = post(
-        url=reverse('api:job_template_survey_spec', args=(deploy_jobtemplate.id,)),
+        url=reverse('api:job_template_survey_spec', kwargs={'pk': deploy_jobtemplate.id}),
         data=survey_spec_factory(['submitter_email', 'submitter_email']),
-        user=user('admin', True), expect=400)
+        user=user('admin', True),
+        expect=400
+    )
     assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."
 
 
@@ -166,7 +172,7 @@ def test_job_template_delete_access_with_survey(job_template_with_survey, admin_
 @pytest.mark.survey
 def test_delete_survey_spec_without_license(job_template_with_survey, delete, admin_user):
     """Functional delete test through the survey_spec view."""
-    delete(reverse('api:job_template_survey_spec', args=[job_template_with_survey.pk]),
+    delete(reverse('api:job_template_survey_spec', kwargs={'pk': job_template_with_survey.pk}),
            admin_user, expect=200)
     new_jt = JobTemplate.objects.get(pk=job_template_with_survey.pk)
     assert new_jt.survey_spec == {}
@@ -185,7 +191,7 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
     obj = objects.job_template
     obj.survey_enabled = True
     obj.save()
-    response = post(reverse('api:job_template_launch', args=[obj.pk]),
+    response = post(reverse('api:job_template_launch', kwargs={'pk':obj.pk}),
                     dict(extra_vars=dict(survey_var=7)), admin_user, expect=201)
     assert 'survey_var' in response.data['ignored_fields']['extra_vars']
 
@@ -205,7 +211,7 @@ def test_launch_with_non_empty_survey_spec_no_license(job_template_factory, post
     obj = objects.job_template
     obj.survey_enabled = False
     obj.save()
-    post(reverse('api:job_template_launch', args=[obj.pk]), {}, admin_user, expect=201)
+    post(reverse('api:job_template_launch', kwargs={'pk': obj.pk}), {}, admin_user, expect=201)
 
 
 @pytest.mark.django_db

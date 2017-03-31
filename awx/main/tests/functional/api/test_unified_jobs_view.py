@@ -1,7 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
-
+from awx.api.versioning import reverse
 from awx.main.models import UnifiedJob, ProjectUpdate
 from awx.main.tests.base import URI
 
@@ -60,7 +59,7 @@ formats = [
 def test_project_update_redaction_enabled(get, format, content_type, test_cases, admin):
     for test_data in test_cases:
         job = test_data['project']
-        response = get(reverse("api:project_update_stdout", args=(job.pk,)) + "?format=" + format, user=admin, expect=200, accept=content_type)
+        response = get(reverse("api:project_update_stdout", kwargs={'pk': job.pk}) + "?format=" + format, user=admin, expect=200, accept=content_type)
         assert content_type in response['CONTENT-TYPE']
         assert response.data is not None
         content = response.data['content'] if format == 'json' else response.data
@@ -74,7 +73,7 @@ def test_project_update_redaction_enabled(get, format, content_type, test_cases,
 def test_job_redaction_disabled(get, format, content_type, negative_test_cases, admin):
     for test_data in negative_test_cases:
         job = test_data['job']
-        response = get(reverse("api:job_stdout", args=(job.pk,)) + "?format=" + format, user=admin, expect=200, format=format)
+        response = get(reverse("api:job_stdout", kwargs={'pk': job.pk}) + "?format=" + format, user=admin, expect=200, format=format)
         content = response.data['content'] if format == 'json' else response.data
         assert response.data is not None
         assert test_data['uri'].username in content

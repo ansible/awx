@@ -6,11 +6,11 @@ import urlparse
 import urllib
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models.fact import Fact
 from awx.main.utils import timestamp_apiformat
 
 # Django
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 
@@ -26,7 +26,7 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params=
     hosts = hosts(host_count=host_count)
     fact_scans(fact_scans=3, timestamp_epoch=epoch)
 
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True), data=get_params)
 
     return (hosts[0], response)
@@ -37,7 +37,7 @@ def check_url(url1_full, fact_known, module):
     url1 = url1_split.path
     url1_params = urlparse.parse_qsl(url1_split.query)
 
-    url2 = reverse('api:host_fact_compare_view', args=(fact_known.host.pk,))
+    url2 = reverse('api:host_fact_compare_view', kwargs={'pk': fact_known.host.pk})
     url2_params = [('module', module), ('datetime', timestamp_apiformat(fact_known.timestamp))]
 
     assert url1 == url2
@@ -64,7 +64,7 @@ def check_system_tracking_feature_forbidden(response):
 @pytest.mark.license_feature
 def test_system_tracking_license_get(hosts, get, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True))
 
     check_system_tracking_feature_forbidden(response)
@@ -75,7 +75,7 @@ def test_system_tracking_license_get(hosts, get, user):
 @pytest.mark.license_feature
 def test_system_tracking_license_options(hosts, options, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = options(url, None, user('admin', True))
 
     check_system_tracking_feature_forbidden(response)
@@ -86,7 +86,7 @@ def test_system_tracking_license_options(hosts, options, user):
 @pytest.mark.license_feature
 def test_no_facts_db(hosts, get, user):
     hosts = hosts(host_count=1)
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = get(url, user('admin', True))
 
     response_expected = {
@@ -119,7 +119,7 @@ def test_basic_options_fields(hosts, fact_scans, options, user, monkeypatch_json
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = options(url, None, user('admin', True), pk=hosts[0].id)
 
     assert 'related' in response.data['actions']['GET']
@@ -228,7 +228,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
 
     team_obj.member_role.members.add(user_obj)
 
-    url = reverse('api:host_fact_versions_list', args=(hosts[0].pk,))
+    url = reverse('api:host_fact_versions_list', kwargs={'pk': hosts[0].pk})
     response = get(url, user_obj)
     return response
 

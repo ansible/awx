@@ -10,12 +10,12 @@ import uuid
 # Django
 from django.conf import settings
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import * # noqa
 from awx.main.models.rbac import (
@@ -65,8 +65,8 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
     )
 
 
-    def get_absolute_url(self):
-        return reverse('api:organization_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:organization_detail', kwargs={'pk': self.pk}, request=request)
 
     def __unicode__(self):
         return self.name
@@ -109,8 +109,8 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         parent_role=['organization.auditor_role', 'member_role'],
     )
 
-    def get_absolute_url(self):
-        return reverse('api:team_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class Permission(CommonModelNameNotUnique):
@@ -167,8 +167,8 @@ class Permission(CommonModelNameNotUnique):
             '+adhoc' if self.run_ad_hoc_commands else '',
         ))
 
-    def get_absolute_url(self):
-        return reverse('api:permission_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:permission_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class Profile(CreatedModifiedModel):
@@ -326,6 +326,6 @@ class AuthToken(BaseModel):
 
 # Add get_absolute_url method to User model if not present.
 if not hasattr(User, 'get_absolute_url'):
-    def user_get_absolute_url(user):
-        return reverse('api:user_detail', args=(user.pk,))
+    def user_get_absolute_url(user, request=None):
+        return reverse('api:user_detail', kwargs={'pk': user.pk}, request=request)
     User.add_to_class('get_absolute_url', user_get_absolute_url)
