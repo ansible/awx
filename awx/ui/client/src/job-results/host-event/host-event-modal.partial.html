@@ -9,7 +9,7 @@
 				</a>
 				<span class="HostEvent-title">{{event.host_name}}</span>
 				<!-- close -->
-				<button ui-sref="jobResult" type="button" class="close">
+				<button ng-click="closeHostEvent()" type="button" class="close">
 					<i class="fa fa-times-circle"></i>
 				</button>
 			</div>
@@ -64,7 +64,7 @@
 
 			<!-- controls -->
 			<div class="HostEvent-controls">
-				<button ui-sref="jobResult" class="btn btn-sm btn-default HostEvent-close">Close</button>
+				<button ng-click="closeHostEvent()" class="btn btn-sm btn-default HostEvent-close">Close</button>
 			</div>
 		</div>
 		</div>

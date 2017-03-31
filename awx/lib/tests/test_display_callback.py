@@ -60,7 +60,7 @@ def executor(tmpdir_factory, request):
 
     cli = PlaybookCLI(['', 'playbook.yml'])
     cli.parse()
-    options = cli.parser.parse_args([])[0]
+    options = cli.parser.parse_args(['-v'])[0]
     loader = DataLoader()
     variable_manager = VariableManager()
     inventory = Inventory(loader=loader, variable_manager=variable_manager,

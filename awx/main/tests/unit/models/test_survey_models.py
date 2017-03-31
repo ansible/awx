@@ -4,6 +4,7 @@ import json
 from awx.main.tasks import RunJob
 from awx.main.models import (
     Job,
+    JobTemplate,
     WorkflowJobTemplate
 )
 
@@ -76,6 +77,18 @@ def test_job_args_unredacted_passwords(job):
     ev_index = args.index('-e') + 1
     extra_vars = json.loads(args[ev_index])
     assert extra_vars['secret_key'] == 'my_password'
+
+
+def test_update_kwargs_survey_invalid_default(survey_spec_factory):
+    spec = survey_spec_factory('var2')
+    spec['spec'][0]['required'] = False
+    spec['spec'][0]['min'] = 3
+    spec['spec'][0]['default'] = 1
+    jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True, extra_vars="var2: 2")
+    defaulted_extra_vars = jt._update_unified_job_kwargs()
+    assert 'extra_vars' in defaulted_extra_vars
+    # Make sure we did not set the invalid default of 1
+    assert json.loads(defaulted_extra_vars['extra_vars'])['var2'] == 2
 
 
 class TestWorkflowSurveys:

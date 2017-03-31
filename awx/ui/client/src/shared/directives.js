@@ -1368,4 +1368,33 @@ function(ConfigurationUtils, i18n, $rootScope) {
             });
         }
     };
+}])
+
+.directive('awRequireMultiple', [function() {
+    return {
+        require: 'ngModel',
+        link: function postLink(scope, element, attrs, ngModel) {
+            // Watch for changes to the required attribute
+            attrs.$observe('required', function(value) {
+                if(value) {
+                    ngModel.$validators.required = function (value) {
+                        if(angular.isArray(value)) {
+                            if(value.length === 0) {
+                                return false;
+                            }
+                            else {
+                                return (!value[0] || value[0] === "") ? false : true;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    };
+                }
+                else {
+                    delete ngModel.$validators.required;
+                }
+            });
+        }
+    };
 }]);

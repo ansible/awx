@@ -30,6 +30,8 @@ from ansible.plugins.callback.default import CallbackModule as DefaultCallbackMo
 from .events import event_context
 from .minimal import CallbackModule as MinimalCallbackModule
 
+CENSORED = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"  # noqa
+
 
 class BaseCallbackModule(CallbackBase):
     '''
@@ -69,8 +71,12 @@ class BaseCallbackModule(CallbackBase):
         else:
             task = None
 
-        if event_data.get('res') and event_data['res'].get('_ansible_no_log', False):
-            event_data['res'] = {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}  # noqa
+        if event_data.get('res'):
+            if event_data['res'].get('_ansible_no_log', False):
+                event_data['res'] = {'censored': CENSORED}
+            for i, item in enumerate(event_data['res'].get('results', [])):
+                if event_data['res']['results'][i].get('_ansible_no_log', False):
+                    event_data['res']['results'][i] = {'censored': CENSORED}
 
         with event_context.display_lock:
             try:
