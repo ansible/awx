@@ -23,19 +23,20 @@
 .JobSubmission-header {
     display: flex;
     flex: 0 0 auto;
-    align-items: center;
 }
 .JobSubmission-title {
     align-items: center;
     flex: 1 0 auto;
     display: flex;
+    word-wrap: break-word;
+    word-break: break-all;
+    max-width: 98%;
 }
 .JobSubmission-titleText {
     color: @list-title-txt;
     font-size: 14px;
     font-weight: bold;
     margin-right: 10px;
-    text-transform: uppercase;
 }
 .JobSubmission-titleLockup {
     margin-left: 4px;
@@ -174,18 +175,12 @@
     background-color: @btn-bg-hov;
     color: @btn-txt;
 }
-.JobSubmission-revertButton {
-    background-color: @default-bg;
-    color: @default-link;
-    text-transform: uppercase;
-    padding-left:15px;
-    padding-right: 15px;
+
+.JobSubmission-revertLink {
+    padding-left:10px;
     font-size: 11px;
 }
-.JobSubmission-revertButton:hover{
-    background-color: @default-bg;
-    color: @default-link-hov;
-}
+
 .JobSubmission-selectedItem {
     display: flex;
     flex: 1 0 auto;

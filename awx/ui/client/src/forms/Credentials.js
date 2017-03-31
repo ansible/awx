@@ -15,7 +15,7 @@ export default
         .factory('CredentialForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('Create Credential'), //Legend in add mode
+            addTitle: i18n._('CREATE CREDENTIAL'), //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'credential',
             // the top-most node of generated state tree
@@ -55,7 +55,8 @@ export default
                     dataTitle: i18n._('Organization') + ' ',
                     dataPlacement: 'bottom',
                     dataContainer: "body",
-                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                    awLookupWhen: '(credential_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
                 },
                 kind: {
                     label: i18n._('Type'),

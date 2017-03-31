@@ -30,6 +30,8 @@ from ansible.plugins.callback.default import CallbackModule as DefaultCallbackMo
 from .events import event_context
 from .minimal import CallbackModule as MinimalCallbackModule
 
+CENSORED = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"  # noqa
+
 
 class BaseCallbackModule(CallbackBase):
     '''
@@ -55,22 +57,6 @@ class BaseCallbackModule(CallbackBase):
         'playbook_on_no_hosts_remaining',
     ]
 
-    CENSOR_FIELD_WHITELIST = [
-        'msg',
-        'failed',
-        'changed',
-        'results',
-        'start',
-        'end',
-        'delta',
-        'cmd',
-        '_ansible_no_log',
-        'rc',
-        'failed_when_result',
-        'skipped',
-        'skip_reason',
-    ]
-
     def __init__(self):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
@@ -84,6 +70,13 @@ class BaseCallbackModule(CallbackBase):
             task = event_data.pop('task', None)
         else:
             task = None
+
+        if event_data.get('res'):
+            if event_data['res'].get('_ansible_no_log', False):
+                event_data['res'] = {'censored': CENSORED}
+            for i, item in enumerate(event_data['res'].get('results', [])):
+                if event_data['res']['results'][i].get('_ansible_no_log', False):
+                    event_data['res']['results'][i] = {'censored': CENSORED}
 
         with event_context.display_lock:
             try:
@@ -132,7 +125,9 @@ class BaseCallbackModule(CallbackBase):
             task_ctx['task_path'] = task.get_path()
         except AttributeError:
             pass
-        if not task.no_log:
+        if task.no_log:
+            task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        else:
             task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
             task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):
@@ -304,6 +299,12 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         # FIXME: Display detailed results or not based on verbosity.
+
+        # strip environment vars from the job event; it already exists on the
+        # job and sensitive values are filtered there
+        if result._task.get_name() == 'setup':
+            result._result.get('ansible_facts', {}).pop('ansible_env', None)
+
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,

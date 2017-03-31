@@ -5,6 +5,9 @@
 import logging
 import json
 import requests
+import time
+import urlparse
+from concurrent.futures import ThreadPoolExecutor
 from copy import copy
 
 # loggly
@@ -17,6 +20,8 @@ from awx.main.utils.formatters import LogstashFormatter
 
 
 __all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'configure_external_logger']
+
+logger = logging.getLogger('awx.main.utils.handlers')
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -33,6 +38,7 @@ PARAM_NAMES = {
     'enabled_loggers': 'LOG_AGGREGATOR_LOGGERS',
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
+    'http_timeout': 'LOG_AGGREGATOR_HTTP_TIMEOUT',
 }
 
 
@@ -47,17 +53,41 @@ class HTTPSNullHandler(logging.NullHandler):
         return super(HTTPSNullHandler, self).__init__()
 
 
+class VerboseThreadPoolExecutor(ThreadPoolExecutor):
+
+    last_log_emit = 0
+
+    def submit(self, func, *args, **kwargs):
+        def _wrapped(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception:
+                # If an exception occurs in a concurrent thread worker (like
+                # a ConnectionError or a read timeout), periodically log
+                # that failure.
+                #
+                # This approach isn't really thread-safe, so we could
+                # potentially log once per thread every 10 seconds, but it
+                # beats logging *every* failed HTTP request in a scenario where
+                # you've typo'd your log aggregator hostname.
+                now = time.time()
+                if now - self.last_log_emit > 10:
+                    logger.exception('failed to emit log to external aggregator')
+                    self.last_log_emit = now
+                raise
+        return super(VerboseThreadPoolExecutor, self).submit(_wrapped, *args,
+                                                             **kwargs)
+
+
 class BaseHTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
         super(BaseHTTPSHandler, self).__init__()
         self.fqdn = fqdn
-        self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
             setattr(self, fd, kwargs.get(fd, None))
-        if self.async:
-            self.session = FuturesSession()
-        else:
-            self.session = requests.Session()
+        self.session = FuturesSession(executor=VerboseThreadPoolExecutor(
+            max_workers=2  # this is the default used by requests_futures
+        ))
         self.add_auth_information()
 
     @classmethod
@@ -89,10 +119,21 @@ class BaseHTTPSHandler(logging.Handler):
 
     def get_http_host(self):
         host = self.host or ''
-        if not host.startswith('http'):
-            host = 'http://%s' % self.host
-        if self.port != 80 and self.port is not None:
-            host = '%s:%s' % (host, str(self.port))
+        # urlparse requires scheme to be provided, default to use http if
+        # missing
+        if not urlparse.urlsplit(host).scheme:
+            host = 'http://%s' % host
+        parsed = urlparse.urlsplit(host)
+        # Insert self.port if its special and port number is either not
+        # given in host or given as non-numerical
+        try:
+            port = parsed.port or self.port
+        except ValueError:
+            port = self.port
+        if port not in (80, None):
+            new_netloc = '%s:%s' % (parsed.hostname, port)
+            return urlparse.urlunsplit((parsed.scheme, new_netloc, parsed.path,
+                                        parsed.query, parsed.fragment))
         return host
 
     def get_post_kwargs(self, payload_input):
@@ -105,10 +146,8 @@ class BaseHTTPSHandler(logging.Handler):
             payload_str = json.dumps(payload_input)
         else:
             payload_str = payload_input
-        if self.async:
-            return dict(data=payload_str, background_callback=unused_callback)
-        else:
-            return dict(data=payload_str)
+        return dict(data=payload_str, background_callback=unused_callback,
+                    timeout=self.http_timeout)
 
     def skip_log(self, logger_name):
         if self.host == '' or (not self.enabled_flag):
@@ -122,10 +161,6 @@ class BaseHTTPSHandler(logging.Handler):
         """
             Emit a log record.  Returns a list of zero or more
             ``concurrent.futures.Future`` objects.
-
-            When ``self.async`` is True, the list will contain one
-            Future object for each HTTP request made.  When ``self.async`` is
-            False, the list will be empty.
 
             See:
             https://docs.python.org/3/library/concurrent.futures.html#future-objects
@@ -147,17 +182,10 @@ class BaseHTTPSHandler(logging.Handler):
                         for key in facts_dict:
                             fact_payload = copy(payload_data)
                             fact_payload.update(facts_dict[key])
-                            if self.async:
-                                async_futures.append(self._send(fact_payload))
-                            else:
-                                self._send(fact_payload)
+                            async_futures.append(self._send(fact_payload))
                         return async_futures
 
-            if self.async:
-                return [self._send(payload)]
-
-            self._send(payload)
-            return []
+            return [self._send(payload)]
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -179,7 +207,7 @@ def add_or_remove_logger(address, instance):
             specific_logger.handlers.append(instance)
 
 
-def configure_external_logger(settings_module, async_flag=True, is_startup=True):
+def configure_external_logger(settings_module, is_startup=True):
 
     is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
     if is_startup and (not is_enabled):
@@ -188,7 +216,7 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
 
     instance = None
     if is_enabled:
-        instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
+        instance = BaseHTTPSHandler.from_django_settings(settings_module)
         instance.setFormatter(LogstashFormatter(settings_module=settings_module))
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:

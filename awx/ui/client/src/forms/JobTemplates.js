@@ -17,7 +17,7 @@ export default
         .factory('JobTemplateFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Job Template'),
+            addTitle: i18n._('NEW JOB TEMPLATE'),
             editTitle: '{{ name }}',
             name: 'job_template',
             breadcrumbName: i18n._('JOB TEMPLATE'),
@@ -349,7 +349,11 @@ export default
                     dataPlacement: 'right',
                     dataTitle: i18n._("Host Config Key"),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    awRequiredWhen: {
+                        reqExpression: 'allow_callbacks',
+                        alwaysShowAsterisk: true
+                    }
                 },
                 labels: {
                     label: i18n._('Labels'),

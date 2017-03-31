@@ -10,9 +10,9 @@
  * @description This form is for executing an adhoc command
 */
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
-        addTitle: 'Execute Command',
+        addTitle: 'EXECUTE COMMAND',
         name: 'adhoc',
         well: true,
         forceListeners: true,
@@ -121,6 +121,23 @@ export default function() {
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
+            extra_vars: {
+                label: i18n._('Extra Variables'),
+                type: 'textarea',
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                rows: 6,
+                "default": "---",
+                column: 2,
+                awPopOver: "<p>" + i18n.sprintf(i18n._("Pass extra command line variables. This is the %s or %s command line parameter " +
+                    "for %s. Provide key/value pairs using either YAML or JSON."), '<code>-e</code>', '<code>--extra-vars</code>', '<code>ansible</code>') + "</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                dataTitle: i18n._('Extra Variables'),
+                dataPlacement: 'right',
+                dataContainer: "body"
+            }
         },
         buttons: {
             reset: {
@@ -139,4 +156,4 @@ export default function() {
 
         related: {}
     };
-}
+}];

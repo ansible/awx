@@ -1,6 +1,6 @@
 <div class="BreadCrumb InventoryManageBreadCrumbs">
 	<ol class="BreadCrumb-list">
-		<li class="BreadCrumb-item"><a ui-sref="inventories">Inventories</a></li>
+		<li class="BreadCrumb-item"><a ui-sref="inventories">INVENTORIES</a></li>
 		<li class="BreadCrumb-item BreadCrumb-invItem">
 			<a href ng-if="currentState !== 'inventoryManage' || groups.length > 0" ng-click="goToInventory()">{{inventory.name}}</a>
 			<span ng-if="currentState === 'inventoryManage' && groups.length === 0">{{inventory.name}}</span>

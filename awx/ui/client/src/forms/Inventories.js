@@ -15,7 +15,7 @@ angular.module('InventoryFormDefinition', [])
     .factory('InventoryForm', ['i18n', function(i18n) {
         return {
 
-        addTitle: i18n._('New Inventory'),
+        addTitle: i18n._('NEW INVENTORY'),
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
         basePath: 'inventory',
@@ -49,7 +49,8 @@ angular.module('InventoryFormDefinition', [])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
             variables: {
                 label: i18n._('Variables'),

@@ -35,6 +35,21 @@ def test_edit_inventory(put, inventory, alice, role_field, expected_status_code)
     put(reverse('api:inventory_detail', args=(inventory.id,)), data, alice, expect=expected_status_code)
 
 
+@pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
+@pytest.mark.django_db
+def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order_by):
+    for i, script in enumerate(('#!/bin/a', '#!/bin/b', '#!/bin/c')):
+        custom_script = organization.custom_inventory_scripts.create(
+            name="I%d" % i,
+            script=script
+        )
+        custom_script.admin_role.members.add(alice)
+
+    response = get(reverse('api:inventory_script_list'), alice,
+                   QUERY_STRING='order_by=%s' % order_by, status=400)
+    assert response.status_code == 400
+
+
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
     ('admin_role', 201),

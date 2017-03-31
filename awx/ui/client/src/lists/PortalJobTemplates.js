@@ -12,8 +12,8 @@ export default
 
         name: 'job_templates',
         iterator: 'job_template',
-        editTitle: i18n._('Job Templates'),
-        listTitle: i18n._('Job Templates'),
+        editTitle: i18n._('JOB TEMPLATES'),
+        listTitle: i18n._('JOB TEMPLATES'),
         index: false,
         hover: true,
         well: true,

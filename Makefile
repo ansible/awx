@@ -176,11 +176,11 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
-	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
-	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian debsign pbuilder reprepro setup_tarball \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-bundle setup_bundle_tarball \
+	receiver test test_unit test_ansible test_coverage coverage_html \
+	test_jenkins dev_build release_build release_clean sdist rpmtar mock-rpm \
+	mock-srpm rpm-sign deb deb-src debian debsign pbuilder \
+	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
+	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
 
@@ -215,6 +215,7 @@ clean-bundle:
 clean-ui:
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
+	rm -rf awx/ui/coverage/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
 
@@ -224,15 +225,18 @@ clean-tmp:
 clean-venv:
 	rm -rf venv/
 
+clean-dist:
+	rm -rf dist
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
-	rm -rf dist/*
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
 	rm -f awx/awx_test.sqlite3
+	rm -rf requirements/vendor
 	rm -rf tmp
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
@@ -263,8 +267,8 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==23.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==8.1.2; \
 		fi; \
 	fi
 
@@ -275,42 +279,40 @@ virtualenv_tower:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
-			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==23.0.0 && \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==8.1.2; \
 		fi; \
 	fi
 
 requirements_ansible: virtualenv_ansible
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
-		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
+	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
-	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	fi
+	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+
+requirements_ansible_dev:
+	if [ "$(VENV_BASE)" ]; then \
+		$(VENV_BASE)/ansible/bin/pip install pytest; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
+	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
+	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
-	pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
+	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_tower_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
-	fi
+	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
 
 requirements: requirements_ansible requirements_tower
 
-requirements_dev: requirements requirements_tower_dev
+requirements_dev: requirements requirements_tower_dev requirements_ansible_dev
 
 requirements_test: requirements
 
@@ -481,7 +483,7 @@ check: flake8 pep8 # pyflakes pylint
 
 TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
-test:
+test: test_ansible
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
@@ -492,6 +494,12 @@ test_unit:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
+
+test_ansible:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/ansible/bin/activate; \
+	fi; \
+	py.test awx/lib/tests -c awx/lib/tests/pytest.ini
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
@@ -608,7 +616,7 @@ ui-test-ci: $(UI_DEPS_FLAG_FILE)
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
-jshint:
+jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 
 ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
@@ -693,23 +701,67 @@ setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) 
 rpm-build:
 	mkdir -p $@
 
-rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
+rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
+	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
 	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
 	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
+	  (cd tar-build/ && tar zxf $(SETUP_TAR_FILE)) ; \
+	  (cd tar-build/ && mv $(NAME)-setup-$(VERSION)-$(BUILD) $(NAME)-setup-$(VERSION)) ; \
+	  (cd tar-build/ && tar czf ../rpm-build/$(SETUP_TAR_FILE) $(NAME)-setup-$(VERSION)) ; \
+	  ln -sf $(SETUP_TAR_FILE) rpm-build/$(NAME)-setup-$(VERSION).tar.gz ; \
 	else \
 	  cp -a dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
+
+brewrpmtar: rpm-build/python-deps.tar.gz requirements/requirements_local.txt requirements/requirements_ansible_local.txt rpmtar
+
+rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
+	tar czf rpm-build/python-deps.tar.gz requirements/vendor
+
+requirements/vendor:
+	cat requirements/requirements.txt requirements/requirements_git.txt | pip download \
+	    --no-binary=:all: \
+	    --requirement=/dev/stdin \
+	    --dest=$@ \
+	    --exists-action=i
+
+	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | pip download \
+	    --no-binary=:all: \
+	    --requirement=/dev/stdin \
+	    --dest=$@ \
+	    --exists-action=i
+
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements_setup_requires.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
+requirements/requirements_local.txt:
+	@echo "This is going to take a while..."
+	pip download \
+	    --requirement=requirements/requirements_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
+
+requirements/requirements_ansible_local.txt:
+	pip download \
+	    --requirement=requirements/requirements_ansible_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
@@ -720,6 +772,8 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "Artifacts:"
 	@echo rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
+
+brew-srpm: brewrpmtar mock-srpm
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
@@ -829,7 +883,7 @@ amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
 # Vagrant box using virtualbox provider
-vagrant-virtualbox: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box
+vagrant-virtualbox: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box tar-build/$(SETUP_TAR_FILE)
 
 packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
 	cd packaging/packer && $(PACKER) build -only virtualbox-ovf $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
@@ -840,7 +894,7 @@ packaging/packer/output-virtualbox-iso/centos-7.ovf:
 virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
 # Vagrant box using VMware provider
-vagrant-vmware: packaging/packer/ansible-tower-$(VERSION)-vmware.box
+vagrant-vmware: packaging/packer/ansible-tower-$(VERSION)-vmware.box tar-build/$(SETUP_TAR_FILE)
 
 packaging/packer/output-vmware-iso/centos-7.vmx:
 	cd packaging/packer && $(PACKER) build -only vmware-iso packer-centos-7.json

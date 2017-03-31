@@ -377,9 +377,9 @@ register(
     help_text=_('User profile flags updated from group membership (key is user '
                 'attribute name, value is group DN).  These are boolean fields '
                 'that are matched based on whether the user is a member of the '
-                'given group.  So far only is_superuser is settable via this '
-                'method.  This flag is set both true and false at login time '
-                'based on current LDAP settings.'),
+                'given group.  So far only is_superuser and is_system_auditor '
+                'are settable via this method.  This flag is set both true and '
+                'false at login time based on current LDAP settings.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([

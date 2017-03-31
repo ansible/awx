@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:ProjectStatus
@@ -15,7 +15,7 @@ export default
         .value('ProjectStatusForm', {
 
             name: 'project_update',
-            editTitle: 'SCM Status',
+            editTitle: 'SCM STATUS',
             well: false,
             'class': 'horizontal-narrow',
 

@@ -92,3 +92,15 @@ def test_expired_licenses():
 
     assert vdata['compliant'] is False
     assert vdata['grace_period_remaining'] > 0
+
+
+@pytest.mark.django_db
+def test_cloudforms_license(mocker):
+    with mocker.patch('awx.main.task_engine.TaskEnhancer._check_cloudforms_subscription', return_value=True):
+        task_enhancer = TaskEnhancer()
+        vdata = task_enhancer.validate_enhancements()
+        assert vdata['compliant'] is True
+        assert vdata['subscription_name'] == "Red Hat CloudForms License"
+        assert vdata['available_instances'] == 9999999
+        assert vdata['license_type'] == 'enterprise'
+        assert vdata['features']['ha'] is True

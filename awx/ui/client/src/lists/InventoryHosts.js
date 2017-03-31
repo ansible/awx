@@ -11,7 +11,7 @@ export default
         name: 'hosts',
         iterator: 'host',
         editTitle: '{{ selected_group }}',
-        listTitle: 'Hosts',
+        listTitle: 'HOSTS',
         searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         showTitle: false,
         well: true,

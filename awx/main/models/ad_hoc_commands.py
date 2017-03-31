@@ -190,7 +190,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
                       'module_name', 'module_args', 'forks', 'verbosity',
-                      'become_enabled'):
+                      'extra_vars', 'become_enabled'):
             data[field] = getattr(self, field)
         return AdHocCommand.objects.create(**data)
 

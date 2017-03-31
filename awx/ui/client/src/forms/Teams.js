@@ -15,7 +15,7 @@ export default
         .factory('TeamForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Team'), //Legend in add mode
+            addTitle: i18n._('NEW TEAM'), //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
             // the top-most node of generated state tree
@@ -42,7 +42,8 @@ export default
                     sourceModel: 'organization',
                     basePath: 'organizations',
                     sourceField: 'name',
-                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                    awLookupWhen: '(team_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg',
                     required: true,
                 }
             },

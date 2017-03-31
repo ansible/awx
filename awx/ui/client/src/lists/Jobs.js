@@ -11,7 +11,7 @@ export default
 
         name: 'jobs',
         iterator: 'job',
-        editTitle: 'Jobs',
+        editTitle: 'JOBS',
         'class': 'table-condensed',
         index: false,
         hover: true,

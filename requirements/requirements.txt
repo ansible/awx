@@ -4,11 +4,6 @@
 #
 #    pip-compile --output-file requirements/requirements.txt requirements/requirements.in
 #
-git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
-git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
-git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
-git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
-git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
 adal==0.4.3               # via msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -197,4 +192,5 @@ xmltodict==0.10.2
 zope.interface==4.3.3     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via cryptography, django-polymorphic, python-ldap, zope.interface
+pip==8.1.2
+setuptools==23.0.0

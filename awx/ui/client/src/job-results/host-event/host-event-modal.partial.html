@@ -9,12 +9,12 @@
 				</a>
 				<span class="HostEvent-title">{{event.host_name}}</span>
 				<!-- close -->
-				<button ui-sref="jobDetail" type="button" class="close">
+				<button ng-click="closeHostEvent()" type="button" class="close">
 					<i class="fa fa-times-circle"></i>
 				</button>
 			</div>
 
-			<div class="HostEvent-details--left">
+			<div class="HostEvent-details">
 			    <div class="HostEvent-field">
 			        <span class="HostEvent-field--label">CREATED</span>
 			        <span class="HostEvent-field--content">{{(event.created | longDate) || "No result found"}}</span>
@@ -64,7 +64,7 @@
 
 			<!-- controls -->
 			<div class="HostEvent-controls">
-				<button ui-sref="jobDetail" class="btn btn-sm btn-default HostEvent-close">Close</button>
+				<button ng-click="closeHostEvent()" class="btn btn-sm btn-default HostEvent-close">Close</button>
 			</div>
 		</div>
 		</div>

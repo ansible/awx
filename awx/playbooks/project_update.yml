@@ -25,7 +25,7 @@
     - name: update project using git and accept hostkey
       git:
         dest: "{{project_path|quote}}"
-        repo: "{{scm_url|quote}}"
+        repo: "{{scm_url}}"
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
         accept_hostkey: "{{scm_accept_hostkey}}"
@@ -42,7 +42,7 @@
     - name: update project using git
       git:
         dest: "{{project_path|quote}}"
-        repo: "{{scm_url|quote}}"
+        repo: "{{scm_url}}"
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
         #clone: "{{ scm_full_checkout }}"
@@ -105,6 +105,45 @@
         scm_version: "{{ scm_result['after'] }}"
       when: "'after' in scm_result"
 
+    - name: update project using insights
+      uri:
+        url: "{{insights_url}}/r/insights/v1/maintenance?ansible=true"
+        user: "{{scm_username}}"
+        password: "{{scm_password}}"
+        force_basic_auth: yes
+      when: scm_type == 'insights'
+      register: insights_output
+
+    - name: Ensure the project directory is present
+      file:
+        dest: "{{project_path|quote}}"
+        state: directory
+      when: scm_type == 'insights'
+
+    - name: Fetch Insights Playbook With Name
+      get_url:
+        url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
+        dest: "{{project_path|quote}}/{{item.name}}-{{item.maintenance_id}}.yml"
+        url_username: "{{scm_username}}"
+        url_password: "{{scm_password}}"
+        force_basic_auth: yes
+        force: yes
+      when: scm_type == 'insights' and item.name != None
+      with_items: "{{insights_output.json}}"
+      failed_when: false
+
+    - name: Fetch Insights Playbook
+      get_url:
+        url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
+        dest: "{{project_path|quote}}/insights-plan-{{item.maintenance_id}}.yml"
+        url_username: "{{scm_username}}"
+        url_password: "{{scm_password}}"
+        force_basic_auth: yes
+        force: yes
+      when: scm_type == 'insights' and item.name == None
+      with_items: "{{insights_output.json}}"
+      failed_when: false
+
     - name: detect requirements.yml
       stat: path={{project_path|quote}}/roles/requirements.yml
       register: doesRequirementsExist
@@ -120,6 +159,11 @@
       set_fact:
         scm_version: "{{scm_version|regex_replace('^.*Revision: ([0-9]+).*$', '\\1')}}"
       when: scm_type == 'svn'
+
+    - name: parse hg version string properly
+      set_fact:
+        scm_version: "{{scm_version|regex_replace('^([A-Za-z0-9]+).*$', '\\1')}}"
+      when: scm_type == 'hg'
 
     - name: Repository Version
       debug: msg="Repository Version {{ scm_version }}"

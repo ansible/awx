@@ -213,8 +213,8 @@
             <div class="Panel">
 
                 <!-- RIGHT PANE HEADER -->
-                <div class="StandardOut-panelHeader">
-                    <div class="StandardOut-panelHeaderText">
+                <div class="StandardOut-panelHeader WorkflowResults-panelRightTitle">
+                    <div class="StandardOut-panelHeaderText WorkflowResults-panelRightTitleText">
                         <i class="WorkflowResults-statusResultIcon
                             fa icon-job-{{ workflow.status }}"
                             ng-show="stdoutFullScreen"
@@ -224,39 +224,40 @@
                         </i>
                         {{ workflow.name }}
                     </div>
+                    <div class="WorkflowResults-badgeAndActionRow">
+                        <!-- HEADER COUNTS -->
+                        <div class="WorkflowResults-badgeRow">
+                            <!-- PLAYS COUNT -->
+                            <div class="WorkflowResults-badgeTitle">
+                                Total Jobs
+                            </div>
+                            <span class="badge List-titleBadge">
+                                {{ workflow_nodes.length || 0}}
+                            </span>
 
-                    <!-- HEADER COUNTS -->
-                    <div class="WorkflowResults-badgeRow">
-                        <!-- PLAYS COUNT -->
-                        <div class="WorkflowResults-badgeTitle">
-                            Total Jobs
+                            <!-- ELAPSED TIME -->
+                            <div class="WorkflowResults-badgeTitle">
+                                Elapsed
+                            </div>
+                            <span class="badge List-titleBadge">
+                                {{ workflow.elapsed * 1000 | duration: "hh:mm:ss"}}
+                            </span>
                         </div>
-                        <span class="badge List-titleBadge">
-                            {{ workflow_nodes.length || 0}}
-                        </span>
 
-                        <!-- ELAPSED TIME -->
-                        <div class="WorkflowResults-badgeTitle">
-                            Elapsed
+                        <!-- HEADER ACTIONS -->
+                        <div class="StandardOut-panelHeaderActions">
+
+                            <!-- FULL-SCREEN TOGGLE ACTION -->
+                            <button class="StandardOut-actionButton"
+                                aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
+                                data-tip-watch="toggleStdoutFullscreenTooltip"
+                                data-placement="top"
+                                ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
+                                ng-click="toggleStdoutFullscreen()">
+                                <i class="fa fa-arrows-alt"></i>
+                            </button>
+
                         </div>
-                        <span class="badge List-titleBadge">
-                            {{ workflow.elapsed * 1000 | duration: "hh:mm:ss"}}
-                        </span>
-                    </div>
-
-                    <!-- HEADER ACTIONS -->
-                    <div class="StandardOut-panelHeaderActions">
-
-                        <!-- FULL-SCREEN TOGGLE ACTION -->
-                        <button class="StandardOut-actionButton"
-                            aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
-                            data-tip-watch="toggleStdoutFullscreenTooltip"
-                            data-placement="top"
-                            ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
-                            ng-click="toggleStdoutFullscreen()">
-                            <i class="fa fa-arrows-alt"></i>
-                        </button>
-
                     </div>
                 </div>
                 <workflow-status-bar></workflow-status-bar>

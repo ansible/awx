@@ -4,7 +4,6 @@
 #
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
-git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
 adal==0.4.3               # via msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -128,4 +127,5 @@ wrapt==1.10.8             # via debtcollector, positional
 xmltodict==0.10.2         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via cryptography
+pip==8.1.2
+setuptools==23.0.0

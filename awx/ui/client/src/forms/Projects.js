@@ -15,7 +15,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .factory('ProjectsFormObject', ['i18n', function(i18n) {
     return {
 
-        addTitle: i18n._('New Project'),
+        addTitle: i18n._('NEW PROJECT'),
         editTitle: '{{ name }}',
         name: 'project',
         basePath: 'projects',
@@ -50,7 +50,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 required: true,
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                awLookupWhen: '(project_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
             scm_type: {
                 label: i18n._('SCM Type'),
@@ -105,7 +106,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_url: {
                 label: 'SCM URL',
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== 'manual'",
+                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights' ",
                 awRequiredWhen: {
                     reqExpression: "scmRequired",
                     init: false
@@ -122,18 +123,23 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== 'manual'",
+                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm',
             },
             credential: {
-                label: i18n._('SCM Credential'),
+                labelBind: 'credentialLabel',
                 type: 'lookup',
                 basePath: 'credentials',
                 list: 'CredentialList',
                 // apply a default search filter to show only scm credentials
                 search: {
                     kind: 'scm'
+                },
+                autopopulateLookup: false,
+                awRequiredWhen: {
+                    reqExpression: "credRequired",
+                    init: false
                 },
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',

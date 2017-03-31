@@ -16,7 +16,7 @@ export default
         .factory('WorkflowFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Workflow Job Template'),
+            addTitle: i18n._('NEW WORKFLOW JOB TEMPLATE'),
             editTitle: '{{ name }}',
             name: 'workflow_job_template',
             breadcrumbName: i18n._('WORKFLOW'),
@@ -54,7 +54,8 @@ export default
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     column: 1,
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditOrg',
+                    awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && canEditOrg'
                 },
                 labels: {
                     label: i18n._('Labels'),

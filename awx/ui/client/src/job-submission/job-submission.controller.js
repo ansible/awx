@@ -316,15 +316,6 @@ export default
             $scope.revertToDefaultInventory = function() {
                 if($scope.has_default_inventory) {
                     $scope.selected_inventory = angular.copy($scope.defaults.inventory);
-
-                    // Loop across inventories and set update the "checked" attribute for each row
-                    $scope.inventories.forEach(function(row, i) {
-                        if (row.id === $scope.selected_inventory.id) {
-                            $scope.inventories[i].checked = 1;
-                        } else {
-                            $scope.inventories[i].checked = 0;
-                        }
-                    });
                 }
             };
 
@@ -332,15 +323,6 @@ export default
                 if($scope.has_default_credential) {
                     $scope.selected_credential = angular.copy($scope.defaults.credential);
                     updateRequiredPasswords();
-
-                    // Loop across credentials and set update the "checked" attribute for each row
-                    $scope.credentials.forEach(function(row, i) {
-                        if (row.id === $scope.selected_credential.id) {
-                            $scope.credentials[i].checked = 1;
-                        } else {
-                            $scope.credentials[i].checked = 0;
-                        }
-                    });
                 }
             };
 

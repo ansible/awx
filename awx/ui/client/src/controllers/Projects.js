@@ -97,7 +97,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
 
     $scope.reloadList = function(){
         let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-        qs.search(path, $stateParams[`${list.iterator}_search`])
+        qs.search(path, $state.params[`${list.iterator}_search`])
         .then(function(searchResponse) {
             $scope[`${list.iterator}_dataset`] = searchResponse.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
@@ -314,6 +314,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
     init();
 
     function init() {
+        $scope.canEditOrg = true;
         Rest.setUrl(GetBasePath('projects'));
         Rest.options()
             .success(function(data) {
@@ -348,6 +349,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         });
 
         $scope.scmRequired = false;
+        $scope.credRequired = false;
         master.scm_type = $scope.scm_type;
     });
 
@@ -408,6 +410,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+            $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         }
 
@@ -415,6 +418,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' +
                         i18n._('Example URLs for GIT SCM include:') +
                         '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
@@ -424,11 +428,13 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                         'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                     break;
                 case 'svn':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                         '<li>svn+ssh://servername.example.com/path</li></ul>';
                     break;
                 case 'hg':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
@@ -436,7 +442,14 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                         'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                     break;
+                case 'insights':
+                    $scope.pathRequired = false;
+                    $scope.scmRequired = false;
+                    $scope.credRequired = true;
+                    $scope.credentialLabel = "Credential";
+                break;
                 default:
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p> ' + i18n._('URL popover text');
             }
         }
@@ -455,7 +468,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, ProjectsForm, Rest, Alert, ProcessErrors, GenerateForm,
     Prompt, ClearScope, GetBasePath, GetProjectPath, Authorization,
-    GetChoices, Empty, DebugForm, Wait, ProjectUpdate, $state, CreateSelect2, ToggleNotification, i18n) {
+    GetChoices, Empty, DebugForm, Wait, ProjectUpdate, $state, CreateSelect2, ToggleNotification, i18n, OrgAdminLookup) {
 
     ClearScope('htmlTemplate');
 
@@ -509,6 +522,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 
         $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
         $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+        $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
         $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         Wait('stop');
 
@@ -585,6 +599,11 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                     $scope.scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
                     $scope.scm_type_class = "btn-disabled";
                 }
+
+                OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+                .then(function(canEditOrg){
+                    $scope.canEditOrg = canEditOrg;
+                });
 
                 $scope.project_obj = data;
                 $scope.name = data.name;
@@ -692,6 +711,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+            $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? i18n._('Revision #') : i18n._('SCM Branch');
         }
 
@@ -699,6 +719,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for GIT SCM include:') + '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
                         '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
@@ -706,11 +727,13 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                         'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                     break;
                 case 'svn':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                         '<li>svn+ssh://servername.example.com/path</li></ul>';
                     break;
                 case 'hg':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
@@ -718,7 +741,14 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                         'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                     break;
+                case 'insights':
+                    $scope.pathRequired = false;
+                    $scope.scmRequired = false;
+                    $scope.credRequired = true;
+                    $scope.credentialLabel = "Credential";
+                    break;
                 default:
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p> ' + i18n._('URL popover text');
             }
         }
@@ -742,4 +772,4 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GenerateForm',
     'Prompt', 'ClearScope', 'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification', 'i18n'];
+    'DebugForm', 'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification', 'i18n', 'OrgAdminLookup'];

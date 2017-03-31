@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   # Primary Tower Development Container
   tower:
@@ -20,13 +20,17 @@ services:
       - postgres
       - memcached
       - rabbitmq
+      - logstash
     #   - sync
     # volumes_from:
     #   - sync
     volumes:
       - "../:/tower_devel"
     privileged: true
-
+  logstash:
+    build:
+      context: ./docker-compose
+      dockerfile: Dockerfile-logstash
   # Postgres Database Container
   postgres:
     image: postgres:9.4.1
@@ -38,16 +42,3 @@ services:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
-
-  # Source Code Synchronization Container
-  # sync:
-  #     build:
-  #         context: ./docker-compose
-  #         dockerfile: Dockerfile-sync
-  #     command: "lsyncd -delay 1 -nodaemon -rsync /src /tower_devel"
-  #     volumes:
-  #         - /tower_devel
-  #         - "../:/src"
-  #     working_dir: /src
-  #     stdin_open: true
-  #     tty: true

@@ -20,6 +20,7 @@ import templateUrl from './template-url/main';
 import RestServices from '../rest/main';
 import stateDefinitions from './stateDefinitions.factory';
 import apiLoader from './api-loader';
+import orgAdminLookup from './org-admin-lookup/main';
 import 'angular-duration-format';
 
 export default
@@ -36,6 +37,7 @@ angular.module('shared', [listGenerator.name,
         templateUrl.name,
         RestServices.name,
         apiLoader.name,
+        orgAdminLookup.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])

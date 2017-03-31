@@ -108,6 +108,7 @@ reports
 *.results
 local/
 *.mo
+requirements/vendor
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

@@ -27,7 +27,8 @@
             var container = document.getElementById(el);
             var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
                 lineNumbers: true,
-                mode: mode
+                mode: mode,
+                readOnly: true
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
@@ -42,6 +43,12 @@
                 return obj.id === $scope.event.id;
             });
             return $scope.hostResults.indexOf(result[0]);
+        };
+
+        $scope.closeHostEvent = function() {
+            // Unbind the listener so it doesn't fire when we close the modal via navigation
+            $('#HostEvent').off('hidden.bs.modal');
+            $state.go('jobDetail');
         };
 
         var init = function(){
@@ -97,6 +104,10 @@
                 }
             }
             $('#HostEvent').modal('show');
+
+            $('#HostEvent').on('hidden.bs.modal', function () {
+                $scope.closeHostEvent();
+            });
         };
         init();
     }];

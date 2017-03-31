@@ -344,3 +344,53 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
 
     # Check that the survey variable is accepted and the job variable isn't
     mock_job.signal_start.assert_called_once()
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_callback_accept_prompted_extra_var(mocker, survey_spec_factory, job_template_prompts, post, admin_user, host):
+    job_template = job_template_prompts(True)
+    job_template.host_config_key = "foo"
+    job_template.survey_enabled = True
+    job_template.survey_spec = survey_spec_factory('survey_var')
+    job_template.save()
+
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
+        mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
+        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
+            with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
+                with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
+                    post(
+                        reverse('api:job_template_callback', args=[job_template.pk]),
+                        dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
+                        admin_user, expect=201, format='json')
+                    assert JobTemplate.create_unified_job.called
+                    assert JobTemplate.create_unified_job.call_args == ({'extra_vars': {'survey_var': 4,
+                                                                                        'job_launch_var': 3},
+                                                                         'launch_type': 'callback',
+                                                                         'limit': 'single-host'},)
+
+    mock_job.signal_start.assert_called_once()
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_callback_ignore_unprompted_extra_var(mocker, survey_spec_factory, job_template_prompts, post, admin_user, host):
+    job_template = job_template_prompts(False)
+    job_template.host_config_key = "foo"
+    job_template.save()
+
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
+        mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
+        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
+            with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
+                with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
+                    post(
+                        reverse('api:job_template_callback', args=[job_template.pk]),
+                        dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
+                        admin_user, expect=201, format='json')
+                    assert JobTemplate.create_unified_job.called
+                    assert JobTemplate.create_unified_job.call_args == ({'launch_type': 'callback',
+                                                                         'limit': 'single-host'},)
+
+    mock_job.signal_start.assert_called_once()

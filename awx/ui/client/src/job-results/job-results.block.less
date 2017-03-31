@@ -161,6 +161,24 @@
     flex-direction: column;
 }
 
+.JobResults-panelRightTitle{
+    flex-wrap: wrap;
+}
+
+.JobResults-panelRightTitleText{
+    word-wrap: break-word;
+    word-break: break-all;
+    max-width: 100%;
+}
+
+.JobResults-badgeAndActionRow{
+    display:flex;
+    flex: 1 0 auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
 .StandardOut-panelHeader {
     flex: initial;
 }
@@ -195,23 +213,8 @@ job-results-standard-out {
     color: @default-icon;
 }
 
-.JobResults .CodeMirror.cm-s-default,
-.JobResults .CodeMirror-line {
-    background-color: #f6f6f6;
-}
-
-.JobResults .CodeMirror-gutter.CodeMirror-lint-markers,
-.JobResults .CodeMirror-gutter.CodeMirror-linenumbers {
-    background-color: #ebebeb;
-    color: @b7grey;
-}
-
 .JobResults .CodeMirror-lines {
-    cursor: default;
-}
-
-.JobResults .CodeMirror-cursors {
-    display: none;
+    cursor: not-allowed;
 }
 
 .JobResults-downloadTooLarge {

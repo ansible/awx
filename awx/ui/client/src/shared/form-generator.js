@@ -1388,6 +1388,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.autopopulateLookup !== undefined)  ? ` autopopulateLookup=${field.autopopulateLookup} ` : "";
                         html += (field.watchBasePath !== undefined) ? ` watchBasePath=${field.watchBasePath} ` : "";
                         html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
+                        html += (field.awLookupWhen !== undefined) ? this.attr(field, 'awLookupWhen') : "";
                         html += " awlookup >\n";
                         html += "</div>\n";
 

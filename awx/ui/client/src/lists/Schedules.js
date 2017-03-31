@@ -13,8 +13,8 @@ export default
         name: 'schedules',
         iterator: 'schedule',
         selectTitle: '',
-        editTitle: 'Schedules',
-        listTitle: '{{parentObject}} || Schedules',
+        editTitle: 'SCHEDULES',
+        listTitle: '{{parentObject}} || SCHEDULES',
         index: false,
         hover: true,
 

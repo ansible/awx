@@ -169,6 +169,15 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 scope.imageData = $rootScope.custom_logo;
             });
 
+            scope.$watch('imagePresent', (val) => {
+                if(val){
+                    filePickerButton.html(removeText);
+                }
+                else{
+                    filePickerButton.html(browseText);
+                }
+            });
+
             scope.$on(fieldKey+'_reverted', function(e) {
                 scope.update(e, true);
             });
@@ -484,14 +493,14 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 modelName = attrs.source,
                 lookupType = attrs.awlookuptype,
                 watcher = attrs.awRequiredWhen || undefined,
-                watchBasePath;
+                watchBasePath,
+                awLookupWhen = attrs.awLookupWhen;
 
             if (attrs.autopopulatelookup !== undefined) {
                autopopulateLookup = JSON.parse(attrs.autopopulatelookup);
             } else {
                autopopulateLookup = true;
             }
-
 
             // The following block of code is for instances where the
             // lookup field is reused by varying sub-forms. Example: The groups
@@ -593,7 +602,12 @@ function(ConfigurationUtils, i18n, $rootScope) {
             // form.$pending will contain object reference to any ngModelControllers with outstanding requests
             fieldCtrl.$asyncValidators.validResource = function(modelValue, viewValue) {
 
-                applyValidationStrategy(viewValue, fieldCtrl);
+                if(awLookupWhen === undefined || (awLookupWhen !== undefined && Boolean(scope.$eval(awLookupWhen)) === true)) {
+                    applyValidationStrategy(viewValue, fieldCtrl);
+                }
+                else {
+                    defer.resolve();
+                }
 
                 return defer.promise;
             };
@@ -1354,6 +1368,35 @@ function(ConfigurationUtils, i18n, $rootScope) {
         link: function(scope) {
             scope.$watch('breadcrumbStep.ncyBreadcrumbLabel', function(){
                 BreadCrumbService.truncateCrumbs();
+            });
+        }
+    };
+}])
+
+.directive('awRequireMultiple', [function() {
+    return {
+        require: 'ngModel',
+        link: function postLink(scope, element, attrs, ngModel) {
+            // Watch for changes to the required attribute
+            attrs.$observe('required', function(value) {
+                if(value) {
+                    ngModel.$validators.required = function (value) {
+                        if(angular.isArray(value)) {
+                            if(value.length === 0) {
+                                return false;
+                            }
+                            else {
+                                return (!value[0] || value[0] === "") ? false : true;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    };
+                }
+                else {
+                    delete ngModel.$validators.required;
+                }
             });
         }
     };

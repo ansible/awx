@@ -86,6 +86,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 result += value;
                 result += '"';
                 break;
+            case 'awLookupWhen':
+                result = "ng-attr-awlookup=\"" + value + "\" ";
+                break;
             default:
                 result = key + "=\"" + value + "\" ";
             }
