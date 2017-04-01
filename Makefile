@@ -791,6 +791,9 @@ rpm-build/$(GPG_FILE): rpm-build
 
 rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-ui-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-server-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-setup-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
 endif
 
 deb-build:
