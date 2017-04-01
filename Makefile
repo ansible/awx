@@ -702,13 +702,19 @@ rpm-build:
 	mkdir -p $@
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_TAR_FILE)
-	cp packaging/rpm/$(NAME).spec rpm-build/
+	ansible localhost \
+	    -m template \
+	    -a "src=packaging/rpm/$(NAME).spec.j2 dest=rpm-build/$(NAME).spec" \
+	    -e tower_version=$(VERSION) \
+	    -e tower_release=$(RELEASE)
+
 	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
 	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
+
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
@@ -764,8 +770,7 @@ requirements/requirements_ansible_local.txt:
 	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build
 
 mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
@@ -776,8 +781,7 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 brew-srpm: brewrpmtar mock-srpm
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm
 
 mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	@echo "#############################################"
