@@ -5,7 +5,7 @@
 import json
 import re
 import sys
-from pyparsing import infixNotation, opAssoc, Word, Optional, Literal, CharsNotIn
+from pyparsing import infixNotation, opAssoc, Optional, Literal, CharsNotIn
 
 # Django
 from django.db.models.signals import (
@@ -477,6 +477,6 @@ class DynamicFilterField(models.TextField):
         if len(res) > 0:
             return res[0].result
 
-        raise RuntimeError("Parsing the filter_string %s wen't terribly wrong" % filter_string)
+        raise RuntimeError("Parsing the filter_string %s went terribly wrong" % filter_string)
 
 
