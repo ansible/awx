@@ -6,6 +6,7 @@ backports.ssl-match-hostname==3.5.0.1
 boto==2.45.0
 channels==0.17.3
 celery==3.1.17
+daphne>=0.15.0,<1.0.0
 Django==1.8.16
 django-auth-ldap==1.2.8
 django-celery==3.1.17
@@ -30,6 +31,7 @@ psphere==0.5.2
 psutil==5.0.0
 pygerduty==0.35.1
 pyOpenSSL==16.2.0
+pyparsing==2.2.0
 python-logstash==0.4.6
 python-memcached==1.58
 python-radius==1.0
@@ -39,7 +41,7 @@ pyvmomi==6.5
 redbaron==0.6.2
 requests-futures==0.9.7
 service-identity==16.0.0
-shade==1.13.1
+shade==1.19.0
 slackclient==1.0.2
 twilio==5.6.0
 uWSGI==2.0.14
