@@ -302,6 +302,7 @@ class ImplicitRoleField(models.ForeignKey):
 unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
 unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
 
+
 def string_to_type(t):
     if t == 'true':
         return True
