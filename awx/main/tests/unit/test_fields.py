@@ -32,10 +32,16 @@ class TestDynamicFilterFieldFilterStringToQ():
         'a__b__c__ space  =ggg',
     ])
     def test_invalid_filter_strings(self, filter_string):
-
         with pytest.raises(ParseException):
             DynamicFilterField.filter_string_to_q(filter_string)
-    
+
+    @pytest.mark.parametrize("filter_string,q_expected", [
+        (u'(a=abc\u1F5E3def)', Q(**{u"a": u"abc\u1F5E3def"})),
+    ])
+    def test_unicode(self, filter_string, q_expected):
+        q = DynamicFilterField.filter_string_to_q(filter_string)
+        assert str(q) == str(q_expected)
+
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('(a=b)', Q(**{"a": "b"})),
         ('a=b and c=d', Q(**{"a": "b"}) & Q(**{"c": "d"})),

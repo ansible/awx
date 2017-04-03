@@ -4,7 +4,8 @@
 # Python
 import json
 import re
-from pyparsing import infixNotation, opAssoc, Word, Optional, Literal
+import sys
+from pyparsing import infixNotation, opAssoc, Word, Optional, Literal, CharsNotIn
 
 # Django
 from django.db.models.signals import (
@@ -298,11 +299,8 @@ class ImplicitRoleField(models.ForeignKey):
         Role.rebuild_role_ancestor_list([], child_ids)
 
 
-
-unicode_printables = u''.join(unichr(c) for c in xrange(65536) if not unichr(c).isspace())
-unicode_printables += u'.'
-unicode_printables_spaces = u''.join(unichr(c) for c in xrange(65536))
-
+unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
+unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
 
 def string_to_type(t):
     if t == 'true':
@@ -461,8 +459,8 @@ class DynamicFilterField(models.TextField):
         * handle optional value quoted: a.b.c=""
 
         '''
-        atom = Word(unicode_printables, excludeChars=['(', ')', '=', '"'])
-        atom_inside_quotes = Word(unicode_printables_spaces, excludeChars=['"'])
+        atom = CharsNotIn(unicode_spaces_other)
+        atom_inside_quotes = CharsNotIn(u'"')
         atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
         EQUAL = Literal('=')
 
