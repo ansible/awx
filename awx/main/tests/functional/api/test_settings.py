@@ -197,7 +197,6 @@ def test_logging_aggregrator_connection_test_requires_superuser(get, post, alice
 @pytest.mark.parametrize('key', [
     'LOG_AGGREGATOR_TYPE',
     'LOG_AGGREGATOR_HOST',
-    'LOG_AGGREGATOR_PORT',
 ])
 @pytest.mark.django_db
 def test_logging_aggregrator_connection_test_bad_request(get, post, admin, key):
