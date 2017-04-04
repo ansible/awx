@@ -476,9 +476,9 @@ input[type='radio']:checked:before {
 
 .FormToggle {}
 .FormToggle-container {
-    float: right;
     margin: 0 0 0 10px;
     padding-bottom: 5px;
+    display: initial;
 
     label {
         &:first-child {
@@ -497,6 +497,16 @@ input[type='radio']:checked:before {
     .btn.btn-xs {
         padding: 0px 10px;
     }
+}
+
+.Form-inputLabelContainer {
+    width: 100%;
+    display: block !important;
+}
+
+.Form-inputLabelContainer[for=variables] {
+    width: 100%;
+    display: inline-block !important;
 }
 
 .Form-inputLabel{

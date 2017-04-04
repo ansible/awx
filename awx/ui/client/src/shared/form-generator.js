@@ -681,6 +681,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 </div>`;
                         }
 
+                        if (options && options.checkbox) {
+                            html += createCheckbox(options.checkbox);
+                        }
+
                         if (field.labelAction) {
                             let action = field.labelAction;
                             let href = action.href || "";
@@ -696,10 +700,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         html += "\n\t</label>\n";
-
-                        if (options && options.checkbox) {
-                            html += createCheckbox(options.checkbox);
-                        }
                     }
 
                     return html;
