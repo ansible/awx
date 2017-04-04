@@ -5,6 +5,7 @@
 import json
 import re
 import sys
+import six
 from pyparsing import infixNotation, opAssoc, Optional, Literal, CharsNotIn
 
 # Django
@@ -44,6 +45,22 @@ class JSONField(upstream_JSONField):
         if value in {'', None} and not self.null:
             return {}
         return super(JSONField, self).from_db_value(value, expression, connection, context)
+
+class JSONBField(upstream_JSONField):
+    def get_db_prep_value(self, value, connection, prepared=False):
+        if connection.vendor == 'sqlite':
+            # sqlite (which we use for tests) does not support jsonb;
+            return json.dumps(value)
+        return super(JSONBField, self).get_db_prep_value(
+            value, connection, prepared
+        )
+
+    def from_db_value(self, value, expression, connection, context):
+        # Work around a bug in django-jsonfield
+        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
+        if isinstance(value, six.string_types):
+            return json.loads(value)
+        return value
 
 # Based on AutoOneToOneField from django-annoying:
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
