@@ -43,6 +43,7 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
@@ -235,7 +236,11 @@ def _send_notification_templates(instance, status_str):
 
 @task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
-    instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
+    try:
+        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
+    except ObjectDoesNotExist:
+        logger.warning('Missing job `{}` in success callback.'.format(task_actual['id']))
+        return
     if not instance:
         return
 

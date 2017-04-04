@@ -2,10 +2,12 @@ from contextlib import contextmanager
 
 import pytest
 import yaml
+import mock
 
 from awx.main.models import (
     UnifiedJob,
     Notification,
+    ProjectUpdate
 )
 
 from awx.main import tasks
@@ -29,6 +31,13 @@ def test_send_notifications_job_id(mocker):
         tasks.send_notifications([], job_id=1)
         assert UnifiedJob.objects.get.called
         assert UnifiedJob.objects.get.called_with(id=1)
+
+
+def test_work_success_callback_missing_job():
+    task_data = {'type': 'project_update', 'id': 9999}
+    with mock.patch('django.db.models.query.QuerySet.get') as get_mock:
+        get_mock.side_effect = ProjectUpdate.DoesNotExist()
+        assert tasks.handle_work_success(None, task_data) is None
 
 
 def test_send_notifications_list(mocker):
