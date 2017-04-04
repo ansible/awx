@@ -4,11 +4,10 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from jsonbfield.fields import JSONField
-
 from awx.main.fields import JSONBField
 
 __all__ = ('Fact', 'FactRecent')
+
 
 class FactRecent(models.Model):
     host = models.ForeignKey(
@@ -97,3 +96,4 @@ class Fact(models.Model):
         fact_obj = Fact.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         fact_obj.save()
         return fact_obj
+

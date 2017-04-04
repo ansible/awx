@@ -46,6 +46,7 @@ class JSONField(upstream_JSONField):
             return {}
         return super(JSONField, self).from_db_value(value, expression, connection, context)
 
+
 class JSONBField(upstream_JSONField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
