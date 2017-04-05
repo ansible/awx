@@ -28,6 +28,14 @@
             </span>
         </a>
         <a class="MainMenu-item"
+            id="main_menu_inventoriesnew_mobile_link"
+            href="/#/inventoriesnew"
+            ng-class="{'is-currentRoute' : isCurrentState('inventoriesnew')}">
+            <span class="MainMenu-itemText">
+                <translate>INVENTORIES NEW</translate>
+            </span>
+        </a>
+        <a class="MainMenu-item"
             id="main_menu_job_templates_mobile_link"
             href="/#/templates"
             ng-class="{'is-currentRoute' : isCurrentState('templates')}">
@@ -102,6 +110,15 @@
         ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
             <translate>INVENTORIES</translate>
+        </span>
+    </a>
+    <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
+        id="main_menu_inventoriesnew_link"
+        href="/#/inventoriesnew"
+        ng-hide="licenseMissing"
+        ng-class="{'is-currentRoute' : isCurrentState('inventoriesnew'), 'is-loggedOut' : !current_user || !current_user.username}">
+        <span class="MainMenu-itemText">
+            <translate>INVENTORIES NEW</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"

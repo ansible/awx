@@ -89,6 +89,16 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     };
                 }
             }
+
+            let views = params.views ? params.views : {
+                '@': {
+                    // resolves to a variable property name:
+                    // 'templateUrl' OR 'templateProvider'
+                    [params.templates && params.templates.list ? 'templateUrl' : 'templateProvider']: generateTemplateBlock(),
+                    controller: params.controllers.list,
+                }
+            };
+
             state = $stateExtender.buildDefinition({
                 searchPrefix: list.iterator,
                 name: params.parent,
@@ -106,14 +116,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     ],
                     ListDefinition: () => list
                 },
-                views: {
-                    '@': {
-                        // resolves to a variable property name:
-                        // 'templateUrl' OR 'templateProvider'
-                        [params.templates && params.templates.list ? 'templateUrl' : 'templateProvider']: generateTemplateBlock(),
-                        controller: params.controllers.list,
-                    }
-                }
+                views: views
             });
             // allow passed-in params to override default resolve block
             if (params.resolve && params.resolve.list) {
@@ -125,7 +128,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
             }
             if (list.search) {
                 state.params[`${list.iterator}_search`].value = _.merge(state.params[`${list.iterator}_search`].value, list.search);
-            }
+            }if(state.name === 'inventoriesnew'){console.log(state);}
             return state;
         },
         /**

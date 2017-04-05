@@ -40,6 +40,7 @@ if ($basePath) {
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
+import inventorynew from './inventoriesnew/main';
 import inventoryScripts from './inventory-scripts/main';
 import credentialTypes from './credential-types/main';
 import organizations from './organizations/main';
@@ -99,6 +100,7 @@ var tower = angular.module('Tower', [
     configuration.name,
     systemTracking.name,
     inventories.name,
+    inventorynew.name,
     inventoryScripts.name,
     credentialTypes.name,
     organizations.name,

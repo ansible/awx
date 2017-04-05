@@ -11,10 +11,10 @@
  */
 
 function InventoriesList($scope, $rootScope, $location,
-    $compile, $filter, Rest, InventoryList, Prompt,
+    $compile, $filter, Rest, InventoriesNewList, Prompt,
     ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
-    let list = InventoryList,
+    let list = InventoriesNewList,
         defaultUrl = GetBasePath('inventory');
 
     init();
@@ -23,8 +23,8 @@ function InventoriesList($scope, $rootScope, $location,
         $scope.canAdd = false;
 
         rbacUiControlService.canAdd('inventory')
-            .then(function(params) {
-                $scope.canAdd = params.canAdd;
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
             });
 
         $scope.$watchCollection(list.name, function(){
@@ -254,7 +254,7 @@ function InventoriesList($scope, $rootScope, $location,
     };
 
     $scope.editInventory = function (id) {
-        $state.go('inventories.edit', {inventory_id: id});
+        $state.go('inventoriesnew.edit', {inventory_id: id});
     };
 
     $scope.manageInventory = function(id){
@@ -303,6 +303,6 @@ function InventoriesList($scope, $rootScope, $location,
 }
 
 export default ['$scope', '$rootScope', '$location',
-    '$compile', '$filter', 'Rest', 'InventoryList',
+    '$compile', '$filter', 'Rest', 'InventoriesNewList',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
 ];
