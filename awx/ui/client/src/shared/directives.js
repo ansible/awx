@@ -1390,7 +1390,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                             }
                         }
                         else {
-                            return false;
+                            return (!value || value === "") ? false : true;
                         }
                     };
                 }
