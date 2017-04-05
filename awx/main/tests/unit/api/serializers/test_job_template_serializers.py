@@ -104,7 +104,7 @@ class TestJobTemplateSerializerGetSummaryFields():
         serializer.show_capabilities = ['copy', 'edit']
         serializer._summary_field_labels = lambda self: []
         serializer._recent_jobs = lambda self: []
-        request = APIRequestFactory().get('/api/v1/job_templates/42/')
+        request = APIRequestFactory().get('/api/v2/job_templates/42/')
         request.user = user
         view = JobTemplateDetail()
         view.request = request

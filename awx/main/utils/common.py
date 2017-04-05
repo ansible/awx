@@ -31,7 +31,6 @@ from django.db.models import ManyToManyField
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.utils.text import slugify
-from django.core.urlresolvers import reverse
 from django.apps import apps
 
 # PyCrypto
@@ -734,14 +733,6 @@ def get_pk_from_dict(_dict, key):
         return int(_dict[key])
     except (TypeError, KeyError, ValueError):
         return None
-
-
-def build_url(*args, **kwargs):
-    get = kwargs.pop('get', {})
-    url = reverse(*args, **kwargs)
-    if get:
-        url += '?' + urllib.urlencode(get)
-    return url
 
 
 def timestamp_apiformat(timestamp):

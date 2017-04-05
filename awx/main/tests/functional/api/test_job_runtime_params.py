@@ -6,7 +6,7 @@ from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory
 from awx.main.models.jobs import Job, JobTemplate
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 @pytest.fixture
@@ -85,7 +85,7 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+            response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                             runtime_data, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
             assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{}},)
@@ -116,7 +116,7 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+            response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                             runtime_data, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
             assert JobTemplate.create_unified_job.call_args == (runtime_data,)
@@ -136,7 +136,7 @@ def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            post(reverse('api:job_template_launch', args=[job_template.pk]),
+            post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
                  {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
             assert JobTemplate.create_unified_job.call_args == ({'job_tags':'', 'skip_tags':''},)
@@ -162,7 +162,7 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+            response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
                             runtime_data, rando, expect=201)
             assert JobTemplate.create_unified_job.called
             assert JobTemplate.create_unified_job.call_args == (runtime_data,)
@@ -178,7 +178,7 @@ def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, po
     job_template = job_template_prompts(True)
 
     response = post(
-        reverse('api:job_template_launch', args=[job_template.pk]),
+        reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
         dict(job_type='foobicate',  # foobicate is not a valid job type
              inventory=87865, credential=48474), admin_user, expect=400)
 
@@ -193,7 +193,7 @@ def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_promp
     job_template = job_template_prompts(True)
 
     response = post(
-        reverse('api:job_template_launch', args=[job_template.pk]),
+        reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
         dict(extra_vars='{"unbalanced brackets":'), admin_user, expect=400)
 
     assert 'extra_vars' in response.data
@@ -207,7 +207,7 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, admin_user
     deploy_jobtemplate.save()
 
     response = post(reverse('api:job_template_launch',
-                    args=[deploy_jobtemplate.pk]), {}, admin_user, expect=400)
+                    kwargs={'pk': deploy_jobtemplate.pk}), {}, admin_user, expect=400)
 
     assert response.data['inventory'] == ["Job Template 'inventory' is missing or undefined."]
 
@@ -219,7 +219,7 @@ def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime
     job_template.execute_role.members.add(rando)
 
     # Assure that giving an inventory without access to the inventory blocks the launch
-    response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+    response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(inventory=runtime_data['inventory']), rando, expect=403)
 
     assert response.data['detail'] == u'You do not have permission to perform this action.'
@@ -232,7 +232,7 @@ def test_job_launch_fails_without_credential_access(job_template_prompts, runtim
     job_template.execute_role.members.add(rando)
 
     # Assure that giving a credential without access blocks the launch
-    response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+    response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(credential=runtime_data['credential']), rando, expect=403)
 
     assert response.data['detail'] == u'You do not have permission to perform this action.'
@@ -244,7 +244,7 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
     job_template = job_template_prompts(True)
 
     # Assure that changing the type of a scan job blocks the launch
-    response = post(reverse('api:job_template_launch', args=[job_template.pk]),
+    response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(job_type='scan'), admin_user, expect=400)
 
     assert 'job_type' in response.data
@@ -255,7 +255,7 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
 def test_job_block_scan_job_inv_change(mocker, bad_scan_JT, runtime_data, post, admin_user):
     # Assure that giving a new inventory for a scan job blocks the launch
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
-        response = post(reverse('api:job_template_launch', args=[bad_scan_JT.pk]),
+        response = post(reverse('api:job_template_launch', kwargs={'pk': bad_scan_JT.pk}),
                         dict(inventory=runtime_data['inventory']), admin_user,
                         expect=400)
 
@@ -333,7 +333,7 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
         with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 response = post(
-                    reverse('api:job_template_launch', args=[job_template.pk]),
+                    reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
                     admin_user, expect=201)
                 assert JobTemplate.create_unified_job.called
@@ -362,7 +362,7 @@ def test_callback_accept_prompted_extra_var(mocker, survey_spec_factory, job_tem
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
                     post(
-                        reverse('api:job_template_callback', args=[job_template.pk]),
+                        reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
                     assert JobTemplate.create_unified_job.called
@@ -387,7 +387,7 @@ def test_callback_ignore_unprompted_extra_var(mocker, survey_spec_factory, job_t
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
                     post(
-                        reverse('api:job_template_callback', args=[job_template.pk]),
+                        reverse('api:job_template_callback', kwargs={'pk':job_template.pk}),
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
                     assert JobTemplate.create_unified_job.called

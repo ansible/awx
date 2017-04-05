@@ -7,10 +7,10 @@
 # Django
 from django.db import models
 from django.conf import settings
-from django.core.urlresolvers import reverse
 #from django import settings as tower_settings
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models import prevent_search, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -177,8 +177,8 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         on_delete=models.CASCADE,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:workflow_job_template_node_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_job_template_node_detail', kwargs={'pk': self.pk}, request=request)
 
     def create_wfjt_node_copy(self, user, workflow_job_template=None):
         '''
@@ -223,8 +223,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         editable=False,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:workflow_job_node_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_job_kwargs(self):
         '''
@@ -365,8 +365,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return (base_list +
                 ['survey_spec', 'survey_enabled', 'organization'])
 
-    def get_absolute_url(self):
-        return reverse('api:workflow_job_template_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_job_template_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def cache_timeout_blocked(self):
@@ -467,8 +467,8 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def socketio_emit_data(self):
         return {}
 
-    def get_absolute_url(self):
-        return reverse('api:workflow_job_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:workflow_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.pk))

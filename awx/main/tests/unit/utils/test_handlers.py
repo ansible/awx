@@ -147,7 +147,17 @@ def test_https_logging_handler_splunk_auth_info():
     ('http://localhost', None, 'http://localhost'),
     ('http://localhost', 80, 'http://localhost'),
     ('http://localhost', 8080, 'http://localhost:8080'),
-    ('https://localhost', 443, 'https://localhost:443')
+    ('https://localhost', 443, 'https://localhost:443'),
+    ('ftp://localhost', 443, 'ftp://localhost:443'),
+    ('https://localhost:550', 443, 'https://localhost:550'),
+    ('https://localhost:yoho/foobar', 443, 'https://localhost:443/foobar'),
+    ('https://localhost:yoho/foobar', None, 'https://localhost:yoho/foobar'),
+    ('http://splunk.server:8088/services/collector/event', 80,
+     'http://splunk.server:8088/services/collector/event'),
+    ('http://splunk.server/services/collector/event', 80,
+     'http://splunk.server/services/collector/event'),
+    ('http://splunk.server/services/collector/event', 8088,
+     'http://splunk.server:8088/services/collector/event'),
 ])
 def test_https_logging_handler_http_host_format(host, port, normalized):
     handler = HTTPSHandler(host=host, port=port)

@@ -3,10 +3,10 @@
 
 # Django
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models.base import CommonModelNameNotUnique
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 
@@ -30,8 +30,8 @@ class Label(CommonModelNameNotUnique):
         on_delete=models.CASCADE,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:label_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:label_detail', kwargs={'pk': self.pk}, request=request)
 
     @staticmethod
     def get_orphaned_labels():

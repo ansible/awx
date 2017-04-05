@@ -1,6 +1,7 @@
 import mock
 import pytest
 
+from awx.api.versioning import reverse
 from awx.main.access import (
     BaseAccess,
     JobTemplateAccess,
@@ -12,7 +13,6 @@ from awx.main.models.jobs import JobTemplate
 from awx.main.models.schedules import Schedule
 from django.apps import apps
 
-from django.core.urlresolvers import reverse
 
 
 @pytest.fixture
@@ -250,7 +250,7 @@ def test_job_template_creator_access(project, rando, post):
     with mock.patch(
             'awx.main.models.projects.ProjectOptions.playbooks',
             new_callable=mock.PropertyMock(return_value=['helloworld.yml'])):
-        response = post(reverse('api:job_template_list', args=[]), dict(
+        response = post(reverse('api:job_template_list'), dict(
             name='newly-created-jt',
             job_type='run',
             ask_inventory_on_launch=True,

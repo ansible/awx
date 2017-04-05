@@ -13,10 +13,10 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
-from django.core.urlresolvers import reverse
 from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.schedule')
@@ -98,8 +98,8 @@ class Schedule(CommonModel):
     def __unicode__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
-    def get_absolute_url(self):
-        return reverse('api:schedule_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:schedule_detail', kwargs={'pk': self.pk}, request=request)
 
     def update_computed_fields(self):
         future_rs = dateutil.rrule.rrulestr(self.rrule, forceset=True)

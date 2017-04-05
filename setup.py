@@ -126,7 +126,8 @@ setup(
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
                          "tools/scripts/failure-event-handler",
-                         "tools/scripts/tower-python"]),
+                         "tools/scripts/tower-python",
+                         "tools/scripts/ansible-tower-setup"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'egg_info': {

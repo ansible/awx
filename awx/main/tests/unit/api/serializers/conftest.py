@@ -6,7 +6,7 @@ import pytest
 def get_related_assert():
     def fn(model_obj, related, resource_name, related_resource_name):
         assert related_resource_name in related
-        assert related[related_resource_name] == '/api/v1/%s/%d/%s/' % (resource_name, model_obj.pk, related_resource_name)
+        assert related[related_resource_name] == '/api/v2/%s/%d/%s/' % (resource_name, model_obj.pk, related_resource_name)
     return fn
 
 

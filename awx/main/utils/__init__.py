@@ -12,7 +12,6 @@ from awx.main.utils.common import ( # noqa
     encrypt_field,
     parse_yaml_or_json,
     decrypt_field,
-    build_url,
     timestamp_apiformat,
     model_instance_diff,
     model_to_dict,

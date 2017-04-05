@@ -1,11 +1,10 @@
 import mock
 import pytest
 
+from awx.api.versioning import reverse
 from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.inventory import Inventory, Group
 from awx.main.models.jobs import JobTemplate
-
-from django.core.urlresolvers import reverse
 
 
 @pytest.mark.django_db
@@ -29,7 +28,7 @@ def test_basic_parameterization(get, post, user, organization):
                                                          headers={"Test": "Header"})),
                     u)
     assert response.status_code == 201
-    url = reverse('api:notification_template_detail', args=(response.data['id'],))
+    url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
     assert 'related' in response.data
     assert 'organization' in response.data['related']
@@ -60,7 +59,7 @@ def test_encrypted_subfields(get, post, user, organization):
                     u)
     assert response.status_code == 201
     notification_template_actual = NotificationTemplate.objects.get(id=response.data['id'])
-    url = reverse('api:notification_template_detail', args=(response.data['id'],))
+    url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
     with mock.patch.object(notification_template_actual.notification_class, "send_messages", assert_send):
@@ -89,13 +88,13 @@ def test_inherited_notification_templates(get, post, user, organization, project
     g.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
-    url = reverse('api:organization_notification_templates_any_list', args=(organization.id,))
+    url = reverse('api:organization_notification_templates_any_list', kwargs={'pk': organization.id})
     response = post(url, dict(id=notification_templates[0]), u)
     assert response.status_code == 204
-    url = reverse('api:project_notification_templates_any_list', args=(project.id,))
+    url = reverse('api:project_notification_templates_any_list', kwargs={'pk': project.id})
     response = post(url, dict(id=notification_templates[1]), u)
     assert response.status_code == 204
-    url = reverse('api:job_template_notification_templates_any_list', args=(jt.id,))
+    url = reverse('api:job_template_notification_templates_any_list', kwargs={'pk': jt.id})
     response = post(url, dict(id=notification_templates[2]), u)
     assert response.status_code == 204
     assert len(jt.notification_templates['any']) == 3
@@ -113,18 +112,18 @@ def test_notification_template_merging(get, post, user, organization, project, n
 
 @pytest.mark.django_db
 def test_notification_template_simple_patch(patch, notification_template, admin):
-    patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'name': 'foo'}, admin, expect=200)
+    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), { 'name': 'foo'}, admin, expect=200)
 
 
 @pytest.mark.django_db
 def test_notification_template_invalid_notification_type(patch, notification_template, admin):
-    patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'notification_type': 'invalid'}, admin, expect=400)
+    patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), { 'notification_type': 'invalid'}, admin, expect=400)
 
 
 @pytest.mark.django_db
 def test_disallow_delete_when_notifications_pending(delete, user, notification_template):
     u = user('superuser', True)
-    url = reverse('api:notification_template_detail', args=(notification_template.id,))
+    url = reverse('api:notification_template_detail', kwargs={'pk': notification_template.id})
     Notification.objects.create(notification_template=notification_template,
                                 status='pending')
     response = delete(url, user=u)

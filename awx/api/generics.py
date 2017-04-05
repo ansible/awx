@@ -31,6 +31,7 @@ from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
+from awx.api.versioning import URLPathVersioning
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -85,6 +86,8 @@ def get_view_description(cls, html=False):
 
 
 class APIView(views.APIView):
+
+    versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
         '''
@@ -161,6 +164,7 @@ class APIView(views.APIView):
             'new_in_240': getattr(self, 'new_in_240', False),
             'new_in_300': getattr(self, 'new_in_300', False),
             'new_in_310': getattr(self, 'new_in_310', False),
+            'new_in_320': getattr(self, 'new_in_320', False),
             'deprecated': getattr(self, 'deprecated', False),
         }
 
@@ -187,6 +191,23 @@ class APIView(views.APIView):
             return self.request.data.copy()
 
         return data
+
+    def determine_version(self, request, *args, **kwargs):
+        return (
+            getattr(request, 'version', None),
+            getattr(request, 'versioning_scheme', None),
+        )
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.versioning_class is not None:
+            scheme = self.versioning_class()
+            request.version, request.versioning_scheme = (
+                scheme.determine_version(request, *args, **kwargs),
+                scheme
+            )
+            if 'version' in kwargs:
+                kwargs.pop('version')
+        return super(APIView, self).dispatch(request, *args, **kwargs)
 
 
 class GenericAPIView(generics.GenericAPIView, APIView):
@@ -424,7 +445,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         obj = serializer.save()
         serializer = self.get_serializer(instance=obj)
 
-        headers = {'Location': obj.get_absolute_url()}
+        headers = {'Location': obj.get_absolute_url(request)}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 

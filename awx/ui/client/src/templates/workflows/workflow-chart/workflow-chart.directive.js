@@ -207,7 +207,7 @@ export default ['$state','moment', '$timeout', '$window',
             }
 
             function update() {
-                let userCanAddEdit = (scope.workflowJobTemplateObjt && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate;
+                let userCanAddEdit = (scope.workflowJobTemplateObj && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate;
                 if(scope.dimensionsSet) {
                     // Declare the nodes
                     let nodes = tree.nodes(scope.treeData),
@@ -813,7 +813,7 @@ export default ['$state','moment', '$timeout', '$window',
 
             function add_node() {
                 this.on("click", function(d) {
-                    if((scope.workflowJobTemplateObjt && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
+                    if((scope.workflowJobTemplateObj && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
                         scope.addNode({
                             parent: d,
                             betweenTwoNodes: false
@@ -824,7 +824,7 @@ export default ['$state','moment', '$timeout', '$window',
 
             function add_node_between() {
                 this.on("click", function(d) {
-                    if((scope.workflowJobTemplateObjt && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
+                    if((scope.workflowJobTemplateObj && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
                         scope.addNode({
                             parent: d,
                             betweenTwoNodes: true
@@ -835,7 +835,7 @@ export default ['$state','moment', '$timeout', '$window',
 
             function remove_node() {
                 this.on("click", function(d) {
-                    if((scope.workflowJobTemplateObjt && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
+                    if((scope.workflowJobTemplateObj && scope.workflowJobTemplateObj.summary_fields && scope.workflowJobTemplateObj.summary_fields.user_capabilities && scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) || scope.canAddWorkflowJobTemplate) {
                         scope.deleteNode({
                             nodeToDelete: d
                         });

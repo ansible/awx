@@ -7,7 +7,7 @@ import mock
 
 
 # Django
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 # AWX
 from awx.main.models import * # noqa
@@ -29,10 +29,10 @@ def test_organization_list_access_tests(options, head, get, admin, alice):
 @pytest.mark.django_db
 def test_organization_access_tests(organization, get, admin, alice, bob):
     organization.member_role.members.add(alice)
-    get(reverse('api:organization_detail', args=(organization.id,)), user=admin, expect=200)
-    get(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=200)
-    get(reverse('api:organization_detail', args=(organization.id,)), user=bob, expect=403)
-    get(reverse('api:organization_detail', args=(organization.id,)), user=None, expect=401)
+    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200)
+    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200)
+    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=bob, expect=403)
+    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)
 
 
 @pytest.mark.django_db
@@ -68,9 +68,9 @@ def test_organization_project_list(organization, project_factory, get, alice, bo
     organization.admin_role.members.add(alice)
     organization.member_role.members.add(bob)
     prj1.use_role.members.add(bob)
-    assert get(reverse('api:organization_projects_list', args=(organization.id,)), user=alice).data['count'] == 2
-    assert get(reverse('api:organization_projects_list', args=(organization.id,)), user=bob).data['count'] == 1
-    assert get(reverse('api:organization_projects_list', args=(organization.id,)), user=rando).status_code == 403
+    assert get(reverse('api:organization_projects_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 2
+    assert get(reverse('api:organization_projects_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 1
+    assert get(reverse('api:organization_projects_list', kwargs={'pk': organization.id}), user=rando).status_code == 403
 
 
 @pytest.mark.django_db
@@ -78,12 +78,12 @@ def test_organization_user_list(organization, get, admin, alice, bob):
     organization.admin_role.members.add(alice)
     organization.member_role.members.add(alice)
     organization.member_role.members.add(bob)
-    assert get(reverse('api:organization_users_list', args=(organization.id,)), user=admin).data['count'] == 2
-    assert get(reverse('api:organization_users_list', args=(organization.id,)), user=alice).data['count'] == 2
-    assert get(reverse('api:organization_users_list', args=(organization.id,)), user=bob).data['count'] == 2
-    assert get(reverse('api:organization_admins_list', args=(organization.id,)), user=admin).data['count'] == 1
-    assert get(reverse('api:organization_admins_list', args=(organization.id,)), user=alice).data['count'] == 1
-    assert get(reverse('api:organization_admins_list', args=(organization.id,)), user=bob).data['count'] == 1
+    assert get(reverse('api:organization_users_list', kwargs={'pk': organization.id}), user=admin).data['count'] == 2
+    assert get(reverse('api:organization_users_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 2
+    assert get(reverse('api:organization_users_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 2
+    assert get(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), user=admin).data['count'] == 1
+    assert get(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 1
+    assert get(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 1
 
 
 @pytest.mark.django_db
@@ -93,9 +93,9 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
     organization.admin_role.members.add(alice)
     organization.member_role.members.add(bob)
     inv1.use_role.members.add(bob)
-    assert get(reverse('api:organization_inventories_list', args=(organization.id,)), user=alice).data['count'] == 2
-    assert get(reverse('api:organization_inventories_list', args=(organization.id,)), user=bob).data['count'] == 1
-    get(reverse('api:organization_inventories_list', args=(organization.id,)), user=rando, expect=403)
+    assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 2
+    assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 1
+    get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=rando, expect=403)
 
 
 @pytest.mark.django_db
@@ -123,25 +123,25 @@ def test_create_organization_xfail(post, alice):
 @pytest.mark.django_db
 def test_add_user_to_organization(post, organization, alice, bob):
     organization.admin_role.members.add(alice)
-    post(reverse('api:organization_users_list', args=(organization.id,)), {'id': bob.id}, user=alice, expect=204)
+    post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=204)
     assert bob in organization.member_role
-    post(reverse('api:organization_users_list', args=(organization.id,)), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
+    post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
     assert bob not in organization.member_role
 
 
 @pytest.mark.django_db
 def test_add_user_to_organization_xfail(post, organization, alice, bob):
     organization.member_role.members.add(alice)
-    post(reverse('api:organization_users_list', args=(organization.id,)), {'id': bob.id}, user=alice, expect=403)
+    post(reverse('api:organization_users_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=403)
 
 
 @pytest.mark.django_db
 def test_add_admin_to_organization(post, organization, alice, bob):
     organization.admin_role.members.add(alice)
-    post(reverse('api:organization_admins_list', args=(organization.id,)), {'id': bob.id}, user=alice, expect=204)
+    post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=204)
     assert bob in organization.admin_role
     assert bob in organization.member_role
-    post(reverse('api:organization_admins_list', args=(organization.id,)), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
+    post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id, 'disassociate': True} , user=alice, expect=204)
     assert bob not in organization.admin_role
     assert bob not in organization.member_role
 
@@ -149,42 +149,42 @@ def test_add_admin_to_organization(post, organization, alice, bob):
 @pytest.mark.django_db
 def test_add_admin_to_organization_xfail(post, organization, alice, bob):
     organization.member_role.members.add(alice)
-    post(reverse('api:organization_admins_list', args=(organization.id,)), {'id': bob.id}, user=alice, expect=403)
+    post(reverse('api:organization_admins_list', kwargs={'pk': organization.id}), {'id': bob.id}, user=alice, expect=403)
 
 
 @pytest.mark.django_db
 def test_update_organization(get, put, organization, alice, bob):
     organization.admin_role.members.add(alice)
-    data = get(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=200).data
+    data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
     data['description'] = 'hi'
-    put(reverse('api:organization_detail', args=(organization.id,)), data, user=alice, expect=200)
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=alice, expect=200)
     organization.refresh_from_db()
     assert organization.description == 'hi'
     data['description'] = 'bye'
-    put(reverse('api:organization_detail', args=(organization.id,)), data, user=bob, expect=403)
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=bob, expect=403)
 
 
 @pytest.mark.django_db
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization(delete, organization, admin):
-    delete(reverse('api:organization_detail', args=(organization.id,)), user=admin, expect=204)
+    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=204)
 
 
 @pytest.mark.django_db
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization2(delete, organization, alice):
     organization.admin_role.members.add(alice)
-    delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=204)
+    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=204)
 
 
 @pytest.mark.django_db
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail1(delete, organization, alice):
     organization.member_role.members.add(alice)
-    delete(reverse('api:organization_detail', args=(organization.id,)), user=alice, expect=403)
+    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=403)
 
 
 @pytest.mark.django_db
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda *a, **kw: True)
 def test_delete_organization_xfail2(delete, organization):
-    delete(reverse('api:organization_detail', args=(organization.id,)), user=None, expect=401)
+    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)

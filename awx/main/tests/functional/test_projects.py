@@ -3,7 +3,7 @@
 import mock # noqa
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 from awx.main.models import Project
 
 
@@ -38,13 +38,13 @@ def test_user_project_paged_list(get, organization_factory):
 
     # first page has first project and no previous page
     pk = objects.users.alice.pk
-    url = reverse('api:user_projects_list', args=(pk,))
+    url = reverse('api:user_projects_list', kwargs={'pk':pk,})
     results = get(url, objects.users.alice, QUERY_STRING='page_size=1').data
     assert results['count'] == 3
     assert len(results['results']) == 1
     assert results['previous'] is None
     assert results['next'] == (
-        '/api/v1/users/%s/projects/?page=2&page_size=1' % pk
+        '/api/v2/users/%s/projects/?page=2&page_size=1' % pk
     )
 
     # second page has one more, a previous and next page
@@ -52,10 +52,10 @@ def test_user_project_paged_list(get, organization_factory):
                   QUERY_STRING='page=2&page_size=1').data
     assert len(results['results']) == 1
     assert results['previous'] == (
-        '/api/v1/users/%s/projects/?page=1&page_size=1' % pk
+        '/api/v2/users/%s/projects/?page=1&page_size=1' % pk
     )
     assert results['next'] == (
-        '/api/v1/users/%s/projects/?page=3&page_size=1' % pk
+        '/api/v2/users/%s/projects/?page=3&page_size=1' % pk
     )
 
     # third page has last project and a previous page
@@ -63,7 +63,7 @@ def test_user_project_paged_list(get, organization_factory):
                   QUERY_STRING='page=3&page_size=1').data
     assert len(results['results']) == 1
     assert results['previous'] == (
-        '/api/v1/users/%s/projects/?page=2&page_size=1' % pk
+        '/api/v2/users/%s/projects/?page=2&page_size=1' % pk
     )
     assert results['next'] is None
 
@@ -81,7 +81,7 @@ def test_user_project_paged_list_with_unicode(get, organization_factory):
         roles=['project-☁-1.admin_role:alice','project-☁-2.admin_role:alice'],
     )
     pk = objects.users.alice.pk
-    url = reverse('api:user_projects_list', args=(pk,))
+    url = reverse('api:user_projects_list', kwargs={'pk':pk,})
 
     # first on first page, next page link contains unicode char
     results = get(url, objects.users.alice,
@@ -89,7 +89,7 @@ def test_user_project_paged_list_with_unicode(get, organization_factory):
     assert results['count'] == 2
     assert len(results['results']) == 1
     assert results['next'] == (
-        '/api/v1/users/%s/projects/?page=2&page_size=1&search=%%E2%%98%%81' % pk  # noqa
+        '/api/v2/users/%s/projects/?page=2&page_size=1&search=%%E2%%98%%81' % pk  # noqa
     )
 
     # second project on second page, previous page link contains unicode char
@@ -98,7 +98,7 @@ def test_user_project_paged_list_with_unicode(get, organization_factory):
     assert results['count'] == 2
     assert len(results['results']) == 1
     assert results['previous'] == (
-        '/api/v1/users/%s/projects/?page=1&page_size=1&search=%%E2%%98%%81' % pk  # noqa
+        '/api/v2/users/%s/projects/?page=1&page_size=1&search=%%E2%%98%%81' % pk  # noqa
     )
 
 
@@ -114,21 +114,23 @@ def test_user_project_list(get, organization_factory):
                                           'bob project.admin_role:bob',
                                           'shared project.admin_role:bob',
                                           'shared project.admin_role:alice'])
-
-    assert get(reverse('api:user_projects_list', args=(objects.superusers.admin.pk,)), objects.superusers.admin).data['count'] == 3
+    assert get(reverse(
+        'api:user_projects_list',
+        kwargs={'pk':objects.superusers.admin.pk,}
+    ), objects.superusers.admin).data['count'] == 3
 
     # admins can see everyones projects
-    assert get(reverse('api:user_projects_list', args=(objects.users.alice.pk,)), objects.superusers.admin).data['count'] == 2
-    assert get(reverse('api:user_projects_list', args=(objects.users.bob.pk,)), objects.superusers.admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':objects.users.alice.pk,}), objects.superusers.admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':objects.users.bob.pk,}), objects.superusers.admin).data['count'] == 2
 
     # users can see their own projects
-    assert get(reverse('api:user_projects_list', args=(objects.users.alice.pk,)), objects.users.alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':objects.users.alice.pk,}), objects.users.alice).data['count'] == 2
 
     # alice should only be able to see the shared project when looking at bobs projects
-    assert get(reverse('api:user_projects_list', args=(objects.users.bob.pk,)), objects.users.alice).data['count'] == 1
+    assert get(reverse('api:user_projects_list', kwargs={'pk':objects.users.bob.pk,}), objects.users.alice).data['count'] == 1
 
     # alice should see all projects they can see when viewing an admin
-    assert get(reverse('api:user_projects_list', args=(objects.superusers.admin.pk,)), objects.users.alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':objects.superusers.admin.pk,}), objects.users.alice).data['count'] == 2
 
 
 @pytest.mark.django_db
@@ -139,35 +141,35 @@ def test_team_project_list(get, team_project_list):
     alice, bob, admin = objects.users.alice, objects.users.bob, objects.superusers.admin
 
     # admins can see all projects on a team
-    assert get(reverse('api:team_projects_list', args=(team1.pk,)), admin).data['count'] == 2
-    assert get(reverse('api:team_projects_list', args=(team2.pk,)), admin).data['count'] == 2
+    assert get(reverse('api:team_projects_list', kwargs={'pk':team1.pk,}), admin).data['count'] == 2
+    assert get(reverse('api:team_projects_list', kwargs={'pk':team2.pk,}), admin).data['count'] == 2
 
     # users can see all projects on teams they are a member of
-    assert get(reverse('api:team_projects_list', args=(team1.pk,)), alice).data['count'] == 2
+    assert get(reverse('api:team_projects_list', kwargs={'pk':team1.pk,}), alice).data['count'] == 2
 
     # but if she does, then she should only see the shared project
     team2.read_role.members.add(alice)
-    assert get(reverse('api:team_projects_list', args=(team2.pk,)), alice).data['count'] == 1
+    assert get(reverse('api:team_projects_list', kwargs={'pk':team2.pk,}), alice).data['count'] == 1
     team2.read_role.members.remove(alice)
 
     # admins can see all projects
-    assert get(reverse('api:user_projects_list', args=(admin.pk,)), admin).data['count'] == 3
+    assert get(reverse('api:user_projects_list', kwargs={'pk':admin.pk,}), admin).data['count'] == 3
 
     # admins can see everyones projects
-    assert get(reverse('api:user_projects_list', args=(alice.pk,)), admin).data['count'] == 2
-    assert get(reverse('api:user_projects_list', args=(bob.pk,)), admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':alice.pk,}), admin).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':bob.pk,}), admin).data['count'] == 2
 
     # users can see their own projects
-    assert get(reverse('api:user_projects_list', args=(alice.pk,)), alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':alice.pk,}), alice).data['count'] == 2
 
     # alice should see all projects they can see when viewing an admin
-    assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
+    assert get(reverse('api:user_projects_list', kwargs={'pk':admin.pk,}), alice).data['count'] == 2
 
 
 @pytest.mark.django_db
 def test_team_project_list_fail1(get, team_project_list):
     objects = team_project_list
-    res = get(reverse('api:team_projects_list', args=(objects.teams.team2.pk,)), objects.users.alice)
+    res = get(reverse('api:team_projects_list', kwargs={'pk':objects.teams.team2.pk,}), objects.users.alice)
     assert res.status_code == 403
 
 
@@ -210,19 +212,22 @@ def test_create_project_null_organization_xfail(post, organization, org_admin):
 
 @pytest.mark.django_db()
 def test_patch_project_null_organization(patch, organization, project, admin):
-    patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': organization.id}, admin, expect=200)
+    patch(reverse('api:project_detail', kwargs={'pk':project.id,}), { 'name': 't', 'organization': organization.id}, admin, expect=200)
 
 
 @pytest.mark.django_db()
 def test_patch_project_null_organization_xfail(patch, project, org_admin):
-    patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': None}, org_admin, expect=400)
+    patch(reverse('api:project_detail', kwargs={'pk':project.id,}), { 'name': 't', 'organization': None}, org_admin, expect=400)
 
 
 @pytest.mark.django_db
 def test_cannot_schedule_manual_project(project, admin_user, post):
     response = post(
-        reverse('api:project_schedules_list', args=(project.pk,)),
-        {"name": "foo", "description": "", "enabled": True,
+        reverse('api:project_schedules_list', kwargs={'pk':project.pk,}),
+        {
+            "name": "foo", "description": "", "enabled": True,
             "rrule": "DTSTART:20160926T040000Z RRULE:FREQ=HOURLY;INTERVAL=1",
-            "extra_data": {}}, admin_user, expect=400)
+            "extra_data": {}
+        }, admin_user, expect=400
+    )
     assert 'Manual' in response.data['unified_job_template'][0]

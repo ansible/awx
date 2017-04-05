@@ -3,6 +3,7 @@
 
 # Python
 import datetime
+import hashlib
 import hmac
 import logging
 import time
@@ -17,9 +18,9 @@ from django.utils.encoding import force_text
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
@@ -292,8 +293,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         '''
         return self.create_unified_job(**kwargs)
 
-    def get_absolute_url(self):
-        return reverse('api:job_template_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:job_template_detail', kwargs={'pk': self.pk}, request=request)
 
     def can_start_without_user_input(self, callback_extra_vars=None):
         '''
@@ -470,8 +471,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def _get_unified_job_template_class(cls):
         return JobTemplate
 
-    def get_absolute_url(self):
-        return reverse('api:job_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
@@ -480,7 +481,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def task_auth_token(self):
         '''Return temporary auth token used for task requests via API.'''
         if self.status == 'running':
-            h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
+            h = hmac.new(settings.SECRET_KEY, self.created.isoformat(), digestmod=hashlib.sha1)
             return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
@@ -687,8 +688,8 @@ class JobHostSummary(CreatedModifiedModel):
             (self.host.name, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
-    def get_absolute_url(self):
-        return reverse('api:job_host_summary_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:job_host_summary_detail', kwargs={'pk': self.pk}, request=request)
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -905,8 +906,8 @@ class JobEvent(CreatedModifiedModel):
         editable=False,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:job_event_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
 
     def __unicode__(self):
         return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
@@ -1219,8 +1220,8 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'extra_vars']
 
-    def get_absolute_url(self):
-        return reverse('api:system_job_template_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:system_job_template_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def cache_timeout_blocked(self):
@@ -1275,8 +1276,8 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
     def websocket_emit_data(self):
         return {}
 
-    def get_absolute_url(self):
-        return reverse('api:system_job_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))

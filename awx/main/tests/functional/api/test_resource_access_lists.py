@@ -1,6 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 from awx.main.models import Role
 
 
@@ -19,7 +19,7 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
 
     project_admin_team.admin_role.members.add(team_admin)
 
-    result = get(reverse('api:project_access_list', args=(project.id,)), admin)
+    result = get(reverse('api:project_access_list', kwargs={'pk': project.id}), admin)
     assert result.status_code == 200
 
     # Result should be:

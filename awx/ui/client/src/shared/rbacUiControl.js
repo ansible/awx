@@ -10,7 +10,7 @@ export default
             this.canAdd = function(apiPath) {
                 var canAddVal = $q.defer();
 
-                if (apiPath.indexOf("api/v1") > -1) {
+                if (/api\/v[0-9]+\//.test(apiPath)) {
                     Rest.setUrl(apiPath);
                 } else {
                     Rest.setUrl(GetBasePath(apiPath));

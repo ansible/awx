@@ -4,11 +4,12 @@
 import logging
 
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.core.mail.message import EmailMessage
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
+# AWX
+from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.main.notifications.email_backend import CustomEmailBackend
@@ -56,8 +57,8 @@ class NotificationTemplate(CommonModel):
 
     notification_configuration = JSONField(blank=False)
 
-    def get_absolute_url(self):
-        return reverse('api:notification_template_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:notification_template_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def notification_class(self):
@@ -169,9 +170,9 @@ class Notification(CreatedModifiedModel):
         editable=False,
     )
     body = JSONField(blank=True)
-    
-    def get_absolute_url(self):
-        return reverse('api:notification_detail', args=(self.pk,))
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class JobNotificationMixin(object):

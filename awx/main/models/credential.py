@@ -5,9 +5,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 
 # AWX
+from awx.api.versioning import reverse
 from awx.main.fields import ImplicitRoleField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
@@ -271,8 +271,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append(field)
         return needed
 
-    def get_absolute_url(self):
-        return reverse('api:credential_detail', args=(self.pk,))
+    def get_absolute_url(self, request=None):
+        return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
 
     def clean_host(self):
         """Ensure that if this is a type of credential that requires a

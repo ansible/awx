@@ -9,10 +9,8 @@ import os
 # Mock
 import mock
 
-# Django
-from django.core.urlresolvers import reverse
-
 # AWX
+from awx.api.versioning import reverse
 from awx.conf.models import Setting
 from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
 
@@ -32,7 +30,7 @@ def mock_no_license_file(mocker):
 
 @pytest.mark.django_db
 def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get, put, patch, delete, admin, enterprise_license):
-    url = reverse('api:setting_singleton_detail', args=('system',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'})
     response = get(url, user=admin, expect=200)
     assert not response.data['LICENSE']
     Setting.objects.create(key='TOWER_URL_BASE', value='https://towerhost')
@@ -53,13 +51,13 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
 @pytest.mark.django_db
 def test_url_base_defaults_to_request(options, admin):
     # If TOWER_URL_BASE is not set, default to the Tower request hostname
-    resp = options(reverse('api:setting_singleton_detail', args=('system',)), user=admin, expect=200)
+    resp = options(reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'}), user=admin, expect=200)
     assert resp.data['actions']['PUT']['TOWER_URL_BASE']['default'] == 'http://testserver'
 
 
 @pytest.mark.django_db
 def test_jobs_settings(get, put, patch, delete, admin):
-    url = reverse('api:setting_singleton_detail', args=('jobs',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
     get(url, user=admin, expect=200)
     delete(url, user=admin, expect=204)
     response = get(url, user=admin, expect=200)
@@ -80,7 +78,7 @@ def test_jobs_settings(get, put, patch, delete, admin):
 
 @pytest.mark.django_db
 def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
-    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     get(url, user=admin, expect=404)
     Setting.objects.create(key='LICENSE', value=enterprise_license)
     get(url, user=admin, expect=200)
@@ -107,7 +105,7 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
 @pytest.mark.django_db
 def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
                        setting):
-    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     Setting.objects.create(key='LICENSE', value=enterprise_license)
 
     patch(url, user=admin, data={setting: ''}, expect=200)
@@ -121,7 +119,7 @@ def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
 
 @pytest.mark.django_db
 def test_radius_settings(get, put, patch, delete, admin, enterprise_license, settings):
-    url = reverse('api:setting_singleton_detail', args=('radius',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'radius'})
     get(url, user=admin, expect=404)
     Setting.objects.create(key='LICENSE', value=enterprise_license)
     response = get(url, user=admin, expect=200)
@@ -155,7 +153,7 @@ def test_radius_settings(get, put, patch, delete, admin, enterprise_license, set
 
 @pytest.mark.django_db
 def test_ui_settings(get, put, patch, delete, admin, enterprise_license):
-    url = reverse('api:setting_singleton_detail', args=('ui',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'})
     response = get(url, user=admin, expect=200)
     assert 'CUSTOM_LOGO' not in response.data
     assert 'CUSTOM_LOGIN_INFO' not in response.data
@@ -199,7 +197,6 @@ def test_logging_aggregrator_connection_test_requires_superuser(get, post, alice
 @pytest.mark.parametrize('key', [
     'LOG_AGGREGATOR_TYPE',
     'LOG_AGGREGATOR_HOST',
-    'LOG_AGGREGATOR_PORT',
 ])
 @pytest.mark.django_db
 def test_logging_aggregrator_connection_test_bad_request(get, post, admin, key):

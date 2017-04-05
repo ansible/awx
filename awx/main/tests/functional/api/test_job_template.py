@@ -2,11 +2,11 @@ import pytest
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer, JobLaunchSerializer
+from awx.api.versioning import reverse
 from awx.main.models.jobs import Job
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
-from django.core.urlresolvers import reverse
 from django.apps import apps
 
 
@@ -56,7 +56,7 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
     if grant_inventory:
         objs.inventory.use_role.members.add(alice)
 
-    patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
+    patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), {
         'name': 'Some name',
         'project': objs.project.id,
         'credential': objs.credential.id,
@@ -72,7 +72,7 @@ def test_reject_dict_extra_vars_patch(patch, job_template_factory, admin_user):
     jt = job_template_factory(
         'jt', organization='org1', project='prj', inventory='inv', credential='cred'
     ).job_template
-    patch(reverse('api:job_template_detail', args=(jt.id,)),
+    patch(reverse('api:job_template_detail', kwargs={'pk': jt.id}),
           {'extra_vars': {'foo': 5}}, admin_user, expect=400)
 
 
@@ -84,12 +84,12 @@ def test_edit_playbook(patch, job_template_factory, alice):
     objs.credential.use_role.members.add(alice)
     objs.inventory.use_role.members.add(alice)
 
-    patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
+    patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), {
         'playbook': 'alt-helloworld.yml',
     }, alice, expect=200)
 
     objs.inventory.use_role.members.remove(alice)
-    patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
+    patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), {
         'playbook': 'helloworld.yml',
     }, alice, expect=403)
 
@@ -101,7 +101,7 @@ def test_invalid_json_body(patch, job_template_factory, alice, json_body):
     objs = job_template_factory('jt', organization='org1')
     objs.job_template.admin_role.members.add(alice)
     resp = patch(
-        reverse('api:job_template_detail', args=(objs.job_template.id,)),
+        reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}),
         json_body,
         alice,
         expect=400
@@ -117,7 +117,7 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
     jt = objs.job_template
     jt.admin_role.members.add(alice)
 
-    res = patch(reverse('api:job_template_detail', args=(jt.id,)), {
+    res = patch(reverse('api:job_template_detail', kwargs={'pk': jt.id}), {
         'name': 'updated',
         'description': 'bar',
         'forks': 14,
@@ -157,7 +157,7 @@ def test_job_template_role_user(post, organization_factory, job_template_factory
                                       inventory='test_inv',
                                       project='test_proj')
 
-    url = reverse('api:user_roles_list', args=(objects.users.test.pk,))
+    url = reverse('api:user_roles_list', kwargs={'pk': objects.users.test.pk})
     response = post(url, dict(id=jt_objects.job_template.execute_role.pk), objects.superusers.admin)
     assert response.status_code == 204
 
@@ -168,12 +168,12 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
     jt_copy_edit.admin_role.members.add(rando)
     jt_copy_edit.save()
 
-    get_response = get(reverse('api:job_template_detail', args=[jt_copy_edit.pk]), user=rando)
+    get_response = get(reverse('api:job_template_detail', kwargs={'pk':jt_copy_edit.pk}), user=rando)
     assert get_response.status_code == 200
 
     post_data = get_response.data
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
-    post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
+    post_response = post(reverse('api:job_template_list'), user=rando, data=post_data)
     assert post_response.status_code == 403
 
 
@@ -244,7 +244,7 @@ def test_disallow_template_delete_on_running_job(job_template_factory, delete, a
                                    inventory='i',
                                    organization='o')
     objects.job_template.create_unified_job()
-    delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
+    delete_response = delete(reverse('api:job_template_detail', kwargs={'pk': objects.job_template.pk}), user=admin_user)
     assert delete_response.status_code == 409
 
 

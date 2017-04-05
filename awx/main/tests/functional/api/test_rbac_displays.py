@@ -1,6 +1,6 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
@@ -30,17 +30,17 @@ class TestOptionsRBAC:
     def test_inventory_group_host_can_add(self, inventory, alice, options):
         inventory.admin_role.members.add(alice)
 
-        response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), alice)
+        response = options(reverse('api:inventory_hosts_list', kwargs={'pk': inventory.pk}), alice)
         assert 'POST' in response.data['actions']
-        response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), alice)
+        response = options(reverse('api:inventory_groups_list', kwargs={'pk': inventory.pk}), alice)
         assert 'POST' in response.data['actions']
 
     def test_inventory_group_host_can_not_add(self, inventory, bob, options):
         inventory.read_role.members.add(bob)
 
-        response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), bob)
+        response = options(reverse('api:inventory_hosts_list', kwargs={'pk': inventory.pk}), bob)
         assert 'POST' not in response.data['actions']
-        response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), bob)
+        response = options(reverse('api:inventory_groups_list', kwargs={'pk': inventory.pk}), bob)
         assert 'POST' not in response.data['actions']
 
     def test_user_list_can_add(self, org_member, org_admin, options):
@@ -192,7 +192,7 @@ class TestAccessListCapabilities:
         inventory.admin_role.members.add(rando)
 
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', args=(inventory.id,)), rando)
+            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), rando)
 
         mock_access_method.assert_called_once_with(inventory.admin_role, rando, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
@@ -202,7 +202,7 @@ class TestAccessListCapabilities:
     def test_access_list_indirect_access_capability(
             self, inventory, organization, org_admin, get, mocker, mock_access_method):
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', args=(inventory.id,)), org_admin)
+            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), org_admin)
 
         mock_access_method.assert_called_once_with(organization.admin_role, org_admin, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data, sublist='indirect_access')
@@ -214,7 +214,7 @@ class TestAccessListCapabilities:
         team.member_role.children.add(inventory.admin_role)
 
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', args=(inventory.id,)), team_member)
+            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), team_member)
 
         mock_access_method.assert_called_once_with(inventory.admin_role, team.member_role, 'parents', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
@@ -223,7 +223,7 @@ class TestAccessListCapabilities:
 
     def test_user_access_list_direct_access_capability(self, rando, get):
         "When a user views their own access list, they cannot unattach their admin role"
-        response = get(reverse('api:user_access_list', args=(rando.id,)), rando)
+        response = get(reverse('api:user_access_list', kwargs={'pk': rando.id}), rando)
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert not direct_access_list[0]['role']['user_capabilities']['unattach']
 
@@ -233,7 +233,7 @@ def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_m
     team.member_role.children.add(inventory.admin_role)
 
     with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-        response = get(reverse('api:team_roles_list', args=(team.id,)), team_member)
+        response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
 
     # Did we assess whether team_member can remove team's permission to the inventory?
     mock_access_method.assert_called_once_with(
@@ -248,7 +248,7 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
     organization.member_role.members.add(bob)
 
     with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-        response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
+        response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
 
     # Did we assess whether bob can remove alice's permission to the inventory?
     mock_access_method.assert_called_once_with(
@@ -259,7 +259,7 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
 @pytest.mark.django_db
 def test_team_roles_unattach_functional(team, team_member, inventory, get):
     team.member_role.children.add(inventory.admin_role)
-    response = get(reverse('api:team_roles_list', args=(team.id,)), team_member)
+    response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
     # Team member should be able to remove access to inventory, becauase
     # the inventory admin_role grants that ability
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
@@ -269,7 +269,7 @@ def test_team_roles_unattach_functional(team, team_member, inventory, get):
 def test_user_roles_unattach_functional(organization, alice, bob, get):
     organization.member_role.members.add(alice)
     organization.member_role.members.add(bob)
-    response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
+    response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
     # Org members cannot revoke the membership of other members
     assert not response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
 
@@ -336,7 +336,7 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_c
 
 @pytest.mark.django_db
 def test_manual_projects_no_update(project, get, admin_user):
-    response = get(reverse('api:project_detail', args=[project.pk]), admin_user, expect=200)
+    response = get(reverse('api:project_detail', kwargs={'pk': project.pk}), admin_user, expect=200)
     assert not response.data['summary_fields']['user_capabilities']['start']
     assert not response.data['summary_fields']['user_capabilities']['schedule']
 
@@ -369,5 +369,5 @@ def test_license_check_not_called(mocker, job_template, project, org_admin, get)
     job_template.save() # need this to make the JT visible
     mock_license_check = mocker.MagicMock()
     with mocker.patch('awx.main.access.BaseAccess.check_license', mock_license_check):
-        get(reverse('api:job_template_detail', args=[job_template.pk]), org_admin, expect=200)
+        get(reverse('api:job_template_detail', kwargs={'pk': job_template.pk}), org_admin, expect=200)
         assert not mock_license_check.called

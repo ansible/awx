@@ -7,8 +7,17 @@ from awx.api.filters import FieldLookupBackend
 from awx.main.models import (AdHocCommand, AuthToken, CustomInventoryScript,
                              Credential, Job, JobTemplate, SystemJob,
                              UnifiedJob, User, WorkflowJob,
-                             WorkflowJobTemplate, WorkflowJobOptions)
+                             WorkflowJobTemplate, WorkflowJobOptions,
+                             InventorySource)
 from awx.main.models.jobs import JobOptions
+
+
+def test_related():
+    field_lookup = FieldLookupBackend()
+    lookup = '__'.join(['inventory', 'organization', 'pk'])
+    field, new_lookup = field_lookup.get_field_from_lookup(InventorySource, lookup)
+    print(field)
+    print(new_lookup)
 
 
 @pytest.mark.parametrize(u"empty_value", [u'', ''])

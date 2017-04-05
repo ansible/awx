@@ -794,7 +794,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        html += (field.clear || field.genMD5) ? "<div class=\"input-group\">\n" : "";
+                        html += (field.clear || field.genMD5) ? "<div class=\"input-group Form-mixedInputGroup\">\n" : "";
 
                         if (field.control === null || field.control === undefined || field.control) {
                             html += "<input ";
@@ -878,7 +878,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "\t" + label();
                         if (field.hasShowInputButton) {
                             var tooltip = i18n._("Toggle the display of plaintext.");
-                            html += "\<div class='input-group";
+                            html += "\<div class='input-group Form-mixedInputGroup";
                             html += (horizontal) ? " " + getFieldWidth() : "";
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
@@ -1357,7 +1357,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        html += `<div class="input-group">`;
+                        html += `<div class="input-group Form-mixedInputGroup">`;
                         html += "<span class=\"input-group-btn\">\n";
                         html += `<button type="button" class="Form-lookupButton btn btn-default" ng-click="${field.ngClick || defaultLookupNgClick}"
                         ${field.readonly || field.showonly}

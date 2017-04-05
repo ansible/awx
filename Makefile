@@ -225,15 +225,18 @@ clean-tmp:
 clean-venv:
 	rm -rf venv/
 
+clean-dist:
+	rm -rf dist
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
-	rm -rf dist/*
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
 	rm -f awx/awx_test.sqlite3
+	rm -rf requirements/vendor
 	rm -rf tmp
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
@@ -282,7 +285,11 @@ virtualenv_tower:
 	fi
 
 requirements_ansible: virtualenv_ansible
-	$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt
+	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_local.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	else \
+	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	fi
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_dev:
@@ -292,7 +299,11 @@ requirements_ansible_dev:
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
-	$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt
+	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
+	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	else \
+	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	fi
 	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_tower_dev:
@@ -690,39 +701,44 @@ setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) 
 rpm-build:
 	mkdir -p $@
 
-rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
+rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
+	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
 	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
 	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
+	  (cd tar-build/ && tar zxf $(SETUP_TAR_FILE)) ; \
+	  (cd tar-build/ && mv $(NAME)-setup-$(VERSION)-$(BUILD) $(NAME)-setup-$(VERSION)) ; \
+	  (cd tar-build/ && tar czf ../rpm-build/$(SETUP_TAR_FILE) $(NAME)-setup-$(VERSION)) ; \
+	  ln -sf $(SETUP_TAR_FILE) rpm-build/$(NAME)-setup-$(VERSION).tar.gz ; \
 	else \
 	  cp -a dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
-brewrpmtar: rpm-build/python-deps.tar.gz rpmtar
+brewrpmtar: rpm-build/python-deps.tar.gz requirements/requirements_local.txt requirements/requirements_ansible_local.txt rpmtar
 
 rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
 	tar czf rpm-build/python-deps.tar.gz requirements/vendor
 
 requirements/vendor:
-	pip download \
+	cat requirements/requirements.txt requirements/requirements_git.txt | pip download \
 	    --no-binary=:all: \
-	    --requirement=requirements/requirements_ansible.txt \
+	    --requirement=/dev/stdin \
 	    --dest=$@ \
 	    --exists-action=i
 
-	pip download \
+	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | pip download \
 	    --no-binary=:all: \
-	    --requirement=requirements/requirements.txt \
+	    --requirement=/dev/stdin \
 	    --dest=$@ \
 	    --exists-action=i
 
@@ -731,6 +747,21 @@ requirements/vendor:
 	    --requirement=requirements/requirements_setup_requires.txt \
 	    --dest=$@ \
 	    --exists-action=i
+
+requirements/requirements_local.txt:
+	@echo "This is going to take a while..."
+	pip download \
+	    --requirement=requirements/requirements_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
+
+requirements/requirements_ansible_local.txt:
+	pip download \
+	    --requirement=requirements/requirements_ansible_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
@@ -760,6 +791,9 @@ rpm-build/$(GPG_FILE): rpm-build
 
 rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
 	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-ui-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-server-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
+	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/$(NAME)-setup-$(VERSION)-$(RELEASE)$(RPM_DIST).$(RPM_ARCH).rpm
 endif
 
 deb-build:
