@@ -389,6 +389,16 @@ class BaseAccess(object):
         return False
 
 
+class InstanceAccess(BaseAccess):
+
+    model = Instance
+
+
+class InstanceGroupAccess(BaseAccess):
+
+    model = InstanceGroup
+
+
 class UserAccess(BaseAccess):
     '''
     I can see user records when:
@@ -2314,3 +2324,5 @@ register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
 register_access(WorkflowJobNode, WorkflowJobNodeAccess)
 register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
 register_access(WorkflowJob, WorkflowJobAccess)
+register_access(Instance, InstanceAccess)
+register_access(InstanceGroup, InstanceGroupAccess)

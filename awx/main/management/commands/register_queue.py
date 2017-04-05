@@ -29,11 +29,11 @@ class Command(BaseCommand):
         instance_list = [x.strip() for x in options.get('hostnames').split(",")]
         for inst_name in instance_list:
             instance = Instance.objects.filter(hostname=inst_name)
-            if instance.exists() and instance not in ig.instances:
-                ig.instances.add(instance)
-                print("Added instance {} to {}".format(instance, ig))
+            if instance.exists() and instance not in ig.instances.all():
+                ig.instances.add(instance[0])
+                print("Added instance {} to {}".format(instance[0], ig))
             elif not instance.exists():
-                print("Instance does not exist: {}".format(instance))
+                print("Instance does not exist: {}".format(inst_name))
                 sys.exit(1)
             else:
-                print("Instance already registered {}".format(instance))
+                print("Instance already registered {}".format(instance[0]))

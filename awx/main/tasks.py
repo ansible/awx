@@ -102,7 +102,7 @@ def _clear_cache_keys(set_of_keys):
     cache.delete_many(set_of_keys)
 
 
-@task(queue='broadcast_all')
+@task(queue='tower_broadcast_all')
 def process_cache_changes(cache_keys):
     logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
         process_cache_changes.request))
@@ -114,7 +114,7 @@ def process_cache_changes(cache_keys):
             break
 
 
-@task(queue='default')
+@task(queue='tower')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -138,7 +138,7 @@ def send_notifications(notification_list, job_id=None):
             notification.save()
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def run_administrative_checks(self):
     logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
@@ -160,7 +160,7 @@ def run_administrative_checks(self):
                   fail_silently=True)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def cleanup_authtokens(self):
     logger.warn("Cleaning up expired authtokens.")
     AuthToken.objects.filter(expires__lt=now()).delete()

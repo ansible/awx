@@ -105,6 +105,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
+    'instance_group': {'id', 'name'}
 }
 
 
@@ -895,6 +896,7 @@ class OrganizationSerializer(BaseSerializer):
             notification_templates_error = self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
+            instance_groups = self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -1128,6 +1130,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             ad_hoc_commands = self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
+            instance_groups = self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
@@ -2211,6 +2214,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             survey_spec = self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
+            instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
         ))
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
@@ -2263,7 +2267,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'allow_simultaneous', 'artifacts', 'scm_revision')
+                  'allow_simultaneous', 'artifacts', 'scm_revision', 'instance_group')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -3230,6 +3234,37 @@ class ScheduleSerializer(BaseSerializer):
         return value
 
 
+class InstanceSerializer(BaseSerializer):
+
+    consumed_capacity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Instance
+        fields = ("related", "id", "uuid", "hostname", "created", "modified", "version", "capacity", "consumed_capacity")
+
+    def get_related(self, obj):
+        res = super(InstanceSerializer, self).get_related(obj)
+        res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
+        res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
+        return res
+
+    def get_consumed_capacity(self, obj):
+        return obj.consumed_capacity
+
+
+class InstanceGroupSerializer(BaseSerializer):
+
+    class Meta:
+        model = InstanceGroup
+        fields = ("related", "id", "name", "created", "modified", "capacity", "consumed_capacity")
+
+    def get_related(self, obj):
+        res = super(InstanceGroupSerializer, self).get_related(obj)
+        res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
+        res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
+        return res
+
+        
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()

@@ -159,6 +159,8 @@ class ApiVersionRootView(APIView):
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
+        data['instances'] = reverse('api:instance_list', request=request)
+        data['instance_groups'] = reverse('api:instance_group_list', request=request)
         data['config'] = reverse('api:api_v1_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)
@@ -238,6 +240,11 @@ class ApiV1PingView(APIView):
             response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
                                               capacity=instance.capacity, version=instance.version))
             response['instances'].sort()
+        response['rampart_groups'] = []
+        for instance_group in InstanceGroup.objects.all():
+            response['rampart_groups'].append(dict(name=instance_group.name,
+                                                   capacity=instance_group.capacity,
+                                                   instances=[x.hostname for x in instance_group.instances.all()]))
         return Response(response)
 
 
@@ -496,6 +503,88 @@ class DashboardJobsGraphView(APIView):
             dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()),
                                                      element[1]])
         return Response(dashboard_data)
+
+
+class InstanceList(ListAPIView):
+
+    view_name = _("Instances")
+    model = Instance
+    serializer_class = InstanceSerializer
+    new_in_320 = True
+
+
+class InstanceDetail(RetrieveAPIView):
+
+    view_name = _("Instance Detail")
+    model = Instance
+    serializer_class = InstanceSerializer
+    new_in_320 = True
+
+
+class InstanceUnifiedJobsList(SubListAPIView):
+
+    view_name = _("Instance Running Jobs")
+    model = UnifiedJob
+    serializer_class = UnifiedJobSerializer
+    parent_model = Instance
+    new_in_320 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        qs = get_user_queryset(self.request.user, UnifiedJob)
+        qs = qs.filter(execution_node=po.hostname, status__in=('running', 'waiting', 'pending'))
+        return qs
+
+
+class InstanceInstanceGroupsList(SubListAPIView):
+
+    view_name = _("Instance's Instance Groups")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Instance
+    new_in_320 = True
+    relationship = 'rampart_groups'
+
+
+class InstanceGroupList(ListAPIView):
+
+    view_name = _("Instance Groups")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    new_in_320 = True
+
+
+class InstanceGroupDetail(RetrieveAPIView):
+
+    view_name = _("Instance Group Detail")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    new_in_320 = True
+
+    
+class InstanceGroupUnifiedJobsList(SubListAPIView):
+
+    view_name = _("Instance Group Running Jobs")
+    model = UnifiedJob
+    serializer_class = UnifiedJobSerializer
+    parent_model = InstanceGroup
+    new_in_320 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        qs = get_user_queryset(self.request.user, UnifiedJob)
+        qs = qs.filter(instance_group=po, status__in=('running', 'waiting', 'pending'))
+        return qs
+
+
+class InstanceGroupInstanceList(SubListAPIView):
+
+    view_name = _("Instance Group's Instances")
+    model = Instance
+    serializer_class = InstanceSerializer
+    parent_model = InstanceGroup
+    new_in_320 = True
+    relationship = "instances"
 
 
 class ScheduleList(ListAPIView):
@@ -902,6 +991,22 @@ class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIV
     parent_model = Organization
     relationship = 'notification_templates_success'
     new_in_300 = True
+
+
+class OrganizationInstanceGroupsList(SubListCreateAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Organization
+    relationship = 'instance_groups'
+    new_in_320 = True
+
+    def post(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            return Response(dict(msg=_("Instance Group 'id' field is missing.")),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(OrganizationInstanceGroupsList, self).post(request, *args, **kwargs)
 
 
 class OrganizationAccessList(ResourceAccessList):
@@ -1745,6 +1850,22 @@ class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+
+class InventoryInstanceGroupsList(SubListCreateAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Inventory
+    relationship = 'instance_groups'
+    new_in_320 = True
+    
+    def post(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            return Response(dict(msg=_("Instance Group 'id' field is missing.")),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(InventoryInstanceGroupsList, self).post(request, *args, **kwargs)
 
 
 class InventoryAccessList(ResourceAccessList):
@@ -2886,6 +3007,22 @@ class JobTemplateJobsList(SubListCreateAPIView):
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
+
+
+class JobTemplateInstanceGroupsList(SubListCreateAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = JobTemplate
+    relationship = 'instance_groups'
+    new_in_320 = True
+
+    def post(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            return Response(dict(msg=_("Instance Group 'id' field is missing.")),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(JobTemplateInstanceGroupsList, self).post(request, *args, **kwargs)
 
 
 class JobTemplateAccessList(ResourceAccessList):

@@ -400,7 +400,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 djcelery.setup_loader()
 
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-CELERY_DEFAULT_QUEUE = 'default'
+CELERY_DEFAULT_QUEUE = 'tower'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -414,25 +414,18 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
-    Queue('jobs', Exchange('jobs'), routing_key='jobs'),
-    Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
-    Broadcast('broadcast_all')
-    # Projects use a fanout queue, this isn't super well supported
+    Queue('tower', Exchange('tower'), routing_key='tower'),
+    Queue('tower_scheduler', Exchange('scheduler', type='topic'), routing_key='tower_scheduler.job.#', durable=False),
+    Broadcast('tower_broadcast_all')
 )
-CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
-                                            'routing_key': 'jobs'},
-                 'awx.main.tasks.run_project_update': {'queue': 'jobs',
-                                                       'routing_key': 'jobs'},
-                 'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
-                                                         'routing_key': 'jobs'},
-                 'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
-                                                       'routing_key': 'jobs'},
-                 'awx.main.tasks.run_system_job': {'queue': 'jobs',
-                                                   'routing_key': 'jobs'},
-                 'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
-                                                             'routing_key': 'scheduler.job.launch'},
-                 'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
-                                                               'routing_key': 'scheduler.job.complete'},
+CELERY_ROUTES = {'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs': {'queue': 'tower',
+                                                                                 'routing_key': 'tower'},
+                 'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
+                                                               'routing_key': 'tower'},
+                 'awx.main.scheduler.tasks.run_job_launch': {'queue': 'tower_scheduler',
+                                                             'routing_key': 'tower_scheduler.job.launch'},
+                 'awx.main.scheduler.tasks.run_job_complete': {'queue': 'tower_scheduler',
+                                                               'routing_key': 'tower_scheduler.job.complete'},
                  'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
                                                            'routing_key': 'cluster.heartbeat'},
                  'awx.main.tasks.purge_old_stdout_files': {'queue': 'default',

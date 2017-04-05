@@ -14,7 +14,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
 
-__all__ = ('Instance', 'JobOrigin', 'TowerScheduleState',)
+__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
@@ -35,6 +35,11 @@ class Instance(models.Model):
         app_label = 'main'
 
     @property
+    def consumed_capacity(self):
+        return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname,
+                                                                    status__in=('running', 'waiting')))
+
+    @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
@@ -51,6 +56,15 @@ class InstanceGroup(models.Model):
         editable=False,
         help_text=_('Instances that are members of this InstanceGroup'),
     )
+
+    @property
+    def capacity(self):
+        return sum([x[0] for x in self.instances.values_list('capacity')])
+
+    @property
+    def consumed_capacity(self):
+        return sum(x.task_impact for x in UnifiedJob.objects.filter(instance_group=self,
+                                                                    status__in=('running', 'waiting')))
 
     class Meta:
         app_label = 'main'
