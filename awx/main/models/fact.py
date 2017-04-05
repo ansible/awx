@@ -6,13 +6,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from awx.main.fields import JSONBField
 
-__all__ = ('Fact', 'FactRecent')
+__all__ = ('Fact', 'FactLatest')
 
 
-class FactRecent(models.Model):
+class FactLatest(models.Model):
     host = models.ForeignKey(
         'Host',
-        related_name='facts_recent',
+        related_name='facts_latest',
         db_index=True,
         on_delete=models.CASCADE,
         help_text=_('Host for the facts that the fact scan captured.'),
@@ -33,10 +33,10 @@ class FactRecent(models.Model):
 
     @staticmethod
     def add_fact(host_id, module, timestamp, facts):
-        qs = FactRecent.objects.filter(host_id=host_id, module=module)
+        qs = FactLatest.objects.filter(host_id=host_id, module=module)
         qs.delete()
 
-        fact_obj = FactRecent.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
+        fact_obj = FactLatest.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         return fact_obj
 
 
@@ -91,7 +91,7 @@ class Fact(models.Model):
 
     @staticmethod
     def add_fact(host_id, module, timestamp, facts):
-        FactRecent.add_fact(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
+        FactLatest.add_fact(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
 
         fact_obj = Fact.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         fact_obj.save()

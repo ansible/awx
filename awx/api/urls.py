@@ -114,7 +114,7 @@ host_urls = patterns('awx.api.views',
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'host_single_fact_view'),
     url(r'^(?P<pk>[0-9]+)/fact_versions/$',             'host_fact_versions_list'),
     url(r'^(?P<pk>[0-9]+)/fact_view/$',                 'host_fact_compare_view'),
-    url(r'^(?P<pk>[0-9]+)/facts_recent/$',              'host_facts_recent_list'),
+    url(r'^(?P<pk>[0-9]+)/facts_latest/$',              'host_facts_latest_list'),
 )
 
 group_urls = patterns('awx.api.views',

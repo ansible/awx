@@ -9,7 +9,7 @@ from psycopg2.extensions import AsIs
 
 # AWX
 import awx.main.fields
-from awx.main.models import FactRecent
+from awx.main.models import FactLatest
 
 
 class Migration(migrations.Migration):
@@ -20,13 +20,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='FactRecent',
+            name='FactLatest',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
                 ('module', models.CharField(max_length=128)),
                 ('facts', awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
-                ('host', models.ForeignKey(related_name='facts_recent', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
+                ('host', models.ForeignKey(related_name='facts_latest', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
             ],
         ),
         migrations.AlterField(
@@ -35,10 +35,10 @@ class Migration(migrations.Migration):
             field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
         ),
         migrations.AlterIndexTogether(
-            name='factrecent',
+            name='factlatest',
             index_together=set([('timestamp', 'module', 'host')]),
         ),
-        migrations.RunSQL([("CREATE INDEX fact_recent_facts_default_gin ON %s USING gin"
-                            "(facts jsonb_path_ops);", [AsIs(FactRecent._meta.db_table)])],
-                          [('DROP INDEX fact_recent_facts_default_gin;', None)]),
+        migrations.RunSQL([("CREATE INDEX fact_latest_facts_default_gin ON %s USING gin"
+                            "(facts jsonb_path_ops);", [AsIs(FactLatest._meta.db_table)])],
+                          [('DROP INDEX fact_latest_facts_default_gin;', None)]),
     ]

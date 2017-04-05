@@ -2264,12 +2264,12 @@ class RoleAccess(BaseAccess):
         return False
 
 
-class FactRecentAccess(BaseAccess):
+class FactLatestAccess(BaseAccess):
 
-    model = FactRecent
+    model = FactLatest
 
     def get_queryset(self):
-        return FactRecent.objects.distinct()
+        return FactLatest.objects.distinct()
 
 
 register_access(User, UserAccess)
@@ -2304,4 +2304,4 @@ register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
 register_access(WorkflowJobNode, WorkflowJobNodeAccess)
 register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
 register_access(WorkflowJob, WorkflowJobAccess)
-register_access(FactRecent, FactRecentAccess)
+register_access(FactLatest, FactLatestAccess)
