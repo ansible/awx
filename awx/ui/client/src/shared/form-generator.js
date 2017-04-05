@@ -639,7 +639,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     return html;
                 }
 
-                function label() {
+                function label(options) {
                     var html = '';
                     if (field.label || field.labelBind) {
                         html += "<label class=\"";
@@ -681,6 +681,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 </div>`;
                         }
 
+                        if (options && options.checkbox) {
+                            html += createCheckbox(options.checkbox);
+                        }
+
                         if (field.labelAction) {
                             let action = field.labelAction;
                             let href = action.href || "";
@@ -697,6 +701,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "\n\t</label>\n";
                     }
+
                     return html;
                 }
 
@@ -770,7 +775,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //text fields
                     if (field.type === 'text' || field.type === 'password' || field.type === 'email') {
-                        html += label();
+                        let labelOptions = {};
+
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngModel: field.subCheckbox.variable,
+                                ngDisabled: field.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
+
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
@@ -819,19 +838,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
                                 "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
-                        }
-
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" + field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
                         }
 
                         // Add error messages
@@ -930,24 +936,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "</div>\n";
 
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" +
-                                field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.subCheckbox.ngDisabled !== undefined) {
-                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
-                            } else {
-                                html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            }
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
-                        }
-
                         // Add error messages
                         if (field.required || field.awRequiredWhen) {
                             error_message = i18n._("Please enter a value.");
@@ -1006,8 +994,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //textarea fields
                     if (field.type === 'textarea') {
+                        let labelOptions = {};
 
-                        html += label();
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngModel: field.subCheckbox.variable,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngDisabled: field.ngDisabled || field.subCheckbox.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
 
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
@@ -1038,23 +1038,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
                         html += "aw-watch ></textarea>\n";
 
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" +
-                                field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.subCheckbox.ngDisabled) {
-                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
-                            }
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
-                        }
-
                         // Add error messages
                         if (field.required) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
@@ -1066,8 +1049,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //select field
                     if (field.type === 'select') {
+                        let labelOptions = {};
 
-                        html += label();
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngModel: field.subCheckbox.variable,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngDisabled: field.subCheckbox.ngDisabled,
+                                text: field.subCheckbox.text
+                            };
+                        }
+
+                        html += label(labelOptions);
 
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
@@ -1106,23 +1101,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "</select>\n";
                         html += "</div>\n";
 
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" +
-                                field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.subCheckbox.ngDisabled) {
-                                html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
-                            }
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
-                        }
-
                             // Add error messages
                         if (field.required || field.awRequiredWhen) {
                                 html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
@@ -1142,8 +1120,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //number field
                     if (field.type === 'number') {
+                        let labelOptions = {};
 
-                        html += label();
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngModel: field.subCheckbox.variable,
+                                ngDisabled: field.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
 
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
@@ -1177,20 +1167,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
                         html += " >\n";
-
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" +
-                                field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
-                        }
 
                         // Add error messages
                         if (field.required) {
@@ -1362,7 +1338,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     //lookup type fields
                     if (field.type === 'lookup') {
                         let defaultLookupNgClick = `$state.go($state.current.name + '.${field.sourceModel}', {selected: ${field.sourceModel}})`;
-                        html += label();
+                        let labelOptions = {};
+
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngModel: field.subCheckbox.variable,
+                                ngDisabled: field.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
 
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
@@ -1403,20 +1392,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.awLookupWhen !== undefined) ? this.attr(field, 'awLookupWhen') : "";
                         html += " awlookup >\n";
                         html += "</div>\n";
-
-                        if (field.subCheckbox) {
-                            html += "<label class=\"checkbox-inline Form-subCheckbox\" ";
-                            html += (field.subCheckbox.ngShow) ? "ng-show=\"" + field.subCheckbox.ngShow + "\" " : "";
-                            html += ">";
-                            html += "<input type=\"checkbox\" ng-model=\"" +
-                                field.subCheckbox.variable + "\" ";
-                            html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            html += ">";
-                            html += field.subCheckbox.text ? field.subCheckbox.text : "";
-                            html += "</label>";
-                        }
 
                         // Add error messages
                         if (field.required || field.awRequiredWhen) {
@@ -2022,7 +1997,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" collection="${collection.iterator}s" iterator="${collection.iterator}" ng-hide="hidePagination">`;
                 return html;
-            }
+            },
         };
+
+        function createCheckbox (options) {
+            let ngChange = options.ngChange ? `ng-change="${options.ngChange}"` : '';
+            let ngDisabled = options.ngDisabled ? `ng-disabled="${options.ngDisabled}"` : '';
+            let ngModel = options.ngModel ? `ng-model="${options.ngModel}"` : '';
+            let ngShow = options.ngShow ? `ng-show="${options.ngShow}"` : '';
+
+            return `
+                <label class="checkbox-inline Form-checkbox" ${ngShow}>
+                    <input type="checkbox" id="${options.id}" ${ngModel} ${ngChange} ${ngDisabled} />
+                    ${options.text}
+                </label> `;
+        }
     }
 ]);

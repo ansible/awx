@@ -33,27 +33,36 @@
         <div class="WorkflowMaker-contentLeft">
             <div class="WorkflowLegend-maker">
                 <div class="WorkflowLegend-maker--left">
-                    <div class="WorkflowLegend-legendItem">KEY:</div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-onSuccessLegend"></div>
-                        <div>On Success</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-onFailLegend"></div>
-                        <div>On Fail</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-alwaysLegend"></div>
-                        <div>Always</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-letterCircle">P</div>
-                        <div>Project Sync</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-letterCircle">I</div>
-                        <div>Inventory Sync</div>
-                    </div>
+                    <i ng-class="{{ keyClassList }}" class="fa fa-key Key-menuIcon" ng-click="toggleKey()"></i>
+                    <ul ng-show="showKey" class="Key-list noselect">
+                        <li class="Key-listItem">
+                            <p class="Key-heading">KEY</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--success"></div>
+                            <p class="Key-listItemContent">On Success</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--fail"></div>
+                            <p class="Key-listItemContent">On Fail</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--always"></div>
+                            <p class="Key-listItemContent">Always</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--circle Key-icon--default">P</div>
+                            <p class="Key-listItemContent Key-listItemContent--circle">Project Sync</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--circle Key-icon--default">I</div>
+                            <p class="Key-listItemContent Key-listItemContent--circle">Inventory Sync</p>
+                        </li>
+                        <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--circle Key-icon--warning">!</div>
+                            <p class="Key-listItemContent Key-listItemContent--circle">Warning</p>
+                        </li>
+                    </ul>
                 </div>
                 <div class="WorkflowLegend-maker--right">
                     <span class="WorkflowMaker-totalJobs">TOTAL TEMPLATES</span>

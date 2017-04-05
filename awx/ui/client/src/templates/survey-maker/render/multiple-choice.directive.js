@@ -2,7 +2,6 @@
 import {templateUrl} from '../../../shared/template-url/template-url.factory';
 
 function link($timeout, CreateSelect2, scope, element, attrs, ngModel) {
-
     $timeout(function() {
 
         // select2-ify the dropdown.  If the preview flag is passed here
@@ -13,12 +12,13 @@ function link($timeout, CreateSelect2, scope, element, attrs, ngModel) {
         // and we don't actually need the dropdown portion.  Note that the custom
         // dropdown adapter is used to get the dropdown contents to show up in
         // a modal.
+
         CreateSelect2({
              element: element.find('select'),
              multiple: scope.isMultipleSelect(),
-             customDropdownAdapter: scope.preview ? false : true
+             customDropdownAdapter: scope.preview ? false : true,
+             disabledOptions: true
         });
-
     });
 
 }
