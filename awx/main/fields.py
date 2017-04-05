@@ -27,6 +27,7 @@ from django.db.models import Q
 
 # Django-JSONField
 from jsonfield import JSONField as upstream_JSONField
+from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # AWX
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
@@ -47,7 +48,7 @@ class JSONField(upstream_JSONField):
         return super(JSONField, self).from_db_value(value, expression, connection, context)
 
 
-class JSONBField(upstream_JSONField):
+class JSONBField(upstream_JSONBField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
@@ -399,8 +400,10 @@ class DynamicFilterField(models.TextField):
                     last_v = new_v
                     last_kv = new_kv
                     contains_count += 1
-                    
-            if contains_count > 1:
+
+            if contains_count == 1 and isinstance(assembled_v, basestring):
+                assembled_v = '"' + assembled_v + '"'
+            elif contains_count > 1:
                 if type(last_v) is list:
                     last_v.append(v)
                 if type(last_v) is dict:

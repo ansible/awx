@@ -39,5 +39,6 @@ class Migration(migrations.Migration):
             index_together=set([('timestamp', 'module', 'host')]),
         ),
         migrations.RunSQL([("CREATE INDEX fact_recent_facts_default_gin ON %s USING gin"
-                            "(facts jsonb_path_ops);", [AsIs(FactRecent._meta.db_table)])]),
+                            "(facts jsonb_path_ops);", [AsIs(FactRecent._meta.db_table)])],
+                          [('DROP INDEX fact_recent_facts_default_gin;', None)]),
     ]
