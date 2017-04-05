@@ -5,7 +5,8 @@
  *************************************************/
 
 function HostsList($scope, HostsNewList, $rootScope, GetBasePath,
-    rbacUiControlService, Dataset, $state, $filter, Prompt, Wait, HostManageService) {
+    rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
+    HostManageService, SetStatus) {
 
     let list = HostsNewList;
 
@@ -26,6 +27,24 @@ function HostsList($scope, HostsNewList, $rootScope, GetBasePath,
 
         $rootScope.flashMessage = null;
 
+        $scope.$watchCollection(list.name, function() {
+            $scope[list.name] = _.map($scope.hosts, function(value) {
+                value.inventory_name = value.summary_fields.inventory.name;
+                value.inventory_id = value.summary_fields.inventory.id;
+                return value;
+            });
+            setJobStatus();
+        });
+
+    }
+
+    function setJobStatus(){
+        _.forEach($scope.hosts, function(value) {
+            SetStatus({
+                scope: $scope,
+                host: value
+            });
+        });
     }
 
     $scope.createHost = function(){
@@ -58,7 +77,7 @@ function HostsList($scope, HostsNewList, $rootScope, GetBasePath,
         });
         $rootScope.promptActionBtnClass = 'Modal-errorButton';
     };
-
+    
     $scope.toggleHost = function(event, host) {
         try {
             $(event.target).tooltip('hide');
@@ -76,5 +95,6 @@ function HostsList($scope, HostsNewList, $rootScope, GetBasePath,
 }
 
 export default ['$scope', 'HostsNewList', '$rootScope', 'GetBasePath',
-    'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait', 'HostManageService', HostsList
+    'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
+    'HostManageService', 'SetStatus', HostsList
 ];

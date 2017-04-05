@@ -21,7 +21,7 @@ export default ['i18n', function(i18n) {
 
         fields: {
             toggleHost: {
-                ngDisabled: "!host.summary_fields.user_capabilities.edit",
+                ngDisabled: 'host.has_inventory_sources',
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",
@@ -54,13 +54,20 @@ export default ['i18n', function(i18n) {
             },
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 ngClick: "editHost(host.id)",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
-            }
+            },
+            inventory_name: {
+                label: i18n._('Inventory'),
+                sourceModel: 'inventory',
+                sourceField: 'name',
+                columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
+                linkTo: "{{ '/#/inventories/' + host.inventory_id }}"
+            },
         },
 
         fieldActions: {
