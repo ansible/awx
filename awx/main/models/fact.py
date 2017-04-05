@@ -4,9 +4,40 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from jsonbfield.fields import JSONField
+from awx.main.fields import JSONBField
 
-__all__ = ('Fact', )
+__all__ = ('Fact', 'FactLatest')
+
+
+class FactLatest(models.Model):
+    host = models.ForeignKey(
+        'Host',
+        related_name='facts_latest',
+        db_index=True,
+        on_delete=models.CASCADE,
+        help_text=_('Host for the facts that the fact scan captured.'),
+    )
+    timestamp = models.DateTimeField(
+        default=None,
+        editable=False,
+        help_text=_('Date and time of the corresponding fact scan gathering time.')
+    )
+    module = models.CharField(max_length=128)
+    facts = JSONBField(blank=True, default={}, help_text=_('Arbitrary JSON structure of module facts captured at timestamp for a single host.'))
+
+    class Meta:
+        app_label = 'main'
+        index_together = [
+            ["timestamp", "module", "host"],
+        ]
+
+    @staticmethod
+    def add_fact(host_id, module, timestamp, facts):
+        qs = FactLatest.objects.filter(host_id=host_id, module=module)
+        qs.delete()
+
+        fact_obj = FactLatest.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
+        return fact_obj
 
 
 class Fact(models.Model):
@@ -26,7 +57,7 @@ class Fact(models.Model):
         help_text=_('Date and time of the corresponding fact scan gathering time.')
     )
     module = models.CharField(max_length=128)
-    facts = JSONField(blank=True, default={}, help_text=_('Arbitrary JSON structure of module facts captured at timestamp for a single host.'))
+    facts = JSONBField(blank=True, default={}, help_text=_('Arbitrary JSON structure of module facts captured at timestamp for a single host.'))
 
     class Meta:
         app_label = 'main'
@@ -60,6 +91,9 @@ class Fact(models.Model):
 
     @staticmethod
     def add_fact(host_id, module, timestamp, facts):
+        FactLatest.add_fact(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
+
         fact_obj = Fact.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         fact_obj.save()
         return fact_obj
+

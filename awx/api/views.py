@@ -1835,6 +1835,15 @@ class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
         return Response(self.serializer_class(instance=fact_entry).data)
 
 
+class HostFactsLatestList(SubListAPIView):
+
+    model = FactLatest
+    parent_model = Host
+    relationship = 'facts_latest'
+    serializer_class = FactSerializer
+    new_in_320 = True
+
+
 class GroupList(ListCreateAPIView):
 
     model = Group
