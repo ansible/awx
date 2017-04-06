@@ -128,8 +128,8 @@
         url_password: "{{scm_password}}"
         force_basic_auth: yes
         force: yes
-      when: scm_type == 'insights' and item.name != None
-      with_items: "{{insights_output.json}}"
+      when: scm_type == 'insights' and item.name != None and item.name != ""
+      with_items: "{{ insights_output.json|default([]) }}"
       failed_when: false
 
     - name: Fetch Insights Playbook
@@ -140,8 +140,8 @@
         url_password: "{{scm_password}}"
         force_basic_auth: yes
         force: yes
-      when: scm_type == 'insights' and item.name == None
-      with_items: "{{insights_output.json}}"
+      when: scm_type == 'insights' and (item.name == None or items.name == "")
+      with_items: "{{ insights_output.json|default([]) }}"
       failed_when: false
 
     - name: detect requirements.yml
