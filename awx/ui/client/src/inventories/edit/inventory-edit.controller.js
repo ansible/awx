@@ -11,13 +11,13 @@
  */
 
 function InventoriesEdit($scope, $location,
-    $stateParams, InventoriesForm, Rest, ProcessErrors,
+    $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoriesForm,
+        form = InventoryForm,
         inventory_id = $stateParams.inventory_id,
         master = {},
         fld, json_data, data;
@@ -129,7 +129,7 @@ function InventoriesEdit($scope, $location,
 }
 
 export default ['$scope', '$location',
-    '$stateParams', 'InventoriesForm', 'Rest',
+    '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', InventoriesEdit,

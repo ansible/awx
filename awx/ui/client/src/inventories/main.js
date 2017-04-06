@@ -10,8 +10,8 @@ import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
-import InventoriesList from './inventory.list';
-import InventoriesForm from './inventory.form';
+import InventoryList from './inventory.list';
+import InventoryForm from './inventory.form';
 export default
 angular.module('inventory', [
         host.name,
@@ -19,8 +19,8 @@ angular.module('inventory', [
         inventoryEdit.name,
         inventoryList.name
     ])
-    .factory('InventoriesForm', InventoriesForm)
-    .factory('InventoriesList', InventoriesList)
+    .factory('InventoryForm', InventoryForm)
+    .factory('InventoryList', InventoryList)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             // When stateDefinition.lazyLoad() resolves, states matching name.** or /url** will be de-registered and replaced with resolved states
@@ -33,8 +33,8 @@ angular.module('inventory', [
                     lazyLoad: () => stateDefinitions.generateTree({
                         parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
                         modes: ['add', 'edit'],
-                        list: 'InventoriesList',
-                        form: 'InventoriesForm',
+                        list: 'InventoryList',
+                        form: 'InventoryForm',
                         controllers: {
                             list: 'InventoryListController',
                             add: 'InventoryAddController',
@@ -51,9 +51,9 @@ angular.module('inventory', [
                                 templateUrl: templateUrl('inventories/inventories')
                             },
                             'list@inventories': {
-                                templateProvider: function(InventoriesList, generateList) {
+                                templateProvider: function(InventoryList, generateList) {
                                     let html = generateList.build({
-                                        list: InventoriesList,
+                                        list: InventoryList,
                                         mode: 'edit'
                                     });
                                     return html;

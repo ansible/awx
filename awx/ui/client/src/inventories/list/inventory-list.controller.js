@@ -11,10 +11,10 @@
  */
 
 function InventoriesList($scope, $rootScope, $location,
-    $compile, $filter, Rest, InventoriesList, Prompt,
+    $compile, $filter, Rest, InventoryList, Prompt,
     ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
-    let list = InventoriesList,
+    let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
 
     init();
@@ -303,6 +303,6 @@ function InventoriesList($scope, $rootScope, $location,
 }
 
 export default ['$scope', '$rootScope', '$location',
-    '$compile', '$filter', 'Rest', 'InventoriesList',
+    '$compile', '$filter', 'Rest', 'InventoryList',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
 ];
