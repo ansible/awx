@@ -1,5 +1,6 @@
 # Python
 import json
+from copy import copy
 
 # Django
 from django.db import models
@@ -196,16 +197,22 @@ class SurveyJobTemplateMixin(models.Model):
                 if type(data[survey_element['variable']]) != list:
                     errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                 else:
+                    choice_list = copy(survey_element['choices'])
+                    if isinstance(choice_list, basestring):
+                        choice_list = choice_list.split('\n')
                     for val in data[survey_element['variable']]:
-                        if val not in survey_element['choices']:
+                        if val not in choice_list:
                             errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
-                                                                                           survey_element['choices']))
+                                                                                           choice_list))
         elif survey_element['type'] == 'multiplechoice':
+            choice_list = copy(survey_element['choices'])
+            if isinstance(choice_list, basestring):
+                choice_list = choice_list.split('\n')
             if survey_element['variable'] in data:
-                if data[survey_element['variable']] not in survey_element['choices']:
+                if data[survey_element['variable']] not in choice_list:
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
                                                                                    survey_element['variable'],
-                                                                                   survey_element['choices']))
+                                                                                   choice_list))
         return errors
 
     def survey_variable_validation(self, data):

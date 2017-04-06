@@ -91,6 +91,40 @@ def test_update_kwargs_survey_invalid_default(survey_spec_factory):
     assert json.loads(defaulted_extra_vars['extra_vars'])['var2'] == 2
 
 
+@pytest.mark.parametrize("question_type,default,expect_use,expect_value", [
+    ("multiplechoice", "",       False, 'N/A'),  # historical bug
+    ("multiplechoice", "zeb",    False, 'N/A'),  # zeb not in choices
+    ("multiplechoice", "coffee", True,  'coffee'),
+    ("multiselect",    None,     False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
+    ("multiselect",    "",       False, 'N/A'),
+    ("multiselect",    ["zeb"],  False, 'N/A'),
+    ("multiselect",    ["milk"], True,  ["milk"]),
+    ("multiselect",    ["orange\nmilk"], False,  'N/A'),  # historical bug
+])
+def test_optional_survey_question_defaults(
+        survey_spec_factory, question_type, default, expect_use, expect_value):
+    spec = survey_spec_factory([
+        {
+            "required": False,
+            "default": default,
+            "choices": "orange\nmilk\nchocolate\ncoffee",
+            "variable": "c",
+            "type": question_type
+        },
+    ])
+    jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
+    defaulted_extra_vars = jt._update_unified_job_kwargs()
+    element = spec['spec'][0]
+    if expect_use:
+        assert jt._survey_element_validation(element, {element['variable']: element['default']}) == []
+    else:
+        assert jt._survey_element_validation(element, {element['variable']: element['default']})
+    if expect_use:
+        assert json.loads(defaulted_extra_vars['extra_vars'])['c'] == expect_value
+    else:
+        assert 'c' not in defaulted_extra_vars['extra_vars']
+
+
 class TestWorkflowSurveys:
     def test_update_kwargs_survey_defaults(self, survey_spec_factory):
         "Assure that the survey default over-rides a JT variable"
