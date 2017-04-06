@@ -11,7 +11,7 @@
  */
 
 function InventoriesAdd($scope, $location,
-    GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
+    GenerateForm, InventoriesForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state) {
 
@@ -34,7 +34,7 @@ function InventoriesAdd($scope, $location,
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoryForm;
+        form = InventoriesForm;
 
     init();
 
@@ -98,7 +98,7 @@ function InventoriesAdd($scope, $location,
 }
 
 export default ['$scope', '$location',
-    'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
+    'GenerateForm', 'InventoriesForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
     'Wait', 'ToJSON', '$state', InventoriesAdd
 ];
