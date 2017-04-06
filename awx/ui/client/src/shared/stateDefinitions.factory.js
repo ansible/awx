@@ -128,7 +128,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
             }
             if (list.search) {
                 state.params[`${list.iterator}_search`].value = _.merge(state.params[`${list.iterator}_search`].value, list.search);
-            }if(state.name === 'inventoriesnew'){console.log(state);}
+            }
             return state;
         },
         /**

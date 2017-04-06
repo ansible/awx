@@ -11,10 +11,10 @@
  */
 
 function InventoriesList($scope, $rootScope, $location,
-    $compile, $filter, Rest, InventoryList, Prompt,
+    $compile, $filter, Rest, InventoriesList, Prompt,
     ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
-    let list = InventoryList,
+    let list = InventoriesList,
         defaultUrl = GetBasePath('inventory');
 
     init();
@@ -250,7 +250,7 @@ function InventoriesList($scope, $rootScope, $location,
     };
 
     $scope.addInventory = function () {
-        $state.go('inventoriesnew.add');
+        $state.go('inventories.add');
     };
 
     $scope.editInventory = function (id) {
@@ -303,6 +303,6 @@ function InventoriesList($scope, $rootScope, $location,
 }
 
 export default ['$scope', '$rootScope', '$location',
-    '$compile', '$filter', 'Rest', 'InventoryList',
+    '$compile', '$filter', 'Rest', 'InventoriesList',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
 ];

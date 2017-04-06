@@ -17,6 +17,7 @@ export default ['i18n', function(i18n) {
         index: false,
         hover: true,
         basePath: 'inventory',
+        title: false,
 
         fields: {
             status: {
@@ -44,9 +45,9 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Name'),
                 columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
-                linkTo: '/#/inventories/{{inventory.id}}/manage',
                 awToolTip: "{{ inventory.description }}",
                 awTipPlacement: "top"
+                linkTo: '/#/inventories/{{inventory.id}}'
             },
             organization: {
                 label: i18n._('Organization'),
