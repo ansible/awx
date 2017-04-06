@@ -28,8 +28,6 @@
     color: @default-interface-txt;
     white-space: nowrap;
     margin-right: auto;
-    margin-bottom: 20px;
-    margin-top: 5px;
 }
 
 .DashboardGraphs-graphSection {
@@ -57,12 +55,10 @@
 
 .DashboardGraphs-filterLabel{
     color: @db-graph-per-dd-txt;
-    font-size: 12px;
+    font-size: 10px;
     padding-right: 10px;
     padding-left: 10px;
-    padding-top: 2px;
     text-transform: uppercase;
-    padding-top:5px;
 }
 
 .DashboardGraphs-graph {
@@ -76,7 +72,6 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-right: 14px;
 }
 
 .DashboardGraphs-filterDropdownText,
@@ -89,7 +84,7 @@
 .DashboardGraphs-filterDropdownText {
     flex: initial;
     background-color: @db-graph-per-dd-bg;
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
     white-space: nowrap;
     padding-right: 10px;
@@ -106,7 +101,7 @@
 
 .DashboardGraphs-filterIcon{
     color: @db-graph-per-dd-icon;
-    font-size: 14px;
+    font-size: 12px;
     width: 20px;
     padding-left:10px;
     padding-right: 10px;
@@ -122,10 +117,17 @@
     border-color: @d7grey;
 }
 
+.DashboardGraphs-filterDropdownItems {
+  & > li {
+    font-size: 10px;
+  }
+}
+
 .DashboardGraphs-periodDropdown,
 .DashboardGraphs-jobTypeDropdown,
 .DashboardGraphs-statusDropdown {
-    padding-top:5px;
+    font-size: 10px;
+    padding-top:0px;
 }
 
 .DashboardGraphs-filterDropdownItems {
