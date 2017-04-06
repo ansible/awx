@@ -74,13 +74,6 @@ export default ['i18n', function(i18n) {
         fieldActions: {
 
             columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
-            copy: {
-                mode: 'all',
-                ngClick: "copyMoveHost(host.id)",
-                awToolTip: 'Copy or move host to another group',
-                dataPlacement: "top",
-                ngShow: 'host.summary_fields.user_capabilities.edit'
-            },
             edit: {
                 //label: 'Edit',
                 ngClick: "editHost(host.id)",
@@ -95,14 +88,6 @@ export default ['i18n', function(i18n) {
                 awToolTip: 'View host',
                 dataPlacement: 'top',
                 ngShow: '!host.summary_fields.user_capabilities.edit'
-            },
-            "delete": {
-                //label: 'Delete',
-                ngClick: "deleteHost(host.id, host.name)",
-                icon: 'icon-trash',
-                awToolTip: 'Delete host',
-                dataPlacement: 'top',
-                ngShow: 'host.summary_fields.user_capabilities.delete'
             }
         },
 

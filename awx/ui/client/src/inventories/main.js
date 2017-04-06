@@ -80,6 +80,17 @@ angular.module('inventory', [
                         urls: {
                             list: '/hosts'
                         },
+                        resolve: {
+                            edit: {
+                                host: ['Rest', '$stateParams', 'GetBasePath',
+                                    function(Rest, $stateParams, GetBasePath) {
+                                        let path = GetBasePath('hosts') + $stateParams.host_id;
+                                        Rest.setUrl(path);
+                                        return Rest.get();
+                                    }
+                                ]
+                            }
+                        },
                         ncyBreadcrumb: {
                             label: N_('HOSTS')
                         },
