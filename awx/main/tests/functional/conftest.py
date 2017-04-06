@@ -343,7 +343,8 @@ def group(inventory):
 
 @pytest.fixture
 def inventory_source(group, inventory):
-    return InventorySource.objects.create(name=group.name, group=group,
+    group.inventory = inventory
+    return InventorySource.objects.create(name=group.name,
                                           inventory=inventory, source='gce')
 
 

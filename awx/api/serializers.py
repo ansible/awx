@@ -1270,8 +1270,6 @@ class GroupSerializer(BaseSerializerWithVariables):
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.inventory_source:
-            res['inventory_source'] = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk})
         return res
 
     def validate_name(self, value):
@@ -1432,10 +1430,10 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'inventory', 'group', 'update_on_launch',
+        fields = ('*', 'inventory', 'update_on_launch',
                   'update_cache_timeout') + \
                  ('last_update_failed', 'last_updated') # Backwards compatibility.
-        read_only_fields = ('*', 'name', 'inventory', 'group')
+        read_only_fields = ('*', 'name', 'inventory')
 
     def get_related(self, obj):
         res = super(InventorySourceSerializer, self).get_related(obj)

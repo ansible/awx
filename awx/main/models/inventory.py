@@ -19,7 +19,7 @@ from django.utils.timezone import now
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.fields import AutoOneToOneField, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
@@ -1063,14 +1063,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         editable=False,
         on_delete=models.CASCADE,
     )
-    group = AutoOneToOneField(
-        'Group',
-        related_name='inventory_source',
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.CASCADE,
-    )
     update_on_launch = models.BooleanField(
         default=False,
     )
@@ -1092,20 +1084,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # Update inventory from group (if available).
-        if self.group and not self.inventory:
-            self.inventory = self.group.inventory
-            if 'inventory' not in update_fields:
-                update_fields.append('inventory')
+
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
         old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
         if not self.name or old_name_re.match(self.name) or '__replace_' in self.name:
-            if self.inventory and self.group and self.pk:
-                self.name = '%s (%s - %s)' % (self.group.name, self.inventory.name, self.pk)
-            elif self.inventory and self.group:
-                self.name = '%s (%s - %s)' % (self.group.name, self.inventory.name, replace_text)
-            elif self.inventory and self.pk:
+            if self.inventory and self.pk:
                 self.name = '%s (%s)' % (self.inventory.name, self.pk)
             elif self.inventory:
                 self.name = '%s (%s)' % (self.inventory.name, replace_text)
@@ -1237,10 +1221,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         update_fields = kwargs.get('update_fields', [])
         inventory_source = self.inventory_source
         if inventory_source.inventory and self.name == inventory_source.name:
-            if inventory_source.group:
-                self.name = '%s (%s)' % (inventory_source.group.name, inventory_source.inventory.name)
-            else:
-                self.name = inventory_source.inventory.name
+            self.name = inventory_source.inventory.name
             if 'name' not in update_fields:
                 update_fields.append('name')
         super(InventoryUpdate, self).save(*args, **kwargs)

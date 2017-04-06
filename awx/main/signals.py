@@ -372,9 +372,6 @@ model_serializer_mapping = {
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
-        # Skip recording any inventory source directly associated with a group.
-        if isinstance(instance, InventorySource) and instance.group:
-            return
         object1 = camelcase_to_underscore(instance.__class__.__name__)
         changes = model_to_dict(instance, model_serializer_mapping)
         # Special case where Job survey password variables need to be hidden
