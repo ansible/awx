@@ -140,7 +140,7 @@
         url_password: "{{scm_password}}"
         force_basic_auth: yes
         force: yes
-      when: scm_type == 'insights' and (item.name == None or items.name == "")
+      when: scm_type == 'insights' and (item.name == None or item.name == "")
       with_items: "{{ insights_output.json|default([]) }}"
       failed_when: false
 
