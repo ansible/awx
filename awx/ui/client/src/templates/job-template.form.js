@@ -64,7 +64,8 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     subCheckbox: {
                         variable: 'ask_job_type_on_launch',
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
-                        text: i18n._('Prompt on launch')
+                        text: i18n._('Prompt on launch'),
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },

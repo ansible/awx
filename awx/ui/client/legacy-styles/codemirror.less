@@ -11,11 +11,12 @@
     height: auto;
     overflow-x: scroll;
     overflow-y: hidden;
-    border: 1px solid @cgrey;
+    border: 1px solid @b7grey;
 }
 
+.CodeMirror,
 .CodeMirror-activeline-background {
-    background-color: @f7grey;
+    background-color: @default-secondary-bg;
 }
 
 /* Make sure code editor dialog is always at top of stack */
@@ -27,15 +28,44 @@
     z-index: 2060;
 }
 
-.CodeMirror {
-    border-color: @b7grey !important;
-}
-
 .CodeMirror-gutters {
-    border-color: @d7grey !important;
-    background-color: @default-secondary-bg !important;
+    border-color: @d7grey;
+    background-color: @default-no-items-bord;
 }
 
 .CodeMirror-lineNumber {
-    color: @default-icon !important;
+    color: @default-icon;
+}
+
+// Disabled
+textarea[disabled="disabled"] + div[id*="-container"]{
+    pointer-events: none;
+    cursor: not-allowed;
+
+        .CodeMirror {
+            cursor: not-allowed;
+        }
+
+        .CodeMirror.cm-s-default,
+        .CodeMirror-line {
+            background-color: @egrey;
+        }
+
+        .CodeMirror-gutters {
+            border-color: @b7grey;
+        }
+
+        .CodeMirror-gutter.CodeMirror-lint-markers,
+        .CodeMirror-gutter.CodeMirror-linenumbers {
+            background-color: @default-bg;
+            color: @default-interface-txt;
+        }
+
+        .CodeMirror-lines {
+            cursor: default;
+        }
+
+        .CodeMirror-cursors {
+            display: none;
+        }
 }

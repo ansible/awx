@@ -139,7 +139,7 @@ a:focus {
 
 /* Make buttons appear to be disabled, but allow mouse events */
 .btn-disabled {
-   opacity: 1 !important;
+   opacity: 1;
    -webkit-box-shadow: none;
    box-shadow: none;
 }
@@ -2149,9 +2149,9 @@ tr td button i {
 
 /* Overwrite select2 base styles for single/multiple selects so that match up with other form elements.  Also overwrite disabled styles. */
 .select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
-    cursor: not-allowed !important;
-    opacity: 100 !important;
-    background: @egrey !important;
+    cursor: not-allowed;
+    opacity: 100;
+    background: @egrey;
 }
 
 .select2-container--default .select2-selection--single {
@@ -2309,13 +2309,13 @@ html input[disabled] {
 
 .btn-default {
   background: @default-bg;
-  border-color: @b7grey !important;
+  border-color: @b7grey;
   color: @default-interface-txt;
 }
 
 .select2-container--disabled .select2-selection,
 .select2-container--disabled .select2-arrow {
-    background: @egrey !important;
+    background: @egrey;
 }
 
 .btn.disabled,.btn[disabled],fieldset[disabled] .bt {
@@ -2324,9 +2324,9 @@ html input[disabled] {
 
 .ui-state-disabled,.ui-widget-content .ui-state-disabled,.ui-widget-header .ui-state-disabled {
     opacity: 1;
-    background: @egrey !important;
+    background: @egrey;
 }
 
 input[disabled].ui-spinner-input {
-  background-color: @egrey !important;
+  background-color: @egrey;
 }
