@@ -62,5 +62,7 @@ def validate_ldap_filter_with_user(value):
 
 
 def validate_tacacsplus_disallow_nonascii(value):
-    if not all(ord(c) < 128 for c in value):
+    try:
+        value.encode('ascii')
+    except (UnicodeEncodeError, UnicodeDecodeError):
         raise ValidationError(_('TACACS+ secret does not allow non-ascii characters'))
