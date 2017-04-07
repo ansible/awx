@@ -129,6 +129,135 @@ export default ['i18n', function(i18n) {
                         class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                     }
                 }
+            },
+            groups: {
+                name: 'groups',
+                // awToolTip: i18n._('Please save before assigning permissions'),
+                // dataPlacement: 'top',
+                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/root_groups/',
+                type: 'collection',
+                title: i18n._('Groups'),
+                iterator: 'group',
+                index: false,
+                open: false,
+                // search: {
+                //     order_by: 'username'
+                // },
+                actions: {
+                    add: {
+                        label: i18n._('Add'),
+                        ngClick: "$state.go('.add')",
+                        awToolTip: i18n._('Add a permission'),
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD',
+                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+
+                    }
+                },
+                fields: {
+                    name: {
+                        label: i18n._('Name'),
+                        // linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                    }
+                }
+            },
+            hosts: {
+                name: 'hosts',
+                // awToolTip: i18n._('Please save before assigning permissions'),
+                // dataPlacement: 'top',
+                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/hosts/',
+                type: 'collection',
+                title: i18n._('Hosts'),
+                iterator: 'host',
+                index: false,
+                open: false,
+                // search: {
+                //     order_by: 'username'
+                // },
+                actions: {
+                    add: {
+                        label: i18n._('Add'),
+                        ngClick: "$state.go('.add')",
+                        awToolTip: i18n._('Add a permission'),
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD',
+                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+
+                    }
+                },
+                fields: {
+                    name: {
+                        label: i18n._('Name'),
+                        // linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                    }
+                }
+            },
+            inventory_sources: {
+                name: 'inventory_sources',
+                // awToolTip: i18n._('Please save before assigning permissions'),
+                // dataPlacement: 'top',
+                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/inventory_sources/',
+                type: 'collection',
+                title: i18n._('Sources'),
+                iterator: 'inventory_source',
+                index: false,
+                open: false,
+                // search: {
+                //     order_by: 'username'
+                // },
+                actions: {
+                    add: {
+                        label: i18n._('Add'),
+                        ngClick: "$state.go('.add')",
+                        awToolTip: i18n._('Add a permission'),
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD',
+                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+
+                    }
+                },
+                fields: {
+                    name: {
+                        label: i18n._('Name'),
+                        // linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                    }
+                }
+            },
+            //this is a placeholder for when we're ready for completed jobs
+            completed_jobs: {
+                name: 'completed_jobs',
+                // awToolTip: i18n._('Please save before assigning permissions'),
+                // dataPlacement: 'top',
+                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/completed_jobs/',
+                type: 'collection',
+                title: i18n._('Completed Jobs'),
+                iterator: 'completed_job',
+                index: false,
+                open: false,
+                // search: {
+                //     order_by: 'username'
+                // },
+                actions: {
+                    add: {
+                        label: i18n._('Add'),
+                        ngClick: "$state.go('.add')",
+                        awToolTip: i18n._('Add a permission'),
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD',
+                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+
+                    }
+                },
+                fields: {
+                    name: {
+                        label: i18n._('Name'),
+                        // linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                    }
+                }
             }
         }
 

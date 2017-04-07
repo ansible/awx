@@ -483,9 +483,10 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         ListDefinition: () => {
                             return list;
                         },
-                        inventorySourceData: ['$stateParams', 'GroupManageService', function($stateParams, GroupManageService) {
+                        inventorySourceData: ['$stateParams', //'GroupManageService',
+                        function($stateParams){ //, GroupManageService) {
                             if($stateParams.hasOwnProperty('group_id')){
-                                return GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
+                                return; //GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
                             }
                             else{
                                 return null;
