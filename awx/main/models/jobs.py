@@ -595,7 +595,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
                          playbook=self.playbook,
                          credential=self.credential.name if self.credential else None,
                          limit=self.limit,
-                         extra_vars=self.extra_vars,
+                         extra_vars=self.display_extra_vars(),
                          hosts=all_hosts))
         return data
 
