@@ -324,17 +324,17 @@ unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
 
 def string_to_type(t):
     if t == 'true':
-        return True
+        return unicode(t)
     elif t == 'false':
-        return False
+        return unicode(t)
 
     if re.search('^[-+]?[0-9]+$',t):
-        return int(t)
+        return unicode(t)
 
     if re.search('^[-+]?[0-9]+\.[0-9]+$',t):
-        return float(t)
+        return unicode(t)
 
-    return t
+    return u'"' + unicode(t) + u'"'
 
 
 class DynamicFilterField(models.TextField):
@@ -401,9 +401,10 @@ class DynamicFilterField(models.TextField):
                     last_kv = new_kv
                     contains_count += 1
 
-            if contains_count == 1 and isinstance(assembled_v, basestring):
-                assembled_v = '"' + assembled_v + '"'
-            elif contains_count > 1:
+            if contains_count == 1:
+                #assembled_v = u'"' + assembled_v + u'"'
+                assembled_v = string_to_type(assembled_v)
+            if contains_count > 1:
                 if type(last_v) is list:
                     last_v.append(v)
                 if type(last_v) is dict:
@@ -430,7 +431,8 @@ class DynamicFilterField(models.TextField):
             # value
             # ="something"
             if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
-                v = t[v_offset + 1]
+                #v = u'"' + unicode(t[v_offset + 1]) + u'"'
+                v = unicode(t[v_offset + 1])
             # empty ""
             elif t_len > (v_offset + 1):
                 v = ""
