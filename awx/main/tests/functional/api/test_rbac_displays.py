@@ -186,7 +186,7 @@ class TestAccessListCapabilities:
         "Establish that exactly 1 type of access exists so we know the entry is the right one"
         assert len(data['results']) == 1
         assert len(data['results'][0]['summary_fields'][sublist]) == 1
-    
+
     def test_access_list_direct_access_capability(
             self, inventory, rando, get, mocker, mock_access_method):
         inventory.admin_role.members.add(rando)
@@ -346,7 +346,7 @@ def test_group_update_capabilities_possible(group, inventory_source, admin_user)
     group.inventory_source = inventory_source
     group.save()
 
-    capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
+    capabilities = get_user_capabilities(admin_user, group.inventory, method_list=['start'])
     assert capabilities['start']
 
 

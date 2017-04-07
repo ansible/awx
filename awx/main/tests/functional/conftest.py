@@ -342,10 +342,23 @@ def group(inventory):
 
 
 @pytest.fixture
-def inventory_source(group, inventory):
-    group.inventory = inventory
-    return InventorySource.objects.create(name=group.name,
+def inventory_source(inventory):
+    return InventorySource.objects.create(name='single-inv-src',
                                           inventory=inventory, source='gce')
+
+
+@pytest.fixture
+def inventory_source_factory(inventory_factory):
+    def invsrc(name, source=None, inventory=None):
+        if inventory is None:
+            inventory = inventory_factory("inv-is-%s" % name)
+        if source is None:
+            source = 'file'
+        try:
+            return inventory.inventory_sources.get(name=name)
+        except:
+            return inventory.inventory_sources.create(name=name, source=source)
+    return invsrc
 
 
 @pytest.fixture
