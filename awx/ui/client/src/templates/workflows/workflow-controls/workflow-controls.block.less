@@ -60,10 +60,24 @@
 }
 .WorkflowControls-zoomSlider {
     width: 150px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 .WorkflowControls-zoomPercentage {
     text-align: center;
     font-size: 0.7em;
     height: 24px;
     line-height: 24px;
+}
+
+.ui-slider-handle.ui-state-default.ui-corner-all {
+    border-radius: 50%;
+    border-color: @default-icon;
+    background: @default-icon;
+}
+
+.ui-slider-handle.ui-state-default.ui-corner-all:hover,
+.ui-slider-handle.ui-state-default.ui-corner-all:active {
+    border-color: @default-link-hov;
+    background: @default-link-hov;
 }

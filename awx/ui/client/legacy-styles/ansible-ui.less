@@ -52,6 +52,11 @@ body.modal-open {
 }
 
 
+
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    border-color: @b7grey;
+}
+
 /* Helper Classes */
 .pad-right-sm { padding-right: 10px; }
 .pad-left-md { padding-left: 30px; }
@@ -134,8 +139,7 @@ a:focus {
 
 /* Make buttons appear to be disabled, but allow mouse events */
 .btn-disabled {
-   opacity: 0.35;
-   filter: alpha(opacity=65);
+   opacity: 1 !important;
    -webkit-box-shadow: none;
    box-shadow: none;
 }
@@ -2101,11 +2105,15 @@ tr td button i {
 }
 
 .form-control + .select2 .select2-selection {
-    border-color: @d7grey !important;
-    background-color: #fcfcfc !important;
+    border-color: @b7grey !important;
+    background-color: @default-bg !important;
     color: @default-data-txt !important;
     transition: border-color 0.3s !important;
     box-shadow: none !important;
+}
+
+.form-control + .select2-container--disabled .select2-selection {
+  background-color: @egrey !important;
 }
 
 .form-control:active, .form-control:focus {
@@ -2142,10 +2150,8 @@ tr td button i {
 /* Overwrite select2 base styles for single/multiple selects so that match up with other form elements.  Also overwrite disabled styles. */
 .select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
     cursor: not-allowed !important;
-}
-
-.select2-container--disabled {
-    opacity: .35;
+    opacity: 100 !important;
+    background: @egrey !important;
 }
 
 .select2-container--default .select2-selection--single {
@@ -2198,7 +2204,7 @@ a:hover {
 }
 
 .nv-axis text {
-   fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
+   fill: @db-graph-axis-label !important;
    font-family: 'Open Sans' !important;
 }
 
@@ -2280,12 +2286,12 @@ html input[disabled] {
 
 .CodeMirror--disabled .CodeMirror.cm-s-default,
 .CodeMirror--disabled .CodeMirror-line {
-    background-color: #f6f6f6;
+    background-color: @default-no-items-bord;
 }
 
 .CodeMirror--disabled .CodeMirror-gutter.CodeMirror-lint-markers,
 .CodeMirror--disabled .CodeMirror-gutter.CodeMirror-linenumbers {
-    background-color: #ebebeb;
+    background-color: @default-list-header-bg;
     color: @b7grey;
 }
 
@@ -2297,3 +2303,30 @@ html input[disabled] {
     display: none;
 }
 
+.btn-default.disabled,.btn-default[disabled],fieldset[disabled] .btn-default,.btn-default.disabled:hover,.btn-default[disabled]:hover,fieldset[disabled] .btn-default:hover,.btn-default.disabled:focus,.btn-default[disabled]:focus,fieldset[disabled] .btn-default:focus,.btn-default.disabled:active,.btn-default[disabled]:active,fieldset[disabled] .btn-default:active,.btn-default.disabled.active,.btn-default[disabled].active,fieldset[disabled] .btn-default.active {
+    border-color: @field-border;
+}
+
+.btn-default {
+  background: @default-bg;
+  border-color: @b7grey !important;
+  color: @default-interface-txt;
+}
+
+.select2-container--disabled .select2-selection,
+.select2-container--disabled .select2-arrow {
+    background: @egrey !important;
+}
+
+.btn.disabled,.btn[disabled],fieldset[disabled] .bt {
+    opacity: 1;
+}
+
+.ui-state-disabled,.ui-widget-content .ui-state-disabled,.ui-widget-header .ui-state-disabled {
+    opacity: 1;
+    background: @egrey !important;
+}
+
+input[disabled].ui-spinner-input {
+  background-color: @egrey !important;
+}

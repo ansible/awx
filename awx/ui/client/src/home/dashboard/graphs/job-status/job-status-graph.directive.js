@@ -124,7 +124,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                         period = this.getAttribute("id");
                         $('#period-dropdown')
                             .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
-                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
                         recreateGraph(period, job_type);
@@ -134,7 +134,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                     $('.m').on("click", function(){
                         job_type = this.getAttribute("id");
                         $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--jobType\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
-                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$parent.isFailed = true;
                         scope.$parent.isSuccessful = true;
                         recreateGraph(period, job_type);
@@ -143,7 +143,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                     $('.o').on('click', function() {
                         var job_status = this.getAttribute('id');
                         $('#status-dropdown').replaceWith("<a id=\"status-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownText--status\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+
-                        "<i class=\"fa fa-chevron-down DashboardGraphs-filterIcon\"></i>\n");
+                        "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
                         scope.$broadcast("jobStatusChange", job_status);
                     });
 

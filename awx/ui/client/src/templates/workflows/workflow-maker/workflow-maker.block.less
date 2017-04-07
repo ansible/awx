@@ -36,7 +36,8 @@
 }
 .WorkflowMaker-contentHolder {
     display: flex;
-    border: 1px solid @default-list-header-bg;
+    border: 1px solid @d7grey;
+    border-radius: 5px;
     height: ~"calc(100% - 85px)";
 }
 .WorkflowMaker-contentLeft {
@@ -46,7 +47,7 @@
 }
 .WorkflowMaker-contentRight {
     flex: 0 0 400px;
-    border-left: 1px solid @default-list-header-bg;
+    border-left: 1px solid @d7grey;
     padding: 20px;
     height: 100%;
     overflow-y: scroll;
@@ -81,7 +82,7 @@
     color: @btn-txt;
     text-transform: uppercase;
     border-radius: 5px;
-    border: 1px solid @btn-bord;
+    border: 1px solid @b7grey;
     transition: background-color 0.2s;
     padding-left:15px;
     padding-right: 15px;
@@ -149,6 +150,7 @@
     height: 40px;
     line-height: 40px;
     color: @default-interface-txt;
+    border-bottom: 1px solid @d7grey;
 }
 .WorkflowLegend-maker--left {
     flex: 1 0 auto;
@@ -192,8 +194,10 @@
     height: 40px;
     line-height: 40px;
     padding-left: 20px;
-    border: 1px solid @default-no-items-bord;
     margin-top:10px;
+    border: 1px solid @d7grey;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 .WorkflowLegend-legendItem {
     display: flex;
@@ -217,7 +221,7 @@
     color: @default-icon;
     vertical-align: middle;
     font-size: 1.2em;
-    margin-left: 10px;
+    margin-left: 15px;
 }
 .Key-menuIcon:hover,
 .WorkflowMaker-manualControlsIcon:hover {
@@ -235,17 +239,22 @@
     width: 293px;
     background-color: @default-bg;
     display: flex;
-    border: 1px solid @default-list-header-bg;
+    border: 1px solid @d7grey;
+    border-top: 0px;
+    border-bottom-left-radius: 5px;
+    margin-left: -1px;
+    border-right: 0;
 }
 .WorkflowLegend-manualControls {
     position: absolute;
-    left: -245px;
+    left: -239px;
     top: 38px;
     height: 60px;
     width: 290px;
     background-color: @default-bg;
     display: flex;
-    border: 1px solid @default-list-header-bg;
+    border: 1px solid @d7grey;
+    border-bottom-left-radius: 5px;
 }
 .WorkflowMaker-formTab {
     margin-right: 10px;

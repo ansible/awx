@@ -13,7 +13,6 @@
 .JobResultsStdOut-toolbar {
     flex: initial;
     display: flex;
-    border: 1px solid @default-list-header-bg;
     border-bottom: 0px;
     border-radius: 5px;
     border-bottom-left-radius: 0px;
@@ -37,6 +36,7 @@
     padding-top: 10px;
     border-top-left-radius: 5px;
     z-index: 1;
+    border-right: 1px solid @d7grey;
 }
 
 .JobResultsStdOut-expandAllButton {
@@ -48,6 +48,7 @@
     background-color: @default-bg;
     font-size: 12px;
     cursor: pointer;
+    color: #848992;
 }
 
 .JobResultsStdOut-expandAllButton:hover .JobResultsStdOut-expandAllIcon,
@@ -61,7 +62,8 @@
     display: flex;
     justify-content: flex-end;
     padding-right: 10px;
-    background-color: @default-no-items-bord;
+    background-color: @default-secondary-bg;
+    border-top-right-radius: 5px;
 }
 
 .JobResultsStdOut-followButton {
@@ -74,20 +76,15 @@
     margin-top: 10px;
     font-size: 12px;
     background-color: @default-icon;
-    color: @default-border;
+    color: @default-bg;
 }
 
 .JobResultsStdOut-followIcon {
-    color: @default-border;
+    color: @default-bg;
 }
 
 .JobResultsStdOut-followButton:hover {
-    background-color: @default-icon-hov;
-}
-
-.JobResultsStdOut-followButton:hover .JobResultsStdOut-followIcon,
-.JobResultsStdOut-followIcon:hover {
-    color: @default-interface-txt;
+    background-color: @default-data-txt;
 }
 
 .JobResultsStdOut-followButton.is-engaged {
@@ -111,13 +108,14 @@
 .JobResultsStdOut-stdoutContainer {
     flex: 1;
     position: relative;
-    background-color: #F6F6F6;
+    background-color: @default-secondary-bg;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
 .JobResultsStdOut-numberColumnPreload {
     background-color: @default-list-header-bg;
+    border-right: 1px solid @d7grey;
     position: absolute;
     height: 100%;
     width: 70px;
@@ -150,7 +148,6 @@
     padding-right: 10px;
     padding-top: 2px;
     padding-bottom: 2px;
-    color: @b7grey;
     width: 75px;
     flex: initial;
     user-select: none;
@@ -158,6 +155,8 @@
     -webkit-user-select: none;
     -ms-user-select: none;
     z-index: 1;
+    border-right: 1px solid @d7grey;
+    color: @default-icon;
 }
 
 .JobResultsStdOut-stdoutColumn {
@@ -170,6 +169,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     width:100%;
+    background-color: @default-secondary-bg;
 }
 
 .JobResultsStdOut-stdoutColumn--tooMany {
@@ -183,16 +183,20 @@
 }
 
 .JobResultsStdOut-aLineOfStdOut:hover,
-.JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-lineNumberColumn {
+.JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-lineNumberColumn,
+.JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-stdoutColumn {
     background-color: @default-bg;
+}
+
+.JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-lineNumberColumn {
+    border-right: 1px solid @default-bg;
 }
 
 .JobResultsStdOut-footer {
     height: 10px;
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
-    background-color: @default-no-items-bord;
-    border: 1px solid @default-list-header-bg;
+    background-color: @default-secondary-bg;
     border-top: 0px;
     border-radius: 5px;
     border-top-left-radius: 0px;
@@ -203,24 +207,27 @@
     background-color: @default-list-header-bg;
     width: 70px;
     height: 100%;
+    border-right: 1px solid @d7grey;
 }
 
 .JobResultsStdOut-followAnchor {
     height: 20px;
     width: 100%;
     border-left: 70px solid @default-list-header-bg;
+    background-color: @default-secondary-bg;
 }
 
 .JobResultsStdOut-toTop {
     margin-right: 20px;
-    color: #D7D7D7;
+    color: @default-icon;
     cursor: pointer;
     text-align: right;
     font-family: monaco;
+    border-left: 1px solid @d7grey;
 }
 
 .JobResultsStdOut-toTop:hover {
-    color: @default-interface-txt;
+    color: @default-data-txt;
 }
 
 .JobResultsStdOut-cappedLine {

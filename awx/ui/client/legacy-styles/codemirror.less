@@ -5,15 +5,17 @@
  *
  */
 
+ @import "./client/src/shared/branding/colors.default.less";
+
 .CodeMirror {
     height: auto;
     overflow-x: scroll;
     overflow-y: hidden;
-    border: 1px solid #ccc;
+    border: 1px solid @cgrey;
 }
 
 .CodeMirror-activeline-background {
-    background-color: #f7f7f7;
+    background-color: @f7grey;
 }
 
 /* Make sure code editor dialog is always at top of stack */
@@ -23,4 +25,17 @@
 
 .CodeMirror-lint-tooltip {
     z-index: 2060;
+}
+
+.CodeMirror {
+    border-color: @b7grey !important;
+}
+
+.CodeMirror-gutters {
+    border-color: @d7grey !important;
+    background-color: @default-secondary-bg !important;
+}
+
+.CodeMirror-lineNumber {
+    color: @default-icon !important;
 }
