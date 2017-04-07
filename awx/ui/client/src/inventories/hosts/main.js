@@ -12,12 +12,14 @@
  import HostManageService from './hosts.service';
  import SetStatus from './set-status.factory';
  import SetEnabledMsg from './set-enabled-msg.factory';
+ import SmartInventory from './smart-inventory/main';
 
 export default
 angular.module('host', [
         hostAdd.name,
         hostEdit.name,
-        hostList.name
+        hostList.name,
+        SmartInventory.name,
     ])
     .factory('HostsForm', HostsForm)
     .factory('HostsList', HostsList)

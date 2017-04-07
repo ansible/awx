@@ -21,53 +21,36 @@ angular.module('inventory', [
     ])
     .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
-    .config(['$stateProvider', 'stateDefinitionsProvider',
-        function($stateProvider, stateDefinitionsProvider) {
+    .config(['$stateProvider', '$stateExtenderProvider', 'stateDefinitionsProvider',
+        function($stateProvider, $stateExtenderProvider, stateDefinitionsProvider) {
             // When stateDefinition.lazyLoad() resolves, states matching name.** or /url** will be de-registered and replaced with resolved states
             // This means inventoryManage states will not be registered correctly on page refresh, unless they're registered at the same time as the inventories state tree
-            let stateDefinitions = stateDefinitionsProvider.$get();
+            let stateDefinitions = stateDefinitionsProvider.$get(),
+            stateExtender = $stateExtenderProvider.$get();
 
-                $stateProvider.state({
-                    name: 'inventories',
-                    url: '/inventories',
-                    lazyLoad: () => stateDefinitions.generateTree({
-                        parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
-                        modes: ['add', 'edit'],
-                        list: 'InventoryList',
-                        form: 'InventoryForm',
-                        controllers: {
-                            list: 'InventoryListController',
-                            add: 'InventoryAddController',
-                            edit: 'InventoryEditController'
-                        },
-                        urls: {
-                            list: '/inventories'
-                        },
+                function foobar() {
+
+                    let smartInventoryAdd = {
+                        name: 'hosts.addSmartInventory',
+                        url: '/smartinventory',
+                        form: 'SmartInventoryForm',
                         ncyBreadcrumb: {
-                            label: N_('INVENTORIES')
+                            label: "CREATE SMART INVENTORY"
                         },
                         views: {
-                            '@': {
-                                templateUrl: templateUrl('inventories/inventories')
-                            },
-                            'list@inventories': {
-                                templateProvider: function(InventoryList, generateList) {
-                                    let html = generateList.build({
-                                        list: InventoryList,
-                                        mode: 'edit'
+                            'form@hosts': {
+                                templateProvider: function(SmartInventoryForm, GenerateForm) {
+                                    return GenerateForm.buildHTML(SmartInventoryForm, {
+                                        mode: 'add',
+                                        related: false
                                     });
-                                    return html;
                                 },
-                                controller: 'InventoryListController'
+                                controller: 'SmartInventoryAddController'
                             }
                         }
-                    })
-                });
+                    };
 
-                $stateProvider.state({
-                    name: 'hosts',
-                    url: '/hosts',
-                    lazyLoad: () => stateDefinitions.generateTree({
+                    let hosts = stateDefinitions.generateTree({
                         parent: 'hosts', // top-most node in the generated tree (will replace this state definition)
                         modes: ['add', 'edit'],
                         list: 'HostsList',
@@ -109,7 +92,63 @@ angular.module('inventory', [
                                 controller: 'HostListController'
                             }
                         }
+                    });
+
+                    return Promise.all([
+                        hosts
+                    ]).then((generated) => {
+                        return {
+                            states: _.reduce(generated, (result, definition) => {
+                                return result.concat(definition.states);
+                            }, [
+                                stateExtender.buildDefinition(smartInventoryAdd)
+                            ])
+                        };
+                    });
+
+                }
+
+                $stateProvider.state({
+                    name: 'inventories',
+                    url: '/inventories',
+                    lazyLoad: () => stateDefinitions.generateTree({
+                        parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
+                        modes: ['add', 'edit'],
+                        list: 'InventoryList',
+                        form: 'InventoryForm',
+                        controllers: {
+                            list: 'InventoryListController',
+                            add: 'InventoryAddController',
+                            edit: 'InventoryEditController'
+                        },
+                        urls: {
+                            list: '/inventories'
+                        },
+                        ncyBreadcrumb: {
+                            label: N_('INVENTORIES')
+                        },
+                        views: {
+                            '@': {
+                                templateUrl: templateUrl('inventories/inventories')
+                            },
+                            'list@inventories': {
+                                templateProvider: function(InventoryList, generateList) {
+                                    let html = generateList.build({
+                                        list: InventoryList,
+                                        mode: 'edit'
+                                    });
+                                    return html;
+                                },
+                                controller: 'InventoryListController'
+                            }
+                        }
                     })
+                });
+
+                $stateProvider.state({
+                    name: 'hosts',
+                    url: '/hosts',
+                    lazyLoad: () => foobar()
                 });
         }
     ]);

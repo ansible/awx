@@ -78,7 +78,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         });
         $rootScope.promptActionBtnClass = 'Modal-errorButton';
     };
-    
+
     $scope.toggleHost = function(event, host) {
         try {
             $(event.target).tooltip('hide');
@@ -91,6 +91,10 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         HostManageService.put(host).then(function(){
             $state.go($state.current, null, {reload: true});
         });
+    };
+
+    $scope.smartInventory = function() {
+        $state.go('hosts.addSmartInventory');
     };
 
 }
