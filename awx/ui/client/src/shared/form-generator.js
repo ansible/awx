@@ -1520,7 +1520,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "class=\"btn btn-sm";
                             html += (button['class']) ? " " + button['class'] : "";
                             html += "\" ";
-                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+                            html += "id=\"" + this.form.name + "_" + itm + "_btn\" ";
 
                             if(button.ngShow){
                                 html += this.attr(button, 'ngShow');
@@ -1533,7 +1533,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             }
                             if (button.ngDisabled) {
                                 ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
-                                if (btn !== 'reset') {
+                                if (itm !== 'reset') {
                                     //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
                                     html += "ng-disabled=\"" + ngDisabled;
                                     //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
@@ -1572,7 +1572,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "class=\"btn btn-sm Form-tab--disabled";
                             html += (button['class']) ? " " + button['class'] : "";
                             html += "\" ";
-                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+                            html += "id=\"" + this.form.name + "_" + itm + "_btn\" ";
 
                             if(button.ngShow){
                                 html += this.attr(button, 'ngShow');
