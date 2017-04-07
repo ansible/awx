@@ -99,6 +99,21 @@ def test_edit_inventory_group(put, group, alice, role_field, expected_status_cod
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
+    ('admin_role', 201),
+    ('update_role', 403),
+    ('adhoc_role', 403),
+    ('use_role', 403)
+])
+@pytest.mark.django_db
+def test_create_inventory_inventory_source(post, inventory, alice, role_field, expected_status_code):
+    data = { 'source': 'ec2', 'name': 'ec2-inv-source'}
+    if role_field:
+        getattr(inventory, role_field).members.add(alice)
+    post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}), data, alice, expect=expected_status_code)
+
+
+@pytest.mark.parametrize("role_field,expected_status_code", [
+    (None, 403),
     ('admin_role', 204),
     ('update_role', 403),
     ('adhoc_role', 403),

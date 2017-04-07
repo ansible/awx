@@ -1060,7 +1060,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         related_name='inventory_sources',
         null=True,
         default=None,
-        editable=False,
         on_delete=models.CASCADE,
     )
     update_on_launch = models.BooleanField(
@@ -1169,16 +1168,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
-    def clean_source(self):
-        source = self.source
-        if source and self.group:
-            qs = self.group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-            existing_sources = qs.exclude(pk=self.pk)
-            if existing_sources.count():
-                s = u', '.join([x.group.name for x in existing_sources])
-                raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
-        return source
-
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
     '''
@@ -1213,8 +1202,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def websocket_emit_data(self):
         websocket_data = super(InventoryUpdate, self).websocket_emit_data()
-        if self.inventory_source.group is not None:
-            websocket_data.update(dict(group_id=self.inventory_source.group.id))
         return websocket_data
 
     def save(self, *args, **kwargs):

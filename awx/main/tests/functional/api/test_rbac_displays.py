@@ -342,28 +342,6 @@ def test_manual_projects_no_update(project, get, admin_user):
 
 
 @pytest.mark.django_db
-def test_group_update_capabilities_possible(group, inventory_source, admin_user):
-    group.inventory_source = inventory_source
-    group.save()
-
-    capabilities = get_user_capabilities(admin_user, group.inventory, method_list=['start'])
-    assert capabilities['start']
-
-
-@pytest.mark.django_db
-def test_group_update_capabilities_impossible(group, inventory_source, admin_user):
-    "Manual groups can not be updated or scheduled"
-    inventory_source.source = ""
-    inventory_source.save()
-    group.inventory_source = inventory_source
-    group.save()
-
-    capabilities = get_user_capabilities(admin_user, group, method_list=['edit', 'start', 'schedule'])
-    assert not capabilities['start']
-    assert not capabilities['schedule']
-
-
-@pytest.mark.django_db
 def test_license_check_not_called(mocker, job_template, project, org_admin, get):
     job_template.project = project
     job_template.save() # need this to make the JT visible

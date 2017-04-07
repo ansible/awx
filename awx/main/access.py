@@ -670,7 +670,7 @@ class GroupAccess(BaseAccess):
     def get_queryset(self):
         qs = Group.objects.filter(inventory__in=Inventory.accessible_objects(self.user, 'read_role'))
         qs = qs.select_related('created_by', 'modified_by', 'inventory')
-        return qs.prefetch_related('parents', 'children', 'inventory_source').all()
+        return qs.prefetch_related('parents', 'children').all()
 
     def can_read(self, obj):
         return obj and self.user in obj.inventory.read_role
@@ -720,11 +720,6 @@ class GroupAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
-    def can_start(self, obj, validate_license=True):
-        if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'start', obj.inventory, validate_license=validate_license)
-        return False
-
 
 class InventorySourceAccess(BaseAccess):
     '''
@@ -736,10 +731,9 @@ class InventorySourceAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
+        qs = qs.select_related('created_by', 'modified_by', 'inventory')
         inventory_ids = self.user.get_queryset(Inventory)
-        return qs.filter(Q(inventory_id__in=inventory_ids) |
-                         Q(group__inventory_id__in=inventory_ids))
+        return qs.filter(Q(inventory_id__in=inventory_ids))
 
     def can_read(self, obj):
         if obj and obj.inventory:
@@ -748,8 +742,10 @@ class InventorySourceAccess(BaseAccess):
             return False
 
     def can_add(self, data):
-        # Automatically created from group or management command.
-        return False
+        if not data or 'inventory' not in data:
+            return False
+        # Checks for admin or change permission on inventory.
+        return self.check_related('inventory', Inventory, data)
 
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
@@ -780,8 +776,7 @@ class InventoryUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = InventoryUpdate.objects.distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'inventory_source__group',
-                               'inventory_source__inventory')
+        qs = qs.select_related('created_by', 'modified_by', 'inventory_source__inventory')
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
 

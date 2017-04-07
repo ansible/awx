@@ -24,6 +24,11 @@ class Migration(migrations.Migration):
             model_name='inventorysource',
             name='group',
         ),
+        migrations.AlterField(
+            model_name='inventorysource',
+            name='inventory',
+            field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
+        ),
 
         # Facts Latest
         migrations.CreateModel(
