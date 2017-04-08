@@ -9,7 +9,8 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
-export default ['$injector', '$stateExtender', '$log', 'i18n', function($injector, $stateExtender, $log, i18n) {
+export default ['$injector', '$stateExtender', '$log', 'i18n',
+function($injector, $stateExtender, $log, i18n) {
     return {
         /**
         * @ngdoc method
@@ -557,7 +558,11 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
 
             function buildListNodes(field) {
                 let states = [];
-                if(field.iterator === 'notification'){
+                if(field.iterator === 'group'){
+                    states.push(field.stateGeneratorFunction(field, formStateDefinition, params));
+                    states = _.flatten(states);
+                }
+                else if(field.iterator === 'notification'){
                     states.push(buildNotificationState(field));
                     states = _.flatten(states);
                 }

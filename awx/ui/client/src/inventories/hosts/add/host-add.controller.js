@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-function HostsAdd($scope) {
+function HostsAdd() {
 
 console.log('inside host add');
 
 }
 
-export default ['$scope', HostsAdd
+export default [ HostsAdd
 ];

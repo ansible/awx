@@ -5,6 +5,7 @@
  *************************************************/
 
 import host from './hosts/main';
+import group from './groups/main';
 import inventoryAdd from './add/main';
 import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
@@ -16,6 +17,7 @@ import InventoryManageService from './inventory-manage.service';
 export default
 angular.module('inventory', [
         host.name,
+        group.name,
         inventoryAdd.name,
         inventoryEdit.name,
         inventoryList.name
@@ -175,7 +177,10 @@ angular.module('inventory', [
                         controllers: {
                             list: 'InventoryListController',
                             add: 'InventoryAddController',
-                            edit: 'InventoryEditController'
+                            edit: 'InventoryEditController',
+                            related: {
+                                groups: 'GroupsListController'
+                            }
                         },
                         urls: {
                             list: '/inventories'

@@ -170,7 +170,9 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
-                    html += `<div class="${list.name}List List-well">`;
+                    html += `<div class="${list.name}List`; //List-well">`;
+                    html += (!list.wellOverride) ? "List-well" : "";
+                    html += `">`;
                     // List actions
                     html += "<div class=\"List-actionHolder\">";
                     html += "<div class=\"List-actions\">";

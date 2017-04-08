@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-function SmartInventoryEdit($scope) {
+function SmartInventoryEdit() {
 
 console.log('inside smart inventory add');
 
 }
 
-export default ['$scope', SmartInventoryEdit
+export default [ SmartInventoryEdit
 ];

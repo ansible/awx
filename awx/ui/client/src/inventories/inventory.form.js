@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2017 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -10,8 +10,9 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n', function(i18n) {
-        return {
+export default ['i18n', 'buildGroupListState',
+function(i18n,buildGroupListState) {
+    return {
 
         addTitle: i18n._('NEW INVENTORY'),
         editTitle: '{{ inventory_name }}',
@@ -133,35 +134,10 @@ export default ['i18n', function(i18n) {
             },
             groups: {
                 name: 'groups',
-                // awToolTip: i18n._('Please save before assigning permissions'),
-                // dataPlacement: 'top',
-                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/root_groups/',
-                type: 'collection',
+                include: "InventoryGroupsList",
                 title: i18n._('Groups'),
                 iterator: 'group',
-                index: false,
-                open: false,
-                // search: {
-                //     order_by: 'username'
-                // },
-                actions: {
-                    add: {
-                        label: i18n._('Add'),
-                        ngClick: "$state.go('.add')",
-                        awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
-                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
-
-                    }
-                },
-                fields: {
-                    name: {
-                        label: i18n._('Name'),
-                        // linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                    }
-                }
+                stateGeneratorFunction: buildGroupListState
             },
             hosts: {
                 name: 'hosts',
