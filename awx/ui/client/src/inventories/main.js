@@ -12,6 +12,7 @@ import { templateUrl } from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
 import InventoryList from './inventory.list';
 import InventoryForm from './inventory.form';
+import InventoryManageService from './inventory-manage.service';
 export default
 angular.module('inventory', [
         host.name,
@@ -21,14 +22,15 @@ angular.module('inventory', [
     ])
     .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
-    .config(['$stateProvider', '$stateExtenderProvider', 'stateDefinitionsProvider',
-        function($stateProvider, $stateExtenderProvider, stateDefinitionsProvider) {
+    .service('InventoryManageService', InventoryManageService)
+    .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
+        function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             // When stateDefinition.lazyLoad() resolves, states matching name.** or /url** will be de-registered and replaced with resolved states
             // This means inventoryManage states will not be registered correctly on page refresh, unless they're registered at the same time as the inventories state tree
             let stateDefinitions = stateDefinitionsProvider.$get(),
             stateExtender = $stateExtenderProvider.$get();
 
-                function foobar() {
+                function generateHostStates() {
 
                     let smartInventoryAdd = {
                         name: 'hosts.addSmartInventory',
@@ -50,14 +52,67 @@ angular.module('inventory', [
                         }
                     };
 
+                    let smartInventoryAddOrgLookup = {
+                        searchPrefix: 'organization',
+                        name: 'hosts.addSmartInventory.organization',
+                        url: '/organization',
+                        data: {
+                            formChildState: true
+                        },
+                        params: {
+                            organization_search: {
+                                value: {
+                                    page_size: '5'
+                                },
+                                squash: true,
+                                dynamic: true
+                            }
+                        },
+                        ncyBreadcrumb: {
+                            skip: true
+                        },
+                        views: {
+                            'related': {
+                                templateProvider: function(ListDefinition, generateList) {
+                                    let list_html = generateList.build({
+                                        mode: 'lookup',
+                                        list: ListDefinition,
+                                        input_type: 'radio'
+                                    });
+                                    return `<lookup-modal>${list_html}</lookup-modal>`;
+
+                                }
+                            }
+                        },
+                        resolve: {
+                            ListDefinition: ['OrganizationList', function(OrganizationList) {
+                                let list = _.cloneDeep(OrganizationList);
+                                list.lookupConfirmText = 'SELECT';
+                                return list;
+                            }],
+                            Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                                (list, qs, $stateParams, GetBasePath) => {
+                                    let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                                }
+                            ]
+                        },
+                        onExit: function($state) {
+                            if ($state.transition) {
+                                $('#form-modal').modal('hide');
+                                $('.modal-backdrop').remove();
+                                $('body').removeClass('modal-open');
+                            }
+                        },
+                    };
+
                     let hosts = stateDefinitions.generateTree({
                         parent: 'hosts', // top-most node in the generated tree (will replace this state definition)
-                        modes: ['add', 'edit'],
+                        modes: ['edit'],
                         list: 'HostsList',
                         form: 'HostsForm',
                         controllers: {
                             list: 'HostListController',
-                            add: 'HostAddController',
                             edit: 'HostEditController'
                         },
                         urls: {
@@ -101,7 +156,8 @@ angular.module('inventory', [
                             states: _.reduce(generated, (result, definition) => {
                                 return result.concat(definition.states);
                             }, [
-                                stateExtender.buildDefinition(smartInventoryAdd)
+                                stateExtender.buildDefinition(smartInventoryAdd),
+                                stateExtender.buildDefinition(smartInventoryAddOrgLookup)
                             ])
                         };
                     });
@@ -148,7 +204,7 @@ angular.module('inventory', [
                 $stateProvider.state({
                     name: 'hosts',
                     url: '/hosts',
-                    lazyLoad: () => foobar()
+                    lazyLoad: () => generateHostStates()
                 });
         }
     ]);

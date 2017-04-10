@@ -51,7 +51,7 @@ function SmartInventoryAdd($scope, $location,
             scope: $scope,
             variable: 'variables',
             parse_variable: 'parseType',
-            field_id: 'inventory_variables'
+            field_id: 'smartinventory_variables'
         });
     }
 
