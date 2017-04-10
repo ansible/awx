@@ -15,6 +15,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
     function init(){
         $scope.canAdd = false;
+        $scope.activeHostSearch = false;
 
         rbacUiControlService.canAdd('hosts')
             .then(function(canAdd) {
@@ -35,6 +36,21 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
                 return value;
             });
             setJobStatus();
+        });
+
+        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+            if(toParams && toParams.host_search) {
+                let hasMoreThanDefaultKeys = false;
+                angular.forEach(toParams.host_search, function(value, key) {
+                    if(key !== 'order_by' && key !== 'page_size') {
+                        hasMoreThanDefaultKeys = true;
+                    }
+                });
+                $scope.activeHostSearch = hasMoreThanDefaultKeys ? true : false;
+            }
+            else {
+                $scope.activeHostSearch = false;
+            }
         });
 
     }
