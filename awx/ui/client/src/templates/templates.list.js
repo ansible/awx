@@ -23,16 +23,14 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9',
-                ngHref: '#/templates/{{template.type}}/{{template.id}}'
+                ngHref: '#/templates/{{template.type}}/{{template.id}}',
+                awToolTip: '{{template.description}}',
+                dataPlacement: 'top'
             },
             type: {
                 label: i18n._('Type'),
                 ngBind: 'template.type_label',
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 hidden-xs'
-            },
-            description: {
-                label: i18n._('Description'),
-                columnClass: 'col-lg-2 hidden-md hidden-sm hidden-xs'
             },
             smart_status: {
               label: i18n._('Activity'),

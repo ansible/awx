@@ -19,12 +19,9 @@ export default ['i18n', function(i18n){
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-8'
-            },
-            description: {
-                label: i18n._('Description'),
-                excludeModal: true,
-                columnClass: 'col-md-4 hidden-sm hidden-xs'
+                modalColumnClass: 'col-md-8',
+                awToolTip: '{{inventory_script.description}}',
+                dataPlacement: 'top'
             },
             organization: {
                 label: i18n._('Organization'),

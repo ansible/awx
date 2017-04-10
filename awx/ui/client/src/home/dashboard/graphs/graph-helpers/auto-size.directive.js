@@ -20,12 +20,12 @@ function AutoSizeModule($window) {
         function adjustSize() {
             if (attrs.graphType === "hostStatus") {
                 if (element.parent().width() > 596) {
-                    element.height(320);//596);
+                    element.height(285);//596);
                 } else {
                     element.height(element.parent().width());
                 }
             } else {
-                element.height(320);
+                element.height(285);
             }
         }
 

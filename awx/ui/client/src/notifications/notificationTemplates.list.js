@@ -31,7 +31,9 @@ export default ['i18n', function(i18n){
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notification_templates/{{notification_template.id}}'
+                linkTo: '/#/notification_templates/{{notification_template.id}}',
+                awToolTip: '{{notification_template.description}}',
+                dataPlacement: 'top'
             },
             notification_type: {
                     label: i18n._('Type'),

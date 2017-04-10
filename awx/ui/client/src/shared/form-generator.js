@@ -663,7 +663,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             let parseTypeName = field.parseTypeName || 'parseType';
                             let getToggleClass = (primary, secondary) => `{
                                 'btn-primary': ${parseTypeName} === '${primary}',
-                                'btn-default' : ${parseTypeName} === '${secondary}'
+                                'Button-primary--hollow' : ${parseTypeName} === '${secondary}'
                             }`;
                             let toggleLeftClass = getToggleClass('yaml', 'json');
                             let toggleRightClass = getToggleClass('json', 'yaml');
@@ -674,7 +674,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                         <label ng-class="${toggleLeftClass}" class="btn btn-xs">
                                             <input type="radio" value="yaml" ng-model="${parseTypeName}" ng-change="parseTypeChange('${parseTypeName}', '${fld}')" />YAML
                                         </label>
-                                        <label ng-class="${toggleRightClass}" class="btn btn-xs btn-default">
+                                        <label ng-class="${toggleRightClass}" class="btn btn-xs">
                                             <input type="radio" value="json" ng-model="${parseTypeName}" ng-change="parseTypeChange('${parseTypeName}', '${fld}')" />JSON
                                         </label>
                                     </div>

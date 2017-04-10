@@ -21,13 +21,10 @@ export default [function() {
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8'
+                columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
+                awToolTip: '{{organization.description}}',
+                dataPlacement: 'top'
             },
-            description: {
-                label: 'Description',
-                columnClass: 'hidden-sm hidden-xs',
-                excludeModal: true
-            }
         },
 
         actions: {

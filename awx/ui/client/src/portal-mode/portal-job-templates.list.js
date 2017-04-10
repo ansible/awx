@@ -21,11 +21,9 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8',
-                linkTo: '/#/templates/{{job_template.id}}'
-            },
-            description: {
-                label: i18n._('Description'),
-                columnClass: 'col-lg-4 col-md-4 hidden-sm hidden-xs'
+                linkTo: '/#/templates/{{job_template.id}}',
+                awToolTip: '{{job_template.description}}',
+                dataPlacement: 'top'
             }
         },
 

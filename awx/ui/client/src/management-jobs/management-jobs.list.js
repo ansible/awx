@@ -15,11 +15,9 @@ export default function(){
         fields: {
             name: {
                 label: 'Name',
-                columnClass: 'col-sm-4 col-xs-4'
-            },
-            description: {
-                label: 'Description',
-                columnClass: 'col-sm-6 col-xs-6 hidden-sm hidden-xs'
+                columnClass: 'col-sm-4 col-xs-4',
+                awToolTip: '{{configure_job.description}}',
+                dataPlacement: 'top'
             }
         },
         actions: {
