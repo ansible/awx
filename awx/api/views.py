@@ -222,7 +222,8 @@ class ApiV1PingView(APIView):
 
         response['instances'] = []
         for instance in Instance.objects.all():
-            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified, capacity=instance.capacity))
+            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
+                                              capacity=instance.capacity, version=instance.version))
             response['instances'].sort()
         return Response(response)
 

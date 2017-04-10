@@ -21,6 +21,7 @@ import traceback
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
+from datetime import timedelta
 import yaml
 try:
     import psutil
@@ -45,6 +46,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 
 # AWX
+from awx import __version__ as tower_application_version
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
@@ -53,7 +55,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
-from awx.main.utils.reload import restart_local_services
+from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
@@ -174,13 +176,27 @@ def purge_old_stdout_files(self):
 @task(bind=True)
 def cluster_node_heartbeat(self):
     logger.debug("Cluster node heartbeat task.")
+    nowtime = now()
     inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
     if inst.exists():
         inst = inst[0]
         inst.capacity = get_system_task_capacity()
+        inst.version = tower_application_version
         inst.save()
-        return
-    raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+    else:
+        raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+    recent_inst = Instance.objects.filter(modified__gt=nowtime - timedelta(seconds=70)).exclude(hostname=settings.CLUSTER_HOST_ID)
+    # IFF any node has a greater version than we do, then we'll shutdown services
+    for other_inst in recent_inst:
+        if other_inst.version == "":
+            continue
+        if Version(other_inst.version) > Version(tower_application_version):
+            logger.error("Host {} reports Tower version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
+                                                                                                             other_inst.version,
+                                                                                                             inst.hostname,
+                                                                                                             inst.version))
+            stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
+
 
 
 @task(bind=True, queue='default')
