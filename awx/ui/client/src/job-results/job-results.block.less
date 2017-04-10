@@ -200,7 +200,9 @@ job-results-standard-out {
     flex: 1;
     flex-basis: auto;
     height: ~"calc(100% - 800px)";
-    display: flex
+    display: flex;
+    border: 1px solid @d7grey;
+    border-radius: 5px;
 }
 @media screen and (max-width: @breakpoint-md) {
   job-results-standard-out {
@@ -211,18 +213,4 @@ job-results-standard-out {
 .JobResults-extraVarsHelp {
     margin-left: 10px;
     color: @default-icon;
-}
-
-.JobResults .CodeMirror-lines {
-    cursor: not-allowed;
-}
-
-.JobResults-downloadTooLarge {
-    display: flex;
-}
-
-.JobResults-downloadTooLarge--icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }

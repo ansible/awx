@@ -3,8 +3,9 @@
 @default-data-txt:      #161B1F;
 @default-icon:          #848992;
 @default-icon-hov:      #D7D7D7; // also selected button
-@default-border:        #E8E8E8;
-@d7grey:                #D7D7D7; // used for random things, like the close button on top-right corner of panes
+@default-border:        @default-icon-hov;
+@d7grey:                @default-icon-hov; // used for random things, like the close button on top-right corner of panes
+@default-succ-disabled: @default-icon-hov;  // no different than other disableds...remove sometime
 @default-bg:            #FFFFFF; // also selected btn txt
 @default-secondary-bg:  #FCFCFC; // page/input field bg, just adds depth
 @default-tertiary-bg:   #FAFAFA; // hover bg, alt-list
@@ -12,7 +13,6 @@
 @default-err-hov:       #C9302C;
 @default-succ:          #5CB85C;
 @default-succ-hov:      #449D44;
-@default-succ-disabled: #D7D7D7; // no different than other disableds...remove sometime
 @default-link:          #337AB7;
 @default-link-hov:      #286090;
 @default-list-header-bg:#EBEBEB;
@@ -20,6 +20,9 @@
 @default-stdout-txt:    #707070;
 @default-dark:          #000000;
 @b7grey:                #B7B7B7;
+@egrey:                 #EEEEEE;
+@cgrey:                 #CCCCCC;
+@f7grey:                #F7F7F7;
 
 
 @default-warning:     #F0AD4E;
@@ -113,7 +116,7 @@
 @field-input-text:      @default-data-txt;
 @field-bg:              @default-secondary-bg;
 @field-secondary-bg:    @default-secondary-bg;
-@field-border:          @d7grey;
+@field-border:          @b7grey;
 @field-border-sel:      @default-link;
 @field-dropdown-icon:   @default-icon;
 @field-button-bg:       @default-bg;

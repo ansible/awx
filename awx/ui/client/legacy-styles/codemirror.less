@@ -5,15 +5,18 @@
  *
  */
 
+ @import "./client/src/shared/branding/colors.default.less";
+
 .CodeMirror {
     height: auto;
     overflow-x: scroll;
     overflow-y: hidden;
-    border: 1px solid #ccc;
+    border: 1px solid @b7grey;
 }
 
+.CodeMirror,
 .CodeMirror-activeline-background {
-    background-color: #f7f7f7;
+    background-color: @default-secondary-bg;
 }
 
 /* Make sure code editor dialog is always at top of stack */
@@ -23,4 +26,46 @@
 
 .CodeMirror-lint-tooltip {
     z-index: 2060;
+}
+
+.CodeMirror-gutters {
+    border-color: @d7grey;
+    background-color: @default-no-items-bord;
+}
+
+.CodeMirror-lineNumber {
+    color: @default-icon;
+}
+
+// Disabled
+textarea[disabled="disabled"] + div[id*="-container"]{
+    pointer-events: none;
+    cursor: not-allowed;
+
+        .CodeMirror {
+            cursor: not-allowed;
+        }
+
+        .CodeMirror.cm-s-default,
+        .CodeMirror-line {
+            background-color: @egrey;
+        }
+
+        .CodeMirror-gutters {
+            border-color: @b7grey;
+        }
+
+        .CodeMirror-gutter.CodeMirror-lint-markers,
+        .CodeMirror-gutter.CodeMirror-linenumbers {
+            background-color: @default-bg;
+            color: @default-interface-txt;
+        }
+
+        .CodeMirror-lines {
+            cursor: default;
+        }
+
+        .CodeMirror-cursors {
+            display: none;
+        }
 }

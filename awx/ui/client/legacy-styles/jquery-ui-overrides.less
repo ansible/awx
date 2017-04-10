@@ -98,7 +98,7 @@ table.ui-datepicker-calendar {
 
     button.btn.btn-default {
       text-transform: uppercase;
-      border-color: @d7grey;
+      border-color: @b7grey;
       color: @default-interface-txt;
     }
 
@@ -153,7 +153,7 @@ table.ui-datepicker-calendar {
 
 .ui-widget-content {
     background-image: none;
-    background-color: @white;
+    background-color: @default-secondary-bg;
 
     a,
     a:visited,
@@ -215,4 +215,17 @@ table.ui-datepicker-calendar {
 
 .ui-accordion .ui-accordion-header {
     margin-top: 1px;
+}
+
+.ui-spinner.ui-state-disabled,
+.ui-state-disabled .ui-spinner-button {
+    cursor: not-allowed !important;
+}
+
+.ui-state-disabled .ui-spinner-button:hover {
+    background-color: @default-bg !important;
+}
+
+.ui-state-disabled.ui-widget-content {
+    background-color: @egrey;
 }
