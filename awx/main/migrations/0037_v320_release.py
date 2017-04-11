@@ -19,6 +19,24 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Inventory Refresh
+        migrations.RenameField(
+            'InventorySource',
+            'group',
+            'deprecated_group'
+        ),
+        migrations.AlterField(
+            model_name='inventorysource',
+            name='deprecated_group',
+            field=models.ForeignKey(related_name='deprecated_inventory_source', default=None, null=True, to='main.Group'),
+        ),
+        migrations.AlterField(
+            model_name='inventorysource',
+            name='inventory',
+            field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
+        ),
+
+        # Facts Latest
         migrations.CreateModel(
             name='FactLatest',
             fields=[

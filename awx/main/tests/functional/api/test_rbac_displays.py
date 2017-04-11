@@ -4,10 +4,7 @@ from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
-from awx.main.access import (
-    access_registry,
-    get_user_capabilities
-)
+from awx.main.access import access_registry
 from awx.main.utils import cache_list_capabilities
 from awx.api.serializers import JobTemplateSerializer
 
@@ -186,7 +183,7 @@ class TestAccessListCapabilities:
         "Establish that exactly 1 type of access exists so we know the entry is the right one"
         assert len(data['results']) == 1
         assert len(data['results'][0]['summary_fields'][sublist]) == 1
-    
+
     def test_access_list_direct_access_capability(
             self, inventory, rando, get, mocker, mock_access_method):
         inventory.admin_role.members.add(rando)
@@ -339,28 +336,6 @@ def test_manual_projects_no_update(project, get, admin_user):
     response = get(reverse('api:project_detail', kwargs={'pk': project.pk}), admin_user, expect=200)
     assert not response.data['summary_fields']['user_capabilities']['start']
     assert not response.data['summary_fields']['user_capabilities']['schedule']
-
-
-@pytest.mark.django_db
-def test_group_update_capabilities_possible(group, inventory_source, admin_user):
-    group.inventory_source = inventory_source
-    group.save()
-
-    capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
-    assert capabilities['start']
-
-
-@pytest.mark.django_db
-def test_group_update_capabilities_impossible(group, inventory_source, admin_user):
-    "Manual groups can not be updated or scheduled"
-    inventory_source.source = ""
-    inventory_source.save()
-    group.inventory_source = inventory_source
-    group.save()
-
-    capabilities = get_user_capabilities(admin_user, group, method_list=['edit', 'start', 'schedule'])
-    assert not capabilities['start']
-    assert not capabilities['schedule']
 
 
 @pytest.mark.django_db

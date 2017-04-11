@@ -1238,7 +1238,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
-    show_capabilities = ['start', 'copy', 'schedule', 'edit', 'delete']
+    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         model = Group
@@ -1270,8 +1270,6 @@ class GroupSerializer(BaseSerializerWithVariables):
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.inventory_source:
-            res['inventory_source'] = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk})
         return res
 
     def validate_name(self, value):
@@ -1429,13 +1427,12 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
+    show_capabilities = ['start', 'schedule', 'edit', 'delete']
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'inventory', 'group', 'update_on_launch',
-                  'update_cache_timeout') + \
+        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout') + \
                  ('last_update_failed', 'last_updated') # Backwards compatibility.
-        read_only_fields = ('*', 'name', 'inventory', 'group')
 
     def get_related(self, obj):
         res = super(InventorySourceSerializer, self).get_related(obj)
@@ -1452,8 +1449,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.group:
-            res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.group.pk})
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = self.reverse('api:inventory_update_detail',
@@ -1469,8 +1464,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             return ret
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'group' in ret and not obj.group:
-            ret['group'] = None
         return ret
 
 

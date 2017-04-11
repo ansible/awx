@@ -3,7 +3,7 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main.models.notifications import NotificationTemplate, Notification
-from awx.main.models.inventory import Inventory, Group
+from awx.main.models.inventory import Inventory, InventorySource
 from awx.main.models.jobs import JobTemplate
 
 
@@ -84,8 +84,8 @@ def test_inherited_notification_templates(get, post, user, organization, project
         notification_templates.append(response.data['id'])
     i = Inventory.objects.create(name='test', organization=organization)
     i.save()
-    g = Group.objects.create(name='test', inventory=i)
-    g.save()
+    isrc = InventorySource.objects.create(name='test', inventory=i)
+    isrc.save()
     jt = JobTemplate.objects.create(name='test', inventory=i, project=project, playbook='debug.yml')
     jt.save()
     url = reverse('api:organization_notification_templates_any_list', kwargs={'pk': organization.id})
@@ -99,7 +99,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
     assert response.status_code == 204
     assert len(jt.notification_templates['any']) == 3
     assert len(project.notification_templates['any']) == 2
-    assert len(g.inventory_source.notification_templates['any']) == 1
+    assert len(isrc.notification_templates['any']) == 1
 
 
 @pytest.mark.django_db

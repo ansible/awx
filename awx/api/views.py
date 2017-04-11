@@ -2153,8 +2153,7 @@ class InventoryTreeView(RetrieveAPIView):
         group_children_map = inventory.get_group_children_map()
         root_group_pks = inventory.root_groups.order_by('name').values_list('pk', flat=True)
         groups_qs = inventory.groups
-        groups_qs = groups_qs.select_related('inventory')
-        groups_qs = groups_qs.prefetch_related('inventory_source')
+        groups_qs = groups_qs.prefetch_related('inventory_sources')
         all_group_data = GroupSerializer(groups_qs, many=True).data
         all_group_data_map = dict((x['id'], x) for x in all_group_data)
         tree_data = [all_group_data_map[x] for x in root_group_pks]
@@ -2164,21 +2163,16 @@ class InventoryTreeView(RetrieveAPIView):
         return Response(tree_data)
 
 
-class InventoryInventorySourcesList(SubListAPIView):
+class InventoryInventorySourcesList(SubListCreateAPIView):
+
+    view_name = _('Inventory Source List')
 
     model = InventorySource
     serializer_class = InventorySourceSerializer
     parent_model = Inventory
-    relationship = None # Not defined since using get_queryset().
-    view_name = _('Inventory Source List')
+    relationship = 'inventory_sources'
+    parent_key = 'inventory'
     new_in_14 = True
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(Q(inventory__pk=parent.pk) |
-                         Q(group__inventory__pk=parent.pk))
 
 
 class InventorySourceList(ListAPIView):
