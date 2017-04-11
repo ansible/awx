@@ -10,8 +10,6 @@ from psycopg2.extensions import AsIs
 # AWX
 import awx.main.fields
 from awx.main.models import FactLatest
-from awx.main.migrations import _inventory_source as invsrc
-from awx.main.migrations import _migration_utils as migration_utils
 
 
 class Migration(migrations.Migration):
@@ -37,9 +35,6 @@ class Migration(migrations.Migration):
             name='inventory',
             field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
         ),
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations),
-        migrations.RunPython(invsrc.remove_manual_inventory_sources),
-        migrations.RunPython(invsrc.rename_inventory_sources),
 
         # Facts Latest
         migrations.CreateModel(

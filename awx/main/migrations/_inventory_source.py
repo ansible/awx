@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Q
 
-logger = logging.getLogger('invsrc_migrations')
+logger = logging.getLogger('awx.main.migrations')
 
 
 def remove_manual_inventory_sources(apps, schema_editor):
@@ -12,6 +12,7 @@ def remove_manual_inventory_sources(apps, schema_editor):
     '''
     InventorySource = apps.get_model('main', 'InventorySource')
     # see models/inventory.py SOURCE_CHOICES - ('', _('Manual'))
+    logger.debug("Removing all Manual InventorySource from database.")
     InventorySource.objects.filter(source='').delete()
 
 
@@ -29,6 +30,7 @@ def rename_inventory_sources(apps, schema_editor):
 
             inventory = invsrc.deprecated_group.inventory if invsrc.deprecated_group else invsrc.inventory
             name = '{0} - {1} - {2}'.format(invsrc.name, inventory.name, i)
+            logger.debug("Renaming InventorySource({0}) {1} -> {2}".format(invsrc.pk, invsrc.name, name))
             invsrc.name = name
             invsrc.save()
 
@@ -38,4 +40,5 @@ def remove_inventory_source_with_no_inventory_link(apps, schema_editor):
     we can safely remove it.
     '''
     InventorySource = apps.get_model('main', 'InventorySource')
+    logger.debug("Removing all InventorySource that have no link to an Inventory from database.")
     InventorySource.objects.filter(Q(inventory__organization=None) & Q(deprecated_group__inventory=None)).delete()
