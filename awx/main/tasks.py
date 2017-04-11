@@ -1594,7 +1594,7 @@ class RunInventoryUpdate(BaseTask):
         """
         # Get the inventory source and inventory.
         inventory_source = inventory_update.inventory_source
-        inventory = inventory_source.group.inventory
+        inventory = inventory_source.inventory
 
         # Piece together the initial command to run via. the shell.
         args = ['tower-manage', 'inventory_import']
