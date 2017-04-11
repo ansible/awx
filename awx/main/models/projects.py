@@ -210,9 +210,9 @@ class ProjectOptions(models.Model):
 
     def get_lock_file(self):
         proj_path = self.get_project_path()
-        if proj_path:
-            return os.path.join(proj_path, 'tower_sync.lock')
-        return None
+        if not proj_path:
+            return None
+        return proj_path + '.lock'
 
 
 class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
