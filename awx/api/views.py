@@ -2153,7 +2153,6 @@ class InventoryTreeView(RetrieveAPIView):
         group_children_map = inventory.get_group_children_map()
         root_group_pks = inventory.root_groups.order_by('name').values_list('pk', flat=True)
         groups_qs = inventory.groups
-        groups_qs = groups_qs.select_related('inventory')
         groups_qs = groups_qs.prefetch_related('inventory_sources')
         all_group_data = GroupSerializer(groups_qs, many=True).data
         all_group_data_map = dict((x['id'], x) for x in all_group_data)

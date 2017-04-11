@@ -1062,6 +1062,15 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         default=None,
         on_delete=models.CASCADE,
     )
+
+    deprecated_group = models.ForeignKey(
+        'Group',
+        related_name='deprecated_inventory_source',
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
+    )
+
     update_on_launch = models.BooleanField(
         default=False,
     )
@@ -1105,7 +1114,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             self.name = self.name.replace(replace_text, str(self.pk))
             super(InventorySource, self).save(update_fields=['name'])
         if not getattr(_inventory_updates, 'is_updating', False):
-            self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
+            if self.inventory is not None:
+                self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
     def _get_current_status(self):
         if self.source:

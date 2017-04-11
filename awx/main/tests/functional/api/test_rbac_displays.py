@@ -4,10 +4,7 @@ from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
-from awx.main.access import (
-    access_registry,
-    get_user_capabilities
-)
+from awx.main.access import access_registry
 from awx.main.utils import cache_list_capabilities
 from awx.api.serializers import JobTemplateSerializer
 

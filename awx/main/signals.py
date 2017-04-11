@@ -417,9 +417,6 @@ def activity_stream_update(sender, instance, **kwargs):
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    # Skip recording any inventory source directly associated with a group.
-    if isinstance(instance, InventorySource) and instance.group:
-        return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
