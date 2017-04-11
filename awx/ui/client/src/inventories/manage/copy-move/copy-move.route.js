@@ -8,6 +8,7 @@ import { N_ } from '../../../i18n';
 
 import CopyMoveGroupsController from './copy-move-groups.controller';
 import CopyMoveHostsController from './copy-move-hosts.controller';
+import CopyMoveListController from './copy-move-list.controller';
 
 var copyMoveGroupRoute = {
     name: 'inventoryManage.copyMoveGroup',
@@ -53,7 +54,8 @@ var copyMoveGroupRoute = {
                     input_type: 'radio'
                 });
                 return html;
-            }
+            },
+            controller: CopyMoveListController
         }
     }
 };
@@ -90,7 +92,8 @@ var copyMoveHostRoute = {
                     input_type: 'radio'
                 });
                 return html;
-            }
+            },
+            controller: CopyMoveListController
         }
     }
 };
