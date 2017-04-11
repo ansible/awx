@@ -8,7 +8,6 @@
 
 .License-container{
 	.OnePlusTwo-container;
-    margin-bottom: 20px;
 }
 
 .License-container--missing {
@@ -84,14 +83,12 @@
 .License-fields{
 	.OnePlusTwo-left--details;
 }
-.License-details {
-	.OnePlusTwo-left--panel(650px);
-}
+
 .License-titleText {
 	.OnePlusTwo-panelHeader;
 }
 .License-management{
-	.OnePlusTwo-right--panel(650px);
+    display: flex;
 }
 .License-management--missingLicense{
 	height: auto;
@@ -109,11 +106,19 @@
 	color:@default-bg !important;
 }
 .License-submit--container{
-	height: 33px;
+    position: absolute;
+    right: 36px;
+    bottom: 20px;
 }
+
+@media (min-width: 900px) {
+    .License-details {
+        margin-right: 20px;
+    }
+}
+
 .License-submit--success{
-	line-height:33px;
-	margin: 0 10px 0 0;
+    margin: 0;
 }
 .License-file--container {
 	input[type=file] {
