@@ -22,6 +22,7 @@ import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
 import yaml
+import fcntl
 try:
     import psutil
 except:
@@ -1312,7 +1313,37 @@ class RunProjectUpdate(BaseTask):
             instance_actual.save()
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
+    def release_lock(self, instance):
+        # May raise IOError
+        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+
+        os.close(self.lock_fd)
+        self.lock_fd = None
+
+    '''
+    Note: We don't support blocking=False
+    '''
+    def acquire_lock(self, instance, blocking=True):
+        lock_path = instance.get_lock_file()
+        if lock_path is None:
+            raise RuntimeError(u'Invalid file %s' % instance.get_lock_file())
+
+        # May raise IOError
+        self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+
+        # May raise IOError
+        fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+    
+    def pre_run_hook(self, instance, **kwargs):
+        if instance.launch_type == 'sync':
+            #from celery.contrib import rdb
+            #rdb.set_trace()
+            self.acquire_lock(instance)
+
     def post_run_hook(self, instance, status, **kwargs):
+        if instance.launch_type == 'sync':
+            self.release_lock(instance)
+
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
             fd = open(self.revision_path, 'r')
