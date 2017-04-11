@@ -44,7 +44,9 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Name'),
                 columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
-                linkTo: '/#/inventories/{{inventory.id}}/manage'
+                linkTo: '/#/inventories/{{inventory.id}}/manage',
+                awToolTip: "{{ inventory.description }}",
+                awTipPlacement: "top"
             },
             organization: {
                 label: i18n._('Organization'),

@@ -52,7 +52,11 @@
                     ng-class="{'OrgCards-card--selected': $stateParams.organization_id == card.id}"
                     ng-repeat="card in orgCards track by card.id">
                     <div class="OrgCards-header">
-                        <h3 class="OrgCards-label">{{ card.name }}</h3>
+                        <h3 class="OrgCards-label"
+                            aw-tool-tip="{{ card.description || 'Place organization description here' }}"
+                            aw-tip-placement="top">
+                            {{ card.name }}
+                        </h3>
                         <div class="OrgCards-actionItems">
                             <button class="OrgCards-actionItem
                                 List-actionButton"
@@ -80,7 +84,6 @@
                             </button>
                         </div>
                     </div>
-                    <p class="OrgCards-description">{{ card.description || "Place organization description here" }}</p>
                     <div class="OrgCards-links">
                         <div class="OrgCards-link" ng-repeat="link in card.links">
                             <span class="badge List-titleBadge

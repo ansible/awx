@@ -26,12 +26,9 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-11'
-            },
-            description: {
-                label: i18n._('Description'),
-                excludeModal: true,
-                columnClass: 'col-md-3 hidden-sm hidden-xs'
+                modalColumnClass: 'col-md-11',
+                awToolTip: '{{credential.description}}',
+                dataPlacement: 'top'
             },
             kind: {
                 label: i18n._('Type'),

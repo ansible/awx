@@ -35,7 +35,9 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
-                modalColumnClass: 'col-md-8'
+                modalColumnClass: 'col-md-8',
+                awToolTip: '{{project.description}}',
+                dataPlacement: 'top'
             },
             scm_type: {
                 label: i18n._('Type'),

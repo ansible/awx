@@ -282,11 +282,21 @@
     color: @login-notice-text;
 }
 
+.Button-primary--hollow {
+    border: 1px solid @default-link;    
+    color: @default-link;
+    background: @default-bg;
+}
+.Button-primary--hollow:hover {
+    color: @default-link-hov;
+    border: 1px solid @default-link-hov;    
+}
+
 .ui-spinner{
     height: 30px;
-    background-color: @field-secondary-bg;
+    background-color: @field-secondary-bg !important;
     border-radius: 5px;
-    border:1px solid @field-border;
+    border:1px solid @field-border !important;
     color: @field-input-text;
     width:100%
 }
