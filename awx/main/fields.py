@@ -323,9 +323,9 @@ unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
 
 
 def string_to_type(t):
-    if t == 'true':
+    if t == u'true':
         return True
-    elif t == 'false':
+    elif t == u'false':
         return False
 
     if re.search('^[-+]?[0-9]+$',t):
@@ -342,7 +342,6 @@ class DynamicFilterField(models.TextField):
 
     class BoolOperand(object):
         def __init__(self, t):
-            #print("Got t %s" % t)
             kwargs = dict()
             k, v = self._extract_key_value(t)
             k, v = self._json_path_to_contains(k, v)
@@ -371,13 +370,13 @@ class DynamicFilterField(models.TextField):
             contains_count = 0
             for i, piece in enumerate(pieces):
                 if flag_first_arr_found is False and piece.endswith('[]'):
-                    assembled_k += '%s__contains' % (piece[0:-2])
+                    assembled_k += u'%s__contains' % (piece[0:-2])
                     contains_count += 1
                     flag_first_arr_found = True
                 elif flag_first_arr_found is False and i == len(pieces) - 1:
-                    assembled_k += '%s' % piece
+                    assembled_k += u'%s' % piece
                 elif flag_first_arr_found is False:
-                    assembled_k += '%s__' % piece
+                    assembled_k += u'%s__' % piece
                 elif flag_first_arr_found is True:
                     new_kv = dict()
                     if piece.endswith('[]'):
@@ -401,9 +400,20 @@ class DynamicFilterField(models.TextField):
                     last_kv = new_kv
                     contains_count += 1
 
-            if contains_count == 1 and isinstance(assembled_v, basestring):
-                assembled_v = '"' + assembled_v + '"'
-            elif contains_count > 1:
+            '''
+            Explicit quotes are kept up till this point.
+            They will be kept if there is ONLY ONE [] in the key search.
+            This is because django filter + postgres expect strings to be
+            quoted "\"hello_world\"". If, instead, there are many [] in a
+            filter key then we can remove the " and ".
+            '''
+            if contains_count != 1:
+                if type(v) is unicode and v.startswith('"') and v.endswith('"'):
+                    v = v[1:-1]
+                if contains_count == 0:
+                    assembled_v = v
+
+            if contains_count > 1:
                 if type(last_v) is list:
                     last_v.append(v)
                 if type(last_v) is dict:
@@ -430,10 +440,11 @@ class DynamicFilterField(models.TextField):
             # value
             # ="something"
             if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
-                v = t[v_offset + 1]
+                v = u'"' + unicode(t[v_offset + 1]) + u'"'
+                #v = t[v_offset + 1]
             # empty ""
             elif t_len > (v_offset + 1):
-                v = ""
+                v = u""
             # no ""
             else:
                 v = string_to_type(t[v_offset])
@@ -481,6 +492,8 @@ class DynamicFilterField(models.TextField):
         * handle optional value quoted: a.b.c=""
 
         '''
+        filter_string = unicode(filter_string)
+
         atom = CharsNotIn(unicode_spaces_other)
         atom_inside_quotes = CharsNotIn(u'"')
         atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
