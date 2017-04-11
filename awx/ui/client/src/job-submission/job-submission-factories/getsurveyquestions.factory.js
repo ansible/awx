@@ -42,6 +42,13 @@ export default
                             else if(question.type === "multiplechoice") {
                                 question.model = question.default ? angular.copy(question.default) : "";
                                 question.choices = question.choices.split(/\n/);
+
+                                // Add a default empty string option to the choices array.  If this choice is
+                                // selected then the extra var will not be sent when we POST to the launch
+                                // endpoint
+                                if(!question.required) {
+                                    question.choices.unshift('');
+                                }
                             }
                             else if(question.type === "float"){
                                 question.model = (!Empty(question.default)) ? angular.copy(question.default) : (!Empty(question.default_float)) ? angular.copy(question.default_float) : "";
