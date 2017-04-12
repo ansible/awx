@@ -1314,8 +1314,12 @@ class RunProjectUpdate(BaseTask):
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def release_lock(self, instance):
-        # May raise IOError
-        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        except IOError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
+            os.close(self.lock_fd)
+            raise
 
         os.close(self.lock_fd)
         self.lock_fd = None
@@ -1328,16 +1332,21 @@ class RunProjectUpdate(BaseTask):
         if lock_path is None:
             raise RuntimeError(u'Invalid lock file path')
 
-        # May raise IOError
-        self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+        try:
+            self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+        except OSError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
 
-        # May raise IOError
-        fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+        except IOError as e:
+            os.close(self.lock_fd)
+            logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
     
     def pre_run_hook(self, instance, **kwargs):
         if instance.launch_type == 'sync':
-            #from celery.contrib import rdb
-            #rdb.set_trace()
             self.acquire_lock(instance)
 
     def post_run_hook(self, instance, status, **kwargs):
