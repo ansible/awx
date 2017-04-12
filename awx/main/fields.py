@@ -488,13 +488,8 @@ class DynamicFilterField(models.TextField):
         * handle keys with " via: a.\"b.c="yeah"
         * handle key with __ in it
 
-        * add not support
-
-        * transform [] into contains via: a.b.c[].d[].e.f[]="blah"
-
-        * handle optional value quoted: a.b.c=""
-
         '''
+        filter_string_raw = filter_string
         filter_string = unicode(filter_string)
 
         atom = CharsNotIn(unicode_spaces_other)
@@ -511,7 +506,11 @@ class DynamicFilterField(models.TextField):
             ("or",  2, opAssoc.LEFT, cls.BoolOr),
         ])
 
-        res = boolExpr.parseString('(' + filter_string + ')')
+        try:
+            res = boolExpr.parseString('(' + filter_string + ')')
+        except:
+            raise RuntimeError(u"Invalid query %s" % filter_string_raw)
+
         if len(res) > 0:
             return res[0].result
 
