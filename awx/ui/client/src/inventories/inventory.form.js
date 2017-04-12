@@ -10,8 +10,8 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n', 'buildGroupListState',
-function(i18n,buildGroupListState) {
+export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState', 'buildGroupsEditState',
+function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState) {
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -134,10 +134,12 @@ function(i18n,buildGroupListState) {
             },
             groups: {
                 name: 'groups',
-                include: "InventoryGroupsList",
+                include: "GroupList",
                 title: i18n._('Groups'),
                 iterator: 'group',
-                stateGeneratorFunction: buildGroupListState
+                listState: buildGroupsListState,
+                addState: buildGroupsAddState,
+                editState: buildGroupsEditState
             },
             hosts: {
                 name: 'hosts',

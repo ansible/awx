@@ -5,6 +5,10 @@
  *************************************************/
 
 import groupList from './list/main';
+import groupAdd from './add/main';
+import groupEdit from './edit/main';
+import groupFormDefinition from './groups.form';
+import groupListDefinition from './groups.list';
 import service from './groups.service';
 import GetHostsStatusMsg from './factories/get-hosts-status-msg.factory';
 import GetSourceTypeOptions from './factories/get-source-type-options.factory';
@@ -14,8 +18,12 @@ import ViewUpdateStatus from './factories/view-update-status.factory';
 
 export default
     angular.module('group', [
-        groupList.name
+        groupList.name,
+        groupAdd.name,
+        groupEdit.name
     ])
+    .value('GroupForm', groupFormDefinition)
+    .value('GroupList', groupListDefinition)
     .factory('GetHostsStatusMsg', GetHostsStatusMsg)
     .factory('GetSourceTypeOptions', GetSourceTypeOptions)
     .factory('GetSyncStatusMsg', GetSyncStatusMsg)

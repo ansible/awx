@@ -4,12 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-import buildGroupListState from './build-groups-list-state.factory';
+import buildGroupsListState from './build-groups-list-state.factory';
 import controller from './groups-list.controller';
-import InventoryGroupsList from './inventory-groups.list';
 
 export default
-    angular.module('groupList', [])
-        .factory('buildGroupListState', buildGroupListState)
-        .value('InventoryGroupsList', InventoryGroupsList)
+    angular.module('groupsList', [])
+        .factory('buildGroupsListState', buildGroupsListState)
         .controller('GroupsListController', controller);

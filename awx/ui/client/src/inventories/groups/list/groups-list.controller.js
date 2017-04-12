@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroupsList', 'InventoryUpdate',
+    ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
     'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData',
-    function($scope, $rootScope, $state, $stateParams, InventoryGroupsList, InventoryUpdate,
+    function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
         GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
         GetSyncStatusMsg, GetHostsStatusMsg, Dataset, Find, qs, inventoryData){
 
-        let list = InventoryGroupsList;
+        let list = GroupList;
 
         init();
 
@@ -88,10 +88,10 @@
             }, {reload: true});
         };
         $scope.createGroup = function(){
-            $state.go('inventoryManage.addGroup');
+            $state.go('inventories.edit.groups.add');
         };
         $scope.editGroup = function(id){
-            $state.go('inventoryManage.editGroup', {group_id: id});
+            $state.go('inventories.edit.groups.edit', {group_id: id});
         };
         $scope.deleteGroup = function(group){
             $scope.toDelete = {};

@@ -246,7 +246,6 @@ function($injector, $stateExtender, $log, i18n) {
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
         generateFormListDefinitions: function(form, formStateDefinition, params) {
-
             function buildRbacUserTeamDirective(){
                 let states = [];
 
@@ -508,10 +507,6 @@ function($injector, $stateExtender, $log, i18n) {
                         ]
                     }
                 });
-                // // appy any default search parameters in form definition
-                // if (field.search) {
-                //     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
-                // }
                 return state;
             }
 
@@ -559,7 +554,9 @@ function($injector, $stateExtender, $log, i18n) {
             function buildListNodes(field) {
                 let states = [];
                 if(field.iterator === 'group'){
-                    states.push(field.stateGeneratorFunction(field, formStateDefinition, params));
+                    states.push(field.listState(field, formStateDefinition));
+                    states.push(field.addState(field, formStateDefinition, params));
+                    states.push(field.editState(field, formStateDefinition, params));
                     states = _.flatten(states);
                 }
                 else if(field.iterator === 'notification'){
