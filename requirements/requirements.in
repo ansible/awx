@@ -41,6 +41,7 @@ requests-futures==0.9.7
 service-identity==16.0.0
 shade==1.13.1
 slackclient==1.0.2
+tacacs_plus==0.1
 twilio==5.6.0
 uWSGI==2.0.14
 xmltodict==0.10.2
