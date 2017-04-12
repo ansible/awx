@@ -2,7 +2,7 @@
 	ng-class="{'License-container--missing': licenseMissing}">
 	<div class="License-details" ng-hide="licenseMissing">
 		<div class="Panel">
-			<div class="License-titleText" translate>Details</div>
+			<div class="List-titleText" translate>Details</div>
 			<div class="License-fields">
 				<div class="License-field">
 					<div class="License-field--label" translate>License</div>
@@ -73,7 +73,7 @@
 	</div>
 	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">
 		<div class="Panel">
-			<div class="License-titleText">{{title}}</div>
+			<div class="List-titleText">{{title}}</div>
 			<div class="License-body">
 				<div class="License-helperText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
 				<div class="AddPermissions-directions" ng-if="licenseMissing">
@@ -117,10 +117,10 @@
 							</label>
 						</div>
 					</div>
-					<div class="License-submit--container">
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null" translate>Submit</button>
-						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
-					</div>
+          <div class="License-submit--container">
+            <button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null" translate>Submit</button>
+            <span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
+          </div>
 				</form>
 			</div>
 		</div>
