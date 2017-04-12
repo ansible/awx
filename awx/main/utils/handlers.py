@@ -107,7 +107,7 @@ class BaseHTTPSHandler(logging.Handler):
         Tests logging connectivity for the current logging settings.
         @raises LoggingConnectivityException
         """
-        handler = cls.from_django_settings(settings, async=True)
+        handler = cls.from_django_settings(settings)
         handler.enabled_flag = True
         handler.setFormatter(LogstashFormatter(settings_module=settings))
         logger = logging.getLogger(__file__)
