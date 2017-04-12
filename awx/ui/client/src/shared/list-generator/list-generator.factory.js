@@ -174,7 +174,9 @@ export default ['$compile', 'Attr', 'Icon',
                     html += (!list.wellOverride) ? "List-well" : "";
                     html += `">`;
                     // List actions
-                    html += "<div class=\"List-actionHolder\">";
+                    html += "<div class=\"";
+                    html += (list.actionHolderClass) ? list.actionHolderClass : "List-actionHolder";
+                    html += "\">";
                     html += "<div class=\"List-actions\">";
                     html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
 

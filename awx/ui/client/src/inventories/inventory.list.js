@@ -63,11 +63,31 @@ export default ['i18n', function(i18n) {
         actions: {
             add: {
                 mode: 'all', // One of: edit, select, all
-                ngClick: 'addInventory()',
+                type: 'buttonDropdown',
+                basePaths: ['inventories'],
                 awToolTip: i18n._('Create a new inventory'),
-                actionClass: 'btn List-buttonSubmit',
+                actionClass: 'btn List-dropdownSuccess',
                 buttonContent: '&#43; ' + i18n._('ADD'),
-                ngShow: 'canAdd'
+                options: [
+                    {
+                        optionContent: i18n._('Inventory'),
+                        optionSref: 'inventories.add',
+                        ngShow: 'canAddInventory'
+                    },
+                    {
+                        optionContent: i18n._('Smart Inventory'),
+                        optionSref: 'inventories.addSmartInventory',
+                        //TODO: this should have its own permission
+                        ngShow: 'canAddInventory'
+                    },
+                    {
+                        optionContent: i18n._('SCM Inventory'),
+                        optionSref: 'inventories.addSCMInventory',
+                        //TODO: this should have its own permission
+                        ngShow: 'canAddInventory'
+                    }
+                ],
+                ngShow: 'canAddInventory || canAddSmartInventory || canAddSCMInventory'
             }
         },
 

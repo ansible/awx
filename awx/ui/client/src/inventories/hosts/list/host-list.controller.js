@@ -15,7 +15,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
     function init(){
         $scope.canAdd = false;
-        $scope.activeHostSearch = false;
+        $scope.enableSmartInventoryButton = false;
 
         rbacUiControlService.canAdd('hosts')
             .then(function(canAdd) {
@@ -39,17 +39,22 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         });
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toParams && toParams.host_search) {
-                let hasMoreThanDefaultKeys = false;
-                angular.forEach(toParams.host_search, function(value, key) {
-                    if(key !== 'order_by' && key !== 'page_size') {
-                        hasMoreThanDefaultKeys = true;
-                    }
-                });
-                $scope.activeHostSearch = hasMoreThanDefaultKeys ? true : false;
+            if(toState.name === 'hosts.addSmartInventory') {
+                $scope.enableSmartInventoryButton = false;
             }
             else {
-                $scope.activeHostSearch = false;
+                if(toParams && toParams.host_search) {
+                    let hasMoreThanDefaultKeys = false;
+                    angular.forEach(toParams.host_search, function(value, key) {
+                        if(key !== 'order_by' && key !== 'page_size') {
+                            hasMoreThanDefaultKeys = true;
+                        }
+                    });
+                    $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+                }
+                else {
+                    $scope.enableSmartInventoryButton = false;
+                }
             }
         });
 
@@ -110,7 +115,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     };
 
     $scope.smartInventory = function() {
-        $state.go('hosts.addSmartInventory');
+        $state.go('inventories.addSmartInventory');
     };
 
 }

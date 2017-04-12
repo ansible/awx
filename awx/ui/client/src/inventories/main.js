@@ -32,17 +32,17 @@ angular.module('inventory', [
             let stateDefinitions = stateDefinitionsProvider.$get(),
             stateExtender = $stateExtenderProvider.$get();
 
-                function generateHostStates() {
+                function generateInventoryStates() {
 
                     let smartInventoryAdd = {
-                        name: 'hosts.addSmartInventory',
+                        name: 'inventories.addSmartInventory',
                         url: '/smartinventory',
                         form: 'SmartInventoryForm',
                         ncyBreadcrumb: {
                             label: "CREATE SMART INVENTORY"
                         },
                         views: {
-                            'form@hosts': {
+                            'form@inventories': {
                                 templateProvider: function(SmartInventoryForm, GenerateForm) {
                                     return GenerateForm.buildHTML(SmartInventoryForm, {
                                         mode: 'add',
@@ -56,7 +56,7 @@ angular.module('inventory', [
 
                     let smartInventoryAddOrgLookup = {
                         searchPrefix: 'organization',
-                        name: 'hosts.addSmartInventory.organization',
+                        name: 'inventories.addSmartInventory.organization',
                         url: '/organization',
                         data: {
                             formChildState: true
@@ -108,7 +108,61 @@ angular.module('inventory', [
                         },
                     };
 
-                    let hosts = stateDefinitions.generateTree({
+                    let inventories = stateDefinitions.generateTree({
+                        parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
+                        modes: ['add', 'edit'],
+                        list: 'InventoryList',
+                        form: 'InventoryForm',
+                        controllers: {
+                            list: 'InventoryListController',
+                            add: 'InventoryAddController',
+                            edit: 'InventoryEditController',
+                            related: {
+                                groups: 'GroupsListController'
+                            }
+                        },
+                        urls: {
+                            list: '/inventories'
+                        },
+                        ncyBreadcrumb: {
+                            label: N_('INVENTORIES')
+                        },
+                        views: {
+                            '@': {
+                                templateUrl: templateUrl('inventories/inventories')
+                            },
+                            'list@inventories': {
+                                templateProvider: function(InventoryList, generateList) {
+                                    let html = generateList.build({
+                                        list: InventoryList,
+                                        mode: 'edit'
+                                    });
+                                    return html;
+                                },
+                                controller: 'InventoryListController'
+                            }
+                        }
+                    });
+
+                    return Promise.all([
+                        inventories
+                    ]).then((generated) => {
+                        return {
+                            states: _.reduce(generated, (result, definition) => {
+                                return result.concat(definition.states);
+                            }, [
+                                stateExtender.buildDefinition(smartInventoryAdd),
+                                stateExtender.buildDefinition(smartInventoryAddOrgLookup)
+                            ])
+                        };
+                    });
+
+                }
+
+                $stateProvider.state({
+                    name: 'hosts',
+                    url: '/hosts',
+                    lazyLoad: () => stateDefinitions.generateTree({
                         parent: 'hosts', // top-most node in the generated tree (will replace this state definition)
                         modes: ['edit'],
                         list: 'HostsList',
@@ -149,67 +203,13 @@ angular.module('inventory', [
                                 controller: 'HostListController'
                             }
                         }
-                    });
-
-                    return Promise.all([
-                        hosts
-                    ]).then((generated) => {
-                        return {
-                            states: _.reduce(generated, (result, definition) => {
-                                return result.concat(definition.states);
-                            }, [
-                                stateExtender.buildDefinition(smartInventoryAdd),
-                                stateExtender.buildDefinition(smartInventoryAddOrgLookup)
-                            ])
-                        };
-                    });
-
-                }
-
-                $stateProvider.state({
-                    name: 'inventories',
-                    url: '/inventories',
-                    lazyLoad: () => stateDefinitions.generateTree({
-                        parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
-                        modes: ['add', 'edit'],
-                        list: 'InventoryList',
-                        form: 'InventoryForm',
-                        controllers: {
-                            list: 'InventoryListController',
-                            add: 'InventoryAddController',
-                            edit: 'InventoryEditController',
-                            related: {
-                                groups: 'GroupsListController'
-                            }
-                        },
-                        urls: {
-                            list: '/inventories'
-                        },
-                        ncyBreadcrumb: {
-                            label: N_('INVENTORIES')
-                        },
-                        views: {
-                            '@': {
-                                templateUrl: templateUrl('inventories/inventories')
-                            },
-                            'list@inventories': {
-                                templateProvider: function(InventoryList, generateList) {
-                                    let html = generateList.build({
-                                        list: InventoryList,
-                                        mode: 'edit'
-                                    });
-                                    return html;
-                                },
-                                controller: 'InventoryListController'
-                            }
-                        }
                     })
                 });
 
                 $stateProvider.state({
-                    name: 'hosts',
-                    url: '/hosts',
-                    lazyLoad: () => generateHostStates()
+                    name: 'inventories',
+                    url: '/inventories',
+                    lazyLoad: () => generateInventoryStates()
                 });
         }
     ]);

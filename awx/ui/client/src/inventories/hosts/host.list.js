@@ -19,6 +19,7 @@ export default ['i18n', function(i18n) {
         trackBy: 'host.id',
         basePath: 'hosts',
         title: false,
+        actionHolderClass: 'List-actionHolder List-actionHolder--leftAlign',
 
         fields: {
             toggleHost: {
@@ -108,7 +109,7 @@ export default ['i18n', function(i18n) {
                 buttonContent: 'SMART INVENTORY',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
-                ngDisabled: '!activeHostSearch'
+                ngDisabled: '!enableSmartInventoryButton'
             }
         }
     };
