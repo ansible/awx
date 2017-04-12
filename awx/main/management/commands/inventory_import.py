@@ -675,7 +675,6 @@ class Command(NoArgsCommand):
             with ignore_inventory_computed_fields():
                 self.inventory_source, created = InventorySource.objects.get_or_create(
                     inventory=self.inventory,
-                    group=None,
                     source='file',
                     source_path=os.path.abspath(self.source),
                     overwrite=self.overwrite,

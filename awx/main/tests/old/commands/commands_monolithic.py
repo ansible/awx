@@ -16,7 +16,6 @@ import unittest2 as unittest
 # Django
 from django.conf import settings
 from django.core.management import call_command
-from django.core.management.base import CommandError
 from django.utils.timezone import now
 from django.test.utils import override_settings
 
@@ -527,129 +526,6 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 continue
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
-
-    def test_invalid_options(self):
-        inventory_id = self.inventories[0].pk
-        inventory_name = self.inventories[0].name
-        # No options specified.
-        result, stdout, stderr = self.run_command('inventory_import')
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('inventory-id' in str(result))
-        self.assertTrue('required' in str(result))
-        # Both inventory ID and name.
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=inventory_id,
-                                                  inventory_name=inventory_name)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('inventory-id' in str(result))
-        self.assertTrue('exclusive' in str(result))
-        # Inventory ID with overwrite and keep_vars.
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=inventory_id,
-                                                  overwrite=True, keep_vars=True)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('overwrite-vars' in str(result))
-        self.assertTrue('exclusive' in str(result))
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=inventory_id,
-                                                  overwrite_vars=True,
-                                                  keep_vars=True)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('overwrite-vars' in str(result))
-        self.assertTrue('exclusive' in str(result))
-        # Inventory ID, but no source.
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=inventory_id)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('--source' in str(result))
-        self.assertTrue('required' in str(result))
-        # Inventory ID, with invalid source.
-        invalid_source = ''.join([os.path.splitext(self.ini_path)[0] + '-invalid',
-                                  os.path.splitext(self.ini_path)[1]])
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=inventory_id,
-                                                  source=invalid_source)
-        self.assertTrue(isinstance(result, IOError), result)
-        self.assertTrue('not exist' in str(result))
-        # Invalid inventory ID.
-        invalid_id = Inventory.objects.order_by('-pk')[0].pk + 1
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=invalid_id,
-                                                  source=self.ini_path)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('found' in str(result))
-        # Invalid inventory name.
-        invalid_name = 'invalid inventory name'
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_name=invalid_name,
-                                                  source=self.ini_path)
-        self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('found' in str(result))
-
-    def test_ini_file(self, source=None):
-        inv_src = source or self.ini_path
-        # New empty inventory.
-        new_inv = self.organizations[0].inventories.create(name=os.path.basename(inv_src))
-        self.assertEqual(new_inv.hosts.count(), 0)
-        self.assertEqual(new_inv.groups.count(), 0)
-        result, stdout, stderr = self.run_command('inventory_import',
-                                                  inventory_id=new_inv.pk,
-                                                  source=inv_src)
-        self.assertEqual(result, None, stdout + stderr)
-        # Check that inventory is populated as expected.
-        new_inv = Inventory.objects.get(pk=new_inv.pk)
-        expected_group_names = set(['servers', 'dbservers', 'webservers', 'others'])
-        group_names = set(new_inv.groups.values_list('name', flat=True))
-        self.assertEqual(expected_group_names, group_names)
-        expected_host_names = set(['web1.example.com', 'web2.example.com',
-                                   'web3.example.com', 'db1.example.com',
-                                   'db2.example.com', '10.11.12.13',
-                                   '10.12.14.16', 'fe80::1610:9fff:fedd:654b',
-                                   'fe80::1610:9fff:fedd:b654', '::1'])
-        host_names = set(new_inv.hosts.values_list('name', flat=True))
-        self.assertEqual(expected_host_names, host_names)
-        if source and os.path.isdir(source):
-            self.assertEqual(new_inv.variables_dict, {
-                'vara': 'A',
-                'test_group_name': 'all',
-            })
-        else:
-            self.assertEqual(new_inv.variables_dict, {'vara': 'A'})
-        for host in new_inv.hosts.all():
-            if host.name == 'web1.example.com':
-                self.assertEqual(host.variables_dict,
-                                 {'ansible_ssh_host': 'w1.example.net'})
-            elif host.name in ('db1.example.com', 'db2.example.com') and source and os.path.isdir(source):
-                self.assertEqual(host.variables_dict, {'test_host_name': host.name})
-            elif host.name in ('web3.example.com', 'fe80::1610:9fff:fedd:b654'):
-                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
-            elif host.name == '10.12.14.16':
-                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 8022})
-            else:
-                self.assertEqual(host.variables_dict, {})
-        for group in new_inv.groups.all():
-            if group.name == 'servers':
-                self.assertEqual(group.variables_dict, {'varb': 'B'})
-                children = set(group.children.values_list('name', flat=True))
-                self.assertEqual(children, set(['dbservers', 'webservers']))
-                self.assertEqual(group.hosts.count(), 0)
-            elif group.name == 'dbservers':
-                if source and os.path.isdir(source):
-                    self.assertEqual(group.variables_dict, {'dbvar': 'ugh', 'test_group_name': 'dbservers'})
-                else:
-                    self.assertEqual(group.variables_dict, {'dbvar': 'ugh'})
-                self.assertEqual(group.children.count(), 0)
-                hosts = set(group.hosts.values_list('name', flat=True))
-                host_names = set(['db1.example.com','db2.example.com'])
-                self.assertEqual(hosts, host_names)
-            elif group.name == 'webservers':
-                self.assertEqual(group.variables_dict, {'webvar': 'blah'})
-                self.assertEqual(group.children.count(), 0)
-                hosts = set(group.hosts.values_list('name', flat=True))
-                host_names = set(['web1.example.com','web2.example.com',
-                                  'web3.example.com'])
-                self.assertEqual(hosts, host_names)
-        self.check_adhoc_inventory_source(new_inv)
 
     def test_dir_with_ini_file(self):
         self.create_test_dir(host_names=['db1.example.com', 'db2.example.com'],
