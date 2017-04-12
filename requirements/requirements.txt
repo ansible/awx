@@ -178,6 +178,7 @@ six==1.10.0               # via asgi-amqp, asgiref, autobahn, cliff, cryptograph
 slackclient==1.0.2
 stevedore==1.19.1         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient, python-magnumclient
 suds==0.4                 # via psphere
+tacacs_plus==0.1
 tempora==1.6.1            # via irc, jaraco.logging
 twilio==5.6.0
 twisted==16.6.0           # via daphne
