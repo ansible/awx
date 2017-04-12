@@ -85,6 +85,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         q = DynamicFilterField.filter_string_to_q(filter_string)
         assert unicode(q) == unicode(q_expected)
 
+
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
 #('facts__facts__arr[]="foo"', 1),
