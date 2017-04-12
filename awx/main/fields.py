@@ -401,19 +401,18 @@ class DynamicFilterField(models.TextField):
                     contains_count += 1
 
             '''
-            Explicit quotes are kept up till this point.
-            They will be kept if there is ONLY ONE [] in the key search.
-            This is because django filter + postgres expect strings to be
-            quoted "\"hello_world\"". If, instead, there are many [] in a
-            filter key then we can remove the " and ".
+            Explicit quotes are kept until this point.
+            Note: we could have totally "ripped" them off earlier when we decided
+            what type to convert the token to.
             '''
-            if contains_count != 1:
-                if type(v) is unicode and v.startswith('"') and v.endswith('"'):
-                    v = v[1:-1]
-                if contains_count == 0:
-                    assembled_v = v
+            if type(v) is unicode and v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
 
-            if contains_count > 1:
+            if contains_count == 0:
+                assembled_v = v
+            elif contains_count == 1:
+                assembled_v = [v]
+            elif contains_count > 1:
                 if type(last_v) is list:
                     last_v.append(v)
                 if type(last_v) is dict:
@@ -471,9 +470,13 @@ class DynamicFilterField(models.TextField):
 
 
     class BoolNot(object):
-        def __init__(self,t):
-            self.right = t[0][1]
-            self.result = ~self.right
+        def __init__(self, t):
+            self.right = t[0][1].result
+
+            self.result = self.execute_logic(self.right)
+
+        def execute_logic(self, right):
+            return ~right
 
 
     @classmethod
@@ -503,7 +506,7 @@ class DynamicFilterField(models.TextField):
         grammar.setParseAction(cls.BoolOperand)
 
         boolExpr = infixNotation(grammar, [
-            #("not", 1, opAssoc.RIGHT, cls.BoolNot),
+            ("not", 1, opAssoc.RIGHT, cls.BoolNot),
             ("and", 2, opAssoc.LEFT, cls.BoolAnd),
             ("or",  2, opAssoc.LEFT, cls.BoolOr),
         ])

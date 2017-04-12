@@ -48,19 +48,20 @@ class TestDynamicFilterFieldFilterStringToQ():
         ('(a=b and c=d)', Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})),
         ('a=b or c=d', Q(**{u"a": u"b"}) | Q(**{u"c": u"d"})),
         ('(a=b and c=d) or (e=f)', (Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})) | (Q(**{u"e": u"f"}))),
-        ('(a=b) and (c=d or (e=f and (g=h or i=j))) or (y=z)', Q(**{u"a": u"b"}) & (Q(**{u"c": u"d"}) | (Q(**{u"e": u"f"}) & (Q(**{u"g": u"h"}) | Q(**{u"i": u"j"})))) | Q(**{u"y": u"z"}))
+        ('(a=b and not c=d) or not (e=f)', (Q(**{u"a": u"b"}) & ~Q(**{u"c": u"d"})) | (~Q(**{u"e": u"f"}))),
+        ('(a=b) and not (c=d or (e=f and (g=h or i=j))) or (y=z)', Q(**{u"a": u"b"}) & ~(Q(**{u"c": u"d"}) | (Q(**{u"e": u"f"}) & (Q(**{u"g": u"h"}) | Q(**{u"i": u"j"})))) | Q(**{u"y": u"z"}))
     ])
     def test_boolean_parenthesis(self, filter_string, q_expected):
         q = DynamicFilterField.filter_string_to_q(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('a__b__c[]=3', Q(**{u"a__b__c__contains": 3})),
-        ('a__b__c[]=3.14', Q(**{u"a__b__c__contains": 3.14})),
-        ('a__b__c[]=true', Q(**{u"a__b__c__contains": True})),
-        ('a__b__c[]=false', Q(**{u"a__b__c__contains": False})),
-        ('a__b__c[]="true"', Q(**{u"a__b__c__contains": u"\"true\""})),
-        ('a__b__c[]="hello world"', Q(**{u"a__b__c__contains": u"\"hello world\""})),
+        ('a__b__c[]=3', Q(**{u"a__b__c__contains": [3]})),
+        ('a__b__c[]=3.14', Q(**{u"a__b__c__contains": [3.14]})),
+        ('a__b__c[]=true', Q(**{u"a__b__c__contains": [True]})),
+        ('a__b__c[]=false', Q(**{u"a__b__c__contains": [False]})),
+        ('a__b__c[]="true"', Q(**{u"a__b__c__contains": [u"true"]})),
+        ('a__b__c[]="hello world"', Q(**{u"a__b__c__contains": [u"hello world"]})),
         ('a__b__c[]__d[]="foobar"', Q(**{u"a__b__c__contains": [{u"d": [u"foobar"]}]})),
         ('a__b__c[]__d="foobar"', Q(**{u"a__b__c__contains": [{u"d": u"foobar"}]})),
         ('a__b__c[]__d__e="foobar"', Q(**{u"a__b__c__contains": [{u"d": {u"e": u"foobar"}}]})),
@@ -83,8 +84,6 @@ class TestDynamicFilterFieldFilterStringToQ():
     def test_contains_query_generated_unicode(self, filter_string, q_expected):
         q = DynamicFilterField.filter_string_to_q(filter_string)
         assert unicode(q) == unicode(q_expected)
-
-
 
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
