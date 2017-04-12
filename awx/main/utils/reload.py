@@ -49,7 +49,15 @@ def _supervisor_service_command(service_internal_names, command):
     args.extend([command])
     args.extend(programs)
     logger.debug('Issuing command to restart services, args={}'.format(args))
-    subprocess.Popen(args)
+    supervisor_process = subprocess.Popen(args, stdin=subprocess.PIPE,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    restart_stdout, restart_err = supervisor_process.communicate()
+    restart_code = supervisor_process.returncode
+    if restart_code or restart_err:
+        logger.error('supervisorctl restart errored with exit code `{}`, stdout:\n{}stderr:\n{}'.format(
+            restart_code, restart_stdout.strip(), restart_err.strip()))
+    else:
+        logger.info('supervisorctl restart finished, stdout:\n{}'.format(restart_stdout.strip()))
 
 
 def restart_local_services(service_internal_names):
