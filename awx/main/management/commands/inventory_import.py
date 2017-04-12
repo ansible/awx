@@ -709,10 +709,7 @@ class Command(NoArgsCommand):
         '''
         self.db_instance_id_map = {}
         if self.instance_id_var:
-            if self.inventory_source.group:
-                host_qs = self.inventory_source.group.all_hosts
-            else:
-                host_qs = self.inventory.hosts.all()
+            host_qs = self.inventory_source.hosts.all()
             host_qs = host_qs.filter(instance_id='',
                                      variables__contains=self.instance_id_var.split('.')[0])
             for host in host_qs:
@@ -746,11 +743,7 @@ class Command(NoArgsCommand):
         '''
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        if self.inventory_source.group:
-            hosts_qs = self.inventory_source.group.all_hosts
-            # FIXME: Also include hosts from inventory_source.managed_hosts?
-        else:
-            hosts_qs = self.inventory.hosts
+        hosts_qs = self.inventory_source.hosts
         # Build list of all host pks, remove all that should not be deleted.
         del_host_pks = set(hosts_qs.values_list('pk', flat=True))
         if self.instance_id_var:
@@ -791,11 +784,7 @@ class Command(NoArgsCommand):
         '''
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        if self.inventory_source.group:
-            groups_qs = self.inventory_source.group.all_children.all()
-            # FIXME: Also include groups from inventory_source.managed_groups?
-        else:
-            groups_qs = self.inventory.groups.all()
+        groups_qs = self.inventory_source.groups.all()
         # Build list of all group pks, remove those that should not be deleted.
         del_group_pks = set(groups_qs.values_list('pk', flat=True))
         all_group_names = self.all_group.all_groups.keys()
@@ -829,10 +818,7 @@ class Command(NoArgsCommand):
             queries_before = len(connection.queries)
         group_group_count = 0
         group_host_count = 0
-        if self.inventory_source.group:
-            db_groups = self.inventory_source.group.all_children
-        else:
-            db_groups = self.inventory.groups
+        db_groups = self.inventory_source.groups
         for db_group in db_groups.all():
             # Delete child group relationships not present in imported data.
             db_children = db_group.children
@@ -887,13 +873,9 @@ class Command(NoArgsCommand):
         cloud source attached to a specific group, variables will be set on
         the base group, otherwise they will be set on the whole inventory.
         '''
-        if self.inventory_source.group:
-            all_obj = self.inventory_source.group
-            all_obj.inventory_sources.add(self.inventory_source)
-            all_name = 'group "%s"' % all_obj.name
-        else:
-            all_obj = self.inventory
-            all_name = 'inventory'
+        # FIXME: figure out how "all" variables are handled in the new inventory source system
+        all_obj = self.inventory
+        all_name = 'inventory'
         db_variables = all_obj.variables_dict
         if self.overwrite_vars:
             db_variables = self.all_group.variables
@@ -918,7 +900,6 @@ class Command(NoArgsCommand):
         '''
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        inv_src_group = self.inventory_source.group
         all_group_names = sorted(self.all_group.all_groups.keys())
         root_group_names = set()
         for k,v in self.all_group.all_groups.items():
@@ -946,22 +927,14 @@ class Command(NoArgsCommand):
                 else:
                     self.logger.info('Group "%s" variables unmodified', group.name)
                 existing_group_names.add(group.name)
-                if inv_src_group and inv_src_group != group and group.name in root_group_names:
-                    self._batch_add_m2m(inv_src_group.children, group)
                 self._batch_add_m2m(self.inventory_source.groups, group)
         for group_name in all_group_names:
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
             group = self.inventory.groups.create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
-            # Create related inventory source (name will be set by save() method on InventorySource).
-            InventorySource.objects.create(group=group, inventory=self.inventory)
             self.logger.info('Group "%s" added', group.name)
-            if inv_src_group and group_name in root_group_names:
-                self._batch_add_m2m(inv_src_group.children, group)
             self._batch_add_m2m(self.inventory_source.groups, group)
-        if inv_src_group:
-            self._batch_add_m2m(inv_src_group.children, flush=True)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
         if settings.SQL_DEBUG:
             self.logger.warning('group updates took %d queries for %d groups',
@@ -1017,8 +990,6 @@ class Command(NoArgsCommand):
                 self.logger.info('Host "%s" is now enabled', mem_host.name)
             else:
                 self.logger.info('Host "%s" is now disabled', mem_host.name)
-        if self.inventory_source.group:
-            self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
     def _create_update_hosts(self):
@@ -1095,12 +1066,8 @@ class Command(NoArgsCommand):
                 self.logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
                 self.logger.info('Host "%s" added', mem_host_name)
-            if self.inventory_source.group:
-                self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
             self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
-        if self.inventory_source.group:
-            self._batch_add_m2m(self.inventory_source.group.hosts, flush=True)
         self._batch_add_m2m(self.inventory_source.hosts, flush=True)
 
         if settings.SQL_DEBUG:
@@ -1315,17 +1282,12 @@ class Command(NoArgsCommand):
                         self.mark_license_failure(save=True)
                         raise e
 
-                    if self.inventory_source.group:
-                        inv_name = 'group "%s"' % (self.inventory_source.group.name)
-                    else:
-                        inv_name = '"%s" (id=%s)' % (self.inventory.name,
-                                                     self.inventory.id)
                     if settings.SQL_DEBUG:
                         self.logger.warning('Inventory import completed for %s in %0.1fs',
-                                            inv_name, time.time() - begin)
+                                            self.inventory_source.name, time.time() - begin)
                     else:
                         self.logger.info('Inventory import completed for %s in %0.1fs',
-                                         inv_name, time.time() - begin)
+                                         self.inventory_source.name, time.time() - begin)
                     status = 'successful'
 
             # If we're in debug mode, then log the queries and time
