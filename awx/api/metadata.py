@@ -186,6 +186,14 @@ class Metadata(metadata.SimpleMetadata):
                 break
         metadata['added_in_version'] = added_in_version
 
+        # Add API version number in which view was added to Tower.
+        added_in_api_version = 'v1'
+        for version in ('v2',):
+            if getattr(view, 'new_in_api_%s' % version, False):
+                added_in_api_version = version
+                break
+        metadata['added_in_api_version'] = added_in_api_version
+
         # Add type(s) handled by this view/serializer.
         if hasattr(view, 'get_serializer'):
             serializer = view.get_serializer()

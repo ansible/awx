@@ -340,7 +340,7 @@ activity_stream_urls = patterns('awx.api.views',
 )
 
 v1_urls = patterns('awx.api.views',
-    url(r'^$',                      'api_version_root_view'),
+    url(r'^$',                      'api_v1_root_view'),
     url(r'^ping/$',                 'api_v1_ping_view'),
     url(r'^config/$',               'api_v1_config_view'),
     url(r'^auth/$',                 'auth_view'),
@@ -384,7 +384,7 @@ v1_urls = patterns('awx.api.views',
 )
 
 v2_urls = patterns('awx.api.views',
-    url(r'^$',                      'api_version_root_view'),
+    url(r'^$',                      'api_v2_root_view'),
     url(r'^credential_types/',     include(credential_type_urls)),
 )
 

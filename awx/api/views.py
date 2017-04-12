@@ -134,8 +134,8 @@ class ApiRootView(APIView):
     def get(self, request, format=None):
         ''' list supported API versions '''
 
-        v1 = reverse('api:api_version_root_view', kwargs={'version': 'v1'})
-        v2 = reverse('api:api_version_root_view', kwargs={'version': 'v2'})
+        v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
+        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
         data = dict(
             description = _('Ansible Tower REST API'),
             current_version = v2,
@@ -150,7 +150,6 @@ class ApiRootView(APIView):
 class ApiVersionRootView(APIView):
 
     authentication_classes = []
-    view_name = _('Version')
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
@@ -195,6 +194,16 @@ class ApiVersionRootView(APIView):
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)
+
+
+class ApiV1RootView(ApiVersionRootView):
+    view_name = _('Version 1')
+
+
+class ApiV2RootView(ApiVersionRootView):
+    view_name = _('Version 2')
+    new_in_320 = True
+    new_in_api_v2 = True
 
 
 class ApiV1PingView(APIView):
@@ -1482,6 +1491,7 @@ class CredentialTypeList(ListCreateAPIView):
     model = CredentialType
     serializer_class = CredentialTypeSerializer
     new_in_320 = True
+    new_in_api_v2 = True
 
 
 class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
@@ -1489,6 +1499,7 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     model = CredentialType
     serializer_class = CredentialTypeSerializer
     new_in_320 = True
+    new_in_api_v2 = True
 
 
 class CredentialList(ListCreateAPIView):
