@@ -23,6 +23,7 @@ import uuid
 from distutils.version import LooseVersion as Version
 from datetime import timedelta
 import yaml
+import fcntl
 try:
     import psutil
 except:
@@ -1328,7 +1329,46 @@ class RunProjectUpdate(BaseTask):
             instance_actual.save()
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
+    def release_lock(self, instance):
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        except IOError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
+            os.close(self.lock_fd)
+            raise
+
+        os.close(self.lock_fd)
+        self.lock_fd = None
+
+    '''
+    Note: We don't support blocking=False
+    '''
+    def acquire_lock(self, instance, blocking=True):
+        lock_path = instance.get_lock_file()
+        if lock_path is None:
+            raise RuntimeError(u'Invalid lock file path')
+
+        try:
+            self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+        except OSError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
+
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+        except IOError as e:
+            os.close(self.lock_fd)
+            logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
+    
+    def pre_run_hook(self, instance, **kwargs):
+        if instance.launch_type == 'sync':
+            self.acquire_lock(instance)
+
     def post_run_hook(self, instance, status, **kwargs):
+        if instance.launch_type == 'sync':
+            self.release_lock(instance)
+
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
             fd = open(self.revision_path, 'r')

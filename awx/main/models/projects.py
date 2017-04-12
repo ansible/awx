@@ -208,6 +208,12 @@ class ProjectOptions(models.Model):
                     results.append(smart_text(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
+    def get_lock_file(self):
+        proj_path = self.get_project_path()
+        if not proj_path:
+            return None
+        return proj_path + '.lock'
+
 
 class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     '''
