@@ -453,10 +453,14 @@ class DynamicFilterField(models.TextField):
 
     class BoolBinOp(object):
         def __init__(self, t):
-            self.left = t[0][0].result
-            self.right = t[0][2].result
-
-            self.result = self.execute_logic(self.left, self.right)
+            self.result = None
+            i = 2
+            while i < len(t[0]):
+                if not self.result:
+                    self.result = t[0][0].result
+                right = t[0][i].result
+                self.result = self.execute_logic(self.result, right)
+                i += 2
 
 
     class BoolAnd(BoolBinOp):
@@ -508,7 +512,7 @@ class DynamicFilterField(models.TextField):
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
-        except:
+        except Exception:
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:
