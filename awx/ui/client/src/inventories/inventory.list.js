@@ -47,7 +47,7 @@ export default ['i18n', function(i18n) {
                 modalColumnClass: 'col-md-11',
                 awToolTip: "{{ inventory.description }}",
                 awTipPlacement: "top"
-                linkTo: '/#/inventories/{{inventory.id}}'
+                linkTo: '/#/inventories/basic_inventory/{{inventory.id}}'
             },
             organization: {
                 label: i18n._('Organization'),

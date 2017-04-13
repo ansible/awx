@@ -59,7 +59,7 @@ angular.module('inventory', [
 
                 let smartInventoryAdd = stateDefinitions.generateTree({
                     name: 'inventories.addSmartInventory', // top-most node in the generated tree (will replace this state definition)
-                    url: '/smart_inventory/add',
+                    url: '/smart_inventory/add?hostfilter',
                     modes: ['add'],
                     form: 'SmartInventoryForm',
                     controllers: {
