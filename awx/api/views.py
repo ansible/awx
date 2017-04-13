@@ -1710,6 +1710,13 @@ class HostList(ListCreateAPIView):
             qs = qs.filter(filter_q)
         return qs
 
+    def list(self, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+        except Exception as e:
+            return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
+        return Response(dict(results=self.serializer_class(queryset, many=True).data))
+
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
 
