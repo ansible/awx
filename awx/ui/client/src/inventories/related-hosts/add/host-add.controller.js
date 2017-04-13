@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange',
+export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition', 'ParseTypeChange',
                 'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath', 'ToJSON',
-                function($state, $stateParams, $scope, HostForm, ParseTypeChange,
+                function($state, $stateParams, $scope, RelatedHostsFormDefinition, ParseTypeChange,
                          GenerateForm, HostManageService, rbacUiControlService, GetBasePath, ToJSON) {
 
         init();
@@ -21,7 +21,7 @@ export default ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange
             $scope.parseType = 'yaml';
             $scope.host = { enabled: true };
             // apply form definition's default field values
-            GenerateForm.applyDefaults(HostForm, $scope);
+            GenerateForm.applyDefaults(RelatedHostsFormDefinition, $scope);
 
             ParseTypeChange({
                 scope: $scope,

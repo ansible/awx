@@ -9,10 +9,6 @@
  import relatedHostList from './list/main';
  import relatedHostsListDefinition from './related-host.list';
  import relatedHostsFormDefinition from './related-host.form';
- // import HostManageService from './hosts.service';
- // import SetStatus from './set-status.factory';
- // import SetEnabledMsg from './set-enabled-msg.factory';
- // import SmartInventory from './smart-inventory/main';
 
 export default
 angular.module('relatedHost', [
@@ -20,8 +16,5 @@ angular.module('relatedHost', [
         relatedHostEdit.name,
         relatedHostList.name
     ])
-    .value('RelatedHostsFormDefinition', relatedHostsFormDefinition)
+    .factory('RelatedHostsFormDefinition', relatedHostsFormDefinition)
     .value('RelatedHostsListDefinition', relatedHostsListDefinition);
-    // .factory('SetStatus', SetStatus)
-    // .factory('SetEnabledMsg', SetEnabledMsg)
-    // .service('HostManageService', HostManageService);

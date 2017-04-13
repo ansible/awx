@@ -34,10 +34,10 @@
 
  		};
  		var init = function(){
- 			$scope.host = host.data;
- 			$scope.name = host.data.name;
- 			$scope.description = host.data.description;
-			$scope.variables = getVars(host.data.variables);
+ 			$scope.host = host;
+ 			$scope.name = host.name;
+ 			$scope.description = host.description;
+			$scope.variables = getVars(host.variables);
         	ParseTypeChange({
         		scope: $scope,
         		field_id: 'host_variables',

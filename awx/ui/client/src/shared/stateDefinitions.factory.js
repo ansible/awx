@@ -553,18 +553,20 @@ function($injector, $stateExtender, $log, i18n) {
 
             function buildListNodes(field) {
                 let states = [];
-                if(field.iterator === 'group'){
-                    states.push(field.listState(field, formStateDefinition));
-                    states.push(field.addState(field, formStateDefinition, params));
-                    states.push(field.editState(field, formStateDefinition, params));
-                    states = _.flatten(states);
+                if(field && (field.listState || field.addState || field.editState)){
+                    if(field && field.listState){
+                        states.push(field.listState(field, formStateDefinition));
+                        states = _.flatten(states);
+                    }
+                    if(field && field.addState){
+                        states.push(field.addState(field, formStateDefinition, params));
+                        states = _.flatten(states);
+                    }
+                    if(field && field.editState){
+                        states.push(field.editState(field, formStateDefinition, params));
+                        states = _.flatten(states);
+                    }
                 }
-                else if(field.iterator === 'host'){
-                    states.push(field.listState(field, formStateDefinition));
-                }
-                // if(field && field.listState){
-                //     states.push(field.listState(field, formStateDefinition));
-                // }
                 else if(field.iterator === 'notification'){
                     states.push(buildNotificationState(field));
                     states = _.flatten(states);

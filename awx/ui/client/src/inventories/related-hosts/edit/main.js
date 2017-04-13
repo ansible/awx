@@ -3,9 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
-
+import buildHostEditState from './build-host-edit-state.factory';
 import controller from './host-edit.controller';
 
 export default
 angular.module('relatedHostEdit', [])
-    .controller('HostEditController', controller);
+    .factory('buildHostEditState', buildHostEditState)
+    .controller('RelatedHostEditController', controller);

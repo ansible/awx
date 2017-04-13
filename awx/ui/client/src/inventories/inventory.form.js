@@ -11,9 +11,10 @@
  */
 
 export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
-    'buildGroupsEditState', 'buildHostListState',
+    'buildGroupsEditState', 'buildHostListState', 'buildHostAddState',
+    'buildHostEditState',
 function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
-    buildHostListState) {
+    buildHostListState, buildHostAddState, buildHostEditState) {
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -149,8 +150,8 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 title: i18n._('Hosts'),
                 iterator: 'host',
                 listState: buildHostListState,
-                // addState: buildGroupsAddState,
-                // editState: buildGroupsEditState
+                addState: buildHostAddState,
+                editState: buildHostEditState
             },
             inventory_sources: {
                 name: 'inventory_sources',
