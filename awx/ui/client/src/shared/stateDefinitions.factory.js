@@ -559,6 +559,12 @@ function($injector, $stateExtender, $log, i18n) {
                     states.push(field.editState(field, formStateDefinition, params));
                     states = _.flatten(states);
                 }
+                else if(field.iterator === 'host'){
+                    states.push(field.listState(field, formStateDefinition));
+                }
+                // if(field && field.listState){
+                //     states.push(field.listState(field, formStateDefinition));
+                // }
                 else if(field.iterator === 'notification'){
                     states.push(buildNotificationState(field));
                     states = _.flatten(states);

@@ -6,6 +6,7 @@
 
 import host from './hosts/main';
 import group from './groups/main';
+import relatedHost from './related-hosts/main';
 import inventoryAdd from './add/main';
 import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
@@ -18,6 +19,7 @@ export default
 angular.module('inventory', [
         host.name,
         group.name,
+        relatedHost.name,
         inventoryAdd.name,
         inventoryEdit.name,
         inventoryList.name
@@ -116,10 +118,7 @@ angular.module('inventory', [
                         controllers: {
                             list: 'InventoryListController',
                             add: 'InventoryAddController',
-                            edit: 'InventoryEditController',
-                            related: {
-                                groups: 'GroupsListController'
-                            }
+                            edit: 'InventoryEditController'
                         },
                         urls: {
                             list: '/inventories'

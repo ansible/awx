@@ -10,8 +10,10 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState', 'buildGroupsEditState',
-function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState) {
+export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
+    'buildGroupsEditState', 'buildHostListState',
+function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
+    buildHostListState) {
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -143,35 +145,12 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState) 
             },
             hosts: {
                 name: 'hosts',
-                // awToolTip: i18n._('Please save before assigning permissions'),
-                // dataPlacement: 'top',
-                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/hosts/',
-                type: 'collection',
+                include: "RelatedHostsListDefinition",
                 title: i18n._('Hosts'),
                 iterator: 'host',
-                index: false,
-                open: false,
-                // search: {
-                //     order_by: 'username'
-                // },
-                actions: {
-                    add: {
-                        label: i18n._('Add'),
-                        ngClick: "$state.go('.add')",
-                        awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
-                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
-
-                    }
-                },
-                fields: {
-                    name: {
-                        label: i18n._('Name'),
-                        // linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                    }
-                }
+                listState: buildHostListState,
+                // addState: buildGroupsAddState,
+                // editState: buildGroupsEditState
             },
             inventory_sources: {
                 name: 'inventory_sources',
