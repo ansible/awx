@@ -1238,13 +1238,41 @@ class HostSerializer(BaseSerializerWithVariables):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
-    show_capabilities = ['copy', 'edit', 'delete']
+    inventory_source = serializers.SerializerMethodField(
+        help_text=_('Dedicated inventory source for the group, will be removed in 3.3.'))
 
     class Meta:
         model = Group
         fields = ('*', 'inventory', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
-                  'groups_with_active_failures', 'has_inventory_sources')
+                  'groups_with_active_failures', 'has_inventory_sources', 'inventory_source')
+
+    def get_fields(self):  # TODO: remove in 3.3
+        fields = super(GroupSerializer, self).get_fields()
+        if not self.V1:
+            fields.pop('inventory_source')
+        return fields
+
+    @property
+    def V1(self):
+        request = self.context.get('request')
+        # TODO: use the better version-getter after merged with other branches
+        if request and request.version == 'v1':
+            return True
+        return False
+
+    @property
+    def show_capabilities(self):  # TODO: consolidate in 3.3
+        if self.V1:
+            return ['copy', 'edit', 'start', 'schedule', 'delete']
+        else:
+            return ['copy', 'edit', 'delete']
+
+    def get_inventory_source(self, obj):  # TODO: remove in 3.3
+        try:
+            return obj.deprecated_inventory_source.id
+        except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+            return None
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(GroupSerializer, self).build_relational_field(field_name, relation_info)
@@ -1268,9 +1296,21 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = self.reverse('api:group_inventory_sources_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:group_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
         ))
+        if self.V1:  # TODO: remove in 3.3
+            try:
+                res['inventory_source'] = self.reverse('api:inventory_source_detail',
+                                                       kwargs={'pk': obj.deprecated_inventory_source.pk})
+            except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+                res['inventory_source'] = None
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         return res
+
+    def create(self, validated_data):  # TODO: remove in 3.3
+        instance = super(GroupSerializer, self).create(validated_data)
+        if self.V1:
+            InventorySource.objects.create(deprecated_group=instance, inventory=instance.inventory)
+        return instance
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
@@ -1428,11 +1468,13 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete']
+    group = serializers.SerializerMethodField(
+        help_text=_('Automatic group relationship, will be removed in 3.3'))
 
     class Meta:
         model = InventorySource
         fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout') + \
-                 ('last_update_failed', 'last_updated') # Backwards compatibility.
+                 ('last_update_failed', 'last_updated', 'group') # Backwards compatibility.
 
     def get_related(self, obj):
         res = super(InventorySourceSerializer, self).get_related(obj)
@@ -1456,7 +1498,29 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if obj.last_update:
             res['last_update'] = self.reverse('api:inventory_update_detail',
                                               kwargs={'pk': obj.last_update.pk})
+        if self.V1:  # TODO: remove in 3.3
+            res['group'] = None
+            if obj.deprecated_group:
+                res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.deprecated_group.pk})
         return res
+
+    def get_fields(self):  # TODO: remove in 3.3
+        fields = super(InventorySourceSerializer, self).get_fields()
+        if not self.V1:
+            fields.pop('group')
+        return fields
+
+    def get_group(self, obj):  # TODO: remove in 3.3
+        if obj.deprecated_group:
+            return obj.deprecated_group.id
+        return None
+
+    @property
+    def V1(self):  # TODO: use the better version-getter after merged with other branches
+        request = self.context.get('request')
+        if request and request.version == 'v1':
+            return True
+        return False
 
     def to_representation(self, obj):
         ret = super(InventorySourceSerializer, self).to_representation(obj)

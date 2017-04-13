@@ -10,6 +10,7 @@ def remove_manual_inventory_sources(apps, schema_editor):
     Group creation and we would use the parent Group as our interface for the user.
     During that process we would create InventorySource that had a source of "manual".
     '''
+    # TODO: use this in the 3.3 data migrations
     InventorySource = apps.get_model('main', 'InventorySource')
     # see models/inventory.py SOURCE_CHOICES - ('', _('Manual'))
     logger.debug("Removing all Manual InventorySource from database.")

@@ -372,6 +372,10 @@ model_serializer_mapping = {
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
+        # TODO: remove deprecated_group conditional in 3.3
+        # Skip recording any inventory source directly associated with a group.
+        if isinstance(instance, InventorySource) and instance.deprecated_group:
+            return
         object1 = camelcase_to_underscore(instance.__class__.__name__)
         changes = model_to_dict(instance, model_serializer_mapping)
         # Special case where Job survey password variables need to be hidden
@@ -416,6 +420,10 @@ def activity_stream_update(sender, instance, **kwargs):
 
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
+        return
+    # TODO: remove deprecated_group conditional in 3.3
+    # Skip recording any inventory source directly associated with a group.
+    if isinstance(instance, InventorySource) and instance.deprecated_group:
         return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
