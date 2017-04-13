@@ -34,129 +34,219 @@ angular.module('inventory', [
             let stateDefinitions = stateDefinitionsProvider.$get(),
             stateExtender = $stateExtenderProvider.$get();
 
-                function generateInventoryStates() {
 
-                    let smartInventoryAdd = {
-                        name: 'inventories.addSmartInventory',
-                        url: '/smartinventory',
-                        form: 'SmartInventoryForm',
-                        ncyBreadcrumb: {
-                            label: "CREATE SMART INVENTORY"
-                        },
-                        views: {
-                            'form@inventories': {
-                                templateProvider: function(SmartInventoryForm, GenerateForm) {
-                                    return GenerateForm.buildHTML(SmartInventoryForm, {
-                                        mode: 'add',
-                                        related: false
-                                    });
+            function generateInventoryStates() {
+
+                let basicInventoryAdd = stateDefinitions.generateTree({
+                    name: 'inventories.add', // top-most node in the generated tree (will replace this state definition)
+                    url: '/basic_inventory/add',
+                    modes: ['add'],
+                    form: 'InventoryForm',
+                    controllers: {
+                        add: 'InventoryAddController'
+                    }
+                });
+
+                let basicInventoryEdit = stateDefinitions.generateTree({
+                    name: 'inventories.edit',
+                    url: '/basic_inventory/:inventory_id',
+                    modes: ['edit'],
+                    form: 'InventoryForm',
+                    controllers: {
+                        edit: 'InventoryEditController'
+                    }
+                });
+
+                let smartInventoryAdd = stateDefinitions.generateTree({
+                    name: 'inventories.addSmartInventory', // top-most node in the generated tree (will replace this state definition)
+                    url: '/smart_inventory/add',
+                    modes: ['add'],
+                    form: 'SmartInventoryForm',
+                    controllers: {
+                        add: 'SmartInventoryAddController'
+                    }
+                });
+
+                let smartInventoryEdit = stateDefinitions.generateTree({
+                    name: 'inventories.editSmartInventory',
+                    url: '/smart_inventory/:inventory_id',
+                    modes: ['edit'],
+                    form: 'SmartInventoryForm',
+                    controllers: {
+                        edit: 'SmartInventoryEditController'
+                    }
+                });
+
+                return Promise.all([
+                    basicInventoryAdd,
+                    basicInventoryEdit,
+                    smartInventoryAdd,
+                    smartInventoryEdit
+                ]).then((generated) => {
+                    return {
+                        states: _.reduce(generated, (result, definition) => {
+                            return result.concat(definition.states);
+                        }, [
+                            stateExtender.buildDefinition({
+                                name: 'inventories', // top-most node in the generated tree (will replace this state definition)
+                                route: '/inventories',
+                                ncyBreadcrumb: {
+                                    label: N_('INVENTORIES')
                                 },
-                                controller: 'SmartInventoryAddController'
-                            }
-                        }
-                    };
-
-                    let smartInventoryAddOrgLookup = {
-                        searchPrefix: 'organization',
-                        name: 'inventories.addSmartInventory.organization',
-                        url: '/organization',
-                        data: {
-                            formChildState: true
-                        },
-                        params: {
-                            organization_search: {
-                                value: {
-                                    page_size: '5'
+                                views: {
+                                    '@': {
+                                        templateUrl: templateUrl('inventories/inventories')
+                                    },
+                                    'list@inventories': {
+                                        templateProvider: function(InventoryList, generateList) {
+                                            let html = generateList.build({
+                                                list: InventoryList,
+                                                mode: 'edit'
+                                            });
+                                            return html;
+                                        },
+                                        controller: 'InventoryListController'
+                                    }
                                 },
-                                squash: true,
-                                dynamic: true
-                            }
-                        },
-                        ncyBreadcrumb: {
-                            skip: true
-                        },
-                        views: {
-                            'related': {
-                                templateProvider: function(ListDefinition, generateList) {
-                                    let list_html = generateList.build({
-                                        mode: 'lookup',
-                                        list: ListDefinition,
-                                        input_type: 'radio'
-                                    });
-                                    return `<lookup-modal>${list_html}</lookup-modal>`;
-
+                                searchPrefix: 'inventory',
+                                resolve: {
+                                    Dataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
+                                        function(list, qs, $stateParams, GetBasePath) {
+                                            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                                        }
+                                    ]
                                 }
-                            }
-                        },
-                        resolve: {
-                            ListDefinition: ['OrganizationList', function(OrganizationList) {
-                                let list = _.cloneDeep(OrganizationList);
-                                list.lookupConfirmText = 'SELECT';
-                                return list;
-                            }],
-                            Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
-                                (list, qs, $stateParams, GetBasePath) => {
-                                    let path = GetBasePath(list.name) || GetBasePath(list.basePath);
-                                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                                }
-                            ]
-                        },
-                        onExit: function($state) {
-                            if ($state.transition) {
-                                $('#form-modal').modal('hide');
-                                $('.modal-backdrop').remove();
-                                $('body').removeClass('modal-open');
-                            }
-                        },
+                            })
+                        ])
                     };
+                });
 
-                    let inventories = stateDefinitions.generateTree({
-                        parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
-                        modes: ['add', 'edit'],
-                        list: 'InventoryList',
-                        form: 'InventoryForm',
-                        controllers: {
-                            list: 'InventoryListController',
-                            add: 'InventoryAddController',
-                            edit: 'InventoryEditController'
-                        },
-                        urls: {
-                            list: '/inventories'
-                        },
-                        ncyBreadcrumb: {
-                            label: N_('INVENTORIES')
-                        },
-                        views: {
-                            '@': {
-                                templateUrl: templateUrl('inventories/inventories')
-                            },
-                            'list@inventories': {
-                                templateProvider: function(InventoryList, generateList) {
-                                    let html = generateList.build({
-                                        list: InventoryList,
-                                        mode: 'edit'
-                                    });
-                                    return html;
-                                },
-                                controller: 'InventoryListController'
-                            }
-                        }
-                    });
+            }
 
-                    return Promise.all([
-                        inventories
-                    ]).then((generated) => {
-                        return {
-                            states: _.reduce(generated, (result, definition) => {
-                                return result.concat(definition.states);
-                            }, [
-                                stateExtender.buildDefinition(smartInventoryAdd),
-                                stateExtender.buildDefinition(smartInventoryAddOrgLookup)
-                            ])
-                        };
-                    });
-
-                }
+                // function generateInventoryStates() {
+                //
+                //     let smartInventoryAdd = {
+                //         name: 'inventories.addSmartInventory',
+                //         url: '/smartinventory',
+                //         form: 'SmartInventoryForm',
+                //         ncyBreadcrumb: {
+                //             label: "CREATE SMART INVENTORY"
+                //         },
+                //         views: {
+                //             'form@inventories': {
+                //                 templateProvider: function(SmartInventoryForm, GenerateForm) {
+                //                     return GenerateForm.buildHTML(SmartInventoryForm, {
+                //                         mode: 'add',
+                //                         related: false
+                //                     });
+                //                 },
+                //                 controller: 'SmartInventoryAddController'
+                //             }
+                //         }
+                //     };
+                //
+                //     let smartInventoryAddOrgLookup = {
+                //         searchPrefix: 'organization',
+                //         name: 'inventories.addSmartInventory.organization',
+                //         url: '/organization',
+                //         data: {
+                //             formChildState: true
+                //         },
+                //         params: {
+                //             organization_search: {
+                //                 value: {
+                //                     page_size: '5'
+                //                 },
+                //                 squash: true,
+                //                 dynamic: true
+                //             }
+                //         },
+                //         ncyBreadcrumb: {
+                //             skip: true
+                //         },
+                //         views: {
+                //             'related': {
+                //                 templateProvider: function(ListDefinition, generateList) {
+                //                     let list_html = generateList.build({
+                //                         mode: 'lookup',
+                //                         list: ListDefinition,
+                //                         input_type: 'radio'
+                //                     });
+                //                     return `<lookup-modal>${list_html}</lookup-modal>`;
+                //
+                //                 }
+                //             }
+                //         },
+                //         resolve: {
+                //             ListDefinition: ['OrganizationList', function(OrganizationList) {
+                //                 let list = _.cloneDeep(OrganizationList);
+                //                 list.lookupConfirmText = 'SELECT';
+                //                 return list;
+                //             }],
+                //             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                //                 (list, qs, $stateParams, GetBasePath) => {
+                //                     let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                //                     return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                //                 }
+                //             ]
+                //         },
+                //         onExit: function($state) {
+                //             if ($state.transition) {
+                //                 $('#form-modal').modal('hide');
+                //                 $('.modal-backdrop').remove();
+                //                 $('body').removeClass('modal-open');
+                //             }
+                //         },
+                //     };
+                //
+                //     let inventories = stateDefinitions.generateTree({
+                //         parent: 'inventories', // top-most node in the generated tree (will replace this state definition)
+                //         modes: ['add', 'edit'],
+                //         list: 'InventoryList',
+                //         form: 'InventoryForm',
+                //         controllers: {
+                //             list: 'InventoryListController',
+                //             add: 'InventoryAddController',
+                //             edit: 'InventoryEditController'
+                //         },
+                //         urls: {
+                //             list: '/inventories'
+                //         },
+                //         ncyBreadcrumb: {
+                //             label: N_('INVENTORIES')
+                //         },
+                //         views: {
+                //             '@': {
+                //                 templateUrl: templateUrl('inventories/inventories')
+                //             },
+                //             'list@inventories': {
+                //                 templateProvider: function(InventoryList, generateList) {
+                //                     let html = generateList.build({
+                //                         list: InventoryList,
+                //                         mode: 'edit'
+                //                     });
+                //                     return html;
+                //                 },
+                //                 controller: 'InventoryListController'
+                //             }
+                //         }
+                //     });
+                //
+                //     return Promise.all([
+                //         inventories
+                //     ]).then((generated) => {
+                //         return {
+                //             states: _.reduce(generated, (result, definition) => {
+                //                 return result.concat(definition.states);
+                //             }, [
+                //                 stateExtender.buildDefinition(smartInventoryAdd),
+                //                 stateExtender.buildDefinition(smartInventoryAddOrgLookup)
+                //             ])
+                //         };
+                //     });
+                //
+                // }
 
                 $stateProvider.state({
                     name: 'hosts',
