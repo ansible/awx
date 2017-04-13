@@ -22,6 +22,9 @@ from django_auth_ldap.backend import populate_user
 # radiusauth
 from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
 
+# tacacs+ auth
+import tacacs_plus
+
 # social
 from social.backends.saml import OID_USERID
 from social.backends.saml import SAMLAuth as BaseSAMLAuth
@@ -149,6 +152,60 @@ class RADIUSBackend(BaseRADIUSBackend):
             user.save()
 
         return user
+
+
+class TACACSPlusBackend(object):
+    '''
+    Custom TACACS+ auth backend for AWX
+    '''
+    def _get_or_set_user(self, username, password):
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={'is_superuser': False},
+        )
+        if created:
+            logger.debug("Created TACACS+ user %s" % (username,))
+        if password is not None:
+            user.set_unusable_password()
+            user.save()
+        return user
+
+    def authenticate(self, username, password):
+        if not django_settings.TACACSPLUS_HOST:
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("Unable to authenticate, license does not support TACACS+ authentication")
+            return None
+        try:
+            # Upstream TACACS+ client does not accept non-string, so convert if needed.
+            auth = tacacs_plus.TACACSClient(
+                django_settings.TACACSPLUS_HOST.encode('utf-8'),
+                django_settings.TACACSPLUS_PORT,
+                django_settings.TACACSPLUS_SECRET.encode('utf-8'),
+                timeout=django_settings.TACACSPLUS_SESSION_TIMEOUT,
+            ).authenticate(
+                username.encode('utf-8'), password.encode('utf-8'),
+                tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL],
+            )
+        except Exception as e:
+            logger.exception("TACACS+ Authentication Error: %s" % (e.message,))
+            return None
+        if auth.valid:
+            return self._get_or_set_user(username, password)
+        else:
+            return None
+        return None
+
+    def get_user(self, user_id):
+        if not django_settings.TACACSPLUS_HOST:
+            return None
+        if not feature_enabled('enterprise_auth'):
+            logger.error("Unable to get user, license does not support TACACS+ authentication")
+            return None
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
 
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):

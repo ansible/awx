@@ -286,6 +286,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.LDAPBackend',
     'awx.sso.backends.RADIUSBackend',
+    'awx.sso.backends.TACACSPlusBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
@@ -312,6 +313,14 @@ AUTH_LDAP_CONNECTION_OPTIONS = {
 RADIUS_SERVER = ''
 RADIUS_PORT = 1812
 RADIUS_SECRET = ''
+
+# TACACS+ settings (default host to empty string to skip using TACACS+ auth).
+# Note: These settings may be overridden by database settings.
+TACACSPLUS_HOST = ''
+TACACSPLUS_PORT = 49
+TACACSPLUS_SECRET = ''
+TACACSPLUS_SESSION_TIMEOUT = 5
+TACACSPLUS_AUTH_PROTOCOL = 'ascii'
 
 # Seconds before auth tokens expire.
 # Note: This setting may be overridden by database settings.
