@@ -40,6 +40,7 @@
                     <div class="Form-tab"
                         ng-click="selectTab('workflow_templates')"
                         ng-class="{'is-selected': tab.workflow_templates}"
+                        ng-hide="resolve.workflowTemplatesDataset.status === 402" 
                     translate>
                         Workflow Templates
                     </div>
@@ -65,7 +66,7 @@
                 <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.job_templates">
                     <rbac-multiselect-list view="JobTemplates" all-selected="allSelected" dataset="resolve.jobTemplatesDataset"></rbac-multiselect-list>
                 </div>
-                <div id="AddPermissions-workflowTemplates" class="AddPermissions-list" ng-show="tab.workflow_templates">
+                <div ng-if="resolve.workflowTemplatesDataset.status !== 402" id="AddPermissions-workflowTemplates" class="AddPermissions-list" ng-show="tab.workflow_templates">
                     <rbac-multiselect-list view="WorkflowTemplates" all-selected="allSelected" dataset="resolve.workflowTemplatesDataset"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-projects" class="AddPermissions-list" ng-show="tab.projects">
