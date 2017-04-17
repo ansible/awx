@@ -135,13 +135,15 @@ def create_survey_spec(variables=None, default_type='integer', required=True):
     argument specifying variable name(s)
     '''
     if isinstance(variables, list):
-        name = "%s survey" % variables[0]
-        description = "A survey that starts with %s." % variables[0]
         vars_list = variables
     else:
-        name = "%s survey" % variables
-        description = "A survey about %s." % variables
         vars_list = [variables]
+    if isinstance(variables[0], basestring):
+        slogan = variables[0]
+    else:
+        slogan = variables[0].get('question_name', 'something')
+    name = "%s survey" % slogan
+    description = "A survey that asks about %s." % slogan
 
     spec = []
     index = 0
