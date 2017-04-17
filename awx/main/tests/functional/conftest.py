@@ -133,7 +133,9 @@ def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
                                  description="test-proj-desc",
                                  organization=organization,
-                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml']
+                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
+                                 local_path='_92__test_proj',
+                                 scm_revision='1234567890123456789012345678901234567890'
                                  )
     return prj
 
@@ -206,6 +208,15 @@ def org_credential(organization):
 @pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
+
+
+@pytest.fixture
+def scm_inventory_source(inventory, project):
+    return InventorySource.objects.create(
+        name="test-scm-inv",
+        scm_project=project,
+        source_path='inventory_file',
+        inventory=inventory)
 
 
 @pytest.fixture

@@ -48,7 +48,7 @@ from django.core.exceptions import ObjectDoesNotExist
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
-from awx.main.models import UnifiedJob
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
@@ -1099,16 +1099,22 @@ class RunJob(BaseTask):
 
     def pre_run_hook(self, job, **kwargs):
         if job.project and job.project.scm_type:
-            local_project_sync = job.project.create_project_update(launch_type="sync")
-            local_project_sync.job_type = 'run'
-            local_project_sync.save()
-            # save the associated project update before calling run() so that a
+            job_request_id = '' if self.request.id is None else self.request.id
+            local_project_sync = job.project.create_project_update(
+                launch_type="sync",
+                _eager_params=dict(
+                    job_type='run',
+                    status='running',
+                    celery_task_id=job_request_id))
+            # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
             job = self.update_model(job.pk, project_update=local_project_sync)
 
             project_update_task = local_project_sync._get_task_class()
             try:
-                project_update_task().run(local_project_sync.id)
+                task_instance = project_update_task()
+                task_instance.request.id = job_request_id
+                task_instance.run(local_project_sync.id)
                 job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
                 job = self.update_model(job.pk, status='failed',
@@ -1317,9 +1323,43 @@ class RunProjectUpdate(BaseTask):
             instance_actual.save()
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
+    def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
+        for inv_src in dependent_inventory_sources:
+            if inv_src.scm_last_revision == project_update.project.scm_revision:
+                logger.debug('Skipping SCM inventory update for `{}` because '
+                             'project has not changed.'.format(inv_src.name))
+                continue
+            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
+            with transaction.atomic():
+                if InventoryUpdate.objects.filter(inventory_source=inv_src,
+                                                  status__in=ACTIVE_STATES).exists():
+                    logger.info('Skipping SCM inventory update for `{}` because '
+                                'another update is already active.'.format(inv.name))
+                    continue
+                project_request_id = '' if self.request.id is None else self.request.id
+                local_inv_update = inv_src.create_inventory_update(
+                    scm_project_update_id=project_update.id,
+                    launch_type='scm',
+                    _eager_fields=dict(
+                        status='running',
+                        celery_task_id=str(project_request_id)))
+            inv_update_task = local_inv_update._get_task_class()
+            try:
+                task_instance = inv_update_task()
+                # Runs in the same Celery task as project update
+                task_instance.request.id = project_request_id
+                task_instance.run(local_inv_update.id)
+                inv_src.scm_last_revision = project_update.project.scm_revision
+                inv_src.save(update_fields=['scm_last_revision'])
+            except Exception as e:
+                # A failed file update does not block other actions
+                logger.error('Encountered error updating project dependent inventory: {}'.format(e))
+                continue
+
     def post_run_hook(self, instance, status, **kwargs):
+        p = instance.project
+        dependent_inventory_sources = p.scm_inventory_sources.all()
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
-            p = instance.project
             fd = open(self.revision_path, 'r')
             lines = fd.readlines()
             if lines:
@@ -1327,11 +1367,17 @@ class RunProjectUpdate(BaseTask):
             else:
                 logger.info("Could not find scm revision in check")
             p.playbook_files = p.playbooks
+            if len(dependent_inventory_sources) > 0:
+                p.inventory_files = p.inventories
             p.save()
         try:
             os.remove(self.revision_path)
         except Exception, e:
             logger.error("Failed removing revision tmp file: {}".format(e))
+        # Update any inventories that depend on this project
+        if len(dependent_inventory_sources) > 0:
+            if status == 'successful' and instance.launch_type != 'sync':
+                self._update_dependent_inventories(p, dependent_inventory_sources)
 
 
 class RunInventoryUpdate(BaseTask):
@@ -1580,8 +1626,8 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'cloudforms':
             env['CLOUDFORMS_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'file':
-            # FIXME: Parse source_env to dict, update env.
-            pass
+            # Parse source_vars to dict, update env.
+            env.update(parse_yaml_or_json(inventory_update.source_vars))
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
@@ -1650,7 +1696,7 @@ class RunInventoryUpdate(BaseTask):
                 ])
 
         elif inventory_update.source == 'file':
-            args.append(inventory_update.source_path)
+            args.append(inventory_update.get_actual_source_path())
         elif inventory_update.source == 'custom':
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)

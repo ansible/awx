@@ -7,6 +7,7 @@ import logging
 import re
 import copy
 from urlparse import urljoin
+import os.path
 
 # Django
 from django.conf import settings
@@ -719,7 +720,7 @@ class InventorySourceOptions(BaseModel):
 
     SOURCE_CHOICES = [
         ('', _('Manual')),
-        ('file', _('Local File, Directory or Script')),
+        ('file', _('File, Directory or Script Locally or in Project')),
         ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
@@ -828,7 +829,6 @@ class InventorySourceOptions(BaseModel):
         max_length=1024,
         blank=True,
         default='',
-        editable=False,
     )
     source_script = models.ForeignKey(
         'CustomInventoryScript',
@@ -1086,6 +1086,21 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         on_delete=models.CASCADE,
     )
 
+    scm_project = models.ForeignKey(
+        'Project',
+        related_name='scm_inventory_sources',
+        help_text=_('Project containing inventory file used as source.'),
+        on_delete=models.CASCADE,
+        blank=True,
+        default=None,
+        null=True
+    )
+    scm_last_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
     update_on_launch = models.BooleanField(
         default=False,
     )
@@ -1101,12 +1116,14 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                'timeout', 'launch_type',]
+                'timeout', 'launch_type', 'scm_project_update',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+        is_new_instance = not bool(self.pk)
+        is_scm_type = self.scm_project_id is not None
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
@@ -1116,18 +1133,33 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 self.name = '%s (%s)' % (self.inventory.name, self.pk)
             elif self.inventory:
                 self.name = '%s (%s)' % (self.inventory.name, replace_text)
-            elif self.pk:
+            elif not is_new_instance:
                 self.name = 'inventory source (%s)' % self.pk
             else:
                 self.name = 'inventory source (%s)' % replace_text
             if 'name' not in update_fields:
                 update_fields.append('name')
+        # Reset revision if SCM source has changed parameters
+        if is_scm_type and not is_new_instance:
+            before_is = self.__class__.objects.get(pk=self.pk)
+            if before_is.source_path != self.source_path or before_is.scm_project_id != self.scm_project_id:
+                # Reset the scm_revision if file changed to force update
+                self.scm_revision = None
+                if 'scm_revision' not in update_fields:
+                    update_fields.append('scm_revision')
+
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
+
         # Add the PK to the name.
         if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             super(InventorySource, self).save(update_fields=['name'])
+        if is_scm_type and is_new_instance:
+            # Schedule a new Project update if one is not already queued
+            if not self.scm_project.project_updates.filter(
+                    status__in=['new', 'pending', 'waiting']).exists():
+                self.scm_project.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
@@ -1222,6 +1254,15 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         default=False,
         editable=False,
     )
+    scm_project_update = models.ForeignKey(
+        'ProjectUpdate',
+        related_name='scm_inventory_updates',
+        help_text=_('Inventory files from this Project Update were used for the inventory update.'),
+        on_delete=models.CASCADE,
+        blank=True,
+        default=None,
+        null=True
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -1255,6 +1296,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
+
+    def get_actual_source_path(self):
+        '''Alias to source_path that combines with project path for for SCM file based sources'''
+        if self.inventory_source_id is None or self.inventory_source.scm_project_id is None:
+            return self.source_path
+        return os.path.join(
+            self.inventory_source.scm_project.get_project_path(check_if_exists=False),
+            self.source_path)
 
     @property
     def task_impact(self):

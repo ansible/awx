@@ -1074,6 +1074,12 @@ class ProjectPlaybooks(RetrieveAPIView):
     serializer_class = ProjectPlaybooksSerializer
 
 
+class ProjectInventories(RetrieveAPIView):
+
+    model = Project
+    serializer_class = ProjectInventoriesSerializer
+
+
 class ProjectTeamsList(ListAPIView):
 
     model = Team
@@ -1099,6 +1105,17 @@ class ProjectSchedulesList(SubListCreateAPIView):
     relationship = 'schedules'
     parent_key = 'unified_job_template'
     new_in_148 = True
+
+
+class ProjectScmInventorySources(SubListCreateAPIView):
+
+    view_name = _("Project SCM Inventory Sources")
+    model = Inventory
+    serializer_class = InventorySourceSerializer
+    parent_model = Project
+    relationship = 'scm_inventory_sources'
+    parent_key = 'scm_project'
+    new_in_320 = True
 
 
 class ProjectActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -1224,6 +1241,17 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     parent_model = ProjectUpdate
     relationship = 'notifications'
     new_in_300 = True
+
+
+class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
+
+    view_name = _("Project Update SCM Inventory Updates")
+    model = InventoryUpdate
+    serializer_class = InventoryUpdateSerializer
+    parent_model = ProjectUpdate
+    relationship = 'scm_inventory_updates'
+    parent_key = 'scm_project_update'
+    new_in_320 = True
 
 
 class ProjectAccessList(ResourceAccessList):
@@ -2185,7 +2213,7 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
     new_in_14 = True
 
 
-class InventorySourceList(ListAPIView):
+class InventorySourceList(ListCreateAPIView):
 
     model = InventorySource
     serializer_class = InventorySourceSerializer
@@ -2292,6 +2320,10 @@ class InventorySourceUpdateView(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.source == 'file' and obj.scm_project_id is not None:
+            raise PermissionDenied(detail=_(
+                'Update the project `{}` in order to update this inventory source.'.format(
+                    obj.scm_project.name)))
         if obj.can_update:
             inventory_update = obj.update()
             if not inventory_update:

@@ -333,6 +333,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
         unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
+        eager_fields = kwargs.get('_eager_fields', None)
+        if eager_fields:
+            for fd, val in eager_fields.items():
+                setattr(unified_job, fd, val)
 
         # Set the unified job template back-link on the job
         parent_field_name = unified_job_class._get_parent_field_name()
@@ -418,6 +422,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
         ('workflow', _('Workflow')),        # Job was started from a workflow job.
         ('sync', _('Sync')),                # Job was started from a project sync.
+        ('scm', _('SCM Update'))            # Job was created as an Inventory SCM sync.
     ]
 
     PASSWORD_FIELDS = ('start_args',)

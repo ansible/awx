@@ -4,7 +4,6 @@
 # Python
 import datetime
 import os
-import re
 import urlparse
 
 # Django
@@ -26,6 +25,7 @@ from awx.main.models.notifications import (
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
+from awx.main.utils.ansible import could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -173,39 +173,35 @@ class ProjectOptions(models.Model):
 
     @property
     def playbooks(self):
-        valid_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
         results = []
         project_path = self.get_project_path()
         if project_path:
             for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
                 for filename in filenames:
-                    if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
-                        continue
-                    playbook = os.path.join(dirpath, filename)
-                    # Filter files that do not have either hosts or top-level
-                    # includes. Use regex to allow files with invalid YAML to
-                    # show up.
-                    matched = False
-                    try:
-                        for n, line in enumerate(file(playbook)):
-                            if valid_re.match(line):
-                                matched = True
-                            # Any YAML file can also be encrypted with vault;
-                            # allow these to be used as the main playbook.
-                            elif n == 0 and line.startswith('$ANSIBLE_VAULT;'):
-                                matched = True
-                    except IOError:
-                        continue
-                    if not matched:
-                        continue
-                    playbook = os.path.relpath(playbook, smart_str(project_path))
-                    # Filter files in a roles subdirectory.
-                    if 'roles' in playbook.split(os.sep):
-                        continue
-                    # Filter files in a tasks subdirectory.
-                    if 'tasks' in playbook.split(os.sep):
-                        continue
-                    results.append(smart_text(playbook))
+                    playbook = could_be_playbook(project_path, dirpath, filename)
+                    if playbook is not None:
+                        results.append(smart_text(playbook))
+        return sorted(results, key=lambda x: smart_str(x).lower())
+
+
+    @property
+    def inventories(self):
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            # Cap the number of results, because it could include lots
+            max_inventory_listing = 50
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
+                if dirpath.startswith('.'):
+                    continue
+                for filename in filenames:
+                    inv_path = could_be_inventory(project_path, dirpath, filename)
+                    if inv_path is not None:
+                        results.append(smart_text(inv_path))
+                        if len(results) > max_inventory_listing:
+                            break
+                if len(results) > max_inventory_listing:
+                    break
         return sorted(results, key=lambda x: smart_str(x).lower())
 
 
@@ -255,6 +251,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
+    )
+
+    inventory_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Inventory Files'),
+        help_text=_('Suggested list of content that could be Ansible inventory in the project'),
     )
 
     admin_role = ImplicitRoleField(parent_role=[

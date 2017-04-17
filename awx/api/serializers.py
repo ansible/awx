@@ -81,6 +81,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
+    'scm_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
@@ -960,8 +961,10 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         res.update(dict(
             teams = self.reverse('api:project_teams_list', kwargs={'pk': obj.pk}),
             playbooks = self.reverse('api:project_playbooks', kwargs={'pk': obj.pk}),
+            inventory_files = self.reverse('api:project_inventories', kwargs={'pk': obj.pk}),
             update = self.reverse('api:project_update_view', kwargs={'pk': obj.pk}),
             project_updates = self.reverse('api:project_updates_list', kwargs={'pk': obj.pk}),
+            scm_inventories = self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates_any = self.reverse('api:project_notification_templates_any_list', kwargs={'pk': obj.pk}),
@@ -1027,6 +1030,23 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ReturnList(ret, serializer=self)
 
 
+class ProjectInventoriesSerializer(ProjectSerializer):
+
+    inventory_files = serializers.ReadOnlyField(help_text=_(
+        'Array of inventory files and directories available within this project, '
+        'not comprehensive.'))
+
+    class Meta:
+        model = Project
+        fields = ('inventory_files',)
+
+    @property
+    def data(self):
+        ret = super(ProjectInventoriesSerializer, self).data
+        ret = ret.get('inventory_files', [])
+        return ReturnList(ret, serializer=self)
+
+
 class ProjectUpdateViewSerializer(ProjectSerializer):
 
     can_update = serializers.BooleanField(read_only=True)
@@ -1046,6 +1066,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
         res.update(dict(
             project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
             cancel = self.reverse('api:project_update_cancel', kwargs={'pk': obj.pk}),
+            scm_inventory_updates = self.reverse('api:project_update_scm_inventory_updates', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:project_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
         return res
@@ -1481,7 +1502,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout') + \
+        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'scm_project') + \
                  ('last_update_failed', 'last_updated', 'group') # Backwards compatibility.
 
     def get_related(self, obj):
@@ -1499,6 +1520,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
+        if obj.scm_project_id is not None:
+            res['scm_project'] = self.reverse('api:project_detail', kwargs={'pk': obj.scm_project.pk})
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = self.reverse('api:inventory_update_detail',
@@ -1530,6 +1553,14 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             return True
         return False
 
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(InventorySourceSerializer, self).build_relational_field(field_name, relation_info)
+        # SCM Project and inventory are read-only unless creating a new inventory.
+        if self.instance and field_name in ['scm_project', 'inventory']:
+            field_kwargs['read_only'] = True
+            field_kwargs.pop('queryset', None)
+        return field_class, field_kwargs
+
     def to_representation(self, obj):
         ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
@@ -1537,6 +1568,16 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         return ret
+
+    def validate(self, attrs):
+        # source_path = attrs.get('source_path', self.instance and self.instance.source_path)
+        update_on_launch = attrs.get('update_on_launch', self.instance and self.instance.update_on_launch)
+        scm_project = attrs.get('scm_project', self.instance and self.instance.scm_project)
+        if attrs.get('source_path', None) and not scm_project:
+            raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
+        elif update_on_launch and scm_project:
+            raise serializers.ValidationError({"detail": _("Cannot update SCM-based inventory source on launch.")})
+        return super(InventorySourceSerializer, self).validate(attrs)
 
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
