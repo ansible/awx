@@ -19,7 +19,7 @@ from django.utils.timezone import now
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, JSONBField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
@@ -382,6 +382,11 @@ class Host(CommonModelNameNotUnique):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
+    ansible_facts = JSONBField(
+        blank=True,
+        default={},
+        help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
+    )
 
     objects = HostManager()
 
@@ -443,6 +448,16 @@ class Host(CommonModelNameNotUnique):
 
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
+
+    '''
+    We don't use timestamp, but we may in the future.
+    '''
+    def update_ansible_facts(self, module, facts, timestamp=None):
+        if module == "ansible":
+            self.ansible_facts.update(facts)
+        else:
+            self.ansible_facts[module] = facts
+        self.save()
 
 
 class Group(CommonModelNameNotUnique):
