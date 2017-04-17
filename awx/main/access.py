@@ -354,9 +354,6 @@ class BaseAccess(object):
                 except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
                     user_capabilities[display_method] = False
                     continue
-                if obj.inventory_source and not obj.inventory_source._can_update():
-                    user_capabilities[display_method] = False
-                    continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, (Project)):
                 if obj.scm_type == '':
                     user_capabilities[display_method] = False
