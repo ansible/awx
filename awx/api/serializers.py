@@ -1246,20 +1246,12 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
-    inventory_source = serializers.SerializerMethodField(
-        help_text=_('Dedicated inventory source for the group, will be removed in 3.3.'))
 
     class Meta:
         model = Group
         fields = ('*', 'inventory', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
-                  'groups_with_active_failures', 'has_inventory_sources', 'inventory_source')
-
-    def get_fields(self):  # TODO: remove in 3.3
-        fields = super(GroupSerializer, self).get_fields()
-        if not self.V1:
-            fields.pop('inventory_source')
-        return fields
+                  'groups_with_active_failures', 'has_inventory_sources')
 
     @property
     def V1(self):
@@ -1276,12 +1268,6 @@ class GroupSerializer(BaseSerializerWithVariables):
         else:
             return ['copy', 'edit', 'delete']
 
-    def get_inventory_source(self, obj):  # TODO: remove in 3.3
-        try:
-            return obj.deprecated_inventory_source.id
-        except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
-            return None
-
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(GroupSerializer, self).build_relational_field(field_name, relation_info)
         # Inventory is read-only unless creating a new group.
@@ -1289,6 +1275,20 @@ class GroupSerializer(BaseSerializerWithVariables):
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
+
+    def get_summary_fields(self, obj):  # TODO: remove in 3.3
+        summary_fields = super(GroupSerializer, self).get_summary_fields(obj)
+        if self.V1:
+            try:
+                inv_src = obj.deprecated_inventory_source
+                summary_fields['inventory_source'] = {}
+                for field in SUMMARIZABLE_FK_FIELDS['inventory_source']:
+                    fval = getattr(inv_src, field, None)
+                    if fval is not None:
+                        summary_fields['inventory_source'][field] = fval
+            except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+                pass
+        return summary_fields
 
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
@@ -1515,7 +1515,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def get_fields(self):  # TODO: remove in 3.3
         fields = super(InventorySourceSerializer, self).get_fields()
         if not self.V1:
-            fields.pop('group')
+            fields.pop('group', None)
         return fields
 
     def get_group(self, obj):  # TODO: remove in 3.3
