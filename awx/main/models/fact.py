@@ -1,43 +1,17 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+import logging
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from awx.main.fields import JSONBField
+from awx.main.models import Host
 
-__all__ = ('Fact', 'FactLatest')
+__all__ = ('Fact',)
 
-
-class FactLatest(models.Model):
-    host = models.ForeignKey(
-        'Host',
-        related_name='facts_latest',
-        db_index=True,
-        on_delete=models.CASCADE,
-        help_text=_('Host for the facts that the fact scan captured.'),
-    )
-    timestamp = models.DateTimeField(
-        default=None,
-        editable=False,
-        help_text=_('Date and time of the corresponding fact scan gathering time.')
-    )
-    module = models.CharField(max_length=128)
-    facts = JSONBField(blank=True, default={}, help_text=_('Arbitrary JSON structure of module facts captured at timestamp for a single host.'))
-
-    class Meta:
-        app_label = 'main'
-        index_together = [
-            ["timestamp", "module", "host"],
-        ]
-
-    @staticmethod
-    def add_fact(host_id, module, timestamp, facts):
-        qs = FactLatest.objects.filter(host_id=host_id, module=module)
-        qs.delete()
-
-        fact_obj = FactLatest.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
-        return fact_obj
+logger = logging.getLogger('awx.main.models.fact')
 
 
 class Fact(models.Model):
@@ -91,7 +65,13 @@ class Fact(models.Model):
 
     @staticmethod
     def add_fact(host_id, module, timestamp, facts):
-        FactLatest.add_fact(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
+        try:
+            host = Host.objects.get(id=host_id)
+        except Host.DoesNotExist as e:
+            logger.warn("Host with id %s not found while trying to update latest fact set." % host_id)
+            raise e
+
+        host.update_ansible_facts(module=module, facts=facts, timestamp=timestamp)
 
         fact_obj = Fact.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         fact_obj.save()

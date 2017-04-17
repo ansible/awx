@@ -1157,7 +1157,7 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
-            facts_latest = self.reverse('api:host_facts_latest_list', kwargs={'pk': obj.pk}),
+            ansible_facts = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
@@ -1235,6 +1235,14 @@ class HostSerializer(BaseSerializerWithVariables):
         if 'last_job_host_summary' in ret and not obj.last_job_host_summary:
             ret['last_job_host_summary'] = None
         return ret
+
+
+class AnsibleFactsSerializer(BaseSerializer):
+    class Meta:
+        model = Host
+
+    def to_representation(self, obj):
+        return obj.ansible_facts
 
 
 class GroupSerializer(BaseSerializerWithVariables):

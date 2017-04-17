@@ -2,14 +2,15 @@
 # Python
 from __future__ import unicode_literals
 
+# Psycopg2
+from psycopg2.extensions import AsIs
+
 # Django
 from django.db import migrations, models
 
-from psycopg2.extensions import AsIs
-
 # AWX
 import awx.main.fields
-from awx.main.models import FactLatest
+from awx.main.models import Host
 
 
 class Migration(migrations.Migration):
@@ -36,27 +37,18 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
         ),
 
-        # Facts Latest
-        migrations.CreateModel(
-            name='FactLatest',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('timestamp', models.DateTimeField(default=None, help_text='Date and time of the corresponding fact scan gathering time.', editable=False)),
-                ('module', models.CharField(max_length=128)),
-                ('facts', awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True)),
-                ('host', models.ForeignKey(related_name='facts_latest', to='main.Host', help_text='Host for the facts that the fact scan captured.')),
-            ],
-        ),
+        # Facts
         migrations.AlterField(
             model_name='fact',
             name='facts',
             field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of module facts captured at timestamp for a single host.', blank=True),
         ),
-        migrations.AlterIndexTogether(
-            name='factlatest',
-            index_together=set([('timestamp', 'module', 'host')]),
+        migrations.AddField(
+            model_name='host',
+            name='ansible_facts',
+            field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
         ),
-        migrations.RunSQL([("CREATE INDEX fact_latest_facts_default_gin ON %s USING gin"
-                            "(facts jsonb_path_ops);", [AsIs(FactLatest._meta.db_table)])],
-                          [('DROP INDEX fact_latest_facts_default_gin;', None)]),
+        migrations.RunSQL([("CREATE INDEX host_ansible_facts_default_gin ON %s USING gin"
+                            "(ansible_facts jsonb_path_ops);", [AsIs(Host._meta.db_table)])],
+                          [('DROP INDEX host_ansible_facts_default_gin;', None)]),
     ]

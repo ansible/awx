@@ -1725,6 +1725,13 @@ class HostDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = HostSerializer
 
 
+class HostAnsibleFactsDetail(RetrieveAPIView):
+
+    model = Host
+    serializer_class = AnsibleFactsSerializer
+    new_in_320 = True
+
+
 class InventoryHostsList(SubListCreateAttachDetachAPIView):
 
     model = Host
@@ -1840,15 +1847,6 @@ class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
         if not fact_entry:
             return Response({'detail': _('Fact not found.')}, status=status.HTTP_404_NOT_FOUND)
         return Response(self.serializer_class(instance=fact_entry).data)
-
-
-class HostFactsLatestList(SubListAPIView):
-
-    model = FactLatest
-    parent_model = Host
-    relationship = 'facts_latest'
-    serializer_class = FactSerializer
-    new_in_320 = True
 
 
 class GroupList(ListCreateAPIView):
