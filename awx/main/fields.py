@@ -49,6 +49,11 @@ class JSONField(upstream_JSONField):
 
 
 class JSONBField(upstream_JSONBField):
+    def get_prep_lookup(self, lookup_type, value):
+        if isinstance(value, basestring) and value == "null":
+            return 'null'
+        return super(JSONBField, self).get_prep_lookup(lookup_type, value)
+
     def get_db_prep_value(self, value, connection, prepared=False):
         if connection.vendor == 'sqlite':
             # sqlite (which we use for tests) does not support jsonb;
@@ -405,7 +410,7 @@ class DynamicFilterField(models.TextField):
             Note: we could have totally "ripped" them off earlier when we decided
             what type to convert the token to.
             '''
-            if type(v) is unicode and v.startswith('"') and v.endswith('"'):
+            if type(v) is unicode and v.startswith('"') and v.endswith('"') and v != u'"null"':
                 v = v[1:-1]
 
             if contains_count == 0:

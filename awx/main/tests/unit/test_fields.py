@@ -86,6 +86,14 @@ class TestDynamicFilterFieldFilterStringToQ():
         q = DynamicFilterField.filter_string_to_q(filter_string)
         assert unicode(q) == unicode(q_expected)
 
+    @pytest.mark.parametrize("filter_string,q_expected", [
+        ('a__b__c=null', Q(**{u"a__b__c": u"null"})),
+        ('a__b__c="null"', Q(**{u"a__b__c": u"\"null\""})),
+    ])
+    def test_contains_query_generated_null(self, filter_string, q_expected):
+        q = DynamicFilterField.filter_string_to_q(filter_string)
+        assert unicode(q) == unicode(q_expected)
+
 
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
