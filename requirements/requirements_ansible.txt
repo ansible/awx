@@ -4,11 +4,12 @@
 #
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
-adal==0.4.3               # via msrestazure
+adal==0.4.5               # via msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==1.3.0
-appdirs==1.4.0            # via os-client-config, python-ironicclient
+appdirs==1.4.3            # via os-client-config, python-ironicclient
+asn1crypto==0.22.0        # via cryptography
 azure-batch==1.0.0        # via azure
 azure-common[autorest]==1.1.4  # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage, azure-servicebus, azure-servicemanagement-legacy, azure-storage
 azure-mgmt-batch==1.0.0   # via azure-mgmt
@@ -27,103 +28,89 @@ azure-servicebus==0.20.3  # via azure
 azure-servicemanagement-legacy==0.20.4  # via azure
 azure-storage==0.33.0     # via azure
 azure==2.0.0rc6
-Babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-heatclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
+babel==2.4.0              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-neutronclient, python-novaclient, python-openstackclient
 backports.ssl-match-hostname==3.5.0.1
 boto==2.45.0
-#certifi==2016.9.26        # via msrest
-cffi==1.9.1               # via cryptography
-chardet==2.3.0            # via msrest
-cliff==2.3.0              # via osc-lib, python-designateclient, python-heatclient, python-mistralclient, python-neutronclient, python-openstackclient
-cmd2==0.6.9               # via cliff
-cryptography==1.7.1       # via adal, azure-storage, python-magnumclient, secretstorage
-debtcollector==1.10.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
-decorator==4.0.10         # via python-magnumclient, shade
+certifi==2017.1.23        # via msrest
+cffi==1.10.0              # via cryptography
+cliff==2.5.0              # via osc-lib, python-designateclient, python-neutronclient, python-openstackclient
+cmd2==0.7.0               # via cliff
+cryptography==1.8.1       # via adal, azure-storage, secretstorage
+debtcollector==1.13.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
+decorator==4.0.11         # via shade
+deprecation==1.0          # via openstacksdk
 dogpile.cache==0.6.2      # via python-ironicclient, shade
 enum34==1.1.6             # via cryptography, msrest
-funcsigs==1.0.2           # via debtcollector, mock, oslo.utils
+funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
-futures==3.0.5            # via azure-storage, python-swiftclient
-idna==2.1                 # via cryptography
-ip-associations-python-novaclient-ext==0.2  # via rackspace-novaclient
-ipaddress==1.0.17         # via cryptography, shade
-iso8601==0.1.11           # via keystoneauth1, oslo.utils, python-heatclient, python-neutronclient, python-novaclient
+futures==3.0.5            # via azure-storage, shade
+idna==2.5                 # via cryptography
+ipaddress==1.0.18         # via cryptography, shade
+iso8601==0.1.11           # via keystoneauth1, oslo.utils, python-neutronclient, python-novaclient
 isodate==0.5.4            # via msrest
-jmespath==0.9.0           # via shade
-jsonpatch==1.14           # via shade, warlock
+jmespath==0.9.2           # via shade
+jsonpatch==1.15           # via shade, warlock
 jsonpointer==1.10         # via jsonpatch
-jsonschema==2.5.1         # via python-designateclient, python-ironicclient, warlock
-keyring==10.1             # via msrest, msrestazure
-keystoneauth1==2.16.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient, shade
+jsonschema==2.6.0         # via python-designateclient, python-ironicclient, warlock
+keyring==10.3.1           # via msrestazure
+keystoneauth1==2.19.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
 kombu==3.0.35
-mock==2.0.0
-monotonic==1.2            # via oslo.utils
+monotonic==1.3            # via oslo.utils
 msgpack-python==0.4.8     # via oslo.serialization
-msrest==0.4.4             # via azure-common, msrestazure
-msrestazure==0.4.6        # via azure-common
-munch==2.0.4              # via shade
-netaddr==0.7.18           # via oslo.config, oslo.utils, python-neutronclient
+msrest==0.4.6             # via azure-common, msrestazure
+msrestazure==0.4.7        # via azure-common
+munch==2.1.1              # via shade
+netaddr==0.7.19           # via oslo.config, oslo.utils, python-neutronclient
 netifaces==0.10.5         # via oslo.utils, shade
 ntlm-auth==1.0.2          # via requests-ntlm
-oauthlib==2.0.1           # via requests-oauthlib
-openstacksdk==0.9.11      # via python-openstackclient
+oauthlib==2.0.2           # via requests-oauthlib
+openstacksdk==0.9.14      # via python-openstackclient
 ordereddict==1.1          # via ntlm-auth
-os-client-config==1.24.0  # via openstacksdk, osc-lib, python-magnumclient, python-neutronclient, shade
-os-diskconfig-python-novaclient-ext==0.1.3  # via rackspace-novaclient
-os-networksv2-python-novaclient-ext==0.26  # via rackspace-novaclient
-os-virtual-interfacesv2-python-novaclient-ext==0.20  # via rackspace-novaclient
-osc-lib==1.2.0            # via python-designateclient, python-heatclient, python-ironicclient, python-mistralclient, python-neutronclient, python-openstackclient
-oslo.config==3.21.0       # via python-keystoneclient
-oslo.i18n==3.11.0         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
-oslo.serialization==2.15.0  # via python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-neutronclient, python-novaclient
-oslo.utils==3.20.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
-pbr==1.10.0               # via cliff, debtcollector, keystoneauth1, mock, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient, requestsexceptions, shade, stevedore
+os-client-config==1.26.0  # via openstacksdk, osc-lib, python-neutronclient, shade
+osc-lib==1.3.0            # via python-designateclient, python-ironicclient, python-neutronclient, python-openstackclient
+oslo.config==3.24.0       # via python-keystoneclient
+oslo.i18n==3.15.0         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
+oslo.serialization==2.18.0  # via python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
+oslo.utils==3.25.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
+packaging==16.8           # via cryptography
+pbr==2.0.0                # via cliff, debtcollector, keystoneauth1, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, requestsexceptions, shade, stevedore
 positional==1.1.1         # via keystoneauth1, python-keystoneclient
-PrettyTable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-heatclient, python-ironicclient, python-magnumclient, python-novaclient, python-troveclient
+prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-ironicclient, python-novaclient
 psphere==0.5.2
 psutil==5.0.0
-pyasn1==0.1.9             # via cryptography
 pycparser==2.17           # via cffi
-PyJWT==1.4.2              # via adal
-pykerberos==1.1.13        # via requests-kerberos
-pyparsing==2.1.10         # via cliff, cmd2, oslo.utils
-python-memcached==1.58
-python-cinderclient==1.9.0  # via python-openstackclient, shade
+pyjwt==1.4.2              # via adal
+pykerberos==1.1.14        # via requests-kerberos
+pyparsing==2.2.0          # via cliff, cmd2, oslo.utils, packaging
+python-cinderclient==2.0.1  # via python-openstackclient, shade
 python-dateutil==2.6.0    # via adal, azure-storage
-python-designateclient==2.4.0  # via shade
-python-glanceclient==2.5.0  # via python-openstackclient, shade
-python-heatclient==1.7.0  # via shade
-python-ironicclient==1.8.0  # via shade
-python-keystoneclient==3.8.0  # via python-glanceclient, python-mistralclient, python-openstackclient, shade
-python-magnumclient==2.3.1  # via shade
-python-mistralclient==2.1.2  # via python-troveclient
-python-neutronclient==6.0.0  # via shade
-python-novaclient==6.0.0  # via ip-associations-python-novaclient-ext, os-diskconfig-python-novaclient-ext, os-networksv2-python-novaclient-ext, os-virtual-interfacesv2-python-novaclient-ext, python-openstackclient, rackspace-auth-openstack, rackspace-novaclient, rax-default-network-flags-python-novaclient-ext, rax-scheduled-images-python-novaclient-ext, shade
-python-openstackclient==3.5.0  # via python-ironicclient
-python-swiftclient==3.2.0  # via python-heatclient, python-troveclient, shade
-python-troveclient==2.7.0  # via shade
-pytz==2016.10             # via babel, oslo.serialization, oslo.utils
+python-designateclient==2.6.0  # via shade
+python-glanceclient==2.6.0  # via python-openstackclient
+python-ironicclient==1.12.0  # via shade
+python-keystoneclient==3.10.0  # via python-neutronclient, python-openstackclient, shade
+python-memcached==1.58
+python-neutronclient==6.1.0  # via shade
+python-novaclient==7.1.0  # via python-openstackclient, shade
+python-openstackclient==3.9.0  # via python-ironicclient
+pytz==2017.2              # via babel, oslo.serialization, oslo.utils
 pyvmomi==6.5
 pywinrm[kerberos]==0.2.2
-PyYAML==3.12              # via cliff, os-client-config, psphere, python-heatclient, python-ironicclient, python-mistralclient
-rackspace-auth-openstack==1.3  # via rackspace-novaclient
-rackspace-novaclient==2.1
-rax-default-network-flags-python-novaclient-ext==0.4.0  # via rackspace-novaclient
-rax-scheduled-images-python-novaclient-ext==0.3.1  # via rackspace-novaclient
+pyyaml==3.12              # via cliff, os-client-config, psphere, python-ironicclient
 requests-kerberos==0.11.0  # via pywinrm
 requests-ntlm==1.0.0      # via pywinrm
-requests-oauthlib==0.7.0  # via msrest
-requests==2.11.1          # via adal, azure-servicebus, azure-servicemanagement-legacy, azure-storage, keystoneauth1, msrest, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-swiftclient, python-troveclient, pyvmomi, pywinrm, requests-kerberos, requests-ntlm, requests-oauthlib
-requestsexceptions==1.1.3  # via os-client-config, shade
+requests-oauthlib==0.8.0  # via msrest
+requests==2.12.5          # via adal, azure-servicebus, azure-servicemanagement-legacy, azure-storage, keystoneauth1, msrest, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, pyvmomi, pywinrm, requests-kerberos, requests-ntlm, requests-oauthlib
+requestsexceptions==1.2.0  # via os-client-config, shade
 rfc3986==0.4.1            # via oslo.config
 secretstorage==2.3.1
-shade==1.13.1
-simplejson==3.10.0        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient, python-troveclient
-six==1.10.0               # via cliff, cryptography, debtcollector, keystoneauth1, mock, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-swiftclient, python-troveclient, pyvmomi, pywinrm, shade, stevedore, warlock
-stevedore==1.19.1         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient, python-magnumclient
+shade==1.19.0
+simplejson==3.10.0        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
+six==1.10.0               # via cliff, cmd2, cryptography, debtcollector, keystoneauth1, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, pywinrm, shade, stevedore, warlock
+stevedore==1.21.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
 suds==0.4                 # via psphere
 unicodecsv==0.14.1        # via cliff
 warlock==1.2.0            # via python-glanceclient
-wrapt==1.10.8             # via debtcollector, positional
+wrapt==1.10.10            # via debtcollector, positional, python-glanceclient
 xmltodict==0.10.2         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:

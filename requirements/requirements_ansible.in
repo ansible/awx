@@ -9,6 +9,6 @@ psutil==5.0.0
 pyvmomi==6.5
 pywinrm[kerberos]==0.2.2
 secretstorage==2.3.1
-shade==1.13.1
+shade==1.19.0
 setuptools==23.0.0
 pip==8.1.2
