@@ -39,6 +39,7 @@ PARAM_NAMES = {
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
     'http_timeout': 'LOG_AGGREGATOR_HTTP_TIMEOUT',
+    'verify_cert': 'LOG_AGGREGATOR_VERIFY_CERT'
 }
 
 
@@ -146,8 +147,11 @@ class BaseHTTPSHandler(logging.Handler):
             payload_str = json.dumps(payload_input)
         else:
             payload_str = payload_input
-        return dict(data=payload_str, background_callback=unused_callback,
-                    timeout=self.http_timeout)
+        kwargs = dict(data=payload_str, background_callback=unused_callback,
+                      timeout=self.http_timeout)
+        if self.verify_cert is False:
+            kwargs['verify'] = False
+        return kwargs
 
     def skip_log(self, logger_name):
         if self.host == '' or (not self.enabled_flag):
