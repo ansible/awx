@@ -1714,8 +1714,8 @@ class HostList(ListCreateAPIView):
         try:
             queryset = self.get_queryset()
         except Exception as e:
-            return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
-        return Response(dict(results=self.serializer_class(queryset, many=True).data))
+            return Response(dict(error=_(unicode(e))), context=self.get_serializer_context(), status=status.HTTP_400_BAD_REQUEST)
+        return Response(dict(results=self.serializer_class(queryset, many=True, context=self.get_serializer_context()).data))
 
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
