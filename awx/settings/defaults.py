@@ -866,8 +866,10 @@ INSIGHTS_URL_BASE = "https://access.redhat.com"
 
 TOWER_SETTINGS_MANIFEST = {}
 
+# Settings related to external logger configuration
 LOG_AGGREGATOR_ENABLED = False
 LOG_AGGREGATOR_HTTP_TIMEOUT = 5
+LOG_AGGREGATOR_VERIFY_CERT = True
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in clustered Tower,
