@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='inventorysource',
             name='deprecated_group',
-            field=models.ForeignKey(related_name='deprecated_inventory_source', default=None, null=True, to='main.Group'),
+            field=models.OneToOneField(related_name='deprecated_inventory_source', null=True, default=None, to='main.Group'),
         ),
         migrations.AlterField(
             model_name='inventorysource',

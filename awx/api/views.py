@@ -1855,7 +1855,7 @@ class GroupList(ListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc', 'inventory.update']
+    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
 
 
 class EnforceParentRelationshipMixin(object):
@@ -1999,6 +1999,11 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
+        if self.request.version == 'v1':  # TODO: deletion of automatic inventory_source, remove in 3.3
+            try:
+                obj.deprecated_inventory_source.delete()
+            except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+                pass
         obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -2189,7 +2194,7 @@ class InventorySourceList(ListAPIView):
     new_in_14 = True
 
 
-class InventorySourceDetail(RetrieveUpdateAPIView):
+class InventorySourceDetail(RetrieveUpdateDestroyAPIView):
 
     model = InventorySource
     serializer_class = InventorySourceSerializer

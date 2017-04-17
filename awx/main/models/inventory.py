@@ -1063,7 +1063,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         on_delete=models.CASCADE,
     )
 
-    deprecated_group = models.ForeignKey(
+    deprecated_group = models.OneToOneField(
         'Group',
         related_name='deprecated_inventory_source',
         null=True,
@@ -1178,6 +1178,16 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
+    def clean_source(self):  # TODO: remove in 3.3
+        source = self.source
+        if source and self.deprecated_group:
+            qs = self.deprecated_group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
+            existing_sources = qs.exclude(pk=self.pk)
+            if existing_sources.count():
+                s = u', '.join([x.deprecated_group.name for x in existing_sources])
+                raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
+        return source
+
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
     '''
@@ -1212,6 +1222,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def websocket_emit_data(self):
         websocket_data = super(InventoryUpdate, self).websocket_emit_data()
+        if self.inventory_source.deprecated_group is not None:  # TODO: remove in 3.3
+            websocket_data.update(dict(group_id=self.inventory_source.deprecated_group.id))
         return websocket_data
 
     def save(self, *args, **kwargs):

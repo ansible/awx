@@ -346,6 +346,17 @@ class BaseAccess(object):
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
+            elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
+                try:
+                    if obj.deprecated_inventory_source and not obj.deprecated_inventory_source._can_update():
+                        user_capabilities[display_method] = False
+                        continue
+                except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+                    user_capabilities[display_method] = False
+                    continue
+                if obj.inventory_source and not obj.inventory_source._can_update():
+                    user_capabilities[display_method] = False
+                    continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, (Project)):
                 if obj.scm_type == '':
                     user_capabilities[display_method] = False
@@ -719,6 +730,19 @@ class GroupAccess(BaseAccess):
             raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
+
+    def can_start(self, obj, validate_license=True):
+        # TODO: Delete for 3.3, only used by v1 serializer
+        # Used as another alias to inventory_source start access for user_capabilities
+        if obj:
+            try:
+                return self.user.can_access(
+                    InventorySource, 'start', obj.deprecated_inventory_source,
+                    validate_license=validate_license)
+                obj.deprecated_inventory_source
+            except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
+                return False
+        return False
 
 
 class InventorySourceAccess(BaseAccess):
