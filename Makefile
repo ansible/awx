@@ -294,7 +294,7 @@ requirements_ansible: virtualenv_ansible
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
-		$(VENV_BASE)/ansible/bin/pip install pytest; \
+		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
