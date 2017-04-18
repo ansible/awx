@@ -254,6 +254,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     .catch(function(response) {
                         Wait('stop');
 
+                        if (/^\/api\/v[0-9]+\/workflow_job_templates\/$/.test(endpoint) && response.status === 402) {
+                            return response;
+                        }
+
                         this.error(response.data, response.status);
 
                         throw response;
