@@ -1740,10 +1740,9 @@ class HostList(ListCreateAPIView):
 
     def list(self, *args, **kwargs):
         try:
-            queryset = self.get_queryset()
+            return super(HostList, self).list(*args, **kwargs)
         except Exception as e:
-            return Response(dict(error=_(unicode(e))), context=self.get_serializer_context(), status=status.HTTP_400_BAD_REQUEST)
-        return Response(dict(results=self.serializer_class(queryset, many=True, context=self.get_serializer_context()).data))
+            return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
