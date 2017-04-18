@@ -10,6 +10,8 @@ import GetSurveyQuestions from './job-submission-factories/getsurveyquestions.fa
 import submitJob from './job-submission.directive';
 import credentialList from './lists/credential/job-sub-cred-list.directive';
 import inventoryList from './lists/inventory/job-sub-inv-list.directive';
+import awPasswordMin from './job-submission-directives/aw-password-min.directive';
+import awPasswordMax from './job-submission-directives/aw-password-max.directive';
 
 export default
 	angular.module('jobSubmission', [])
@@ -18,4 +20,6 @@ export default
 		.factory('GetSurveyQuestions', GetSurveyQuestions)
 		.directive('submitJob', submitJob)
 		.directive('jobSubCredList', credentialList)
-		.directive('jobSubInvList', inventoryList);
+		.directive('jobSubInvList', inventoryList)
+		.directive('awPasswordMin', awPasswordMin)
+		.directive('awPasswordMax', awPasswordMax);

@@ -29,9 +29,7 @@ class ResourceMixin(models.Model):
         '''
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
-
         MyModel.accessible_objects(user, 'read_role').filter(name__istartswith='bar');
-
         NOTE: This should only be used for list type things. If you have a
         specific resource you want to check permissions on, it is more
         performant to resolve the resource in question then call
@@ -160,12 +158,13 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
-                if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
-                    errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
-                                  (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
-                if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
-                    errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                  (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+                if not data[survey_element['variable']] == '$encrypted$' and not survey_element['type'] == 'password':
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
         elif survey_element['type'] == 'integer':
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) != int:
