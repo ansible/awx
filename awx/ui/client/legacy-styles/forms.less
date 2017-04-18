@@ -343,7 +343,6 @@
 
 .select2-results__option{
     color: @field-label !important;
-    height: 30px!important;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected]{
@@ -630,3 +629,15 @@ input[type='radio']:checked:before {
 .alert-info--noTextTransform {
     text-transform: none;
 }
+
+.select2-results__option {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select2-results__option:hover {
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
