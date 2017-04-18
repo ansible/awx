@@ -43,6 +43,17 @@ export default ['i18n', 'buildHostListState', function(i18n, buildHostListState)
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
+            dynamic_hosts: {
+                label: i18n._('Dynamic Hosts'),
+                type: 'custom',
+                control: '<dynamic-inventory-host-filter host-filter="dynamic_hosts"></dynamic-inventory-host-filter>',
+                basePath: 'hosts',
+                list: 'HostsList',
+                sourceModel: 'host',
+                sourceField: 'name',
+                required: true
+                // TODO: add required, ngDisabled, awLookupWhen (?)
+            },
             variables: {
                 label: i18n._('Variables'),
                 type: 'textarea',

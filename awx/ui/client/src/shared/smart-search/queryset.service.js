@@ -274,6 +274,32 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     hdr: 'Error!',
                     msg: `Invalid search term entered. GET returned: ${status}`
                 });
+            },
+            // Removes state definition defaults and pagination terms
+            stripDefaultParams(params, defaults) {
+                if(defaults) {
+                    let stripped =_.pick(params, (value, key) => {
+                        // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
+                        return defaults[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
+                    });
+                    let strippedCopy = _.cloneDeep(stripped);
+                    if(_.keys(_.pick(defaults, _.keys(strippedCopy))).length > 0){
+                        for (var key in strippedCopy) {
+                            if (strippedCopy.hasOwnProperty(key)) {
+                                let value = strippedCopy[key];
+                                if(_.isArray(value)){
+                                    let index = _.indexOf(value, defaults[key]);
+                                    value = value.splice(index, 1)[0];
+                                }
+                            }
+                        }
+                        stripped = strippedCopy;
+                    }
+                    return _(strippedCopy).map(this.decodeParam).flatten().value();
+                }
+                else {
+                    return _(params).map(this.decodeParam).flatten().value();
+                }
             }
         };
     }

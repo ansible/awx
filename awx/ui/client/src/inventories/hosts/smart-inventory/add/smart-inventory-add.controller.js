@@ -53,6 +53,8 @@ function SmartInventoryAdd($scope, $location,
             parse_variable: 'parseType',
             field_id: 'smartinventory_variables'
         });
+
+        $scope.dynamic_hosts = $state.params.hostfilter ? JSON.parse($state.params.hostfilter) : '';
     }
 
     // Save

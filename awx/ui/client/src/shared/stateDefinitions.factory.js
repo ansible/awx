@@ -699,6 +699,11 @@ function($injector, $stateExtender, $log, i18n) {
                         organization: null
                     };
                 }
+                else if(field.sourceModel === 'host') {
+                    params = {
+                        page_size: '5'
+                    };
+                }
                 else {
                     params = {
                         page_size: '5',
