@@ -46,7 +46,7 @@ export default ['i18n', function(i18n) {
                 columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
                 awToolTip: "{{ inventory.description }}",
-                awTipPlacement: "top"
+                awTipPlacement: "top",
                 linkTo: '/#/inventories/basic_inventory/{{inventory.id}}'
             },
             organization: {
