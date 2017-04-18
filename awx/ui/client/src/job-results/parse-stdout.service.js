@@ -258,11 +258,7 @@ export default ['$log', 'moment', function($log, moment){
                 .split("\r\n");
 
             if (lineNums.length > lines.length) {
-                let padBy = lineNums.length - lines.length;
-
-                for (let i = 0; i <= padBy; i++) {
-                    lines.push("");
-                }
+                lineNums = lineNums.slice(0, lines.length);
             }
 
             lines = this.distributeColors(lines);
