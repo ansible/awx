@@ -10,11 +10,10 @@ anyjson==0.3.3            # via kombu
 apache-libcloud==1.3.0
 appdirs==1.4.2
 asgi-amqp==0.4.1
-asgiref==1.1.1            # via asgi-amqp, channels, daphne
+asgiref==1.0.1
 asn1crypto==0.22.0        # via cryptography
-attrs==16.3.0             # via automat, service-identity
-autobahn==0.18.1          # via daphne
-automat==0.5.0            # via twisted
+attrs==16.3.0             # via service-identity
+autobahn==0.18.2          # via daphne
 azure-batch==1.0.0        # via azure
 azure-common[autorest]==1.1.4  # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage, azure-servicebus, azure-servicemanagement-legacy, azure-storage
 azure-mgmt-batch==1.0.0   # via azure-mgmt
@@ -22,13 +21,13 @@ azure-mgmt-compute==0.30.0rc6  # via azure-mgmt
 azure-mgmt-keyvault==0.30.0rc6  # via azure-mgmt
 azure-mgmt-logic==1.0.0   # via azure-mgmt
 azure-mgmt-network==0.30.0rc6  # via azure-mgmt
-azure-mgmt-nspkg==1.0.0   # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage
+azure-mgmt-nspkg==2.0.0   # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage
 azure-mgmt-redis==1.0.0   # via azure-mgmt
 azure-mgmt-resource==0.30.0rc6  # via azure-mgmt
 azure-mgmt-scheduler==1.0.0  # via azure-mgmt
 azure-mgmt-storage==0.30.0rc6  # via azure-mgmt
 azure-mgmt==0.30.0rc6     # via azure
-azure-nspkg==1.0.0        # via azure-common, azure-mgmt-nspkg, azure-storage
+azure-nspkg==2.0.0        # via azure-common, azure-mgmt-nspkg, azure-storage
 azure-servicebus==0.20.3  # via azure
 azure-servicemanagement-legacy==0.20.4  # via azure
 azure-storage==0.33.0     # via azure
@@ -40,7 +39,7 @@ baron==0.6.5              # via redbaron
 billiard==3.3.0.23        # via celery
 boto==2.45.0
 celery==3.1.17
-certifi==2017.1.23        # via msrest
+#certifi==2017.4.17        # via msrest
 cffi==1.10.0              # via cryptography
 channels==0.17.3
 cliff==2.5.0              # via osc-lib, python-designateclient, python-neutronclient, python-openstackclient
@@ -70,7 +69,7 @@ dogpile.cache==0.6.2      # via python-ironicclient, shade
 enum34==1.1.6             # via cryptography, msrest
 funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
-futures==3.0.5            # via azure-storage, requests-futures, shade
+futures==3.1.1            # via azure-storage, requests-futures, shade
 gevent-websocket==0.9.5
 gevent==1.2.1             # via gevent-websocket
 greenlet==0.4.12          # via gevent
@@ -94,7 +93,7 @@ jsonpatch==1.15           # via shade, warlock
 jsonpickle==0.9.4         # via asgi-amqp
 jsonpointer==1.10         # via jsonpatch
 jsonschema==2.6.0         # via python-designateclient, python-ironicclient, warlock
-keyring==10.3.1           # via msrestazure
+keyring==10.3.2           # via msrestazure
 keystoneauth1==2.19.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
 kombu==3.0.37             # via asgi-amqp, celery
 lxml==3.7.3
@@ -103,13 +102,13 @@ markdown==2.6.7
 monotonic==1.3            # via oslo.utils
 more-itertools==3.0.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.4.8     # via asgi-amqp, oslo.serialization
-msrest==0.4.6             # via azure-common, msrestazure
+msrest==0.4.7             # via azure-common, msrestazure
 msrestazure==0.4.7        # via azure-common
 munch==2.1.1              # via shade
 netaddr==0.7.19           # via oslo.config, oslo.utils, pyrad, python-neutronclient
 netifaces==0.10.5         # via oslo.utils, shade
 oauthlib==2.0.2           # via python-social-auth, requests-oauthlib
-openstacksdk==0.9.14      # via python-openstackclient
+openstacksdk==0.9.15      # via python-openstackclient
 ordereddict==1.1
 os-client-config==1.26.0  # via openstacksdk, osc-lib, python-neutronclient, shade
 osc-lib==1.3.0            # via python-designateclient, python-ironicclient, python-neutronclient, python-openstackclient
@@ -129,7 +128,7 @@ pyasn1-modules==0.0.8     # via service-identity
 pyasn1==0.2.3             # via pyasn1-modules, service-identity
 pycparser==2.17           # via cffi
 pygerduty==0.35.1
-pyjwt==1.4.2              # via adal, python-social-auth
+pyjwt==1.5.0              # via adal, python-social-auth
 pyopenssl==16.2.0         # via service-identity
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
@@ -142,8 +141,8 @@ python-keystoneclient==3.10.0  # via python-neutronclient, python-openstackclien
 python-ldap==2.4.32       # via django-auth-ldap
 python-logstash==0.4.6
 python-memcached==1.58
-python-neutronclient==6.1.0  # via shade
-python-novaclient==7.1.0  # via python-openstackclient, shade
+python-neutronclient==6.2.0  # via shade
+python-novaclient==8.0.0  # via python-openstackclient, shade
 python-openid==2.2.5      # via python-social-auth
 python-openstackclient==3.9.0  # via python-ironicclient
 python-radius==1.0
@@ -163,15 +162,15 @@ secretstorage==2.3.1      # via keyring
 service-identity==16.0.0
 shade==1.19.0
 simplejson==3.10.0        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
-six==1.10.0               # via asgi-amqp, asgiref, autobahn, automat, cliff, cmd2, cryptography, debtcollector, django-extensions, irc, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, pygerduty, pyopenssl, pyrad, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, python-social-auth, pyvmomi, shade, slackclient, stevedore, tempora, twilio, txaio, warlock, websocket-client
+six==1.10.0               # via asgi-amqp, asgiref, autobahn, cliff, cmd2, cryptography, debtcollector, django-extensions, irc, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, pygerduty, pyopenssl, pyrad, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, python-social-auth, pyvmomi, shade, slackclient, stevedore, tacacs-plus, tempora, twilio, txaio, warlock, websocket-client
 slackclient==1.0.2
 stevedore==1.21.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
 suds==0.4                 # via psphere
 tacacs_plus==0.1
 tempora==1.6.1            # via irc, jaraco.logging
 twilio==5.6.0
-twisted==17.1.0           # via daphne
-txaio==2.6.2              # via autobahn
+twisted==16.6.0
+txaio==2.7.0              # via autobahn
 typing==3.6.1             # via m2crypto
 unicodecsv==0.14.1        # via cliff
 uwsgi==2.0.14
