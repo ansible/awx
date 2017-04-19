@@ -979,7 +979,7 @@ class InventorySourceOptions(BaseModel):
         if not self.source:
             return None
         cred = self.credential
-        if cred:
+        if cred and self.source != 'custom':
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)

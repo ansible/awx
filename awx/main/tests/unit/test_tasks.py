@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
 import ConfigParser
+import json
 import tempfile
 
 import pytest
@@ -558,6 +559,199 @@ class TestJobCredentials(TestJobExecution):
             assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
             assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
             assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+            return ['successful', 0]
+
+        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.task.run(self.pk)
+
+    def test_custom_environment_injectors_with_jinja_syntax_error(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'api_token',
+                    'label': 'API Token',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'env': {
+                    'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'api_token': 'ABC123'}
+        )
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+
+    def test_custom_environment_injectors(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'api_token',
+                    'label': 'API Token',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'env': {
+                    'MY_CLOUD_API_TOKEN': '{{api_token}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'api_token': 'ABC123'}
+        )
+        self.task.run(self.pk)
+
+        assert self.task.run_pexpect.call_count == 1
+        call_args, _ = self.task.run_pexpect.call_args_list[0]
+        job, args, cwd, env, passwords, stdout = call_args
+
+        assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
+
+    def test_custom_environment_injectors_with_secret_field(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'password',
+                    'label': 'Password',
+                    'type': 'string',
+                    'secret': True
+                }]
+            },
+            injectors={
+                'env': {
+                    'MY_CLOUD_PRIVATE_VAR': '{{password}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'password': 'SUPER-SECRET-123'}
+        )
+        self.instance.cloud_credential.inputs['password'] = encrypt_field(
+            self.instance.cloud_credential, 'password'
+        )
+        self.task.run(self.pk)
+
+        assert self.task.run_pexpect.call_count == 1
+        call_args, _ = self.task.run_pexpect.call_args_list[0]
+        job, args, cwd, env, passwords, stdout = call_args
+
+        assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
+        assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
+
+    def test_custom_environment_injectors_with_extra_vars(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'api_token',
+                    'label': 'API Token',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'extra_vars': {
+                    'api_token': '{{api_token}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'api_token': 'ABC123'}
+        )
+        self.task.run(self.pk)
+
+        assert self.task.run_pexpect.call_count == 1
+        call_args, _ = self.task.run_pexpect.call_args_list[0]
+        job, args, cwd, env, passwords, stdout = call_args
+
+        assert '-e {"api_token": "ABC123"}' in ' '.join(args)
+
+    def test_custom_environment_injectors_with_secret_extra_vars(self):
+        """
+        extra_vars that contain secret field values should be censored in the DB
+        """
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'password',
+                    'label': 'Password',
+                    'type': 'string',
+                    'secret': True
+                }]
+            },
+            injectors={
+                'extra_vars': {
+                    'password': '{{password}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'password': 'SUPER-SECRET-123'}
+        )
+        self.instance.cloud_credential.inputs['password'] = encrypt_field(
+            self.instance.cloud_credential, 'password'
+        )
+        self.task.run(self.pk)
+
+        assert self.task.run_pexpect.call_count == 1
+        call_args, _ = self.task.run_pexpect.call_args_list[0]
+        job, args, cwd, env, passwords, stdout = call_args
+
+        assert '-e {"password": "SUPER-SECRET-123"}' in ' '.join(args)
+        assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
+
+    def test_custom_environment_injectors_with_file(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'api_token',
+                    'label': 'API Token',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'file': {
+                    'template': '[mycloud]\n{{api_token}}'
+                },
+                'env': {
+                    'MY_CLOUD_INI_FILE': '{{tower.filename}}'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'api_token': 'ABC123'}
+        )
+        self.task.run(self.pk)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            job, args, cwd, env, passwords, stdout = args
+            assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
             return ['successful', 0]
 
         self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
