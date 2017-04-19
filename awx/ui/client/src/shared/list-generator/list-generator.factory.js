@@ -198,11 +198,15 @@ export default ['$compile', 'Attr', 'Icon',
                     list.searchSize = 'col-lg-7 col-md-12 col-sm-12 col-xs-12';
                 }
                 if (options.showSearch === undefined || options.showSearch === true) {
+                    let nonstandardSearchParam = list.nonstandardSearchParam && list.nonstandardSearchParam.param ? list.nonstandardSearchParam.param : undefined;
+                    let nonstandardSearchParamRoot = list.nonstandardSearchParam && list.nonstandardSearchParam.root ? list.nonstandardSearchParam.root : undefined;
                     html += `
                     <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
                         <smart-search
                             django-model="${list.name}"
                             search-size="${list.searchSize}"
+                            nonstandard-search-param="${nonstandardSearchParam}"
+                            nonstandard-search-param-root="${nonstandardSearchParamRoot}"
                             base-path="${list.basePath || list.name}"
                             iterator="${list.iterator}"
                             dataset="${list.iterator}_dataset"

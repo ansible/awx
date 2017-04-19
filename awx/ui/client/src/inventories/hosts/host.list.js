@@ -10,6 +10,10 @@ export default ['i18n', function(i18n) {
         iterator: 'host',
         editTitle: '{{ selected_group }}',
         searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+        nonstandardSearchParam: {
+            root: 'ansible_facts',
+            param: 'host_filter'
+        },
         showTitle: false,
         well: true,
         index: false,

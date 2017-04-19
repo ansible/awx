@@ -17,7 +17,9 @@ export default ['templateUrl',
                 searchTags: '=',
                 disableSearch: '=',
                 defaultParams: '=',
-                querySet: '='
+                querySet: '=',
+                nonstandardSearchParam: '@',
+                nonstandardSearchParamRoot: '@'
             },
             controller: 'SmartSearchController',
             templateUrl: templateUrl('shared/smart-search/smart-search')

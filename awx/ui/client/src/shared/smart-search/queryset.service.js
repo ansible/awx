@@ -57,6 +57,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                 function encodeTerm(value, key){
 
+                    let root = key.split("__")[0].replace(/^-/, '');
+
                     key = key.replace(/__icontains_DEFAULT/g, "__icontains");
                     key = key.replace(/__search_DEFAULT/g, "__search");
 
@@ -69,13 +71,27 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                             }
                             concated += `${key}=${item}&`;
                         });
-                        return concated;
+
+                        if(root === 'ansible_facts') {
+                            return `host_filter=${encodeURIComponent(concated)}&`;
+                        }
+                        else {
+                            return concated;
+                        }
                     }
                     else {
                         if(value && typeof value === 'string') {
                             value = decodeURIComponent(value).replace(/"|'/g, "");
                         }
-                        return `${key}=${value}&`;
+
+                        if(root === 'ansible_facts') {
+                            let foobar = encodeURIComponent(`${key}=${value}`);
+                            return `host_filter=${foobar}&`;
+                        }
+                        else {
+                            return `${key}=${value}&`;
+                        }
+
                     }
                 }
             },

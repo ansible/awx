@@ -87,13 +87,9 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
         }
 
         function setDefaults(term) {
-            if ($scope.list.defaultSearchParams) {
-                return $scope.list.defaultSearchParams(encodeURIComponent(term));
-            } else {
-               return {
-                    search: encodeURIComponent(term)
-                };
-            }
+           return {
+                search: encodeURIComponent(term)
+            };
         }
 
         $scope.toggleKeyPane = function() {
@@ -158,6 +154,9 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     }
                     else if(_.contains($scope.models[$scope.list.name].related, root)) {
                         encodeParams.relatedSearchTerm = true;
+                        removed = qs.encodeParam(encodeParams);
+                    }
+                    else if($scope.nonstandardSearchParam && $scope.nonstandardSearchParamRoot && root === $scope.nonstandardSearchParamRoot) {
                         removed = qs.encodeParam(encodeParams);
                     }
                     else {
@@ -235,6 +234,9 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                         // Django search model is what sets the related fields on the model.
                         else if(_.contains($scope.models[$scope.list.name].related, root)) {
                             params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
+                        }
+                        else if($scope.nonstandardSearchParam && $scope.nonstandardSearchParamRoot && root === $scope.nonstandardSearchParamRoot) {
+                            params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                         }
                         // Its not a search term or a related search term - treat it as a string
                         else {
