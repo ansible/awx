@@ -4,14 +4,18 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
-    'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
-    'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData',
-    function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
-        GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
-        GetSyncStatusMsg, GetHostsStatusMsg, Dataset, Find, qs, inventoryData){
+    ['$scope', '$rootScope', '$state', '$stateParams', 'SourcesListDefinition',
+    'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate',
+    'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
+    'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet',
+    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService',
+    function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
+        InventoryUpdate, GroupManageService, GroupsCancelUpdate,
+        ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
+        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, $filter, Prompt,
+        Wait, SourcesService){
 
-        let list = GroupList;
+        let list = SourcesListDefinition;
 
         init();
 
@@ -45,22 +49,34 @@
 
         }
 
-        function buildStatusIndicators(group){
-            if (group === undefined || group === null) {
-                group = {};
+        function buildStatusIndicators(inventory_source){
+            if (inventory_source === undefined || inventory_source === null) {
+                inventory_source = {};
             }
 
-            let hosts_status;
+            let inventory_source_status, hosts_status;
 
-            hosts_status = GetHostsStatusMsg({
-                active_failures: group.hosts_with_active_failures,
-                total_hosts: group.total_hosts,
-                inventory_id: $scope.inventory_id,
-                group_id: group.id
+            inventory_source_status = GetSyncStatusMsg({
+                status: inventory_source.status,
+                has_inventory_sources: inventory_source.has_inventory_sources,
+                source: ( (inventory_source) ? inventory_source.source : null )
             });
-            _.assign(group,
+            hosts_status = GetHostsStatusMsg({
+                active_failures: inventory_source.hosts_with_active_failures,
+                total_hosts: inventory_source.total_hosts,
+                inventory_id: $scope.inventory_id,
+                // group_id: group.id
+            });
+            _.assign(inventory_source,
+                {status_class: inventory_source_status.class},
+                {status_tooltip: inventory_source_status.tooltip},
+                {launch_tooltip: inventory_source_status.launch_tip},
+                {launch_class: inventory_source_status.launch_class},
+                {group_schedule_tooltip: inventory_source_status.schedule_tip},
                 {hosts_status_tip: hosts_status.tooltip},
-                {hosts_status_class: hosts_status.class});
+                {hosts_status_class: hosts_status.class},
+                {source: inventory_source ? inventory_source.source : null},
+                {status: inventory_source ? inventory_source.status : null});
         }
 
         $scope.groupSelect = function(id){
@@ -75,69 +91,42 @@
                 }
             }, {reload: true});
         };
-        $scope.createGroup = function(){
-            $state.go('inventories.edit.groups.add');
+        $scope.createSource = function(){
+            $state.go('inventories.edit.inventory_sources.add');
         };
-        $scope.editGroup = function(id){
-            $state.go('inventories.edit.groups.edit', {group_id: id});
+        $scope.editSource = function(id){
+            $state.go('inventories.edit.inventory_sources.edit', {source_id: id});
         };
-        $scope.deleteGroup = function(group){
-            $scope.toDelete = {};
-            angular.extend($scope.toDelete, group);
-            if($scope.toDelete.total_groups === 0 && $scope.toDelete.total_hosts === 0) {
-                // This group doesn't have any child groups or hosts - the user is just trying to delete
-                // the group
-                $scope.deleteOption = "delete";
-            }
-            $('#group-delete-modal').modal('show');
-        };
-        $scope.confirmDelete = function(){
-
-            // Bind an even listener for the modal closing.  Trying to $state.go() before the modal closes
-            // will mean that these two things are running async and the modal may not finish closing before
-            // the state finishes transitioning.
-            $('#group-delete-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                // Remove the event handler so that we don't end up with multiple bindings
-                $('#group-delete-modal').off('hidden.bs.modal');
-                // Reload the inventory manage page and show that the group has been removed
-                $state.go('inventoryManage', null, {reload: true});
+        $scope.deleteSource = function(inventory_source){
+            var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the inventory source below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
+            var action = function(){
+                delete $rootScope.promptActionBtnClass;
+                Wait('start');
+                SourcesService.delete(inventory_source.id).then(() => {
+                    $('#prompt-modal').modal('hide');
+                    // if (parseInt($state.params.source_id) === id) {
+                    //     $state.go("sources", null, {reload: true});
+                    // } else {
+                        $state.go($state.current.name, null, {reload: true});
+                    // }
+                    Wait('stop');
+                });
+            };
+            // Prompt depends on having $rootScope.promptActionBtnClass available...
+            Prompt({
+                hdr: 'Delete Source',
+                body: body,
+                action: action,
+                actionText: 'DELETE',
             });
-
-            switch($scope.deleteOption){
-                case 'promote':
-                    GroupManageService.promote($scope.toDelete.id, $stateParams.inventory_id)
-                        .then(() => {
-                            if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                                $state.go("inventoryManage", null, {reload: true});
-                            } else {
-                                $state.go($state.current, null, {reload: true});
-                            }
-                            $('#group-delete-modal').modal('hide');
-                            $('body').removeClass('modal-open');
-                            $('.modal-backdrop').remove();
-                        });
-                    break;
-                default:
-                    GroupManageService.delete($scope.toDelete.id).then(() => {
-                        if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                            $state.go("inventoryManage", null, {reload: true});
-                        } else {
-                            $state.go($state.current, null, {reload: true});
-                        }
-                        $('#group-delete-modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                    });
-            }
+            $rootScope.promptActionBtnClass = 'Modal-errorButton';
         };
-        $scope.updateGroup = function(group) {
-            GroupManageService.getInventorySource({group: group.id}).then(res =>InventoryUpdate({
+
+        $scope.updateSource = function(inventory_source) {
+            InventoryUpdate({
                 scope: $scope,
-                group_id: group.id,
-                url: res.data.results[0].related.update,
-                group_name: group.name,
-                group_source: res.data.results[0].source
-            }));
+                url: inventory_source.related.update
+            });
         };
 
         $scope.$on(`ws-jobs`, function(e, data){
@@ -160,7 +149,7 @@
                 .then(function(searchResponse) {
                     $scope[`${list.iterator}_dataset`] = searchResponse.data;
                     $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-                    _.forEach($scope[list.name], buildStatusIndicators);
+                    // _.forEach($scope[list.name], buildStatusIndicators);
                 });
             } else {
                 var status = GetSyncStatusMsg({

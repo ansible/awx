@@ -246,6 +246,7 @@ function($injector, $stateExtender, $log, i18n) {
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
         generateFormListDefinitions: function(form, formStateDefinition, params) {
+            var that = this;
             function buildRbacUserTeamDirective(){
                 let states = [];
 
@@ -559,11 +560,23 @@ function($injector, $stateExtender, $log, i18n) {
                         states = _.flatten(states);
                     }
                     if(field && field.addState){
-                        states.push(field.addState(field, formStateDefinition, params));
+                        let formState = field.addState(field, formStateDefinition, params);
+                        states.push(formState);
+                        // intent here is to add lookup states for any add-forms
+                        if(field.includeForm){
+                            let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                            states.push(that.generateLookupNodes(form, formState));
+                        }
                         states = _.flatten(states);
                     }
                     if(field && field.editState){
-                        states.push(field.editState(field, formStateDefinition, params));
+                        let formState = field.editState(field, formStateDefinition, params);
+                        states.push(formState);
+                        // intent here is to add lookup states for any edit-forms
+                        if(field.includeForm){
+                            let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                            states.push(that.generateLookupNodes(form, formState));
+                        }
                         states = _.flatten(states);
                     }
                 }

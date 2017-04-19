@@ -6,6 +6,7 @@
 
 import host from './hosts/main';
 import group from './groups/main';
+import sources from './sources/main';
 import relatedHost from './related-hosts/main';
 import inventoryAdd from './add/main';
 import inventoryEdit from './edit/main';
@@ -19,6 +20,7 @@ export default
 angular.module('inventory', [
         host.name,
         group.name,
+        sources.name,
         relatedHost.name,
         inventoryAdd.name,
         inventoryEdit.name,

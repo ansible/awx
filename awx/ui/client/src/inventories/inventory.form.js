@@ -12,9 +12,11 @@
 
 export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
     'buildGroupsEditState', 'buildHostListState', 'buildHostAddState',
-    'buildHostEditState',
+    'buildHostEditState', 'buildSourcesListState', 'buildSourcesAddState',
+    'buildSourcesEditState',
 function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
-    buildHostListState, buildHostAddState, buildHostEditState) {
+    buildHostListState, buildHostAddState, buildHostEditState,
+    buildSourcesListState, buildSourcesAddState,buildSourcesEditState) {
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -155,35 +157,13 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
             },
             inventory_sources: {
                 name: 'inventory_sources',
-                // awToolTip: i18n._('Please save before assigning permissions'),
-                // dataPlacement: 'top',
-                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/inventory_sources/',
-                type: 'collection',
+                include: "SourcesListDefinition",
+                includeForm: "SourcesFormDefinition",
                 title: i18n._('Sources'),
                 iterator: 'inventory_source',
-                index: false,
-                open: false,
-                // search: {
-                //     order_by: 'username'
-                // },
-                actions: {
-                    add: {
-                        label: i18n._('Add'),
-                        ngClick: "$state.go('.add')",
-                        awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
-                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
-
-                    }
-                },
-                fields: {
-                    name: {
-                        label: i18n._('Name'),
-                        // linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                    }
-                }
+                listState: buildSourcesListState,
+                addState: buildSourcesAddState,
+                editState: buildSourcesEditState
             },
             //this is a placeholder for when we're ready for completed jobs
             completed_jobs: {

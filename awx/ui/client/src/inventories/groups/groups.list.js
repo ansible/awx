@@ -17,19 +17,6 @@ export default {
     basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/root_groups/',
 
     fields: {
-        sync_status: {
-            label: '',
-            nosort: true,
-            mode: 'all',
-            iconOnly: true,
-            ngClick: 'viewUpdateStatus(group.id)',
-            awToolTip: "{{ group.status_tooltip }}",
-            dataTipWatch: "group.status_tooltip",
-            icon: "{{ 'fa icon-cloud-' + group.status_class }}",
-            ngClass: "group.status_class",
-            dataPlacement: "top",
-            columnClass: 'status-column List-staticColumn--smallStatus'
-        },
         failed_hosts: {
             label: '',
             nosort: true,
