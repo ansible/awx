@@ -61,6 +61,24 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
             }
         });
 
+        $scope.$on('selectedOrDeselected', function(e, value) {
+            let item = value.value;
+
+            if (value.isSelected) {
+                if(!$scope.hostsSelected) {
+                    $scope.hostsSelected = [];
+                }
+                $scope.hostsSelected.push(item);
+            } else {
+                _.remove($scope.hostsSelected, { id: item.id });
+                if($scope.hostsSelected.length === 0) {
+                    $scope.hostsSelected = null;
+                }
+            }
+
+            $scope.systemTrackingDisabled = ($scope.hostsSelected && $scope.hostsSelected.length > 2) ? true : false;
+        });
+
     }
 
     function setJobStatus(){
@@ -119,5 +137,14 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
 
     $scope.smartInventory = function() {
         $state.go('inventories.addSmartInventory');
+    };
+
+    $scope.systemTracking = function(){
+        var hostIds = _.map($scope.hostsSelected, (host) => host.id);
+        $state.go('systemTracking', {
+            inventoryId: $state.params.inventory_id,
+            hosts: $scope.$parent.hostsSelectedItems,
+            hostIds: hostIds
+        });
     };
 }];
