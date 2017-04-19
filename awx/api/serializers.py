@@ -1471,7 +1471,13 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                 errors['source_script'] = _("If 'source' is 'custom', 'source_script' must be provided.")
             else:
                 try:
-                    if source_script.organization != self.instance.inventory.organization:
+                    if not self.instance:
+                        dest_inventory = attrs.get('inventory', None)
+                        if not dest_inventory:
+                            errors['inventory'] = _("Must provide an inventory.")
+                    else:
+                        dest_inventory = self.instance.inventory
+                    if source_script.organization != dest_inventory.organization:
                         errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
                 except Exception as exc:
                     errors['source_script'] = _("'source_script' doesn't exist.")
