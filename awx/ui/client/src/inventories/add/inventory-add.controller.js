@@ -77,7 +77,7 @@ function InventoriesAdd($scope, $location,
                 .success(function(data) {
                     var inventory_id = data.id;
                     Wait('stop');
-                    $location.path('/inventories/' + inventory_id);
+                    $state.go('inventories.edit', {inventory_id: inventory_id});
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, form, {
