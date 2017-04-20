@@ -3,7 +3,7 @@
 
 import logging
 
-from twilio.rest import TwilioRestClient
+from twilio.rest import Client
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -29,7 +29,7 @@ class TwilioBackend(TowerBaseEmailBackend):
     def send_messages(self, messages):
         sent_messages = 0
         try:
-            connection = TwilioRestClient(self.account_sid, self.account_token)
+            connection = Client(self.account_sid, self.account_token)
         except Exception as e:
             if not self.fail_silently:
                 raise

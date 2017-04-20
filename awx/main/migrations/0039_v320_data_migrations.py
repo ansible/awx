@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
     operations = [
         # Inventory Refresh
         migrations.RunPython(migration_utils.set_current_apps_for_migrations),
+        migrations.RunPython(invsrc.remove_rax_inventory_sources),
         migrations.RunPython(invsrc.remove_inventory_source_with_no_inventory_link),
         migrations.RunPython(invsrc.rename_inventory_sources),
     ]

@@ -745,7 +745,6 @@ class InventorySourceOptions(BaseModel):
         ('', _('Manual')),
         ('file', _('File, Directory or Script')),
         ('scm', _('Sourced from a project in Tower')),
-        ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure Classic (deprecated)')),
@@ -954,14 +953,6 @@ class InventorySourceOptions(BaseModel):
         ]
 
     @classmethod
-    def get_rax_region_choices(cls):
-        # Not possible to get rax regions without first authenticating, so use
-        # list from settings.
-        regions = list(getattr(settings, 'RAX_REGION_CHOICES', []))
-        regions.insert(0, ('ALL', 'All'))
-        return regions
-
-    @classmethod
     def get_gce_region_choices(self):
         """Return a complete list of regions in GCE, as a list of
         two-tuples.
@@ -1037,10 +1028,7 @@ class InventorySourceOptions(BaseModel):
         if self.source in CLOUD_PROVIDERS:
             get_regions = getattr(self, 'get_%s_region_choices' % self.source)
             valid_regions = [x[0] for x in get_regions()]
-            if self.source == 'rax':
-                region_transform = lambda x: x.strip().upper()
-            else:
-                region_transform = lambda x: x.strip().lower()
+            region_transform = lambda x: x.strip().lower()
         else:
             return ''
         all_region = region_transform('all')

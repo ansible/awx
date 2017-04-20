@@ -361,16 +361,9 @@ class DashboardView(APIView):
                                'job_failed': inventory_with_failed_hosts.count(),
                                'inventory_failed': failed_inventory}
         user_inventory_sources = get_user_queryset(request.user, InventorySource)
-        rax_inventory_sources = user_inventory_sources.filter(source='rax')
-        rax_inventory_failed = rax_inventory_sources.filter(status='failed')
         ec2_inventory_sources = user_inventory_sources.filter(source='ec2')
         ec2_inventory_failed = ec2_inventory_sources.filter(status='failed')
         data['inventory_sources'] = {}
-        data['inventory_sources']['rax'] = {'url': reverse('api:inventory_source_list', request=request) + "?source=rax",
-                                            'label': 'Rackspace',
-                                            'failures_url': reverse('api:inventory_source_list', request=request) + "?source=rax&status=failed",
-                                            'total': rax_inventory_sources.count(),
-                                            'failed': rax_inventory_failed.count()}
         data['inventory_sources']['ec2'] = {'url': reverse('api:inventory_source_list', request=request) + "?source=ec2",
                                             'failures_url': reverse('api:inventory_source_list', request=request) + "?source=ec2&status=failed",
                                             'label': 'Amazon EC2',

@@ -35,7 +35,7 @@ from rest_framework import validators
 from rest_framework.utils.serializer_helpers import ReturnList
 
 # Django-Polymorphic
-from polymorphic import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS

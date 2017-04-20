@@ -17,6 +17,14 @@ def remove_manual_inventory_sources(apps, schema_editor):
     InventorySource.objects.filter(source='').delete()
 
 
+def remove_rax_inventory_sources(apps, schema_editor):
+    '''Rackspace inventory sources are not supported since 3.2, remove them.
+    '''
+    InventorySource = apps.get_model('main', 'InventorySource')
+    logger.debug("Removing all Rackspace InventorySource from database.")
+    InventorySource.objects.filter(source='rax').delete()
+
+
 def rename_inventory_sources(apps, schema_editor):
     '''Rename existing InventorySource entries using the following format.
     {{ inventory_source.name }} - {{ inventory.module }} - {{ number }}
