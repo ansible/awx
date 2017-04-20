@@ -108,7 +108,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     //         // and pass the related endpoint
                     //         _.assign(params, { group: res.data.id }), res.data.related.inventory_source))
                     //     .then(res => $state.go('inventoryManage.editGroup', { group_id: res.data.group }, { reload: true }));
-                    SourcesService.post({params}).then(function(){
+                    SourcesService.post(params).then(function(){
                         $state.go('.', null, {reload: true});
                     });
             //         break;
