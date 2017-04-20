@@ -457,6 +457,14 @@ class CredentialType(CommonModelNameNotUnique):
 
     defaults = OrderedDict()
 
+    ENV_BLACKLIST = set((
+        'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
+        'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
+        'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'TOWER_HOST',
+        'MAX_EVENT_RES', 'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
+        'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
+    ))
+
     class Meta:
         app_label = 'main'
         ordering = ('kind', 'name')
@@ -613,6 +621,8 @@ class CredentialType(CommonModelNameNotUnique):
             namespace['tower'].filename = path
 
         for env_var, tmpl in self.injectors.get('env', {}).items():
+            if env_var.startswith('ANSIBLE_') or env_var in self.ENV_BLACKLIST:
+                continue
             env[env_var] = Template(tmpl).render(**namespace)
             safe_env[env_var] = Template(tmpl).render(**safe_namespace)
 

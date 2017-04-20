@@ -619,6 +619,36 @@ class TestJobCredentials(TestJobExecution):
 
         assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
 
+    def test_custom_environment_injectors_with_reserved_env_var(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'api_token',
+                    'label': 'API Token',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'env': {
+                    'JOB_ID': 'reserved'
+                }
+            }
+        )
+        self.instance.cloud_credential = Credential(
+            credential_type=some_cloud,
+            inputs = {'api_token': 'ABC123'}
+        )
+        self.task.run(self.pk)
+
+        assert self.task.run_pexpect.call_count == 1
+        call_args, _ = self.task.run_pexpect.call_args_list[0]
+        job, args, cwd, env, passwords, stdout = call_args
+
+        assert env['JOB_ID'] == str(self.instance.pk)
+
     def test_custom_environment_injectors_with_secret_field(self):
         some_cloud = CredentialType(
             kind='cloud',
