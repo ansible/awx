@@ -79,12 +79,6 @@ export default ['i18n', function(i18n) {
                         optionSref: 'inventories.addSmartInventory',
                         //TODO: this should have its own permission
                         ngShow: 'canAddInventory'
-                    },
-                    {
-                        optionContent: i18n._('SCM Inventory'),
-                        optionSref: 'inventories.addSCMInventory',
-                        //TODO: this should have its own permission
-                        ngShow: 'canAddInventory'
                     }
                 ],
                 ngShow: 'canAddInventory || canAddSmartInventory || canAddSCMInventory'
