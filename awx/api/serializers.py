@@ -1547,6 +1547,17 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             fields.pop('group', None)
         return fields
 
+    def get_summary_fields(self, obj):  # TODO: remove in 3.3
+        summary_fields = super(InventorySourceSerializer, self).get_summary_fields(obj)
+        if self.V1 and obj.deprecated_group_id:
+            g = obj.deprecated_group
+            summary_fields['group'] = {}
+            for field in SUMMARIZABLE_FK_FIELDS['group']:
+                fval = getattr(g, field, None)
+                if fval is not None:
+                    summary_fields['group'][field] = fval
+        return summary_fields
+
     def get_group(self, obj):  # TODO: remove in 3.3
         if obj.deprecated_group:
             return obj.deprecated_group.id
