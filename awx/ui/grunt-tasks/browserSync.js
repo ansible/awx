@@ -18,6 +18,7 @@ module.exports = {
             },
             keepalive: false,
             watchTask: true,
+            reloadDebounce: 1000,
             // The browser-sync-client lib will write your current scroll position to window.name
             // https://github.com/BrowserSync/browser-sync-client/blob/a2718faa91e11553feca7a3962313bf1ec6ba3e5/dist/index.js#L500
             // This strategy is enabled in the core browser-sync lib, and not externally documented as an option. Yay!

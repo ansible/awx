@@ -11,3 +11,5 @@ templates
 tests
 client/**/*.js
 
+!client/components/**/*.js
+

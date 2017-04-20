@@ -10,18 +10,19 @@ module.exports = {
             src: [
                 'client/legacy-styles/*.less',
                 'client/src/**/*.less',
+                'client/theme/index.less'
             ]
         }],
         options: {
             sourceMap: true
         }
     },
-
     prod: {
         files: {
             'static/tower.min.css': [
                 'client/legacy-styles/*.less',
                 'client/src/**/*.less',
+                'client/theme/index.less'
             ]
         },
         options: {

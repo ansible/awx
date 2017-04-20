@@ -60,7 +60,6 @@ import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
-import credentials from './credentials/main';
 import jobs from './jobs/main';
 import teams from './teams/main';
 import users from './users/main';
@@ -71,6 +70,9 @@ import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
+
+import '../components';
+import './credentials';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -118,7 +120,6 @@ var tower = angular.module('Tower', [
     standardOut.name,
     Templates.name,
     portalMode.name,
-    credentials.name,
     jobs.name,
     teams.name,
     users.name,
@@ -131,6 +132,8 @@ var tower = angular.module('Tower', [
     'PromptDialog',
     'AWDirectives',
     'features',
+    'at.components',
+    'at.feature.credentials'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

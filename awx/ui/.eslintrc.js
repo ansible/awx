@@ -15,8 +15,9 @@ module.exports = {
         jsyaml: true
     },
     rules: {
-        indent: ['error', 4],
-        'comma-dangle': 'off',
-        'prefer-const': ['off']
+        indent: [0, 4],
+        'comma-dangle': 0,
+        'prefer-const': 0,
+        'space-before-function-paren': [2, 'always']
     }
 };
