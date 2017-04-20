@@ -33,6 +33,18 @@ class MongoFilterBackend(BaseFilterBackend):
         return queryset
 
 
+class V1CredentialFilterBackend(BaseFilterBackend):
+    '''
+    For /api/v1/ requests, filter out v2 (custom) credentials
+    '''
+
+    def filter_queryset(self, request, queryset, view):
+        from awx.api.versioning import get_request_version
+        if get_request_version(request) == 1:
+            queryset = queryset.filter(credential_type__managed_by_tower=True)
+        return queryset
+
+
 class TypeFilterBackend(BaseFilterBackend):
     '''
     Filter on type field now returned with all objects.

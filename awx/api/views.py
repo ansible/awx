@@ -62,6 +62,7 @@ from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
+from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.api.versioning import reverse, get_request_version
@@ -1507,6 +1508,7 @@ class CredentialList(ListCreateAPIView):
     model = Credential
     serializer_class = CredentialSerializerCreate
     capabilities_prefetch = ['admin', 'use']
+    filter_backends = ListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
 class CredentialOwnerUsersList(SubListAPIView):
@@ -1542,6 +1544,7 @@ class UserCredentialsList(SubListCreateAPIView):
     serializer_class = UserCredentialSerializerCreate
     parent_model = User
     parent_key = 'user'
+    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         user = self.get_parent_object()
@@ -1558,6 +1561,7 @@ class TeamCredentialsList(SubListCreateAPIView):
     serializer_class = TeamCredentialSerializerCreate
     parent_model = Team
     parent_key = 'team'
+    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         team = self.get_parent_object()
@@ -1574,6 +1578,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
     serializer_class = OrganizationCredentialSerializerCreate
     parent_model = Organization
     parent_key = 'organization'
+    filter_backends = SubListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
     def get_queryset(self):
         organization = self.get_parent_object()
@@ -1592,6 +1597,7 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
+    filter_backends = RetrieveUpdateDestroyAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
 class CredentialActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
