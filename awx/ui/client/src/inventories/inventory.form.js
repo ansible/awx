@@ -13,10 +13,29 @@
 export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
     'buildGroupsEditState', 'buildHostListState', 'buildHostAddState',
     'buildHostEditState', 'buildSourcesListState', 'buildSourcesAddState',
-    'buildSourcesEditState',
+    'buildSourcesEditState', 'buildInventoryCompletedJobsState',
+    'InventoryCompletedJobsList',
 function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
     buildHostListState, buildHostAddState, buildHostEditState,
-    buildSourcesListState, buildSourcesAddState,buildSourcesEditState) {
+    buildSourcesListState, buildSourcesAddState,buildSourcesEditState,
+    buildInventoryCompletedJobsState, InventoryCompletedJobsList) {
+
+    var completed_jobs_object = {
+        name: 'completed_jobs',
+        index: false,
+        basePath: "unified_jobs",
+        include: "InventoryCompletedJobsList",
+        title: i18n._('Completed Jobs'),
+        iterator: 'completed_job',
+        generateList: true,
+        listState: buildInventoryCompletedJobsState,
+        search: {
+            "or__job__inventory": ''
+        }
+    };
+    let clone = _.clone(InventoryCompletedJobsList);
+    completed_jobs_object = angular.extend(clone, completed_jobs_object);
+
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -96,7 +115,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 name: 'permissions',
                 awToolTip: i18n._('Please save before assigning permissions'),
                 dataPlacement: 'top',
-                basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/access_list/',
+                basePath: 'api/v2/inventories/{{$stateParams.inventory_id}}/access_list/',
                 type: 'collection',
                 title: i18n._('Permissions'),
                 iterator: 'permission',
@@ -165,39 +184,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 addState: buildSourcesAddState,
                 editState: buildSourcesEditState
             },
-            //this is a placeholder for when we're ready for completed jobs
-            completed_jobs: {
-                name: 'completed_jobs',
-                // awToolTip: i18n._('Please save before assigning permissions'),
-                // dataPlacement: 'top',
-                basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/completed_jobs/',
-                type: 'collection',
-                title: i18n._('Completed Jobs'),
-                iterator: 'completed_job',
-                index: false,
-                open: false,
-                // search: {
-                //     order_by: 'username'
-                // },
-                actions: {
-                    add: {
-                        label: i18n._('Add'),
-                        ngClick: "$state.go('.add')",
-                        awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
-                        // ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
-
-                    }
-                },
-                fields: {
-                    name: {
-                        label: i18n._('Name'),
-                        // linkBase: 'users',
-                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                    }
-                }
-            }
+            completed_jobs: completed_jobs_object
         }
 
     };}];

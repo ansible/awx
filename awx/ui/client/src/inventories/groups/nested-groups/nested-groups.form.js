@@ -16,7 +16,8 @@ function(i18n, nestedGroupListState){
         addTitle: 'CREATE GROUP',
         editTitle: '{{ name }}',
         showTitle: true,
-        name: 'group',
+        name: 'nested_group',
+        iterator: "nested_group",
         basePath: 'groups',
         parent: 'inventories.edit.groups',
         // the parent node this generated state definition tree expects to attach to
@@ -81,12 +82,12 @@ function(i18n, nestedGroupListState){
         },
         related: {
             nested_groups: {
-                name: 'nested_groups',
-                ngClick: "$state.go('inventories.edit.groups.edit.nested_groups')",
-                include: "NestedGroupListDefinition",
-                includeForm: "NestedGroupFormDefinition",
+                name: 'related_groups',
+                ngClick: "$state.go('inventories.edit.groups.edit.related_groups')",
+                include: "RelatedGroupListDefinition",
+                includeForm: "RelatedGroupFormDefinition",
                 title: i18n._('Groups'),
-                iterator: 'nested_group',
+                iterator: 'related_group',
                 listState: nestedGroupListState,
                 // addState: buildGroupsAddState,
                 // editState: buildGroupsEditState

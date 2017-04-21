@@ -7,6 +7,7 @@
 import groupList from './list/main';
 import groupAdd from './add/main';
 import groupEdit from './edit/main';
+import nestedGroups from './nested-groups/main';
 import groupFormDefinition from './groups.form';
 import groupListDefinition from './groups.list';
 import service from './groups.service';
@@ -20,9 +21,10 @@ export default
     angular.module('group', [
         groupList.name,
         groupAdd.name,
-        groupEdit.name
+        groupEdit.name,
+        nestedGroups.name
     ])
-    .value('GroupForm', groupFormDefinition)
+    .factory('GroupForm', groupFormDefinition)
     .value('GroupList', groupListDefinition)
     .factory('GetHostsStatusMsg', GetHostsStatusMsg)
     .factory('GetSourceTypeOptions', GetSourceTypeOptions)

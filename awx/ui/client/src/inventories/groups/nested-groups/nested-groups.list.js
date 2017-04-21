@@ -5,15 +5,15 @@
  *************************************************/
 
 export default {
-    name: 'groups',
-    iterator: 'group',
+    name: 'nested_groups',
+    iterator: 'nested_group',
     editTitle: '{{ inventory.name }}',
     well: true,
     wellOverride: true,
     index: false,
     hover: true,
     multiSelect: true,
-    trackBy: 'group.id',
+    trackBy: 'nested_group.id',
     basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/root_groups/',
 
     fields: {
@@ -31,6 +31,8 @@ export default {
         name: {
             label: 'Groups',
             key: true,
+
+            // ngClick: "groupSelect(group.id)",
             ngClick: "editGroup(group.id)",
             columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
             class: 'InventoryManage-breakWord',

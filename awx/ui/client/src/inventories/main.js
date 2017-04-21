@@ -8,6 +8,7 @@ import host from './hosts/main';
 import group from './groups/main';
 import sources from './sources/main';
 import relatedHost from './related-hosts/main';
+import inventoryCompletedJobs from './completed_jobs/main';
 import inventoryAdd from './add/main';
 import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
@@ -22,6 +23,7 @@ angular.module('inventory', [
         group.name,
         sources.name,
         relatedHost.name,
+        inventoryCompletedJobs.name,
         inventoryAdd.name,
         inventoryEdit.name,
         inventoryList.name

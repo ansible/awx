@@ -576,6 +576,7 @@ function($injector, $stateExtender, $log, i18n) {
                         if(field.includeForm){
                             let form = field.includeForm ? $injector.get(field.includeForm) : field;
                             states.push(that.generateLookupNodes(form, formState));
+                            states.push(that.generateFormListDefinitions(form, formState, params));
                         }
                         states = _.flatten(states);
                     }
@@ -678,6 +679,7 @@ function($injector, $stateExtender, $log, i18n) {
                 if (field.search) {
                     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
                 }
+                
                 return state;
             }
             return _(form.related).map(buildListNodes).flatten().value();
