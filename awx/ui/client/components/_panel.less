@@ -1,9 +1,14 @@
 .at-Panel {
-    margin: @at-margin-md 0;
+    margin: @at-margin-md 0 0 0;
+    padding: @at-padding-md;
 }
 
-// TODO (remove override on cleanup):
-.at-Panel-heading:hover {
-    cursor: default;
+.at-Panel-heading {
+    margin: 0;
+    padding: 0;
 }
-// TODO-end
+
+.at-Panel-body {
+    margin: @at-margin-md 0 0 0;
+    padding: 0;
+}

@@ -1,10 +1,26 @@
 function IndexController () {
-  let vm = this;
+    let vm = this;
 
-  vm.panel = {
-    title: 'Credentials',
-    titleBadge: 5
-  };
+    vm.panel = {
+        heading: {
+            title: {
+                text: 'Credentials'
+            },
+            badge: {
+                text: 5
+            }
+        }
+    };
+
+    vm.key = {
+        on: false,
+        button: {
+            text: 'Key'
+        },
+        body: {
+            text: 'Yadda yadda yadda'
+        }
+    };
 }
 
 // IndexController.$inject = [];

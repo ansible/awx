@@ -1,13 +1,11 @@
 <div class="panel-heading at-Panel-heading">
-  <div ng-if="heading" class="at-Title-row">
-    <div ng-if="heading.title" class="at-Title-text">
-      {{ heading.title }}
+  <div ng-if="config" class="at-Title-row">
+    <div ng-if="config.title.text" class="at-Title-text">
+      {{ config.title.text }}
     </div>
-    <div ng-if="heading.titleBadge" class="at-Title-badge">
-      {{ heading.titleBadge }}
-    </div>
+    <at-badge config="config.badge"></at-badge>
   </div>
   
-  <ng-if="!heading" ng-transclude></ng-transclude>
+  <ng-if="!config" ng-transclude></ng-transclude>
 </div>
 

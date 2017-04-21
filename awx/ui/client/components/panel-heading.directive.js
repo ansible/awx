@@ -4,7 +4,7 @@ function atPanelHeading () {
         transclude: true,
         templateUrl: 'static/partials/components/panel-heading.partial.html',
         scope: {
-            heading: '=config'
+            config: '='
         }
     };
 }
