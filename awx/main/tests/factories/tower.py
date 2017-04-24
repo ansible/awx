@@ -213,12 +213,12 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
     if 'cloud_credential' in kwargs:
         cloud_cred = kwargs['cloud_credential']
         if type(cloud_cred) is not Credential:
-            cloud_cred = mk_credential(cloud_cred, kind='aws', persisted=persisted)
+            cloud_cred = mk_credential(cloud_cred, credential_type='aws', persisted=persisted)
 
     if 'network_credential' in kwargs:
         net_cred = kwargs['network_credential']
         if type(net_cred) is not Credential:
-            net_cred = mk_credential(net_cred, kind='net', persisted=persisted)
+            net_cred = mk_credential(net_cred, credential_type='net', persisted=persisted)
 
     if 'project' in kwargs:
         proj = kwargs['project']

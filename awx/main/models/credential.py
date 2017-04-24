@@ -1,5 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
+from collections import OrderedDict
+import functools
+import operator
 
 # Django
 from django.db import models
@@ -8,8 +11,9 @@ from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import ImplicitRoleField
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.fields import (ImplicitRoleField, CredentialInputField,
+                             CredentialTypeInputField,
+                             CredentialTypeInjectorField)
 from awx.main.utils import decrypt_field
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import * # noqa
@@ -18,8 +22,176 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.main.utils import encrypt_field
 
-__all__ = ['Credential']
+__all__ = ['Credential', 'CredentialType', 'V1Credential']
+
+
+class V1Credential(object):
+
+    #
+    # API v1 backwards compat; as long as we continue to support the
+    # /api/v1/credentials/ endpoint, we'll keep these definitions around.
+    # The credential serializers are smart enough to detect the request
+    # version and use *these* fields for constructing the serializer if the URL
+    # starts with /api/v1/
+    #
+    PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data',
+                       'ssh_key_unlock', 'become_password',
+                       'vault_password', 'secret', 'authorize_password')
+    KIND_CHOICES = [
+        ('ssh', 'Machine'),
+        ('net', 'Network'),
+        ('scm', 'Source Control'),
+        ('aws', 'Amazon Web Services'),
+        ('rax', 'Rackspace'),
+        ('vmware', 'VMware vCenter'),
+        ('satellite6', 'Red Hat Satellite 6'),
+        ('cloudforms', 'Red Hat CloudForms'),
+        ('gce', 'Google Compute Engine'),
+        ('azure', 'Microsoft Azure Classic (deprecated)'),
+        ('azure_rm', 'Microsoft Azure Resource Manager'),
+        ('openstack', 'OpenStack'),
+    ]
+    FIELDS = {
+        'kind': models.CharField(
+            max_length=32,
+            choices=[
+                (kind[0], _(kind[1]))
+                for kind in KIND_CHOICES
+            ],
+            default='ssh',
+        ),
+        'cloud': models.BooleanField(
+            default=False,
+            editable=False,
+        ),
+        'host': models.CharField(
+            blank=True,
+            default='',
+            max_length=1024,
+            verbose_name=_('Host'),
+            help_text=_('The hostname or IP address to use.'),
+        ),
+        'username': models.CharField(
+            blank=True,
+            default='',
+            max_length=1024,
+            verbose_name=_('Username'),
+            help_text=_('Username for this credential.'),
+        ),
+        'password': models.CharField(
+            blank=True,
+            default='',
+            max_length=1024,
+            verbose_name=_('Password'),
+            help_text=_('Password for this credential (or "ASK" to prompt the '
+                        'user for machine credentials).'),
+        ),
+        'security_token': models.CharField(
+            blank=True,
+            default='',
+            max_length=1024,
+            verbose_name=_('Security Token'),
+            help_text=_('Security Token for this credential'),
+        ),
+        'project': models.CharField(
+            blank=True,
+            default='',
+            max_length=100,
+            verbose_name=_('Project'),
+            help_text=_('The identifier for the project.'),
+        ),
+        'domain': models.CharField(
+            blank=True,
+            default='',
+            max_length=100,
+            verbose_name=_('Domain'),
+            help_text=_('The identifier for the domain.'),
+        ),
+        'ssh_key_data': models.TextField(
+            blank=True,
+            default='',
+            verbose_name=_('SSH private key'),
+            help_text=_('RSA or DSA private key to be used instead of password.'),
+        ),
+        'ssh_key_unlock': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            verbose_name=_('SSH key unlock'),
+            help_text=_('Passphrase to unlock SSH private key if encrypted (or '
+                        '"ASK" to prompt the user for machine credentials).'),
+        ),
+        'become_method': models.CharField(
+            max_length=32,
+            blank=True,
+            default='',
+            choices=[
+                ('', _('None')),
+                ('sudo', _('Sudo')),
+                ('su', _('Su')),
+                ('pbrun', _('Pbrun')),
+                ('pfexec', _('Pfexec')),
+                ('dzdo', _('DZDO')),
+                ('pmrun', _('Pmrun')),
+            ],
+            help_text=_('Privilege escalation method.')
+        ),
+        'become_username': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Privilege escalation username.'),
+        ),
+        'become_password': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Password for privilege escalation method.')
+        ),
+        'vault_password': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Vault password (or "ASK" to prompt the user).'),
+        ),
+        'authorize': models.BooleanField(
+            default=False,
+            help_text=_('Whether to use the authorize mechanism.'),
+        ),
+        'authorize_password': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Password used by the authorize mechanism.'),
+        ),
+        'client': models.CharField(
+            max_length=128,
+            blank=True,
+            default='',
+            help_text=_('Client Id or Application Id for the credential'),
+        ),
+        'secret': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Secret Token for this credential'),
+        ),
+        'subscription': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Subscription identifier for this credential'),
+        ),
+        'tenant': models.CharField(
+            max_length=1024,
+            blank=True,
+            default='',
+            help_text=_('Tenant identifier for this credential'),
+        )
+    }
+
 
 
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
@@ -29,39 +201,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     If used with sudo, a sudo password should be set if required.
     '''
 
-    KIND_CHOICES = [
-        ('ssh', _('Machine')),
-        ('net', _('Network')),
-        ('scm', _('Source Control')),
-        ('aws', _('Amazon Web Services')),
-        ('rax', _('Rackspace')),
-        ('vmware', _('VMware vCenter')),
-        ('satellite6', _('Red Hat Satellite 6')),
-        ('cloudforms', _('Red Hat CloudForms')),
-        ('gce', _('Google Compute Engine')),
-        ('azure', _('Microsoft Azure Classic (deprecated)')),
-        ('azure_rm', _('Microsoft Azure Resource Manager')),
-        ('openstack', _('OpenStack')),
-    ]
-
-    BECOME_METHOD_CHOICES = [
-        ('', _('None')),
-        ('sudo', _('Sudo')),
-        ('su', _('Su')),
-        ('pbrun', _('Pbrun')),
-        ('pfexec', _('Pfexec')),
-        ('dzdo', _('DZDO')),
-        ('pmrun', _('Pmrun')),
-        #('runas',  _('Runas')),
-    ]
-
-    PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data', 'ssh_key_unlock',
-                       'become_password', 'vault_password', 'secret', 'authorize_password')
-
     class Meta:
         app_label = 'main'
-        ordering = ('kind', 'name')
-        unique_together = (('organization', 'name', 'kind'),)
+        ordering = ('name',)
+        unique_together = (('organization', 'name', 'credential_type'))
+
+    PASSWORD_FIELDS = ['inputs']
 
     deprecated_user = models.ForeignKey(
         'auth.User',
@@ -79,6 +224,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         related_name='deprecated_credentials',
     )
+    credential_type = models.ForeignKey(
+        'CredentialType',
+        related_name='credentials',
+        help_text=_('Type for this credential.  Credential Types define '
+                    'valid fields (e.g,. "username", "password") and their '
+                    'properties (e.g,. "username is required" or "password '
+                    'should be stored with encryption").')
+    )
     organization = models.ForeignKey(
         'Organization',
         null=True,
@@ -87,130 +240,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         related_name='credentials',
     )
-    kind = models.CharField(
-        max_length=32,
-        choices=KIND_CHOICES,
-        default='ssh',
-    )
-    cloud = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    host = models.CharField(
+    inputs = CredentialInputField(
         blank=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('Host'),
-        help_text=_('The hostname or IP address to use.'),
-    )
-    username = models.CharField(
-        blank=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('Username'),
-        help_text=_('Username for this credential.'),
-    )
-    password = models.CharField(
-        blank=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('Password'),
-        help_text=_('Password for this credential (or "ASK" to prompt the '
-                    'user for machine credentials).'),
-    )
-    security_token = models.CharField(
-        blank=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('Security Token'),
-        help_text=_('Security Token for this credential'),
-    )
-    project = models.CharField(
-        blank=True,
-        default='',
-        max_length=100,
-        verbose_name=_('Project'),
-        help_text=_('The identifier for the project.'),
-    )
-    domain = models.CharField(
-        blank=True,
-        default='',
-        max_length=100,
-        verbose_name=_('Domain'),
-        help_text=_('The identifier for the domain.'),
-    )
-    ssh_key_data = models.TextField(
-        blank=True,
-        default='',
-        verbose_name=_('SSH private key'),
-        help_text=_('RSA or DSA private key to be used instead of password.'),
-    )
-    ssh_key_unlock = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        verbose_name=_('SSH key unlock'),
-        help_text=_('Passphrase to unlock SSH private key if encrypted (or '
-                    '"ASK" to prompt the user for machine credentials).'),
-    )
-    become_method = models.CharField(
-        max_length=32,
-        blank=True,
-        default='',
-        choices=BECOME_METHOD_CHOICES,
-        help_text=_('Privilege escalation method.')
-    )
-    become_username = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Privilege escalation username.'),
-    )
-    become_password = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Password for privilege escalation method.')
-    )
-    vault_password = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Vault password (or "ASK" to prompt the user).'),
-    )
-    authorize = models.BooleanField(
-        default=False,
-        help_text=_('Whether to use the authorize mechanism.'),
-    )
-    authorize_password = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Password used by the authorize mechanism.'),
-    )
-    client = models.CharField(
-        max_length=128,
-        blank=True,
-        default='',
-        help_text=_('Client Id or Application Id for the credential'),
-    )
-    secret = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Secret Token for this credential'),
-    )
-    subscription = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Subscription identifier for this credential'),
-    )
-    tenant = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Tenant identifier for this credential'),
+        default={},
+        help_text=_('Data structure used to specify input values (e.g., '
+                    '{"username": "jane-doe", "password": "secret"}).  Valid '
+                    'fields and their requirements vary depending on the '
+                    'fields defined on the chosen CredentialType.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -230,9 +266,50 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         'admin_role',
     ])
 
+    def __getattr__(self, item):
+        if item in V1Credential.FIELDS:
+            return self.inputs.get(item, V1Credential.FIELDS[item].default)
+        elif item in self.inputs:
+            return self.inputs[item]
+        raise AttributeError(item)
+
+    def __setattr__(self, item, value):
+        if item in V1Credential.FIELDS and item in self.credential_type.defined_fields:
+            if value:
+                self.inputs[item] = value
+            elif item in self.inputs:
+                del self.inputs[item]
+            return
+        super(Credential, self).__setattr__(item, value)
+
+    @property
+    def kind(self):
+        # TODO: remove the need for this helper property by removing its usage
+        # throughout the codebase
+        type_ = self.credential_type
+        if type_.kind != 'cloud':
+            return type_.kind
+        for field in V1Credential.KIND_CHOICES:
+            kind, name = field
+            if name == type_.name:
+                return kind
+
+    @property
+    def cloud(self):
+        return self.credential_type.kind == 'cloud'
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
+
+    #
+    # TODO: the SSH-related properties below are largely used for validation
+    # and for determining passwords necessary for job/ad-hoc launch
+    #
+    # These are SSH-specific; should we move them elsewhere?
+    #
     @property
     def needs_ssh_password(self):
-        return self.kind == 'ssh' and self.password == 'ASK'
+        return self.kind == 'machine' and self.password == 'ASK'
 
     @property
     def has_encrypted_ssh_key_data(self):
@@ -251,17 +328,17 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def needs_ssh_key_unlock(self):
-        if self.kind == 'ssh' and self.ssh_key_unlock in ('ASK', ''):
+        if self.kind == 'machine' and self.ssh_key_unlock in ('ASK', ''):
             return self.has_encrypted_ssh_key_data
         return False
 
     @property
     def needs_become_password(self):
-        return self.kind == 'ssh' and self.become_password == 'ASK'
+        return self.kind == 'machine' and self.become_password == 'ASK'
 
     @property
     def needs_vault_password(self):
-        return self.kind == 'ssh' and self.vault_password == 'ASK'
+        return self.kind == 'machine' and self.vault_password == 'ASK'
 
     @property
     def passwords_needed(self):
@@ -271,54 +348,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append(field)
         return needed
 
-    def get_absolute_url(self, request=None):
-        return reverse('api:credential_detail', kwargs={'pk': self.pk}, request=request)
-
-    def clean_host(self):
-        """Ensure that if this is a type of credential that requires a
-        `host`, that a host is provided.
-        """
-        host = self.host or ''
-        if not host and self.kind == 'vmware':
-            raise ValidationError(_('Host required for VMware credential.'))
-        if not host and self.kind == 'openstack':
-            raise ValidationError(_('Host required for OpenStack credential.'))
-        return host
-
-    def clean_domain(self):
-        return self.domain or ''
-
-    def clean_username(self):
-        username = self.username or ''
-        if not username and self.kind == 'aws':
-            raise ValidationError(_('Access key required for AWS credential.'))
-        if not username and self.kind == 'rax':
-            raise ValidationError(_('Username required for Rackspace '
-                                    'credential.'))
-        if not username and self.kind == 'vmware':
-            raise ValidationError(_('Username required for VMware credential.'))
-        if not username and self.kind == 'openstack':
-            raise ValidationError(_('Username required for OpenStack credential.'))
-        return username
-
-    def clean_password(self):
-        password = self.password or ''
-        if not password and self.kind == 'aws':
-            raise ValidationError(_('Secret key required for AWS credential.'))
-        if not password and self.kind == 'rax':
-            raise ValidationError(_('API key required for Rackspace credential.'))
-        if not password and self.kind == 'vmware':
-            raise ValidationError(_('Password required for VMware credential.'))
-        if not password and self.kind == 'openstack':
-            raise ValidationError(_('Password or API key required for OpenStack credential.'))
-        return password
-
-    def clean_project(self):
-        project = self.project or ''
-        if self.kind == 'openstack' and not project:
-            raise ValidationError(_('Project name required for OpenStack credential.'))
-        return project
-
+    #
+    # TODO: all of these required fields should be captured in schema
+    # definitions and these clean_ methods should be removed
+    #
     def clean_ssh_key_data(self):
         if self.pk:
             ssh_key_data = decrypt_field(self, 'ssh_key_data')
@@ -355,9 +388,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             raise ValidationError(_('Credential cannot be assigned to both a user and team.'))
 
     def _password_field_allows_ask(self, field):
-        return bool(self.kind == 'ssh' and field != 'ssh_key_data')
+        return bool(self.kind == 'machine' and field != 'ssh_key_data')
 
     def save(self, *args, **kwargs):
+        inputs_before = {}
         # If update_fields has been specified, add our field names to it,
         # if hit hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -377,10 +411,507 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                     self.deprecated_user = None
                     if 'deprecated_user' not in update_fields:
                         update_fields.append('deprecated_user')
-        # Set cloud flag based on credential kind.
-        cloud = self.kind in CLOUD_PROVIDERS + ('aws',)
-        if self.cloud != cloud:
-            self.cloud = cloud
-            if 'cloud' not in update_fields:
-                update_fields.append('cloud')
+
+            inputs_before = cred_before.inputs
+
+        self.PASSWORD_FIELDS = self.credential_type.secret_fields
+
+        if self.pk:
+            # Look up the currently persisted value so that we can replace
+            # $encrypted$ with the actual DB-backed value
+            for field in self.PASSWORD_FIELDS:
+                if self.inputs.get(field) == '$encrypted$':
+                    self.inputs[field] = inputs_before[field]
+
         super(Credential, self).save(*args, **kwargs)
+
+    def encrypt_field(self, field, ask):
+        encrypted = encrypt_field(self, field, ask=ask)
+        if encrypted:
+            self.inputs[field] = encrypted
+        elif field in self.inputs:
+            del self.inputs[field]
+
+    def mark_field_for_save(self, update_fields, field):
+        if field in self.credential_type.secret_fields:
+            # If we've encrypted a v1 field, we actually want to persist
+            # self.inputs
+            field = 'inputs'
+        super(Credential, self).mark_field_for_save(update_fields, field)
+
+
+class CredentialType(CommonModelNameNotUnique):
+    '''
+    A reusable schema for a credential.
+
+    Used to define a named credential type with fields (e.g., an API key) and
+    output injectors (i.e., an environment variable that uses the API key).
+    '''
+
+    defaults = OrderedDict()
+
+    class Meta:
+        app_label = 'main'
+        ordering = ('kind', 'name')
+        unique_together = (('name', 'kind'),)
+
+    KIND_CHOICES = (
+        ('machine', _('Machine')),
+        ('net', _('Network')),
+        ('scm', _('Source Control')),
+        ('cloud', _('Cloud'))
+    )
+
+    kind = models.CharField(
+        max_length=32,
+        choices=KIND_CHOICES
+    )
+    managed_by_tower = models.BooleanField(
+        default=False,
+        editable=False
+    )
+    inputs = CredentialTypeInputField(
+        blank=True,
+        default={}
+    )
+    injectors = CredentialTypeInjectorField(
+        blank=True,
+        default={}
+    )
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:credential_type_detail', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def unique_by_kind(self):
+        return self.kind != 'cloud'
+
+    @property
+    def defined_fields(self):
+        return [field.get('id') for field in self.inputs.get('fields', [])]
+
+    @property
+    def secret_fields(self):
+        return [
+            field['id'] for field in self.inputs.get('fields', [])
+            if field.get('secret', False) is True
+        ]
+
+    @classmethod
+    def default(cls, f):
+        func = functools.partial(f, cls)
+        cls.defaults[f.__name__] = func
+        return func
+
+    @classmethod
+    def setup_tower_managed_defaults(cls, persisted=True):
+        for default in cls.defaults.values():
+            default_ = default()
+            if persisted:
+                default_.save()
+
+    @classmethod
+    def from_v1_kind(cls, kind, data={}):
+        match = None
+        kind = kind or 'ssh'
+        kind_choices = dict(V1Credential.KIND_CHOICES)
+        requirements = {}
+        if kind == 'ssh':
+            if 'vault_password' in data:
+                requirements.update(dict(
+                    kind='machine',
+                    name='Vault'
+                ))
+            else:
+                requirements.update(dict(
+                    kind='machine',
+                    name='SSH'
+                ))
+        elif kind in ('net', 'scm'):
+            requirements['kind'] = kind
+        elif kind in kind_choices:
+            requirements.update(dict(
+                kind='cloud',
+                name=kind_choices[kind]
+            ))
+        if requirements:
+            requirements['managed_by_tower'] = True
+            match = cls.objects.filter(**requirements)[:1].get()
+        return match
+
+
+@CredentialType.default
+def ssh(cls):
+    return cls(
+        kind='machine',
+        name='SSH',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+                'ask_at_runtime': True
+            }, {
+                'id': 'ssh_key_data',
+                'label': 'SSH Private Key',
+                'type': 'string',
+                'secret': True,
+                'multiline': True
+            }, {
+                'id': 'ssh_key_unlock',
+                'label': 'Private Key Passphrase',
+                'type': 'string',
+                'secret': True,
+                'ask_at_runtime': True
+            }, {
+                'id': 'become_method',
+                'label': 'Privilege Escalation Method',
+                'choices': map(operator.itemgetter(0),
+                               V1Credential.FIELDS['become_method'].choices)
+            }, {
+                'id': 'become_username',
+                'label': 'Privilege Escalation Username',
+                'type': 'string',
+            }, {
+                'id': 'become_password',
+                'label': 'Privilege Escalation Password',
+                'type': 'string',
+                'secret': True,
+                'ask_at_runtime': True
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def scm(cls):
+    return cls(
+        kind='scm',
+        name='Source Control',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True
+            }, {
+                'id': 'ssh_key_data',
+                'label': 'SCM Private Key',
+                'type': 'string',
+                'secret': True,
+                'multiline': True
+            }, {
+                'id': 'ssh_key_unlock',
+                'label': 'Private Key Passphrase',
+                'type': 'string',
+                'secret': True
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def vault(cls):
+    return cls(
+        kind='machine',
+        name='Vault',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'vault_password',
+                'label': 'Vault Password',
+                'type': 'string',
+                'secret': True,
+                'ask_at_runtime': True
+            }],
+        }
+    )
+
+
+@CredentialType.default
+def net(cls):
+    return cls(
+        kind='net',
+        name='Network',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'ssh_key_data',
+                'label': 'SSH Private Key',
+                'type': 'string',
+                'secret': True,
+                'multiline': True
+            }, {
+                'id': 'ssh_key_unlock',
+                'label': 'Private Key Passphrase',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'authorize_password',
+                'label': 'Authorize Password',
+                'type': 'string',
+                'secret': True,
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def aws(cls):
+    return cls(
+        kind='cloud',
+        name='Amazon Web Services',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'security_token',
+                'label': 'STS Token',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['username', 'password']
+        }
+    )
+
+
+@CredentialType.default
+def openstack(cls):
+    return cls(
+        kind='cloud',
+        name='OpenStack',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'host',
+                'label': 'Host',
+                'type': 'string',
+            }, {
+                'id': 'project',
+                'label': 'Project',
+                'type': 'string',
+            }],
+            'required': ['username', 'password', 'host', 'project']
+        }
+    )
+
+
+@CredentialType.default
+def rackspace(cls):
+    return cls(
+        kind='cloud',
+        name='Rackspace',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['username', 'password']
+        }
+    )
+
+
+@CredentialType.default
+def vmware(cls):
+    return cls(
+        kind='cloud',
+        name='VMware vCenter',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'VCenter Host',
+                'type': 'string',
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['host', 'username', 'password']
+        }
+    )
+
+
+@CredentialType.default
+def satellite6(cls):
+    return cls(
+        kind='cloud',
+        name='Red Hat Satellite 6',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'Satellite 6 URL',
+                'type': 'string',
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def cloudforms(cls):
+    return cls(
+        kind='cloud',
+        name='Red Hat CloudForms',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'CloudForms URL',
+                'type': 'string',
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def gce(cls):
+    return cls(
+        kind='cloud',
+        name='Google Compute Engine',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Service Account Email Address',
+                'type': 'string'
+            }, {
+                'id': 'project',
+                'label': 'Project',
+                'type': 'string'
+            }, {
+                'id': 'ssh_key_data',
+                'label': 'RSA Private Key',
+                'type': 'string',
+                'secret': True,
+                'multiline': True
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def azure(cls):
+    return cls(
+        kind='cloud',
+        name='Microsoft Azure Classic (deprecated)',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Subscription ID',
+                'type': 'string'
+            }, {
+                'id': 'ssh_key_data',
+                'label': 'Management Certificate',
+                'type': 'string',
+                'secret': True,
+                'multiline': True
+            }]
+        }
+    )
+
+
+@CredentialType.default
+def azure_rm(cls):
+    return cls(
+        kind='cloud',
+        name='Microsoft Azure Resource Manager',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'subscription',
+                'label': 'Subscription ID',
+                'type': 'string'
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'client',
+                'label': 'Client ID',
+                'type': 'string'
+            }, {
+                'id': 'secret',
+                'label': 'Client Secret',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'tenant',
+                'label': 'Tenant ID',
+                'type': 'string'
+            }]
+        }
+    )

@@ -64,7 +64,7 @@ from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.versioning import reverse
+from awx.api.versioning import reverse, get_request_version
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
@@ -134,8 +134,8 @@ class ApiRootView(APIView):
     def get(self, request, format=None):
         ''' list supported API versions '''
 
-        v1 = reverse('api:api_version_root_view', kwargs={'version': 'v1'})
-        v2 = reverse('api:api_version_root_view', kwargs={'version': 'v2'})
+        v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
+        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
         data = dict(
             description = _('Ansible Tower REST API'),
             current_version = v2,
@@ -150,12 +150,10 @@ class ApiRootView(APIView):
 class ApiVersionRootView(APIView):
 
     authentication_classes = []
-    view_name = _('Version')
     permission_classes = (AllowAny,)
 
     def get(self, request, format=None):
         ''' list top level resources '''
-
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
@@ -169,6 +167,8 @@ class ApiVersionRootView(APIView):
         data['project_updates'] = reverse('api:project_update_list', request=request)
         data['teams'] = reverse('api:team_list', request=request)
         data['credentials'] = reverse('api:credential_list', request=request)
+        if get_request_version(request) > 1:
+            data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
@@ -194,6 +194,16 @@ class ApiVersionRootView(APIView):
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)
+
+
+class ApiV1RootView(ApiVersionRootView):
+    view_name = _('Version 1')
+
+
+class ApiV2RootView(ApiVersionRootView):
+    view_name = _('Version 2')
+    new_in_320 = True
+    new_in_api_v2 = True
 
 
 class ApiV1PingView(APIView):
@@ -1474,6 +1484,22 @@ class UserAccessList(ResourceAccessList):
     model = User # needs to be User for AccessLists's
     parent_model = User
     new_in_300 = True
+
+
+class CredentialTypeList(ListCreateAPIView):
+
+    model = CredentialType
+    serializer_class = CredentialTypeSerializer
+    new_in_320 = True
+    new_in_api_v2 = True
+
+
+class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
+
+    model = CredentialType
+    serializer_class = CredentialTypeSerializer
+    new_in_320 = True
+    new_in_api_v2 = True
 
 
 class CredentialList(ListCreateAPIView):

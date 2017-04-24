@@ -165,6 +165,7 @@ class APIView(views.APIView):
             'new_in_300': getattr(self, 'new_in_300', False),
             'new_in_310': getattr(self, 'new_in_310', False),
             'new_in_320': getattr(self, 'new_in_320', False),
+            'new_in_api_v2': getattr(self, 'new_in_api_v2', False),
             'deprecated': getattr(self, 'deprecated', False),
         }
 

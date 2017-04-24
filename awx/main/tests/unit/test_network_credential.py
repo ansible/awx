@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models.credential import Credential
+from awx.main.models.credential import CredentialType, Credential
 from awx.main.models.jobs import Job
 from awx.main.models.inventory import Inventory
 from awx.main.tasks import RunJob
@@ -10,12 +10,15 @@ def test_aws_cred_parse(mocker):
     with mocker.patch('django.db.ConnectionRouter.db_for_write'):
         job = Job(id=1)
         job.inventory = mocker.MagicMock(spec=Inventory, id=2)
+        aws = CredentialType.defaults['aws']()
 
         options = {
-            'kind': 'aws',
-            'username': 'aws_user',
-            'password': 'aws_passwd',
-            'security_token': 'token',
+            'credential_type': aws,
+            'inputs': {
+                'username': 'aws_user',
+                'password': 'aws_passwd',
+                'security_token': 'token',
+            }
         }
         job.cloud_credential = Credential(**options)
 
@@ -23,22 +26,26 @@ def test_aws_cred_parse(mocker):
         mocker.patch.object(run_job, 'should_use_proot', return_value=False)
 
         env = run_job.build_env(job, private_data_dir='/tmp')
-        assert env['AWS_ACCESS_KEY'] == options['username']
-        assert env['AWS_SECRET_KEY'] == options['password']
-        assert env['AWS_SECURITY_TOKEN'] == options['security_token']
+        assert env['AWS_ACCESS_KEY'] == options['inputs']['username']
+        assert env['AWS_SECRET_KEY'] == options['inputs']['password']
+        assert env['AWS_SECURITY_TOKEN'] == options['inputs']['security_token']
 
 
 def test_net_cred_parse(mocker):
     with mocker.patch('django.db.ConnectionRouter.db_for_write'):
         job = Job(id=1)
         job.inventory = mocker.MagicMock(spec=Inventory, id=2)
+        net = CredentialType.defaults['aws']()
 
         options = {
-            'username':'test',
-            'password':'test',
-            'authorize': True,
-            'authorize_password': 'passwd',
-            'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
+            'credential_type': net,
+            'inputs': {
+                'username':'test',
+                'password':'test',
+                'authorize': True,
+                'authorize_password': 'passwd',
+                'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
+            }
         }
         private_data_files = {
             'network_credential': '/tmp/this_file_does_not_exist_during_test_but_the_path_is_real',
@@ -49,21 +56,25 @@ def test_net_cred_parse(mocker):
         mocker.patch.object(run_job, 'should_use_proot', return_value=False)
 
         env = run_job.build_env(job, private_data_dir='/tmp', private_data_files=private_data_files)
-        assert env['ANSIBLE_NET_USERNAME'] == options['username']
-        assert env['ANSIBLE_NET_PASSWORD'] == options['password']
+        assert env['ANSIBLE_NET_USERNAME'] == options['inputs']['username']
+        assert env['ANSIBLE_NET_PASSWORD'] == options['inputs']['password']
         assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
-        assert env['ANSIBLE_NET_AUTH_PASS'] == options['authorize_password']
+        assert env['ANSIBLE_NET_AUTH_PASS'] == options['inputs']['authorize_password']
         assert env['ANSIBLE_NET_SSH_KEYFILE'] == private_data_files['network_credential']
 
 
 @pytest.fixture
 def mock_job(mocker):
+    ssh = CredentialType.defaults['ssh']()
     options = {
-        'username':'test',
-        'password':'test',
-        'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
-        'authorize': True,
-        'authorize_password': 'passwd',
+        'credential_type': ssh,
+        'inputs': {
+            'username':'test',
+            'password':'test',
+            'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
+            'authorize': True,
+            'authorize_password': 'passwd',
+        }
     }
 
     mock_job_attrs = {'forks': False, 'id': 1, 'cancel_flag': False, 'status': 'running', 'job_type': 'normal',

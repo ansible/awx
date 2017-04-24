@@ -51,13 +51,20 @@ class TestJobRelaunchAccess:
         return jt.create_unified_job()
 
     @pytest.fixture
-    def job_with_prompts(self, machine_credential, inventory, organization):
+    def job_with_prompts(self, machine_credential, inventory, organization, credentialtype_ssh):
         jt = JobTemplate.objects.create(
             name='test-job-template-prompts', credential=machine_credential, inventory=inventory,
             ask_tags_on_launch=True, ask_variables_on_launch=True, ask_skip_tags_on_launch=True,
             ask_limit_on_launch=True, ask_job_type_on_launch=True, ask_inventory_on_launch=True,
             ask_credential_on_launch=True)
-        new_cred = Credential.objects.create(name='new-cred', kind='ssh', username='test_user', password='pas4word')
+        new_cred = Credential.objects.create(
+            name='new-cred',
+            credential_type=credentialtype_ssh,
+            inputs={
+                'username': 'test_user',
+                'password': 'pas4word'
+            }
+        )
         new_inv = Inventory.objects.create(name='new-inv', organization=organization)
         return jt.create_unified_job(credential=new_cred, inventory=new_inv)
 

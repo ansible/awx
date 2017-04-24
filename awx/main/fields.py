@@ -2,13 +2,18 @@
 # All Rights Reserved.
 
 # Python
+import copy
 import json
 import re
 import sys
 import six
 from pyparsing import infixNotation, opAssoc, Optional, Literal, CharsNotIn
 
+from jinja2 import Environment, StrictUndefined
+from jinja2.exceptions import UndefinedError
+
 # Django
+from django.core import exceptions as django_exceptions
 from django.db.models.signals import (
     post_save,
     post_delete,
@@ -24,6 +29,10 @@ from django.db.models.fields.related import (
 )
 from django.utils.encoding import smart_text
 from django.db.models import Q
+from django.utils.translation import ugettext_lazy as _
+
+# jsonschema
+from jsonschema import Draft4Validator
 
 # Django-JSONField
 from jsonfield import JSONField as upstream_JSONField
@@ -526,3 +535,236 @@ class DynamicFilterField(models.TextField):
         raise RuntimeError("Parsing the filter_string %s went terribly wrong" % filter_string)
 
 
+class JSONSchemaField(JSONBField):
+    """
+    A JSONB field that self-validates against a defined JSON schema
+    (http://json-schema.org).  This base class is intended to be overwritten by
+    defining `self.schema`.
+    """
+
+    # If an empty {} is provided, we still want to perform this schema
+    # validation
+    empty_values=(None, '')
+
+    def get_default(self):
+        return copy.deepcopy(super(JSONBField, self).get_default())
+
+    def schema(self, model_instance):
+        raise NotImplementedError()
+
+    def validate(self, value, model_instance):
+        super(JSONSchemaField, self).validate(value, model_instance)
+        errors = []
+        for error in Draft4Validator(self.schema(model_instance)).iter_errors(value):
+            errors.append(error)
+
+        if errors:
+            raise django_exceptions.ValidationError(
+                [e.message for e in errors],
+                code='invalid',
+                params={'value': value},
+            )
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        if connection.vendor == 'sqlite':
+            # sqlite (which we use for tests) does not support jsonb;
+            return json.dumps(value)
+        return super(JSONSchemaField, self).get_db_prep_value(
+            value, connection, prepared
+        )
+
+    def from_db_value(self, value, expression, connection, context):
+        # Work around a bug in django-jsonfield
+        # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
+        if isinstance(value, six.string_types):
+            return json.loads(value)
+        return value
+
+
+class CredentialInputField(JSONSchemaField):
+    """
+    Used to validate JSON for
+    `awx.main.models.credential:Credential().inputs`.
+
+    Input data for credentials is represented as a dictionary e.g.,
+    {'api_token': 'abc123', 'api_secret': 'SECRET'}
+
+    For the data to be valid, the keys of this dictionary should correspond
+    with the field names (and datatypes) defined in the associated
+    CredentialType e.g.,
+
+    {
+        'fields': [{
+            'id': 'api_token',
+            'label': 'API Token',
+            'type': 'string'
+        }, {
+            'id': 'api_secret',
+            'label': 'API Secret',
+            'type': 'string'
+        }]
+    }
+    """
+
+    def schema(self, model_instance):
+        # determine the defined fields for the associated credential type
+        properties = {}
+        for field in model_instance.credential_type.inputs.get('fields', []):
+            field = field.copy()
+            properties[field.pop('id')] = field
+        return {
+            'type': 'object',
+            'properties': properties,
+            'additionalProperties': False,
+        }
+
+    def validate(self, value, model_instance):
+        super(CredentialInputField, self).validate(
+            value, model_instance
+        )
+
+        errors = []
+        inputs = model_instance.credential_type.inputs
+        for field in inputs.get('required', []):
+            if not value.get(field, None):
+                errors.append(
+                    _('%s required for %s credential.') % (
+                        field, model_instance.credential_type.name
+                    )
+                )
+
+        if errors:
+            raise django_exceptions.ValidationError(
+                errors,
+                code='invalid',
+                params={'value': value},
+            )
+
+
+class CredentialTypeInputField(JSONSchemaField):
+    """
+    Used to validate JSON for
+    `awx.main.models.credential:CredentialType().inputs`.
+    """
+
+    def schema(self, model_instance):
+        return {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'fields':  {
+                    'type': 'array',
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'type': {'enum': ['string', 'number', 'ssh_private_key']},
+                            'choices': {
+                                'type': 'array',
+                                'minItems': 1,
+                                'items': {'type': 'string'},
+                                'uniqueItems': True
+                            },
+                            'id': {'type': 'string'},
+                            'label': {'type': 'string'},
+                            'help_text': {'type': 'string'},
+                            'multiline': {'type': 'boolean'},
+                            'secret': {'type': 'boolean'},
+                            'ask_at_runtime': {'type': 'boolean'},
+                        },
+                        'additionalProperties': False,
+                        'required': ['id', 'label'],
+                    }
+                }
+            }
+        }
+
+
+
+class CredentialTypeInjectorField(JSONSchemaField):
+    """
+    Used to validate JSON for
+    `awx.main.models.credential:CredentialType().injectors`.
+    """
+
+    def schema(self, model_instance):
+        return {
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'file': {
+                    'type': 'object',
+                    'properties': {
+                        'template': {'type': 'string'},
+                    },
+                    'additionalProperties': False,
+                    'required': ['template'],
+                },
+                'ssh': {
+                    'type': 'object',
+                    'properties': {
+                        'private': {'type': 'string'},
+                        'public': {'type': 'string'},
+                    },
+                    'additionalProperties': False,
+                    'required': ['public', 'private'],
+                },
+                'password': {
+                    'type': 'object',
+                    'properties': {
+                        'key': {'type': 'string'},
+                        'value': {'type': 'string'},
+                    },
+                    'additionalProperties': False,
+                    'required': ['key', 'value'],
+                },
+                'env': {
+                    'type': 'object',
+                    'patternProperties': {
+                        # http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap08.html
+                        # In the shell command language, a word consisting solely
+                        # of underscores, digits, and alphabetics from the portable
+                        # character set. The first character of a name is not
+                        # a digit.
+                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                    },
+                    'additionalProperties': False,
+                },
+                'extra_vars': {
+                    'type': 'object',
+                    'patternProperties': {
+                        # http://docs.ansible.com/ansible/playbooks_variables.html#what-makes-a-valid-variable-name
+                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                    },
+                    'additionalProperties': False,
+                },
+            },
+            'additionalProperties': False
+        }
+
+    def validate(self, value, model_instance):
+        super(CredentialTypeInjectorField, self).validate(
+            value, model_instance
+        )
+
+        # make sure the inputs are clean first
+        CredentialTypeInputField().validate(model_instance.inputs, model_instance)
+
+        # In addition to basic schema validation, search the injector fields
+        # for template variables and make sure they match the fields defined in
+        # the inputs
+        valid_namespace = dict(
+            (field, 'EXAMPLE')
+            for field in model_instance.defined_fields
+        )
+        for type_, injector in value.items():
+            for key, tmpl in injector.items():
+                try:
+                    Environment(
+                        undefined=StrictUndefined
+                    ).from_string(tmpl).render(valid_namespace)
+                except UndefinedError as e:
+                    raise django_exceptions.ValidationError(
+                        _('%s uses an undefined field (%s)') % (key, e),
+                        code='invalid',
+                        params={'value': value},
+                    )

@@ -321,7 +321,7 @@ try:
                         name='%s Credential %d User %d' % (prefix, credential_id, user_idx),
                         defaults=dict(created_by=next(creator_gen),
                                       modified_by=next(modifier_gen)),
-                        kind='ssh'
+                        credential_type=CredentialType.from_v1_kind('ssh')
                     )
                     credential.admin_role.members.add(user)
                     credentials.append(credential)
@@ -344,7 +344,7 @@ try:
                         name='%s Credential %d team %d' % (prefix, credential_id, team_idx),
                         defaults=dict(created_by=next(creator_gen),
                                       modified_by=next(modifier_gen)),
-                        kind='ssh'
+                        credential_type=CredentialType.from_v1_kind('ssh')
                     )
                     credential.admin_role.parents.add(team.member_role)
                     credentials.append(credential)

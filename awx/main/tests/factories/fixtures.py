@@ -10,6 +10,7 @@ from awx.main.models import (
     JobTemplate,
     Job,
     NotificationTemplate,
+    CredentialType,
     Credential,
     Inventory,
     Label,
@@ -84,8 +85,14 @@ def mk_project(name, organization=None, description=None, persisted=True):
     return project
 
 
-def mk_credential(name, cloud=False, kind='ssh', persisted=True):
-    cred = Credential(name=name, cloud=cloud, kind=kind)
+def mk_credential(name, credential_type='ssh', persisted=True):
+    type_ = CredentialType.defaults[credential_type]()
+    if persisted:
+        type_.save()
+    cred = Credential(
+        credential_type=type_,
+        name=name
+    )
     if persisted:
         cred.save()
     return cred

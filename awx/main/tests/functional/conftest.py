@@ -28,7 +28,7 @@ from rest_framework.test import (
     force_authenticate,
 )
 
-from awx.main.models.credential import Credential
+from awx.main.models.credential import CredentialType, Credential
 from awx.main.models.jobs import JobTemplate
 from awx.main.models.inventory import (
     Group,
@@ -191,18 +191,43 @@ def organization(instance):
 
 
 @pytest.fixture
-def credential():
-    return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret')
+def credentialtype_ssh():
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+    return ssh
 
 
 @pytest.fixture
-def machine_credential():
-    return Credential.objects.create(name='machine-cred', kind='ssh', username='test_user', password='pas4word')
+def credentialtype_aws():
+    aws = CredentialType.defaults['aws']()
+    aws.save()
+    return aws
 
 
 @pytest.fixture
-def org_credential(organization):
-    return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret', organization=organization)
+def credentialtype_net():
+    net = CredentialType.defaults['net']()
+    net.save()
+    return net
+
+
+@pytest.fixture
+def credential(credentialtype_aws):
+    return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
+                                     inputs={'username': 'something', 'password': 'secret'})
+
+
+@pytest.fixture
+def machine_credential(credentialtype_ssh):
+    return Credential.objects.create(credential_type=credentialtype_ssh, name='machine-cred',
+                                     inputs={'username': 'test_user', 'password': 'pas4word'})
+
+
+@pytest.fixture
+def org_credential(organization, credentialtype_aws):
+    return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
+                                     inputs={'username': 'something', 'password': 'secret'},
+                                     organization=organization)
 
 
 @pytest.fixture
