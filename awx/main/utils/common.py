@@ -863,8 +863,8 @@ class OutputEventFilter(object):
 
 def callback_filter_out_ansible_extra_vars(extra_vars):
     extra_vars_redacted = {}
+    extra_vars = parse_yaml_or_json(extra_vars)
     for key, value in extra_vars.iteritems():
         if not key.startswith('ansible_'):
             extra_vars_redacted[key] = value
     return extra_vars_redacted
-
