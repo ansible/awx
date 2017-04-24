@@ -83,6 +83,19 @@ export default {
     },
 
     actions: {
+        launch: {
+            mode: 'all',
+            ngDisabled: '!hostsSelected',
+            ngClick: 'setAdhocPattern()',
+            awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.",
+            dataTipWatch: "adhocCommandTooltip",
+            actionClass: 'btn List-buttonDefault',
+            buttonContent: 'RUN COMMANDS',
+            showTipWhenDisabled: true,
+            tooltipInnerClass: "Tooltip-wide",
+            // TODO: we don't always want to show this
+            ngShow: true
+        },
         system_tracking: {
             buttonContent: 'System Tracking',
             ngClick: 'systemTracking()',

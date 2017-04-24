@@ -16,14 +16,14 @@
         init();
 
         function init(){
-        $scope.inventory_id = $stateParams.inventory_id;
-        $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
-        $scope.canAdd = false;
+            $scope.inventory_id = $stateParams.inventory_id;
+            $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
+            $scope.canAdd = false;
 
-        rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
 
             // Search init
             $scope.list = list;
@@ -42,6 +42,22 @@
 
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
+
+            $scope.$on('selectedOrDeselected', function(e, value) {
+                let item = value.value;
+
+                if (value.isSelected) {
+                    if(!$scope.groupsSelected) {
+                        $scope.groupsSelected = [];
+                    }
+                    $scope.groupsSelected.push(item);
+                } else {
+                    _.remove($scope.groupsSelected, { id: item.id });
+                    if($scope.groupsSelected.length === 0) {
+                        $scope.groupsSelected = null;
+                    }
+                }
+            });
 
         }
 
@@ -195,11 +211,6 @@
             groupsArr.push(id);
             $state.go('inventoryManage.editGroup.schedules', {group_id: id, group: groupsArr}, {reload: true});
         };
-        // $scope.$parent governed by InventoryManageController, for unified multiSelect options
-        $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
-            $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
-            $scope.$parent.groupsSelectedItems = selection.selectedItems;
-        });
 
         $scope.copyMoveGroup = function(id){
             $state.go('inventoryManage.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
@@ -220,5 +231,14 @@
         $scope.$on('$destroy', function() {
             cleanUpStateChangeListener();
         });
+
+        $scope.setAdhocPattern = function(){
+            var pattern = _($scope.groupsSelected)
+                .map(function(item){
+                    return item.name;
+                }).value().join(':');
+
+            $state.go('^.adhoc', {pattern: pattern});
+        };
 
     }];

@@ -221,4 +221,13 @@
             cleanUpStateChangeListener();
         });
 
+        $scope.setAdhocPattern = function(){
+            var pattern = _($scope.groupsSelected)
+                .map(function(item){
+                    return item.name;
+                }).value().join(':');
+
+            $state.go('^.adhoc', {pattern: pattern});
+        };
+
     }];

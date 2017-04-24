@@ -203,13 +203,18 @@ table, tbody {
 .List-buttonDefault {
     background-color: @btn-bg;
     color: @btn-txt;
-    border-color: @btn-bord;
+    border-color: @b7grey;
 }
 
 .List-buttonDefault:hover,
 .List-buttonDefault:focus {
     background-color: @btn-bg-hov;
     color: @btn-txt;
+}
+
+.List-buttonDefault[disabled] {
+    color: @d7grey;
+    border-color: @d7grey;
 }
 
 .List-searchDropdown {

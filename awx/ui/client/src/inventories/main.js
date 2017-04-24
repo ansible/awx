@@ -4,6 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
+import adhoc from './adhoc/main';
 import host from './hosts/main';
 import group from './groups/main';
 import sources from './sources/main';
@@ -17,8 +18,10 @@ import { N_ } from '../i18n';
 import InventoryList from './inventory.list';
 import InventoryForm from './inventory.form';
 import InventoryManageService from './inventory-manage.service';
+import adHocRoute from './adhoc/adhoc.route';
 export default
 angular.module('inventory', [
+        adhoc.name,
         host.name,
         group.name,
         sources.name,
@@ -81,6 +84,60 @@ angular.module('inventory', [
                     }
                 });
 
+                let adhocCredentialLookup = {
+                    searchPrefix: 'credential',
+                    name: 'inventories.edit.adhoc.credential',
+                    url: '/credential',
+                    data: {
+                        formChildState: true
+                    },
+                    params: {
+                        credential_search: {
+                            value: {
+                                page_size: '5'
+                            },
+                            squash: true,
+                            dynamic: true
+                        }
+                    },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
+                    views: {
+                        'related': {
+                            templateProvider: function(ListDefinition, generateList) {
+                                let list_html = generateList.build({
+                                    mode: 'lookup',
+                                    list: ListDefinition,
+                                    input_type: 'radio'
+                                });
+                                return `<lookup-modal>${list_html}</lookup-modal>`;
+
+                            }
+                        }
+                    },
+                    resolve: {
+                        ListDefinition: ['CredentialList', function(CredentialList) {
+                            let list = _.cloneDeep(CredentialList);
+                            list.lookupConfirmText = 'SELECT';
+                            return list;
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                            (list, qs, $stateParams, GetBasePath) => {
+                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ]
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#form-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    }
+                };
+
                 return Promise.all([
                     basicInventoryAdd,
                     basicInventoryEdit,
@@ -121,7 +178,9 @@ angular.module('inventory', [
                                         }
                                     ]
                                 }
-                            })
+                            }),
+                            stateExtender.buildDefinition(adHocRoute),
+                            stateExtender.buildDefinition(adhocCredentialLookup)
                         ])
                     };
                 });

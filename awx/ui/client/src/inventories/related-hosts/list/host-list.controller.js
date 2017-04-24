@@ -143,8 +143,17 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
         var hostIds = _.map($scope.hostsSelected, (host) => host.id);
         $state.go('systemTracking', {
             inventoryId: $state.params.inventory_id,
-            hosts: $scope.$parent.hostsSelectedItems,
+            hosts: $scope.hostsSelected,
             hostIds: hostIds
         });
+    };
+
+    $scope.setAdhocPattern = function(){
+        var pattern = _($scope.hostsSelected)
+            .map(function(item){
+                return item.name;
+            }).value().join(':');
+
+        $state.go('^.adhoc', {pattern: pattern});
     };
 }];
