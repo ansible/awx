@@ -35,7 +35,7 @@ from jsonfield import JSONField as upstream_JSONField
 from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # AWX
-from awx.main.querysets import DynamicFilterQuerySet
+from awx.main.utils.filters import DynamicFilter
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main import utils
 
@@ -334,7 +334,7 @@ class DynamicFilterField(models.TextField):
         if value is None:
             return value
         try:
-            DynamicFilterQuerySet().query_from_string(value)
+            DynamicFilter().query_from_string(value)
         except RuntimeError, e:
             raise models.base.ValidationError(e)
         return super(DynamicFilterField, self).get_prep_value(value)

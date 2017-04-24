@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from django.db.models import Sum
 from django.conf import settings
 
-from awx.main.querysets import DynamicFilterQuerySet
+from awx.main.utils.filters import DynamicFilter
 
 
 class HostManager(models.Manager):
@@ -26,10 +26,10 @@ class HostManager(models.Manager):
         """When the Inventory this host belongs to has a `host_filter` set
         generate the QuerySet using that filter. Otherwise just return the default filter.
         """
-        qs = DynamicFilterQuerySet(self.model, using=self._db)
+        qs = super(HostManager, self).get_queryset()
         if self.instance is not None:
             if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
-                q = qs.query_from_string(self.instance.host_filter)
+                q = DynamicFilter.query_from_string(self.instance.host_filter)
                 # If we are using host_filters, disable the core_filters, this allows
                 # us to access all of the available Host entries, not just the ones associated
                 # with a specific FK/relation.

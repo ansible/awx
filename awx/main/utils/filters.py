@@ -11,7 +11,7 @@ from pyparsing import (
 from django.db import models
 
 
-__all__ = ['DynamicFilterQuerySet']
+__all__ = ['DynamicFilter']
 
 
 unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
@@ -33,7 +33,7 @@ def string_to_type(t):
     return t
 
 
-class DynamicFilterQuerySet(models.QuerySet):
+class DynamicFilter(object):
 
 
     class BoolOperand(object):
