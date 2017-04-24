@@ -646,6 +646,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.labelClass) ? field.labelClass : "";
                         html += `${field.required ? ' prepend-asterisk ' : ''}`;
                         html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
+                        html += (field.showParseTypeToggle) ? "Form-inputLabelContainer--codeMirror " : "";
                         html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
@@ -658,7 +659,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
                         // Variable editing
-                        if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars') {
+                        if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars' || field.showParseTypeToggle === true) {
                             let parseTypeId = `${form.name}_${fld}_parse_type`;
                             let parseTypeName = field.parseTypeName || 'parseType';
                             let getToggleClass = (primary, secondary) => `{
@@ -674,7 +675,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                         <label ng-class="${toggleLeftClass}" class="btn btn-xs">
                                             <input type="radio" value="yaml" ng-model="${parseTypeName}" ng-change="parseTypeChange('${parseTypeName}', '${fld}')" />YAML
                                         </label>
-                                        <label ng-class="${toggleRightClass}" class="btn btn-xs">
+                                        <label ng-class="${toggleRightClass}" class="btn btn-xs btn-default">
                                             <input type="radio" value="json" ng-model="${parseTypeName}" ng-change="parseTypeChange('${parseTypeName}', '${fld}')" />JSON
                                         </label>
                                     </div>

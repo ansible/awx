@@ -43,6 +43,13 @@
             Create templates for sending notifications with Email, HipChat, Slack, and SMS.
             </p>
         </a>
+        <a ui-sref="credentialTypes" class="SetupItem"
+            ng-if="user_is_system_auditor || user_is_superuser">
+            <h4 class="SetupItem-title" translate>Credential Types</h4>
+            <p class="SetupItem-description" translate>
+                Create custom credential types to be used for authenticating to network hosts and cloud sources
+            </p>
+        </a>
         <a ui-sref="license" class="SetupItem">
           <h4 class="SetupItem-title" translate>View Your License</h4>
           <p class="SetupItem-description" translate>

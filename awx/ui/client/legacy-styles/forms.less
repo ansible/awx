@@ -283,13 +283,13 @@
 }
 
 .Button-primary--hollow {
-    border: 1px solid @default-link;    
+    border: 1px solid @default-link;
     color: @default-link;
     background: @default-bg;
 }
 .Button-primary--hollow:hover {
     color: @default-link-hov;
-    border: 1px solid @default-link-hov;    
+    border: 1px solid @default-link-hov;
 }
 
 .ui-spinner{
@@ -495,7 +495,8 @@ input[type='radio']:checked:before {
     display: block !important;
 }
 
-.Form-inputLabelContainer[for=variables] {
+.Form-inputLabelContainer[for=variables],
+.Form-inputLabelContainer--codeMirror {
     width: auto;
     display: inline-block !important;
 }
@@ -506,9 +507,10 @@ input[type='radio']:checked:before {
 
 .FormToggle {}
 .FormToggle-container {
+    float: right;
     margin: 0 0 0 10px;
-    padding-bottom: 5px;
     display: initial;
+    padding-bottom: 5px;
 
     label {
         &:first-child {
@@ -527,6 +529,10 @@ input[type='radio']:checked:before {
     .btn.btn-xs {
         padding: 0px 10px;
     }
+}
+
+#credential_type_form .FormToggle-container {
+    float: initial;
 }
 
 .Form-inputLabelContainer {
