@@ -563,7 +563,7 @@ function($injector, $stateExtender, $log, i18n) {
                         if(field && field.addState){
                             let formState = field.addState(field, formStateDefinition, params);
                             states.push(formState);
-                            // intent here is to add lookup states for any add-forms
+                            // intent below is to add lookup states for any add-forms
                             if(field.includeForm){
                                 let form = field.includeForm ? $injector.get(field.includeForm) : field;
                                 states.push(that.generateLookupNodes(form, formState));
@@ -573,7 +573,7 @@ function($injector, $stateExtender, $log, i18n) {
                         if(field && field.editState){
                             let formState = field.editState(field, formStateDefinition, params);
                             states.push(formState);
-                            // intent here is to add lookup states for any edit-forms
+                            // intent below is to add lookup states for any edit-forms
                             if(field.includeForm){
                                 let form = field.includeForm ? $injector.get(field.includeForm) : field;
                                 states.push(that.generateLookupNodes(form, formState));

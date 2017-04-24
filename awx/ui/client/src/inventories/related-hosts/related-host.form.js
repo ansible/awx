@@ -21,7 +21,8 @@ export default ['i18n', function(i18n) {
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
             iterator: 'host',
-            activeEditState: 'inventories.edit.hosts.edit',
+            // activeEditState: 'inventories.edit.hosts.edit',
+            // activeEditState: 'inventories.edit.groups.edit.nested_hosts.edit',
             stateTree: 'inventories.edit.hosts',
             headerFields:{
                 enabled: {

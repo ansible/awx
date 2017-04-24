@@ -256,6 +256,7 @@ angular.module('inventory', [
                 };
 
                 let relatedHostsAnsibleFacts = factsConfig('inventories.edit.hosts.edit.ansible_facts');
+                let nestedHostsAnsibleFacts =  factsConfig('inventories.edit.groups.edit.nested_hosts.edit.ansible_facts');
 
                 return Promise.all([
                     basicInventoryAdd,
@@ -304,6 +305,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(addSchedule),
                             stateExtender.buildDefinition(editSchedule),
                             stateExtender.buildDefinition(relatedHostsAnsibleFacts),
+                            stateExtender.buildDefinition(nestedHostsAnsibleFacts),
                             stateExtender.buildDefinition(copyMoveGroupRoute),
                             stateExtender.buildDefinition(copyMoveHostRoute)
                         ])

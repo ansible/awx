@@ -10,8 +10,9 @@
  * @description This form is for adding/editing a Group on the inventory page
 */
 
-export default ['i18n', 'nestedGroupListState',
-function(i18n, nestedGroupListState){
+export default ['i18n', 'nestedGroupListState', 'nestedHostsListState',
+    'buildHostAddState',
+function(i18n, nestedGroupListState, nestedHostsListState, buildHostAddState){
     return {
         addTitle: 'CREATE GROUP',
         editTitle: '{{ name }}',
@@ -89,6 +90,16 @@ function(i18n, nestedGroupListState){
                 iterator: 'nested_group',
                 listState: nestedGroupListState,
                 // addState: buildGroupsAddState,
+                // editState: buildGroupsEditState
+            },
+            nested_hosts: {
+                name: 'nested_hosts',
+                ngClick: "$state.go('inventories.edit.groups.edit.nested_hosts')",
+                include: "NestedHostsListDefinition",
+                title: i18n._('Hosts'),
+                iterator: 'nested_hosts',
+                listState: nestedHostsListState,
+                addState: buildHostAddState,
                 // editState: buildGroupsEditState
             },
 

@@ -8,6 +8,7 @@ import groupList from './list/main';
 import groupAdd from './add/main';
 import groupEdit from './edit/main';
 import nestedGroups from './nested-groups/main';
+import nestedHosts from './nested-hosts/main';
 import groupFormDefinition from './groups.form';
 import groupListDefinition from './groups.list';
 import service from './groups.service';
@@ -22,7 +23,8 @@ export default
         groupList.name,
         groupAdd.name,
         groupEdit.name,
-        nestedGroups.name
+        nestedGroups.name,
+        nestedHosts.name
     ])
     .factory('GroupForm', groupFormDefinition)
     .value('GroupList', groupListDefinition)
