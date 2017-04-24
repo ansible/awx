@@ -1120,7 +1120,7 @@ class ProjectSchedulesList(SubListCreateAPIView):
 class ProjectScmInventorySources(SubListCreateAPIView):
 
     view_name = _("Project SCM Inventory Sources")
-    model = Inventory
+    model = InventorySource
     serializer_class = InventorySourceSerializer
     parent_model = Project
     relationship = 'scm_inventory_sources'
