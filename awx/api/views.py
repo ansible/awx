@@ -79,7 +79,7 @@ from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
-from awx.main.fields import DynamicFilterField
+from awx.main.querysets import DynamicFilterQuerySet
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1764,10 +1764,10 @@ class HostList(ListCreateAPIView):
     capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
-        qs = super(HostList, self).get_queryset()
+        qs = DynamicFilterQuerySet(HostList, using=self._db)
         filter_string = self.request.query_params.get('host_filter', None)
         if filter_string:
-            filter_q = DynamicFilterField.filter_string_to_q(filter_string)
+            filter_q = qs.query_from_string(filter_string)
             qs = qs.filter(filter_q)
         return qs
 

@@ -9,6 +9,8 @@ from django.utils.timezone import now
 from django.db.models import Sum
 from django.conf import settings
 
+from awx.main.querysets import DynamicFilterQuerySet
+
 
 class HostManager(models.Manager):
     """Custom manager class for Hosts model."""
@@ -19,6 +21,24 @@ class HostManager(models.Manager):
             return self.order_by('name').distinct('name').count()
         except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
             return len(set(self.values_list('name', flat=True)))
+
+    def get_queryset(self):
+        """When the Inventory this host belongs to has a `host_filter` set
+        generate the QuerySet using that filter. Otherwise just return the default filter.
+        """
+        qs = DynamicFilterQuerySet(self.model, using=self._db)
+        if self.instance is not None:
+            if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
+                q = qs.query_from_string(self.instance.host_filter)
+                # If we are using host_filters, disable the core_filters, this allows
+                # us to access all of the available Host entries, not just the ones associated
+                # with a specific FK/relation.
+                #
+                # If we don't disable this, a filter of {'inventory': self.instance} gets automatically
+                # injected by the related object mapper.
+                self.core_filters = {}
+                return qs.filter(q)
+        return qs
 
 
 class InstanceManager(models.Manager):

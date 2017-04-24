@@ -3,14 +3,13 @@
 import pytest
 
 # AWX
-from awx.main.fields import DynamicFilterField
+from awx.main.querysets import DynamicFilterQuerySet
 
 # Django
 from django.db.models import Q
 
 
-
-class TestDynamicFilterFieldFilterStringToQ():
+class TestDynamicFilterQuerySetQueryFromString():
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
         ('"facts__facts__ space "="f"', Q(**{u"facts__facts__ space ": u"f"})),
@@ -24,7 +23,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_query_generated(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string", [
@@ -33,7 +32,7 @@ class TestDynamicFilterFieldFilterStringToQ():
     ])
     def test_invalid_filter_strings(self, filter_string):
         with pytest.raises(RuntimeError) as e:
-            DynamicFilterField.filter_string_to_q(filter_string)
+            DynamicFilterQuerySet.query_from_string(filter_string)
         assert e.value.message == u"Invalid query " + filter_string
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -41,7 +40,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         (u'(ansible_facts__a=abc\u1F5E3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1F5E3def"}})),
     ])
     def test_unicode(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -55,7 +54,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         ('a=b or a=d or a=e or a=z and b=h and b=i and b=j and b=k', Q(**{u"a": u"b"}) | Q(**{u"a": u"d"}) | Q(**{u"a": u"e"}) | Q(**{u"a": u"z"}) & Q(**{u"b": u"h"}) & Q(**{u"b": u"i"}) & Q(**{u"b": u"j"}) & Q(**{u"b": u"k"}))
     ])
     def test_boolean_parenthesis(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -75,7 +74,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_contains_query_generated(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -85,7 +84,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_contains_query_generated_unicode(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -93,12 +92,12 @@ class TestDynamicFilterFieldFilterStringToQ():
         ('ansible_facts__c="null"', Q(**{u"ansible_facts__contains": {u"c": u"\"null\""}})),
     ])
     def test_contains_query_generated_null(self, filter_string, q_expected):
-        q = DynamicFilterField.filter_string_to_q(filter_string)
+        q = DynamicFilterQuerySet.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
 
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
 #('facts__facts__arr[]="foo"', 1),
-#('facts__facts__arr_nested[]__a[]="foo"', 1), 
+#('facts__facts__arr_nested[]__a[]="foo"', 1),
 '''
