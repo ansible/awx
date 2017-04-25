@@ -1928,8 +1928,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += "<tbody>\n";
 
                 html += "<tr class=\"List-tableRow\" ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
-                html += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
-                html += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                 html += "id=\"{{ " + collection.iterator + ".id }}\">\n";
                 if (collection.index === undefined || collection.index !== false) {
                     html += "<td class=\"List-tableCell";

@@ -294,8 +294,6 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += "]\" ";
                 innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                 innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
-                innerTable += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
-                innerTable += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                 innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
                 innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                 innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
