@@ -40,7 +40,7 @@ from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # AWX
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
-from awx.main.utils import get_current_apps
+from awx.main import utils
 
 
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'DynamicFilterField']
@@ -120,7 +120,7 @@ def resolve_role_field(obj, field):
         return []
 
     if len(field_components) == 1:
-        role_cls = str(get_current_apps().get_model('main', 'Role'))
+        role_cls = str(utils.get_current_apps().get_model('main', 'Role'))
         if not str(type(obj)) == role_cls:
             raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
@@ -255,8 +255,8 @@ class ImplicitRoleField(models.ForeignKey):
 
 
     def _post_save(self, instance, created, *args, **kwargs):
-        Role_ = get_current_apps().get_model('main', 'Role')
-        ContentType_ = get_current_apps().get_model('contenttypes', 'ContentType')
+        Role_ = utils.get_current_apps().get_model('main', 'Role')
+        ContentType_ = utils.get_current_apps().get_model('contenttypes', 'ContentType')
         ct_id = ContentType_.objects.get_for_model(instance).id
         with batch_role_ancestor_rebuilding():
             # Create any missing role objects
@@ -307,7 +307,7 @@ class ImplicitRoleField(models.ForeignKey):
         for path in paths:
             if path.startswith("singleton:"):
                 singleton_name = path[10:]
-                Role_ = get_current_apps().get_model('main', 'Role')
+                Role_ = utils.get_current_apps().get_model('main', 'Role')
                 qs = Role_.objects.filter(singleton_name=singleton_name)
                 if qs.count() >= 1:
                     role = qs[0]
@@ -326,7 +326,7 @@ class ImplicitRoleField(models.ForeignKey):
         for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
             role_ids.append(getattr(instance, implicit_role_field.name + '_id'))
 
-        Role_ = get_current_apps().get_model('main', 'Role')
+        Role_ = utils.get_current_apps().get_model('main', 'Role')
         child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
         Role_.objects.filter(id__in=role_ids).delete()
         Role.rebuild_role_ancestor_list([], child_ids)

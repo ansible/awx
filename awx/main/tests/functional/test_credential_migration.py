@@ -1,6 +1,7 @@
 import mock
 import pytest
 from contextlib import contextmanager
+from copy import deepcopy
 
 from django.apps import apps
 
@@ -17,7 +18,7 @@ EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-
 def migrate(credential, kind):
     with mock.patch.object(Credential, 'kind', kind), \
             mock.patch.object(Credential, 'objects', mock.Mock(
-                get=lambda **kw: credential,
+                get=lambda **kw: deepcopy(credential),
                 all=lambda: [credential]
             )):
                 class Apps(apps.__class__):
