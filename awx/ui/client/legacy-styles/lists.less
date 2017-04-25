@@ -11,7 +11,7 @@
 
 
 table, tbody {
-    border-collapse: separate !important;
+    border-collapse: collapse;
 }
 
 .List-well {
@@ -60,6 +60,15 @@ table, tbody {
     height: 40px;
     font-size: 14px;
     color: @list-item;
+    border-bottom: 1px solid #d7d7d7;
+}
+
+.List-tableRow:last-of-type {
+    border-bottom: none;
+}
+
+.List-tableRow:hover {
+    background-color: #f2f2f2;
 }
 
 .List-tableRow--selected,
