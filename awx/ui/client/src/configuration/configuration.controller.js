@@ -75,7 +75,10 @@ export default [
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key].toString();
                                 }
-                                else{
+                                else if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
+                                    $scope[key] = data[key];
+                                }
+                                else {
                                     $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
                                 }
 
@@ -375,8 +378,15 @@ export default [
                         payload[key] = $scope[key].value;
                     }
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
-                    // Parse lists
-                    payload[key] = ConfigurationUtils.listToArray($scope[key], key);
+
+                    if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
+                        payload[key] = $scope[key];
+                    }
+                    else {
+                        // Parse lists
+                        payload[key] = ConfigurationUtils.listToArray($scope[key], key);
+                    }
+
                 }
                 else if($scope.configDataResolve[key].type === 'nested object') {
                     if($scope[key] === '') {
