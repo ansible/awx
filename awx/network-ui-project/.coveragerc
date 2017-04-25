@@ -1,5 +1,0 @@
-[run]
-include = prototype/*,prototype/management/commands/*
-omit = *migrations*, *tests*
-plugins =
-    django_coverage_plugin
