@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('prototype', '0010_link_id'),
+        ('network_ui', '0010_link_id'),
     ]
 
     operations = [

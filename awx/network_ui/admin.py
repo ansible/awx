@@ -1,18 +1,18 @@
 from django.contrib import admin
 
-from prototype.models import Device
+from network_ui.models import Device
 
-from prototype.models import Link
+from network_ui.models import Link
 
-from prototype.models import Topology
+from network_ui.models import Topology
 
-from prototype.models import Client
+from network_ui.models import Client
 
-from prototype.models import TopologyHistory
+from network_ui.models import TopologyHistory
 
-from prototype.models import MessageType
+from network_ui.models import MessageType
 
-from prototype.models import Interface
+from network_ui.models import Interface
 
 
 class DeviceAdmin(admin.ModelAdmin):

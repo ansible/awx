@@ -1,8 +1,8 @@
 # In consumers.py
 from channels import Group, Channel
 from channels.sessions import channel_session
-from prototype.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
-from prototype.serializers import yaml_serialize_topology
+from network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
+from network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
 from collections import defaultdict
@@ -10,7 +10,7 @@ from django.conf import settings
 import math
 import random
 
-from prototype.utils import transform_dict
+from network_ui.utils import transform_dict
 from pprint import pprint
 import dpath.util
 
