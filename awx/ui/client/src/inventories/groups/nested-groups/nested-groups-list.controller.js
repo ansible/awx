@@ -35,7 +35,7 @@
             // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
             // problem that this solves.
             $scope.ncyBreadcrumbIgnore = true;
-            if($state.current.name === "inventoryManage.editGroup") {
+            if($state.current.name === "inventories.edit.groups.edit.nested_groups.edit") {
                 $scope.rowBeingEdited = $state.params.group_id;
                 $scope.listBeingEdited = "groups";
             }
@@ -63,18 +63,6 @@
                 {hosts_status_class: hosts_status.class});
         }
 
-        $scope.groupSelect = function(id){
-            var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
-            $state.go('inventoryManage', {
-                inventory_id: $stateParams.inventory_id,
-                group: group,
-                group_search: {
-                    page_size: '20',
-                    page: '1',
-                    order_by: 'name',
-                }
-            }, {reload: true});
-        };
         $scope.createGroup = function(){
             $state.go('inventories.edit.groups.add');
         };
@@ -100,7 +88,7 @@
                 // Remove the event handler so that we don't end up with multiple bindings
                 $('#group-delete-modal').off('hidden.bs.modal');
                 // Reload the inventory manage page and show that the group has been removed
-                $state.go('inventoryManage', null, {reload: true});
+                $state.go('.', null, {reload: true});
             });
 
             switch($scope.deleteOption){
@@ -108,7 +96,7 @@
                     GroupManageService.promote($scope.toDelete.id, $stateParams.inventory_id)
                         .then(() => {
                             if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                                $state.go("inventoryManage", null, {reload: true});
+                                $state.go("^", null, {reload: true});
                             } else {
                                 $state.go($state.current, null, {reload: true});
                             }
@@ -120,7 +108,7 @@
                 default:
                     GroupManageService.delete($scope.toDelete.id).then(() => {
                         if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                            $state.go("inventoryManage", null, {reload: true});
+                            $state.go("^", null, {reload: true});
                         } else {
                             $state.go($state.current, null, {reload: true});
                         }
@@ -186,14 +174,7 @@
             });
         };
         $scope.showFailedHosts = function() {
-            $state.go('inventoryManage', {failed: true}, {reload: true});
-        };
-        $scope.scheduleGroup = function(id) {
-            // Add this group's id to the array of group id's so that it gets
-            // added to the breadcrumb trail
-            var groupsArr = $stateParams.group ? $stateParams.group : [];
-            groupsArr.push(id);
-            $state.go('inventoryManage.editGroup.schedules', {group_id: id, group: groupsArr}, {reload: true});
+            // TODO: implement
         };
         // $scope.$parent governed by InventoryManageController, for unified multiSelect options
         $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
@@ -202,11 +183,11 @@
         });
 
         $scope.copyMoveGroup = function(id){
-            $state.go('inventoryManage.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
+            // TODO: implement
         };
 
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-             if (toState.name === "inventoryManage.editGroup") {
+             if (toState.name === "inventories.edit.groups.edit.nested_groups.edit") {
                  $scope.rowBeingEdited = toParams.group_id;
                  $scope.listBeingEdited = "groups";
              }

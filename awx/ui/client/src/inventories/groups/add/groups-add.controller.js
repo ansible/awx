@@ -53,7 +53,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm',
                     return GroupManageService.associateGroup(res.data, _.last($stateParams.group))
                         .then(() => $state.go('^', null, { reload: true }));
                 } else {
-                    $state.go('inventoryManage.editGroup', { group_id: res.data.group }, { reload: true });
+                    $state.go('^.edit', { group_id: res.data.id }, { reload: true });
                 }
             });
 

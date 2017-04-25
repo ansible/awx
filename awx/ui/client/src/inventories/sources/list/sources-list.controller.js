@@ -39,10 +39,6 @@
             // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
             // problem that this solves.
             $scope.ncyBreadcrumbIgnore = true;
-            if($state.current.name === "inventoryManage.editGroup") {
-                $scope.rowBeingEdited = $state.params.group_id;
-                $scope.listBeingEdited = "groups";
-            }
 
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
@@ -79,23 +75,11 @@
                 {status: inventory_source ? inventory_source.status : null});
         }
 
-        $scope.groupSelect = function(id){
-            var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
-            $state.go('inventoryManage', {
-                inventory_id: $stateParams.inventory_id,
-                group: group,
-                group_search: {
-                    page_size: '20',
-                    page: '1',
-                    order_by: 'name',
-                }
-            }, {reload: true});
-        };
         $scope.createSource = function(){
             $state.go('inventories.edit.inventory_sources.add');
         };
         $scope.editSource = function(id){
-            $state.go('inventories.edit.inventory_sources.edit', {source_id: id});
+            $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
             var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the inventory source below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
@@ -129,42 +113,6 @@
             });
         };
 
-        $scope.$on(`ws-jobs`, function(e, data){
-            var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
-
-            if (group === undefined || group === null) {
-                group = {};
-            }
-
-            if(data.status === 'failed' || data.status === 'successful'){
-                let path;
-                if($stateParams && $stateParams.group && $stateParams.group.length > 0) {
-                    path = GetBasePath('groups') + _.last($stateParams.group) + '/children';
-                }
-                else {
-                    //reaches here if the user is on the root level group
-                    path = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
-                }
-                qs.search(path, $state.params[`${list.iterator}_search`])
-                .then(function(searchResponse) {
-                    $scope[`${list.iterator}_dataset`] = searchResponse.data;
-                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-                    // _.forEach($scope[list.name], buildStatusIndicators);
-                });
-            } else {
-                var status = GetSyncStatusMsg({
-                    status: data.status,
-                    has_inventory_sources: group.has_inventory_sources,
-                    source: group.source
-                });
-                group.status = data.status;
-                group.status_class = status.class;
-                group.status_tooltip = status.tooltip;
-                group.launch_tooltip = status.launch_tip;
-                group.launch_class = status.launch_class;
-            }
-        });
-
         $scope.cancelUpdate = function (id) {
             GroupsCancelUpdate({ scope: $scope, id: id });
         };
@@ -174,40 +122,10 @@
                 group_id: id
             });
         };
-        $scope.showFailedHosts = function() {
-            $state.go('inventoryManage', {failed: true}, {reload: true});
-        };
-        $scope.scheduleGroup = function(id) {
+        $scope.scheduleSource = function(id) {
             // Add this group's id to the array of group id's so that it gets
             // added to the breadcrumb trail
-            var groupsArr = $stateParams.group ? $stateParams.group : [];
-            groupsArr.push(id);
-            $state.go('inventoryManage.editGroup.schedules', {group_id: id, group: groupsArr}, {reload: true});
+            $state.go('inventories.edit.inventory_sources.edit.schedules', {inventory_source_id: id}, {reload: true});
         };
-        // $scope.$parent governed by InventoryManageController, for unified multiSelect options
-        $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
-            $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
-            $scope.$parent.groupsSelectedItems = selection.selectedItems;
-        });
-
-        $scope.copyMoveGroup = function(id){
-            $state.go('inventoryManage.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
-        };
-
-        var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-             if (toState.name === "inventoryManage.editGroup") {
-                 $scope.rowBeingEdited = toParams.group_id;
-                 $scope.listBeingEdited = "groups";
-             }
-             else {
-                 delete $scope.rowBeingEdited;
-                 delete $scope.listBeingEdited;
-             }
-        });
-
-        // Remove the listener when the scope is destroyed to avoid a memory leak
-        $scope.$on('$destroy', function() {
-            cleanUpStateChangeListener();
-        });
 
     }];

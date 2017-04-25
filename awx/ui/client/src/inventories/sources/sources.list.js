@@ -12,7 +12,6 @@ export default {
     wellOverride: true,
     index: false,
     hover: true,
-    multiSelect: true,
     trackBy: 'inventory_source.id',
     basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/inventory_sources/',
 

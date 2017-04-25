@@ -50,31 +50,31 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         };
 
         $scope.formSave = function() {
-            var params, source, json_data;
+            var params, json_data;
             json_data = ToJSON($scope.parseType, $scope.variables, true);
 
+            params = {
+                name: $scope.name,
+                description: $scope.description,
+                inventory: inventoryData.id,
+                instance_filters: $scope.instance_filters,
+                source_script: $scope.inventory_script,
+                credential: $scope.credential,
+                overwrite: $scope.overwrite,
+                overwrite_vars: $scope.overwrite_vars,
+                update_on_launch: $scope.update_on_launch,
+                update_cache_timeout: $scope.update_cache_timeout || 0,
+                variables: json_data,
+                // comma-delimited strings
+                group_by: _.map($scope.group_by, 'value').join(','),
+                source_regions: _.map($scope.source_regions, 'value').join(',')
+            };
+
             if ($scope.source) {
-                params = {
-                    name: $scope.name,
-                    description: $scope.description,
-                    inventory: inventoryData.id,
-                    instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'],
-                    source_script: $scope.inventory_script,
-                    source: $scope.source.value,
-                    credential: $scope.credential,
-                    overwrite: $scope.overwrite,
-                    overwrite_vars: $scope.overwrite_vars,
-                    update_on_launch: $scope.update_on_launch,
-                    update_cache_timeout: $scope.update_cache_timeout || 0,
-                    variables: json_data,
-                    // comma-delimited strings
-                    group_by: _.map($scope.group_by, 'value').join(','),
-                    source_regions: _.map($scope.source_regions, 'value').join(',')
-                };
-                source = $scope.source.value;
+                params.source_vars = $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'];
+                params.source = $scope.source.value;
             } else {
-                source = null;
+                params.source = null;
             }
             // switch (source) {
             //     // no inventory source set, just create a new group
@@ -109,7 +109,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     //         _.assign(params, { group: res.data.id }), res.data.related.inventory_source))
                     //     .then(res => $state.go('inventoryManage.editGroup', { group_id: res.data.group }, { reload: true }));
                     SourcesService.post(params).then(function(){
-                        $state.go('.', null, {reload: true});
+                        $state.go('^.edit', null, {reload: true});
                     });
             //         break;
             // }

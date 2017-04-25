@@ -169,7 +169,7 @@ function adhocController($q, $scope, $stateParams,
     ParseTypeChange({ scope: $scope, field_id: 'adhoc_extra_vars' , variable: "extra_vars"});
 
     $scope.formCancel = function(){
-        $state.go('inventoryManage');
+        $state.go('^');
     };
 
     // remove all data input into the form and reset the form back to defaults

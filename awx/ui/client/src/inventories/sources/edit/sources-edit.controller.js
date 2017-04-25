@@ -7,11 +7,11 @@
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
     'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'inventorySourceData', 'SourcesService',
+    'inventorySourceData', 'SourcesService', 'inventoryData',
     function($state, $stateParams, $scope, ParseVariableString,
         rbacUiControlService, ToJSON,ParseTypeChange, GroupManageService,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
-        inventorySourceData, SourcesService) {
+        inventorySourceData, SourcesService, inventoryData) {
 
         init();
 
@@ -76,39 +76,37 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             $state.go('^');
         };
         $scope.formSave = function() {
-            var params, source, json_data;
+            var params, json_data;
             json_data = ToJSON($scope.parseType, $scope.variables, true);
 
+            params = {
+                name: $scope.name,
+                description: $scope.description,
+                inventory: inventoryData.id,
+                instance_filters: $scope.instance_filters,
+                source_script: $scope.inventory_script,
+                credential: $scope.credential,
+                overwrite: $scope.overwrite,
+                overwrite_vars: $scope.overwrite_vars,
+                update_on_launch: $scope.update_on_launch,
+                update_cache_timeout: $scope.update_cache_timeout || 0,
+                variables: json_data,
+                // comma-delimited strings
+                group_by: _.map($scope.group_by, 'value').join(','),
+                source_regions: _.map($scope.source_regions, 'value').join(',')
+            };
+
             if ($scope.source) {
-                // inventory_source fields
-                params = {
-                    id: $scope.id,
-                    variables: json_data,
-                    name: $scope.name,
-                    description: $scope.description,
-                    inventory: $scope.inventory,
-                    source: $scope.source.value,
-                    credential: $scope.credential,
-                    overwrite: $scope.overwrite,
-                    overwrite_vars: $scope.overwrite_vars,
-                    source_script: $scope.inventory_script,
-                    update_on_launch: $scope.update_on_launch,
-                    update_cache_timeout: $scope.update_cache_timeout || 0,
-                    // comma-delimited strings
-                    group_by: _.map($scope.group_by, 'value').join(','),
-                    source_regions: _.map($scope.source_regions, 'value').join(','),
-                    instance_filters: $scope.instance_filters,
-                    source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables']
-                };
-                source = $scope.source.value;
+                params.source_vars = $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'];
+                params.source = $scope.source.value;
             } else {
-                source = null;
+                params.source = null;
             }
             // switch (source) {
                 // no inventory source set, just create a new group
                 // '' is the value supplied for Manual source type
                 // case null || '':
-                    SourcesService.put(params).then(() => $state.go($state.current, null, { reload: true }));
+                    SourcesService.put(params).then(() => $state.go('.', null, { reload: true }));
             //         break;
             //         // create a new group and create/associate an inventory source
             //         // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'

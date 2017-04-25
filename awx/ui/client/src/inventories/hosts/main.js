@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
- import hostAdd from './add/main';
  import hostEdit from './edit/main';
  import hostList from './list/main';
  import HostsList from './host.list';
@@ -16,7 +15,6 @@
 
 export default
 angular.module('host', [
-        hostAdd.name,
         hostEdit.name,
         hostList.name,
         SmartInventory.name,
