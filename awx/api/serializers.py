@@ -1195,7 +1195,6 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
-            ansible_facts = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
@@ -1203,6 +1202,10 @@ class HostSerializer(BaseSerializerWithVariables):
             res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': obj.last_job.pk})
         if obj.last_job_host_summary:
             res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': obj.last_job_host_summary.pk})
+        if self.version > 1:
+            res.update(dict(
+                ansible_facts = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
+            ))
         return res
 
     def get_summary_fields(self, obj):
@@ -1292,16 +1295,8 @@ class GroupSerializer(BaseSerializerWithVariables):
                   'groups_with_active_failures', 'has_inventory_sources')
 
     @property
-    def V1(self):
-        request = self.context.get('request')
-        # TODO: use the better version-getter after merged with other branches
-        if request and request.version == 'v1':
-            return True
-        return False
-
-    @property
     def show_capabilities(self):  # TODO: consolidate in 3.3
-        if self.V1:
+        if self.version == 1:
             return ['copy', 'edit', 'start', 'schedule', 'delete']
         else:
             return ['copy', 'edit', 'delete']
@@ -1316,7 +1311,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def get_summary_fields(self, obj):  # TODO: remove in 3.3
         summary_fields = super(GroupSerializer, self).get_summary_fields(obj)
-        if self.V1:
+        if self.version == 1:
             try:
                 inv_src = obj.deprecated_inventory_source
                 summary_fields['inventory_source'] = {}
@@ -1342,7 +1337,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory_sources = self.reverse('api:group_inventory_sources_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:group_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
         ))
-        if self.V1:  # TODO: remove in 3.3
+        if self.version == 1:  # TODO: remove in 3.3
             try:
                 res['inventory_source'] = self.reverse('api:inventory_source_detail',
                                                        kwargs={'pk': obj.deprecated_inventory_source.pk})
@@ -1354,7 +1349,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def create(self, validated_data):  # TODO: remove in 3.3
         instance = super(GroupSerializer, self).create(validated_data)
-        if self.V1:
+        if self.version == 1:  # TODO: remove in 3.3
             InventorySource.objects.create(deprecated_group=instance, inventory=instance.inventory)
         return instance
 
@@ -1552,7 +1547,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if obj.last_update:
             res['last_update'] = self.reverse('api:inventory_update_detail',
                                               kwargs={'pk': obj.last_update.pk})
-        if self.V1:  # TODO: remove in 3.3
+        if self.version == 1:  # TODO: remove in 3.3
             res['group'] = None
             if obj.deprecated_group:
                 res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.deprecated_group.pk})
@@ -1560,13 +1555,13 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     def get_fields(self):  # TODO: remove in 3.3
         fields = super(InventorySourceSerializer, self).get_fields()
-        if not self.V1:
+        if self.version > 1:
             fields.pop('group', None)
         return fields
 
     def get_summary_fields(self, obj):  # TODO: remove in 3.3
         summary_fields = super(InventorySourceSerializer, self).get_summary_fields(obj)
-        if self.V1 and obj.deprecated_group_id:
+        if self.version == 1 and obj.deprecated_group_id:
             g = obj.deprecated_group
             summary_fields['group'] = {}
             for field in SUMMARIZABLE_FK_FIELDS['group']:
@@ -1579,13 +1574,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if obj.deprecated_group:
             return obj.deprecated_group.id
         return None
-
-    @property
-    def V1(self):  # TODO: use the better version-getter after merged with other branches
-        request = self.context.get('request')
-        if request and request.version == 'v1':
-            return True
-        return False
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(InventorySourceSerializer, self).build_relational_field(field_name, relation_info)

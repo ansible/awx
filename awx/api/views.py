@@ -1783,6 +1783,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
     model = Host
     serializer_class = AnsibleFactsSerializer
     new_in_320 = True
+    new_in_api_v2 = True
 
 
 class InventoryHostsList(SubListCreateAttachDetachAPIView):
@@ -2050,7 +2051,7 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if self.request.version == 'v1':  # TODO: deletion of automatic inventory_source, remove in 3.3
+        if get_request_version(request) == 1:  # TODO: deletion of automatic inventory_source, remove in 3.3
             try:
                 obj.deprecated_inventory_source.delete()
             except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
