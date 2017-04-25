@@ -31,6 +31,7 @@ HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
 
 SPACING = 200
 RACK_SPACING = 50
+settings.RECORDING = False
 
 
 def circular_layout(topology_id):
@@ -393,7 +394,7 @@ class _Persistence(object):
         settings.RECORDING = True
 
     def onStopRecording(self, recording, topology_id, client_id):
-        settings.RECORDING = True
+        settings.RECORDING = False
 
     def write_event(self, event, topology_id, client_id):
         if settings.RECORDING and event.get('save', True):
