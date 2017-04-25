@@ -5,10 +5,10 @@
  *************************************************/
 
 export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
-    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'Alert',
+    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'Alert', '$q',
     function(
         $rootScope, $scope, Wait, CredentialTypesList,
-        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter, Dataset, rbacUiControlService, Alert
+        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter, Dataset, rbacUiControlService, Alert, $q
     ) {
         var defaultUrl = GetBasePath('credential_types'),
             list = CredentialTypesList;
@@ -16,6 +16,8 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
         init();
 
         function init() {
+            $scope.optionsDefer = $q.defer();
+
             if (!($rootScope.user_is_superuser || $rootScope.user_is_system_auditor)) {
                 $state.go("setup");
                 Alert('Permission Error', 'You do not have permission to view, edit or create custom credential types.', 'alert-info');
@@ -27,6 +29,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 .then(function(params) {
                     $scope.canAdd = params.canAdd;
                     $scope.options = params.options;
+                    $scope.optionsDefer.resolve(params.options);
                     optionsRequestDataProcessing();
                 });
 

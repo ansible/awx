@@ -6,14 +6,15 @@
 
 export default ['Rest', 'Wait',
     'CredentialTypesForm', 'ProcessErrors', 'GetBasePath',
-    'GenerateForm', 'credential_typeData',
+    'GenerateForm', 'resourceData',
     '$scope', '$state', 'GetChoices', 'ParseTypeChange', 'ToJSON', 'ParseVariableString', 'CreateSelect2',
     function(
         Rest, Wait, CredentialTypesForm, ProcessErrors, GetBasePath,
-        GenerateForm, credential_typeData,
+        GenerateForm, resourceData,
         $scope, $state, GetChoices, ParseTypeChange, ToJSON, ParseVariableString, CreateSelect2
     ) {
-        var generator = GenerateForm,
+        var credential_typeData = resourceData.data,
+            generator = GenerateForm,
             data = credential_typeData,
             id = credential_typeData.id,
             form = CredentialTypesForm,
@@ -24,13 +25,17 @@ export default ['Rest', 'Wait',
 
         function init() {
             // Load the list of options for Kind
-            GetChoices({
-                scope: $scope,
-                url: url,
-                field: 'kind',
-                variable: 'credential_kind_options',
-                callback: 'choicesReadyCredentialTypes'
-            });
+            $scope.$parent.optionsDefer.promise
+                .then(function(options) {
+                    GetChoices({
+                        scope: $scope,
+                        url: url,
+                        field: 'kind',
+                        variable: 'credential_kind_options',
+                        options: options,
+                        callback: 'choicesReadyCredentialTypes'
+                    });
+                });
         }
 
         if ($scope.removeChoicesReady) {
@@ -38,6 +43,7 @@ export default ['Rest', 'Wait',
         }
         $scope.removeChoicesReady = $scope.$on('choicesReadyCredentialTypes',
             function() {
+
                 $scope.credential_type = credential_typeData;
 
                 $scope.$watch('credential_type.summary_fields.user_capabilities.edit', function(val) {

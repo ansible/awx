@@ -17,27 +17,41 @@
         return function (params) {
             var scope = params.scope,
                 url = params.url,
-                field = params.field;
+                field = params.field,
+                options = params.options;
 
-            // Auto populate the field if there is only one result
-            Rest.setUrl(url);
-            return Rest.options()
-                .then(function (data) {
-                    data = data.data;
-                    var choices = data.actions.GET[field].choices;
+            if (!options) {
+              // Auto populate the field if there is only one result
+              Rest.setUrl(url);
+              return Rest.options()
+                  .then(function (data) {
+                      data = data.data;
+                      var choices = data.actions.GET[field].choices;
 
-                    // manually add the adhoc label to the choices object if
-                    // the permission_type field
-                    if (field === "permission_type") {
-                        choices.push(["adhoc",
-                            data.actions.GET.run_ad_hoc_commands.help_text]);
-                    }
+                      // manually add the adhoc label to the choices object if
+                      // the permission_type field
+                      if (field === "permission_type") {
+                          choices.push(["adhoc",
+                              data.actions.GET.run_ad_hoc_commands.help_text]);
+                      }
 
-                    return choices;
-                })
-                .catch(function (data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to get ' + field + ' labels. Options requrest returned status: ' + status });
-                });
+                      return choices;
+                  })
+                  .catch(function (data, status) {
+                      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                              msg: 'Failed to get ' + field + ' labels. Options requrest returned status: ' + status });
+                  });
+            } else {
+              var choices = options.actions.GET[field].choices;
+
+              // manually add the adhoc label to the choices object if
+              // the permission_type field
+              if (field === "permission_type") {
+                  choices.push(["adhoc",
+                      options.actions.GET.run_ad_hoc_commands.help_text]);
+              }
+
+              return choices;
+            }
         };
     }];

@@ -36,27 +36,6 @@ angular.module('credentialTypes', [
                         add: 'CredentialTypesAddController',
                         edit: 'CredentialTypesEditController'
                     },
-                    resolve: {
-                        edit: {
-                            credential_typeData: ['$state', '$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($state, $stateParams, rest, getBasePath, ProcessErrors) {
-                                    var credentialTypeId = $stateParams.credential_type_id;
-                                    var url = getBasePath('credential_types') + credentialTypeId + '/';
-                                    rest.setUrl(url);
-                                    return rest.get()
-                                        .then(function(data) {
-                                            return data.data;
-                                        }).catch(function(response) {
-                                            ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get credential type info. GET returned status: ' +
-                                                    response.status
-                                            });
-                                        });
-                                }
-                            ]
-                        }
-                    },
                     data: {
                         activityStream: true,
                         activityStreamTarget: 'custom_inventory_script' // TODO: change to 'credential_type'...there's probably more work that needs to be done to hook up activity stream

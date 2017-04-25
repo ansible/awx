@@ -18,17 +18,17 @@ export default ['Rest', 'Wait',
 
         function init() {
             // Load the list of options for Kind
-            GetChoices({
-                scope: $scope,
-                url: url,
-                field: 'kind',
-                variable: 'credential_kind_options'
-            });
+            $scope.$parent.optionsDefer.promise
+                .then(function(options) {
+                    GetChoices({
+                        scope: $scope,
+                        url: url,
+                        field: 'kind',
+                        variable: 'credential_kind_options',
+                        options: options
+                    });
 
-            Rest.setUrl(url);
-            Rest.options()
-                .success(function(data) {
-                    if (!data.actions.POST) {
+                    if (!options.actions.POST) {
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a credential type.', 'alert-info');
                     }
