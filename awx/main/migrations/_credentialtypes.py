@@ -1,5 +1,4 @@
-import mock
-
+from awx.main import utils
 from awx.main.models import CredentialType
 from awx.main.utils.common import encrypt_field, decrypt_field
 
@@ -7,11 +6,12 @@ from awx.main.utils.common import encrypt_field, decrypt_field
 def migrate_to_v2_credentials(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
 
-    # this mock is necessary to make the implicit role generation save signal
-    # use the correct Role model (the version active at this point in
+    # this monkey-patch is necessary to make the implicit role generation save
+    # signal use the correct Role model (the version active at this point in
     # migration, not the one at HEAD)
-    with mock.patch('awx.main.utils.get_current_apps', lambda: apps):
-
+    orig_current_apps = utils.get_current_apps
+    try:
+        utils.get_current_apps = lambda: apps
         for cred in apps.get_model('main', 'Credential').objects.all():
             data = {}
             if getattr(cred, 'vault_password', None):
@@ -60,6 +60,8 @@ def migrate_to_v2_credentials(apps, schema_editor):
                                 setattr(new_cred, field, value)
                                 new_cred.inputs[field] = encrypt_field(new_cred, field)
                                 setattr(new_cred, field, '')
-                        else:
+                        elif getattr(cred, field):
                             new_cred.inputs[field] = getattr(cred, field)
                     new_cred.save()
+    finally:
+        utils.get_current_apps = orig_current_apps

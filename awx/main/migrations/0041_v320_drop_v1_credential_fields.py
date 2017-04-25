@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -95,4 +95,9 @@ class Migration(migrations.Migration):
             name='credentialtype',
             unique_together=set([('name', 'kind')]),
         ),
+        migrations.AlterField(
+            model_name='credential',
+            name='credential_type',
+            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=False)
+        )
     ]
