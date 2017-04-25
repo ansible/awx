@@ -2,7 +2,14 @@
 # All Rights Reserved.
 from collections import OrderedDict
 import functools
+import json
 import operator
+import os
+import stat
+import tempfile
+
+# Jinja2
+from jinja2 import Template
 
 # Django
 from django.db import models
@@ -450,6 +457,14 @@ class CredentialType(CommonModelNameNotUnique):
 
     defaults = OrderedDict()
 
+    ENV_BLACKLIST = set((
+        'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
+        'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
+        'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'TOWER_HOST',
+        'MAX_EVENT_RES', 'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
+        'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
+    ))
+
     class Meta:
         app_label = 'main'
         ordering = ('kind', 'name')
@@ -538,6 +553,90 @@ class CredentialType(CommonModelNameNotUnique):
             requirements['managed_by_tower'] = True
             match = cls.objects.filter(**requirements)[:1].get()
         return match
+
+    def inject_credential(self, credential, env, safe_env, args, safe_args, private_data_dir):
+        """
+        Inject credential data into the environment variables and arguments
+        passed to `ansible-playbook`
+
+        :param credential:       a :class:`awx.main.models.Credential` instance
+        :param env:              a dictionary of environment variables used in
+                                 the `ansible-playbook` call.  This method adds
+                                 additional environment variables based on
+                                 custom `env` injectors defined on this
+                                 CredentialType.
+        :param safe_env:         a dictionary of environment variables stored
+                                 in the database for the job run
+                                 (`UnifiedJob.job_env`); secret values should
+                                 be stripped
+        :param args:             a list of arguments passed to
+                                 `ansible-playbook` in the style of
+                                 `subprocess.call(args)`.  This method appends
+                                 additional arguments based on custom
+                                 `extra_vars` injectors defined on this
+                                 CredentialType.
+        :param safe_args:        a list of arguments stored in the database for
+                                 the job run (`UnifiedJob.job_args`); secret
+                                 values should be stripped
+        :param private_data_dir: a temporary directory to store files generated
+                                 by `file` injectors (like config files or key
+                                 files)
+        """
+        if not self.injectors:
+            return
+
+        class TowerNamespace:
+            filename = None
+
+        tower_namespace = TowerNamespace()
+
+        # maintain a normal namespace for building the ansible-playbook arguments (env and args)
+        namespace = {'tower': tower_namespace}
+
+        # maintain a sanitized namespace for building the DB-stored arguments (safe_env and safe_args)
+        safe_namespace = {'tower': tower_namespace}
+
+        # build a normal namespace with secret values decrypted (for
+        # ansible-playbook) and a safe namespace with secret values hidden (for
+        # DB storage)
+        for field_name, value in credential.inputs.items():
+            if field_name in self.secret_fields:
+                value = decrypt_field(credential, field_name)
+                safe_namespace[field_name] = '**********'
+            elif len(value):
+                safe_namespace[field_name] = value
+            if len(value):
+                namespace[field_name] = value
+
+        file_tmpl = self.injectors.get('file', {}).get('template')
+        if file_tmpl is not None:
+            # If a file template is provided, render the file and update the
+            # special `tower` template namespace so the filename can be
+            # referenced in other injectors
+            data = Template(file_tmpl).render(**namespace)
+            _, path = tempfile.mkstemp(dir=private_data_dir)
+            with open(path, 'w') as f:
+                f.write(data)
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            namespace['tower'].filename = path
+
+        for env_var, tmpl in self.injectors.get('env', {}).items():
+            if env_var.startswith('ANSIBLE_') or env_var in self.ENV_BLACKLIST:
+                continue
+            env[env_var] = Template(tmpl).render(**namespace)
+            safe_env[env_var] = Template(tmpl).render(**safe_namespace)
+
+        extra_vars = {}
+        safe_extra_vars = {}
+        for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
+            extra_vars[var_name] = Template(tmpl).render(**namespace)
+            safe_extra_vars[var_name] = Template(tmpl).render(**safe_namespace)
+
+        if extra_vars:
+            args.extend(['-e', json.dumps(extra_vars)])
+
+        if safe_extra_vars:
+            safe_args.extend(['-e', json.dumps(safe_extra_vars)])
 
 
 @CredentialType.default

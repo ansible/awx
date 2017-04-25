@@ -699,24 +699,6 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     'additionalProperties': False,
                     'required': ['template'],
                 },
-                'ssh': {
-                    'type': 'object',
-                    'properties': {
-                        'private': {'type': 'string'},
-                        'public': {'type': 'string'},
-                    },
-                    'additionalProperties': False,
-                    'required': ['public', 'private'],
-                },
-                'password': {
-                    'type': 'object',
-                    'properties': {
-                        'key': {'type': 'string'},
-                        'value': {'type': 'string'},
-                    },
-                    'additionalProperties': False,
-                    'required': ['key', 'value'],
-                },
                 'env': {
                     'type': 'object',
                     'patternProperties': {

@@ -705,6 +705,15 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(env, **kwargs)
+
+            # handle custom injectors specified on the CredentialType
+            for type_ in ('credential', 'cloud_credential', 'network_credential'):
+                credential = getattr(instance, type_, None)
+                if credential:
+                    credential.credential_type.inject_credential(
+                        credential, env, safe_env, args, safe_args, kwargs['private_data_dir']
+                    )
+
             stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
