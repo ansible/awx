@@ -1,7 +1,7 @@
 {
-  "name": "prototype",
+  "name": "network_ui",
   "version": "1.0.0",
-  "description": "A prototype of the Ansible Tower networking UI",
+  "description": "Ansible Tower Networking UI",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
