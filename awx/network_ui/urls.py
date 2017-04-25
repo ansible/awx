@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 import sys
 
 from . import views
-import network_ui.routing
+import awx.network_ui.routing
 
 app_name = 'network_ui'
 urlpatterns = [

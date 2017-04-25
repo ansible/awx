@@ -1,18 +1,18 @@
 from django.contrib import admin
 
-from network_ui.models import Device
+from awx.network_ui.models import Device
 
-from network_ui.models import Link
+from awx.network_ui.models import Link
 
-from network_ui.models import Topology
+from awx.network_ui.models import Topology
 
-from network_ui.models import Client
+from awx.network_ui.models import Client
 
-from network_ui.models import TopologyHistory
+from awx.network_ui.models import TopologyHistory
 
-from network_ui.models import MessageType
+from awx.network_ui.models import MessageType
 
-from network_ui.models import Interface
+from awx.network_ui.models import Interface
 
 
 class DeviceAdmin(admin.ModelAdmin):

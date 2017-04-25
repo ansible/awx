@@ -2,7 +2,7 @@ from django.test import TestCase
 
 # Create your tests here.
 
-from network_ui.models import Topology, Device, Interface, MessageType, Link
+from awx.network_ui.models import Topology, Device, Interface, MessageType, Link
 
 
 class TestToString(TestCase):
