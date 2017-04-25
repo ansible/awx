@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from prototype.models import Topology, Device, Link
+from network_ui.models import Topology, Device, Link
 
 import math
 

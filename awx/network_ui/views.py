@@ -5,4 +5,4 @@ from .models import Topology
 
 
 def index(request):
-    return render(request, "prototype/index.html", dict(topologies=Topology.objects.all().order_by('-pk')))
+    return render(request, "network_ui/index.html", dict(topologies=Topology.objects.all().order_by('-pk')))
