@@ -34,6 +34,79 @@ def test_filter_by_v1_kind(get, admin, organization, kind, total):
 
 
 @pytest.mark.django_db
+def test_custom_credentials_not_in_v1_api_list(get, admin, organization):
+    """
+    'Custom' credentials (those not managed by Tower) shouldn't be visible from
+    the V1 credentials API list
+    """
+    credential_type = CredentialType(
+        kind='cloud',
+        name='MyCloud',
+        inputs = {
+            'fields': [{
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True
+            }]
+        }
+    )
+    credential_type.save()
+    cred = Credential(
+        credential_type=credential_type,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'password': u'secret'
+        }
+    )
+    cred.save()
+
+    response = get(
+        reverse('api:credential_list', kwargs={'version': 'v1'}),
+        admin
+    )
+    assert response.status_code == 200
+    assert response.data['count'] == 0
+
+
+@pytest.mark.django_db
+def test_custom_credentials_not_in_v1_api_detail(get, admin, organization):
+    """
+    'Custom' credentials (those not managed by Tower) shouldn't be visible from
+    the V1 credentials API detail
+    """
+    credential_type = CredentialType(
+        kind='cloud',
+        name='MyCloud',
+        inputs = {
+            'fields': [{
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True
+            }]
+        }
+    )
+    credential_type.save()
+    cred = Credential(
+        credential_type=credential_type,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'password': u'secret'
+        }
+    )
+    cred.save()
+
+    response = get(
+        reverse('api:credential_detail', kwargs={'version': 'v1', 'pk': cred.pk}),
+        admin
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
 def test_filter_by_v1_invalid_kind(get, admin, organization):
     response = get(
         reverse('api:credential_list', kwargs={'version': 'v1'}),
