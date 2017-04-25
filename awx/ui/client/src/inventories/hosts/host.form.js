@@ -21,6 +21,8 @@ export default ['i18n', function(i18n) {
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
             iterator: 'host',
+            activeEditState: 'hosts.edit',
+            stateTree: 'hosts',
             headerFields:{
                 enabled: {
                     class: 'Form-header-field',
@@ -99,5 +101,13 @@ export default ['i18n', function(i18n) {
                     ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
+
+            related: {
+                ansible_facts: {
+                    name: 'ansible_facts',
+                    title: i18n._('Facts'),
+                    skipGenerator: true
+                }
+            }
         };
     }];

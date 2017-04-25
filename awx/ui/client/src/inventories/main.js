@@ -19,6 +19,7 @@ import InventoryList from './inventory.list';
 import InventoryForm from './inventory.form';
 import InventoryManageService from './inventory-manage.service';
 import adHocRoute from './adhoc/adhoc.route';
+import ansibleFacts from './ansible_facts/main';
 export default
 angular.module('inventory', [
         adhoc.name,
@@ -29,7 +30,8 @@ angular.module('inventory', [
         inventoryCompletedJobs.name,
         inventoryAdd.name,
         inventoryEdit.name,
-        inventoryList.name
+        inventoryList.name,
+        ansibleFacts.name
     ])
     .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
@@ -222,6 +224,32 @@ angular.module('inventory', [
                     }
                 };
 
+                let relatedHostsAnsibleFacts = {
+                    name: 'inventories.edit.hosts.edit.ansible_facts',
+                    url: '/ansible_facts',
+                    ncyBreadcrumb: {
+                        label: N_("FACTS")
+                    },
+                    views: {
+                        'related': {
+                            controller: 'AnsibleFactsController',
+                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
+                        }
+                    },
+                    resolve: {
+                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
+                            function($stateParams, GetBasePath, Rest) {
+                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
+                                Rest.setUrl(ansibleFactsUrl);
+                                return Rest.get()
+                                    .success(function(data) {
+                                        return data;
+                                    });
+                            }
+                        ]
+                    }
+                };
+
                 return Promise.all([
                     basicInventoryAdd,
                     basicInventoryEdit,
@@ -267,64 +295,107 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(adhocCredentialLookup),
                             stateExtender.buildDefinition(listSchedules),
                             stateExtender.buildDefinition(addSchedule),
-                            stateExtender.buildDefinition(editSchedule)
+                            stateExtender.buildDefinition(editSchedule),
+                            stateExtender.buildDefinition(relatedHostsAnsibleFacts)
                         ])
                     };
                 });
 
             }
 
-                $stateProvider.state({
-                    name: 'hosts',
-                    url: '/hosts',
-                    lazyLoad: () => stateDefinitions.generateTree({
-                        parent: 'hosts', // top-most node in the generated tree (will replace this state definition)
-                        modes: ['edit'],
-                        list: 'HostsList',
-                        form: 'HostsForm',
-                        controllers: {
-                            list: 'HostListController',
-                            edit: 'HostEditController'
-                        },
-                        urls: {
-                            list: '/hosts'
-                        },
-                        resolve: {
-                            edit: {
-                                host: ['Rest', '$stateParams', 'GetBasePath',
-                                    function(Rest, $stateParams, GetBasePath) {
-                                        let path = GetBasePath('hosts') + $stateParams.host_id;
-                                        Rest.setUrl(path);
-                                        return Rest.get();
-                                    }
-                                ]
-                            }
-                        },
-                        ncyBreadcrumb: {
-                            label: N_('HOSTS')
-                        },
-                        views: {
-                            '@': {
-                                templateUrl: templateUrl('inventories/inventories')
-                            },
-                            'list@hosts': {
-                                templateProvider: function(HostsList, generateList) {
-                                    let html = generateList.build({
-                                        list: HostsList,
-                                        mode: 'edit'
-                                    });
-                                    return html;
-                                },
-                                controller: 'HostListController'
-                            }
+            let generateHostStates = function(){
+                let hostTree = stateDefinitions.generateTree({
+                    parent: 'hosts', // top-most node in the generated tree (will replace this state definition)
+                    modes: ['edit'],
+                    list: 'HostsList',
+                    form: 'HostsForm',
+                    controllers: {
+                        list: 'HostListController',
+                        edit: 'HostEditController'
+                    },
+                    urls: {
+                        list: '/hosts'
+                    },
+                    resolve: {
+                        edit: {
+                            host: ['Rest', '$stateParams', 'GetBasePath',
+                                function(Rest, $stateParams, GetBasePath) {
+                                    let path = GetBasePath('hosts') + $stateParams.host_id;
+                                    Rest.setUrl(path);
+                                    return Rest.get();
+                                }
+                            ]
                         }
-                    })
+                    },
+                    ncyBreadcrumb: {
+                        label: N_('HOSTS')
+                    },
+                    views: {
+                        '@': {
+                            templateUrl: templateUrl('inventories/inventories')
+                        },
+                        'list@hosts': {
+                            templateProvider: function(HostsList, generateList) {
+                                let html = generateList.build({
+                                    list: HostsList,
+                                    mode: 'edit'
+                                });
+                                return html;
+                            },
+                            controller: 'HostListController'
+                        }
+                    }
                 });
 
-                $stateProvider.state({
-                    name: 'inventories',
-                    url: '/inventories',
-                    lazyLoad: () => generateInventoryStates()
+                let hostAnsibleFacts = {
+                    name: 'hosts.edit.ansible_facts',
+                    url: '/ansible_facts',
+                    ncyBreadcrumb: {
+                        label: N_("FACTS")
+                    },
+                    views: {
+                        'related': {
+                            controller: 'AnsibleFactsController',
+                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
+                        }
+                    },
+                    resolve: {
+                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
+                            function($stateParams, GetBasePath, Rest) {
+                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
+                                Rest.setUrl(ansibleFactsUrl);
+                                return Rest.get()
+                                    .success(function(data) {
+                                        return data;
+                                    });
+                            }
+                        ]
+                    }
+                };
+
+                return Promise.all([
+                    hostTree
+                ]).then((generated) => {
+                    return {
+                        states: _.reduce(generated, (result, definition) => {
+                            return result.concat(definition.states);
+                        }, [
+                            stateExtender.buildDefinition(hostAnsibleFacts)
+                        ])
+                    };
                 });
+            };
+
+            $stateProvider.state({
+                name: 'hosts',
+                url: '/hosts',
+                lazyLoad: () => generateHostStates()
+            });
+
+            $stateProvider.state({
+                name: 'inventories',
+                url: '/inventories',
+                lazyLoad: () => generateInventoryStates()
+            });
         }
     ]);

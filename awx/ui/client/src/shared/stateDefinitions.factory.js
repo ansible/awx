@@ -554,53 +554,56 @@ function($injector, $stateExtender, $log, i18n) {
 
             function buildListNodes(field) {
                 let states = [];
-                if(field && (field.listState || field.addState || field.editState)){
-                    if(field && field.listState){
-                        states.push(field.listState(field, formStateDefinition));
+                if(!field.skipGenerator) {
+                    if(field && (field.listState || field.addState || field.editState)){
+                        if(field && field.listState){
+                            states.push(field.listState(field, formStateDefinition));
+                            states = _.flatten(states);
+                        }
+                        if(field && field.addState){
+                            let formState = field.addState(field, formStateDefinition, params);
+                            states.push(formState);
+                            // intent here is to add lookup states for any add-forms
+                            if(field.includeForm){
+                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                                states.push(that.generateLookupNodes(form, formState));
+                            }
+                            states = _.flatten(states);
+                        }
+                        if(field && field.editState){
+                            let formState = field.editState(field, formStateDefinition, params);
+                            states.push(formState);
+                            // intent here is to add lookup states for any edit-forms
+                            if(field.includeForm){
+                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                                states.push(that.generateLookupNodes(form, formState));
+                                states.push(that.generateFormListDefinitions(form, formState, params));
+                            }
+                            states = _.flatten(states);
+                        }
+                    }
+                    else if(field.iterator === 'notification'){
+                        states.push(buildNotificationState(field));
                         states = _.flatten(states);
                     }
-                    if(field && field.addState){
-                        let formState = field.addState(field, formStateDefinition, params);
-                        states.push(formState);
-                        // intent here is to add lookup states for any add-forms
-                        if(field.includeForm){
-                            let form = field.includeForm ? $injector.get(field.includeForm) : field;
-                            states.push(that.generateLookupNodes(form, formState));
+                    else{
+                        states.push(buildListDefinition(field));
+                        if (field.iterator === 'permission' && field.actions && field.actions.add) {
+                            if (form.name === 'user' || form.name === 'team'){
+                                states.push(buildRbacUserTeamDirective());
+                            }
+                            else {
+                                states.push(buildRbacResourceDirective());
+                            }
                         }
-                        states = _.flatten(states);
-                    }
-                    if(field && field.editState){
-                        let formState = field.editState(field, formStateDefinition, params);
-                        states.push(formState);
-                        // intent here is to add lookup states for any edit-forms
-                        if(field.includeForm){
-                            let form = field.includeForm ? $injector.get(field.includeForm) : field;
-                            states.push(that.generateLookupNodes(form, formState));
-                            states.push(that.generateFormListDefinitions(form, formState, params));
-                        }
-                        states = _.flatten(states);
-                    }
-                }
-                else if(field.iterator === 'notification'){
-                    states.push(buildNotificationState(field));
-                    states = _.flatten(states);
-                }
-                else{
-                    states.push(buildListDefinition(field));
-                    if (field.iterator === 'permission' && field.actions && field.actions.add) {
-                        if (form.name === 'user' || form.name === 'team'){
-                            states.push(buildRbacUserTeamDirective());
-                        }
-                        else {
-                            states.push(buildRbacResourceDirective());
-                        }
-                    }
-                    else if (field.iterator === 'user' && field.actions && field.actions.add) {
-                        if(form.name === 'team' || form.name === 'organization') {
-                            states.push(buildRbacUserDirective());
+                        else if (field.iterator === 'user' && field.actions && field.actions.add) {
+                            if(form.name === 'team' || form.name === 'organization') {
+                                states.push(buildRbacUserDirective());
+                            }
                         }
                     }
                 }
+
                 states = _.flatten(states);
                 return states;
             }
@@ -679,7 +682,7 @@ function($injector, $stateExtender, $log, i18n) {
                 if (field.search) {
                     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
                 }
-                
+
                 return state;
             }
             return _(form.related).map(buildListNodes).flatten().value();
