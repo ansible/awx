@@ -9,6 +9,7 @@ from awx.main.fields import DynamicFilterField
 from django.db.models import Q
 
 
+
 class TestDynamicFilterFieldFilterStringToQ():
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
@@ -18,7 +19,7 @@ class TestDynamicFilterFieldFilterStringToQ():
         ('a__b__c=3.14', Q(**{u"a__b__c": 3.14})),
         ('a__b__c=true', Q(**{u"a__b__c": True})),
         ('a__b__c=false', Q(**{u"a__b__c": False})),
-        ('a__b__c="true"', Q(**{u"a__b__c": u"true"})),
+        ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
@@ -27,8 +28,8 @@ class TestDynamicFilterFieldFilterStringToQ():
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string", [
-        'facts__facts__blank='
-        'a__b__c__ space  =ggg',
+        'ansible_facts__facts__facts__blank='
+        'ansible_facts__a__b__c__ space  =ggg',
     ])
     def test_invalid_filter_strings(self, filter_string):
         with pytest.raises(RuntimeError) as e:
@@ -37,6 +38,7 @@ class TestDynamicFilterFieldFilterStringToQ():
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         (u'(a=abc\u1F5E3def)', Q(**{u"a": u"abc\u1F5E3def"})),
+        (u'(ansible_facts__a=abc\u1F5E3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1F5E3def"}})),
     ])
     def test_unicode(self, filter_string, q_expected):
         q = DynamicFilterField.filter_string_to_q(filter_string)
@@ -57,18 +59,18 @@ class TestDynamicFilterFieldFilterStringToQ():
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('a__b__c[]=3', Q(**{u"a__b__c__contains": [3]})),
-        ('a__b__c[]=3.14', Q(**{u"a__b__c__contains": [3.14]})),
-        ('a__b__c[]=true', Q(**{u"a__b__c__contains": [True]})),
-        ('a__b__c[]=false', Q(**{u"a__b__c__contains": [False]})),
-        ('a__b__c[]="true"', Q(**{u"a__b__c__contains": [u"true"]})),
-        ('a__b__c[]="hello world"', Q(**{u"a__b__c__contains": [u"hello world"]})),
-        ('a__b__c[]__d[]="foobar"', Q(**{u"a__b__c__contains": [{u"d": [u"foobar"]}]})),
-        ('a__b__c[]__d="foobar"', Q(**{u"a__b__c__contains": [{u"d": u"foobar"}]})),
-        ('a__b__c[]__d__e="foobar"', Q(**{u"a__b__c__contains": [{u"d": {u"e": u"foobar"}}]})),
-        ('a__b__c[]__d__e[]="foobar"', Q(**{u"a__b__c__contains": [{u"d": {u"e": [u"foobar"]}}]})),
-        ('a__b__c[]__d__e__f[]="foobar"', Q(**{u"a__b__c__contains": [{u"d": {u"e": {u"f": [u"foobar"]}}}]})),
-        ('(a__b__c[]__d__e__f[]="foobar") and (a__b__c[]__d__e[]="foobar")', Q(**{ u"a__b__c__contains": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}) & Q(**{u"a__b__c__contains": [{u"d": {u"e": [u"foobar"]}}]})),
+        ('ansible_facts__a__b__c[]=3', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3]}}}})),
+        ('ansible_facts__a__b__c[]=3.14', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3.14]}}}})),
+        ('ansible_facts__a__b__c[]=true', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [True]}}}})),
+        ('ansible_facts__a__b__c[]=false', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [False]}}}})),
+        ('ansible_facts__a__b__c[]="true"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [u"true"]}}}})),
+        ('ansible_facts__a__b__c[]="hello world"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [u"hello world"]}}}})),
+        ('ansible_facts__a__b__c[]__d[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": [u"foobar"]}]}}}})),
+        ('ansible_facts__a__b__c[]__d="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": u"foobar"}]}}}})),
+        ('ansible_facts__a__b__c[]__d__e="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": u"foobar"}}]}}}})),
+        ('ansible_facts__a__b__c[]__d__e[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
+        ('ansible_facts__a__b__c[]__d__e__f[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}})),
+        ('(ansible_facts__a__b__c[]__d__e__f[]="foobar") and (ansible_facts__a__b__c[]__d__e[]="foobar")', Q(**{ u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}}) & Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
@@ -78,7 +80,7 @@ class TestDynamicFilterFieldFilterStringToQ():
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         #('a__b__c[]="true"', Q(**{u"a__b__c__contains": u"\"true\""})),
-        ('a__b__c="true"', Q(**{u"a__b__c": u"true"})),
+        ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
@@ -87,8 +89,8 @@ class TestDynamicFilterFieldFilterStringToQ():
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('a__b__c=null', Q(**{u"a__b__c": u"null"})),
-        ('a__b__c="null"', Q(**{u"a__b__c": u"\"null\""})),
+        ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
+        ('ansible_facts__c="null"', Q(**{u"ansible_facts__contains": {u"c": u"\"null\""}})),
     ])
     def test_contains_query_generated_null(self, filter_string, q_expected):
         q = DynamicFilterField.filter_string_to_q(filter_string)

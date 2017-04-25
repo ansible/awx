@@ -343,7 +343,7 @@ def string_to_type(t):
 
 
 class DynamicFilterField(models.TextField):
-
+    SEARCHABLE_RELATIONSHIP = 'ansible_facts'
 
     class BoolOperand(object):
         def __init__(self, t):
@@ -352,6 +352,16 @@ class DynamicFilterField(models.TextField):
             k, v = self._json_path_to_contains(k, v)
             kwargs[k] = v
             self.result = Q(**kwargs)
+
+        def strip_quotes_traditional_logic(self, v):
+            if type(v) is unicode and v.startswith('"') and v.endswith('"'):
+                return v[1:-1]
+            return v
+
+        def strip_quotes_json_logic(self, v):
+            if type(v) is unicode and v.startswith('"') and v.endswith('"') and v != u'"null"':
+                return v[1:-1]
+            return v
 
         '''
         TODO: We should be able to express this in the grammar and let 
@@ -362,66 +372,50 @@ class DynamicFilterField(models.TextField):
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):
-            pieces = k.split('__')
+            if not k.startswith(DynamicFilterField.SEARCHABLE_RELATIONSHIP):
+                v = self.strip_quotes_traditional_logic(v)
+                return (k, v)
 
-            flag_first_arr_found = False
+            # Strip off leading relationship key
+            if k.startswith(DynamicFilterField.SEARCHABLE_RELATIONSHIP + '__'):
+                strip_len = len(DynamicFilterField.SEARCHABLE_RELATIONSHIP) + 2
+            else:
+                strip_len = len(DynamicFilterField.SEARCHABLE_RELATIONSHIP)
+            k = k[strip_len:]
 
-            assembled_k = ''
-            assembled_v = v
+            pieces = k.split(u'__')
 
-            last_kv = None
+            assembled_k = u'%s__contains' % (DynamicFilterField.SEARCHABLE_RELATIONSHIP)
+            assembled_v = None
+
             last_v = None
+            last_kv = None
 
-            contains_count = 0
             for i, piece in enumerate(pieces):
-                if flag_first_arr_found is False and piece.endswith('[]'):
-                    assembled_k += u'%s__contains' % (piece[0:-2])
-                    contains_count += 1
-                    flag_first_arr_found = True
-                elif flag_first_arr_found is False and i == len(pieces) - 1:
-                    assembled_k += u'%s' % piece
-                elif flag_first_arr_found is False:
-                    assembled_k += u'%s__' % piece
-                elif flag_first_arr_found is True:
-                    new_kv = dict()
-                    if piece.endswith('[]'):
-                        new_v = []
-                        new_kv[piece[0:-2]] = new_v
-                    else:
-                        new_v = dict()
-                        new_kv[piece] = new_v
+                new_kv = dict()
+                if piece.endswith(u'[]'):
+                    new_v = []
+                    new_kv[piece[0:-2]] = new_v
+                else:
+                    new_v = dict()
+                    new_kv[piece] = new_v
 
+                if last_kv is None:
+                    assembled_v = new_kv
+                elif type(last_v) is list:
+                    last_v.append(new_kv)
+                elif type(last_v) is dict:
+                    last_kv[last_kv.keys()[0]] = new_kv
 
-                    if last_v is None:
-                        last_v = []
-                        assembled_v = last_v
+                last_v = new_v
+                last_kv = new_kv
 
-                    if type(last_v) is list:
-                        last_v.append(new_kv)
-                    elif type(last_v) is dict:
-                        last_kv[last_kv.keys()[0]] = new_kv
+            v = self.strip_quotes_json_logic(v)
 
-                    last_v = new_v
-                    last_kv = new_kv
-                    contains_count += 1
-
-            '''
-            Explicit quotes are kept until this point.
-            Note: we could have totally "ripped" them off earlier when we decided
-            what type to convert the token to.
-            '''
-            if type(v) is unicode and v.startswith('"') and v.endswith('"') and v != u'"null"':
-                v = v[1:-1]
-
-            if contains_count == 0:
-                assembled_v = v
-            elif contains_count == 1:
-                assembled_v = [v]
-            elif contains_count > 1:
-                if type(last_v) is list:
-                    last_v.append(v)
-                if type(last_v) is dict:
-                    last_kv[last_kv.keys()[0]] = v
+            if type(last_v) is list:
+                last_v.append(v)
+            elif type(last_v) is dict:
+                last_kv[last_kv.keys()[0]] = v
 
             return (assembled_k, assembled_v)
 
@@ -517,6 +511,7 @@ class DynamicFilterField(models.TextField):
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
+        #except ParseException as e:
         except Exception:
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
