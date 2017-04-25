@@ -2,6 +2,7 @@
 
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
+import pytest
 
 from awx.conf.models import Setting
 from awx.main.utils import common
@@ -52,3 +53,13 @@ def test_encrypt_field_with_ask():
 def test_encrypt_field_with_empty_value():
     encrypted = common.encrypt_field(Setting(value=None), 'value')
     assert encrypted is None
+
+
+@pytest.mark.parametrize('input_, output', [
+    ({"foo": "bar"}, {"foo": "bar"}),
+    ('{"foo": "bar"}', {"foo": "bar"}),
+    ('---\nfoo: bar', {"foo": "bar"}),
+    (4399, {}),
+])
+def test_parse_yaml_or_json(input_, output):
+    assert common.parse_yaml_or_json(input_) == output
