@@ -2,7 +2,7 @@ function atPanelBody () {
     return {
         restrict: 'E',
         transclude: true,
-        templateUrl: 'static/partials/components/panel-body.partial.html'
+        templateUrl: 'static/partials/components/panel/body.partial.html'
     };
 }
 

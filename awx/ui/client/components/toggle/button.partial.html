@@ -1,0 +1,9 @@
+<button class="btn btn-default at-Button at-ToggleButton"
+        ng-class="{ 'at-ToggleButton--show': config.show }"
+        ng-click="config.show = !config.show">
+  <span ng-if="config.button">
+    {{ config.button.text }}
+  </span>
+
+  <ng-transclude ng-if="!config.button"></ng-transclude>
+</button>

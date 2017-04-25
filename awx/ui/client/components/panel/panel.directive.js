@@ -2,7 +2,7 @@ function atPanel () {
     return {
         restrict: 'E',
         transclude: true,
-        templateUrl: 'static/partials/components/panel.partial.html'
+        templateUrl: 'static/partials/components/panel/panel.partial.html'
     };
 }
 

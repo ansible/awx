@@ -13,11 +13,12 @@ function IndexController () {
     };
 
     vm.key = {
-        on: false,
+        id: 'key-group',
+        show: false,
         button: {
             text: 'Key'
         },
-        body: {
+        content: {
             text: 'Yadda yadda yadda'
         }
     };

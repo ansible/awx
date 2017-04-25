@@ -9,7 +9,7 @@ function atInputSearch () {
     return {
         restrict: 'E',
         transclude: true,
-        templateUrl: 'static/partials/components/input-search.partial.html',
+        templateUrl: 'static/partials/components/input/search.partial.html',
         link,
         scope: {
             config: '='

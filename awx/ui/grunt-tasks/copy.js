@@ -52,7 +52,7 @@ module.exports = {
         }, {
             cwd: 'client/components',
             expand: true,
-            src: ['*.partial.html'],
+            src: ['**/*.partial.html'],
             dest: 'static/partials/components/'
         }]
     },
