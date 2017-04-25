@@ -19,8 +19,8 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd("inventory_scripts")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
 
             // search init

@@ -24,8 +24,10 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd("credential_types")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
+                    $scope.options = params.options;
+                    optionsRequestDataProcessing();
                 });
 
             // search init
@@ -93,7 +95,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
 
                         // Set the item type label
                         if (list.fields.kind && $scope.options &&
-                            $scope.options.hasOwnProperty('kind')) {
+                            $scope.options.kind) {
                                 $scope.options.kind.choices.forEach(function(choice) {
                                     if (choice[0] === item.kind) {
                                         itm.kind_label = choice[1];
@@ -105,13 +107,6 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 }
             }
         }
-
-        Rest.setUrl(GetBasePath("credential_types"));
-        Rest.options()
-            .success(function(data) {
-                $scope.options = data.actions.GET;
-                optionsRequestDataProcessing();
-            });
 
         $scope.$watchCollection(`${$scope.list.name}`, function() {
                 optionsRequestDataProcessing();

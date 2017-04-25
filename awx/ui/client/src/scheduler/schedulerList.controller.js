@@ -34,8 +34,8 @@ export default [
                 scheduleEndpoint = ParentObject.endpoint|| ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
                 $scope.canAdd = false;
                 rbacUiControlService.canAdd(scheduleEndpoint)
-                    .then(function(canAdd) {
-                        $scope.canAdd = canAdd;
+                    .then(function(params) {
+                        $scope.canAdd = params.canAdd;
                     });
             }
 

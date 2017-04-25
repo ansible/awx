@@ -17,8 +17,8 @@
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/hosts")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
 
             // Search init

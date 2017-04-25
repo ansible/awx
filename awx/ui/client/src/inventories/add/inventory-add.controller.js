@@ -17,8 +17,8 @@ function InventoriesAdd($scope, $location,
 
     $scope.canAdd = false;
     rbacUiControlService.canAdd(GetBasePath('inventory'))
-        .then(function(canAdd) {
-            $scope.canAdd = canAdd;
+        .then(function(params) {
+            $scope.canAdd = params.canAdd;
         });
 
     Rest.setUrl(GetBasePath('inventory'));

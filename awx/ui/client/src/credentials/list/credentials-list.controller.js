@@ -19,8 +19,8 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
 
         function init() {
             rbacUiControlService.canAdd('credentials')
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
 
             // search init

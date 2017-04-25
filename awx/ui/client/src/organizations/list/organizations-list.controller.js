@@ -23,8 +23,8 @@ export default ['$stateParams', '$scope', '$rootScope',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd("organizations")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
             $scope.orgCount = Dataset.data.count;
 

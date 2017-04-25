@@ -34,8 +34,8 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd('users')
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
 
             // search init

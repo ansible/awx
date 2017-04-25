@@ -21,8 +21,8 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt', 'ClearScope',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd('teams')
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
             // search init
             $scope.list = list;
