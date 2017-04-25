@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 
-from network_ui.models import Device
+from awx.network_ui.models import Device
 from pprint import pprint
 
 

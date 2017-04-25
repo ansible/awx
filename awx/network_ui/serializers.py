@@ -1,5 +1,5 @@
 
-from network_ui.models import Topology, Device, Link, Interface
+from awx.network_ui.models import Topology, Device, Link, Interface
 from django.db.models import Q
 import yaml
 

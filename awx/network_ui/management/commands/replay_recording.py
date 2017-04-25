@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from websocket import create_connection
 from ui_test import MessageHandler, _Time
-from network_ui.models import Device, TopologyHistory
+from awx.network_ui.models import Device, TopologyHistory
 
 import json
 

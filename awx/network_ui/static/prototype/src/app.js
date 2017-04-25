@@ -18,7 +18,7 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
-  $scope.control_socket = new window.ReconnectingWebSocket("ws://" + window.location.host + "/prototype/topology?topology_id=" + $scope.topology_id,
+  $scope.control_socket = new window.ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
   $scope.history = [];

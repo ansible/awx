@@ -1,8 +1,8 @@
 # In consumers.py
 from channels import Group, Channel
 from channels.sessions import channel_session
-from network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
-from network_ui.serializers import yaml_serialize_topology
+from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
+from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
 from collections import defaultdict
@@ -10,7 +10,7 @@ from django.conf import settings
 import math
 import random
 
-from network_ui.utils import transform_dict
+from awx.network_ui.utils import transform_dict
 from pprint import pprint
 import dpath.util
 
@@ -622,7 +622,6 @@ discovery = _Discovery()
 
 @channel_session
 def ansible_connect(message):
-    message.reply_channel.send({"accept": True})
     data = urlparse.parse_qs(message.content['query_string'])
     topology_id = parse_topology_id(data)
     message.channel_session['topology_id'] = topology_id
@@ -646,7 +645,6 @@ def ansible_disconnect(message):
 @channel_session
 def ws_connect(message):
     # Accept connection
-    message.reply_channel.send({"accept": True})
     data = urlparse.parse_qs(message.content['query_string'])
     topology_id = parse_topology_id(data)
     topology, created = Topology.objects.get_or_create(
@@ -739,7 +737,6 @@ def console_printer(message):
 @channel_session
 def worker_connect(message):
     Group("workers").add(message.reply_channel)
-    message.reply_channel.send({"accept": True})
 
 
 @channel_session
@@ -757,7 +754,6 @@ def worker_disconnect(message):
 
 @channel_session
 def tester_connect(message):
-    message.reply_channel.send({"accept": True})
     data = urlparse.parse_qs(message.content['query_string'])
     topology_id = parse_topology_id(data)
     message.channel_session['topology_id'] = topology_id
