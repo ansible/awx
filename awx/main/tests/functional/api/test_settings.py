@@ -225,7 +225,9 @@ def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
             ('LOG_AGGREGATOR_LOGGERS', ['awx', 'activity_stream', 'job_events', 'system_tracking']),
             ('LOG_AGGREGATOR_INDIVIDUAL_FACTS', False),
             ('LOG_AGGREGATOR_ENABLED', False),
-            ('LOG_AGGREGATOR_TOWER_UUID', '')
+            ('LOG_AGGREGATOR_TOWER_UUID', ''),
+            ('LOG_AGGREGATOR_PROTOCOL', 'https'),
+            ('LOG_AGGREGATOR_TCP_TIMEOUT', 5),
         ]))
 
 
