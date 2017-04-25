@@ -182,7 +182,7 @@
             $scope.$parent.groupsSelectedItems = selection.selectedItems;
         });
 
-        $scope.copyMoveGroup = function(id){
+        $scope.copyMoveGroup = function(){
             // TODO: implement
         };
 
