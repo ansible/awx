@@ -20,6 +20,8 @@ import InventoryForm from './inventory.form';
 import InventoryManageService from './inventory-manage.service';
 import adHocRoute from './adhoc/adhoc.route';
 import ansibleFacts from './ansible_facts/main';
+import { copyMoveGroupRoute, copyMoveHostRoute } from './copy-move/copy-move.route';
+import copyMove from './copy-move/main';
 export default
 angular.module('inventory', [
         adhoc.name,
@@ -31,7 +33,8 @@ angular.module('inventory', [
         inventoryAdd.name,
         inventoryEdit.name,
         inventoryList.name,
-        ansibleFacts.name
+        ansibleFacts.name,
+        copyMove.name
     ])
     .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
@@ -40,6 +43,34 @@ angular.module('inventory', [
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get(),
             stateExtender = $stateExtenderProvider.$get();
+
+            function factsConfig(stateName) {
+                return {
+                    name: stateName,
+                    url: '/ansible_facts',
+                    ncyBreadcrumb: {
+                        label: N_("FACTS")
+                    },
+                    views: {
+                        'related': {
+                            controller: 'AnsibleFactsController',
+                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
+                        }
+                    },
+                    resolve: {
+                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
+                            function($stateParams, GetBasePath, Rest) {
+                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
+                                Rest.setUrl(ansibleFactsUrl);
+                                return Rest.get()
+                                    .success(function(data) {
+                                        return data;
+                                    });
+                            }
+                        ]
+                    }
+                };
+            }
 
             function generateInventoryStates() {
 
@@ -224,31 +255,7 @@ angular.module('inventory', [
                     }
                 };
 
-                let relatedHostsAnsibleFacts = {
-                    name: 'inventories.edit.hosts.edit.ansible_facts',
-                    url: '/ansible_facts',
-                    ncyBreadcrumb: {
-                        label: N_("FACTS")
-                    },
-                    views: {
-                        'related': {
-                            controller: 'AnsibleFactsController',
-                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
-                        }
-                    },
-                    resolve: {
-                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
-                            function($stateParams, GetBasePath, Rest) {
-                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
-                                Rest.setUrl(ansibleFactsUrl);
-                                return Rest.get()
-                                    .success(function(data) {
-                                        return data;
-                                    });
-                            }
-                        ]
-                    }
-                };
+                let relatedHostsAnsibleFacts = factsConfig('inventories.edit.hosts.edit.ansible_facts');
 
                 return Promise.all([
                     basicInventoryAdd,
@@ -296,7 +303,9 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(listSchedules),
                             stateExtender.buildDefinition(addSchedule),
                             stateExtender.buildDefinition(editSchedule),
-                            stateExtender.buildDefinition(relatedHostsAnsibleFacts)
+                            stateExtender.buildDefinition(relatedHostsAnsibleFacts),
+                            stateExtender.buildDefinition(copyMoveGroupRoute),
+                            stateExtender.buildDefinition(copyMoveHostRoute)
                         ])
                     };
                 });
@@ -347,31 +356,7 @@ angular.module('inventory', [
                     }
                 });
 
-                let hostAnsibleFacts = {
-                    name: 'hosts.edit.ansible_facts',
-                    url: '/ansible_facts',
-                    ncyBreadcrumb: {
-                        label: N_("FACTS")
-                    },
-                    views: {
-                        'related': {
-                            controller: 'AnsibleFactsController',
-                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
-                        }
-                    },
-                    resolve: {
-                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
-                            function($stateParams, GetBasePath, Rest) {
-                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
-                                Rest.setUrl(ansibleFactsUrl);
-                                return Rest.get()
-                                    .success(function(data) {
-                                        return data;
-                                    });
-                            }
-                        ]
-                    }
-                };
+                let hostAnsibleFacts = factsConfig('hosts.edit.ansible_facts');
 
                 return Promise.all([
                     hostTree

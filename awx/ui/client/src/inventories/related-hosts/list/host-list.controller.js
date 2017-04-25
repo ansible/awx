@@ -156,4 +156,8 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
 
         $state.go('^.adhoc', {pattern: pattern});
     };
+
+    $scope.copyMoveHost = function(id) {
+        $state.go('inventories.edit.hosts.copyMoveHost', {host_id: id});
+    };
 }];

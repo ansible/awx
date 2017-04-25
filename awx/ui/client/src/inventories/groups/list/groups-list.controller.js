@@ -194,7 +194,7 @@
         };
 
         $scope.copyMoveGroup = function(id){
-            // TODO: implement
+            $state.go('inventories.edit.groups.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
         };
 
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
