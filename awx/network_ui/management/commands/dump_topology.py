@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from prototype.serializers import yaml_serialize_topology
+from network_ui.serializers import yaml_serialize_topology
 
 
 

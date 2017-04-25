@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
             name='Link',
             fields=[
                 ('link_id', models.AutoField(serialize=False, primary_key=True)),
-                ('from_device', models.ForeignKey(related_name='+', to='prototype.Device')),
-                ('to_device', models.ForeignKey(related_name='+', to='prototype.Device')),
+                ('from_device', models.ForeignKey(related_name='+', to='network_ui.Device')),
+                ('to_device', models.ForeignKey(related_name='+', to='network_ui.Device')),
             ],
         ),
         migrations.CreateModel(
@@ -42,6 +42,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='device',
             name='topology',
-            field=models.ForeignKey(to='prototype.Topology'),
+            field=models.ForeignKey(to='network_ui.Topology'),
         ),
     ]

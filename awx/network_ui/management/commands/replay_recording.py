@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from websocket import create_connection
 from ui_test import MessageHandler, _Time
-from prototype.models import Device, TopologyHistory
+from network_ui.models import Device, TopologyHistory
 
 import json
 
@@ -25,7 +25,7 @@ class Command(BaseCommand):
             TopologyHistory.objects.filter(topology_id=topology_id).delete()
             Device.objects.filter(topology_id=topology_id).delete()
         time.scale = options.get('time_scale', 1.0)
-        ui = MessageHandler(create_connection("ws://localhost:8001/prototype/topology?topology_id={0}".format(options['topology_id'])))
+        ui = MessageHandler(create_connection("ws://localhost:8001/network_ui/topology?topology_id={0}".format(options['topology_id'])))
         ui.recv()
         ui.recv()
         ui.send('StopRecording')

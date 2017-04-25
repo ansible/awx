@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('prototype', '0003_device_type'),
+        ('network_ui', '0003_device_type'),
     ]
 
     operations = [
@@ -30,9 +30,9 @@ class Migration(migrations.Migration):
                 ('topology_history_id', models.AutoField(serialize=False, primary_key=True)),
                 ('message_id', models.IntegerField()),
                 ('message_data', models.TextField()),
-                ('client', models.ForeignKey(to='prototype.Client')),
-                ('message_type', models.ForeignKey(to='prototype.MessageType')),
-                ('topology', models.ForeignKey(to='prototype.Topology')),
+                ('client', models.ForeignKey(to='network_ui.Client')),
+                ('message_type', models.ForeignKey(to='network_ui.MessageType')),
+                ('topology', models.ForeignKey(to='network_ui.Topology')),
             ],
         ),
     ]
