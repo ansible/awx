@@ -76,7 +76,7 @@ export default [
                                     $scope[key] = data[key].toString();
                                 }
                                 else if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
-                                    $scope[key] = data[key];
+                                    $scope[key] = JSON.stringify(data[key]);
                                 }
                                 else {
                                     $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
@@ -380,7 +380,8 @@ export default [
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
 
                     if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
-                        payload[key] = $scope[key];
+                        payload[key] = $scope[key] === "{}" ? [] : ToJSON($scope.parseType,
+                            $scope[key]);
                     }
                     else {
                         // Parse lists
