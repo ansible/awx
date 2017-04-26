@@ -22,10 +22,10 @@ export default {
             nosort: true,
             mode: 'all',
             iconOnly: true,
-            awToolTip: "{{ group.hosts_status_tip }}",
+            awToolTip: "{{ nested_group.hosts_status_tip }}",
             dataPlacement: "top",
-            ngClick: "showFailedHosts(group)",
-            icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
+            ngClick: "showFailedHosts(nested_group)",
+            icon: "{{ 'fa icon-job-' + nested_group.hosts_status_class }}",
             columnClass: 'status-column List-staticColumn--smallStatus'
         },
         name: {
@@ -33,7 +33,7 @@ export default {
             key: true,
 
             // ngClick: "groupSelect(group.id)",
-            ngClick: "editGroup(group.id)",
+            ngClick: "editGroup(nested_group.id)",
             columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
             class: 'InventoryManage-breakWord',
         }
@@ -104,7 +104,7 @@ export default {
         // },
         copy: {
             mode: 'all',
-            ngClick: "copyMoveGroup(group.id)",
+            ngClick: "copyMoveGroup(nested_group.id)",
             awToolTip: 'Copy or move group',
             ngShow: "group.id > 0 && group.summary_fields.user_capabilities.copy",
             dataPlacement: "top"
@@ -120,23 +120,23 @@ export default {
         edit: {
             //label: 'Edit',
             mode: 'all',
-            ngClick: "editGroup(group.id)",
+            ngClick: "editGroup(nested_group.id)",
             awToolTip: 'Edit group',
             dataPlacement: "top",
-            ngShow: "group.summary_fields.user_capabilities.edit"
+            ngShow: "nested_group.summary_fields.user_capabilities.edit"
         },
         view: {
             //label: 'Edit',
             mode: 'all',
-            ngClick: "editGroup(group.id)",
+            ngClick: "editGroup(nested_group.id)",
             awToolTip: 'View group',
             dataPlacement: "top",
-            ngShow: "!group.summary_fields.user_capabilities.edit"
+            ngShow: "!nested_group.summary_fields.user_capabilities.edit"
         },
         "delete": {
             //label: 'Delete',
             mode: 'all',
-            ngClick: "deleteGroup(group)",
+            ngClick: "deleteGroup(nested_group)",
             awToolTip: 'Delete group',
             dataPlacement: "top",
             ngShow: "group.summary_fields.user_capabilities.delete"

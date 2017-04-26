@@ -88,9 +88,7 @@ function(i18n, nestedGroupListState){
                 includeForm: "RelatedGroupFormDefinition",
                 title: i18n._('Groups'),
                 iterator: 'related_group',
-                listState: nestedGroupListState,
-                // addState: buildGroupsAddState,
-                // editState: buildGroupsEditState
+                listState: nestedGroupListState
             },
 
         }

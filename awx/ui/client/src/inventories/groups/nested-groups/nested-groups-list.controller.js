@@ -64,7 +64,7 @@
         }
 
         $scope.createGroup = function(){
-            $state.go('inventories.edit.groups.add');
+            $state.go('inventories.edit.groups.edit.nested_groups.add');
         };
         $scope.editGroup = function(id){
             $state.go('inventories.edit.groups.edit', {group_id: id});

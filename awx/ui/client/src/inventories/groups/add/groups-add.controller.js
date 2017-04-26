@@ -49,8 +49,8 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm',
             };
 
             GroupManageService.post(group).then(res => {
-                if ($stateParams.group) {
-                    return GroupManageService.associateGroup(res.data, _.last($stateParams.group))
+                if ($stateParams.group_id) {
+                    return GroupManageService.associateGroup(res.data, $stateParams.group_id)
                         .then(() => $state.go('^', null, { reload: true }));
                 } else {
                     $state.go('^.edit', { group_id: res.data.id }, { reload: true });
