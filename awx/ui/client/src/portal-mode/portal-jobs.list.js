@@ -24,7 +24,10 @@ export default ['i18n', function(i18n) {
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                nosort: true
+                nosort: true,
+                awTipPlacement: "top",
+                awToolTip: "{{ job.status_tip }}",
+                dataTipWatch: 'job.status_tip',
             },
             name: {
                 label: i18n._('Name'),
