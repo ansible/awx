@@ -13,6 +13,7 @@ from awx.main.management.commands.inventory_import import (
 )
 
 
+@pytest.mark.inventory_import
 class TestInvalidOptions:
 
     def test_invalid_options_no_options_specified(self):
