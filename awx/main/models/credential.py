@@ -234,6 +234,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     credential_type = models.ForeignKey(
         'CredentialType',
         related_name='credentials',
+        null=False,
         help_text=_('Type for this credential.  Credential Types define '
                     'valid fields (e.g,. "username", "password") and their '
                     'properties (e.g,. "username is required" or "password '
