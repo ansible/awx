@@ -1761,6 +1761,16 @@ class RunInventoryUpdate(BaseTask):
 
         elif inventory_update.source == 'file':
             args.append(inventory_update.get_actual_source_path())
+            if hasattr(settings, 'ANSIBLE_INVENTORY_MODULE'):
+                module_name = settings.ANSIBLE_INVENTORY_MODULE
+            else:
+                module_name = 'backport'
+                v = get_ansible_version()
+                if Version(v) > Version('2.4'):
+                    module_name = 'modern'
+                elif Version(v) < Version('2.2'):
+                    module_name = 'legacy'
+            args.extend(['--method', module_name])
         elif inventory_update.source == 'custom':
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)
@@ -1770,11 +1780,10 @@ class RunInventoryUpdate(BaseTask):
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-            args.append(runpath)
+            args.append(path)
             args.append("--custom")
             self.custom_dir_path.append(runpath)
-        verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
-        args.append('-v%d' % verbosity)
+        args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')
         return args

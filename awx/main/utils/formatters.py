@@ -5,6 +5,16 @@ from logstash.formatter import LogstashFormatterVersion1
 from copy import copy
 import json
 import time
+import logging
+
+
+class TimeFormatter(logging.Formatter):
+    '''
+    Custom log formatter used for inventory imports
+    '''
+    def format(self, record):
+        record.relativeSeconds = record.relativeCreated / 1000.0
+        return logging.Formatter.format(self, record)
 
 
 class LogstashFormatter(LogstashFormatterVersion1):

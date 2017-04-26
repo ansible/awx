@@ -114,4 +114,16 @@ class Migration(migrations.Migration):
             name='notificationtemplate',
             unique_together=set([('organization', 'name')]),
         ),
+
+        # Add verbosity option to inventory updates
+        migrations.AddField(
+            model_name='inventorysource',
+            name='verbosity',
+            field=models.PositiveIntegerField(default=1, blank=True, choices=[(0, b'0 (WARNING)'), (1, b'1 (INFO)'), (2, b'2 (DEBUG)')]),
+        ),
+        migrations.AddField(
+            model_name='inventoryupdate',
+            name='verbosity',
+            field=models.PositiveIntegerField(default=1, blank=True, choices=[(0, b'0 (WARNING)'), (1, b'1 (INFO)'), (2, b'2 (DEBUG)')]),
+        ),
     ]

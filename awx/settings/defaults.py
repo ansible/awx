@@ -907,6 +907,10 @@ LOGGING = {
         },
         'json': {
             '()': 'awx.main.utils.formatters.LogstashFormatter'
+        },
+        'timed_import': {
+            '()': 'awx.main.utils.formatters.TimeFormatter',
+            'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'
         }
     },
     'handlers': {
@@ -957,6 +961,11 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
+        },
+        'inventory_import': {
+            'level': 'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'timed_import',
         },
         'task_system': {
             'level': 'INFO',
@@ -1028,6 +1037,10 @@ LOGGING = {
         },
         'awx.main.commands.run_callback_receiver': {
             'handlers': ['callback_receiver'],
+        },
+        'awx.main.commands.inventory_import': {
+            'handlers': ['inventory_import'],
+            'propagate': False
         },
         'awx.main.tasks': {
             'handlers': ['task_system'],

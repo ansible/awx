@@ -733,6 +733,13 @@ class InventorySourceOptions(BaseModel):
         ('custom', _('Custom Script')),
     ]
 
+    # From the options of the Django management base command
+    INVENTORY_UPDATE_VERBOSITY_CHOICES = [
+        (0, '0 (WARNING)'),
+        (1, '1 (INFO)'),
+        (2, '2 (DEBUG)'),
+    ]
+
     # Use tools/scripts/get_ec2_filter_names.py to build this list.
     INSTANCE_FILTER_NAMES = [
         "architecture",
@@ -878,6 +885,11 @@ class InventorySourceOptions(BaseModel):
     timeout = models.IntegerField(
         blank=True,
         default=0,
+    )
+    verbosity = models.PositiveIntegerField(
+        choices=INVENTORY_UPDATE_VERBOSITY_CHOICES,
+        blank=True,
+        default=1,
     )
 
     @classmethod
@@ -1116,7 +1128,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                'timeout', 'launch_type', 'scm_project_update',]
+                'timeout', 'verbosity', 'launch_type', 'scm_project_update',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,

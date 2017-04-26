@@ -79,6 +79,7 @@ def test_job_args_unredacted_passwords(job):
     assert extra_vars['secret_key'] == 'my_password'
 
 
+@pytest.mark.survey
 def test_update_kwargs_survey_invalid_default(survey_spec_factory):
     spec = survey_spec_factory('var2')
     spec['spec'][0]['required'] = False
@@ -91,6 +92,7 @@ def test_update_kwargs_survey_invalid_default(survey_spec_factory):
     assert json.loads(defaulted_extra_vars['extra_vars'])['var2'] == 2
 
 
+@pytest.mark.survey
 @pytest.mark.parametrize("question_type,default,expect_use,expect_value", [
     ("multiplechoice", "",       False, 'N/A'),  # historical bug
     ("multiplechoice", "zeb",    False, 'N/A'),  # zeb not in choices
@@ -125,6 +127,7 @@ def test_optional_survey_question_defaults(
         assert 'c' not in defaulted_extra_vars['extra_vars']
 
 
+@pytest.mark.survey
 class TestWorkflowSurveys:
     def test_update_kwargs_survey_defaults(self, survey_spec_factory):
         "Assure that the survey default over-rides a JT variable"
