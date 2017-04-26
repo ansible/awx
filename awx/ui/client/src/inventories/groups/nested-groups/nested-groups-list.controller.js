@@ -69,6 +69,9 @@
         $scope.editGroup = function(id){
             $state.go('inventories.edit.groups.edit', {group_id: id});
         };
+        // $scope.editGroup = function(id){
+        //     $state.go('inventories.edit.groups.edit.nested_groups.edit', {nested_group_id: id});
+        // };
         $scope.deleteGroup = function(group){
             $scope.toDelete = {};
             angular.extend($scope.toDelete, group);

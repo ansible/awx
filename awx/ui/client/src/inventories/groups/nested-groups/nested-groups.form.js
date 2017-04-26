@@ -19,13 +19,13 @@ function(i18n, nestedGroupListState){
         name: 'nested_group',
         iterator: "nested_group",
         basePath: 'groups',
-        parent: 'inventories.edit.groups',
+        parent: 'inventories.edit.groups.edit.nested_groups',
         // the parent node this generated state definition tree expects to attach to
         stateTree: 'inventories',
         // form generator inspects the current state name to determine whether or not to set an active (.is-selected) class on a form tab
         // this setting is optional on most forms, except where the form's edit state name is not parentStateName.edit
-        activeEditState: 'inventories.edit.groups.edit',
-        detailsClick: "$state.go('inventories.edit.groups.edit')",
+        activeEditState: 'inventories.edit.groups.edit.nested_groups.edit',
+        detailsClick: "$state.go('inventories.edit.groups.edit.nested_groups.edit')",
         well: false,
         tabs: true,
         fields: {
