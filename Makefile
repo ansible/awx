@@ -368,10 +368,12 @@ server_noattach:
 	tmux select-window -t tower:1
 	tmux rename-window 'WebSockets'
 	tmux split-window -h 'exec make runworker'
+	tmux split-window -v 'exec make nginx'
 	tmux new-window 'exec make receiver'
 	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
 	tmux split-window -h 'exec make factcacher'
+	tmux select-window -t tower:0
 
 server: server_noattach
 	tmux -2 attach-session -t tower
