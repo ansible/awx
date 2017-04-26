@@ -720,7 +720,8 @@ class InventorySourceOptions(BaseModel):
 
     SOURCE_CHOICES = [
         ('', _('Manual')),
-        ('file', _('File, Directory or Script Locally or in Project')),
+        ('file', _('File, Directory or Script')),
+        ('scm', _('Sourced from a project in Tower')),
         ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
@@ -991,7 +992,7 @@ class InventorySourceOptions(BaseModel):
         if not self.source:
             return None
         cred = self.credential
-        if cred and self.source != 'custom':
+        if cred and self.source not in ('custom', 'scm'):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
@@ -1135,7 +1136,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
         is_new_instance = not bool(self.pk)
-        is_scm_type = self.scm_project_id is not None
+        is_scm_type = self.scm_project_id is not None and self.source == 'scm'
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
@@ -1335,6 +1336,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
         if (self.source not in ('custom', 'ec2') and
                 not (self.credential)):
+            return False
+        elif self.source in ('file', 'scm'):
             return False
         return True
 

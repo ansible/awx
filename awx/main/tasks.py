@@ -1689,13 +1689,17 @@ class RunInventoryUpdate(BaseTask):
             env['FOREMAN_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'cloudforms':
             env['CLOUDFORMS_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'file':
+        elif inventory_update.source == 'scm':
             # Parse source_vars to dict, update env.
             env.update(parse_yaml_or_json(inventory_update.source_vars))
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+        elif inventory_update.source == 'file':
+            raise NotImplementedError('Can not update file sources through the task system.')
+        # add private_data_files
+        env['AWX_PRIVATE_DATA_DIR'] = kwargs.get('private_data_dir', '')
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -1759,18 +1763,8 @@ class RunInventoryUpdate(BaseTask):
                     getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),
                 ])
 
-        elif inventory_update.source == 'file':
+        elif inventory_update.source == 'scm':
             args.append(inventory_update.get_actual_source_path())
-            if hasattr(settings, 'ANSIBLE_INVENTORY_MODULE'):
-                module_name = settings.ANSIBLE_INVENTORY_MODULE
-            else:
-                module_name = 'backport'
-                v = get_ansible_version()
-                if Version(v) > Version('2.4'):
-                    module_name = 'modern'
-                elif Version(v) < Version('2.2'):
-                    module_name = 'legacy'
-            args.extend(['--method', module_name])
         elif inventory_update.source == 'custom':
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)

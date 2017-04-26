@@ -117,7 +117,7 @@ class TestInvalidOptionsFunctional:
 @mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
 class TestINIImports:
 
-    @mock.patch.object(inventory_import.BaseLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
+    @mock.patch.object(inventory_import.AnsibleInventoryLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
     def test_inventory_single_ini_import(self, inventory, capsys):
         cmd = inventory_import.Command()
         r = cmd.handle_noargs(

@@ -2353,7 +2353,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if obj.source == 'file' and obj.scm_project_id is not None:
+        if obj.source == 'scm':
             raise PermissionDenied(detail=_(
                 'Update the project `{}` in order to update this inventory source.'.format(
                     obj.scm_project.name)))

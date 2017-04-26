@@ -11,10 +11,12 @@ import subprocess
 import sys
 import time
 import traceback
+import shutil
 
 # Django
 from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
+from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, transaction
 from django.utils.encoding import smart_text
 
@@ -24,7 +26,8 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (
     ignore_inventory_computed_fields,
     check_proot_installed,
-    wrap_args_with_proot
+    wrap_args_with_proot,
+    build_proot_temp_dir
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
@@ -48,52 +51,109 @@ Demo mode free license count exceeded, would bring available instances to %(new_
 See http://www.ansible.com/renew for licensing information.'''
 
 
-# if called with --list, inventory outputs a JSON representing everything
-# in the inventory. Supported cases are maintained in tests.
-# if called with --host <host_record_name> outputs JSON for that host
+def functioning_dir(path):
+    if os.path.isdir(path):
+        return path
+    return os.path.dirname(path)
 
 
-class BaseLoader(object):
-    use_proot = True
+class AnsibleInventoryLoader(object):
+    '''
+    Given executable `source` (directory, executable, or file) this will
+    use the ansible-inventory CLI utility to convert it into in-memory
+    representational objects. Example:
+        /usr/bin/ansible/ansible-inventory -i hosts --list
+    If it fails to find this, it uses the backported script instead
+    '''
 
-    def __init__(self, source, group_filter_re=None, host_filter_re=None):
+    def __init__(self, source, group_filter_re=None, host_filter_re=None, is_custom=False):
         self.source = source
-        self.exe_dir = os.path.dirname(source)
-        self.inventory = MemInventory(
-            group_filter_re=group_filter_re, host_filter_re=host_filter_re)
+        self.is_custom = is_custom
+        self.tmp_private_dir = None
+        self.method = 'ansible-inventory'
+        self.group_filter_re = group_filter_re
+        self.host_filter_re = host_filter_re
 
     def build_env(self):
         # Use ansible venv if it's available and setup to use
         env = dict(os.environ.items())
         if settings.ANSIBLE_USE_VENV:
             env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-            # env['VIRTUAL_ENV'] += settings.ANSIBLE_VENV_PATH
             env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-            # env['PATH'] += os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
             venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
             env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
             for python_ver in ["python2.7", "python2.6"]:
                 if os.path.isdir(os.path.join(venv_libdir, python_ver)):
                     env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
                     break
-            env['PYTHONPATH'] += os.path.abspath(os.path.join(settings.BASE_DIR, '..')) + ":"
         return env
+
+    def get_base_args(self):
+        # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
+        for path in os.environ["PATH"].split(os.pathsep):
+            potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
+            if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
+                return [potential_path, '-i', self.source]
+
+        # ansible-inventory was not found, look for backported module
+        abs_module_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', '..', 'plugins',
+            'ansible_inventory', 'backport.py'))
+        self.method = 'ansible-inventory backport'
+
+        if not os.path.exists(abs_module_path):
+            raise ImproperlyConfigured('Can not find inventory module')
+        return [abs_module_path, '-i', self.source]
+
+    def get_proot_args(self, cmd, env):
+        source_dir = functioning_dir(self.source)
+        cwd = os.getcwd()
+        if not check_proot_installed():
+            raise RuntimeError("proot is not installed but is configured for use")
+
+        kwargs = {}
+        if self.is_custom:
+            # use source's tmp dir for proot, task manager will delete folder
+            logger.debug("Using provided directory '{}' for isolation.".format(source_dir))
+            kwargs['proot_temp_dir'] = source_dir
+            cwd = source_dir
+        else:
+            # we can not safely store tmp data in source dir or trust script contents
+            if env['AWX_PRIVATE_DATA_DIR']:
+                # If this is non-blank, file credentials are being used and we need access
+                private_data_dir = functioning_dir(env['AWX_PRIVATE_DATA_DIR'])
+                logger.debug("Using private credential data in '{}'.".format(private_data_dir))
+                kwargs['private_data_dir'] = private_data_dir
+            self.tmp_private_dir = build_proot_temp_dir()
+            logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
+            kwargs['proot_temp_dir'] = self.tmp_private_dir
+            # Run from source's location so that custom script contents are in `show_paths`
+            cwd = functioning_dir(self.source)
+        logger.debug("Running from `{}` working directory.".format(cwd))
+
+        return wrap_args_with_proot(cmd, cwd, **kwargs)
 
     def command_to_json(self, cmd):
         data = {}
         stdout, stderr = '', ''
-        try:
-            if self.use_proot and getattr(settings, 'AWX_PROOT_ENABLED', False):
-                if not check_proot_installed():
-                    raise RuntimeError("proot is not installed but is configured for use")
-                kwargs = {'proot_temp_dir': self.exe_dir} # TODO: Remove proot dir
-                cmd = wrap_args_with_proot(cmd, self.exe_dir, **kwargs)
-            env = self.build_env()
+        env = self.build_env()
 
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-            stdout, stderr = proc.communicate()
-            if proc.returncode != 0:
-                raise RuntimeError('%r failed (rc=%d) with output: %s' % (cmd, proc.returncode, stderr))
+        if ((self.is_custom or 'AWX_PRIVATE_DATA_DIR' in env) and
+                getattr(settings, 'AWX_PROOT_ENABLED', False)):
+            cmd = self.get_proot_args(cmd, env)
+
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        stdout, stderr = proc.communicate()
+
+        if self.tmp_private_dir:
+            shutil.rmtree(self.tmp_private_dir, True)
+        if proc.returncode != 0:
+            raise RuntimeError('%s failed (rc=%d) with output:\n%s' % (self.method, proc.returncode, stderr))
+        elif 'file not found' in stderr:
+            # File not visible to inventory module due proot (exit code 0, Ansible behavior)
+            raise IOError('Inventory module failed to find source {} with output:\n{}.'.format(self.source, stderr))
+
+        try:
             data = json.loads(stdout)
             if not isinstance(data, dict):
                 raise TypeError('Returned JSON must be a dictionary, got %s instead' % str(type(data)))
@@ -102,105 +162,22 @@ class BaseLoader(object):
             raise
         return data
 
-    def build_base_args(self):
-        raise NotImplementedError
-
     def load(self):
-        base_args = self.build_base_args()
-        logger.info('Reading executable JSON source: %s', ' '.join(base_args))
+        base_args = self.get_base_args()
+        logger.info('Reading Ansible inventory source: %s', self.source)
         data = self.command_to_json(base_args + ['--list'])
-        self.has_hostvars = '_meta' in data and 'hostvars' in data['_meta']
 
-        inventory = dict_to_mem_data(data, inventory=self.inventory)
+        logger.info('Processing JSON output...')
+        inventory = MemInventory(
+            group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
+        inventory = dict_to_mem_data(data, inventory=inventory)
 
-        return inventory
-
-
-class AnsibleInventoryLoader(BaseLoader):
-    '''
-    Given executable `source` directory, executable, or file, this will
-    use the ansible-inventory CLI utility to convert it into in-memory
-    representational objects. Example:
-        /usr/bin/ansible/ansible-inventory -i hosts --list
-    '''
-
-    def build_base_args(self):
-        # Need absolute path of anisble-inventory in order to run inside
-        # of bubblewrap, inside of Popen
-        for path in os.environ["PATH"].split(os.pathsep):
-            potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
-            if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
-                return [potential_path]
-        raise RuntimeError(
-            'ImproperlyConfigured: Called with modern method but '
-            'not detect ansible-inventory on this system. '
-            'Check to see that system Ansible is 2.4 or higher.')
-
-
-# TODO: delete after Ansible 2.3 is deprecated
-class InventoryPluginLoader(BaseLoader):
-    '''
-    Implements a different use pattern for loading JSON content from an
-    Ansible inventory module, example:
-        /path/ansible_inventory_module.py -i my_inventory.ini --list
-    '''
-
-    def __init__(self, source, module, *args, **kwargs):
-        super(InventoryPluginLoader, self).__init__(source, *args, **kwargs)
-        assert module in ['legacy', 'backport'], (
-            'Supported modules are `legacy` and `backport`, received {}'.format(module))
-        self.module = module
-        # self.use_proot = False
-
-    def build_env(self):
-        if self.module == 'legacy':
-            # legacy script does not rely on Ansible imports
-            return dict(os.environ.items())
-        return super(InventoryPluginLoader, self).build_env()
-
-    def build_base_args(self):
-        abs_module_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', '..', 'plugins',
-            'ansible_inventory', '{}.py'.format(self.module)))
-        return [abs_module_path, '-i', self.source]
-
-
-# TODO: delete after Ansible 2.3 is deprecated
-class ExecutableJsonLoader(BaseLoader):
-    '''
-    Directly calls an inventory script, example:
-        /path/ec2.py --list
-    '''
-
-    def __init__(self, source, is_custom=False, **kwargs):
-        super(ExecutableJsonLoader, self).__init__(source, **kwargs)
-        self.use_proot = is_custom
-
-    def build_base_args(self):
-        return [self.source]
-
-    def load(self):
-        inventory = super(ExecutableJsonLoader, self).load()
-
-        # Invoke the executable once for each host name we've built up
-        # to set their variables
-        if not self.has_hostvars:
-            base_args = self.build_base_args()
-            for k,v in self.inventory.all_group.all_hosts.iteritems():
-                host_data = self.command_to_json(
-                    base_args + ['--host', k.encode("utf-8")])
-                if isinstance(host_data, dict):
-                    v.variables.update(host_data)
-                else:
-                    logger.warning('Expected dict of vars for '
-                                   'host "%s", got %s instead',
-                                   k, str(type(host_data)))
         return inventory
 
 
 def load_inventory_source(source, group_filter_re=None,
                           host_filter_re=None, exclude_empty_groups=False,
-                          is_custom=False, method='legacy'):
+                          is_custom=False):
     '''
     Load inventory from given source directory or file.
     '''
@@ -209,35 +186,17 @@ def load_inventory_source(source, group_filter_re=None,
     source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
     source = source.replace('vmware.py', 'vmware_inventory.py')
-    logger.debug('Analyzing type of source: %s', source)
     if not os.path.exists(source):
         raise IOError('Source does not exist: %s' % source)
     source = os.path.join(os.getcwd(), os.path.dirname(source),
                           os.path.basename(source))
     source = os.path.normpath(os.path.abspath(source))
 
-    # TODO: delete options for 'legacy' and 'backport' after Ansible 2.3 deprecated
-    if method == 'modern':
-        inventory = AnsibleInventoryLoader(
-            source=source,
-            group_filter_re=group_filter_re,
-            host_filter_re=host_filter_re).load()
-
-    elif method == 'legacy' and (os.access(source, os.X_OK) and not os.path.isdir(source)):
-        # Legacy method of loading executable files
-        inventory = ExecutableJsonLoader(
-            source=source,
-            group_filter_re=group_filter_re,
-            host_filter_re=host_filter_re,
-            is_custom=is_custom).load()
-
-    else:
-        # Load using specified ansible-inventory module
-        inventory = InventoryPluginLoader(
-            source=source,
-            module=method,
-            group_filter_re=group_filter_re,
-            host_filter_re=host_filter_re).load()
+    inventory = AnsibleInventoryLoader(
+        source=source,
+        group_filter_re=group_filter_re,
+        host_filter_re=host_filter_re,
+        is_custom=is_custom).load()
 
     logger.debug('Finished loading from source: %s', source)
     # Exclude groups that are completely empty.
@@ -299,12 +258,6 @@ class Command(NoArgsCommand):
                     default=None, metavar='v', help='host variable that '
                     'specifies the unique, immutable instance ID, may be '
                     'specified as "foo.bar" to traverse nested dicts.'),
-        # TODO: remove --method option when Ansible 2.3 is deprecated
-        make_option('--method', dest='method', type='choice',
-                    choices=['modern', 'backport', 'legacy'],
-                    default='legacy', help='Method for importing inventory '
-                    'to use, distinguishing whether to use `ansible-inventory`, '
-                    'its backport, or the legacy algorithms.'),
     )
 
     def set_logging_level(self):
@@ -975,8 +928,7 @@ class Command(NoArgsCommand):
                                                    self.group_filter_re,
                                                    self.host_filter_re,
                                                    self.exclude_empty_groups,
-                                                   self.is_custom,
-                                                   options.get('method'))
+                                                   self.is_custom)
             self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
