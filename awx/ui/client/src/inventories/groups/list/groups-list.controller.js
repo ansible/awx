@@ -183,14 +183,12 @@
         $scope.cancelUpdate = function (id) {
             GroupsCancelUpdate({ scope: $scope, id: id });
         };
+        
         $scope.viewUpdateStatus = function (id) {
             ViewUpdateStatus({
                 scope: $scope,
                 group_id: id
             });
-        };
-        $scope.showFailedHosts = function() {
-            // TODO: implement
         };
 
         $scope.copyMoveGroup = function(id){

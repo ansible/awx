@@ -24,7 +24,6 @@ export default {
             iconOnly: true,
             awToolTip: "{{ group.hosts_status_tip }}",
             dataPlacement: "top",
-            ngClick: "showFailedHosts(group)",
             icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
             columnClass: 'status-column List-staticColumn--smallStatus'
         },

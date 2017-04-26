@@ -167,15 +167,14 @@
         $scope.cancelUpdate = function (id) {
             GroupsCancelUpdate({ scope: $scope, id: id });
         };
+        
         $scope.viewUpdateStatus = function (id) {
             ViewUpdateStatus({
                 scope: $scope,
                 group_id: id
             });
         };
-        $scope.showFailedHosts = function() {
-            // TODO: implement
-        };
+
         // $scope.$parent governed by InventoryManageController, for unified multiSelect options
         $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
             $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
