@@ -126,7 +126,9 @@ def test_openstack_client_config_generation(mocker):
         'source_vars_dict': {}
     })
     cloud_config = update.build_private_data(inventory_update)
-    cloud_credential = yaml.load(cloud_config['cloud_credential'])
+    cloud_credential = yaml.load(
+        cloud_config.get('credentials')[inventory_update.credential]
+    )
     assert cloud_credential['clouds'] == {
         'devstack': {
             'auth': {
@@ -155,7 +157,9 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
         'source_vars_dict': {'private': source}
     })
     cloud_config = update.build_private_data(inventory_update)
-    cloud_credential = yaml.load(cloud_config['cloud_credential'])
+    cloud_credential = yaml.load(
+        cloud_config.get('credentials')[inventory_update.credential]
+    )
     assert cloud_credential['clouds'] == {
         'devstack': {
             'auth': {
@@ -227,17 +231,26 @@ class TestJobExecution:
             p.stop()
 
     def get_instance(self):
-        return Job(
+        job = Job(
             pk=1,
             created=datetime.utcnow(),
             status='new',
             job_type='run',
             cancel_flag=False,
-            credential=None,
-            cloud_credential=None,
-            network_credential=None,
             project=Project()
         )
+
+        # mock the job.extra_credentials M2M relation so we can avoid DB access
+        job._extra_credentials = []
+        patch = mock.patch.object(Job, 'extra_credentials', mock.Mock(
+            all=lambda: job._extra_credentials,
+            add=job._extra_credentials.append,
+            spec_set=['all', 'add']
+        ))
+        self.patches.append(patch)
+        patch.start()
+
+        return job
 
     @property
     def pk(self):
@@ -278,13 +291,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_ssh_passwords(self, field, password_name, expected_flag):
         ssh = CredentialType.defaults['ssh']()
-        self.instance.credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=ssh,
             inputs = {'username': 'bob', field: 'secret'}
         )
-        self.instance.credential.inputs[field] = encrypt_field(
-            self.instance.credential, field
-        )
+        credential.inputs[field] = encrypt_field(credential, field)
+        self.instance.credential = credential
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -298,20 +311,20 @@ class TestJobCredentials(TestJobExecution):
 
     def test_ssh_key_with_agent(self):
         ssh = CredentialType.defaults['ssh']()
-        self.instance.credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=ssh,
             inputs = {
                 'username': 'bob',
                 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
             }
         )
-        self.instance.credential.inputs['ssh_key_data'] = encrypt_field(
-            self.instance.credential, 'ssh_key_data'
-        )
+        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
+        self.instance.credential = credential
 
         def run_pexpect_side_effect(private_data, *args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
-            ssh_key_data_fifo = '/'.join([private_data, 'credential'])
+            ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
             assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
             assert ' '.join(args).startswith(
                 'ssh-agent -a %s sh -c ssh-add %s && rm -f %s' % (
@@ -331,13 +344,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_aws_cloud_credential(self):
         aws = CredentialType.defaults['aws']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=aws,
             inputs = {'username': 'bob', 'password': 'secret'}
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -350,14 +363,14 @@ class TestJobCredentials(TestJobExecution):
 
     def test_aws_cloud_credential_with_sts_token(self):
         aws = CredentialType.defaults['aws']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=aws,
             inputs = {'username': 'bob', 'password': 'secret', 'security_token': 'token'}
         )
         for key in ('password', 'security_token'):
-            self.instance.cloud_credential.inputs[key] = encrypt_field(
-                self.instance.cloud_credential, key
-            )
+            credential.inputs[key] = encrypt_field(credential, key)
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -370,13 +383,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_rax_credential(self):
         rax = CredentialType.defaults['rackspace']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=rax,
             inputs = {'username': 'bob', 'password': 'secret'}
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -389,7 +402,8 @@ class TestJobCredentials(TestJobExecution):
 
     def test_gce_credentials(self):
         gce = CredentialType.defaults['gce']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=gce,
             inputs = {
                 'username': 'bob',
@@ -397,9 +411,8 @@ class TestJobCredentials(TestJobExecution):
                 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
             }
         )
-        self.instance.cloud_credential.inputs['ssh_key_data'] = encrypt_field(
-            self.instance.cloud_credential, 'ssh_key_data'
-        )
+        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
+        self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
@@ -414,16 +427,16 @@ class TestJobCredentials(TestJobExecution):
 
     def test_azure_credentials(self):
         azure = CredentialType.defaults['azure']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=azure,
             inputs = {
                 'username': 'bob',
                 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
             }
         )
-        self.instance.cloud_credential.inputs['ssh_key_data'] = encrypt_field(
-            self.instance.cloud_credential, 'ssh_key_data'
-        )
+        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
+        self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
@@ -437,7 +450,8 @@ class TestJobCredentials(TestJobExecution):
 
     def test_azure_rm_with_tenant(self):
         azure = CredentialType.defaults['azure_rm']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=azure,
             inputs = {
                 'client': 'some-client',
@@ -446,9 +460,8 @@ class TestJobCredentials(TestJobExecution):
                 'subscription': 'some-subscription'
             }
         )
-        self.instance.cloud_credential.inputs['secret'] = encrypt_field(
-            self.instance.cloud_credential, 'secret'
-        )
+        credential.inputs['secret'] = encrypt_field(credential, 'secret')
+        self.instance.extra_credentials.add(credential)
 
         self.task.run(self.pk)
 
@@ -463,7 +476,8 @@ class TestJobCredentials(TestJobExecution):
 
     def test_azure_rm_with_password(self):
         azure = CredentialType.defaults['azure_rm']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=azure,
             inputs = {
                 'subscription': 'some-subscription',
@@ -471,9 +485,8 @@ class TestJobCredentials(TestJobExecution):
                 'password': 'secret'
             }
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
 
         self.task.run(self.pk)
 
@@ -487,13 +500,13 @@ class TestJobCredentials(TestJobExecution):
 
     def test_vmware_credentials(self):
         vmware = CredentialType.defaults['vmware']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=vmware,
             inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -506,7 +519,8 @@ class TestJobCredentials(TestJobExecution):
 
     def test_openstack_credentials(self):
         openstack = CredentialType.defaults['openstack']()
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=openstack,
             inputs = {
                 'username': 'bob',
@@ -515,9 +529,8 @@ class TestJobCredentials(TestJobExecution):
                 'host': 'https://keystone.example.org'
             }
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
@@ -539,7 +552,8 @@ class TestJobCredentials(TestJobExecution):
 
     def test_net_credentials(self):
         net = CredentialType.defaults['net']()
-        self.instance.network_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=net,
             inputs = {
                 'username': 'bob',
@@ -550,9 +564,8 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         for field in ('password', 'ssh_key_data', 'authorize_password'):
-            self.instance.network_credential.inputs[field] = encrypt_field(
-                self.instance.network_credential, field
-            )
+            credential.inputs[field] = encrypt_field(credential, field)
+        self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
@@ -584,10 +597,12 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
+        self.instance.extra_credentials.add(credential)
         with pytest.raises(Exception):
             self.task.run(self.pk)
 
@@ -609,10 +624,12 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -639,10 +656,12 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -670,13 +689,13 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'password': 'SUPER-SECRET-123'}
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -704,10 +723,12 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -738,13 +759,13 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'password': 'SUPER-SECRET-123'}
         )
-        self.instance.cloud_credential.inputs['password'] = encrypt_field(
-            self.instance.cloud_credential, 'password'
-        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.task.run_pexpect.call_count == 1
@@ -775,15 +796,60 @@ class TestJobCredentials(TestJobExecution):
                 }
             }
         )
-        self.instance.cloud_credential = Credential(
+        credential = Credential(
+            pk=1,
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
+        self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
         def run_pexpect_side_effect(*args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
             assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
+            return ['successful', 0]
+
+        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.task.run(self.pk)
+
+    def test_multi_cloud(self):
+        gce = CredentialType.defaults['gce']()
+        gce_credential = Credential(
+            pk=1,
+            credential_type=gce,
+            inputs = {
+                'username': 'bob',
+                'project': 'some-project',
+                'ssh_key_data': 'GCE: %s' % self.EXAMPLE_PRIVATE_KEY
+            }
+        )
+        gce_credential.inputs['ssh_key_data'] = encrypt_field(gce_credential, 'ssh_key_data')
+        self.instance.extra_credentials.add(gce_credential)
+
+        azure = CredentialType.defaults['azure']()
+        azure_credential = Credential(
+            pk=2,
+            credential_type=azure,
+            inputs = {
+                'username': 'joe',
+                'ssh_key_data': 'AZURE: %s' % self.EXAMPLE_PRIVATE_KEY
+            }
+        )
+        azure_credential.inputs['ssh_key_data'] = encrypt_field(azure_credential, 'ssh_key_data')
+        self.instance.extra_credentials.add(azure_credential)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            job, args, cwd, env, passwords, stdout = args
+
+            assert env['GCE_EMAIL'] == 'bob'
+            assert env['GCE_PROJECT'] == 'some-project'
+            ssh_key_data = env['GCE_PEM_FILE_PATH']
+            assert open(ssh_key_data, 'rb').read() == 'GCE: %s' % self.EXAMPLE_PRIVATE_KEY
+
+            assert env['AZURE_SUBSCRIPTION_ID'] == 'joe'
+            ssh_key_data = env['AZURE_CERT_PATH']
+            assert open(ssh_key_data, 'rb').read() == 'AZURE: %s' % self.EXAMPLE_PRIVATE_KEY
+
             return ['successful', 0]
 
         self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
@@ -817,6 +883,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
         ssh = CredentialType.defaults['ssh']()
         self.instance.scm_type = scm_type
         self.instance.credential = Credential(
+            pk=1,
             credential_type=ssh,
             inputs = {'username': 'bob', 'password': 'secret'}
         )
@@ -836,6 +903,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
         ssh = CredentialType.defaults['ssh']()
         self.instance.scm_type = scm_type
         self.instance.credential = Credential(
+            pk=1,
             credential_type=ssh,
             inputs = {
                 'username': 'bob',
@@ -848,7 +916,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(private_data, *args, **kwargs):
             job, args, cwd, env, passwords, stdout = args
-            ssh_key_data_fifo = '/'.join([private_data, 'scm_credential'])
+            ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
             assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
             assert ' '.join(args).startswith(
                 'ssh-agent -a %s sh -c ssh-add %s && rm -f %s' % (
@@ -885,6 +953,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         aws = CredentialType.defaults['aws']()
         self.instance.source = 'ec2'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=aws,
             inputs = {'username': 'bob', 'password': 'secret'}
         )
@@ -911,6 +980,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         vmware = CredentialType.defaults['vmware']()
         self.instance.source = 'vmware'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=vmware,
             inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
         )
@@ -935,6 +1005,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         azure = CredentialType.defaults['azure']()
         self.instance.source = 'azure'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=azure,
             inputs = {
                 'username': 'bob',
@@ -959,6 +1030,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         gce = CredentialType.defaults['gce']()
         self.instance.source = 'gce'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=gce,
             inputs = {
                 'username': 'bob',
@@ -985,6 +1057,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         openstack = CredentialType.defaults['openstack']()
         self.instance.source = 'openstack'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=openstack,
             inputs = {
                 'username': 'bob',
@@ -1019,6 +1092,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         satellite6 = CredentialType.defaults['satellite6']()
         self.instance.source = 'satellite6'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=satellite6,
             inputs = {
                 'username': 'bob',
@@ -1046,6 +1120,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         cloudforms = CredentialType.defaults['cloudforms']()
         self.instance.source = 'cloudforms'
         self.instance.credential = Credential(
+            pk=1,
             credential_type=cloudforms,
             inputs = {
                 'username': 'bob',

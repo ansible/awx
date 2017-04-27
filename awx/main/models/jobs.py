@@ -96,21 +96,9 @@ class JobOptions(BaseModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    cloud_credential = models.ForeignKey(
+    extra_credentials = models.ManyToManyField(
         'Credential',
-        related_name='%(class)ss_as_cloud_credential+',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    network_credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss_as_network_credential+',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
+        related_name='%(class)ss_as_extra_credential+',
     )
     forks = models.PositiveIntegerField(
         blank=True,
@@ -170,26 +158,44 @@ class JobOptions(BaseModel):
         cred = self.credential
         if cred and cred.kind != 'ssh':
             raise ValidationError(
-                _('You must provide a machine / SSH credential.'),
+                _('You must provide an SSH credential.'),
             )
         return cred
 
-    def clean_network_credential(self):
-        cred = self.network_credential
-        if cred and cred.kind != 'net':
+    def clean_vault_credential(self):
+        cred = self.vault_credential
+        if cred and cred.kind != 'vault':
             raise ValidationError(
-                _('You must provide a network credential.'),
+                _('You must provide a Vault credential.'),
             )
         return cred
 
-    def clean_cloud_credential(self):
-        cred = self.cloud_credential
-        if cred and cred.kind not in CLOUD_PROVIDERS + ('aws',):
-            raise ValidationError(
-                _('Must provide a credential for a cloud provider, such as '
-                  'Amazon Web Services or Rackspace.'),
-            )
-        return cred
+    def clean(self):
+        super(JobOptions, self).clean()
+        # extra_credentials M2M can't be accessed until a primary key exists
+        if self.pk:
+            for cred in self.extra_credentials.all():
+                if cred.credential_type.kind not in ('net', 'cloud'):
+                    raise ValidationError(
+                        _('Extra credentials must be network or cloud.'),
+                    )
+
+    @property
+    def all_credentials(self):
+        credentials = self.extra_credentials.all()
+        if self.vault_credential:
+            credentials.insert(0, self.vault_credential)
+        if self.credential:
+            credentials.insert(0, self.credential)
+        return credentials
+
+    @property
+    def network_credentials(self):
+        return [cred for cred in self.extra_credentials.all() if cred.credential_type.kind == 'net']
+
+    @property
+    def cloud_credentials(self):
+        return [cred for cred in self.extra_credentials.all() if cred.credential_type.kind == 'cloud']
 
     @property
     def passwords_needed_to_start(self):
@@ -262,11 +268,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
-                'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
-                'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels', 'survey_passwords', 'allow_simultaneous', 'timeout',
-                'store_facts',]
+                'playbook', 'credential', 'extra_credentials', 'forks',
+                'schedule', 'limit', 'verbosity', 'job_tags', 'extra_vars',
+                'launch_type', 'force_handlers', 'skip_tags', 'start_at_task',
+                'become_enabled', 'labels', 'survey_passwords',
+                'allow_simultaneous', 'timeout', 'store_facts',]
 
     def resource_validation_data(self):
         '''

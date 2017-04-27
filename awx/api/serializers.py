@@ -86,8 +86,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'scm_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
-    'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
-    'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -2096,7 +2094,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
-                  'credential', 'cloud_credential', 'network_credential', 'forks', 'limit',
+                  'credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
                   'skip_tags', 'start_at_task', 'timeout', 'store_facts',)
 
@@ -2109,12 +2107,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
         if obj.credential:
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
-        if obj.cloud_credential:
-            res['cloud_credential'] = self.reverse('api:credential_detail',
-                                                   kwargs={'pk': obj.cloud_credential.pk})
-        if obj.network_credential:
-            res['network_credential'] = self.reverse('api:credential_detail',
-                                                     kwargs={'pk': obj.network_credential.pk})
+        # TODO: add related links for `extra_credentials`
         return res
 
     def to_representation(self, obj):
@@ -2129,10 +2122,6 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 ret['playbook'] = ''
         if 'credential' in ret and not obj.credential:
             ret['credential'] = None
-        if 'cloud_credential' in ret and not obj.cloud_credential:
-            ret['cloud_credential'] = None
-        if 'network_credential' in ret and not obj.network_credential:
-            ret['network_credential'] = None
         return ret
 
     def validate(self, attrs):
@@ -2296,10 +2285,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
                 data.setdefault('credential', job_template.credential.pk)
-            if job_template.cloud_credential:
-                data.setdefault('cloud_credential', job_template.cloud_credential.pk)
-            if job_template.network_credential:
-                data.setdefault('network_credential', job_template.network_credential.pk)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)

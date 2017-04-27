@@ -1072,7 +1072,7 @@ class JobTemplateAccess(BaseAccess):
         else:
             qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
-                                 'credential', 'cloud_credential', 'next_schedule').all()
+                                 'credential', 'next_schedule').all()
 
     def can_add(self, data):
         '''
@@ -1113,13 +1113,8 @@ class JobTemplateAccess(BaseAccess):
         if not self.check_related('credential', Credential, data, role_field='use_role'):
             return False
 
-        # If a cloud credential is provided, the user should have use access.
-        if not self.check_related('cloud_credential', Credential, data, role_field='use_role'):
-            return False
-
-        # If a network credential is provided, the user should have use access.
-        if not self.check_related('network_credential', Credential, data, role_field='use_role'):
-            return False
+        # TODO: If a vault credential is provided, the user should have use access to it.
+        # TODO: If any credential in extra_credentials, the user must have access
 
         # If an inventory is provided, the user should have use access.
         inventory = get_value(Inventory, 'inventory')
@@ -1185,7 +1180,8 @@ class JobTemplateAccess(BaseAccess):
                     self.check_license(feature='surveys')
                 return True
 
-            for required_field in ('credential', 'cloud_credential', 'network_credential', 'inventory', 'project'):
+            # TODO: handle vault_credential and extra_credentials
+            for required_field in ('credential', 'inventory', 'project'):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
@@ -1219,8 +1215,6 @@ class JobTemplateAccess(BaseAccess):
         project_id = data.get('project', obj.project.id if obj.project else None)
         inventory_id = data.get('inventory', obj.inventory.id if obj.inventory else None)
         credential_id = data.get('credential', obj.credential.id if obj.credential else None)
-        cloud_credential_id = data.get('cloud_credential', obj.cloud_credential.id if obj.cloud_credential else None)
-        network_credential_id = data.get('network_credential', obj.network_credential.id if obj.network_credential else None)
 
         if project_id and self.user not in Project.objects.get(pk=project_id).use_role:
             return False
@@ -1228,10 +1222,7 @@ class JobTemplateAccess(BaseAccess):
             return False
         if credential_id and self.user not in Credential.objects.get(pk=credential_id).use_role:
             return False
-        if cloud_credential_id and self.user not in Credential.objects.get(pk=cloud_credential_id).use_role:
-            return False
-        if network_credential_id and self.user not in Credential.objects.get(pk=network_credential_id).use_role:
-            return False
+        # TODO: handle vault_credential and extra_credentials
 
         return True
 
@@ -1271,7 +1262,7 @@ class JobAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
-                               'project', 'credential', 'cloud_credential', 'job_template')
+                               'project', 'credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
@@ -1907,7 +1898,6 @@ class UnifiedJobTemplateAccess(BaseAccess):
         #    'project',
         #    'inventory',
         #    'credential',
-        #    'cloud_credential',
         #)
 
         return qs.all()
@@ -1957,14 +1947,12 @@ class UnifiedJobAccess(BaseAccess):
         #    'credential',
         #    'job_template',
         #    'inventory_source',
-        #    'cloud_credential',
         #    'project___credential',
         #    'inventory_source___credential',
         #    'inventory_source___inventory',
         #    'job_template__inventory',
         #    'job_template__project',
         #    'job_template__credential',
-        #    'job_template__cloud_credential',
         #)
         return qs.all()
 

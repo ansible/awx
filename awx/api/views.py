@@ -2432,7 +2432,7 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     capabilities_prefetch = [
         'admin', 'execute',
-        {'copy': ['project.use', 'inventory.use', 'credential.use', 'cloud_credential.use', 'network_credential.use']}
+        {'copy': ['project.use', 'inventory.use', 'credential.use']}
     ]
 
     def post(self, request, *args, **kwargs):
@@ -3906,7 +3906,6 @@ class UnifiedJobTemplateList(ListAPIView):
     capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
-                  'jobtemplate.cloud_credential.use', 'jobtemplate.network_credential.use',
                   'workflowjobtemplate.organization.admin']}
     ]
 
