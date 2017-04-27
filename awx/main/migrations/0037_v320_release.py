@@ -98,4 +98,20 @@ class Migration(migrations.Migration):
             name='launch_type',
             field=models.CharField(default=b'manual', max_length=20, editable=False, choices=[(b'manual', 'Manual'), (b'relaunch', 'Relaunch'), (b'callback', 'Callback'), (b'scheduled', 'Scheduled'), (b'dependency', 'Dependency'), (b'workflow', 'Workflow'), (b'sync', 'Sync'), (b'scm', 'SCM Update')]),
         ),
+
+        # Named URL
+        migrations.AlterField(
+            model_name='notificationtemplate',
+            name='name',
+            field=models.CharField(max_length=512),
+        ),
+        migrations.AlterField(
+            model_name='notificationtemplate',
+            name='organization',
+            field=models.ForeignKey(related_name='notification_templates', to='main.Organization', null=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name='notificationtemplate',
+            unique_together=set([('organization', 'name')]),
+        ),
     ]
