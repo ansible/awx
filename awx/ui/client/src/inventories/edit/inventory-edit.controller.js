@@ -20,7 +20,7 @@ function InventoriesEdit($scope, $location,
         form = InventoryForm,
         inventory_id = $stateParams.inventory_id,
         master = {},
-        fld, json_data, data;
+        fld, data;
 
     ClearScope();
     init();
@@ -45,9 +45,9 @@ function InventoriesEdit($scope, $location,
         .success(function(data) {
             var fld;
             for (fld in form.fields) {
-                if (fld === 'variables') {
-                    $scope.variables = ParseVariableString(data.variables);
-                    master.variables = $scope.variables;
+                if (fld === 'inventory_variables') {
+                    $scope.inventory_variables = ParseVariableString(data.variables);
+                    master.inventory_variables = $scope.variables;
                 } else if (fld === 'inventory_name') {
                     $scope[fld] = data.name;
                     master[fld] = $scope[fld];
@@ -71,9 +71,9 @@ function InventoriesEdit($scope, $location,
             $scope.parseType = 'yaml';
             ParseTypeChange({
                 scope: $scope,
-                variable: 'variables',
+                variable: 'inventory_variables',
                 parse_variable: 'parseType',
-                field_id: 'inventory_variables'
+                field_id: 'inventory_inventory_variables'
             });
 
             OrgAdminLookup.checkForAdminAccess({organization: data.organization})
@@ -83,8 +83,6 @@ function InventoriesEdit($scope, $location,
 
             $scope.inventory_obj = data;
             $scope.name = data.name;
-
-            $scope.$emit('inventoryLoaded');
         })
         .error(function(data, status) {
             ProcessErrors($scope, data, status, null, {
@@ -95,9 +93,6 @@ function InventoriesEdit($scope, $location,
     // Save
     $scope.formSave = function() {
         Wait('start');
-
-        // Make sure we have valid variable data
-        json_data = ToJSON($scope.parseType, $scope.variables);
 
         data = {};
         for (fld in form.fields) {

@@ -20,10 +20,10 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
-        rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
             $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';
             ParseTypeChange({

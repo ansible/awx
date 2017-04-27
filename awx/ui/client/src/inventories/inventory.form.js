@@ -75,7 +75,8 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
-            variables: {
+            inventory_variables: {
+                realName: 'variables',
                 label: i18n._('Variables'),
                 type: 'textarea',
                 class: 'Form-formGroup--fullWidth',
