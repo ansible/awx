@@ -20,13 +20,14 @@ module.exports = config => {
             'karma-ng-html2js-preprocessor'
         ],
         preprocessors: {
-            '../components/index.js': 'webpack',
             '../components/**/*.html': 'ng-html2js',
+            '../components/index.js': 'webpack',
             './index.js': 'webpack'
         },
         ngHtml2JsPreprocessor: {
             moduleName: 'at.test.templates',
-            prependPrefix: '/'
+            stripPrefix: path.resolve(__dirname, '..'),
+            prependPrefix: 'static/partials'
         },
         webpack: {
             module: {

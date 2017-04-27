@@ -1,4 +1,5 @@
 describe('Components | panel', () => {
+
     let $compile;
     let $rootScope;
 
@@ -9,17 +10,13 @@ describe('Components | panel', () => {
         inject((_$compile_, _$rootScope_) => {
             $compile = _$compile_;
             $rootScope = _$rootScope_;
-
             done();
         });
     });
 
     it('should load the navigation partial', function() {
-        console.log($rootScope);
         var element = $compile('<at-panel></at-panel>')($rootScope);
-
         $rootScope.$digest();
       
-        expect(element.html()).toContain('<nav class="navbar navbar-default" role="navigation">');
-    });
-});
+        expect(element.html()).toContain('at-Panel');
+    }); });
