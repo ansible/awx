@@ -1,23 +1,22 @@
-.at-placeholder {
+.at-placeholder(@color) {
     &:-moz-placeholder {
-        color: @at-gray-dark;
+        color: @color;
     }
     &:-ms-input-placeholder {
-        color: @at-gray-dark;
+        color: @color;
     }
     &::-webkit-input-placeholder {
-        color: @at-gray-dark;
+        color: @color;
     }
 }
 
-.at-buttonColor () {
-    background-color: @at-white;
-    border-color: @at-gray-light;
-    color: @at-gray;
-}
+.at-Button(@bg, @color) {
+    color: @color;
+    background-color: @bg;
+    padding: @at-padding-xs @at-padding-md;
 
-.at-buttonColorHover () {
-    background-color: @at-gray-lighter;  
-    border-color: @at-gray-light;
-    color: @at-gray;
+    &:hover {
+        color: @color;
+        background-color: '@{bg}-dark';
+    }
 }

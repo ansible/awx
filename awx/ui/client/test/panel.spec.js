@@ -1,20 +1,25 @@
 describe('Components | panel', () => {
-    var $compile,
-        $rootScope;
+    let $compile;
+    let $rootScope;
 
-    beforeEach(module('at.components'));
+    beforeEach(done => {
+        angular.mock.module('at.components')
+        angular.mock.module('at.test.templates');
 
-    beforeEach(inject((_$compile_, _$rootScope_) => {
-        $compile = _$compile_;
-        $rootScope = _$rootScope_;
-    }));
+        inject((_$compile_, _$rootScope_) => {
+            $compile = _$compile_;
+            $rootScope = _$rootScope_;
+
+            done();
+        });
+    });
 
     it('should load the navigation partial', function() {
+        console.log($rootScope);
         var element = $compile('<at-panel></at-panel>')($rootScope);
 
         $rootScope.$digest();
       
-        console.log(element.html());
-        //expect(element.html()).toContain('<nav class="navbar navbar-default" role="navigation">');
+        expect(element.html()).toContain('<nav class="navbar navbar-default" role="navigation">');
     });
 });

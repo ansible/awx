@@ -1,3 +1,13 @@
+/**
+ * For styles that are used in more than one place throughout the application.
+ *
+ * 1. Content
+ * 2. Buttons
+ *
+ */
+
+// 1. Content
+// ------------------------------------------------------------------------------------------------
 .at-Title-row {
     align-items: center;
     flex: 1 0 auto;
@@ -10,5 +20,31 @@
     font-weight: bold;
     margin-right: @at-margin-sm;
     text-transform: uppercase;
+}
+
+// 2. Buttons
+// ------------------------------------------------------------------------------------------------
+.at-Button--success {
+  .at-Button(@at-success, @at-white);
+}
+.at-Button--link {
+  .at-Button(@at-link, @at-white);
+}
+.at-Button--danger {
+  .at-Button(@at-danger, @at-white);
+}
+.at-Button--default { 
+  .at-Button(@at-white, @at-gray);
+
+  border-color: @at-gray-light;
+
+  &:hover {
+    background: @at-gray-lightest;
+  }
+}
+
+.at-Button--icon {
+  padding: @at-padding-xxs @at-padding-sm;
+  font-size: @at-font-lg;
 }
 
