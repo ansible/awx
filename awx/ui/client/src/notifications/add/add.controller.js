@@ -42,7 +42,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             });
         }
 
-        if ($state.params.organization_id) {
+        if ($state.params && $state.params.organization_id) {
             let id = $state.params.organization_id,
                 url = GetBasePath('organizations') + id + '/';
 
@@ -57,7 +57,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                         msg: `Failed to retrieve organization. GET status: ${status}`
                     });
                 });
-        };
+        }
 
         if ($scope.removeChoicesReady) {
             $scope.removeChoicesReady();
