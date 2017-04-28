@@ -20,6 +20,7 @@ import InventoryForm from './inventory.form';
 import InventoryManageService from './inventory-manage.service';
 import adHocRoute from './adhoc/adhoc.route';
 import ansibleFacts from './ansible_facts/main';
+import insights from './insights/main';
 import { copyMoveGroupRoute, copyMoveHostRoute } from './copy-move/copy-move.route';
 import copyMove from './copy-move/main';
 export default
@@ -34,6 +35,7 @@ angular.module('inventory', [
         inventoryEdit.name,
         inventoryList.name,
         ansibleFacts.name,
+        insights.name,
         copyMove.name
     ])
     .factory('InventoryForm', InventoryForm)
@@ -55,6 +57,34 @@ angular.module('inventory', [
                         'related': {
                             controller: 'AnsibleFactsController',
                             templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
+                        }
+                    },
+                    resolve: {
+                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
+                            function($stateParams, GetBasePath, Rest) {
+                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
+                                Rest.setUrl(ansibleFactsUrl);
+                                return Rest.get()
+                                    .success(function(data) {
+                                        return data;
+                                    });
+                            }
+                        ]
+                    }
+                };
+            }
+
+            function insightsConfig(stateName) {
+                return {
+                    name: stateName,
+                    url: '/insights',
+                    ncyBreadcrumb: {
+                        label: N_("INSIGHTS")
+                    },
+                    views: {
+                        'related': {
+                            controller: 'InsightsController',
+                            templateUrl: templateUrl('inventories/insights/insights')
                         }
                     },
                     resolve: {
@@ -257,6 +287,8 @@ angular.module('inventory', [
 
                 let relatedHostsAnsibleFacts = factsConfig('inventories.edit.hosts.edit.ansible_facts');
                 let nestedHostsAnsibleFacts =  factsConfig('inventories.edit.groups.edit.nested_hosts.edit.ansible_facts');
+                let relatedHostsInsights = insightsConfig('inventories.edit.hosts.edit.insights');
+                let nestedHostsInsights =  insightsConfig('inventories.edit.groups.edit.nested_hosts.edit.insights');
 
                 return Promise.all([
                     basicInventoryAdd,
@@ -306,6 +338,8 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(editSchedule),
                             stateExtender.buildDefinition(relatedHostsAnsibleFacts),
                             stateExtender.buildDefinition(nestedHostsAnsibleFacts),
+                            stateExtender.buildDefinition(relatedHostsInsights),
+                            stateExtender.buildDefinition(nestedHostsInsights),
                             stateExtender.buildDefinition(copyMoveGroupRoute),
                             stateExtender.buildDefinition(copyMoveHostRoute)
                         ])
@@ -359,6 +393,7 @@ angular.module('inventory', [
                 });
 
                 let hostAnsibleFacts = factsConfig('hosts.edit.ansible_facts');
+                let hostInsights = insightsConfig('hosts.edit.insights');
 
                 return Promise.all([
                     hostTree
@@ -367,7 +402,8 @@ angular.module('inventory', [
                         states: _.reduce(generated, (result, definition) => {
                             return result.concat(definition.states);
                         }, [
-                            stateExtender.buildDefinition(hostAnsibleFacts)
+                            stateExtender.buildDefinition(hostAnsibleFacts),
+                            stateExtender.buildDefinition(hostInsights)
                         ])
                     };
                 });

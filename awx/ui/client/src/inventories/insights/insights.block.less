@@ -1,0 +1,57 @@
+@import "../../shared/branding/colors.default.less";
+
+.InsightsNav{
+    width: 100%;
+    display: flex;
+    border: 1px solid #B7B7B7;
+    border-radius:5px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    font-weight: bold;
+
+}
+
+.InsightsNav-rightSide{
+    align-items: center;
+    display: flex;
+    flex: 1 0 auto;
+    flex-wrap: wrap;
+    padding: 10px 0px 10px 0px
+}
+
+.InsightsNav-leftSide{
+    align-items: center;
+    display: flex;
+    flex: 1 0 auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.InsightsNav-totalIssues{
+    background-color: @default-link;
+    color: @default-bg;
+}
+
+.InsightsNav-criticalIssues{
+    background-color: @default-err;
+}
+
+.InsightsNav-highIssues{
+    background-color:@default-warning;
+}
+
+.InsightsNav-mediumIssues{
+    background-color: @default-succ;
+}
+
+.InsightsNav-lowIssues{
+    background-color: @default-succ;
+}
+
+.InsightsNav-solvableBadge{
+    background-color: @b7grey;
+}
+.InsightsNav-solvableBadge:last-of-type{
+    margin-right: 20px;
+}
