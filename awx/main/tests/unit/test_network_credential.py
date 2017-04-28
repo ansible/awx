@@ -83,7 +83,8 @@ def mock_job(mocker):
                       'inventory': mocker.MagicMock(spec=Inventory, id=2), 'force_handlers': False,
                       'limit': None, 'verbosity': None, 'job_tags': None, 'skip_tags': None,
                       'start_at_task': None, 'pk': 1, 'launch_type': 'normal', 'job_template':None,
-                      'created_by': None, 'extra_vars_dict': None, 'project':None, 'playbook': 'test.yml'}
+                      'created_by': None, 'extra_vars_dict': None, 'project':None, 'playbook': 'test.yml',
+                      'store_facts': False,}
     mock_job = mocker.MagicMock(spec=Job, **mock_job_attrs)
     return mock_job
 

@@ -2088,7 +2088,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'network_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task', 'timeout', 'gather_facts',)
+                  'skip_tags', 'start_at_task', 'timeout', 'store_facts',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)

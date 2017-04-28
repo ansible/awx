@@ -53,6 +53,24 @@ class FactBrokerWorker(ConsumerMixin):
         facts = self._extract_module_facts(module, facts)
         return (module, facts)
 
+    def _do_fact_scan_create_update(self, host_obj, module_name, facts, timestamp):
+        try:
+            fact_obj = Fact.objects.get(host__id=host_obj.id, module=module_name, timestamp=timestamp)
+            fact_obj.facts = facts
+            fact_obj.save()
+            logger.info('Updated existing fact <%s>' % (fact_obj.id))
+        except Fact.DoesNotExist:
+            # Create new Fact entry
+            fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
+            logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
+            analytics_logger.info('Received message with fact data', extra=dict(
+                module_name=module_name, facts_data=facts))
+        return fact_obj
+
+    def _do_gather_facts_update(self, host_obj, module_name, facts, timestamp):
+        host_obj.update_ansible_facts(module=module_name, facts=facts, timestamp=self.timestamp)
+        return host_obj
+
     def process_fact_message(self, body, message):
         hostname = body['host']
         inventory_id = body['inventory_id']
@@ -99,20 +117,10 @@ class FactBrokerWorker(ConsumerMixin):
         ret = None
         # Update existing Fact entry
         if is_fact_scan is True:
-            try:
-                fact_obj = Fact.objects.get(host__id=host_obj.id, module=module_name, timestamp=self.timestamp)
-                fact_obj.facts = facts
-                fact_obj.save()
-                logger.info('Updated existing fact <%s>' % (fact_obj.id))
-            except Fact.DoesNotExist:
-                # Create new Fact entry
-                fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
-                logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
-                analytics_logger.info('Received message with fact data', extra=dict(
-                    module_name=module_name, facts_data=facts))
-            ret = fact_obj
-        if job.gather_facts is True:
-            host_obj.update_ansible_facts(module=module_name, facts=facts, timestamp=self.timestamp)
+            ret = self._do_fact_scan_create_update(host_obj, module_name, facts, self.timestamp)
+
+        if job.store_facts is True:
+            self._do_gather_facts_update(host_obj, module_name, facts, self.timestamp)
 
         message.ack()
         return ret

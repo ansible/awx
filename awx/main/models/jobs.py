@@ -159,8 +159,9 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    gather_facts = models.BooleanField(
+    store_facts = models.BooleanField(
         default=False,
+        help_text=_('During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
@@ -265,7 +266,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
                 'labels', 'survey_passwords', 'allow_simultaneous', 'timeout',
-                'gather_facts',]
+                'store_facts',]
 
     def resource_validation_data(self):
         '''
