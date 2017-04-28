@@ -20,6 +20,10 @@
  		$scope.toggleEnabled = function(){
  			$scope.host.enabled = !$scope.host.enabled;
  		};
+        $scope.groupsTab = function(){
+            let id = $scope.host.summary_fields.inventory.id;
+            $state.go('hosts.edit.nested_groups', {inventory_id: id});
+        };
  		$scope.formSave = function(){
  			var host = {
  				id: $scope.host.id,

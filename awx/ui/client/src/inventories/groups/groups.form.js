@@ -88,9 +88,7 @@ function(i18n, nestedGroupListState, nestedHostsListState, buildHostAddState){
                 includeForm: "NestedGroupFormDefinition",
                 title: i18n._('Groups'),
                 iterator: 'nested_group',
-                listState: nestedGroupListState,
-                // addState: buildGroupsAddState,
-                // editState: buildGroupsEditState
+                listState: nestedGroupListState
             },
             nested_hosts: {
                 name: 'nested_hosts',
