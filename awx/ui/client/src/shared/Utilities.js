@@ -721,7 +721,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     variable = params.variable,
                     callback = params.callback,
                     choice_name = params.choice_name,
-                    options = params.options
+                    options = params.options;
 
                 if (scope[variable]) {
                     scope[variable].length = 0;
@@ -756,7 +756,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     if (callback) {
                         scope.$emit(callback);
                     }
-                }
+                };
 
                 if (!options) {
                   Rest.setUrl(url);

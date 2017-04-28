@@ -91,24 +91,24 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
         // iterate over the list and add fields like type label, after the
         // OPTIONS request returns, or the list is sorted/paginated/searched
         function optionsRequestDataProcessing(){
-            if($scope.list.name === 'credential_types'){
-                if ($scope[list.name] !== undefined) {
-                    $scope[list.name].forEach(function(item, item_idx) {
-                        var itm = $scope[list.name][item_idx];
-
-                        // Set the item type label
-                        if (list.fields.kind && $scope.options &&
-                            $scope.options.kind) {
-                                $scope.options.kind.choices.forEach(function(choice) {
+            $scope.optionsDefer.promise.then(function(options) {
+                if($scope.list.name === 'credential_types'){
+                    if ($scope[list.name] !== undefined) {
+                        $scope[list.name].forEach(function(item, item_idx) {
+                            var itm = $scope[list.name][item_idx];
+                            // Set the item type label
+                            if (list.fields.kind && options && options.actions && options.actions.GET && options.actions.GET.kind) {
+                                options.actions.GET.kind.choices.forEach(function(choice) {
                                     if (choice[0] === item.kind) {
                                         itm.kind_label = choice[1];
                                     }
                                 });
-                        }
+                            }
 
-                    });
+                        });
+                    }
                 }
-            }
+            });
         }
 
         $scope.$watchCollection(`${$scope.list.name}`, function() {
