@@ -71,6 +71,7 @@ def test_cloud_kind_uniqueness():
     ({'fields': [{'id': 'become_method', 'label': 'Become', 'choices': []}]}, False),
     ({'fields': [{'id': 'become_method', 'label': 'Become', 'choices': ['su', 'sudo']}]}, True),  # noqa
     ({'fields': [{'id': 'become_method', 'label': 'Become', 'choices': ['dup', 'dup']}]}, False),  # noqa
+    ({'fields': [{'id': 'tower', 'label': 'Reserved!', }]}, False),  # noqa
 ])
 def test_cred_type_input_schema_validity(input_, valid):
     type_ = CredentialType(

@@ -673,6 +673,19 @@ class CredentialTypeInputField(JSONSchemaField):
             }
         }
 
+    def validate(self, value, model_instance):
+        super(CredentialTypeInputField, self).validate(
+            value, model_instance
+        )
+
+        for field in value.get('fields', []):
+            if field.get('id') == 'tower':
+                raise django_exceptions.ValidationError(
+                    _('"tower" is a reserved field name'),
+                    code='invalid',
+                    params={'value': value},
+                )
+
 
 
 class CredentialTypeInjectorField(JSONSchemaField):
@@ -723,8 +736,14 @@ class CredentialTypeInjectorField(JSONSchemaField):
             value, model_instance
         )
 
-        # make sure the inputs are clean first
-        CredentialTypeInputField().validate(model_instance.inputs, model_instance)
+        # make sure the inputs are valid first
+        try:
+            CredentialTypeInputField().validate(model_instance.inputs, model_instance)
+        except django_exceptions.ValidationError:
+            # If `model_instance.inputs` itself is invalid, we can't make an
+            # estimation as to whether our Jinja templates contain valid field
+            # names; don't continue
+            return
 
         # In addition to basic schema validation, search the injector fields
         # for template variables and make sure they match the fields defined in
