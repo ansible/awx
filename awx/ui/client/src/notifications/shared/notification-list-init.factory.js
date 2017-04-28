@@ -30,8 +30,13 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                 scope.current_user_admin_orgs = data.results.map(i => i.name);
             });
 
-        scope.addNotificationTemplate = function(){
-            $state.go('notifications.add');
+        scope.addNotificationTemplate = function() {
+            if (id) {
+                $state.go('notifications.add', {organization_id: id});
+            }
+            else {
+                $state.go('notifications.add');
+            }
         };
 
         if (scope.relatednotificationsRemove) {

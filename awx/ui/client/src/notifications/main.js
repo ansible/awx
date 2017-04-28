@@ -52,6 +52,9 @@ angular.module('notifications', [
                         add: 'notificationsAddController',
                         edit: 'notificationsEditController'
                     },
+                    urls: {
+                        add: '/add?organization_id'
+                    },
                     resolve: {
                         edit: {
                             notification_template: ['$state', '$stateParams', '$q',

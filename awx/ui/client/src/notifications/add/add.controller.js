@@ -42,6 +42,23 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             });
         }
 
+        if ($state.params.organization_id) {
+            let id = $state.params.organization_id,
+                url = GetBasePath('organizations') + id + '/';
+
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    $scope.organization_name = data.name;
+                })
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: `Failed to retrieve organization. GET status: ${status}`
+                    });
+                });
+        };
+
         if ($scope.removeChoicesReady) {
             $scope.removeChoicesReady();
         }
