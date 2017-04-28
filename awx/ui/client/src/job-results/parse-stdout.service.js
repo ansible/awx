@@ -258,11 +258,7 @@ export default ['$log', 'moment', function($log, moment){
                 .split("\r\n");
 
             if (lineNums.length > lines.length) {
-                let padBy = lineNums.length - lines.length;
-
-                for (let i = 0; i <= padBy; i++) {
-                    lines.push("");
-                }
+                lineNums = lineNums.slice(0, lines.length);
             }
 
             lines = this.distributeColors(lines);
@@ -293,7 +289,7 @@ export default ['$log', 'moment', function($log, moment){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getLineClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn${this.getAnchorTags(event)}>${this.prettify(lineArr[1])} ${this.getStartTimeBadge(event, lineArr[1])}</div>
+    <div class="JobResultsStdOut-stdoutColumn${this.getAnchorTags(event)}><span ng-non-bindable>${this.prettify(lineArr[1])}</span>${this.getStartTimeBadge(event, lineArr[1])}</div>
 </div>`;
                 });
 

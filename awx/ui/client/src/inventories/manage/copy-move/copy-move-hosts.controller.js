@@ -11,11 +11,9 @@
 
         $scope.item = host;
         $scope.submitMode = 'copy';
-        $scope.toggle_row = function(id){
-            // toggle off anything else currently selected
-            _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
-            // yoink the currently selected thing
-            $scope.selected = _.find($scope.groups, (item) => {return item.id === id;});
+        
+        $scope.updateSelected = function(selectedGroup) {
+            $scope.selected = angular.copy(selectedGroup);
         };
         $scope.formCancel = function(){
             $state.go('^');

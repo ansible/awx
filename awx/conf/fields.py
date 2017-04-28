@@ -31,6 +31,16 @@ class CharField(CharField):
         return super(CharField, self).to_representation(value)
 
 
+class IntegerField(IntegerField):
+
+    def get_value(self, dictionary):
+        ret = super(IntegerField, self).get_value(dictionary)
+        # Handle UI corner case
+        if ret == '' and self.allow_null and not getattr(self, 'allow_blank', False):
+            return None
+        return ret
+
+
 class StringListField(ListField):
 
     child = CharField()

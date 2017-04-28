@@ -61,12 +61,15 @@ class FactBrokerWorker(ConsumerMixin):
             host_obj = Host.objects.get(name=hostname, inventory__id=inventory_id)
         except Fact.DoesNotExist:
             logger.warn('Failed to intake fact. Host does not exist <hostname, inventory_id> <%s, %s>' % (hostname, inventory_id))
+            message.ack()
             return
         except Fact.MultipleObjectsReturned:
             logger.warn('Database inconsistent. Multiple Hosts found for <hostname, inventory_id> <%s, %s>.' % (hostname, inventory_id))
+            message.ack()
             return None
         except Exception as e:
             logger.error("Exception communicating with Fact Cache Database: %s" % str(e))
+            message.ack()
             return None
 
         (module_name, facts) = self.process_facts(facts_data)
@@ -84,6 +87,7 @@ class FactBrokerWorker(ConsumerMixin):
             logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
             analytics_logger.info('Received message with fact data', extra=dict(
                 module_name=module_name, facts_data=facts))
+        message.ack()
         return fact_obj
 
 

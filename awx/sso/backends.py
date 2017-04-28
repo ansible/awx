@@ -12,7 +12,6 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
-from django.core.exceptions import ImproperlyConfigured
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -93,8 +92,8 @@ class LDAPBackend(BaseLDAPBackend):
             return None
         try:
             return super(LDAPBackend, self).authenticate(username, password)
-        except ImproperlyConfigured:
-            logger.error("Unable to authenticate, LDAP is improperly configured")
+        except Exception:
+            logger.exception("Encountered an error authenticating to LDAP")
             return None
 
     def get_user(self, user_id):

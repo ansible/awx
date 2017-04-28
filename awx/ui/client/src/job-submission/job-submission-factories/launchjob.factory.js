@@ -90,9 +90,9 @@ export default
                                     // for optional select lists, if they are left blank make sure we submit
                                     // a value that the API will consider "empty"
                                     //
-                                    case "multiplechoice":
-                                        job_launch_data.extra_vars[fld] = "";
-                                        break;
+                                    // ISSUE: I don't think this logic ever actually fires
+                                    // When I tested this, we don't pass this extra var back
+                                    // through the api when the mutliselect is optional and empty
                                     case "multiselect":
                                         job_launch_data.extra_vars[fld] = [];
                                         break;

@@ -21,7 +21,9 @@ import traceback
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
+from datetime import timedelta
 import yaml
+import fcntl
 try:
     import psutil
 except:
@@ -46,6 +48,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
+from awx import __version__ as tower_application_version
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
@@ -54,7 +57,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
-from awx.main.utils.reload import restart_local_services
+from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
@@ -175,13 +178,27 @@ def purge_old_stdout_files(self):
 @task(bind=True)
 def cluster_node_heartbeat(self):
     logger.debug("Cluster node heartbeat task.")
+    nowtime = now()
     inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
     if inst.exists():
         inst = inst[0]
         inst.capacity = get_system_task_capacity()
+        inst.version = tower_application_version
         inst.save()
-        return
-    raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+    else:
+        raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+    recent_inst = Instance.objects.filter(modified__gt=nowtime - timedelta(seconds=70)).exclude(hostname=settings.CLUSTER_HOST_ID)
+    # IFF any node has a greater version than we do, then we'll shutdown services
+    for other_inst in recent_inst:
+        if other_inst.version == "":
+            continue
+        if Version(other_inst.version) > Version(tower_application_version):
+            logger.error("Host {} reports Tower version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
+                                                                                                             other_inst.version,
+                                                                                                             inst.hostname,
+                                                                                                             inst.version))
+            stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
+
 
 
 @task(bind=True, queue='default')
@@ -1365,7 +1382,45 @@ class RunProjectUpdate(BaseTask):
                 logger.error('Encountered error updating project dependent inventory: {}'.format(e))
                 continue
 
+    def release_lock(self, instance):
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        except IOError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
+            os.close(self.lock_fd)
+            raise
+
+        os.close(self.lock_fd)
+        self.lock_fd = None
+
+    '''
+    Note: We don't support blocking=False
+    '''
+    def acquire_lock(self, instance, blocking=True):
+        lock_path = instance.get_lock_file()
+        if lock_path is None:
+            raise RuntimeError(u'Invalid lock file path')
+
+        try:
+            self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
+        except OSError as e:
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
+
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+        except IOError as e:
+            os.close(self.lock_fd)
+            logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+            raise
+    
+    def pre_run_hook(self, instance, **kwargs):
+        if instance.launch_type == 'sync':
+            self.acquire_lock(instance)
+
     def post_run_hook(self, instance, status, **kwargs):
+        if instance.launch_type == 'sync':
+            self.release_lock(instance)
         p = instance.project
         dependent_inventory_sources = p.scm_inventory_sources.all()
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):

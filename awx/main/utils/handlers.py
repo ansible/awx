@@ -44,6 +44,7 @@ PARAM_NAMES = {
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
     'tcp_timeout': 'LOG_AGGREGATOR_TCP_TIMEOUT',
+    'verify_cert': 'LOG_AGGREGATOR_VERIFY_CERT'
 }
 
 
@@ -242,8 +243,11 @@ class BaseHTTPSHandler(BaseHandler):
             payload_str = json.dumps(payload_input)
         else:
             payload_str = payload_input
-        return dict(data=payload_str, background_callback=unused_callback,
-                    timeout=self.tcp_timeout)
+        kwargs = dict(data=payload_str, background_callback=unused_callback,
+                      timeout=self.tcp_timeout)
+        if self.verify_cert is False:
+            kwargs['verify'] = False
+        return kwargs
 
 
     def _send(self, payload):

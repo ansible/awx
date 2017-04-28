@@ -26,7 +26,17 @@ export default ['i18n', function(i18n) {
             },
             AUTH_LDAP_USER_SEARCH: {
                 type: 'textarea',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                 reset: 'AUTH_LDAP_USER_SEARCH'
+            },
+            AUTH_LDAP_GROUP_SEARCH: {
+                type: 'textarea',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                reset: 'AUTH_LDAP_GROUP_SEARCH'
             },
             AUTH_LDAP_USER_DN_TEMPLATE: {
                 type: 'text',
@@ -38,10 +48,6 @@ export default ['i18n', function(i18n) {
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-            },
-            AUTH_LDAP_GROUP_SEARCH: {
-                type: 'textarea',
-                reset: 'AUTH_LDAP_GROUP_SEARCH'
             },
             AUTH_LDAP_GROUP_TYPE: {
                 type: 'select',

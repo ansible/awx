@@ -5,9 +5,11 @@ import ConfigParser
 import json
 import tempfile
 
+import os
+import fcntl
 import pytest
-import yaml
 import mock
+import yaml
 
 from awx.main.models import (
     Credential,
@@ -1067,3 +1069,62 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
         self.task.run(self.pk)
+
+
+def test_os_open_oserror():
+    with pytest.raises(OSError):
+        os.open('this_file_does_not_exist', os.O_RDONLY)
+
+
+def test_fcntl_ioerror():
+    with pytest.raises(IOError):
+        fcntl.flock(99999, fcntl.LOCK_EX)
+
+
+@mock.patch('os.open')
+@mock.patch('logging.getLogger')
+def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
+    err = OSError()
+    err.errno = 3
+    err.strerror = 'dummy message'
+
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = 'this_file_does_not_exist'
+
+    os_open.side_effect = err
+
+    logger = mock.Mock()
+    logging_getLogger.return_value = logger
+    
+    ProjectUpdate = tasks.RunProjectUpdate()
+
+    with pytest.raises(OSError, errno=3, strerror='dummy message'):
+        ProjectUpdate.acquire_lock(instance)
+    assert logger.err.called_with("I/O error({0}) while trying to open lock file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
+
+
+@mock.patch('os.open')
+@mock.patch('os.close')
+@mock.patch('logging.getLogger')
+@mock.patch('fcntl.flock')
+def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_close, os_open):
+    err = IOError()
+    err.errno = 3
+    err.strerror = 'dummy message'
+
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = 'this_file_does_not_exist'
+
+    os_open.return_value = 3
+
+    logger = mock.Mock()
+    logging_getLogger.return_value = logger
+
+    fcntl_flock.side_effect = err
+    
+    ProjectUpdate = tasks.RunProjectUpdate()
+
+    with pytest.raises(IOError, errno=3, strerror='dummy message'):
+        ProjectUpdate.acquire_lock(instance)
+    os_close.assert_called_with(3)
+    assert logger.err.called_with("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))

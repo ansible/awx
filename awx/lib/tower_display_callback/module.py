@@ -63,7 +63,6 @@ class BaseCallbackModule(CallbackBase):
 
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
-
         event_data.setdefault('uuid', str(uuid.uuid4()))
 
         if event not in self.EVENTS_WITHOUT_TASK:
@@ -75,7 +74,7 @@ class BaseCallbackModule(CallbackBase):
             if event_data['res'].get('_ansible_no_log', False):
                 event_data['res'] = {'censored': CENSORED}
             for i, item in enumerate(event_data['res'].get('results', [])):
-                if event_data['res']['results'][i].get('_ansible_no_log', False):
+                if isinstance(item, dict) and item.get('_ansible_no_log', False):
                     event_data['res']['results'][i] = {'censored': CENSORED}
 
         with event_context.display_lock:

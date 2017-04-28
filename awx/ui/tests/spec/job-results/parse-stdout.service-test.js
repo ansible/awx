@@ -129,7 +129,7 @@ describe('parseStdoutService', () => {
                 end_line: 11,
                 stdout: "a\r\nb\r\nc..."
             };
-            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."], [11, ""]];
+            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."]];
 
             let returnedEvent = parseStdoutService.getLineArr(mockEvent);
 
@@ -204,7 +204,7 @@ describe('parseStdoutService', () => {
             var expectedString = `
 <div class="JobResultsStdOut-aLineOfStdOutline_classes">
     <div class="JobResultsStdOut-lineNumberColumn">collapse_icon_dom13</div>
-    <div class="JobResultsStdOut-stdoutColumn" anchor_tag_dom>prettified_line </div>
+    <div class="JobResultsStdOut-stdoutColumn" anchor_tag_dom><span ng-non-bindable>prettified_line</span></div>
 </div>`;
             expect(returnedString).toBe(expectedString);
         });

@@ -79,7 +79,18 @@ export default [
         function populateAdhocCommand(flag){
             $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.toString();
             var ad_hoc_commands = $scope.$parent.AD_HOC_COMMANDS.split(',');
-            $scope.$parent.AD_HOC_COMMANDS = _.map(ad_hoc_commands, (item) => _.find($scope.$parent.AD_HOC_COMMANDS_options, { value: item }));
+            $scope.$parent.AD_HOC_COMMANDS = _.map(ad_hoc_commands, function(item){
+                let option = _.find($scope.$parent.AD_HOC_COMMANDS_options, { value: item });
+                if(!option){
+                    option = {
+                        name: item,
+                        value: item,
+                        label: item
+                    };
+                    $scope.$parent.AD_HOC_COMMANDS_options.push(option);
+                }
+                return option;
+            });
 
             if(flag !== undefined){
                 dropdownRendered = flag;
@@ -90,6 +101,7 @@ export default [
                 CreateSelect2({
                     element: '#configuration_jobs_template_AD_HOC_COMMANDS',
                     multiple: true,
+                    addNew: true,
                     placeholder: i18n._('Select commands')
                 });
             }

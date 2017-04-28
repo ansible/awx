@@ -86,7 +86,19 @@ def executor(tmpdir_factory, request):
     - name: Hello Message
       debug:
         msg: "Hello World!"
-'''}  # noqa
+'''},  # noqa
+{'results_included.yml': '''
+- name: Run module which generates results list
+  connection: local
+  hosts: all
+  gather_facts: no
+  vars:
+    results: ['foo', 'bar']
+  tasks:
+    - name: Generate results list
+      debug:
+        var: results
+'''},  # noqa
 ])
 def test_callback_plugin_receives_events(executor, cache, event, playbook):
     executor.run()

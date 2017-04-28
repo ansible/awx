@@ -75,7 +75,10 @@ export default [
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key].toString();
                                 }
-                                else{
+                                else if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
+                                    $scope[key] = JSON.stringify(data[key]);
+                                }
+                                else {
                                     $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
                                 }
 
@@ -353,27 +356,38 @@ export default [
             clearApiErrors();
             _.each(keys, function(key) {
                 if($scope.configDataResolve[key].type === 'choice' || multiselectDropdowns.indexOf(key) !== -1) {
+
+                    // Handle AD_HOC_COMMANDS
+                    if(multiselectDropdowns.indexOf(key) !== -1) {
+                        let newModules = $("#configuration_jobs_template_AD_HOC_COMMANDS > option")
+                            .filter("[data-select2-tag=true]")
+                            .map((i, val) => ({value: $(val).text()}));
+                        newModules.each(function(i, val) {
+                            $scope[key].push(val);
+                        });
+
+                        payload[key] = ConfigurationUtils.listToArray(_.map($scope[key], 'value').join(','));
+                    }
+
                     //Parse dropdowns and dropdowns labeled as lists
-                    if($scope[key] === null) {
+                    else if($scope[key] === null) {
                         payload[key] = null;
                     } else if($scope[key][0] && $scope[key][0].value !== undefined) {
-                        if(multiselectDropdowns.indexOf(key) !== -1) {
-                            // Handle AD_HOC_COMMANDS
-                            payload[key] = ConfigurationUtils.listToArray(_.map($scope[key], 'value').join(','));
-                        } else {
-                            payload[key] = _.map($scope[key], 'value').join(',');
-                        }
+                        payload[key] = _.map($scope[key], 'value').join(',');
                     } else {
-                        if(multiselectDropdowns.indexOf(key) !== -1) {
-                            // Default AD_HOC_COMMANDS to an empty list
-                            payload[key] = $scope[key].value || [];
-                        } else {
-                            payload[key] = $scope[key].value;
-                        }
+                        payload[key] = $scope[key].value;
                     }
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
-                    // Parse lists
-                    payload[key] = ConfigurationUtils.listToArray($scope[key], key);
+
+                    if(key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH"){
+                        payload[key] = $scope[key] === "{}" ? [] : ToJSON($scope.parseType,
+                            $scope[key]);
+                    }
+                    else {
+                        // Parse lists
+                        payload[key] = ConfigurationUtils.listToArray($scope[key], key);
+                    }
+
                 }
                 else if($scope.configDataResolve[key].type === 'nested object') {
                     if($scope[key] === '') {

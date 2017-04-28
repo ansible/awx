@@ -10,20 +10,32 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions, permissions, views
 
 
+def _force_raising_exception(view_obj, request, format=None):
+    raise view_obj.exception_class()
+
+
 class ApiErrorView(views.APIView):
 
     authentication_classes = []
     permission_classes = (permissions.AllowAny,)
     metadata_class = None
-    allowed_methods = ('GET', 'HEAD')
     exception_class = exceptions.APIException
     view_name = _('API Error')
 
     def get_view_name(self):
         return self.view_name
 
-    def get(self, request, format=None):
-        raise self.exception_class()
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super(ApiErrorView, self).finalize_response(request, response, *args, **kwargs)
+        try:
+            del response['Allow']
+        except Exception:
+            pass
+        return response
+
+
+for method_name in ApiErrorView.http_method_names:
+    setattr(ApiErrorView, method_name, _force_raising_exception)
 
 
 def handle_error(request, status=404, **kwargs):

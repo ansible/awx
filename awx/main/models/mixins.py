@@ -1,5 +1,6 @@
 # Python
 import json
+from copy import copy
 
 # Django
 from django.db import models
@@ -28,9 +29,7 @@ class ResourceMixin(models.Model):
         '''
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
-
         MyModel.accessible_objects(user, 'read_role').filter(name__istartswith='bar');
-
         NOTE: This should only be used for list type things. If you have a
         specific resource you want to check permissions on, it is more
         performant to resolve the resource in question then call
@@ -159,12 +158,13 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
-                if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
-                    errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
-                                  (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
-                if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
-                    errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                  (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+                if not data[survey_element['variable']] == '$encrypted$' and not survey_element['type'] == 'password':
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
         elif survey_element['type'] == 'integer':
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) != int:
@@ -196,16 +196,22 @@ class SurveyJobTemplateMixin(models.Model):
                 if type(data[survey_element['variable']]) != list:
                     errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                 else:
+                    choice_list = copy(survey_element['choices'])
+                    if isinstance(choice_list, basestring):
+                        choice_list = choice_list.split('\n')
                     for val in data[survey_element['variable']]:
-                        if val not in survey_element['choices']:
+                        if val not in choice_list:
                             errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
-                                                                                           survey_element['choices']))
+                                                                                           choice_list))
         elif survey_element['type'] == 'multiplechoice':
+            choice_list = copy(survey_element['choices'])
+            if isinstance(choice_list, basestring):
+                choice_list = choice_list.split('\n')
             if survey_element['variable'] in data:
-                if data[survey_element['variable']] not in survey_element['choices']:
+                if data[survey_element['variable']] not in choice_list:
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
                                                                                    survey_element['variable'],
-                                                                                   survey_element['choices']))
+                                                                                   choice_list))
         return errors
 
     def survey_variable_validation(self, data):
