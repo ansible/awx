@@ -13,7 +13,7 @@ from awx.main.migrations import _migration_utils as migration_utils
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0037_v320_release'),
+        ('main', '0038_v320_release'),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ from awx.main.migrations import _credentialtypes as credentialtypes
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0039_v320_add_credentialtype_model'),
+        ('main', '0040_v320_add_credentialtype_model'),
     ]
 
     operations = [

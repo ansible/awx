@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0040_v320_migrate_v1_credentials'),
+        ('main', '0041_v320_migrate_v1_credentials'),
     ]
 
     operations = [

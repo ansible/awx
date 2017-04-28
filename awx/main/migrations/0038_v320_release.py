@@ -16,7 +16,7 @@ from awx.main.models import Host
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0036_v311_insights'),
+        ('main', '0037_v313_instance_version'),
     ]
 
     operations = [
