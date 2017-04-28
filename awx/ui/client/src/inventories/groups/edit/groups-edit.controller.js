@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
-    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData',
+    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'groupData',
     function($state, $stateParams, $scope, ParseVariableString, rbacUiControlService, ToJSON,
-        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData) {
+        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, groupData) {
 
         init();
 

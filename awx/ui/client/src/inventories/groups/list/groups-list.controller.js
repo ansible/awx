@@ -5,11 +5,11 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
-    'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
-    'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData',
+    'GroupManageService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
+    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData',
     function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
-        GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
-        GetSyncStatusMsg, GetHostsStatusMsg, Dataset, Find, qs, inventoryData){
+        GroupManageService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
+        GetHostsStatusMsg, Dataset, Find, qs, inventoryData){
 
         let list = GroupList;
 
@@ -144,51 +144,8 @@
             }));
         };
 
-        $scope.$on(`ws-jobs`, function(e, data){
-            var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
-
-            if (group === undefined || group === null) {
-                group = {};
-            }
-
-            if(data.status === 'failed' || data.status === 'successful'){
-                let path;
-                if($stateParams && $stateParams.group && $stateParams.group.length > 0) {
-                    path = GetBasePath('groups') + _.last($stateParams.group) + '/children';
-                }
-                else {
-                    //reaches here if the user is on the root level group
-                    path = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
-                }
-                qs.search(path, $state.params[`${list.iterator}_search`])
-                .then(function(searchResponse) {
-                    $scope[`${list.iterator}_dataset`] = searchResponse.data;
-                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-                    _.forEach($scope[list.name], buildStatusIndicators);
-                });
-            } else {
-                var status = GetSyncStatusMsg({
-                    status: data.status,
-                    has_inventory_sources: group.has_inventory_sources,
-                    source: group.source
-                });
-                group.status = data.status;
-                group.status_class = status.class;
-                group.status_tooltip = status.tooltip;
-                group.launch_tooltip = status.launch_tip;
-                group.launch_class = status.launch_class;
-            }
-        });
-
         $scope.cancelUpdate = function (id) {
-            GroupsCancelUpdate({ scope: $scope, id: id });
-        };
-        
-        $scope.viewUpdateStatus = function (id) {
-            ViewUpdateStatus({
-                scope: $scope,
-                group_id: id
-            });
+            CancelSourceUpdate({ scope: $scope, id: id });
         };
 
         $scope.copyMoveGroup = function(id){

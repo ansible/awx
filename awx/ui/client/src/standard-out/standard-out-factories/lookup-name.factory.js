@@ -14,15 +14,10 @@
              Rest.get()
                  .success(function(data) {
                      if (scope_var === 'inventory_source') {
-                         scope[scope_var + '_name'] = data.summary_fields.group.name;
                          scope.inventory = data.inventory;
                      }
-                     else if (!Empty(data.name)) {
+                     if (!Empty(data.name)) {
                          scope[scope_var + '_name'] = data.name;
-                     }
-                     if (!Empty(data.group)) {
-                         // Used for inventory_source
-                         scope.group = data.group;
                      }
                  })
                  .error(function(data, status) {

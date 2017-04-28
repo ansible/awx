@@ -6,11 +6,11 @@
 
 export default ['$state', '$stateParams', '$scope', 'GroupForm',
     'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
-    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'GetChoices', 'GetBasePath', 'CreateSelect2',
     'rbacUiControlService', 'ToJSON',
     function($state, $stateParams, $scope, GroupForm,  ParseTypeChange,
         GenerateForm, inventoryData, GroupManageService, GetChoices,
-        GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
+        GetBasePath, CreateSelect2, rbacUiControlService,
         ToJSON) {
 
         let form = GroupForm;

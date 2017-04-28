@@ -5,14 +5,14 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'SourcesListDefinition',
-    'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate',
+    'InventoryUpdate', 'GroupManageService', 'CancelSourceUpdate',
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
-    'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet',
+    'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
     'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
-        InventoryUpdate, GroupManageService, GroupsCancelUpdate,
+        InventoryUpdate, GroupManageService, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, $filter, Prompt,
+        Dataset, Find, qs, inventoryData, $filter, Prompt,
         Wait, SourcesService){
 
         let list = SourcesListDefinition;
@@ -20,14 +20,14 @@
         init();
 
         function init(){
-        $scope.inventory_id = $stateParams.inventory_id;
-        $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
-        $scope.canAdd = false;
+            $scope.inventory_id = $stateParams.inventory_id;
+            $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
+            $scope.canAdd = false;
 
-        rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
 
             // Search init
             $scope.list = list;
@@ -43,6 +43,33 @@
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
 
+            $scope.$on(`ws-jobs`, function(e, data){
+                var inventory_source = Find({ list: $scope.inventory_sources, key: 'id', val: data.inventory_source_id });
+
+                if (inventory_source === undefined || inventory_source === null) {
+                    inventory_source = {};
+                }
+
+                if(data.status === 'failed' || data.status === 'successful'){
+                    let path = GetBasePath('inventory') + $stateParams.inventory_id + '/inventory_sources';
+
+                    qs.search(path, $state.params[`${list.iterator}_search`])
+                    .then(function(searchResponse) {
+                        $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                        _.forEach($scope[list.name], buildStatusIndicators);
+                    });
+                } else {
+                    var status = GetSyncStatusMsg({
+                        status: data.status
+                    });
+                    inventory_source.status = data.status;
+                    inventory_source.status_class = status.class;
+                    inventory_source.status_tooltip = status.tooltip;
+                    inventory_source.launch_tooltip = status.launch_tip;
+                    inventory_source.launch_class = status.launch_class;
+                }
+            });
         }
 
         function buildStatusIndicators(inventory_source){
@@ -50,18 +77,12 @@
                 inventory_source = {};
             }
 
-            let inventory_source_status, hosts_status;
+            let inventory_source_status;
 
             inventory_source_status = GetSyncStatusMsg({
                 status: inventory_source.status,
                 has_inventory_sources: inventory_source.has_inventory_sources,
                 source: ( (inventory_source) ? inventory_source.source : null )
-            });
-            hosts_status = GetHostsStatusMsg({
-                active_failures: inventory_source.hosts_with_active_failures,
-                total_hosts: inventory_source.total_hosts,
-                inventory_id: $scope.inventory_id,
-                // group_id: group.id
             });
             _.assign(inventory_source,
                 {status_class: inventory_source_status.class},
@@ -69,8 +90,6 @@
                 {launch_tooltip: inventory_source_status.launch_tip},
                 {launch_class: inventory_source_status.launch_class},
                 {group_schedule_tooltip: inventory_source_status.schedule_tip},
-                {hosts_status_tip: hosts_status.tooltip},
-                {hosts_status_class: hosts_status.class},
                 {source: inventory_source ? inventory_source.source : null},
                 {status: inventory_source ? inventory_source.status : null});
         }
@@ -114,12 +133,12 @@
         };
 
         $scope.cancelUpdate = function (id) {
-            GroupsCancelUpdate({ scope: $scope, id: id });
+            CancelSourceUpdate({ scope: $scope, id: id });
         };
         $scope.viewUpdateStatus = function (id) {
             ViewUpdateStatus({
                 scope: $scope,
-                group_id: id
+                inventory_source_id: id
             });
         };
         $scope.scheduleSource = function(id) {

@@ -14,6 +14,13 @@ export default ['SourcesListDefinition', '$stateExtender', 'templateUrl', '$inje
                 searchPrefix: `${list.iterator}`,
                 name: `${formStateDefinition.name}.${list.iterator}s`,
                 url: `/${list.iterator}s`,
+                data: {
+                    socket: {
+                        "groups": {
+                            "jobs": ["status_changed"]
+                        }
+                    }
+                },
                 ncyBreadcrumb: {
                     parent: `${formStateDefinition.name}`,
                     label: `${breadcrumbLabel}`
