@@ -13,6 +13,8 @@ def migrate_to_v2_credentials(apps, schema_editor):
     try:
         utils.get_current_apps = lambda: apps
         for cred in apps.get_model('main', 'Credential').objects.all():
+            job_templates = cred.jobtemplates.all()
+            jobs = cred.jobs.all()
             data = {}
             if getattr(cred, 'vault_password', None):
                 data['vault_password'] = cred.vault_password
@@ -23,6 +25,15 @@ def migrate_to_v2_credentials(apps, schema_editor):
             for field in defined_fields:
                 if getattr(cred, field, None):
                     cred.inputs[field] = getattr(cred, field)
+            if cred.vault_password:
+                for jt in job_templates:
+                    jt.credential = None
+                    jt.vault_credential = cred
+                    jt.save()
+                for job in jobs:
+                    job.credential = None
+                    job.vault_credential = cred
+                    job.save()
             cred.save()
 
             #
@@ -45,10 +56,15 @@ def migrate_to_v2_credentials(apps, schema_editor):
                 new_cred.admin_role = None
                 new_cred.use_role = None
 
-                # TODO: Job Template assignments
-
                 if any([getattr(cred, field) for field in ssh_type.defined_fields]):
                     new_cred.save(force_insert=True)
+
+                    for jt in job_templates:
+                        jt.credential = new_cred
+                        jt.save()
+                    for job in jobs:
+                        job.credential = new_cred
+                        job.save()
 
                     # passwords must be decrypted and re-encrypted, because
                     # their encryption is based on the Credential's primary key

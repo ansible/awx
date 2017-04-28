@@ -88,6 +88,14 @@ class JobOptions(BaseModel):
         default=None,
         on_delete=models.SET_NULL,
     )
+    vault_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_as_vault_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     cloud_credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss_as_cloud_credential+',
