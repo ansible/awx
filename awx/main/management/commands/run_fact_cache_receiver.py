@@ -111,7 +111,7 @@ class FactBrokerWorker(ConsumerMixin):
                 analytics_logger.info('Received message with fact data', extra=dict(
                     module_name=module_name, facts_data=facts))
             ret = fact_obj
-        else:
+        if job.gather_facts is True:
             host_obj.update_ansible_facts(module=module_name, facts=facts, timestamp=self.timestamp)
 
         message.ack()

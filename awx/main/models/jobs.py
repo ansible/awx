@@ -159,6 +159,9 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
+    gather_facts = models.BooleanField(
+        default=False,
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -261,7 +264,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels', 'survey_passwords', 'allow_simultaneous', 'timeout']
+                'labels', 'survey_passwords', 'allow_simultaneous', 'timeout',
+                'gather_facts',]
 
     def resource_validation_data(self):
         '''

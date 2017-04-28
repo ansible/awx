@@ -944,11 +944,12 @@ class RunJob(BaseTask):
                 env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
         # Set environment variables related to gathering facts from the cache
-        env['FACT_QUEUE'] = settings.FACT_QUEUE
-        env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
-        env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
-        env['ANSIBLE_CACHE_PLUGIN'] = "tower"
-        env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = "tcp://127.0.0.1:%s" % str(settings.FACT_CACHE_PORT)
+        if job.job_type == PERM_INVENTORY_SCAN or job.gather_facts is True:
+            env['FACT_QUEUE'] = settings.FACT_QUEUE
+            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
+            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
+            env['ANSIBLE_CACHE_PLUGIN'] = "tower"
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = "tcp://127.0.0.1:%s" % str(settings.FACT_CACHE_PORT)
         return env
 
     def build_args(self, job, **kwargs):

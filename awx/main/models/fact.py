@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from awx.main.fields import JSONBField
-from awx.main.models import Host
 
 __all__ = ('Fact',)
 
@@ -65,14 +64,6 @@ class Fact(models.Model):
 
     @staticmethod
     def add_fact(host_id, module, timestamp, facts):
-        try:
-            host = Host.objects.get(id=host_id)
-        except Host.DoesNotExist as e:
-            logger.warn("Host with id %s not found while trying to update latest fact set." % host_id)
-            raise e
-
-        host.update_ansible_facts(module=module, facts=facts, timestamp=timestamp)
-
         fact_obj = Fact.objects.create(host_id=host_id, module=module, timestamp=timestamp, facts=facts)
         fact_obj.save()
         return fact_obj
