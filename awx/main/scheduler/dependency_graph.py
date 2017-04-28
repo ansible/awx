@@ -78,7 +78,7 @@ class DependencyGraph(object):
 
     '''
     JobDict
-    
+
     Presume that job is related to a project that is update on launch
     '''
     def should_update_related_project(self, job):
@@ -98,7 +98,7 @@ class DependencyGraph(object):
 
         '''
         This is a bit of fuzzy logic.
-        If the latest project update has a created time == job_created_time-1 
+        If the latest project update has a created time == job_created_time-1
         then consider the project update found. This is so we don't enter an infinite loop
         of updating the project when cache timeout is 0.
         '''
@@ -178,6 +178,8 @@ class DependencyGraph(object):
         return False
 
     def can_workflow_job_run(self, job):
+        if job['allow_simultaneous'] is True:
+            return True
         return self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS].get(job['workflow_job_template_id'], True)
 
     def can_system_job_run(self):
@@ -217,4 +219,3 @@ class DependencyGraph(object):
 
     def add_jobs(self, jobs):
         map(lambda j: self.add_job(j), jobs)
- 
