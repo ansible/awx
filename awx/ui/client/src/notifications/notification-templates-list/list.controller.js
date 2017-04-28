@@ -23,8 +23,8 @@
              $scope.canAdd = false;
 
              rbacUiControlService.canAdd("notification_templates")
-                 .then(function(canAdd) {
-                     $scope.canAdd = canAdd;
+                 .then(function(params) {
+                     $scope.canAdd = params.canAdd;
                  });
 
              // search init

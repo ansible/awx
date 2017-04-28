@@ -720,7 +720,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     field = params.field,
                     variable = params.variable,
                     callback = params.callback,
-                    choice_name = params.choice_name;
+                    choice_name = params.choice_name,
+                    options = params.options;
 
                 if (scope[variable]) {
                     scope[variable].length = 0;
@@ -728,42 +729,50 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     scope[variable] = [];
                 }
 
-                Rest.setUrl(url);
-                Rest.options()
-                    .success(function(data) {
-                        var choices, defaultChoice;
-                        choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
-                        if (data && data.actions && data.actions.POST && data.actions.POST[field]) {
-                            defaultChoice = data.actions.POST[field].default;
-                        }
-                        if (choices) {
-                            // including 'name' property so list can be used by search
-                            choices.forEach(function(choice) {
-                                scope[variable].push({
-                                    label: choice[1],
-                                    value: choice[0],
-                                    name: choice[1]
-                                });
+                var withOptions = function(options) {
+                    var choices, defaultChoice;
+                    choices = (choice_name) ? options.actions.GET[field][choice_name] : options.actions.GET[field].choices;
+                    if (options && options.actions && options.actions.POST && options.actions.POST[field]) {
+                        defaultChoice = options.actions.POST[field].default;
+                    }
+                    if (choices) {
+                        // including 'name' property so list can be used by search
+                        choices.forEach(function(choice) {
+                            scope[variable].push({
+                                label: choice[1],
+                                value: choice[0],
+                                name: choice[1]
                             });
-                        }
-                        if (defaultChoice !== undefined) {
-                            var val;
-                            for (val in scope[variable]) {
-                                if (scope[variable][val].value === defaultChoice) {
-                                    scope[variable][val].isDefault = true;
-                                }
+                        });
+                    }
+                    if (defaultChoice !== undefined) {
+                        var val;
+                        for (val in scope[variable]) {
+                            if (scope[variable][val].value === defaultChoice) {
+                                scope[variable][val].isDefault = true;
                             }
                         }
-                        if (callback) {
-                            scope.$emit(callback);
-                        }
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get ' + url + '. GET status: ' + status
-                        });
-                    });
+                    }
+                    if (callback) {
+                        scope.$emit(callback);
+                    }
+                };
+
+                if (!options) {
+                  Rest.setUrl(url);
+                  Rest.options()
+                      .success(function(data) {
+                          withOptions(data);
+                      })
+                      .error(function(data, status) {
+                          ProcessErrors(scope, data, status, null, {
+                              hdr: 'Error!',
+                              msg: 'Failed to get ' + url + '. GET status: ' + status
+                          });
+                      });
+                } else {
+                  withOptions(options);
+                }
             };
         }
     ])

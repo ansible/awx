@@ -17,8 +17,8 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'ParseTypeChang
             GenerateForm.applyDefaults(form, $scope);
 
         rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
+            .then(function(params) {
+                $scope.canAdd = params.canAdd;
             });
             $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';

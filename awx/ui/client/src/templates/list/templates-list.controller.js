@@ -25,13 +25,13 @@ export default ['$scope', '$rootScope',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd("job_templates")
-                .then(function(canAddJobTemplate) {
-                    $scope.canAddJobTemplate = canAddJobTemplate;
+                .then(function(params) {
+                    $scope.canAddJobTemplate = params.canAdd;
                 });
 
             rbacUiControlService.canAdd("workflow_job_templates")
-                .then(function(canAddWorkflowJobTemplate) {
-                    $scope.canAddWorkflowJobTemplate = canAddWorkflowJobTemplate;
+                .then(function(params) {
+                    $scope.canAddWorkflowJobTemplate = params.canAdd;
                 });
             // search init
             $scope.list = list;

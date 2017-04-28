@@ -22,8 +22,8 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd('projects')
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
+                .then(function(params) {
+                    $scope.canAdd = params.canAdd;
                 });
 
             // search init

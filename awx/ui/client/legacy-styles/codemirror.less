@@ -39,11 +39,9 @@
 
 // Disabled
 textarea[disabled="disabled"] + div[id*="-container"]{
-    pointer-events: none;
-    cursor: not-allowed;
-
         .CodeMirror {
             cursor: not-allowed;
+            pointer-events: none;
         }
 
         .CodeMirror.cm-s-default,
@@ -67,5 +65,11 @@ textarea[disabled="disabled"] + div[id*="-container"]{
 
         .CodeMirror-cursors {
             display: none;
+        }
+
+        .CodeMirror.cm-s-default {
+            min-height: initial !important;
+            max-height: initial !important;
+            height: initial !important;
         }
 }

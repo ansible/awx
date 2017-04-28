@@ -20,7 +20,7 @@ export default
                 Rest.options()
                     .success(function(data) {
                         if (data.actions.POST) {
-                            canAddVal.resolve(true);
+                            canAddVal.resolve({canAdd: true, options: data});
                         } else {
                             canAddVal.reject(false);
                         }
