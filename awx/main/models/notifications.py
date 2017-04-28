@@ -27,7 +27,7 @@ logger = logging.getLogger('awx.main.models.notifications')
 __all__ = ['NotificationTemplate', 'Notification']
 
 
-class NotificationTemplate(CommonModel):
+class NotificationTemplate(CommonModelNameNotUnique):
 
     NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                           ('slack', _('Slack'), SlackBackend),
@@ -41,12 +41,13 @@ class NotificationTemplate(CommonModel):
 
     class Meta:
         app_label = 'main'
+        unique_together = ('organization', 'name')
 
     organization = models.ForeignKey(
         'Organization',
         blank=False,
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='notification_templates',
     )
 
