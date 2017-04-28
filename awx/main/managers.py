@@ -23,21 +23,22 @@ class HostManager(models.Manager):
             return len(set(self.values_list('name', flat=True)))
 
     def get_queryset(self):
-        """When the Inventory this host belongs to has a `host_filter` set
-        generate the QuerySet using that filter. Otherwise just return the default filter.
+        """When the parent instance of the host query set has a `kind` of dynamic and a `host_filter`
+        set. Use the `host_filter` to generate the queryset for the hosts.
         """
         qs = super(HostManager, self).get_queryset()
         if self.instance is not None:
-            if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
-                q = DynamicFilter.query_from_string(self.instance.host_filter)
-                # If we are using host_filters, disable the core_filters, this allows
-                # us to access all of the available Host entries, not just the ones associated
-                # with a specific FK/relation.
-                #
-                # If we don't disable this, a filter of {'inventory': self.instance} gets automatically
-                # injected by the related object mapper.
-                self.core_filters = {}
-                return qs.filter(q)
+            if hasattr(self.instance, 'kind') and self.instance.kind == 'dynamic':
+                if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
+                    q = DynamicFilter.query_from_string(self.instance.host_filter)
+                    # If we are using host_filters, disable the core_filters, this allows
+                    # us to access all of the available Host entries, not just the ones associated
+                    # with a specific FK/relation.
+                    #
+                    # If we don't disable this, a filter of {'inventory': self.instance} gets automatically
+                    # injected by the related object mapper.
+                    self.core_filters = {}
+                    return qs.filter(q)
         return qs
 
 

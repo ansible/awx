@@ -41,6 +41,11 @@ class Migration(migrations.Migration):
             name='host_filter',
             field=awx.main.fields.DynamicFilterField(default=None, help_text='Filter that will be applied to the hosts of this inventory.', null=True, blank=True),
         ),
+        migrations.AddField(
+            model_name='inventory',
+            name='kind',
+            field=models.CharField(default=b'standard', help_text='Kind of inventory being represented.', max_length=32, choices=[(b'standard', 'Hosts have a direct link to this inventory.'), (b'dynamic', 'Hosts for inventory generated using the host_filter property.')]),
+        ),
 
         # Facts
         migrations.AlterField(

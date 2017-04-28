@@ -46,6 +46,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     an inventory source contains lists and hosts.
     '''
 
+    KIND_CHOICES = [
+        ('standard', _('Hosts have a direct link to this inventory.')),
+        ('dynamic', _('Hosts for inventory generated using the host_filter property.')),
+    ]
+
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('inventories')
@@ -102,6 +107,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         default=0,
         editable=False,
         help_text=_('Number of external inventory sources in this inventory with failures.'),
+    )
+    kind = models.CharField(
+        max_length=32,
+        choices=KIND_CHOICES,
+        blank=False,
+        default='standard',
+        help_text=_('Kind of inventory being represented.'),
     )
     host_filter = DynamicFilterField(
         blank=True,
