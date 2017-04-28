@@ -30,13 +30,6 @@ export default ['i18n', function(i18n) {
                 awToolTip: '{{credential.description}}',
                 dataPlacement: 'top'
             },
-            kind: {
-                label: i18n._('Type'),
-                ngBind: 'credential.kind_label',
-                excludeModal: true,
-                nosort: true,
-                columnClass: 'col-md-2 hidden-sm hidden-xs'
-            },
             owners: {
                 label: i18n._('Owners'),
                 type: 'owners',

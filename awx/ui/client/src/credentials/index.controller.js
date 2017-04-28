@@ -24,6 +24,8 @@ function IndexController () {
     };
 }
 
-// IndexController.$inject = [];
+IndexController.$inject = [
+
+];
 
 export default IndexController;
