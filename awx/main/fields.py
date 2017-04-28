@@ -733,6 +733,11 @@ class CredentialTypeInjectorField(JSONSchemaField):
             (field, 'EXAMPLE')
             for field in model_instance.defined_fields
         )
+
+        class TowerNamespace:
+            filename = None
+
+        valid_namespace['tower'] = TowerNamespace()
         for type_, injector in value.items():
             for key, tmpl in injector.items():
                 try:
