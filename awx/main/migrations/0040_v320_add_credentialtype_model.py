@@ -50,6 +50,16 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=True),
             preserve_default=False,
         ),
+        migrations.AddField(
+            model_name='job',
+            name='vault_credential',
+            field=models.ForeignKey(related_name='jobs_as_vault_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='vault_credential',
+            field=models.ForeignKey(related_name='jobtemplates_as_vault_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+        ),
         migrations.AlterUniqueTogether(
             name='credential',
             unique_together=set([('organization', 'name', 'credential_type')]),
