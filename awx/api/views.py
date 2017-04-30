@@ -38,7 +38,7 @@ from django.utils.translation import ugettext_lazy as _
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
 from rest_framework.parsers import FormParser
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
@@ -1681,7 +1681,38 @@ class InventoryList(ListCreateAPIView):
         return qs
 
 
-class InventoryDetail(RetrieveUpdateDestroyAPIView):
+class ControlledByScmMixin(object):
+    '''
+    Special method to lock-down items managed by SCM inventory source via
+    project update, which are not protected by the task manager.
+    '''
+
+    def _raise_if_unallowed(self, obj):
+        if (self.request.method not in SAFE_METHODS and obj and
+                obj.inventory_sources.filter(
+                    update_on_project_update=True, source='scm').exists()):
+            # Allow inventory changes unrelated to variables
+            if self.model == Inventory and (
+                    not self.request or not self.request.data or
+                    parse_yaml_or_json(self.request.data.get('variables', '')) == parse_yaml_or_json(obj.variables)):
+                return
+            raise PermissionDenied(detail=_(
+                'This object is managed by updates to the project '
+                'of its inventory source. Remove the inventory source '
+                'in order to make this edit.'))
+
+    def get_object(self):
+        obj = super(ControlledByScmMixin, self).get_object()
+        self._raise_if_unallowed(obj)
+        return obj
+
+    def get_parent_object(self):
+        obj = super(ControlledByScmMixin, self).get_parent_object()
+        self._raise_if_unallowed(obj)
+        return obj
+
+
+class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventoryDetailSerializer
@@ -1788,7 +1819,7 @@ class HostList(ListCreateAPIView):
             return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class HostDetail(RetrieveUpdateDestroyAPIView):
+class HostDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
     model = Host
@@ -1812,7 +1843,7 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
     parent_key = 'inventory'
 
 
-class HostGroupsList(SubListCreateAttachDetachAPIView):
+class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
     ''' the list of groups a host is directly a member of '''
 
     model = Group
@@ -1956,7 +1987,7 @@ class EnforceParentRelationshipMixin(object):
         return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
 
 
-class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -1993,7 +2024,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(SubListCreateAttachDetachAPIView):
+class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
     ''' the list of hosts directly below a group '''
 
     model = Host
@@ -2059,7 +2090,7 @@ class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
         return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 
-class GroupDetail(RetrieveUpdateDestroyAPIView):
+class GroupDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -2361,19 +2392,23 @@ class InventorySourceUpdateView(RetrieveAPIView):
     is_job_start = True
     new_in_14 = True
 
+    def _build_update_response(self, update, request):
+        if not update:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            headers = {'Location': update.get_absolute_url(request=request)}
+            return Response(dict(inventory_update=update.id),
+                            status=status.HTTP_202_ACCEPTED, headers=headers)
+
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if obj.source == 'scm':
-            raise PermissionDenied(detail=_(
-                'Update the project `{}` in order to update this inventory source.'.format(
-                    obj.scm_project.name)))
         if obj.can_update:
-            inventory_update = obj.update()
-            if not inventory_update:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                headers = {'Location': inventory_update.get_absolute_url(request=request)}
-                return Response(dict(inventory_update=inventory_update.id), status=status.HTTP_202_ACCEPTED, headers=headers)
+            if obj.source == 'scm' and obj.update_on_project_update:
+                if not self.request.user or self.request.user.can_access(self.model, 'update', obj):
+                    raise PermissionDenied(detail=_(
+                        'You do not have permission to update project `{}`.'.format(obj.scm_project.name)))
+                return self._build_update_response(obj.scm_project.update(), request)
+            return self._build_update_response(obj.update(), request)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
