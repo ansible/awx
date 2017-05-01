@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Facts', 'ParseTypeChange', 'ParseVariableString',
-function ($scope, Facts, ParseTypeChange, ParseVariableString) {
+export default [
+function () {
 
     function init() {
         // $scope.insights
