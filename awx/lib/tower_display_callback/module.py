@@ -301,7 +301,7 @@ class BaseCallbackModule(CallbackBase):
 
         # strip environment vars from the job event; it already exists on the
         # job and sensitive values are filtered there
-        if result._task.get_name() == 'setup':
+        if result._task.action in ('setup', 'gather_facts'):
             result._result.get('ansible_facts', {}).pop('ansible_env', None)
 
         event_data = dict(

@@ -6,6 +6,9 @@ import pytest
 from datetime import datetime
 import json
 
+# Mock
+import mock
+
 # Django
 from django.utils import timezone
 
@@ -41,21 +44,21 @@ def check_process_fact_message_module(fact_returned, data, module_name):
 @pytest.mark.django_db
 def test_process_fact_message_ansible(fact_msg_ansible, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactBrokerWorker(None)
-    fact_returned = receiver.process_fact_message(fact_msg_ansible, None)
+    fact_returned = receiver.process_fact_message(fact_msg_ansible, mock.MagicMock())
     check_process_fact_message_module(fact_returned, fact_msg_ansible, 'ansible')
 
 
 @pytest.mark.django_db
 def test_process_fact_message_packages(fact_msg_packages, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactBrokerWorker(None)
-    fact_returned = receiver.process_fact_message(fact_msg_packages, None)
+    fact_returned = receiver.process_fact_message(fact_msg_packages, mock.MagicMock())
     check_process_fact_message_module(fact_returned, fact_msg_packages, 'packages')
 
 
 @pytest.mark.django_db
 def test_process_fact_message_services(fact_msg_services, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactBrokerWorker(None)
-    fact_returned = receiver.process_fact_message(fact_msg_services, None)
+    fact_returned = receiver.process_fact_message(fact_msg_services, mock.MagicMock())
     check_process_fact_message_module(fact_returned, fact_msg_services, 'services')
 
 
@@ -75,10 +78,10 @@ def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible, m
     value = 'hello world'
 
     receiver = FactBrokerWorker(None)
-    receiver.process_fact_message(fact_msg_ansible, None)
+    receiver.process_fact_message(fact_msg_ansible, mock.MagicMock())
 
     fact_msg_ansible['facts'][key] = value
-    fact_returned = receiver.process_fact_message(fact_msg_ansible, None)
+    fact_returned = receiver.process_fact_message(fact_msg_ansible, mock.MagicMock())
 
     fact_obj = Fact.objects.get(id=fact_returned.id)
     assert key in fact_obj.facts
