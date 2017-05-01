@@ -49,9 +49,9 @@ function InventoriesAdd($scope, $location,
         $scope.parseType = 'yaml';
         ParseTypeChange({
             scope: $scope,
-            variable: 'variables',
+            variable: 'inventory_variables',
             parse_variable: 'parseType',
-            field_id: 'inventory_variables'
+            field_id: 'inventory_inventory_variables'
         });
     }
 
@@ -59,9 +59,7 @@ function InventoriesAdd($scope, $location,
     $scope.formSave = function() {
         Wait('start');
         try {
-            var fld, json_data, data;
-
-            json_data = ToJSON($scope.parseType, $scope.variables, true);
+            var fld, data;
 
             data = {};
             for (fld in form.fields) {
