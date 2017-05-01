@@ -45,6 +45,8 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json)
+from awx.main.utils.filters import DynamicFilter
+
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
@@ -1113,7 +1115,7 @@ class InventorySerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Inventory
-        fields = ('*', 'organization', 'variables', 'has_active_failures',
+        fields = ('*', 'organization', 'kind', 'host_filter', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
                   'groups_with_active_failures', 'has_inventory_sources',
                   'total_inventory_sources', 'inventory_sources_with_failures')
@@ -1144,6 +1146,17 @@ class InventorySerializer(BaseSerializerWithVariables):
         if obj is not None and 'organization' in ret and not obj.organization:
             ret['organization'] = None
         return ret
+
+    def validate(self, attrs):
+        kind = attrs.get('kind', 'standard')
+        if kind == 'dynamic':
+            host_filter = attrs.get('host_filter')
+            if host_filter is not None:
+                try:
+                    DynamicFilter().query_from_string(host_filter)
+                except RuntimeError, e:
+                    raise models.base.ValidationError(e)
+        return super(InventorySerializer, self).validate(attrs)
 
 
 class InventoryDetailSerializer(InventorySerializer):

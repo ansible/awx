@@ -72,6 +72,8 @@ from awx.main.utils import * # noqa
 from awx.main.utils import (
     callback_filter_out_ansible_extra_vars
 )
+from awx.main.utils.filters import DynamicFilter
+
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
@@ -79,7 +81,6 @@ from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
-from awx.main.querysets import DynamicFilterQuerySet
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1764,10 +1765,10 @@ class HostList(ListCreateAPIView):
     capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
-        qs = DynamicFilterQuerySet(HostList, using=self._db)
+        qs = super(HostList, self).get_queryset()
         filter_string = self.request.query_params.get('host_filter', None)
         if filter_string:
-            filter_q = qs.query_from_string(filter_string)
+            filter_q = DynamicFilter.query_from_string(filter_string)
             qs = qs.filter(filter_q)
         return qs
 

@@ -27,7 +27,7 @@ class HostManager(models.Manager):
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
         qs = super(HostManager, self).get_queryset()
-        if self.instance is not None:
+        if hasattr(self, 'instance') and self.instance is not None:
             if hasattr(self.instance, 'kind') and self.instance.kind == 'dynamic':
                 if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
                     q = DynamicFilter.query_from_string(self.instance.host_filter)
