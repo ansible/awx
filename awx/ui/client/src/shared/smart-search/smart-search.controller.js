@@ -22,7 +22,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             queryset = _.cloneDeep($scope.querySet);
         }
         else {
-            queryset = $stateParams[`${$scope.iterator}_search`];
+            queryset = $state.params[`${$scope.iterator}_search`];
         }
 
         // build $scope.tags from $stateParams.QuerySet, build fieldset key
@@ -30,7 +30,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
 
         function init() {
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
+            $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
             qs.initFieldset(path, $scope.djangoModel).then((data) => {
                 $scope.models = data.models;
                 $scope.options = data.options.data;
@@ -69,7 +69,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                         });
 
                         $scope.searchTerm = null;
-                        $scope.searchTags = stripDefaultParams(queryset);
+                        $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
                     }
                 }
             });
@@ -86,36 +86,10 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             });
         }
 
-        // Removes state definition defaults and pagination terms
-        function stripDefaultParams(params) {
-            let stripped =_.pick(params, (value, key) => {
-                // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
-                return defaults[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
-            });
-            let strippedCopy = _.cloneDeep(stripped);
-            if(_.keys(_.pick(defaults, _.keys(strippedCopy))).length > 0){
-                for (var key in strippedCopy) {
-                    if (strippedCopy.hasOwnProperty(key)) {
-                        let value = strippedCopy[key];
-                        if(_.isArray(value)){
-                            let index = _.indexOf(value, defaults[key]);
-                            value = value.splice(index, 1)[0];
-                        }
-                    }
-                }
-                stripped = strippedCopy;
-            }
-            return _(strippedCopy).map(qs.decodeParam).flatten().value();
-        }
-
         function setDefaults(term) {
-            if ($scope.list.defaultSearchParams) {
-                return $scope.list.defaultSearchParams(encodeURIComponent(term));
-            } else {
-               return {
-                    search: encodeURIComponent(term)
-                };
-            }
+           return {
+                search: encodeURIComponent(term)
+            };
         }
 
         $scope.toggleKeyPane = function() {
@@ -136,7 +110,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
-            $scope.searchTags = stripDefaultParams(queryset);
+            $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
         };
 
         // remove tag, merge new queryset, $state.go
@@ -182,6 +156,9 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                         encodeParams.relatedSearchTerm = true;
                         removed = qs.encodeParam(encodeParams);
                     }
+                    else if($scope.nonstandardSearchParam && $scope.nonstandardSearchParamRoot && root === $scope.nonstandardSearchParamRoot) {
+                        removed = qs.encodeParam(encodeParams);
+                    }
                     else {
                         removed = setDefaults(termParts[termParts.length-1]);
                     }
@@ -208,7 +185,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
-            $scope.searchTags = stripDefaultParams(queryset);
+            $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
         };
 
         // add a search tag, merge new queryset, $state.go()
@@ -257,6 +234,9 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                         // Django search model is what sets the related fields on the model.
                         else if(_.contains($scope.models[$scope.list.name].related, root)) {
                             params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
+                        }
+                        else if($scope.nonstandardSearchParam && $scope.nonstandardSearchParamRoot && root === $scope.nonstandardSearchParamRoot) {
+                            params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                         }
                         // Its not a search term or a related search term - treat it as a string
                         else {
@@ -311,7 +291,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 });
 
                 $scope.searchTerm = null;
-                $scope.searchTags = stripDefaultParams(queryset);
+                $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
             }
         };
 
@@ -333,7 +313,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             });
 
             $scope.searchTerm = null;
-            $scope.searchTags = stripDefaultParams(queryset);
+            $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
         };
     }
 ];

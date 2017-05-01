@@ -170,9 +170,13 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
-                    html += `<div class="${list.name}List List-well">`;
+                    html += `<div class="${list.name}List `; //List-well">`;
+                    html += (!list.wellOverride) ? "List-well" : "";
+                    html += `">`;
                     // List actions
-                    html += "<div class=\"List-actionHolder\">";
+                    html += "<div class=\"";
+                    html += (list.actionHolderClass) ? list.actionHolderClass : "List-actionHolder";
+                    html += "\">";
                     html += "<div class=\"List-actions\">";
                     html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
 
@@ -194,11 +198,15 @@ export default ['$compile', 'Attr', 'Icon',
                     list.searchSize = 'col-lg-7 col-md-12 col-sm-12 col-xs-12';
                 }
                 if (options.showSearch === undefined || options.showSearch === true) {
+                    let nonstandardSearchParam = list.nonstandardSearchParam && list.nonstandardSearchParam.param ? list.nonstandardSearchParam.param : undefined;
+                    let nonstandardSearchParamRoot = list.nonstandardSearchParam && list.nonstandardSearchParam.root ? list.nonstandardSearchParam.root : undefined;
                     html += `
                     <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
                         <smart-search
                             django-model="${list.name}"
                             search-size="${list.searchSize}"
+                            nonstandard-search-param="${nonstandardSearchParam}"
+                            nonstandard-search-param-root="${nonstandardSearchParamRoot}"
                             base-path="${list.basePath || list.name}"
                             iterator="${list.iterator}"
                             dataset="${list.iterator}_dataset"
@@ -312,7 +320,11 @@ export default ['$compile', 'Attr', 'Icon',
                 if (options.mode === 'lookup') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
                         innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator}.id)"></td>`;
-                    } else { // its assumed that options.input_type = checkbox
+                    }
+                    else if (options.input_type === "foobar") {
+
+                    }
+                    else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
@@ -479,7 +491,7 @@ export default ['$compile', 'Attr', 'Icon',
 
                 if (list.multiSelect) {
                     html += buildSelectAll().prop('outerHTML');
-                } else if (options.mode === 'lookup') {
+                } else if (options.mode === 'lookup' && options.input_type !== 'foobar') {
                     html += "<th class=\"List-tableHeader  select-column List-staticColumn--smallStatus\"></th>";
                 }
 

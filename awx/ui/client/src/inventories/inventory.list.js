@@ -17,22 +17,17 @@ export default ['i18n', function(i18n) {
         index: false,
         hover: true,
         basePath: 'inventory',
+        title: false,
 
         fields: {
             status: {
                 label: '',
-                columnClass: 'List-staticColumn--mediumStatus',
+                columnClass: 'col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
                 nosort: true,
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
                 icons: [{
-                    icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
-                    awToolTip: "{{ inventory.syncTip }}",
-                    awTipPlacement: "right",
-                    ngClick: "showGroupSummary($event, inventory.id)",
-                    ngClass: "inventory.launch_class"
-                },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
@@ -42,11 +37,11 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
+                columnClass: 'col-md-5 col-sm-4 col-xs-6 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
-                linkTo: '/#/inventories/{{inventory.id}}/manage',
                 awToolTip: "{{ inventory.description }}",
-                awTipPlacement: "top"
+                awTipPlacement: "top",
+                linkTo: '/#/inventories/basic_inventory/{{inventory.id}}'
             },
             organization: {
                 label: i18n._('Organization'),
@@ -55,18 +50,32 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-5 col-sm-3 hidden-xs'
+                columnClass: 'col-md-4 col-sm-2 hidden-xs'
             }
         },
 
         actions: {
             add: {
                 mode: 'all', // One of: edit, select, all
-                ngClick: 'addInventory()',
+                type: 'buttonDropdown',
+                basePaths: ['inventories'],
                 awToolTip: i18n._('Create a new inventory'),
-                actionClass: 'btn List-buttonSubmit',
+                actionClass: 'btn List-dropdownSuccess',
                 buttonContent: '&#43; ' + i18n._('ADD'),
-                ngShow: 'canAdd'
+                options: [
+                    {
+                        optionContent: i18n._('Inventory'),
+                        optionSref: 'inventories.add',
+                        ngShow: 'canAddInventory'
+                    },
+                    {
+                        optionContent: i18n._('Smart Inventory'),
+                        optionSref: 'inventories.addSmartInventory',
+                        //TODO: this should have its own permission
+                        ngShow: 'canAddInventory'
+                    }
+                ],
+                ngShow: 'canAddInventory || canAddSmartInventory || canAddSCMInventory'
             }
         },
 

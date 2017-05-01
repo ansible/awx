@@ -157,7 +157,7 @@ export default
                                 // If we are on the inventory manage page or any child state of that
                                 // page then we want to stay on that page.  Otherwise go to the stdout
                                 // view.
-                                if(!$state.includes('inventoryManage')) {
+                                if(!$state.includes('inventories.edit')) {
                                     goTojobResults('inventorySyncStdout');
                                 }
                             }

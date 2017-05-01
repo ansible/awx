@@ -57,6 +57,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                 function encodeTerm(value, key){
 
+                    let root = key.split("__")[0].replace(/^-/, '');
+
                     key = key.replace(/__icontains_DEFAULT/g, "__icontains");
                     key = key.replace(/__search_DEFAULT/g, "__search");
 
@@ -69,13 +71,27 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                             }
                             concated += `${key}=${item}&`;
                         });
-                        return concated;
+
+                        if(root === 'ansible_facts') {
+                            return `host_filter=${encodeURIComponent(concated)}&`;
+                        }
+                        else {
+                            return concated;
+                        }
                     }
                     else {
                         if(value && typeof value === 'string') {
                             value = decodeURIComponent(value).replace(/"|'/g, "");
                         }
-                        return `${key}=${value}&`;
+
+                        if(root === 'ansible_facts') {
+                            let foobar = encodeURIComponent(`${key}=${value}`);
+                            return `host_filter=${foobar}&`;
+                        }
+                        else {
+                            return `${key}=${value}&`;
+                        }
+
                     }
                 }
             },
@@ -274,6 +290,32 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     hdr: 'Error!',
                     msg: `Invalid search term entered. GET returned: ${status}`
                 });
+            },
+            // Removes state definition defaults and pagination terms
+            stripDefaultParams(params, defaults) {
+                if(defaults) {
+                    let stripped =_.pick(params, (value, key) => {
+                        // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
+                        return defaults[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
+                    });
+                    let strippedCopy = _.cloneDeep(stripped);
+                    if(_.keys(_.pick(defaults, _.keys(strippedCopy))).length > 0){
+                        for (var key in strippedCopy) {
+                            if (strippedCopy.hasOwnProperty(key)) {
+                                let value = strippedCopy[key];
+                                if(_.isArray(value)){
+                                    let index = _.indexOf(value, defaults[key]);
+                                    value = value.splice(index, 1)[0];
+                                }
+                            }
+                        }
+                        stripped = strippedCopy;
+                    }
+                    return _(strippedCopy).map(this.decodeParam).flatten().value();
+                }
+                else {
+                    return _(params).map(this.decodeParam).flatten().value();
+                }
             }
         };
     }

@@ -30,6 +30,7 @@ import PromptDialog from './prompt-dialog';
 import directives from './directives';
 import features from './features/main';
 import orgAdminLookup from './org-admin-lookup/main';
+import limitPanels from './limit-panels/main';
 import 'angular-duration-format';
 
 export default
@@ -57,6 +58,7 @@ angular.module('shared', [listGenerator.name,
         filters.name,
         features.name,
         orgAdminLookup.name,
+        limitPanels.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])

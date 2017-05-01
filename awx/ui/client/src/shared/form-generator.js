@@ -1493,7 +1493,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if(this.mode === "edit"){
                         html += `<div id="${this.form.name}_tab" class="Form-tab" `;
                         html += this.form.detailsClick ? `ng-click="` + this.form.detailsClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit')" `;
-                        html += `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">` +
+                        let detailsTabSelected = this.form.activeEditState ? `$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState` : `$state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState`;
+                        html += `ng-class="{'is-selected': ${detailsTabSelected} }">` +
                             `${details}</div>`;
 
                         for (itm in this.form.related) {
@@ -1506,7 +1507,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 `aw-tip-placement="${collection.dataPlacement}" ` +
                                 `data-tip-watch="${collection.dataTipWatch}" `;
                             }
-                            html += `ng-class="{'is-selected' : $state.is('${this.form.activeEditState}.${itm}') || $state.is('${this.form.stateTree}.edit.${itm}') ` ;
+                            let relatedTabSelected = this.form.activeEditState ? `$state.includes('${this.form.activeEditState}.${itm}') || $state.includes('${this.form.stateTree}.edit.${itm}')` : `$state.includes('${this.form.stateTree}.edit.${itm}')`;
+                            html += `ng-class="{'is-selected' : ${relatedTabSelected}` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }

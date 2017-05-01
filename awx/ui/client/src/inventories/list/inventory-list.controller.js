@@ -23,8 +23,8 @@ function InventoriesList($scope, $rootScope, $location,
         $scope.canAdd = false;
 
         rbacUiControlService.canAdd('inventory')
-            .then(function(params) {
-                $scope.canAdd = params.canAdd;
+            .then(function(canAdd) {
+                $scope.canAddInventory = canAdd;
             });
 
         $scope.$watchCollection(list.name, function(){

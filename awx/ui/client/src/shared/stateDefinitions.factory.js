@@ -9,7 +9,8 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
-export default ['$injector', '$stateExtender', '$log', 'i18n', function($injector, $stateExtender, $log, i18n) {
+export default ['$injector', '$stateExtender', '$log', 'i18n',
+function($injector, $stateExtender, $log, i18n) {
     return {
         /**
         * @ngdoc method
@@ -89,6 +90,16 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     };
                 }
             }
+
+            let views = params.views ? params.views : {
+                '@': {
+                    // resolves to a variable property name:
+                    // 'templateUrl' OR 'templateProvider'
+                    [params.templates && params.templates.list ? 'templateUrl' : 'templateProvider']: generateTemplateBlock(),
+                    controller: params.controllers.list,
+                }
+            };
+
             state = $stateExtender.buildDefinition({
                 searchPrefix: list.iterator,
                 name: params.parent,
@@ -106,14 +117,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     ],
                     ListDefinition: () => list
                 },
-                views: {
-                    '@': {
-                        // resolves to a variable property name:
-                        // 'templateUrl' OR 'templateProvider'
-                        [params.templates && params.templates.list ? 'templateUrl' : 'templateProvider']: generateTemplateBlock(),
-                        controller: params.controllers.list,
-                    }
-                }
+                views: views
             });
             // allow passed-in params to override default resolve block
             if (params.resolve && params.resolve.list) {
@@ -242,7 +246,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
         generateFormListDefinitions: function(form, formStateDefinition, params) {
-
+            var that = this;
             function buildRbacUserTeamDirective(){
                 let states = [];
 
@@ -480,9 +484,10 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         ListDefinition: () => {
                             return list;
                         },
-                        inventorySourceData: ['$stateParams', 'GroupManageService', function($stateParams, GroupManageService) {
+                        inventorySourceData: ['$stateParams', //'GroupManageService',
+                        function($stateParams){ //, GroupManageService) {
                             if($stateParams.hasOwnProperty('group_id')){
-                                return GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
+                                return; //GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
                             }
                             else{
                                 return null;
@@ -503,10 +508,6 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         ]
                     }
                 });
-                // // appy any default search parameters in form definition
-                // if (field.search) {
-                //     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
-                // }
                 return state;
             }
 
@@ -553,26 +554,56 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
 
             function buildListNodes(field) {
                 let states = [];
-                if(field.iterator === 'notification'){
-                    states.push(buildNotificationState(field));
-                    states = _.flatten(states);
-                }
-                else{
-                    states.push(buildListDefinition(field));
-                    if (field.iterator === 'permission' && field.actions && field.actions.add) {
-                        if (form.name === 'user' || form.name === 'team'){
-                            states.push(buildRbacUserTeamDirective());
+                if(!field.skipGenerator) {
+                    if(field && (field.listState || field.addState || field.editState)){
+                        if(field && field.listState){
+                            states.push(field.listState(field, formStateDefinition));
+                            states = _.flatten(states);
                         }
-                        else {
-                            states.push(buildRbacResourceDirective());
+                        if(field && field.addState){
+                            let formState = field.addState(field, formStateDefinition, params);
+                            states.push(formState);
+                            // intent below is to add lookup states for any add-forms
+                            if(field.includeForm){
+                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                                states.push(that.generateLookupNodes(form, formState));
+                            }
+                            states = _.flatten(states);
+                        }
+                        if(field && field.editState){
+                            let formState = field.editState(field, formStateDefinition, params);
+                            states.push(formState);
+                            // intent below is to add lookup states for any edit-forms
+                            if(field.includeForm){
+                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
+                                states.push(that.generateLookupNodes(form, formState));
+                                states.push(that.generateFormListDefinitions(form, formState, params));
+                            }
+                            states = _.flatten(states);
                         }
                     }
-                    else if (field.iterator === 'user' && field.actions && field.actions.add) {
-                        if(form.name === 'team' || form.name === 'organization') {
-                            states.push(buildRbacUserDirective());
+                    else if(field.iterator === 'notification'){
+                        states.push(buildNotificationState(field));
+                        states = _.flatten(states);
+                    }
+                    else{
+                        states.push(buildListDefinition(field));
+                        if (field.iterator === 'permission' && field.actions && field.actions.add) {
+                            if (form.name === 'user' || form.name === 'team'){
+                                states.push(buildRbacUserTeamDirective());
+                            }
+                            else {
+                                states.push(buildRbacResourceDirective());
+                            }
+                        }
+                        else if (field.iterator === 'user' && field.actions && field.actions.add) {
+                            if(form.name === 'team' || form.name === 'organization') {
+                                states.push(buildRbacUserDirective());
+                            }
                         }
                     }
                 }
+
                 states = _.flatten(states);
                 return states;
             }
@@ -651,6 +682,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                 if (field.search) {
                     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
                 }
+
                 return state;
             }
             return _(form.related).map(buildListNodes).flatten().value();
@@ -683,6 +715,11 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         page_size: '5',
                         role_level: 'admin_role',
                         organization: null
+                    };
+                }
+                else if(field.sourceModel === 'host') {
+                    params = {
+                        page_size: '5'
                     };
                 }
                 else {

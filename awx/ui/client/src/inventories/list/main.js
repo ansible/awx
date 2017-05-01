@@ -7,5 +7,5 @@
 import controller from './inventory-list.controller';
 
 export default
-angular.module('inventoryList', [])
+angular.module('InventoryList', [])
     .controller('InventoryListController', controller);

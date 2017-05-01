@@ -1,5 +1,5 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2017 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
@@ -10,8 +10,33 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n', function(i18n) {
-        return {
+export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
+    'buildGroupsEditState', 'buildHostListState', 'buildHostAddState',
+    'buildHostEditState', 'buildSourcesListState', 'buildSourcesAddState',
+    'buildSourcesEditState', 'buildInventoryCompletedJobsState',
+    'InventoryCompletedJobsList',
+function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
+    buildHostListState, buildHostAddState, buildHostEditState,
+    buildSourcesListState, buildSourcesAddState,buildSourcesEditState,
+    buildInventoryCompletedJobsState, InventoryCompletedJobsList) {
+
+    var completed_jobs_object = {
+        name: 'completed_jobs',
+        index: false,
+        basePath: "unified_jobs",
+        include: "InventoryCompletedJobsList",
+        title: i18n._('Completed Jobs'),
+        iterator: 'completed_job',
+        generateList: true,
+        listState: buildInventoryCompletedJobsState,
+        search: {
+            "or__job__inventory": ''
+        }
+    };
+    let clone = _.clone(InventoryCompletedJobsList);
+    completed_jobs_object = angular.extend(clone, completed_jobs_object);
+
+    return {
 
         addTitle: i18n._('NEW INVENTORY'),
         editTitle: '{{ inventory_name }}',
@@ -50,7 +75,8 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
-            variables: {
+            inventory_variables: {
+                realName: 'variables',
                 label: i18n._('Variables'),
                 type: 'textarea',
                 class: 'Form-formGroup--fullWidth',
@@ -90,7 +116,7 @@ export default ['i18n', function(i18n) {
                 name: 'permissions',
                 awToolTip: i18n._('Please save before assigning permissions'),
                 dataPlacement: 'top',
-                basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/access_list/',
+                basePath: 'api/v2/inventories/{{$stateParams.inventory_id}}/access_list/',
                 type: 'collection',
                 title: i18n._('Permissions'),
                 iterator: 'permission',
@@ -112,6 +138,7 @@ export default ['i18n', function(i18n) {
                 },
                 fields: {
                     username: {
+                        key: true,
                         label: i18n._('User'),
                         linkBase: 'users',
                         class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
@@ -129,7 +156,36 @@ export default ['i18n', function(i18n) {
                         class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                     }
                 }
-            }
+            },
+            groups: {
+                name: 'groups',
+                include: "GroupList",
+                title: i18n._('Groups'),
+                iterator: 'group',
+                listState: buildGroupsListState,
+                addState: buildGroupsAddState,
+                editState: buildGroupsEditState
+            },
+            hosts: {
+                name: 'hosts',
+                include: "RelatedHostsListDefinition",
+                title: i18n._('Hosts'),
+                iterator: 'host',
+                listState: buildHostListState,
+                addState: buildHostAddState,
+                editState: buildHostEditState
+            },
+            inventory_sources: {
+                name: 'inventory_sources',
+                include: "SourcesListDefinition",
+                includeForm: "SourcesFormDefinition",
+                title: i18n._('Sources'),
+                iterator: 'inventory_source',
+                listState: buildSourcesListState,
+                addState: buildSourcesAddState,
+                editState: buildSourcesEditState
+            },
+            completed_jobs: completed_jobs_object
         }
 
     };}];

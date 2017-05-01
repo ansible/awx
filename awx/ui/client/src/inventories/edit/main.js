@@ -7,5 +7,5 @@
 import controller from './inventory-edit.controller';
 
 export default
-    angular.module('inventoryEdit', [])
+    angular.module('InventoryEdit', [])
     .controller('InventoryEditController', controller);
