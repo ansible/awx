@@ -50,7 +50,6 @@ export default {
             ngDisabled: '!groupsSelected',
             ngClick: 'setAdhocPattern()',
             awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single group or a selection of multiple groups.",
-            dataTipWatch: "adhocCommandTooltip",
             dataPlacement: 'top',
             actionClass: 'btn List-buttonDefault',
             buttonContent: 'RUN COMMANDS',

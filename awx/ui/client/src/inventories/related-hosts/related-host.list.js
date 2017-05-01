@@ -88,7 +88,6 @@ export default {
             ngDisabled: '!hostsSelected',
             ngClick: 'setAdhocPattern()',
             awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single host or a selection of multiple hosts.",
-            dataTipWatch: "adhocCommandTooltip",
             dataPlacement: 'top',
             actionClass: 'btn List-buttonDefault',
             buttonContent: 'RUN COMMANDS',

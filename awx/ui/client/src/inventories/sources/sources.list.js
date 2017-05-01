@@ -47,24 +47,6 @@ export default {
             actionClass: 'btn List-buttonDefault',
             buttonContent: 'REFRESH'
         },
-        // launch: {
-        //     mode: 'all',
-        //     // $scope.$parent is governed by InventoryManageController,
-        //     ngDisabled: '!$parent.groupsSelected && !$parent.hostsSelected',
-        //     ngClick: '$parent.setAdhocPattern()',
-        //     awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.",
-        //     dataTipWatch: "adhocCommandTooltip",
-        //     actionClass: 'btn List-buttonDefault',
-        //     buttonContent: 'RUN COMMANDS',
-        //     showTipWhenDisabled: true,
-        //     tooltipInnerClass: "Tooltip-wide",
-        //     ngShow: 'canAdhoc'
-        //     // TODO: set up a tip watcher and change text based on when
-        //     // things are selected/not selected.  This is started and
-        //     // commented out in the inventory controller within the watchers.
-        //     // awToolTip: "{{ adhocButtonTipContents }}",
-        //     // dataTipWatch: "adhocButtonTipContents"
-        // },
         create: {
             mode: 'all',
             ngClick: "createSource()",
