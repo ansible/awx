@@ -7,10 +7,11 @@
     align-items: flex-start;
 }
 
-.LabelList-tagContainer,
+
+.LabelList-tagContainer, 
 .LabelList-seeMoreLess {
     display: flex;
-    max-width: 100%;
+    max-width: 200px;
 }
 
 .LabelList-tag {
@@ -22,9 +23,6 @@
     background-color: @default-list-header-bg;
     margin-right: 5px;
     max-width: 100%;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
 }
 
 .LabelList-seeMoreLess {
@@ -85,4 +83,10 @@
 
 .LabelList-deleteContainer:hover > .LabelList-tagDelete {
     color: @default-bg;
+}
+
+@media (max-width: 1200px) {
+    .List-tableCell.col-md-4 {
+        padding-left: 40px;
+    }
 }

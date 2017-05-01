@@ -50,7 +50,7 @@ export default
 
                     scope.seeLess = function() {
                         // Trim the labels array back down to 10 items
-                        scope.labels = scope.labels.slice(0, 10);
+                        scope.labels = scope.labels.slice(0, 5);
                         // Re-set the seeMoreInteractive flag so that the "See More" will be displayed
                         scope.seeMoreInactive = true;
                     };
@@ -95,7 +95,7 @@ export default
                         // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
                         // array will get set initially and then never be updated as labels are removed
                         if (scope[scope.$parent.list.iterator].summary_fields.labels){
-                            scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results;
+                            scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results.slice(0, 5);
                             scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
                         }
                         else{
