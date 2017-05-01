@@ -66,8 +66,15 @@ export default ['$stateExtender', 'templateUrl', '$injector',
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
                         }
                     ],
+                    host: ['$stateParams', 'HostManageService', function($stateParams, HostManageService) {
+                        if($stateParams.host_id){
+                            return HostManageService.get({ id: $stateParams.host_id }).then(function(res) {
+                                return res.data.results[0];
+                            });
+                        }
+                    }],
                     inventoryData: ['InventoryManageService', '$stateParams', 'host', function(InventoryManageService, $stateParams, host) {
-                        var id = ($stateParams.inventory_id) ? $stateParams.inventory_id : host.data.summary_fields.inventory.id;
+                        var id = ($stateParams.inventory_id) ? $stateParams.inventory_id : host.summary_fields.inventory.id;
                         return InventoryManageService.getInventory(id).then(res => res.data);
                     }]
                 }
