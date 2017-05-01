@@ -317,7 +317,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     #
     @property
     def needs_ssh_password(self):
-        return self.kind == 'machine' and self.password == 'ASK'
+        return self.kind == 'ssh' and self.password == 'ASK'
 
     @property
     def has_encrypted_ssh_key_data(self):
@@ -336,17 +336,17 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def needs_ssh_key_unlock(self):
-        if self.kind == 'machine' and self.ssh_key_unlock in ('ASK', ''):
+        if self.kind == 'ssh' and self.ssh_key_unlock in ('ASK', ''):
             return self.has_encrypted_ssh_key_data
         return False
 
     @property
     def needs_become_password(self):
-        return self.kind == 'machine' and self.become_password == 'ASK'
+        return self.kind == 'ssh' and self.become_password == 'ASK'
 
     @property
     def needs_vault_password(self):
-        return self.kind == 'machine' and self.vault_password == 'ASK'
+        return self.kind == 'vault' and self.vault_password == 'ASK'
 
     @property
     def passwords_needed(self):
@@ -396,7 +396,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             raise ValidationError(_('Credential cannot be assigned to both a user and team.'))
 
     def _password_field_allows_ask(self, field):
-        return bool(self.kind == 'machine' and field != 'ssh_key_data')
+        return field in self.credential_type.askable_fields
 
     def save(self, *args, **kwargs):
         inputs_before = {}
@@ -472,7 +472,8 @@ class CredentialType(CommonModelNameNotUnique):
         unique_together = (('name', 'kind'),)
 
     KIND_CHOICES = (
-        ('machine', _('Machine')),
+        ('ssh', _('SSH')),
+        ('vault', _('Vault')),
         ('net', _('Network')),
         ('scm', _('Source Control')),
         ('cloud', _('Cloud'))
@@ -513,6 +514,13 @@ class CredentialType(CommonModelNameNotUnique):
             if field.get('secret', False) is True
         ]
 
+    @property
+    def askable_fields(self):
+        return [
+            field['id'] for field in self.inputs.get('fields', [])
+            if field.get('ask_at_runtime', False) is True
+        ]
+
     @classmethod
     def default(cls, f):
         func = functools.partial(f, cls)
@@ -534,15 +542,9 @@ class CredentialType(CommonModelNameNotUnique):
         requirements = {}
         if kind == 'ssh':
             if 'vault_password' in data:
-                requirements.update(dict(
-                    kind='machine',
-                    name='Vault'
-                ))
+                requirements['kind'] = 'vault'
             else:
-                requirements.update(dict(
-                    kind='machine',
-                    name='SSH'
-                ))
+                requirements['kind'] = 'ssh'
         elif kind in ('net', 'scm'):
             requirements['kind'] = kind
         elif kind in kind_choices:
@@ -643,7 +645,7 @@ class CredentialType(CommonModelNameNotUnique):
 @CredentialType.default
 def ssh(cls):
     return cls(
-        kind='machine',
+        kind='ssh',
         name='SSH',
         managed_by_tower=True,
         inputs={
@@ -724,7 +726,7 @@ def scm(cls):
 @CredentialType.default
 def vault(cls):
     return cls(
-        kind='machine',
+        kind='vault',
         name='Vault',
         managed_by_tower=True,
         inputs={

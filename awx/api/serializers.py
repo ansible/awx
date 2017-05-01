@@ -318,15 +318,6 @@ class BaseSerializer(serializers.ModelSerializer):
 
                     fval = getattr(fkval, field, None)
 
-                    # TODO: remove when API v1 is removed
-                    if all([
-                        self.version == 1,
-                        'credential' in fk,
-                        field == 'kind',
-                        fval == 'machine'
-                    ]):
-                        fval = 'ssh'
-
                     if fval is None and field == 'type':
                         if isinstance(fkval, PolymorphicModel):
                             fkval = fkval.get_real_instance()
@@ -1883,9 +1874,8 @@ class CredentialSerializer(BaseSerializer):
 
         # TODO: remove when API v1 is removed
         if self.version == 1:
-            if value.get('kind') == 'machine':
+            if value.get('kind') == 'vault':
                 value['kind'] = 'ssh'
-
             for field in V1Credential.PASSWORD_FIELDS:
                 if field in value and force_text(value[field]).startswith('$encrypted$'):
                     value[field] = '$encrypted$'
