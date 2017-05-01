@@ -76,43 +76,10 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             } else {
                 params.source = null;
             }
-            // switch (source) {
-            //     // no inventory source set, just create a new group
-            //     // '' is the value supplied for Manual source type
-            //     case null || '':
-            //         GroupManageService.post(group).then(res => {
-            //             // associate
-            //             if ($stateParams.group) {
-            //                 return GroupManageService.associateGroup(res.data, _.last($stateParams.group))
-            //                     .then(() => $state.go('^', null, { reload: true }));
-            //             } else {
-            //                 $state.go('^', null, { reload: true });
-            //             }
-            //         });
-            //         break;
-            //         // create a new group and create/associate an inventory source
-            //         // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
-            //     default:
-                    // GroupManageService.post(group)
-                    //     // associate to group
-                    //     .then(res => {
-                    //         if ($stateParams.group) {
-                    //             GroupManageService.associateGroup(res.data, _.last($stateParams.group));
-                    //             return res;
-                    //         } else {
-                    //             return res; }
-                    //         // pass the original POST response and not the association response
-                    //     })
-                    //     .then(res => GroupManageService.putInventorySource(
-                    //         // put the received group ID into inventory source payload
-                    //         // and pass the related endpoint
-                    //         _.assign(params, { group: res.data.id }), res.data.related.inventory_source))
-                    //     .then(res => $state.go('inventoryManage.editGroup', { group_id: res.data.group }, { reload: true }));
-                    SourcesService.post(params).then(function(){
-                        $state.go('^.edit', null, {reload: true});
-                    });
-            //         break;
-            // }
+            SourcesService.post(params).then(function(res){
+                let inventory_source_id = res.data.id;
+                $state.go('^.edit', {inventory_source_id: inventory_source_id}, {reload: true});
+            });
         };
         $scope.sourceChange = function(source) {
             source = source.value;
