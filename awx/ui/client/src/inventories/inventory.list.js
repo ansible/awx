@@ -22,18 +22,12 @@ export default ['i18n', function(i18n) {
         fields: {
             status: {
                 label: '',
-                columnClass: 'List-staticColumn--mediumStatus',
+                columnClass: 'col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
                 nosort: true,
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
                 icons: [{
-                    icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
-                    awToolTip: "{{ inventory.syncTip }}",
-                    awTipPlacement: "right",
-                    ngClick: "showGroupSummary($event, inventory.id)",
-                    ngClass: "inventory.launch_class"
-                },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
@@ -43,7 +37,7 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
+                columnClass: 'col-md-5 col-sm-4 col-xs-6 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
                 awToolTip: "{{ inventory.description }}",
                 awTipPlacement: "top",
@@ -56,7 +50,7 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-5 col-sm-3 hidden-xs'
+                columnClass: 'col-md-4 col-sm-2 hidden-xs'
             }
         },
 
