@@ -13,7 +13,7 @@
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup) {$scope.$state = $state;
+    ParseVariableString, $state, OrgAdminLookup) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
