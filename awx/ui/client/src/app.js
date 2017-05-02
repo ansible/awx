@@ -7,6 +7,7 @@
 // Vendor dependencies
 import 'jquery';
 import 'angular';
+import 'angular-resource';
 import 'angular-gettext';
 import 'bootstrap';
 import 'jquery-ui';
@@ -72,6 +73,7 @@ import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
 
 import '../components';
+import '../models';
 import './credentials';
 
 var tower = angular.module('Tower', [
@@ -132,7 +134,10 @@ var tower = angular.module('Tower', [
     'PromptDialog',
     'AWDirectives',
     'features',
-    'at.components',
+
+    'ngResource',
+    'at.component',
+    'at.model',
     'at.feature.credentials'
 ])
 

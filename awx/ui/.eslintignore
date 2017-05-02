@@ -13,4 +13,5 @@ tests
 client/**/*.js
 test
 
-!client/components/**/*.js
+!client/component/**/*.js
+!client/model/**/*.js

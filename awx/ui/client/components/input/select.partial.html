@@ -1,0 +1,18 @@
+<div class="form-group">
+    <label class="at-Input-label">
+        <span ng-if="config.required" class="at-Input-label--required">*</span>
+        <span>{{ config.label }}</span>
+    </label>
+    <select class="form-control at-Input at-Dropdown" ng-model="config.input"
+            ng-mousedown="opened = opened || true"
+            ng-class="{ 'at-Input--placeholder': input === undefined && !opened }">
+        <option class="at-Dropdown-option--placeholder" value="" disabled selected>
+            SELECT A TYPE
+        </option>
+        <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
+            <option ng-repeat="item in group.data" value="{{ item.id }}">
+                {{ item.name }}
+            </option>
+        </optgroup>
+    </select>
+</div>

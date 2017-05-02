@@ -1,5 +1,7 @@
 import badge from './badge/badge.directive';
 import inputSearch from './input/search.directive';
+import inputSelect from './input/select.directive';
+import inputText from './input/text.directive';
 import panel from './panel/panel.directive';
 import panelHeading from './panel/heading.directive';
 import panelBody from './panel/body.directive';
@@ -10,6 +12,8 @@ angular
     .module('at.components', [])
     .directive('atBadge', badge)
     .directive('atInputSearch', inputSearch)
+    .directive('atInputSelect', inputSelect)
+    .directive('atInputText', inputText)
     .directive('atPanel', panel)
     .directive('atPanelHeading', panelHeading)
     .directive('atPanelBody', panelBody)

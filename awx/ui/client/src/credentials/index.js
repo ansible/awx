@@ -1,8 +1,9 @@
 import CredentialList from './credentials.list.js';
 import ListController from './list/credentials-list.controller';
+import AddController from './add-credentials.controller.js';
 import { N_ } from '../i18n';
 
-function routes ($stateExtenderProvider) {
+function config ($stateExtenderProvider) {
     let stateExtender = $stateExtenderProvider.$get();
 
     stateExtender.addState({
@@ -46,10 +47,15 @@ function routes ($stateExtenderProvider) {
         },
         views: {
             'add@credentials': {
-                templateProvider: function() {
-                    return '<span>test-add</span>';
-                }
+                templateUrl: '/static/views/credentials/add-credentials.view.html',
+                controller: AddController,
+                controllerAs: 'vm'
             }
+        },
+        resolve: {
+            credentialType: ['CredentialType', CredentialType => {
+                return CredentialType.get().then(() => CredentialType);
+            }]
         }
     });
 
@@ -69,12 +75,13 @@ function routes ($stateExtenderProvider) {
     });
 }
 
-routes.$inject = [
+config.$inject = [
   '$stateExtenderProvider'
 ];
 
 angular
     .module('at.feature.credentials', [])
-    .config(routes)
+    .config(config)
     .factory('CredentialList', CredentialList)
-    .controller('ListController', ListController);
+    .controller('ListController', ListController)
+    .controller('AddController', AddController);

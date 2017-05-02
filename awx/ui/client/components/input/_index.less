@@ -1,12 +1,35 @@
-.at-InputSearch-field {
+.at-Input {
     .at-placeholder(@at-gray-dark);
 
-    border-color: @at-gray-light;
-    background-color: @at-white; 
-    font-size: @at-font-md;
+    background: @at-white;
+    border-radius: @at-border-radius-md;
+    color: @at-gray-darkest;
+
+    &, &:focus, &:active {
+        border-color: @at-gray-light;
+    }
 }
 
-.at-InputSearch-field:focus {
-    border-color: @at-gray-light;
+.at-Input-label {
+    color: @at-gray-dark;
+    font-size: small;
+    font-weight: @at-font-weight-sm;
+    text-transform: uppercase;
 }
 
+.at-Input-label--required {
+    color: @at-danger;
+    font-weight: @at-font-weight-lg;
+    font-size: @at-font-lg;
+    line-height: 0.7;
+}
+
+.at-Input--placeholder {
+    color: @at-gray;
+}
+
+.at-Dropdown-option--placeholder {
+    &[value=""] {
+        display: none;
+    }
+}
