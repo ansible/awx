@@ -18,6 +18,7 @@ import configurationGithubTeamForm from './auth-form/sub-forms/auth-github-team.
 import configurationGoogleForm from './auth-form/sub-forms/auth-google-oauth2.form';
 import configurationLdapForm from './auth-form/sub-forms/auth-ldap.form.js';
 import configurationRadiusForm from './auth-form/sub-forms/auth-radius.form.js';
+import configurationTacacsForm from './auth-form/sub-forms/auth-tacacs.form.js';
 import configurationSamlForm from './auth-form/sub-forms/auth-saml.form';
 
 //system sub-forms
@@ -39,6 +40,7 @@ angular.module('configuration', [])
     .factory('configurationGoogleForm', configurationGoogleForm)
     .factory('configurationLdapForm', configurationLdapForm)
     .factory('configurationRadiusForm', configurationRadiusForm)
+    .factory('configurationTacacsForm', configurationTacacsForm)
     .factory('configurationSamlForm', configurationSamlForm)
     //system forms
     .factory('systemActivityStreamForm', systemActivityStreamForm)

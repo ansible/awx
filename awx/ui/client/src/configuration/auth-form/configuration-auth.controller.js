@@ -18,6 +18,7 @@ export default [
     'configurationGoogleForm',
     'configurationLdapForm',
     'configurationRadiusForm',
+    'configurationTacacsForm',
     'configurationSamlForm',
     'ConfigurationService',
     'ConfigurationUtils',
@@ -39,6 +40,7 @@ export default [
         configurationGoogleForm,
         configurationLdapForm,
         configurationRadiusForm,
+        configurationTacacsForm,
         configurationSamlForm,
         ConfigurationService,
         ConfigurationUtils,
@@ -107,6 +109,7 @@ export default [
             {label: i18n._('Google OAuth2'), value: 'google_oauth'},
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
+            {label: i18n._('TACACS+'), value: 'tacacs'},
             {label: i18n._('SAML'), value: 'saml'}
         ];
 
@@ -143,6 +146,10 @@ export default [
                 formDef: configurationRadiusForm,
                 id: 'auth-radius-form',
                 name: 'radius'
+            }, {
+                formDef: configurationTacacsForm,
+                id: 'auth-tacacs-form',
+                name: 'tacacs'
             }, {
                 formDef: configurationSamlForm,
                 id: 'auth-saml-form',
@@ -258,8 +265,31 @@ export default [
             }
         }
 
+        function populateTacacsProtocol(flag){
+            if($scope.$parent.TACACSPLUS_AUTH_PROTOCOL !== null) {
+                $scope.$parent.TACACSPLUS_AUTH_PROTOCOL = _.find($scope.$parent.TACACSPLUS_AUTH_PROTOCOL_options, { value: $scope.$parent.TACACSPLUS_AUTH_PROTOCOL });
+            }
+
+            if(flag !== undefined){
+                dropdownRendered = flag;
+            }
+
+            if(!dropdownRendered) {
+                dropdownRendered = true;
+                CreateSelect2({
+                    element: '#configuration_tacacs_template_TACACSPLUS_AUTH_PROTOCOL',
+                    multiple: false,
+                    placeholder: i18n._('Select group types'),
+                });
+            }
+        }
+
         $scope.$on('AUTH_LDAP_GROUP_TYPE_populated', function(e, data, flag) {
             populateLDAPGroupType(flag);
+        });
+
+        $scope.$on('TACACSPLUS_AUTH_PROTOCOL_populated', function(e, data, flag) {
+            populateTacacsProtocol(flag);
         });
 
         $scope.$on('codeMirror_populated', function(e, key) {
@@ -269,6 +299,7 @@ export default [
         $scope.$on('populated', function() {
             startCodeMirrors();
             populateLDAPGroupType(false);
+            populateTacacsProtocol(false);
         });
 
         angular.extend(authVm, {
