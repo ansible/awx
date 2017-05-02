@@ -20,7 +20,11 @@ from django.utils.timezone import now
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.fields import ImplicitRoleField, JSONBField
+from awx.main.fields import (
+    ImplicitRoleField,
+    JSONBField,
+    DynamicFilterField,
+)
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
@@ -41,6 +45,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     '''
     an inventory source contains lists and hosts.
     '''
+
+    KIND_CHOICES = [
+        ('standard', _('Hosts have a direct link to this inventory.')),
+        ('dynamic', _('Hosts for inventory generated using the host_filter property.')),
+    ]
 
     class Meta:
         app_label = 'main'
@@ -99,6 +108,20 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         editable=False,
         help_text=_('Number of external inventory sources in this inventory with failures.'),
     )
+    kind = models.CharField(
+        max_length=32,
+        choices=KIND_CHOICES,
+        blank=False,
+        default='standard',
+        help_text=_('Kind of inventory being represented.'),
+    )
+    host_filter = DynamicFilterField(
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_('Filter that will be applied to the hosts of this inventory.'),
+    )
+
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
     )

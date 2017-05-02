@@ -72,6 +72,8 @@ from awx.main.utils import * # noqa
 from awx.main.utils import (
     callback_filter_out_ansible_extra_vars
 )
+from awx.main.utils.filters import DynamicFilter
+
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
@@ -79,7 +81,6 @@ from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
-from awx.main.fields import DynamicFilterField
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1685,6 +1686,15 @@ class InventoryDetail(RetrieveUpdateDestroyAPIView):
     model = Inventory
     serializer_class = InventoryDetailSerializer
 
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        kind = self.request.data.get('kind') or kwargs.get('kind')
+
+        # Do not allow changes to an Inventory kind.
+        if kind is not None and obj.kind != kind:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+        return super(InventoryDetail, self).update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         with ignore_inventory_computed_fields():
             with ignore_inventory_group_removal():
@@ -1767,7 +1777,7 @@ class HostList(ListCreateAPIView):
         qs = super(HostList, self).get_queryset()
         filter_string = self.request.query_params.get('host_filter', None)
         if filter_string:
-            filter_q = DynamicFilterField.filter_string_to_q(filter_string)
+            filter_q = DynamicFilter.query_from_string(filter_string)
             qs = qs.filter(filter_q)
         return qs
 
