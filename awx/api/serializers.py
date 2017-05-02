@@ -1829,6 +1829,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
 class CredentialTypeSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
+    managed_by_tower = serializers.ReadOnlyField()
 
     class Meta:
         model = CredentialType
@@ -1836,6 +1837,9 @@ class CredentialTypeSerializer(BaseSerializer):
                   'injectors')
 
     def validate(self, attrs):
+        if self.instance and self.instance.managed_by_tower:
+            raise serializers.ValidationError(
+                {"detail": _("Modifications not allowed for credential types managed by Tower")})
         fields = attrs.get('inputs', {}).get('fields', [])
         for field in fields:
             if field.get('ask_at_runtime', False):

@@ -821,14 +821,10 @@ class CredentialTypeAccess(BaseAccess):
     def can_use(self, obj):
         return True
 
-    def can_add(self, data):
-        return self.user.is_superuser
-
-    def can_change(self, obj, data):
-        return self.user.is_superuser and not obj.managed_by_tower
-
-    def can_delete(self, obj):
-        return self.user.is_superuser and not obj.managed_by_tower
+    def get_method_capability(self, method, obj, parent_obj):
+        if obj.managed_by_tower:
+            return False
+        return super(CredentialTypeAccess, self).get_method_capability(method, obj, parent_obj)
 
 
 class CredentialAccess(BaseAccess):
@@ -2138,7 +2134,7 @@ class ActivityStreamAccess(BaseAccess):
         '''
         qs = self.model.objects.all()
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
-                                 'inventory_update', 'credential', 'team', 'project', 'project_update',
+                                 'inventory_update', 'credential', 'credential_type', 'team', 'project', 'project_update',
                                  'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
                                  'schedule', 'custom_inventory_script', 'unified_job_template',
