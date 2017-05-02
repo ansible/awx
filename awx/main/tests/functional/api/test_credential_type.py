@@ -110,8 +110,7 @@ def test_create_with_valid_inputs(get, post, admin):
                 'id': 'api_token',
                 'label': 'API Token',
                 'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
+                'secret': True
             }]
         },
         'injectors': {}
@@ -124,7 +123,6 @@ def test_create_with_valid_inputs(get, post, admin):
     assert len(fields) == 1
     assert fields[0]['id'] == 'api_token'
     assert fields[0]['label'] == 'API Token'
-    assert fields[0]['ask_at_runtime'] is True
     assert fields[0]['secret'] is True
     assert fields[0]['type'] == 'string'
 
@@ -142,7 +140,8 @@ def test_create_with_invalid_inputs_xfail(post, admin):
 
 
 @pytest.mark.django_db
-def test_create_with_valid_injectors(get, post, admin):
+def test_ask_at_runtime_xfail(get, post, admin):
+    # ask_at_runtime is only supported by the built-in SSH and Vault types
     response = post(reverse('api:credential_type_list'), {
         'kind': 'cloud',
         'name': 'MyCloud',
@@ -153,6 +152,31 @@ def test_create_with_valid_injectors(get, post, admin):
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
+            }]
+        },
+        'injectors': {
+            'env': {
+                'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'
+            }
+        }
+    }, admin)
+    assert response.status_code == 400
+
+    response = get(reverse('api:credential_type_list'), admin)
+    assert response.data['count'] == 0
+
+
+@pytest.mark.django_db
+def test_create_with_valid_injectors(get, post, admin):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'MyCloud',
+        'inputs': {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': True
             }]
         },
         'injectors': {
@@ -193,8 +217,7 @@ def test_create_with_undefined_template_variable_xfail(post, admin):
                 'id': 'api_token',
                 'label': 'API Token',
                 'type': 'string',
-                'secret': True,
-                'ask_at_runtime': True
+                'secret': True
             }]
         },
         'injectors': {

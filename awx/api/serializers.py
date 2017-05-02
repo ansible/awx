@@ -1823,6 +1823,13 @@ class CredentialTypeSerializer(BaseSerializer):
         fields = ('*', 'kind', 'name', 'managed_by_tower', 'inputs',
                   'injectors')
 
+    def validate(self, attrs):
+        fields = attrs.get('inputs', {}).get('fields', [])
+        for field in fields:
+            if field.get('ask_at_runtime', False):
+                raise serializers.ValidationError({"detail": _("'ask_at_runtime' is not supported for custom credentials.")})
+        return super(CredentialTypeSerializer, self).validate(attrs)
+
 
 # TODO: remove when API v1 is removed
 @six.add_metaclass(BaseSerializerMetaclass)
