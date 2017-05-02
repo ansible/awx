@@ -24,7 +24,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.models.mixins import ResourceMixin
 
-__all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
+__all__ = ['Organization', 'Team', 'Profile', 'AuthToken']
 
 
 class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
@@ -36,21 +36,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
 
-    deprecated_users = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='deprecated_organizations',
-    )
-    deprecated_admins = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='deprecated_admin_of_organizations',
-    )
-    deprecated_projects = models.ManyToManyField(
-        'Project',
-        blank=True,
-        related_name='deprecated_organizations',
-    )
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )
@@ -82,22 +67,12 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
 
-    deprecated_users = models.ManyToManyField(
-        'auth.User',
-        blank=True,
-        related_name='deprecated_teams',
-    )
     organization = models.ForeignKey(
         'Organization',
         blank=False,
         null=False,
         on_delete=models.CASCADE,
         related_name='teams',
-    )
-    deprecated_projects = models.ManyToManyField(
-        'Project',
-        blank=True,
-        related_name='deprecated_teams',
     )
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
@@ -111,64 +86,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)
-
-
-class Permission(CommonModelNameNotUnique):
-    '''
-    A permission allows a user, project, or team to be able to use an inventory source.
-
-    NOTE: This class is deprecated, permissions and access is to be handled by
-    our new RBAC system. This class should be able to be safely removed after a 3.0.0
-    migration. - anoek 2016-01-28
-    '''
-
-    class Meta:
-        app_label = 'main'
-
-    # permissions are granted to either a user or a team:
-    user            = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
-    team            = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
-
-    # to be used against a project or inventory (or a project and inventory in conjunction):
-    project = models.ForeignKey(
-        'Project',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='permissions',
-    )
-    inventory       = models.ForeignKey('Inventory', null=True, on_delete=models.SET_NULL, related_name='permissions')
-
-    # permission system explanation:
-    #
-    # for example, user A on inventory X has write permissions                 (PERM_INVENTORY_WRITE)
-    #              team C on inventory X has read permissions                  (PERM_INVENTORY_READ)
-    #              user A can create job templates                             (PERM_JOBTEMPLATE_CREATE)
-    #              team C on inventory X and project Y has launch permissions  (PERM_INVENTORY_DEPLOY)
-    #              team C on inventory X and project Z has dry run permissions (PERM_INVENTORY_CHECK)
-    #
-    # basically for launching, permissions can be awarded to the whole inventory source or just the inventory source
-    # in context of a given project.
-    #
-    # the project parameter is not used when dealing with READ, WRITE, or ADMIN permissions.
-
-    permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
-    run_ad_hoc_commands = models.BooleanField(default=False,
-                                              help_text=_('Execute Commands on the Inventory'))
-
-    def __unicode__(self):
-        return unicode("Permission(name=%s,ON(user=%s,team=%s),FOR(project=%s,inventory=%s,type=%s%s))" % (
-            self.name,
-            self.user,
-            self.team,
-            self.project,
-            self.inventory,
-            self.permission_type,
-            '+adhoc' if self.run_ad_hoc_commands else '',
-        ))
-
-    def get_absolute_url(self, request=None):
-        return reverse('api:permission_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class Profile(CreatedModifiedModel):

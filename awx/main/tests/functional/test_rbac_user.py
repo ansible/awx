@@ -1,11 +1,9 @@
 import pytest
 
-from django.apps import apps
 from django.test import TransactionTestCase
 
-from awx.main.migrations import _rbac as rbac
 from awx.main.access import UserAccess
-from awx.main.models import Role, User, Organization, Inventory
+from awx.main.models import User, Organization, Inventory
 
 
 @pytest.mark.django_db
@@ -44,28 +42,6 @@ class TestSysAuditorTransactional(TransactionTestCase):
 @pytest.mark.django_db
 def test_system_auditor_is_system_auditor(system_auditor):
     assert system_auditor.is_system_auditor
-
-
-@pytest.mark.django_db
-def test_user_admin(user_project, project, user):
-    username = unicode("\xc3\xb4", "utf-8")
-
-    joe = user(username, is_superuser = False)
-    admin = user('admin', is_superuser = True)
-    sa = Role.singleton('system_administrator')
-
-    # this should happen automatically with our signal
-    assert sa.members.filter(id=admin.id).exists() is True
-    sa.members.remove(admin)
-
-    assert sa.members.filter(id=joe.id).exists() is False
-    assert sa.members.filter(id=admin.id).exists() is False
-
-    rbac.migrate_users(apps, None)
-
-    # The migration should add the admin back in
-    assert sa.members.filter(id=joe.id).exists() is False
-    assert sa.members.filter(id=admin.id).exists() is True
 
 
 @pytest.mark.django_db
