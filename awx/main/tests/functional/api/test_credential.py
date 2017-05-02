@@ -34,6 +34,38 @@ def test_filter_by_v1_kind(get, admin, organization, kind, total):
 
 
 @pytest.mark.django_db
+def test_filter_by_v1_kind_with_vault(get, admin, organization):
+    CredentialType.setup_tower_managed_defaults()
+    cred = Credential(
+        credential_type=CredentialType.objects.get(kind='ssh'),
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'jim',
+            'password': u'secret'
+        }
+    )
+    cred.save()
+    cred = Credential(
+        credential_type=CredentialType.objects.get(kind='vault'),
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'vault_password': u'vault!'
+        }
+    )
+    cred.save()
+
+    response = get(
+        reverse('api:credential_list', kwargs={'version': 'v1'}),
+        admin,
+        QUERY_STRING='kind=ssh'
+    )
+    assert response.status_code == 200
+    assert response.data['count'] == 2
+
+
+@pytest.mark.django_db
 def test_custom_credentials_not_in_v1_api_list(get, admin, organization):
     """
     'Custom' credentials (those not managed by Tower) shouldn't be visible from

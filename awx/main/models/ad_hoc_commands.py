@@ -99,7 +99,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def clean_credential(self):
         cred = self.credential
-        if cred and cred.kind != 'machine':
+        if cred and cred.kind != 'ssh':
             raise ValidationError(
                 _('You must provide a machine / SSH credential.'),
             )

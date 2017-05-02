@@ -6,7 +6,7 @@ import re
 import json
 
 # Django
-from django.core.exceptions import FieldError, ValidationError, ObjectDoesNotExist
+from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
@@ -174,18 +174,6 @@ class FieldLookupBackend(BaseFilterBackend):
         except UnicodeEncodeError:
             raise ValueError("%r is not an allowed field name. Must be ascii encodable." % lookup)
 
-        # Make legacy v1 Credential fields work for backwards compatability
-        # TODO: remove after API v1 deprecation period
-        if model._meta.object_name == 'Credential' and lookup == 'kind':
-            try:
-                type_ = CredentialType.from_v1_kind(value)
-                if type_ is None:
-                    raise ParseError(_('cannot filter on kind %s') % value)
-                value = type_.pk
-                lookup = 'credential_type'
-            except ObjectDoesNotExist as e:
-                raise ParseError(_('cannot filter on kind %s') % value)
-
         field, new_lookup = self.get_field_from_lookup(model, lookup)
 
         # Type names are stored without underscores internally, but are presented and
@@ -276,6 +264,32 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key.startswith('not__'):
                     key = key[5:]
                     q_not = True
+
+                # Make legacy v1 Credential fields work for backwards compatability
+                # TODO: remove after API v1 deprecation period
+                #
+                # convert v1 `Credential.kind` queries to `Credential.credential_type__pk`
+                if queryset.model._meta.object_name == 'Credential' and key == 'kind':
+                    key = key.replace('kind', 'credential_type')
+
+                    if 'ssh' in values:
+                        # In 3.2, SSH and Vault became separate credential types, but in the v1 API,
+                        # they're both still "kind=ssh"
+                        # under the hood, convert `/api/v1/credentials/?kind=ssh` to
+                        # `/api/v1/credentials/?or__credential_type=<ssh_pk>&or__credential_type=<vault_pk>`
+                        values = set(values)
+                        values.add('vault')
+                        values = list(values)
+                        q_or = True
+
+                    for i, kind in enumerate(values):
+                        if kind == 'vault':
+                            type_ = CredentialType.objects.get(kind=kind)
+                        else:
+                            type_ = CredentialType.from_v1_kind(kind)
+                        if type_ is None:
+                            raise ParseError(_('cannot filter on kind %s') % kind)
+                        values[i] = type_.pk
 
                 # Convert value(s) to python and add to the appropriate list.
                 for value in values:
