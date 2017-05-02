@@ -1,15 +1,31 @@
 import pytest
 
-from awx.api.parsers import _remove_trailing_commas
+import StringIO
+from collections import OrderedDict
+
+from awx.api.parsers import JSONParser
 
 
 @pytest.mark.parametrize('input_, output', [
-    ('{"foo": "bar"}', '{"foo": "bar"}'),
-    ('{"foo": "bar",\n\t\r }', '{"foo": "bar"}'),
-    ('{"foo": ["alice", "bob"]}', '{"foo": ["alice","bob"]}'),
-    ('{"foo": ["alice", "bob",\n\t\r ]}', '{"foo": ["alice","bob"]}'),
-    ('{"foo": "\\"bar,\n\t\r }"}', '{"foo": "\\"bar,\n\t\r }"}'),
-    ('{"foo": ["\\"alice,\n\t\r ]", "bob"]}', '{"foo": ["\\"alice,\n\t\r ]","bob"]}'),
+    ('{"foo": "bar", "alice": "bob"}', OrderedDict([("foo", "bar"), ("alice", "bob")])),
+    ('{"foo": "bar", "alice": "bob",\n }', OrderedDict([("foo", "bar"), ("alice", "bob")])),
+    ('{"foo": ["alice", "bob"]}', {"foo": ["alice","bob"]}),
+    ('{"foo": ["alice", "bob",\n ]}', {"foo": ["alice","bob"]}),
+    ('{"foo": "\\"bar, \\n}"}', {"foo": "\"bar, \n}"}),
+    ('{"foo": ["\\"alice,\\n ]", "bob"]}', {"foo": ["\"alice,\n ]","bob"]}),
 ])
-def test_remove_trailing_commas(input_, output):
-    assert _remove_trailing_commas(input_) == output
+def test_trailing_comma_support(input_, output):
+    input_buffer = StringIO.StringIO()
+    input_buffer.write(input_)
+    input_buffer.seek(0)
+    assert JSONParser().parse(input_buffer) == output
+    input_buffer.close()
+
+
+def test_yaml_load_preserves_input_order():
+    input_ = '{"a": "b", "c": "d", "e": "f"}'
+    output = ('a', 'c', 'e')
+    input_buffer = StringIO.StringIO()
+    input_buffer.write(input_)
+    input_buffer.seek(0)
+    assert tuple(JSONParser().parse(input_buffer)) == output

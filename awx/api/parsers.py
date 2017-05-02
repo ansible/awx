@@ -1,6 +1,7 @@
 # Python
 from collections import OrderedDict
 import json
+import yaml
 
 # Django
 from django.conf import settings
@@ -12,24 +13,34 @@ from rest_framework import parsers
 from rest_framework.exceptions import ParseError
 
 
-def _remove_trailing_commas(data):
-    left = 0
-    right = 0
-    in_string = False
-    ret = []
-    while left != len(data):
-        if data[left] == ',' and not in_string:
-            while right != len(data) and data[right] in ',\n\t\r ':
-                right += 1
-            if right == len(data) or data[right] not in '}]':
-                ret.append(',')
+class OrderedDictLoader(yaml.SafeLoader):
+    """
+    This yaml loader is used to deal with current pyYAML (3.12) not supporting
+    custom object pairs hook. Remove it when new version adds that support.
+    """
+
+    def construct_mapping(self, node, deep=False):
+        if isinstance(node, yaml.nodes.MappingNode):
+            self.flatten_mapping(node)
         else:
-            if data[left] == '"' and (left - 1 >= 0 and data[left - 1] != '\\'):
-                in_string = not in_string
-            ret.append(data[left])
-            right += 1
-        left = right
-    return ''.join(ret)
+            raise yaml.constructor.ConstructorError(
+                None, None,
+                "expected a mapping node, but found %s" % node.id,
+                node.start_mark
+            )
+        mapping = OrderedDict()
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            try:
+                hash(key)
+            except TypeError, exc:
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping", node.start_mark,
+                    "found unacceptable key (%s)" % exc, key_node.start_mark
+                )
+            value = self.construct_object(value_node, deep=deep)
+            mapping[key] = value
+        return mapping
 
 
 class JSONParser(parsers.JSONParser):
@@ -45,10 +56,15 @@ class JSONParser(parsers.JSONParser):
         encoding = parser_context.get('encoding', settings.DEFAULT_CHARSET)
 
         try:
-            data = _remove_trailing_commas(stream.read().decode(encoding))
+            data = stream.read().decode(encoding)
             obj = json.loads(data, object_pairs_hook=OrderedDict)
             if not isinstance(obj, dict):
                 raise ParseError(_('JSON parse error - not a JSON object'))
             return obj
         except ValueError as exc:
-            raise ParseError(_('JSON parse error - %s') % six.text_type(exc))
+            try:
+                # PyYAML can also parse JSON-style input string, and support more flexible
+                # input grammar like trailing commas.
+                return yaml.load(data, OrderedDictLoader)
+            except Exception:
+                raise ParseError(_('JSON parse error - %s') % six.text_type(exc))
