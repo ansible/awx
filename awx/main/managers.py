@@ -27,9 +27,8 @@ class HostManager(models.Manager):
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
         qs = super(HostManager, self).get_queryset()
-        if hasattr(self, 'instance') and self.instance is not None:
-            if hasattr(self.instance, 'kind') and self.instance.kind == 'dynamic':
-                if hasattr(self.instance, 'host_filter') and self.instance.host_filter is not None:
+        if hasattr(self, 'instance') and isinstance(self.instance, models.Inventory):
+            if self.instance.kind == 'dynamic' and self.instance.host_filter is not None:
                     q = DynamicFilter.query_from_string(self.instance.host_filter)
                     # If we are using host_filters, disable the core_filters, this allows
                     # us to access all of the available Host entries, not just the ones associated

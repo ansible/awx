@@ -331,8 +331,10 @@ class ImplicitRoleField(models.ForeignKey):
 
 class DynamicFilterField(models.TextField):
     def get_prep_value(self, value):
-        if value is None:
-            return value
+        # Change any false value to none.
+        # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
+        if not value:
+            return None
         try:
             DynamicFilter().query_from_string(value)
         except RuntimeError, e:

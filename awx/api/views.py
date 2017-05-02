@@ -1686,6 +1686,15 @@ class InventoryDetail(RetrieveUpdateDestroyAPIView):
     model = Inventory
     serializer_class = InventoryDetailSerializer
 
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        kind = self.request.data.get('kind') or kwargs.get('kind')
+
+        # Do not allow changes to an Inventory kind.
+        if kind is not None and obj.kind != kind:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+        return super(InventoryDetail, self).update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         with ignore_inventory_computed_fields():
             with ignore_inventory_group_removal():
