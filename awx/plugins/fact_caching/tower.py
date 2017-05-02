@@ -100,6 +100,7 @@ class CacheModule(BaseCacheModule):
         packet = {
             'host': key,
             'inventory_id': os.environ['INVENTORY_ID'],
+            'job_id': os.getenv('JOB_ID', ''),
             'facts': facts,
             'date_key': self.date_key,
         }

@@ -48,9 +48,20 @@ class Migration(migrations.Migration):
             name='ansible_facts',
             field=awx.main.fields.JSONBField(default={}, help_text='Arbitrary JSON structure of most recent ansible_facts, per-host.', blank=True),
         ),
+        migrations.AddField(
+            model_name='job',
+            name='store_facts',
+            field=models.BooleanField(default=False, help_text='During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='store_facts',
+            field=models.BooleanField(default=False, help_text='During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+        ),
         migrations.RunSQL([("CREATE INDEX host_ansible_facts_default_gin ON %s USING gin"
                             "(ansible_facts jsonb_path_ops);", [AsIs(Host._meta.db_table)])],
                           [('DROP INDEX host_ansible_facts_default_gin;', None)]),
+
 
         # SCM file-based inventories
         migrations.AddField(
