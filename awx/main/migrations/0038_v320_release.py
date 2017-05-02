@@ -147,4 +147,16 @@ class Migration(migrations.Migration):
             name='verbosity',
             field=models.PositiveIntegerField(default=1, blank=True, choices=[(0, b'0 (WARNING)'), (1, b'1 (INFO)'), (2, b'2 (DEBUG)')]),
         ),
+
+        # Workflows
+        migrations.AddField(
+            model_name='workflowjob',
+            name='allow_simultaneous',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='workflowjobtemplate',
+            name='allow_simultaneous',
+            field=models.BooleanField(default=False),
+        ),
     ]

@@ -58,7 +58,7 @@ class PartialModelDict(object):
 
     def get_job_type_str(self):
         raise RuntimeError("Inherit and implement me")
-    
+
     def task_impact(self):
         raise RuntimeError("Inherit and implement me")
 
@@ -87,8 +87,8 @@ class PartialModelDict(object):
 
 class JobDict(PartialModelDict):
     FIELDS = (
-        'id', 'status', 'job_template_id', 'inventory_id', 'project_id', 
-        'launch_type', 'limit', 'allow_simultaneous', 'created', 
+        'id', 'status', 'job_template_id', 'inventory_id', 'project_id',
+        'launch_type', 'limit', 'allow_simultaneous', 'created',
         'job_type', 'celery_task_id', 'project__scm_update_on_launch',
         'forks', 'start_args', 'dependent_jobs__id',
     )
@@ -119,15 +119,15 @@ class JobDict(PartialModelDict):
 
 class ProjectUpdateDict(PartialModelDict):
     FIELDS = (
-        'id', 'status', 'project_id', 'created', 'celery_task_id', 
-        'launch_type', 'project__scm_update_cache_timeout', 
+        'id', 'status', 'project_id', 'created', 'celery_task_id',
+        'launch_type', 'project__scm_update_cache_timeout',
         'project__scm_update_on_launch',
     )
     model = ProjectUpdate
-    
+
     def get_job_type_str(self):
         return 'project_update'
-    
+
     def task_impact(self):
         return 10
 
@@ -142,8 +142,8 @@ class ProjectUpdateDict(PartialModelDict):
 
 class ProjectUpdateLatestDict(ProjectUpdateDict):
     FIELDS = (
-        'id', 'status', 'project_id', 'created', 'finished', 
-        'project__scm_update_cache_timeout', 
+        'id', 'status', 'project_id', 'created', 'finished',
+        'project__scm_update_cache_timeout',
         'launch_type', 'project__scm_update_on_launch',
     )
     model = ProjectUpdate
@@ -162,7 +162,7 @@ class ProjectUpdateLatestDict(ProjectUpdateDict):
 
 
 class InventoryUpdateDict(PartialModelDict):
-    #'inventory_source__update_on_launch', 
+    #'inventory_source__update_on_launch',
     #'inventory_source__update_cache_timeout',
     FIELDS = (
         'id', 'status', 'created', 'celery_task_id', 'inventory_source_id',
@@ -178,10 +178,10 @@ class InventoryUpdateDict(PartialModelDict):
 
 
 class InventoryUpdateLatestDict(InventoryUpdateDict):
-    #'inventory_source__update_on_launch', 
+    #'inventory_source__update_on_launch',
     #'inventory_source__update_cache_timeout',
     FIELDS = (
-        'id', 'status', 'created', 'celery_task_id', 'inventory_source_id', 
+        'id', 'status', 'created', 'celery_task_id', 'inventory_source_id',
         'finished', 'inventory_source__update_cache_timeout', 'launch_type',
         'inventory_source__update_on_launch',
     )
@@ -198,7 +198,7 @@ class InventoryUpdateLatestDict(InventoryUpdateDict):
                                                                   update_on_launch=True).values_list('id', flat=True)
             # Find the most recent inventory update for each inventory source
             for inventory_source_id in inventory_source_ids:
-                qs = cls.model.objects.filter(inventory_source_id=inventory_source_id, 
+                qs = cls.model.objects.filter(inventory_source_id=inventory_source_id,
                                               status__in=['waiting', 'successful', 'failed'],
                                               inventory_source__update_on_launch=True).order_by('-finished', '-started', '-created')
                 if qs.count() > 0:
@@ -263,7 +263,7 @@ class AdHocCommandDict(PartialModelDict):
 
 class WorkflowJobDict(PartialModelDict):
     FIELDS = (
-        'id', 'created', 'status', 'workflow_job_template_id',
+        'id', 'created', 'status', 'workflow_job_template_id', 'allow_simultaneous',
     )
     model = WorkflowJob
 
@@ -272,4 +272,3 @@ class WorkflowJobDict(PartialModelDict):
 
     def task_impact(self):
         return 0
-

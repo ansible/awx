@@ -284,6 +284,9 @@ class WorkflowJobOptions(BaseModel):
         blank=True,
         default='',
     ))
+    allow_simultaneous = models.BooleanField(
+        default=False
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -356,7 +359,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'extra_vars', 'labels', 'survey_passwords',
-                'schedule', 'launch_type']
+                'schedule', 'launch_type', 'allow_simultaneous']
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
