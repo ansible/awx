@@ -16,6 +16,8 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 
   window.scope = $scope;
 
+  $scope.api_token = '';
+
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
   $scope.control_socket = new window.ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
@@ -423,7 +425,30 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 
     $scope.onDiscoverButton = function (button) {
         console.log(button.name);
-        $scope.send_control_message(new messages.Discover($scope.client_id));
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/12/launch/", true);
+        xhr.onload = function () {
+            console.log(xhr.readyState);
+        };
+        xhr.onerror = function () {
+            console.error(xhr.statusText);
+        };
+        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
+        xhr.send();
+    };
+
+    $scope.onConfigureButton = function (button) {
+        console.log(button.name);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/11/launch/", true);
+        xhr.onload = function () {
+            console.log(xhr.readyState);
+        };
+        xhr.onerror = function () {
+            console.error(xhr.statusText);
+        };
+        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
+        xhr.send();
     };
 
     // Buttons
@@ -434,7 +459,8 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
       new models.Button("Record", 150, 10, 60, 50, $scope.onRecordButton),
       new models.Button("Export", 220, 10, 60, 50, $scope.onExportButton),
       new models.Button("Discover", 290, 10, 80, 50, $scope.onDiscoverButton),
-      new models.Button("Layout", 380, 10, 60, 50, $scope.onLayoutButton)
+      new models.Button("Layout", 380, 10, 60, 50, $scope.onLayoutButton),
+      new models.Button("Configure", 450, 10, 80, 50, $scope.onConfigureButton)
     ];
 
     $scope.onTaskStatus = function(data) {
