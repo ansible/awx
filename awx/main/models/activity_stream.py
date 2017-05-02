@@ -45,6 +45,7 @@ class ActivityStream(models.Model):
     inventory_source = models.ManyToManyField("InventorySource", blank=True)
     inventory_update = models.ManyToManyField("InventoryUpdate", blank=True)
     credential = models.ManyToManyField("Credential", blank=True)
+    credential_type = models.ManyToManyField("CredentialType", blank=True)
     team = models.ManyToManyField("Team", blank=True)
     project = models.ManyToManyField("Project", blank=True)
     project_update = models.ManyToManyField("ProjectUpdate", blank=True)
