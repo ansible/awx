@@ -107,11 +107,15 @@ function(i18n,nestedGroupListState) {
             related: {
                 ansible_facts: {
                     name: 'ansible_facts',
+                    awToolTip: i18n._('Please save before viewing facts'),
+                    dataPlacement: 'top',
                     title: i18n._('Facts'),
                     skipGenerator: true
                 },
                 nested_groups: {
                     name: 'nested_groups',
+                    awToolTip: i18n._('Please save before defining groups'),
+                    dataPlacement: 'top',
                     ngClick: "$state.go('inventories.edit.hosts.edit.nested_groups')",
                     include: "NestedGroupListDefinition",
                     includeForm: "NestedGroupFormDefinition",
@@ -121,6 +125,8 @@ function(i18n,nestedGroupListState) {
                 },
                 insights: {
                     name: 'insights',
+                    awToolTip: i18n._('Please save before viewing Insights'),
+                    dataPlacement: 'top',
                     title: i18n._('Insights'),
                     skipGenerator: true
                 }

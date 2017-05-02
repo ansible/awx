@@ -38,27 +38,6 @@ export default {
             ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
             tab: 'properties'
         },
-        variables: {
-            label: 'Variables',
-            type: 'textarea',
-            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-            rows: 6,
-            'default': '---',
-            dataTitle: 'Group Variables',
-            dataPlacement: 'right',
-            parseTypeName: 'parseType',
-            awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +
-                "<p>Enter variables using either JSON or YAML syntax. Use the " +
-                "radio button to toggle between the two.</p>" +
-                "JSON:<br />\n" +
-                "<blockquote>{<br />&emsp; \"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                "YAML:<br />\n" +
-                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-            dataContainer: 'body',
-            tab: 'properties'
-        },
         source: {
             label: 'Source',
             type: 'select',

@@ -167,7 +167,7 @@
                     return item.name;
                 }).value().join(':');
 
-            $state.go('^.adhoc', {pattern: pattern});
+            $state.go('^.^.^.adhoc', {pattern: pattern});
         };
 
     }];

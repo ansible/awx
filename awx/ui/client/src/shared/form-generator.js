@@ -1560,9 +1560,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
-                            html += "<div id=\"" + itm + "_tab\" "+ "aw-tool-tip=\"" +
-                                collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " +
-                                "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
+                            html += "<div id=\"" + itm + "_tab\" ";
+                            html += collection.awToolTip ? "aw-tool-tip=\"" + collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " : "";
+                            html += "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
                                 "</div>\n";
                         }
@@ -1676,7 +1676,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
                         if (options.mode === 'edit' && !_.isEmpty(this.form.related)) {
-                            html += `ng-show="$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.matches('lookup') "`;
+                            html += `ng-show="$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState || $state.matches('lookup') "`;
                         }
                         html += ">\n";
 

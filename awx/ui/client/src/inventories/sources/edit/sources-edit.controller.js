@@ -36,16 +36,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 $scope.canAdd = val;
             });
 
-            // init codemirror(s)
-            $scope.variables = $scope.variables === null || $scope.variables === '' ? '---' : ParseVariableString($scope.variables);
-            $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';
-
-            ParseTypeChange({
-                scope: $scope,
-                field_id: 'inventory_source_variables',
-                variable: 'variables',
-            });
 
             initSources();
         }
@@ -76,10 +67,10 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             $state.go('^');
         };
         $scope.formSave = function() {
-            var params, json_data;
-            json_data = ToJSON($scope.parseType, $scope.variables, true);
+            var params;
 
             params = {
+                id: inventorySourceData.id,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: inventoryData.id,
@@ -90,7 +81,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 overwrite_vars: $scope.overwrite_vars,
                 update_on_launch: $scope.update_on_launch,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
-                variables: json_data,
                 // comma-delimited strings
                 group_by: _.map($scope.group_by, 'value').join(','),
                 source_regions: _.map($scope.source_regions, 'value').join(',')
