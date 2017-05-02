@@ -1689,13 +1689,17 @@ class RunInventoryUpdate(BaseTask):
             env['FOREMAN_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'cloudforms':
             env['CLOUDFORMS_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'file':
+        elif inventory_update.source == 'scm':
             # Parse source_vars to dict, update env.
             env.update(parse_yaml_or_json(inventory_update.source_vars))
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+        elif inventory_update.source == 'file':
+            raise NotImplementedError('Can not update file sources through the task system.')
+        # add private_data_files
+        env['AWX_PRIVATE_DATA_DIR'] = kwargs.get('private_data_dir', '')
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -1759,7 +1763,7 @@ class RunInventoryUpdate(BaseTask):
                     getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),
                 ])
 
-        elif inventory_update.source == 'file':
+        elif inventory_update.source == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif inventory_update.source == 'custom':
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
@@ -1770,11 +1774,10 @@ class RunInventoryUpdate(BaseTask):
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-            args.append(runpath)
+            args.append(path)
             args.append("--custom")
             self.custom_dir_path.append(runpath)
-        verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
-        args.append('-v%d' % verbosity)
+        args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')
         return args

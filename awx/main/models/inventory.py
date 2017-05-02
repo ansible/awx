@@ -743,7 +743,8 @@ class InventorySourceOptions(BaseModel):
 
     SOURCE_CHOICES = [
         ('', _('Manual')),
-        ('file', _('File, Directory or Script Locally or in Project')),
+        ('file', _('File, Directory or Script')),
+        ('scm', _('Sourced from a project in Tower')),
         ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
@@ -754,6 +755,13 @@ class InventorySourceOptions(BaseModel):
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('custom', _('Custom Script')),
+    ]
+
+    # From the options of the Django management base command
+    INVENTORY_UPDATE_VERBOSITY_CHOICES = [
+        (0, '0 (WARNING)'),
+        (1, '1 (INFO)'),
+        (2, '2 (DEBUG)'),
     ]
 
     # Use tools/scripts/get_ec2_filter_names.py to build this list.
@@ -902,6 +910,11 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default=0,
     )
+    verbosity = models.PositiveIntegerField(
+        choices=INVENTORY_UPDATE_VERBOSITY_CHOICES,
+        blank=True,
+        default=1,
+    )
 
     @classmethod
     def get_ec2_region_choices(cls):
@@ -1002,7 +1015,7 @@ class InventorySourceOptions(BaseModel):
         if not self.source:
             return None
         cred = self.credential
-        if cred and self.source != 'custom':
+        if cred and self.source not in ('custom', 'scm'):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
@@ -1139,14 +1152,14 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                'timeout', 'launch_type', 'scm_project_update',]
+                'timeout', 'verbosity', 'launch_type', 'scm_project_update',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
         is_new_instance = not bool(self.pk)
-        is_scm_type = self.scm_project_id is not None
+        is_scm_type = self.scm_project_id is not None and self.source == 'scm'
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
@@ -1346,6 +1359,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
         if (self.source not in ('custom', 'ec2') and
                 not (self.credential)):
+            return False
+        elif self.source in ('file', 'scm'):
             return False
         return True
 
