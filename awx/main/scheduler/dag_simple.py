@@ -5,7 +5,6 @@ from awx.main.models import (
     InventoryUpdate,
     ProjectUpdate,
     WorkflowJob,
-    SystemJob,
 )
 
 
@@ -85,21 +84,6 @@ class SimpleDAG(object):
             if obj == self.nodes[idx]['node_object']:
                 return idx
         return None
-
-    def get_node_type(self, obj):
-        if type(obj) == Job:
-            return "job"
-        elif type(obj) == AdHocCommand:
-            return "ad_hoc_command"
-        elif type(obj) == InventoryUpdate:
-            return "inventory_update"
-        elif type(obj) == ProjectUpdate:
-            return "project_update"
-        elif type(obj) == SystemJob:
-            return "system_job"
-        elif type(obj) == WorkflowJob:
-            return "workflow_job"
-        return "unknown"
 
     def get_dependencies(self, obj, label=None):
         antecedents = []

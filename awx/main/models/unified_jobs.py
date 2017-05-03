@@ -152,6 +152,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         blank=True,
         related_name='%(class)s_labels'
     )
+    instance_groups = models.ManyToManyField(
+        'InstanceGroup',
+        blank=True,
+    )
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
@@ -561,6 +565,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         related_name='%(class)s_labels'
     )
+    instance_group = models.ForeignKey(
+        'InstanceGroup',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('The Rampart/Instance group the job was run under'),
+    )
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
@@ -936,9 +948,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         return (True, opts)
 
-    def start_celery_task(self, opts, error_callback, success_callback):
+    def start_celery_task(self, opts, error_callback, success_callback, queue):
         task_class = self._get_task_class()
-        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback, queue=queue)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''
@@ -1046,3 +1058,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
+
+    @property
+    def preferred_instance_groups(self):
+        '''
+        Return Instance/Rampart Groups preferred by this unified job templates
+        '''
+        from awx.main.models.ha import InstanceGroup
+        default_instance_group = InstanceGroup.objects.filter(name='tower')
+        template_groups = [x for x in self.unified_job_template.instance_groups.all()]
+        if not template_groups and default_instance_group.exists():
+            return [default_instance_group.first()]

@@ -244,6 +244,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
+
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
     )
@@ -467,7 +468,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     )
 
 
-
     @classmethod
     def _get_parent_field_name(cls):
         return 'job_template'
@@ -626,6 +626,19 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if artifacts.get('_ansible_no_log', False):
             return "$hidden due to Ansible no_log flag$"
         return artifacts
+
+    @property
+    def preferred_instance_groups(self):
+        if self.project is not None and self.project.organization is not None:
+            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        if self.inventory is not None:
+            inventory_groups = [x for x in self.inventory.instance_groups.all()]
+        else:
+            inventory_groups = []
+        template_groups = [x for x in super(Job, self).preferred_instance_groups]
+        return template_groups + inventory_groups + organization_groups
 
     # Job Credential required
     @property

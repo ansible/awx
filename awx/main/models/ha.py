@@ -4,6 +4,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import ugettext_lazy as _
 
 from solo.models import SingletonModel
 
@@ -17,9 +18,7 @@ __all__ = ('Instance', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
-    """A model representing an Ansible Tower instance, primary or secondary,
-    running against this database.
-    """
+    """A model representing an Ansible Tower instance running against this database."""
     objects = InstanceManager()
 
     uuid = models.CharField(max_length=40)
@@ -39,6 +38,22 @@ class Instance(models.Model):
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
+
+
+class InstanceGroup(models.Model):
+    """A model representing a Queue/Group of Tower Instances."""
+    name = models.CharField(max_length=250, unique=True)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    instances = models.ManyToManyField(
+        'Instance',
+        related_name='rampart_groups',
+        editable=False,
+        help_text=_('Instances that are members of this InstanceGroup'),
+    )
+
+    class Meta:
+        app_label = 'main'
 
 
 class TowerScheduleState(SingletonModel):

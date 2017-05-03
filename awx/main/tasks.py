@@ -201,7 +201,7 @@ def cluster_node_heartbeat(self):
 
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def tower_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
@@ -251,7 +251,7 @@ def _send_notification_templates(instance, status_str):
                                      job_id=instance.id)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def handle_work_success(self, result, task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -267,7 +267,7 @@ def handle_work_success(self, result, task_actual):
     run_job_complete.delay(instance.id)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
@@ -307,7 +307,7 @@ def handle_work_error(self, task_id, subtasks=None):
         pass
 
 
-@task(queue='default')
+@task(queue='tower')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -1131,6 +1131,7 @@ class RunJob(BaseTask):
                 _eager_fields=dict(
                     job_type='run',
                     status='running',
+                    instance_group = job.instance_group,
                     celery_task_id=job_request_id))
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update

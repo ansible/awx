@@ -36,6 +36,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
 
+    instance_groups = models.ManyToManyField(
+        'InstanceGroup',
+        blank=True,
+    )
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )
