@@ -10,7 +10,25 @@
  * @description This form is for adding/editing a Group on the inventory page
 */
 
-export default {
+export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
+
+    var notifications_object = {
+        name: 'notifications',
+        index: false,
+        basePath: "notifications",
+        include: "NotificationsList",
+        title: i18n._('Notifications'),
+        iterator: 'notification',
+        disabled: "source === undefined || source.value === ''",
+        generateList: true,
+        ngClick: "$state.go('inventories.edit.inventory_sources.edit.notifications')"
+        // search: {
+        //     "or__job__inventory": ''
+        // }
+    };
+    let clone = _.clone(NotificationsList);
+    notifications_object = angular.extend(clone, notifications_object);
+return {
     addTitle: 'CREATE SOURCE',
     editTitle: '{{ name }}',
     showTitle: true,
@@ -19,9 +37,10 @@ export default {
     parent: 'inventories.edit.sources',
     // the parent node this generated state definition tree expects to attach to
     stateTree: 'inventories',
+    tabs: true,
     // form generator inspects the current state name to determine whether or not to set an active (.is-selected) class on a form tab
     // this setting is optional on most forms, except where the form's edit state name is not parentStateName.edit
-    activeEditState: 'inventories.edit.groups.editGroup',
+    activeEditState: 'inventories.edit.inventory_sources.edit',
     detailsClick: "$state.go('inventories.edit.inventory_sources.edit')",
     well: false,
     fields: {
@@ -333,5 +352,11 @@ export default {
             ngDisabled: true,
             ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
         }
+    },
+
+    related: {
+        notifications: notifications_object
     }
 };
+
+}];
