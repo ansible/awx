@@ -197,3 +197,62 @@ def test_inventory_source_update(post, inventory_source, alice, role_field, expe
     if role_field:
         getattr(inventory_source.inventory, role_field).members.add(alice)
     post(reverse('api:inventory_source_update_view', kwargs={'pk': inventory_source.id}), {}, alice, expect=expected_status_code)
+
+
+@pytest.fixture
+def scm_inventory(inventory, project):
+    inventory.inventory_sources.create(
+        name='foobar', update_on_project_update=True, source='scm',
+        scm_project=project)
+    return inventory
+
+
+@pytest.mark.django_db
+class TestControlledBySCM:
+    '''
+    Check that various actions are correctly blocked if object is controlled
+    by an SCM follow-project inventory source
+    '''
+    def test_safe_method_works(self, get, options, scm_inventory, admin_user):
+        get(scm_inventory.get_absolute_url(), admin_user, expect=200)
+        options(scm_inventory.get_absolute_url(), admin_user, expect=200)
+
+    def test_vars_edit_prohibited(self, patch, scm_inventory, admin_user):
+        patch(scm_inventory.get_absolute_url(), {'variables': 'hello: world'},
+              admin_user, expect=403)
+
+    def test_name_edit_allowed(self, patch, scm_inventory, admin_user):
+        patch(scm_inventory.get_absolute_url(), {'variables': '---', 'name': 'newname'},
+              admin_user, expect=200)
+
+    def test_host_associations_prohibited(self, post, scm_inventory, admin_user):
+        inv_src = scm_inventory.inventory_sources.first()
+        h = inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
+        g = inv_src.groups.create(name='fooland', inventory=scm_inventory)
+        post(reverse('api:host_groups_list', kwargs={'pk': h.id}), {'id': g.id},
+             admin_user, expect=403)
+        post(reverse('api:group_hosts_list', kwargs={'pk': g.id}), {'id': h.id},
+             admin_user, expect=403)
+
+    def test_group_group_associations_prohibited(self, post, scm_inventory, admin_user):
+        inv_src = scm_inventory.inventory_sources.first()
+        g1 = inv_src.groups.create(name='barland', inventory=scm_inventory)
+        g2 = inv_src.groups.create(name='fooland', inventory=scm_inventory)
+        post(reverse('api:group_children_list', kwargs={'pk': g1.id}), {'id': g2.id},
+             admin_user, expect=403)
+
+    def test_host_group_delete_prohibited(self, delete, scm_inventory, admin_user):
+        inv_src = scm_inventory.inventory_sources.first()
+        h = inv_src.hosts.create(name='barfoo', inventory=scm_inventory)
+        g = inv_src.groups.create(name='fooland', inventory=scm_inventory)
+        delete(h.get_absolute_url(), admin_user, expect=403)
+        delete(g.get_absolute_url(), admin_user, expect=403)
+
+    def test_remove_scm_inv_src(self, delete, scm_inventory, admin_user):
+        inv_src = scm_inventory.inventory_sources.first()
+        delete(inv_src.get_absolute_url(), admin_user, expect=204)
+        assert scm_inventory.inventory_sources.count() == 0
+
+    def test_adding_inv_src_prohibited(self, post, scm_inventory, admin_user):
+        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
+             {'name': 'new inv src'}, admin_user, expect=400)

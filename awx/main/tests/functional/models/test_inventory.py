@@ -17,6 +17,7 @@ class TestSCMUpdateFeatures:
             scm_project=project,
             source_path='inventory_file',
             inventory=inventory,
+            update_on_project_update=True,
             source='scm')
         with mock.patch.object(inv_src.scm_project, 'update') as mck_update:
             inv_src.save()

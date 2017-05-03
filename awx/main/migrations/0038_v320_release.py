@@ -119,6 +119,11 @@ class Migration(migrations.Migration):
             name='launch_type',
             field=models.CharField(default=b'manual', max_length=20, editable=False, choices=[(b'manual', 'Manual'), (b'relaunch', 'Relaunch'), (b'callback', 'Callback'), (b'scheduled', 'Scheduled'), (b'dependency', 'Dependency'), (b'workflow', 'Workflow'), (b'sync', 'Sync'), (b'scm', 'SCM Update')]),
         ),
+        migrations.AddField(
+            model_name='inventorysource',
+            name='update_on_project_update',
+            field=models.BooleanField(default=False),
+        ),
 
         # Named URL
         migrations.AlterField(

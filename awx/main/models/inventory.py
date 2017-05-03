@@ -1137,6 +1137,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         default='',
         editable=False,
     )
+    update_on_project_update = models.BooleanField(
+        default=False,
+    )
     update_on_launch = models.BooleanField(
         default=False,
     )
@@ -1159,7 +1162,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
         is_new_instance = not bool(self.pk)
-        is_scm_type = self.scm_project_id is not None and self.source == 'scm'
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
         replace_text = '__replace_%s__' % now()
@@ -1176,7 +1178,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             if 'name' not in update_fields:
                 update_fields.append('name')
         # Reset revision if SCM source has changed parameters
-        if is_scm_type and not is_new_instance:
+        if self.source=='scm' and not is_new_instance:
             before_is = self.__class__.objects.get(pk=self.pk)
             if before_is.source_path != self.source_path or before_is.scm_project_id != self.scm_project_id:
                 # Reset the scm_revision if file changed to force update
@@ -1191,9 +1193,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             super(InventorySource, self).save(update_fields=['name'])
-        if is_scm_type and is_new_instance:
+        if self.source=='scm' and is_new_instance and self.update_on_project_update:
             # Schedule a new Project update if one is not already queued
-            if not self.scm_project.project_updates.filter(
+            if self.scm_project and not self.scm_project.project_updates.filter(
                     status__in=['new', 'pending', 'waiting']).exists():
                 self.scm_project.update()
         if not getattr(_inventory_updates, 'is_updating', False):
@@ -1218,6 +1220,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _can_update(self):
         if self.source == 'custom':
             return bool(self.source_script)
+        elif self.source == 'scm':
+            return bool(self.scm_project)
         else:
             return bool(self.source in CLOUD_INVENTORY_SOURCES)
 
@@ -1351,16 +1355,18 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         return 50
 
     # InventoryUpdate credential required
-    # Custom InventoryUpdate credential not required
+    # Custom and SCM InventoryUpdate credential not required
     @property
     def can_start(self):
         if not super(InventoryUpdate, self).can_start:
             return False
 
-        if (self.source not in ('custom', 'ec2') and
+        if (self.source not in ('custom', 'ec2', 'scm') and
                 not (self.credential)):
             return False
-        elif self.source in ('file', 'scm'):
+        elif self.source == 'scm' and not self.inventory_source.scm_project:
+            return False
+        elif self.source == 'file':
             return False
         return True
 

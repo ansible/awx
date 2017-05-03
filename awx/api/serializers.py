@@ -1524,7 +1524,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'scm_project') + \
+        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout',
+                  'scm_project', 'update_on_project_update') + \
                  ('last_update_failed', 'last_updated', 'group') # Backwards compatibility.
 
     def get_related(self, obj):
@@ -1598,13 +1599,21 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return ret
 
     def validate(self, attrs):
-        # source_path = attrs.get('source_path', self.instance and self.instance.source_path)
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
         update_on_launch = attrs.get('update_on_launch', self.instance and self.instance.update_on_launch)
-        scm_project = attrs.get('scm_project', self.instance and self.instance.scm_project)
-        if attrs.get('source_path', None) and not scm_project:
+        update_on_project_update = get_field_from_model_or_attrs('update_on_project_update')
+        source = get_field_from_model_or_attrs('source')
+
+        if attrs.get('source_path', None) and source!='scm':
             raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
-        elif update_on_launch and scm_project:
+        elif update_on_launch and source=='scm' and update_on_project_update:
             raise serializers.ValidationError({"detail": _("Cannot update SCM-based inventory source on launch.")})
+        elif not self.instance and attrs.get('inventory', None) and InventorySource.objects.filter(
+                inventory=attrs.get('inventory', None), update_on_project_update=True, source='scm').exists():
+            raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
+
         return super(InventorySourceSerializer, self).validate(attrs)
 
 

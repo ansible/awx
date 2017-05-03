@@ -1350,8 +1350,12 @@ class RunProjectUpdate(BaseTask):
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
+        project_request_id = '' if self.request.id is None else self.request.id
+        scm_revision = project_update.project.scm_revision
         for inv_src in dependent_inventory_sources:
-            if inv_src.scm_last_revision == project_update.project.scm_revision:
+            if not inv_src.update_on_project_update:
+                continue
+            if inv_src.scm_last_revision == scm_revision:
                 logger.debug('Skipping SCM inventory update for `{}` because '
                              'project has not changed.'.format(inv_src.name))
                 continue
@@ -1362,7 +1366,6 @@ class RunProjectUpdate(BaseTask):
                     logger.info('Skipping SCM inventory update for `{}` because '
                                 'another update is already active.'.format(inv.name))
                     continue
-                project_request_id = '' if self.request.id is None else self.request.id
                 local_inv_update = inv_src.create_inventory_update(
                     scm_project_update_id=project_update.id,
                     launch_type='scm',
@@ -1375,12 +1378,11 @@ class RunProjectUpdate(BaseTask):
                 # Runs in the same Celery task as project update
                 task_instance.request.id = project_request_id
                 task_instance.run(local_inv_update.id)
-                inv_src.scm_last_revision = project_update.project.scm_revision
-                inv_src.save(update_fields=['scm_last_revision'])
             except Exception as e:
                 # A failed file update does not block other actions
                 logger.error('Encountered error updating project dependent inventory: {}'.format(e))
-                continue
+            inv_src.scm_last_revision = scm_revision
+            inv_src.save(update_fields=['scm_last_revision'])
 
     def release_lock(self, instance):
         try:
@@ -1797,8 +1799,38 @@ class RunInventoryUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
 
-    def pre_run_hook(self, instance, **kwargs):
+    def pre_run_hook(self, inventory_update, **kwargs):
         self.custom_dir_path = []
+
+        scm_project = None
+        if inventory_update.inventory_source:
+            scm_project = inventory_update.inventory_source.scm_project
+        if (inventory_update.source=='scm' and scm_project and
+                not inventory_update.inventory_source.update_on_project_update):
+            request_id = '' if self.request.id is None else self.request.id
+            local_project_sync = scm_project.create_project_update(
+                launch_type="sync",
+                _eager_params=dict(
+                    job_type='run',
+                    status='running',
+                    celery_task_id=request_id))
+            # associate the inventory update before calling run() so that a
+            # cancel() call on the inventory update can cancel the project update
+            local_project_sync.scm_inventory_updates.add(inventory_update)
+
+            project_update_task = local_project_sync._get_task_class()
+            try:
+                task_instance = project_update_task()
+                task_instance.request.id = request_id
+                task_instance.run(local_project_sync.id)
+                inventory_update.inventory_source.scm_last_revision = local_project_sync.project.scm_revision
+                inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
+            except Exception:
+                inventory_update = self.update_model(
+                    inventory_update.pk, status='failed',
+                    job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
+                                     ('project_update', local_project_sync.name, local_project_sync.id)))
+                raise
 
     def post_run_hook(self, instance, status, **kwargs):
         print("In post run hook")
