@@ -8,7 +8,6 @@
 standard-out-log {
     flex: 5;
     display: flex;
-    overflow: hidden;
 }
 
 .StandardOut-preContent{
@@ -18,7 +17,7 @@ standard-out-log {
 }
 
 .StandardOut-container {
-    .OnePlusOne-container(80vh, @breakpoint-md);
+    .OnePlusOne-container(100%, @breakpoint-md);
 
     &.fullscreen {
         .StandardOut-rightPanel {
@@ -28,10 +27,15 @@ standard-out-log {
 }
 
 .StandardOut-leftPanel {
-    .OnePlusOne-panel--left(100%, @breakpoint-md);
+    .OnePlusOne-panel--left(auto, @breakpoint-md);
     max-width: 600px;
+    display: flex;
     @media (max-width: @breakpoint-md - 1px) {
         max-width: 100%;
+    }
+
+    .Panel {
+        height: auto;
     }
 }
 
@@ -48,7 +52,7 @@ standard-out-log {
     }
 
     .StandardOut-consoleOutput {
-        height: 94%;
+        height: 493px;
     }
 }
 
@@ -63,7 +67,6 @@ standard-out-log {
     max-height: 100vh;
     height: ~"calc(100vh - 245px)";
     width: 100%;
-
     overflow: auto;
 }
 
