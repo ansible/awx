@@ -1534,7 +1534,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             update = self.reverse('api:inventory_source_update_view', kwargs={'pk': obj.pk}),
             inventory_updates = self.reverse('api:inventory_source_updates_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:inventory_source_schedules_list', kwargs={'pk': obj.pk}),
-            activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
+            activity_stream = self.reverse('api:inventory_source_activity_stream_list', kwargs={'pk': obj.pk}),
             hosts = self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
             groups = self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
             notification_templates_any = self.reverse('api:inventory_source_notification_templates_any_list', kwargs={'pk': obj.pk}),
