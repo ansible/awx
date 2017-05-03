@@ -12,6 +12,7 @@ function AddCredentialsController (credentialType) {
 
     vm.kind = {
         label: 'Type',
+        placeholder: 'Select a Type',
         required: true,
         text: 'kind',
         value: 'id',

@@ -2,7 +2,6 @@
 
 function atInputSelect () {
     function link (scope, element, attrs) {
-        scope.active = false;
     }
 
     return {

@@ -80,7 +80,7 @@ config.$inject = [
 ];
 
 angular
-    .module('at.feature.credentials', [])
+    .module('at.features.credentials', [])
     .config(config)
     .factory('CredentialList', CredentialList)
     .controller('ListController', ListController)

@@ -5,8 +5,12 @@
     border-radius: @at-border-radius-md;
     color: @at-gray-darkest;
 
-    &, &:focus, &:active {
+    &, &:active {
         border-color: @at-gray-light;
+    }
+
+    &:focus {
+        border-color: @at-link;
     }
 }
 
@@ -28,8 +32,36 @@
     color: @at-gray;
 }
 
-.at-Dropdown-option--placeholder {
-    &[value=""] {
-        display: none;
+.at-Input--focus {
+    border-color: @at-link;
+}
+
+.at-InputGroup {
+    position: relative;
+    width: 100%;
+
+    & > i {
+        position: absolute;  
+        z-index: 4;
+        pointer-events: none;
+        right: @at-padding-sm;
+        top: @at-padding-sm;
     }
+}
+
+.at-Dropdown {
+    height: @at-input-height-md;
+    position: relative;
+}
+
+.at-Dropdown-input {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.at-Dropdown-select {
+    position: absolute;
+    z-index: 1;
+    top: 0;
 }

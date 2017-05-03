@@ -136,9 +136,9 @@ var tower = angular.module('Tower', [
     'features',
 
     'ngResource',
-    'at.component',
-    'at.model',
-    'at.feature.credentials'
+    'at.components',
+    'at.models',
+    'at.features.credentials'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

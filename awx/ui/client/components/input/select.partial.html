@@ -3,16 +3,23 @@
         <span ng-if="config.required" class="at-Input-label--required">*</span>
         <span>{{ config.label }}</span>
     </label>
-    <select class="form-control at-Input at-Dropdown" ng-model="config.input"
-            ng-mousedown="opened = opened || true"
-            ng-class="{ 'at-Input--placeholder': input === undefined && !opened }">
-        <option class="at-Dropdown-option--placeholder" value="" disabled selected>
-            SELECT A TYPE
-        </option>
-        <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
-            <option ng-repeat="item in group.data" value="{{ item.id }}">
-                {{ item.name }}
+    <div class="input-group">
+        <select class="form-control at-Input at-Select" ng-model="config.input"
+                ng-mousedown="opened = opened || true"
+                ng-class="{ 'at-Input--placeholder': input === undefined && !opened }">
+            <option class="at-Select-option--placeholder" value="" disabled selected>
+                SELECT A TYPE
             </option>
-        </optgroup>
-    </select>
+            <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
+                <option ng-repeat="item in group.data" value="{{ item.id }}">
+                    {{ item.name }}
+                </option>
+            </optgroup>
+        </select>
+        <span class="input-group-btn">
+            <button class="btn at-Button--default at-Select-button">
+                <i class="fa fa-caret-down"></i>
+            </button>
+        </span>
+    </div>
 </div>

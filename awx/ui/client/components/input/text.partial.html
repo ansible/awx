@@ -1,8 +1,11 @@
-<div class="form-group">
-    <label class="at-Input-label">
-        <span ng-if="config.required" class="at-Input-label--required">*</span>
-        <span>{{ config.label | uppercase }}</span>
-    </label>
-    <input type="text" class="form-control at-Input" ng-model="config.input"
-           placeholder="{{ config.placeholder }}" />
+<div class="col-sm-{{ col }}">
+    <div class="form-group">
+        <label class="at-Input-label">
+            <span ng-if="config.required" class="at-Input-label--required">*</span>
+            <span>{{ config.label | uppercase }}</span>
+        </label>
+        <input type="text" class="form-control at-Input" ng-model="config.input"
+               ng-attr-autofocus="{{ form.autofocus || undefined }}" tabindex="{{ form.tabindex }}" 
+               placeholder="{{ config.placeholder }}" />
+    </div>
 </div>
