@@ -1591,6 +1591,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
             return ret
+        if obj.inventory and obj.inventory.organization:
+            ret['organization'] = obj.inventory.organization.pk
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         return ret
