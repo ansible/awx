@@ -8,11 +8,12 @@
 
 
 .OnePlusOne-container(@height: 100%; @breakpoint: 900px){
-	height: @height;
+	height: ~"calc(100vh - 150px)";
 	display: flex;
 	flex-direction: row;
 	@media screen and(max-width: @breakpoint){
 		flex-direction: column;
+		height: 100%;
 	}
 }
 

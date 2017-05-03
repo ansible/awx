@@ -29,8 +29,14 @@ standard-out-log {
 .StandardOut-leftPanel {
     .OnePlusOne-panel--left(100%, @breakpoint-md);
     max-width: 600px;
+    display: flex;
     @media (max-width: @breakpoint-md - 1px) {
         max-width: 100%;
+    }
+
+    .Panel {
+         height: ~"calc(100% - 20px)";
+         overflow-y: scroll;
     }
 }
 
@@ -44,10 +50,7 @@ standard-out-log {
     .Panel {
         display: flex;
         flex-direction: column;
-    }
-
-    .StandardOut-consoleOutput {
-        height: 493px;
+        height: ~"calc(100% - 20px)";
     }
 }
 
@@ -57,17 +60,9 @@ standard-out-log {
 
 .StandardOut-consoleOutput {
     margin-top: 25px;
-    background-color: @default-secondary-bg;
     border-radius: 5px;
-    min-height: 300px;
-    max-height: 100vh;
-    height: ~"calc(100vh - 245px)";
     width: 100%;
-
     overflow: auto;
-    #pre-container {
-        overflow: visible !important;
-    }
 }
 
 .StandardOut-details {
