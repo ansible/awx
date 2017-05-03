@@ -35,6 +35,8 @@ services:
   # Postgres Database Container
   postgres:
     image: postgres:9.6
+    ports:
+        - "5432:5432"
   memcached:
     image: memcached:alpine
     ports:
