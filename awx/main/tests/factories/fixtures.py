@@ -153,9 +153,6 @@ def mk_job_template(name, job_type='run',
     if jt.credential is None:
         jt.ask_credential_on_launch = True
 
-    jt.network_credential = network_credential
-    jt.cloud_credential = cloud_credential
-
     jt.project = project
 
     jt.survey_spec = spec
@@ -163,6 +160,13 @@ def mk_job_template(name, job_type='run',
         jt.survey_enabled = True
 
     if persisted:
+        jt.save()
+        if cloud_credential:
+            cloud_credential.save()
+            jt.extra_credentials.add(cloud_credential)
+        if network_credential:
+            network_credential.save()
+            jt.extra_credentials.add(network_credential)
         jt.save()
     return jt
 

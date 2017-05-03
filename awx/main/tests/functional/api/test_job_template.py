@@ -36,6 +36,133 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
     }, alice, expect=expect)
 
 
+# TODO: test this with RBAC and lower-priveleged users
+@pytest.mark.django_db
+def test_extra_credential_creation(get, post, organization_factory, job_template_factory, credentialtype_aws):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    response = post(url, {
+        'name': 'My Cred',
+        'credential_type': credentialtype_aws.pk,
+        'inputs': {
+            'username': 'bob',
+            'password': 'secret',
+        }
+    }, objs.superusers.admin)
+    assert response.status_code == 201
+
+    response = get(url, user=objs.superusers.admin)
+    assert response.data.get('count') == 1
+
+
+# TODO: test this with RBAC and lower-priveleged users
+@pytest.mark.django_db
+def test_attach_extra_credential(get, post, organization_factory, job_template_factory, credential):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    response = post(url, {
+        'associate': True,
+        'id': credential.id,
+    }, objs.superusers.admin)
+    assert response.status_code == 204
+
+    response = get(url, user=objs.superusers.admin)
+    assert response.data.get('count') == 1
+
+
+# TODO: test this with RBAC and lower-priveleged users
+@pytest.mark.django_db
+def test_detach_extra_credential(get, post, organization_factory, job_template_factory, credential):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+    jt.extra_credentials.add(credential)
+    jt.save()
+
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    response = post(url, {
+        'disassociate': True,
+        'id': credential.id,
+    }, objs.superusers.admin)
+    assert response.status_code == 204
+
+    response = get(url, user=objs.superusers.admin)
+    assert response.data.get('count') == 0
+
+
+@pytest.mark.django_db
+def test_attach_extra_credential_wrong_kind_xfail(get, post, organization_factory, job_template_factory, machine_credential):
+    """Extra credentials only allow net + cloud credentials"""
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+
+    url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    response = post(url, {
+        'associate': True,
+        'id': machine_credential.id,
+    }, objs.superusers.admin)
+    assert response.status_code == 400
+
+    response = get(url, user=objs.superusers.admin)
+    assert response.data.get('count') == 0
+
+
+@pytest.mark.django_db
+def test_v1_extra_credentials_detail(get, organization_factory, job_template_factory, credential, net_credential):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+    jt.extra_credentials.add(credential)
+    jt.extra_credentials.add(net_credential)
+    jt.save()
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
+    response = get(url, user=objs.superusers.admin)
+    assert response.data.get('cloud_credential') == credential.pk
+    assert response.data.get('network_credential') == net_credential.pk
+
+
+@pytest.mark.django_db
+def test_v1_set_extra_credentials(get, patch, organization_factory, job_template_factory, credential, net_credential):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+    jt.save()
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
+    response = patch(url, {
+        'cloud_credential': credential.pk,
+        'network_credential': net_credential.pk
+    }, objs.superusers.admin)
+    assert response.status_code == 200
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
+    response = get(url, user=objs.superusers.admin)
+    assert response.status_code == 200
+    assert response.data.get('cloud_credential') == credential.pk
+    assert response.data.get('network_credential') == net_credential.pk
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
+    response = patch(url, {
+        'cloud_credential': None,
+        'network_credential': None,
+    }, objs.superusers.admin)
+    assert response.status_code == 200
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
+    response = get(url, user=objs.superusers.admin)
+    assert response.status_code == 200
+    assert response.data.get('cloud_credential') is None
+    assert response.data.get('network_credential') is None
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [

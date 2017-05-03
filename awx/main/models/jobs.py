@@ -21,7 +21,6 @@ from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import (
@@ -196,6 +195,22 @@ class JobOptions(BaseModel):
     @property
     def cloud_credentials(self):
         return [cred for cred in self.extra_credentials.all() if cred.credential_type.kind == 'cloud']
+
+    # TODO: remove when API v1 is removed
+    @property
+    def cloud_credential(self):
+        try:
+            return self.cloud_credentials[-1].pk
+        except IndexError:
+            return None
+
+    # TODO: remove when API v1 is removed
+    @property
+    def network_credential(self):
+        try:
+            return self.network_credentials[-1].pk
+        except IndexError:
+            return None
 
     @property
     def passwords_needed_to_start(self):

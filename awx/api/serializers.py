@@ -86,6 +86,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'scm_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
+    'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -2090,13 +2091,41 @@ class LabelsListMixin(object):
         return res
 
 
+# TODO: remove when API v1 is removed
+@six.add_metaclass(BaseSerializerMetaclass)
+class V1JobOptionsSerializer(BaseSerializer):
+
+    class Meta:
+        model = Credential
+        fields = ('*', 'cloud_credential', 'network_credential')
+
+    V1_FIELDS = {
+        'cloud_credential': models.PositiveIntegerField(blank=True, null=True, default=None),
+        'network_credential': models.PositiveIntegerField(blank=True, null=True, default=None)
+    }
+
+    def build_field(self, field_name, info, model_class, nested_depth):
+        if field_name in self.V1_FIELDS:
+            return self.build_standard_field(field_name,
+                                             self.V1_FIELDS[field_name])
+        return super(V1JobOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
+
+
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
-                  'credential', 'forks', 'limit',
+                  'credential', 'vault_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
                   'skip_tags', 'start_at_task', 'timeout', 'store_facts',)
+
+    def get_fields(self):
+        fields = super(JobOptionsSerializer, self).get_fields()
+
+        # TODO: remove when API v1 is removed
+        if self.version == 1:
+            fields.update(V1JobOptionsSerializer().get_fields())
+        return fields
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -2107,7 +2136,19 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
         if obj.credential:
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
-        # TODO: add related links for `extra_credentials`
+        if obj.vault_credential:
+            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential.pk})
+        if self.version > 1:
+            view = 'api:%s_extra_credentials_list' % camelcase_to_underscore(obj.__class__.__name__)
+            res['extra_credentials'] = self.reverse(view, kwargs={'pk': obj.pk})
+        else:
+            cloud_cred = obj.cloud_credential
+            if cloud_cred:
+                res['cloud_credential'] = self.reverse('api:credential_detail', kwargs={'pk': cloud_cred})
+            net_cred = obj.network_credential
+            if net_cred:
+                res['cloud_credential'] = self.reverse('api:credential_detail', kwargs={'pk': net_cred})
+
         return res
 
     def to_representation(self, obj):
@@ -2122,9 +2163,38 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 ret['playbook'] = ''
         if 'credential' in ret and not obj.credential:
             ret['credential'] = None
+        if 'vault_credential' in ret and not obj.vault_credential:
+            ret['vault_credential'] = None
+        if self.version == 1:
+            ret['cloud_credential'] = obj.cloud_credential
+            ret['network_credential'] = obj.network_credential
         return ret
 
     def validate(self, attrs):
+        if self.version == 1:  # TODO: remove in 3.3
+            if 'cloud_credential' in attrs:
+                pk = attrs.pop('cloud_credential')
+                for cred in self.instance.cloud_credentials:
+                    self.instance.extra_credentials.remove(cred)
+                if pk:
+                    cred = Credential.objects.get(pk=pk)
+                    if cred.credential_type.kind != 'cloud':
+                        raise serializers.ValidationError({
+                            'cloud_credential': _('You must provide a cloud credential.'),
+                        })
+                    self.instance.extra_credentials.add(cred)
+            if 'network_credential' in attrs:
+                pk = attrs.pop('network_credential')
+                for cred in self.instance.network_credentials:
+                    self.instance.extra_credentials.remove(cred)
+                if pk:
+                    cred = Credential.objects.get(pk=pk)
+                    if cred.credential_type.kind != 'net':
+                        raise serializers.ValidationError({
+                            'network_credential': _('You must provide a network credential.'),
+                        })
+                    self.instance.extra_credentials.add(cred)
+
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')

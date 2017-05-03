@@ -2659,6 +2659,21 @@ class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIVi
     new_in_300 = True
 
 
+class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = JobTemplate
+    relationship = 'extra_credentials'
+    new_in_320 = True
+    new_in_api_v2 = True
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.credential_type.kind not in ('net', 'cloud'):
+            return {'error': _('Extra credentials must be network or cloud.')}
+        return super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
+
+
 class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
 
     model = Label
@@ -3418,6 +3433,21 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         except Job.unified_job_node.RelatedObjectDoesNotExist:
             pass
         return super(JobDetail, self).destroy(request, *args, **kwargs)
+
+
+class JobExtraCredentialsList(SubListCreateAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = Job
+    relationship = 'extra_credentials'
+    new_in_320 = True
+    new_in_api_v2 = True
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.credential_type.kind not in ('net', 'cloud'):
+            return {'error': _('Extra credentials must be network or cloud.')}
+        return super(JobExtraCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
 class JobLabelList(SubListAPIView):
