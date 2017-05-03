@@ -19,7 +19,6 @@ from jsonbfield.fields import JSONField
 
 # AWX
 from awx.main.models.projects import Project
-from awx.main.models.base import PERM_INVENTORY_READ
 from awx.main.models.ha import Instance
 from awx.main.models.fact import Fact
 
@@ -38,7 +37,6 @@ from awx.main.models.inventory import (
 )
 from awx.main.models.organization import (
     Organization,
-    Permission,
     Team,
 )
 from awx.main.models.rbac import Role
@@ -526,11 +524,6 @@ def fact_packages_json():
 @pytest.fixture
 def fact_services_json():
     return _fact_json('services')
-
-
-@pytest.fixture
-def permission_inv_read(organization, inventory, team):
-    return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
 
 
 @pytest.fixture

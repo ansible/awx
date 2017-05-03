@@ -244,40 +244,6 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
             #print [x['name'] for x in resp['results']]
             self.assertEquals(resp['count'], 0)
 
-        # We give Juan inventory permission and he can see both Job Templates because he already has deploy permission
-        # Now he can see both job templates
-        Permission.objects.create(
-            inventory       = self.inv_eng,
-            user            = self.user_juan,
-            permission_type = PERM_INVENTORY_READ,
-            created_by      = self.user_sue
-        )
-        with self.current_user(self.user_juan):
-            resp = self.get(url, expect=200)
-            #print [x['name'] for x in resp['results']]
-            self.assertEquals(resp['count'], 2)
-
-        # Randall is on the ops testers team that has permission to run a single check playbook on ops west
-        with self.current_user(self.user_randall):
-            resp = self.get(url, expect=200)
-            #print [x['name'] for x in resp['results']]
-            self.assertEquals(resp['count'], 1)
-
-        # Holly is on the ops east team and can see all of that team's job templates
-        with self.current_user(self.user_holly):
-            resp = self.get(url, expect=200)
-            #print [x['name'] for x in resp['results']]
-            self.assertEquals(resp['count'], 3)
-
-        # Chuck is temporarily assigned to ops east team to help them running some playbooks
-        # even though he's in a different group and org entirely he'll now see their job templates
-        self.team_ops_east.deprecated_users.add(self.user_chuck)
-        with self.current_user(self.user_chuck):
-            resp = self.get(url, expect=200)
-            #print [x['name'] for x in resp['results']]
-            self.assertEquals(resp['count'], 6)
-
-
     def test_credentials_list(self):
         url = reverse('api:credential_list')
         # Greg can't see the 'south' credential because the 'southerns' team is inactive

@@ -215,22 +215,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     PASSWORD_FIELDS = ['inputs']
 
-    deprecated_user = models.ForeignKey(
-        'auth.User',
-        null=True,
-        default=None,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='deprecated_credentials',
-    )
-    deprecated_team = models.ForeignKey(
-        'Team',
-        null=True,
-        default=None,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='deprecated_credentials',
-    )
     credential_type = models.ForeignKey(
         'CredentialType',
         related_name='credentials',
@@ -391,40 +375,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                                     'SSH key is not encrypted.'))
         return self.ssh_key_unlock
 
-    def clean(self):
-        if self.deprecated_user and self.deprecated_team:
-            raise ValidationError(_('Credential cannot be assigned to both a user and team.'))
-
     def _password_field_allows_ask(self, field):
         return field in self.credential_type.askable_fields
 
     def save(self, *args, **kwargs):
-        inputs_before = {}
-        # If update_fields has been specified, add our field names to it,
-        # if hit hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
-        # If updating a credential, make sure that we only allow user OR team
-        # to be set, and clear out the other field based on which one has
-        # changed.
-        if self.pk:
-            cred_before = Credential.objects.get(pk=self.pk)
-            if self.deprecated_user and self.deprecated_team:
-                # If the user changed, remove the previously assigned team.
-                if cred_before.user != self.user:
-                    self.deprecated_team = None
-                    if 'deprecated_team' not in update_fields:
-                        update_fields.append('deprecated_team')
-                # If the team changed, remove the previously assigned user.
-                elif cred_before.deprecated_team != self.deprecated_team:
-                    self.deprecated_user = None
-                    if 'deprecated_user' not in update_fields:
-                        update_fields.append('deprecated_user')
-
-            inputs_before = cred_before.inputs
-
         self.PASSWORD_FIELDS = self.credential_type.secret_fields
 
         if self.pk:
+            cred_before = Credential.objects.get(pk=self.pk)
+            inputs_before = cred_before.inputs
             # Look up the currently persisted value so that we can replace
             # $encrypted$ with the actual DB-backed value
             for field in self.PASSWORD_FIELDS:
