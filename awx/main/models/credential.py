@@ -379,12 +379,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         return field in self.credential_type.askable_fields
 
     def save(self, *args, **kwargs):
-        inputs_before = {}
-        # If update_fields has been specified, add our field names to it,
-        # if hit hasn't been specified, then we're just doing a normal save.
         self.PASSWORD_FIELDS = self.credential_type.secret_fields
 
         if self.pk:
+            cred_before = Credential.objects.get(pk=self.pk)
+            inputs_before = cred_before.inputs
             # Look up the currently persisted value so that we can replace
             # $encrypted$ with the actual DB-backed value
             for field in self.PASSWORD_FIELDS:

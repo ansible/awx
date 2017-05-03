@@ -159,4 +159,69 @@ class Migration(migrations.Migration):
             name='allow_simultaneous',
             field=models.BooleanField(default=False),
         ),
+
+        # Permission and Deprecated Field Removal
+        migrations.RemoveField(
+            model_name='permission',
+            name='created_by',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='inventory',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='modified_by',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='project',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='tags',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='team',
+        ),
+        migrations.RemoveField(
+            model_name='permission',
+            name='user',
+        ),
+        migrations.RemoveField(
+            model_name='activitystream',
+            name='permission',
+        ),
+        migrations.RemoveField(
+            model_name='credential',
+            name='deprecated_team',
+        ),
+        migrations.RemoveField(
+            model_name='credential',
+            name='deprecated_user',
+        ),
+        migrations.RemoveField(
+            model_name='organization',
+            name='deprecated_admins',
+        ),
+        migrations.RemoveField(
+            model_name='organization',
+            name='deprecated_projects',
+        ),
+        migrations.RemoveField(
+            model_name='organization',
+            name='deprecated_users',
+        ),
+        migrations.RemoveField(
+            model_name='team',
+            name='deprecated_projects',
+        ),
+        migrations.RemoveField(
+            model_name='team',
+            name='deprecated_users',
+        ),
+        migrations.DeleteModel(
+            name='Permission',
+        ),
     ]
