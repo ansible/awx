@@ -7,6 +7,7 @@ from awx.main.models import (
     Project,
     Team,
     Instance,
+    InstanceGroup,
     JobTemplate,
     Job,
     NotificationTemplate,
@@ -27,11 +28,23 @@ from awx.main.models import (
 #
 
 
-def mk_instance(persisted=True):
+def mk_instance(persisted=True, hostname='instance.example.org'):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
     from django.conf import settings
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org")
+    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname)[0]
+
+
+def mk_instance_group(name='tower', instance=None):
+    ig, status = InstanceGroup.objects.get_or_create(name=name)
+    if instance is not None:
+        if type(instance) == list:
+            for i in instance:
+                ig.instances.add(i)
+        else:
+            ig.instances.add(instance)
+    ig.save()
+    return ig
 
 
 def mk_organization(name, description=None, persisted=True):
@@ -86,9 +99,11 @@ def mk_project(name, organization=None, description=None, persisted=True):
 
 
 def mk_credential(name, credential_type='ssh', persisted=True):
-    type_ = CredentialType.defaults[credential_type]()
     if persisted:
+        type_, status = CredentialType.objects.get_or_create(kind=credential_type)
         type_.save()
+    else:
+        type_ = CredentialType.defaults[credential_type]()
     cred = Credential(
         credential_type=type_,
         name=name

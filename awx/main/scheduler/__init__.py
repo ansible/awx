@@ -271,6 +271,13 @@ class TaskManager():
         if not latest_inventory_update.exists():
             return True
         latest_inventory_update = latest_inventory_update.first()
+        '''
+        If there's already a inventory update utilizing this job that's about to run
+        then we don't need to create one
+        '''
+        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+            return False
+
         timeout_seconds = timedelta(seconds=latest_inventory_update.inventory_source.update_cache_timeout)
         if (latest_inventory_update.finished + timeout_seconds) < now:
             return True
@@ -289,7 +296,14 @@ class TaskManager():
         latest_project_update = latest_project_update.first()
         if latest_project_update.status in ['failed', 'canceled']:
             return True
-        
+
+        '''
+        If there's already a project update utilizing this job that's about to run
+        then we don't need to create one
+        '''
+        if latest_project_update.status in ['waiting', 'pending', 'running']:
+            return False
+
         '''
         If the latest project update has a created time == job_created_time-1 
         then consider the project update found. This is so we don't enter an infinite loop
@@ -349,7 +363,7 @@ class TaskManager():
             self.process_dependencies(task, self.generate_dependencies(task))
             if self.is_job_blocked(task):
                 logger.debug("Task {} is blocked from running".format(task))
-                return
+                continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
@@ -443,6 +457,7 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
+        logger.debug("Starting Schedule")
         with transaction.atomic():
             # Lock
             try:

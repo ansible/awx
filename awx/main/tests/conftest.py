@@ -6,6 +6,8 @@ import pytest
 from awx.main.tests.factories import (
     create_organization,
     create_job_template,
+    create_instance,
+    create_instance_group,
     create_notification_template,
     create_survey_spec,
     create_workflow_job_template,
@@ -30,6 +32,21 @@ def notification_template_factory():
 @pytest.fixture
 def survey_spec_factory():
     return create_survey_spec
+
+
+@pytest.fixture
+def instance_factory():
+    return create_instance
+
+
+@pytest.fixture
+def instance_group_factory():
+    return create_instance_group
+
+
+@pytest.fixture
+def default_instance_group(instance_factory, instance_group_factory):
+    return create_instance_group("tower", instances=[create_instance("hostA")])
 
 
 @pytest.fixture

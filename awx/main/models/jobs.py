@@ -637,8 +637,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             inventory_groups = [x for x in self.inventory.instance_groups.all()]
         else:
             inventory_groups = []
-        template_groups = [x for x in super(Job, self).preferred_instance_groups]
-        return template_groups + inventory_groups + organization_groups
+        if self.job_template is not None:
+            template_groups = [x for x in self.job_template.instance_groups.all()]
+        else:
+            template_groups = []
+        selected_groups = template_groups + inventory_groups + organization_groups
+        if not selected_groups:
+            return super(Job, self).preferred_instance_groups
+        return selected_groups
 
     # Job Credential required
     @property

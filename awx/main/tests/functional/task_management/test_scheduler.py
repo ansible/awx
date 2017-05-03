@@ -1,0 +1,132 @@
+import pytest
+import mock
+from datetime import timedelta
+from awx.main.scheduler import TaskManager
+
+
+@pytest.mark.django_db
+def test_single_job_scheduler_launch(default_instance_group, job_template_factory, mocker):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job_should_start"])
+    j = objects.jobs["job_should_start"]
+    j.status = 'pending'
+    j.save()
+    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        assert TaskManager.start_task.called
+        assert TaskManager.start_task.call_args == ((j, default_instance_group),)
+
+
+@pytest.mark.django_db
+def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_template_factory, mocker):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job_should_start", "job_should_not_start"])
+    j1 = objects.jobs["job_should_start"]
+    j1.status = 'pending'
+    j1.save()
+    j2 = objects.jobs["job_should_not_start"]
+    j2.status = 'pending'
+    j2.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j1, default_instance_group)
+        j1.status = "successful"
+        j1.save()
+    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j2, default_instance_group)
+
+
+@pytest.mark.django_db
+def test_multi_jt_capacity_blocking(default_instance_group, job_template_factory, mocker):
+    objects1 = job_template_factory('jt1', organization='org1', project='proj1',
+                                    inventory='inv1', credential='cred1',
+                                    jobs=["job_should_start"])
+    objects2 = job_template_factory('jt2', organization='org2', project='proj2',
+                                    inventory='inv2', credential='cred2',
+                                    jobs=["job_should_not_start"])
+    j1 = objects1.jobs["job_should_start"]
+    j1.status = 'pending'
+    j1.save()
+    j2 = objects2.jobs["job_should_not_start"]
+    j2.status = 'pending'
+    j2.save()
+    tm = TaskManager()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = 500
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once_with(j1, default_instance_group)
+            j1.status = "successful"
+            j1.save()
+    with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+        tm.schedule()
+        mock_job.assert_called_once_with(j2, default_instance_group)
+    
+    
+
+@pytest.mark.django_db
+def test_single_job_dependencies_launch(default_instance_group, job_template_factory, mocker):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job_should_start"])
+    j = objects.jobs["job_should_start"]
+    j.status = 'pending'
+    j.save()
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 0
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        tm = TaskManager()
+        with mock.patch.object(TaskManager, "create_project_update", wraps=tm.create_project_update) as mock_pu:
+            tm.schedule()
+            mock_pu.assert_called_once_with(j)
+            pu = [x for x in p.project_updates.all()]
+            assert len(pu) == 1
+            TaskManager.start_task.assert_called_once_with(pu[0], default_instance_group, [pu[0]])
+            pu[0].status = "successful"
+            pu[0].save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j, default_instance_group)
+        
+
+@pytest.mark.django_db
+def test_shared_dependencies_launch(default_instance_group, job_template_factory, mocker):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["first_job", "second_job"])
+    j1 = objects.jobs["first_job"]
+    j1.status = 'pending'
+    j1.save()
+    j2 = objects.jobs["second_job"]
+    j2.status = 'pending'
+    j2.save()
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 10
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.first()
+        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [pu])
+        pu.status = "successful"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j1, default_instance_group)
+        j1.status = "successful"
+        j1.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j2, default_instance_group)
+    pu = [x for x in p.project_updates.all()]
+    assert len(pu) == 1
