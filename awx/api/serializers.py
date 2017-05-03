@@ -73,7 +73,8 @@ SUMMARIZABLE_FK_FIELDS = {
                                            'groups_with_active_failures',
                                            'has_inventory_sources',
                                            'total_inventory_sources',
-                                           'inventory_sources_with_failures'),
+                                           'inventory_sources_with_failures',
+                                           'organization_id'),
     'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
                                       'has_inventory_sources'),
     'group': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
@@ -1592,8 +1593,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if obj.inventory and obj.inventory.organization:
-            ret['organization'] = obj.inventory.organization.pk
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         return ret
