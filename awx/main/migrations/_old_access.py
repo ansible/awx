@@ -27,6 +27,11 @@ from awx.conf.license import LicenseForbids
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
+PERM_INVENTORY_ADMIN = 'admin'
+PERM_INVENTORY_READ = 'read'
+PERM_INVENTORY_WRITE = 'write'
+PERM_JOBTEMPLATE_CREATE = 'create'
+
 PERMISSION_TYPES = [
     PERM_INVENTORY_ADMIN,
     PERM_INVENTORY_READ,
@@ -57,9 +62,11 @@ access_registry = {
     # ...
 }
 
+
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
     access_classes.append(access_class)
+
 
 def get_user_queryset(user, model_class):
     '''
@@ -79,6 +86,7 @@ def get_user_queryset(user, model_class):
         for qs in querysets:
             queryset = queryset.filter(pk__in=qs.values_list('pk', flat=True))
         return queryset
+
 
 def check_user_access(user, model_class, action, *args, **kwargs):
     '''
@@ -243,6 +251,7 @@ class UserAccess(BaseAccess):
         return bool(self.user.is_superuser or
                     obj.deprecated_organizations.filter(deprecated_admins__in=[self.user]).exists())
 
+
 class OrganizationAccess(BaseAccess):
     '''
     I can see organizations when:
@@ -269,6 +278,7 @@ class OrganizationAccess(BaseAccess):
     def can_delete(self, obj):
         self.check_license(feature='multiple_organizations', check_expiration=False)
         return self.can_change(obj, None)
+
 
 class InventoryAccess(BaseAccess):
     '''
@@ -365,6 +375,7 @@ class InventoryAccess(BaseAccess):
     def can_run_ad_hoc_commands(self, obj):
         return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ, True)
 
+
 class HostAccess(BaseAccess):
     '''
     I can see hosts whenever I can see their inventory.
@@ -420,6 +431,7 @@ class HostAccess(BaseAccess):
 
     def can_delete(self, obj):
         return obj and check_user_access(self.user, Inventory, 'delete', obj.inventory)
+
 
 class GroupAccess(BaseAccess):
     '''
@@ -517,6 +529,7 @@ class InventorySourceAccess(BaseAccess):
     def can_start(self, obj):
         return self.can_change(obj, {}) and obj.can_update
 
+
 class InventoryUpdateAccess(BaseAccess):
     '''
     I can see inventory updates when I can see the inventory source.
@@ -535,6 +548,7 @@ class InventoryUpdateAccess(BaseAccess):
 
     def can_cancel(self, obj):
         return self.can_change(obj, {}) and obj.can_cancel
+
 
 class CredentialAccess(BaseAccess):
     '''
@@ -615,6 +629,7 @@ class CredentialAccess(BaseAccess):
             return True
         return self.can_change(obj, None)
 
+
 class TeamAccess(BaseAccess):
     '''
     I can see a team when:
@@ -661,6 +676,7 @@ class TeamAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
+
 
 class ProjectAccess(BaseAccess):
     '''
@@ -728,6 +744,7 @@ class ProjectAccess(BaseAccess):
     def can_start(self, obj):
         return self.can_change(obj, {}) and obj.can_update
 
+
 class ProjectUpdateAccess(BaseAccess):
     '''
     I can see project updates when I can see the project.
@@ -748,6 +765,7 @@ class ProjectUpdateAccess(BaseAccess):
 
     def can_delete(self, obj):
         return obj and check_user_access(self.user, Project, 'delete', obj.project)
+
 
 class PermissionAccess(BaseAccess):
     '''
@@ -841,6 +859,7 @@ class PermissionAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
+
 
 class JobTemplateAccess(BaseAccess):
     '''
@@ -1068,6 +1087,7 @@ class JobTemplateAccess(BaseAccess):
                        job_type=obj.job_type)
         return self.can_add(add_obj)
 
+
 class JobAccess(BaseAccess):
 
     model = Job
@@ -1168,6 +1188,7 @@ class JobAccess(BaseAccess):
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
 
+
 class SystemJobTemplateAccess(BaseAccess):
     '''
     I can only see/manage System Job Templates if I'm a super user
@@ -1178,11 +1199,13 @@ class SystemJobTemplateAccess(BaseAccess):
     def can_start(self, obj):
         return self.can_read(obj)
 
+
 class SystemJobAccess(BaseAccess):
     '''
     I can only see manage System Jobs if I'm a super user
     '''
     model = SystemJob
+
 
 class AdHocCommandAccess(BaseAccess):
     '''
@@ -1259,6 +1282,7 @@ class AdHocCommandAccess(BaseAccess):
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
 
+
 class AdHocCommandEventAccess(BaseAccess):
     '''
     I can see ad hoc command event records whenever I can read both ad hoc
@@ -1288,6 +1312,7 @@ class AdHocCommandEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+
 class JobHostSummaryAccess(BaseAccess):
     '''
     I can see job/host summary records whenever I can read both job and host.
@@ -1312,6 +1337,7 @@ class JobHostSummaryAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
 
 class JobEventAccess(BaseAccess):
     '''
@@ -1347,6 +1373,7 @@ class JobEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+
 class UnifiedJobTemplateAccess(BaseAccess):
     '''
     I can see a unified job template whenever I can see the same project,
@@ -1378,6 +1405,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         )
         # FIXME: Figure out how to do select/prefetch on related project/inventory/credential/cloud_credential.
         return qs
+
 
 class UnifiedJobAccess(BaseAccess):
     '''
@@ -1416,6 +1444,7 @@ class UnifiedJobAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         # FIXME: Figure out how to do select/prefetch on related project/inventory/credential/cloud_credential.
         return qs
+
 
 class ScheduleAccess(BaseAccess):
     '''
@@ -1474,6 +1503,7 @@ class ScheduleAccess(BaseAccess):
             return check_user_access(self.user, type(job_class), 'change', job_class, None)
         else:
             return False
+
 
 class ActivityStreamAccess(BaseAccess):
     '''
@@ -1591,6 +1621,7 @@ class ActivityStreamAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
 
 class CustomInventoryScriptAccess(BaseAccess):
 
