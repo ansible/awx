@@ -1,32 +1,42 @@
-function track (element) { 
+function use (componentScope, componentElement) { 
    let vm = this;
 
-   let input = {
-       el: element,
-       tabindex: vm.form.inputs.length + 1,
-       autofocus: vm.form.inputs.length === 0
-   };
+   let input = vm.track(componentElement);
 
-   vm.form.inputs.push(input);
+   componentScope.meta = input;
+}
 
-   return input;
+function track (componentElement) {
+    let vm = this;
+
+    let input = {
+       el: componentElement,
+       tabindex: vm.inputs.length + 1
+    };
+
+    if (vm.inputs.length === 0) {
+       input.autofocus = true;
+       componentElement.find('input').focus();
+    }
+
+    vm.inputs.push(input);
+
+    return input;
 }
 
 function controller () {
     let vm = this;
 
-    vm.form = {
-        inputs: []
-    };
-
+    vm.inputs = [];
+    vm.use = use;
     vm.track = track;
 }
 
-function atForm () {
+function atForm (pathService) {
     return {
         restrict: 'E',
         transclude: true,
-        templateUrl: 'static/partials/components/form/form.partial.html',
+        templateUrl: pathService.getPartialPath('components/form/form'),
         controller,
         controllerAs: 'vm',
         scope: {
@@ -34,5 +44,7 @@ function atForm () {
         }
     };
 }
+
+atForm.$inject = ['PathService'];
 
 export default atForm;

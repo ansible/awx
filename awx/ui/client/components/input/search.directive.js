@@ -1,6 +1,6 @@
 // TODO: i18n
 
-function atInputSearch () {
+function atInputSearch (pathService) {
     function link (scope) {
         scope.config = scope.config || {};
         scope.config.placeholder = scope.config.placeholder || 'SEARCH';
@@ -9,12 +9,14 @@ function atInputSearch () {
     return {
         restrict: 'E',
         transclude: true,
-        templateUrl: 'static/partials/components/input/search.partial.html',
+        templateUrl: pathService.getPartialPath('components/input/search'),
         link,
         scope: {
             config: '='
         }
     };
 }
+
+atInputSearch.$inject = ['PathService'];
 
 export default atInputSearch;

@@ -1,15 +1,14 @@
 function link (scope, el, attrs, form) {
-    scope.form = form.track(el);
-    console.log('text', scope.form);
+    form.use(scope, el);
 }
 
-function atInputText () {
+function atInputText (pathService) {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: '^^at-form',
-        templateUrl: 'static/partials/components/input/text.partial.html',
+        templateUrl: pathService.getPartialPath('components/input/text'),
         link,
         scope: {
             config: '=',
@@ -17,5 +16,7 @@ function atInputText () {
         }
     };
 }
+
+atInputText.$inject = ['PathService'];
 
 export default atInputText;

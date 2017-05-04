@@ -1,9 +1,12 @@
-function atPanelBody () {
+function atPanelBody (pathService) {
     return {
         restrict: 'E',
+        require: '^^atPanel',
         transclude: true,
-        templateUrl: 'static/partials/components/panel/body.partial.html'
+        templateUrl: pathService.getPartialPath('components/panel/body'),
     };
 }
+
+atPanelBody.$inject = ['PathService'];
 
 export default atPanelBody;

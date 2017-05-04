@@ -74,6 +74,7 @@ import instanceGroups from './instance-groups/main';
 
 import '../components';
 import '../models';
+import '../lib';
 import './credentials';
 
 var tower = angular.module('Tower', [
@@ -138,6 +139,7 @@ var tower = angular.module('Tower', [
     'ngResource',
     'at.components',
     'at.models',
+    'at.lib',
     'at.features.credentials'
 ])
 

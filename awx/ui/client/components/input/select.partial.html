@@ -1,25 +1,23 @@
-<div class="form-group">
-    <label class="at-Input-label">
-        <span ng-if="config.required" class="at-Input-label--required">*</span>
-        <span>{{ config.label }}</span>
-    </label>
-    <div class="input-group">
-        <select class="form-control at-Input at-Select" ng-model="config.input"
-                ng-mousedown="opened = opened || true"
-                ng-class="{ 'at-Input--placeholder': input === undefined && !opened }">
-            <option class="at-Select-option--placeholder" value="" disabled selected>
-                SELECT A TYPE
-            </option>
-            <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
-                <option ng-repeat="item in group.data" value="{{ item.id }}">
-                    {{ item.name }}
-                </option>
-            </optgroup>
-        </select>
-        <span class="input-group-btn">
-            <button class="btn at-Button--default at-Select-button">
-                <i class="fa fa-caret-down"></i>
-            </button>
-        </span>
+<div class="col-sm-{{ col }}">
+    <div class="form-group at-u-flat">
+        <label class="at-Input-label">
+            <span ng-if="config.required" class="at-Input-label--required">*</span>
+            <span>{{ config.label }}</span>
+        </label>
+        <div class="at-InputGroup at-Select">
+            <input type="text" class="form-control at-Input at-Select-input"
+                   ng-attr-autofocus="{{ meta.autofocus || undefined }}"
+                   placeholder="{{ config.placeholder | uppercase }}" ng-model="config.input" />
+
+            <select class="form-control at-Select-select" ng-model="config.input"
+                    tabindex="{{ meta.tabindex }}">
+                <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
+                    <option ng-repeat="item in group.data" value="{{ item.name }}">
+                        {{ item.name }}
+                    </option>
+                </optgroup>
+            </select>
+            <i class="fa" ng-class="{ 'fa-caret-down': !open, 'fa-caret-up': open }"></i>
+        </div>
     </div>
 </div>

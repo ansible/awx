@@ -10,6 +10,10 @@ function AddCredentialsController (credentialType) {
         label: 'Description'
     };
 
+    vm.heading = {
+        text: 'Create Credentials'
+    };
+
     vm.kind = {
         label: 'Type',
         placeholder: 'Select a Type',

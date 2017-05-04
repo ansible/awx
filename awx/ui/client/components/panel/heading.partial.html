@@ -1,8 +1,12 @@
-<div class="panel-heading at-Panel-heading">
-  <div class="at-Title-row">
-    <div class="at-Title-text">
-      <ng-transclude></ng-transclude>
+<div class="row">
+    <div class="col-xs-11">
+        <h3 class="at-Panel-headingTitle">
+            {{ config.text }}
+        </h3>
     </div>
-  </div>
+    <div class="col-xs-1">
+        <div class="at-Panel-dismiss">
+            <i class="fa fa-times-circle fa-lg" ng-click="dismiss()"></i>
+        </div>
+    </div>
 </div>
-

@@ -3,7 +3,8 @@ import ListController from './list/credentials-list.controller';
 import AddController from './add-credentials.controller.js';
 import { N_ } from '../i18n';
 
-function config ($stateExtenderProvider) {
+function config ($stateExtenderProvider, pathServiceProvider) {
+    let pathService = pathServiceProvider.$get();
     let stateExtender = $stateExtenderProvider.$get();
 
     stateExtender.addState({
@@ -14,7 +15,7 @@ function config ($stateExtenderProvider) {
         },
         views: {
             '@': {
-                templateUrl: '/static/views/credentials/index.view.html',
+                templateUrl: pathService.getViewPath('credentials/index')
             },
             'list@credentials': {
                 templateProvider: function(CredentialList, generateList) {
@@ -47,14 +48,14 @@ function config ($stateExtenderProvider) {
         },
         views: {
             'add@credentials': {
-                templateUrl: '/static/views/credentials/add-credentials.view.html',
+                templateUrl: pathService.getViewPath('credentials/add-credentials'),
                 controller: AddController,
                 controllerAs: 'vm'
             }
         },
         resolve: {
-            credentialType: ['CredentialType', CredentialType => {
-                return CredentialType.get().then(() => CredentialType);
+            credentialType: ['CredentialType', credentialType => {
+                return credentialType.get().then(() => credentialType);
             }]
         }
     });
@@ -76,7 +77,8 @@ function config ($stateExtenderProvider) {
 }
 
 config.$inject = [
-  '$stateExtenderProvider'
+  '$stateExtenderProvider',
+  'PathServiceProvider'
 ];
 
 angular
