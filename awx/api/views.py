@@ -2467,7 +2467,7 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     capabilities_prefetch = [
         'admin', 'execute',
-        {'copy': ['project.use', 'inventory.use', 'credential.use', 'cloud_credential.use', 'network_credential.use']}
+        {'copy': ['project.use', 'inventory.use', 'credential.use']}
     ]
 
     def post(self, request, *args, **kwargs):
@@ -2692,6 +2692,21 @@ class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIVi
     parent_model = JobTemplate
     relationship = 'notification_templates_success'
     new_in_300 = True
+
+
+class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = JobTemplate
+    relationship = 'extra_credentials'
+    new_in_320 = True
+    new_in_api_v2 = True
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.credential_type.kind not in ('net', 'cloud'):
+            return {'error': _('Extra credentials must be network or cloud.')}
+        return super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
 class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
@@ -3455,6 +3470,21 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 
+class JobExtraCredentialsList(SubListCreateAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = Job
+    relationship = 'extra_credentials'
+    new_in_320 = True
+    new_in_api_v2 = True
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.credential_type.kind not in ('net', 'cloud'):
+            return {'error': _('Extra credentials must be network or cloud.')}
+        return super(JobExtraCredentialsList, self).is_valid_relation(parent, sub, created)
+
+
 class JobLabelList(SubListAPIView):
 
     model = Label
@@ -3941,7 +3971,6 @@ class UnifiedJobTemplateList(ListAPIView):
     capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
-                  'jobtemplate.cloud_credential.use', 'jobtemplate.network_credential.use',
                   'workflowjobtemplate.organization.admin']}
     ]
 

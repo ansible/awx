@@ -1,7 +1,15 @@
 import pytest
 
+import json
+
 # AWX models
-from awx.main.models import ActivityStream, Organization, JobTemplate
+from awx.main.models import (
+    ActivityStream,
+    Organization,
+    JobTemplate,
+    Credential,
+    CredentialType
+)
 
 
 
@@ -80,3 +88,46 @@ class TestRolesAssociationEntries:
         proj2.use_role.parents.add(proj1.admin_role)
         assert ActivityStream.objects.filter(role=proj1.admin_role, project=proj2).count() == 1
 
+
+
+@pytest.fixture
+def somecloud_type():
+    return CredentialType.objects.create(
+        kind='cloud',
+        name='SomeCloud',
+        managed_by_tower=False,
+        inputs={
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': True
+            }]
+        },
+        injectors={
+            'env': {
+                'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'
+            }
+        }
+    )
+
+
+@pytest.mark.django_db
+class TestCredentialModels:
+    '''
+    Assure that core elements of activity stream feature are working
+    '''
+
+    def test_create_credential_type(self, somecloud_type):
+        assert ActivityStream.objects.filter(credential_type=somecloud_type).count() == 1
+        entry = ActivityStream.objects.filter(credential_type=somecloud_type)[0]
+        assert entry.operation == 'create'
+
+    def test_credential_hidden_information(self, somecloud_type):
+        cred = Credential.objects.create(
+            credential_type=somecloud_type,
+            inputs = {'api_token': 'ABC123'}
+        )
+        entry = ActivityStream.objects.filter(credential=cred)[0]
+        assert entry.operation == 'create'
+        assert json.loads(entry.changes)['inputs'] == 'hidden'

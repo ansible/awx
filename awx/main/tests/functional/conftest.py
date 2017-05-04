@@ -216,6 +216,12 @@ def credential(credentialtype_aws):
 
 
 @pytest.fixture
+def net_credential(credentialtype_net):
+    return Credential.objects.create(credential_type=credentialtype_net, name='test-cred',
+                                     inputs={'username': 'something', 'password': 'secret'})
+
+
+@pytest.fixture
 def machine_credential(credentialtype_ssh):
     return Credential.objects.create(credential_type=credentialtype_ssh, name='machine-cred',
                                      inputs={'username': 'test_user', 'password': 'pas4word'})

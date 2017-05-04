@@ -81,3 +81,21 @@ def migrate_to_v2_credentials(apps, schema_editor):
                     new_cred.save()
     finally:
         utils.get_current_apps = orig_current_apps
+
+
+def migrate_job_credentials(apps, schema_editor):
+    # this monkey-patch is necessary to make the implicit role generation save
+    # signal use the correct Role model (the version active at this point in
+    # migration, not the one at HEAD)
+    orig_current_apps = utils.get_current_apps
+    try:
+        utils.get_current_apps = lambda: apps
+        for type_ in ('Job', 'JobTemplate'):
+            for obj in apps.get_model('main', type_).objects.all():
+                if obj.cloud_credential:
+                    obj.extra_credentials.add(obj.cloud_credential)
+                if obj.network_credential:
+                    obj.extra_credentials.add(obj.network_credential)
+                obj.save()
+    finally:
+        utils.get_current_apps = orig_current_apps

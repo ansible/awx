@@ -397,31 +397,40 @@ class BaseTask(Task):
 
     def build_private_data_files(self, instance, **kwargs):
         '''
-        Create a temporary files containing the private data.
-        Returns a dictionary with keys from build_private_data
-        (i.e. 'credential', 'cloud_credential', 'network_credential') and values the file path.
+        Creates temporary files containing the private data.
+        Returns a dictionary i.e.,
+
+        {
+            'credentials': {
+                <awx.main.models.Credential>: '/path/to/decrypted/data',
+                <awx.main.models.Credential>: '/path/to/decrypted/data',
+                <awx.main.models.Credential>: '/path/to/decrypted/data',
+            }
+        }
         '''
         private_data = self.build_private_data(instance, **kwargs)
-        private_data_files = {}
+        private_data_files = {'credentials': {}}
         if private_data is not None:
             ssh_ver = get_ssh_version()
             ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
             openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
-            for name, data in private_data.iteritems():
+            for credential, data in private_data.get('credentials', {}).iteritems():
                 # Bail out now if a private key was provided in OpenSSH format
                 # and we're running an earlier version (<6.5).
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
-            for name, data in private_data.iteritems():
+            for credential, data in private_data.get('credentials', {}).iteritems():
+                name = 'credential_%d' % credential.pk
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if credential.kind in ('ssh', 'scm') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
                     self.open_fifo_write(path, data)
+                    private_data_files['credentials']['ssh'] = path
                 # Ansible network modules do not yet support ssh-agent.
                 # Instead, ssh private key file is explicitly passed via an
                 # env variable.
@@ -431,7 +440,7 @@ class BaseTask(Task):
                     f.write(data)
                     f.close()
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-                private_data_files[name] = path
+                private_data_files['credentials'][credential] = path
         return private_data_files
 
     def open_fifo_write(self, path, data):
@@ -514,12 +523,6 @@ class BaseTask(Task):
 
     def args2cmdline(self, *args):
         return ' '.join([pipes.quote(a) for a in args])
-
-    def get_ssh_key_path(self, instance, **kwargs):
-        '''
-        Return the path to the SSH key file, if present.
-        '''
-        return ''
 
     def wrap_args_with_ssh_agent(self, args, ssh_key_path, ssh_auth_sock=None):
         if ssh_key_path:
@@ -724,8 +727,11 @@ class BaseTask(Task):
             safe_env = self.build_safe_env(env, **kwargs)
 
             # handle custom injectors specified on the CredentialType
-            for type_ in ('credential', 'cloud_credential', 'network_credential'):
-                credential = getattr(instance, type_, None)
+            if hasattr(instance, 'all_credentials'):
+                credentials = instance.all_credentials
+            else:
+                credentials = [instance.credential]
+            for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
                         credential, env, safe_env, args, safe_args, kwargs['private_data_dir']
@@ -788,6 +794,22 @@ class BaseTask(Task):
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             self.signal_finished(pk)
 
+    def get_ssh_key_path(self, instance, **kwargs):
+        '''
+        If using an SSH key, return the path for use by ssh-agent.
+        '''
+        private_data_files = kwargs.get('private_data_files', {})
+        if 'ssh' in private_data_files.get('credentials', {}):
+            return private_data_files['credentials']['ssh']
+        '''
+        Note: Don't inject network ssh key data into ssh-agent for network
+        credentials because the ansible modules do not yet support it.
+        We will want to add back in support when/if Ansible network modules
+        support this.
+        '''
+
+        return ''
+
 
 class RunJob(BaseTask):
     '''
@@ -800,36 +822,36 @@ class RunJob(BaseTask):
     def build_private_data(self, job, **kwargs):
         '''
         Returns a dict of the form
-        dict['credential'] = <credential_decrypted_ssh_key_data>
-        dict['cloud_credential'] = <cloud_credential_decrypted_ssh_key_data>
-        dict['network_credential'] = <network_credential_decrypted_ssh_key_data>
-        '''
-        job_credentials = ['credential', 'cloud_credential', 'network_credential']
-        private_data = {}
-        # If we were sent SSH credentials, decrypt them and send them
-        # back (they will be written to a temporary file).
-        for cred_name in job_credentials:
-            credential = getattr(job, cred_name, None)
-            if credential:
-                if credential.ssh_key_data not in (None, ''):
-                    private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
-
-        if job.cloud_credential and job.cloud_credential.kind == 'openstack':
-            credential = job.cloud_credential
-            openstack_auth = dict(auth_url=credential.host,
-                                  username=credential.username,
-                                  password=decrypt_field(credential, "password"),
-                                  project_name=credential.project)
-            if credential.domain not in (None, ''):
-                openstack_auth['domain_name'] = credential.domain
-            openstack_data = {
-                'clouds': {
-                    'devstack': {
-                        'auth': openstack_auth,
-                    },
-                },
+        {
+            'credentials': {
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
             }
-            private_data['cloud_credential'] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+        }
+        '''
+        private_data = {'credentials': {}}
+        for credential in job.all_credentials:
+            # If we were sent SSH credentials, decrypt them and send them
+            # back (they will be written to a temporary file).
+            if credential.ssh_key_data not in (None, ''):
+                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data') or ''
+
+            if credential.kind == 'openstack':
+                openstack_auth = dict(auth_url=credential.host,
+                                      username=credential.username,
+                                      password=decrypt_field(credential, "password"),
+                                      project_name=credential.project)
+                if credential.domain not in (None, ''):
+                    openstack_auth['domain_name'] = credential.domain
+                openstack_data = {
+                    'clouds': {
+                        'devstack': {
+                            'auth': openstack_auth,
+                        },
+                    },
+                }
+                private_data['credentials'][credential] = yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
 
         return private_data
 
@@ -894,47 +916,47 @@ class RunJob(BaseTask):
         env['INVENTORY_HOSTVARS'] = str(True)
 
         # Set environment variables for cloud credentials.
-        cloud_cred = job.cloud_credential
-        if cloud_cred and cloud_cred.kind == 'aws':
-            env['AWS_ACCESS_KEY'] = cloud_cred.username
-            env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
-            if len(cloud_cred.security_token) > 0:
-                env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
-            # FIXME: Add EC2_URL, maybe EC2_REGION!
-        elif cloud_cred and cloud_cred.kind == 'rax':
-            env['RAX_USERNAME'] = cloud_cred.username
-            env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
-            env['CLOUD_VERIFY_SSL'] = str(False)
-        elif cloud_cred and cloud_cred.kind == 'gce':
-            env['GCE_EMAIL'] = cloud_cred.username
-            env['GCE_PROJECT'] = cloud_cred.project
-            env['GCE_PEM_FILE_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
-        elif cloud_cred and cloud_cred.kind == 'azure':
-            env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
-            env['AZURE_CERT_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
-        elif cloud_cred and cloud_cred.kind == 'azure_rm':
-            if len(cloud_cred.client) and len(cloud_cred.tenant):
-                env['AZURE_CLIENT_ID'] = cloud_cred.client
-                env['AZURE_SECRET'] = decrypt_field(cloud_cred, 'secret')
-                env['AZURE_TENANT'] = cloud_cred.tenant
-                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
-            else:
-                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
-                env['AZURE_AD_USER'] = cloud_cred.username
-                env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
-        elif cloud_cred and cloud_cred.kind == 'vmware':
-            env['VMWARE_USER'] = cloud_cred.username
-            env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
-            env['VMWARE_HOST'] = cloud_cred.host
-        elif cloud_cred and cloud_cred.kind == 'openstack':
-            env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+        cred_files = kwargs.get('private_data_files', {}).get('credentials', {})
+        for cloud_cred in job.cloud_credentials:
+            if cloud_cred and cloud_cred.kind == 'aws':
+                env['AWS_ACCESS_KEY'] = cloud_cred.username
+                env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
+                if len(cloud_cred.security_token) > 0:
+                    env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
+                # FIXME: Add EC2_URL, maybe EC2_REGION!
+            elif cloud_cred and cloud_cred.kind == 'rax':
+                env['RAX_USERNAME'] = cloud_cred.username
+                env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
+                env['CLOUD_VERIFY_SSL'] = str(False)
+            elif cloud_cred and cloud_cred.kind == 'gce':
+                env['GCE_EMAIL'] = cloud_cred.username
+                env['GCE_PROJECT'] = cloud_cred.project
+                env['GCE_PEM_FILE_PATH'] = cred_files.get(cloud_cred, '')
+            elif cloud_cred and cloud_cred.kind == 'azure':
+                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
+                env['AZURE_CERT_PATH'] = cred_files.get(cloud_cred, '')
+            elif cloud_cred and cloud_cred.kind == 'azure_rm':
+                if len(cloud_cred.client) and len(cloud_cred.tenant):
+                    env['AZURE_CLIENT_ID'] = cloud_cred.client
+                    env['AZURE_SECRET'] = decrypt_field(cloud_cred, 'secret')
+                    env['AZURE_TENANT'] = cloud_cred.tenant
+                    env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+                else:
+                    env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+                    env['AZURE_AD_USER'] = cloud_cred.username
+                    env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
+            elif cloud_cred and cloud_cred.kind == 'vmware':
+                env['VMWARE_USER'] = cloud_cred.username
+                env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
+                env['VMWARE_HOST'] = cloud_cred.host
+            elif cloud_cred and cloud_cred.kind == 'openstack':
+                env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
-        network_cred = job.network_credential
-        if network_cred:
+        for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.username
             env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
 
-            ssh_keyfile = kwargs.get('private_data_files', {}).get('network_credential', '')
+            ssh_keyfile = cred_files.get(network_cred, '')
             if ssh_keyfile:
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
@@ -1099,24 +1121,6 @@ class RunJob(BaseTask):
 
         return OutputEventFilter(stdout_handle, job_event_callback)
 
-    def get_ssh_key_path(self, instance, **kwargs):
-        '''
-        If using an SSH key, return the path for use by ssh-agent.
-        '''
-        private_data_files = kwargs.get('private_data_files', {})
-        if 'credential' in private_data_files:
-            return private_data_files.get('credential')
-        '''
-        Note: Don't inject network ssh key data into ssh-agent for network
-        credentials because the ansible modules do not yet support it.
-        We will want to add back in support when/if Ansible network modules
-        support this.
-        '''
-        #elif 'network_credential' in private_data_files:
-        #    return private_data_files.get('network_credential')
-
-        return ''
-
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
@@ -1169,13 +1173,22 @@ class RunProjectUpdate(BaseTask):
     def build_private_data(self, project_update, **kwargs):
         '''
         Return SSH private key data needed for this project update.
+
+        Returns a dict of the form
+        {
+            'credentials': {
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+            }
+        }
         '''
         handle, self.revision_path = tempfile.mkstemp()
-        private_data = {}
+        private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
             if credential.ssh_key_data not in (None, ''):
-                private_data['scm_credential'] = decrypt_field(project_update.credential, 'ssh_key_data')
+                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
         return private_data
 
     def build_passwords(self, project_update, **kwargs):
@@ -1334,12 +1347,6 @@ class RunProjectUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
-    def get_ssh_key_path(self, instance, **kwargs):
-        '''
-        If using an SSH key, return the path for use by ssh-agent.
-        '''
-        return kwargs.get('private_data_files', {}).get('scm_credential', '')
-
     def get_stdout_handle(self, instance):
         stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
 
@@ -1452,13 +1459,26 @@ class RunInventoryUpdate(BaseTask):
     model = InventoryUpdate
 
     def build_private_data(self, inventory_update, **kwargs):
-        """Return private data needed for inventory update.
+        """
+        Return private data needed for inventory update.
+
+        Returns a dict of the form
+        {
+            'credentials': {
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+            }
+        }
+
         If no private data is needed, return None.
         """
+        private_data = {'credentials': {}}
         # If this is Microsoft Azure or GCE, return the RSA key
         if inventory_update.source in ('azure', 'gce'):
             credential = inventory_update.credential
-            return dict(cloud_credential=decrypt_field(credential, 'ssh_key_data'))
+            private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
+            return private_data
 
         if inventory_update.source == 'openstack':
             credential = inventory_update.credential
@@ -1486,7 +1506,10 @@ class RunInventoryUpdate(BaseTask):
                 },
                 'cache': cache,
             }
-            return dict(cloud_credential=yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True))
+            private_data['credentials'][credential] = yaml.safe_dump(
+                openstack_data, default_flow_style=False, allow_unicode=True
+            )
+            return private_data
 
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
@@ -1602,7 +1625,8 @@ class RunInventoryUpdate(BaseTask):
         if cp.sections():
             f = cStringIO.StringIO()
             cp.write(f)
-            return dict(cloud_credential=f.getvalue())
+            private_data['credentials'][inventory_update.credential] = f.getvalue()
+            return private_data
 
     def build_passwords(self, inventory_update, **kwargs):
         """Build a dictionary of authentication/credential information for
@@ -1648,7 +1672,8 @@ class RunInventoryUpdate(BaseTask):
         # `awx/plugins/inventory` directory; those files should be kept in
         # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
-        cloud_credential = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+        cred_data = kwargs.get('private_data_files', {}).get('credentials', '')
+        cloud_credential = cred_data.get(inventory_update.credential, '')
         if inventory_update.source == 'ec2':
             if passwords.get('source_username', '') and passwords.get('source_password', ''):
                 env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
@@ -1855,13 +1880,22 @@ class RunAdHocCommand(BaseTask):
         '''
         Return SSH private key data needed for this ad hoc command (only if
         stored in DB as ssh_key_data).
+
+        Returns a dict of the form
+        {
+            'credentials': {
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>,
+                <awx.main.models.Credential>: <credential_decrypted_ssh_key_data>
+            }
+        }
         '''
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
         creds = ad_hoc_command.credential
-        private_data = {}
+        private_data = {'credentials': {}}
         if creds and creds.ssh_key_data not in (None, ''):
-            private_data['ad_hoc_credential'] = decrypt_field(creds, 'ssh_key_data') or ''
+            private_data['credentials'][creds] = decrypt_field(creds, 'ssh_key_data') or ''
         return private_data
 
     def build_passwords(self, ad_hoc_command, **kwargs):
@@ -2017,12 +2051,6 @@ class RunAdHocCommand(BaseTask):
                 AdHocCommandEvent.create_from_data(**event_data)
 
         return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
-
-    def get_ssh_key_path(self, instance, **kwargs):
-        '''
-        If using an SSH key, return the path for use by ssh-agent.
-        '''
-        return kwargs.get('private_data_files', {}).get('ad_hoc_credential', '')
 
     def should_use_proot(self, instance, **kwargs):
         '''
