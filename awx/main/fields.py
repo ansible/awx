@@ -363,6 +363,8 @@ class JSONSchemaField(JSONBField):
         super(JSONSchemaField, self).validate(value, model_instance)
         errors = []
         for error in Draft4Validator(self.schema(model_instance)).iter_errors(value):
+            if error.validator == 'pattern' and 'error' in error.schema:
+                error.message = error.schema['error'] % error.instance
             errors.append(error)
 
         if errors:
@@ -471,7 +473,11 @@ class CredentialTypeInputField(JSONSchemaField):
                                 'items': {'type': 'string'},
                                 'uniqueItems': True
                             },
-                            'id': {'type': 'string'},
+                            'id': {
+                                'type': 'string',
+                                'pattern': '^[a-zA-Z_]+[a-zA-Z0-9_]*$',
+                                'error': '%s is an invalid variable name',
+                            },
                             'label': {'type': 'string'},
                             'help_text': {'type': 'string'},
                             'multiline': {'type': 'boolean'},
@@ -490,13 +496,23 @@ class CredentialTypeInputField(JSONSchemaField):
             value, model_instance
         )
 
+        ids = {}
         for field in value.get('fields', []):
-            if field.get('id') == 'tower':
+            id_ = field.get('id')
+            if id_ == 'tower':
                 raise django_exceptions.ValidationError(
                     _('"tower" is a reserved field name'),
                     code='invalid',
                     params={'value': value},
                 )
+
+            if id_ in ids:
+                raise django_exceptions.ValidationError(
+                    _('field IDs must be unique (%s)' % id_),
+                    code='invalid',
+                    params={'value': value},
+                )
+            ids[id_] = True
 
 
 
