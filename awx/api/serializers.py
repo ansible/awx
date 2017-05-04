@@ -2256,8 +2256,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
-                  'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'allow_simultaneous')
 
     def get_related(self, obj):
@@ -2317,6 +2317,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     ask_skip_tags_on_launch = serializers.ReadOnlyField()
     ask_tags_on_launch = serializers.ReadOnlyField()
     ask_job_type_on_launch = serializers.ReadOnlyField()
+    ask_verbosity_on_launch = serializers.ReadOnlyField()
     ask_inventory_on_launch = serializers.ReadOnlyField()
     ask_credential_on_launch = serializers.ReadOnlyField()
     artifacts = serializers.SerializerMethodField()
@@ -2325,8 +2326,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'allow_simultaneous', 'artifacts', 'scm_revision',)
+                  'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
+                  'ask_credential_on_launch', 'allow_simultaneous', 'artifacts', 'scm_revision',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -2929,13 +2930,13 @@ class JobLaunchSerializer(BaseSerializer):
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
                   'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
-                  'ask_inventory_on_launch', 'ask_credential_on_launch',
+                  'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',
                   'job_template_data', 'defaults')
         read_only_fields = (
             'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
-            'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
+            'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
             'ask_inventory_on_launch', 'ask_credential_on_launch')
         extra_kwargs = {
             'credential': {'write_only': True,},
