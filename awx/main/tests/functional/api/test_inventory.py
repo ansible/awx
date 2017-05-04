@@ -203,7 +203,7 @@ def test_inventory_source_update(post, inventory_source, alice, role_field, expe
 def scm_inventory(inventory, project):
     inventory.inventory_sources.create(
         name='foobar', update_on_project_update=True, source='scm',
-        scm_project=project)
+        source_project=project)
     return inventory
 
 

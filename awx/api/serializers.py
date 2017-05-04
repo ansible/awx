@@ -84,7 +84,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
-    'scm_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
+    'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
@@ -975,7 +975,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             inventory_files = self.reverse('api:project_inventories', kwargs={'pk': obj.pk}),
             update = self.reverse('api:project_update_view', kwargs={'pk': obj.pk}),
             project_updates = self.reverse('api:project_updates_list', kwargs={'pk': obj.pk}),
-            scm_inventories = self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
+            scm_inventory_sources = self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates_any = self.reverse('api:project_notification_templates_any_list', kwargs={'pk': obj.pk}),
@@ -1526,7 +1526,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     class Meta:
         model = InventorySource
         fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout',
-                  'scm_project', 'update_on_project_update') + \
+                  'source_project', 'update_on_project_update') + \
                  ('last_update_failed', 'last_updated', 'group') # Backwards compatibility.
 
     def get_related(self, obj):
@@ -1544,8 +1544,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.scm_project_id is not None:
-            res['scm_project'] = self.reverse('api:project_detail', kwargs={'pk': obj.scm_project.pk})
+        if obj.source_project_id is not None:
+            res['source_project'] = self.reverse('api:project_detail', kwargs={'pk': obj.source_project.pk})
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = self.reverse('api:inventory_update_detail',
@@ -1584,7 +1584,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(InventorySourceSerializer, self).build_relational_field(field_name, relation_info)
         # SCM Project and inventory are read-only unless creating a new inventory.
-        if self.instance and field_name in ['scm_project', 'inventory']:
+        if self.instance and field_name in ['source_project', 'inventory']:
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
@@ -1628,7 +1628,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory_source', 'license_error')
+        fields = ('*', 'inventory_source', 'license_error', 'source_project_update')
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
@@ -1637,6 +1637,9 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
+        if obj.source_project_update_id:
+            res['source_project_update'] = self.reverse('api:project_update_detail',
+                                                        kwargs={'pk': obj.source_project_update.pk})
         return res
 
 
