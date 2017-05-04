@@ -6,8 +6,8 @@
 
 export default ['i18n', function(i18n) {
     return {
-        showHeader: false,
         name: 'configuration_misc_template',
+        showHeader: false,
         showActions: true,
 
         fields: {
@@ -19,6 +19,22 @@ export default ['i18n', function(i18n) {
                 type: 'toggleSwitch',
             },
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
+                type: 'toggleSwitch',
+            },
+            AUTH_TOKEN_EXPIRATION: {
+                type: 'number',
+                integer: true,
+                min: 60,
+                reset: 'AUTH_TOKEN_EXPIRATION',
+            },
+            AUTH_TOKEN_PER_USER: {
+                type: 'number',
+                integer: true,
+                spinner: true,
+                min: -1,
+                reset: 'AUTH_TOKEN_PER_USER',
+            },
+            AUTH_BASIC_ENABLED: {
                 type: 'toggleSwitch',
             }
         },
