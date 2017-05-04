@@ -1122,7 +1122,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         on_delete=models.CASCADE,
     )
 
-    scm_project = models.ForeignKey(
+    source_project = models.ForeignKey(
         'Project',
         related_name='scm_inventory_sources',
         help_text=_('Project containing inventory file used as source.'),
@@ -1155,7 +1155,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                'timeout', 'verbosity', 'launch_type', 'scm_project_update',]
+                'timeout', 'verbosity', 'launch_type', 'source_project_update',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -1180,7 +1180,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # Reset revision if SCM source has changed parameters
         if self.source=='scm' and not is_new_instance:
             before_is = self.__class__.objects.get(pk=self.pk)
-            if before_is.source_path != self.source_path or before_is.scm_project_id != self.scm_project_id:
+            if before_is.source_path != self.source_path or before_is.source_project_id != self.source_project_id:
                 # Reset the scm_revision if file changed to force update
                 self.scm_revision = None
                 if 'scm_revision' not in update_fields:
@@ -1195,9 +1195,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             super(InventorySource, self).save(update_fields=['name'])
         if self.source=='scm' and is_new_instance and self.update_on_project_update:
             # Schedule a new Project update if one is not already queued
-            if self.scm_project and not self.scm_project.project_updates.filter(
+            if self.source_project and not self.source_project.project_updates.filter(
                     status__in=['new', 'pending', 'waiting']).exists():
-                self.scm_project.update()
+                self.source_project.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
@@ -1221,7 +1221,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if self.source == 'custom':
             return bool(self.source_script)
         elif self.source == 'scm':
-            return bool(self.scm_project)
+            return bool(self.source_project)
         else:
             return bool(self.source in CLOUD_INVENTORY_SOURCES)
 
@@ -1294,7 +1294,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         default=False,
         editable=False,
     )
-    scm_project_update = models.ForeignKey(
+    source_project_update = models.ForeignKey(
         'ProjectUpdate',
         related_name='scm_inventory_updates',
         help_text=_('Inventory files from this Project Update were used for the inventory update.'),
@@ -1344,10 +1344,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def get_actual_source_path(self):
         '''Alias to source_path that combines with project path for for SCM file based sources'''
-        if self.inventory_source_id is None or self.inventory_source.scm_project_id is None:
+        if self.inventory_source_id is None or self.inventory_source.source_project_id is None:
             return self.source_path
         return os.path.join(
-            self.inventory_source.scm_project.get_project_path(check_if_exists=False),
+            self.inventory_source.source_project.get_project_path(check_if_exists=False),
             self.source_path)
 
     @property
@@ -1364,7 +1364,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         if (self.source not in ('custom', 'ec2', 'scm') and
                 not (self.credential)):
             return False
-        elif self.source == 'scm' and not self.inventory_source.scm_project:
+        elif self.source == 'scm' and not self.inventory_source.source_project:
             return False
         elif self.source == 'file':
             return False

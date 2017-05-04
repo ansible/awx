@@ -1367,7 +1367,7 @@ class RunProjectUpdate(BaseTask):
                                 'another update is already active.'.format(inv.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
-                    scm_project_update_id=project_update.id,
+                    source_project_update_id=project_update.id,
                     launch_type='scm',
                     _eager_fields=dict(
                         status='running',
@@ -1802,13 +1802,13 @@ class RunInventoryUpdate(BaseTask):
     def pre_run_hook(self, inventory_update, **kwargs):
         self.custom_dir_path = []
 
-        scm_project = None
+        source_project = None
         if inventory_update.inventory_source:
-            scm_project = inventory_update.inventory_source.scm_project
-        if (inventory_update.source=='scm' and scm_project and
+            source_project = inventory_update.inventory_source.source_project
+        if (inventory_update.source=='scm' and source_project and
                 not inventory_update.inventory_source.update_on_project_update):
             request_id = '' if self.request.id is None else self.request.id
-            local_project_sync = scm_project.create_project_update(
+            local_project_sync = source_project.create_project_update(
                 launch_type="sync",
                 _eager_params=dict(
                     job_type='run',

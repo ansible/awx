@@ -7,7 +7,7 @@ a project as an Ansible inventory file.
 
 Fields that should be specified on creation of SCM inventory source:
 
- - `scm_project` - project to use
+ - `source_project` - project to use
  - `source_path` - relative path inside of the project indicating a
    directory or a file, if left blank, "" is still a relative path
    indicating the root directory of the project

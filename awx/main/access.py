@@ -743,7 +743,7 @@ class InventorySourceAccess(BaseAccess):
     def can_add(self, data):
         if not data or 'inventory' not in data:
             return False
-        if not self.check_related('scm_project', Project, data, role_field='admin_role'):
+        if not self.check_related('source_project', Project, data, role_field='admin_role'):
             return False
         # Checks for admin or change permission on inventory.
         return self.check_related('inventory', Inventory, data)

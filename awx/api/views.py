@@ -1127,7 +1127,7 @@ class ProjectScmInventorySources(SubListCreateAPIView):
     serializer_class = InventorySourceSerializer
     parent_model = Project
     relationship = 'scm_inventory_sources'
-    parent_key = 'scm_project'
+    parent_key = 'source_project'
     new_in_320 = True
 
 
@@ -1263,7 +1263,7 @@ class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
     serializer_class = InventoryUpdateSerializer
     parent_model = ProjectUpdate
     relationship = 'scm_inventory_updates'
-    parent_key = 'scm_project_update'
+    parent_key = 'source_project_update'
     new_in_320 = True
 
 
@@ -2406,8 +2406,8 @@ class InventorySourceUpdateView(RetrieveAPIView):
             if obj.source == 'scm' and obj.update_on_project_update:
                 if not self.request.user or self.request.user.can_access(self.model, 'update', obj):
                     raise PermissionDenied(detail=_(
-                        'You do not have permission to update project `{}`.'.format(obj.scm_project.name)))
-                return self._build_update_response(obj.scm_project.update(), request)
+                        'You do not have permission to update project `{}`.'.format(obj.source_project.name)))
+                return self._build_update_response(obj.source_project.update(), request)
             return self._build_update_response(obj.update(), request)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)

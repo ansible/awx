@@ -237,7 +237,7 @@ def inventory(organization):
 def scm_inventory_source(inventory, project):
     return InventorySource.objects.create(
         name="test-scm-inv",
-        scm_project=project,
+        source_project=project,
         source='scm',
         source_path='inventory_file',
         update_on_project_update=True,

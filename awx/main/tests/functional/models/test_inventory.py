@@ -14,12 +14,12 @@ class TestSCMUpdateFeatures:
 
     def test_automatic_project_update_on_create(self, inventory, project):
         inv_src = InventorySource(
-            scm_project=project,
+            source_project=project,
             source_path='inventory_file',
             inventory=inventory,
             update_on_project_update=True,
             source='scm')
-        with mock.patch.object(inv_src.scm_project, 'update') as mck_update:
+        with mock.patch.object(inv_src.source_project, 'update') as mck_update:
             inv_src.save()
             mck_update.assert_called_once_with()
 
@@ -32,7 +32,7 @@ class TestSCMUpdateFeatures:
 
     def test_no_unwanted_updates(self, scm_inventory_source):
         # Changing the non-sensitive fields should not trigger update
-        with mock.patch.object(scm_inventory_source.scm_project, 'update') as mck_update:
+        with mock.patch.object(scm_inventory_source.source_project, 'update') as mck_update:
             scm_inventory_source.name = 'edited_inventory'
             scm_inventory_source.description = "I'm testing this!"
             scm_inventory_source.save()

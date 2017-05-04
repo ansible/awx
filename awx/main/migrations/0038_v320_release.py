@@ -81,12 +81,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='inventorysource',
-            name='scm_project',
+            name='source_project',
             field=models.ForeignKey(related_name='scm_inventory_sources', default=None, blank=True, to='main.Project', help_text='Project containing inventory file used as source.', null=True),
         ),
         migrations.AddField(
             model_name='inventoryupdate',
-            name='scm_project_update',
+            name='source_project_update',
             field=models.ForeignKey(related_name='scm_inventory_updates', default=None, blank=True, to='main.ProjectUpdate', help_text='Inventory files from this Project Update were used for the inventory update.', null=True),
         ),
         migrations.AddField(
