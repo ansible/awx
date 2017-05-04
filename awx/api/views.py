@@ -2704,6 +2704,12 @@ class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
     new_in_api_v2 = True
 
     def is_valid_relation(self, parent, sub, created=False):
+        current_extra_types = [
+            cred.credential_type.pk for cred in parent.extra_credentials.all()
+        ]
+        if sub.credential_type.pk in current_extra_types:
+            return {'error': _('Cannot assign multiple %s credentials.' % sub.credential_type.name)}
+
         if sub.credential_type.kind not in ('net', 'cloud'):
             return {'error': _('Extra credentials must be network or cloud.')}
         return super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
@@ -3470,7 +3476,7 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 
-class JobExtraCredentialsList(SubListCreateAttachDetachAPIView):
+class JobExtraCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -3478,11 +3484,6 @@ class JobExtraCredentialsList(SubListCreateAttachDetachAPIView):
     relationship = 'extra_credentials'
     new_in_320 = True
     new_in_api_v2 = True
-
-    def is_valid_relation(self, parent, sub, created=False):
-        if sub.credential_type.kind not in ('net', 'cloud'):
-            return {'error': _('Extra credentials must be network or cloud.')}
-        return super(JobExtraCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
 class JobLabelList(SubListAPIView):

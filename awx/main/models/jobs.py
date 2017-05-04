@@ -181,7 +181,7 @@ class JobOptions(BaseModel):
 
     @property
     def all_credentials(self):
-        credentials = self.extra_credentials.all()
+        credentials = list(self.extra_credentials.all())
         if self.vault_credential:
             credentials.insert(0, self.vault_credential)
         if self.credential:
