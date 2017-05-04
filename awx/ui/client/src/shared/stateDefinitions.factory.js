@@ -407,17 +407,24 @@ function($injector, $stateExtender, $log, i18n) {
                     },
                     views: {
                         'related': {
-                            templateProvider: function(FormDefinition, GenerateForm) {
-                                let html = GenerateForm.buildCollection({
+                            templateProvider: function(FormDefinition, GenerateForm, $stateParams, SourcesFormDefinition) {
+                                var form, html;
+                                if($stateParams && $stateParams.inventory_source_id){
+                                    form = SourcesFormDefinition;
+                                }
+                                else {
+                                    form = typeof(FormDefinition) === 'function' ?
+                                        FormDefinition() : FormDefinition;
+                                }
+                                html = GenerateForm.buildCollection({
                                     mode: 'edit',
                                     related: `${list.iterator}s`,
-                                    form: typeof(FormDefinition) === 'function' ?
-                                        FormDefinition() : FormDefinition
+                                    form: form
                                 });
                                 return html;
                             },
-                            controller: ['$scope', 'ListDefinition', 'Dataset', 'ToggleNotification', 'NotificationsListInit', 'GetBasePath', '$stateParams', 'inventorySourceData',
-                                function($scope, list, Dataset, ToggleNotification, NotificationsListInit, GetBasePath, $stateParams, inventorySourceData) {
+                            controller: ['$scope', 'ListDefinition', 'Dataset', 'ToggleNotification', 'NotificationsListInit', 'GetBasePath', '$stateParams',
+                                function($scope, list, Dataset, ToggleNotification, NotificationsListInit, GetBasePath, $stateParams) {
                                     var url , params = $stateParams, id;
                                     if(params.hasOwnProperty('project_id')){
                                         id = params.project_id;
@@ -431,8 +438,8 @@ function($injector, $stateExtender, $log, i18n) {
                                         id = params.workflow_job_template_id;
                                         url = GetBasePath('workflow_job_templates');
                                     }
-                                    if(params.hasOwnProperty('inventory_id')){
-                                        id = inventorySourceData.id;
+                                    if(params.hasOwnProperty('inventory_source_id')){
+                                        id = params.inventory_source_id;
                                         url = GetBasePath('inventory_sources');
                                     }
                                     if(params.hasOwnProperty('organization_id')){
@@ -484,15 +491,6 @@ function($injector, $stateExtender, $log, i18n) {
                         ListDefinition: () => {
                             return list;
                         },
-                        inventorySourceData: ['$stateParams', //'GroupManageService',
-                        function($stateParams){ //, GroupManageService) {
-                            if($stateParams.hasOwnProperty('group_id')){
-                                return; //GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
-                            }
-                            else{
-                                return null;
-                            }
-                        }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
                             (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
                                 // allow related list definitions to use interpolated $rootScope / $stateParams in basePath field

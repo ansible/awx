@@ -15,8 +15,8 @@
  */
 
 export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
-    '$state', '$rootScope',
-    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state, $rootScope) {
+    '$state', '$rootScope', '$stateParams',
+    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state, $rootScope, $stateParams) {
     return function(params) {
         var scope = params.scope,
             url = params.url,
@@ -31,8 +31,22 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
             });
 
         scope.addNotificationTemplate = function() {
-            if (id) {
-                $state.go('notifications.add', {organization_id: id});
+            var org_id;
+            if($stateParams.hasOwnProperty('project_id')){
+                org_id = scope.$parent.project_obj.organization;
+            }
+            else if($stateParams.hasOwnProperty('workflow_job_template_id')){
+                org_id = scope.$parent.workflow_job_template_obj.organization;
+            }
+            else if($stateParams.hasOwnProperty('inventory_source_id')){
+                org_id = scope.$parent.summary_fields.inventory.organization_id;
+            }
+            else if($stateParams.hasOwnProperty('organization_id')){
+                org_id = scope.$parent.organization_id;
+            }
+
+            if (org_id) {
+                $state.go('notifications.add', {organization_id: org_id});
             }
             else {
                 $state.go('notifications.add');

@@ -21,7 +21,7 @@ export default
         sourcesAdd.name,
         sourcesEdit.name
     ])
-    .value('SourcesFormDefinition', sourcesFormDefinition)
+    .factory('SourcesFormDefinition', sourcesFormDefinition)
     .value('SourcesListDefinition', sourcesListDefinition)
     .factory('GetSyncStatusMsg', GetSyncStatusMsg)
     .factory('ViewUpdateStatus', ViewUpdateStatus)

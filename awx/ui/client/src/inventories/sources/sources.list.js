@@ -32,7 +32,7 @@ export default {
         name: {
             label: 'Sources',
             key: true,
-            ngClick: "groupSelect(inventory_source.id)",
+            ngClick: "editSource(inventory_source.id)",
             columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
             class: 'InventoryManage-breakWord',
         }
