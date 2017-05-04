@@ -24,7 +24,7 @@ class TestDependentInventoryUpdate:
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunProjectUpdate, '_update_dependent_inventories') as inv_update_mck:
             task.post_run_hook(proj_update, 'successful')
-            inv_update_mck.assert_called_once_with(scm_inventory_source.source_project, mock.ANY)
+            inv_update_mck.assert_called_once_with(proj_update, mock.ANY)
 
     def test_no_unwanted_dependent_inventory_updates(self, project, scm_revision_file):
         task = RunProjectUpdate()
@@ -36,8 +36,10 @@ class TestDependentInventoryUpdate:
 
     def test_dependent_inventory_updates(self, scm_inventory_source):
         task = RunProjectUpdate()
+        proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
-            task._update_dependent_inventories(scm_inventory_source.source_project, [scm_inventory_source])
+            task._update_dependent_inventories(proj_update, [scm_inventory_source])
             assert InventoryUpdate.objects.count() == 1
             inv_update = InventoryUpdate.objects.first()
             iu_run_mock.assert_called_once_with(inv_update.id)
+            assert inv_update.source_project_update_id == proj_update.pk

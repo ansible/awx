@@ -1128,7 +1128,7 @@ class RunJob(BaseTask):
             job_request_id = '' if self.request.id is None else self.request.id
             local_project_sync = job.project.create_project_update(
                 launch_type="sync",
-                _eager_params=dict(
+                _eager_fields=dict(
                     job_type='run',
                     status='running',
                     celery_task_id=job_request_id))
@@ -1367,11 +1367,11 @@ class RunProjectUpdate(BaseTask):
                                 'another update is already active.'.format(inv.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
-                    source_project_update_id=project_update.id,
                     launch_type='scm',
                     _eager_fields=dict(
                         status='running',
-                        celery_task_id=str(project_request_id)))
+                        celery_task_id=str(project_request_id),
+                        source_project_update=project_update))
             inv_update_task = local_inv_update._get_task_class()
             try:
                 task_instance = inv_update_task()
@@ -1443,7 +1443,7 @@ class RunProjectUpdate(BaseTask):
         # Update any inventories that depend on this project
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
-                self._update_dependent_inventories(p, dependent_inventory_sources)
+                self._update_dependent_inventories(instance, dependent_inventory_sources)
 
 
 class RunInventoryUpdate(BaseTask):
@@ -1810,7 +1810,7 @@ class RunInventoryUpdate(BaseTask):
             request_id = '' if self.request.id is None else self.request.id
             local_project_sync = source_project.create_project_update(
                 launch_type="sync",
-                _eager_params=dict(
+                _eager_fields=dict(
                     job_type='run',
                     status='running',
                     celery_task_id=request_id))

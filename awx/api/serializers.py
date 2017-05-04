@@ -1629,7 +1629,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory_source', 'license_error')
+        fields = ('*', 'inventory_source', 'license_error', 'source_project_update')
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
@@ -1638,6 +1638,9 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
+        if obj.source_project_update_id:
+            res['source_project_update'] = self.reverse('api:project_update_detail',
+                                                        kwargs={'pk': obj.source_project_update.pk})
         return res
 
 
