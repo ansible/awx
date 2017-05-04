@@ -21,7 +21,7 @@ __metaclass__ = type
 from ansible.plugins.callback import CallbackBase
 from websocket import create_connection
 import json
-from pprint import pprint
+import traceback
 
 from functools import wraps
 
@@ -38,7 +38,21 @@ def debug(fn):
         return wrapper
     else:
         return fn
-ass CallbackModule(CallbackBase):
+
+
+def catch_exceptions(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            ret_value = fn(*args, **kwargs)
+            return ret_value
+        except BaseException:
+            print(traceback.format_exc())
+            return None
+    return wrapper
+
+
+class CallbackModule(CallbackBase):
     '''
     This callback puts results into a host specific file in a directory in json format.
     '''
@@ -55,14 +69,17 @@ ass CallbackModule(CallbackBase):
         self.play = None
         self.hosts = []
 
+    @catch_exceptions
     @debug
     def v2_playbook_on_setup(self):
         pass
 
+    @catch_exceptions
     @debug
     def v2_playbook_on_handler_task_start(self, task):
         pass
 
+    @catch_exceptions
     @debug
     def v2_runner_on_ok(self, result):
         self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
@@ -70,6 +87,7 @@ ass CallbackModule(CallbackBase):
                                                     working=False,
                                                     status="pass")]))
 
+    @catch_exceptions
     @debug
     def v2_runner_on_failed(self, result, ignore_errors=False):
         self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
@@ -77,6 +95,7 @@ ass CallbackModule(CallbackBase):
                                                     working=False,
                                                     status="fail")]))
 
+    @catch_exceptions
     @debug
     def runner_on_unreachable(self, host, result, ignore_errors=False):
         self.ws.send(json.dumps(['TaskStatus', dict(device_name=host,
@@ -84,6 +103,7 @@ ass CallbackModule(CallbackBase):
                                                     working=False,
                                                     status="fail")]))
 
+    @catch_exceptions
     @debug
     def v2_runner_item_on_skipped(self, result, ignore_errors=False):
         self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
@@ -91,6 +111,7 @@ ass CallbackModule(CallbackBase):
                                                     working=False,
                                                     status="skip")]))
 
+    @catch_exceptions
     @debug
     def DISABLED_v2_on_any(self, *args, **kwargs):
         self._display.display("--- play: {} task: {} ---".format(getattr(self.play, 'name', None), self.task))
@@ -102,6 +123,8 @@ ass CallbackModule(CallbackBase):
         self._display.display("      --- KWARGS ")
         for k in kwargs:
             self._display.display('     %s: %s' % (k, kwargs[k]))
+
+    @catch_exceptions
     @debug
     def v2_playbook_on_play_start(self, play):
         self.play = play
@@ -112,6 +135,7 @@ ass CallbackModule(CallbackBase):
                                                           working=True,
                                                           status=None)]))
 
+    @catch_exceptions
     @debug
     def v2_playbook_on_task_start(self, task, is_conditional):
         self.task = task
@@ -121,10 +145,11 @@ ass CallbackModule(CallbackBase):
                                                         working=True,
                                                         status=None)]))
 
+    @catch_exceptions
     @debug
     def v2_playbook_on_stats(self, stats):
         hosts = sorted(stats.processed.keys())
-   summary = {}
+        summary = {}
         for host in self.hosts:
             s = stats.summarize(host.get_name())
             status = "pass"
