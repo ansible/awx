@@ -684,7 +684,12 @@ class BaseTask(Task):
 
     def post_run_hook(self, instance, status, **kwargs):
         '''
-        Hook for any steps to run after job/task is complete.
+        Hook for any steps to run before job/task is marked as complete.
+        '''
+
+    def final_run_hook(self, instance, status, **kwargs):
+        '''
+        Hook for any steps to run after job/task is marked as complete.
         '''
 
     def run(self, pk, **kwargs):
@@ -772,10 +777,11 @@ class BaseTask(Task):
         if instance.cancel_flag:
             status = 'canceled'
 
+        self.post_run_hook(instance, status, **kwargs)
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
                                      **extra_update_fields)
-        self.post_run_hook(instance, status, **kwargs)
+        self.final_run_hook(instance, status, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
@@ -1148,11 +1154,8 @@ class RunJob(BaseTask):
                                                          ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
-    def post_run_hook(self, job, status, **kwargs):
-        '''
-        Hook for actions to run after job/task has completed.
-        '''
-        super(RunJob, self).post_run_hook(job, status, **kwargs)
+    def final_run_hook(self, job, status, **kwargs):
+        super(RunJob, self).final_run_hook(job, status, **kwargs)
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
@@ -1436,14 +1439,18 @@ class RunProjectUpdate(BaseTask):
             if len(dependent_inventory_sources) > 0:
                 p.inventory_files = p.inventories
             p.save()
-        try:
-            os.remove(self.revision_path)
-        except Exception, e:
-            logger.error("Failed removing revision tmp file: {}".format(e))
+
         # Update any inventories that depend on this project
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
+
+    def final_run_hook(self, instance, status, **kwargs):
+        super(RunProjectUpdate, self).final_run_hook(instance, status, **kwargs)
+        try:
+            os.remove(self.revision_path)
+        except Exception, e:
+            logger.error("Failed removing revision tmp file: {}".format(e))
 
 
 class RunInventoryUpdate(BaseTask):
@@ -1832,8 +1839,8 @@ class RunInventoryUpdate(BaseTask):
                                      ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
-    def post_run_hook(self, instance, status, **kwargs):
-        print("In post run hook")
+    def final_run_hook(self, instance, status, **kwargs):
+        print("In final run hook")
         if self.custom_dir_path:
             for p in self.custom_dir_path:
                 try:
@@ -2030,11 +2037,11 @@ class RunAdHocCommand(BaseTask):
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def post_run_hook(self, ad_hoc_command, status, **kwargs):
+    def final_run_hook(self, ad_hoc_command, status, **kwargs):
         '''
-        Hook for actions to run after ad hoc command has completed.
+        Hook for actions to run after ad hoc command is marked as completed.
         '''
-        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, status, **kwargs)
+        super(RunAdHocCommand, self).final_run_hook(ad_hoc_command, status, **kwargs)
 
 
 class RunSystemJob(BaseTask):

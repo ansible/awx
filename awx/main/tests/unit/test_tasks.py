@@ -220,7 +220,7 @@ class TestJobExecution:
         self.task.run_pexpect = mock.Mock(return_value=['successful', 0])
 
         # ignore pre-run and post-run hooks, they complicate testing in a variety of ways
-        self.task.pre_run_hook = self.task.post_run_hook = mock.Mock()
+        self.task.pre_run_hook = self.task.post_run_hook = self.task.final_run_hook = mock.Mock()
 
     def teardown_method(self, method):
         for p in self.patches:
