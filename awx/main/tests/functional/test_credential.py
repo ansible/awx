@@ -58,6 +58,8 @@ def test_cloud_kind_uniqueness():
     ({'fields': [{'id': 'username', 'label': 'Username', 'type': 'string'}]}, True),
     ({'fields': [{'id': 'username', 'label': 'Username', 'help_text': 1}]}, False),
     ({'fields': [{'id': 'username', 'label': 'Username', 'help_text': 'Help Text'}]}, True),  # noqa
+    ({'fields': [{'id': 'username', 'label': 'Username'}, {'id': 'username', 'label': 'Username 2'}]}, False),  # noqa
+    ({'fields': [{'id': '$invalid$', 'label': 'Invalid'}]}, False),  # noqa
     ({'fields': [{'id': 'password', 'label': 'Password', 'type': 'number'}]}, True),
     ({'fields': [{'id': 'ssh_key', 'label': 'SSH Key', 'type': 'ssh_private_key'}]}, True),  # noqa
     ({'fields': [{'id': 'other', 'label': 'Other', 'type': 'boolean'}]}, False),

@@ -265,6 +265,11 @@ class FieldLookupBackend(BaseFilterBackend):
                     key = key[5:]
                     q_not = True
 
+                # Make legacy v1 Job/Template fields work for backwards compatability
+                # TODO: remove after API v1 deprecation period
+                if queryset.model._meta.object_name in ('JobTemplate', 'Job') and key in ('cloud_credential', 'network_credential'):
+                    key = 'extra_credentials'
+
                 # Make legacy v1 Credential fields work for backwards compatability
                 # TODO: remove after API v1 deprecation period
                 #
