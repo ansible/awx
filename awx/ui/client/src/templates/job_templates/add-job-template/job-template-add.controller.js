@@ -413,6 +413,10 @@
                     $scope.survey_enabled = false;
                 }
 
+                if($scope.job_type.value !== "run") {
+                    $scope.store_facts = null;
+                }
+
                 generator.clearApiErrors($scope);
 
                 Wait('start');
