@@ -15,6 +15,9 @@ export default {
             squash: true
         }
     },
+    data: {
+        formChildState: true
+    },
     name: 'inventories.edit.adhoc',
     views: {
         'adhocForm@inventories': {

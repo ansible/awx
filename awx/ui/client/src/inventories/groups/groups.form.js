@@ -83,6 +83,8 @@ function(i18n, nestedGroupListState, nestedHostsListState, buildHostAddState){
         related: {
             nested_groups: {
                 name: 'nested_groups',
+                awToolTip: i18n._('Please save before defining groups'),
+                dataPlacement: 'top',
                 ngClick: "$state.go('inventories.edit.groups.edit.nested_groups')",
                 include: "NestedGroupListDefinition",
                 includeForm: "NestedGroupFormDefinition",
@@ -92,6 +94,8 @@ function(i18n, nestedGroupListState, nestedHostsListState, buildHostAddState){
             },
             nested_hosts: {
                 name: 'nested_hosts',
+                awToolTip: i18n._('Please save before defining hosts'),
+                dataPlacement: 'top',
                 ngClick: "$state.go('inventories.edit.groups.edit.nested_hosts')",
                 include: "NestedHostsListDefinition",
                 title: i18n._('Hosts'),
