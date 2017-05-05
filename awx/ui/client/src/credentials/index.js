@@ -44,7 +44,7 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         name: 'credentials.add',
         route: '/add',
         ncyBreadcrumb: {
-            label: N_('ADD')
+            label: N_('CREATE CREDENTIALS')
         },
         views: {
             'add@credentials': {

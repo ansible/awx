@@ -2,12 +2,17 @@ function AddCredentialsController (credentialType) {
     let vm = this || {};
 
     vm.name = {
-        label: 'Name',
-        required: true
+        label: {
+            text: 'Name',
+            required: true,
+            popover: {}
+        }
     };
 
     vm.description = {
-        label: 'Description'
+        label: {
+            text: 'Description'
+        }
     };
 
     vm.heading = {
@@ -15,9 +20,12 @@ function AddCredentialsController (credentialType) {
     };
 
     vm.kind = {
-        label: 'Type',
+        label: {
+            text: 'Type',
+            required: true,
+            popover: {}
+        },
         placeholder: 'Select a Type',
-        required: true,
         text: 'kind',
         value: 'id',
         data: credentialType.categorizeByKind()

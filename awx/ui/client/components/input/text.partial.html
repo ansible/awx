@@ -1,9 +1,6 @@
 <div class="col-sm-{{ col }}">
     <div class="form-group at-u-flat">
-        <label class="at-Input-label">
-            <span ng-if="config.required" class="at-Input-label--required">*</span>
-            <span>{{ config.label | uppercase }}</span>
-        </label>
+        <at-input-label config="config.label"></at-input-label>
         <input type="text" class="form-control at-Input" ng-model="config.input"
                ng-attr-autofocus="{{ meta.autofocus || undefined }}" tabindex="{{ meta.tabindex }}" 
                placeholder="{{ config.placeholder }}" />

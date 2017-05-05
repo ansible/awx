@@ -1,5 +1,5 @@
 .at-Input {
-    .at-placeholder(@at-gray-dark);
+    .at-Placeholder(@at-gray-dark);
 
     background: @at-white;
     border-radius: @at-border-radius-md;
@@ -14,26 +14,27 @@
     }
 }
 
-.at-Input-label {
-    color: @at-gray-dark;
-    font-size: small;
-    font-weight: @at-font-weight-sm;
-    text-transform: uppercase;
-}
-
-.at-Input-label--required {
-    color: @at-danger;
-    font-weight: @at-font-weight-lg;
-    font-size: @at-font-lg;
-    line-height: 0.7;
-}
-
 .at-Input--placeholder {
     color: @at-gray;
 }
 
 .at-Input--focus {
     border-color: @at-link;
+}
+
+.at-InputLabel {
+    color: @at-gray-dark;
+    font-size: @at-font-sm;
+    font-weight: @at-font-weight-sm;
+    text-transform: uppercase;
+}
+
+.at-InputLabel-required {
+    color: @at-danger;
+    font-weight: @at-font-weight-lg;
+    font-size: @at-font-lg;
+    line-height: @at-font-xs;
+    margin: @at-margin-xs @at-margin-xs 0 0;
 }
 
 .at-InputGroup {
@@ -49,18 +50,18 @@
     }
 }
 
-.at-Select {
+.at-InputSelect {
     height: @at-input-height-md;
     position: relative;
 }
 
-.at-Select-input {
+.at-InputSelect-input {
     position: relative;
     z-index: 2;
     pointer-events: none;
 }
 
-.at-Select-select {
+.at-InputSelect-select {
     position: absolute;
     z-index: 1;
     top: 0;

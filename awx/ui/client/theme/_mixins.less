@@ -1,4 +1,17 @@
-.at-placeholder(@color) {
+.at-IconButton () {
+    line-height: 0.9;
+    color: @at-gray-light;
+
+    & > i {
+        cursor: pointer;
+    }
+
+    & > i:hover {
+        color: @at-gray;
+    }
+}
+
+.at-Placeholder (@color) {
     &:-moz-placeholder {
         color: @color;
     }
@@ -10,7 +23,7 @@
     }
 }
 
-.at-Button(@bg, @color) {
+.at-Button (@bg, @color) {
     color: @color;
     background-color: @bg;
     padding: @at-padding-xs @at-padding-md;
