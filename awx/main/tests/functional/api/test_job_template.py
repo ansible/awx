@@ -36,6 +36,52 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
     }, alice, expect=expect)
 
 
+# TODO: remove in 3.3
+@pytest.mark.django_db
+def test_create_with_v1_deprecated_credentials(get, post, project, machine_credential, credential, net_credential, inventory, alice):
+    project.use_role.members.add(alice)
+    machine_credential.use_role.members.add(alice)
+    inventory.use_role.members.add(alice)
+
+    pk = post(reverse('api:job_template_list', kwargs={'version': 'v1'}), {
+        'name': 'Some name',
+        'project': project.id,
+        'credential': machine_credential.id,
+        'cloud_credential': credential.id,
+        'network_credential': net_credential.id,
+        'inventory': inventory.id,
+        'playbook': 'helloworld.yml',
+    }, alice, expect=201).data['id']
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': pk})
+    response = get(url, alice)
+    assert response.data.get('cloud_credential') == credential.pk
+    assert response.data.get('network_credential') == net_credential.pk
+
+
+# TODO: remove in 3.3
+@pytest.mark.django_db
+def test_create_with_empty_v1_deprecated_credentials(get, post, project, machine_credential, inventory, alice):
+    project.use_role.members.add(alice)
+    machine_credential.use_role.members.add(alice)
+    inventory.use_role.members.add(alice)
+
+    pk = post(reverse('api:job_template_list', kwargs={'version': 'v1'}), {
+        'name': 'Some name',
+        'project': project.id,
+        'credential': machine_credential.id,
+        'cloud_credential': None,
+        'network_credential': None,
+        'inventory': inventory.id,
+        'playbook': 'helloworld.yml',
+    }, alice, expect=201).data['id']
+
+    url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': pk})
+    response = get(url, alice)
+    assert response.data.get('cloud_credential') is None
+    assert response.data.get('network_credential') is None
+
+
 # TODO: test this with RBAC and lower-priveleged users
 @pytest.mark.django_db
 def test_extra_credential_creation(get, post, organization_factory, job_template_factory, credentialtype_aws):
@@ -150,6 +196,7 @@ def test_attach_extra_credential_wrong_kind_xfail(get, post, organization_factor
     assert response.data.get('count') == 0
 
 
+# TODO: remove in 3.3
 @pytest.mark.django_db
 def test_v1_extra_credentials_detail(get, organization_factory, job_template_factory, credential, net_credential):
     objs = organization_factory("org", superusers=['admin'])
@@ -165,6 +212,7 @@ def test_v1_extra_credentials_detail(get, organization_factory, job_template_fac
     assert response.data.get('network_credential') == net_credential.pk
 
 
+# TODO: remove in 3.3
 @pytest.mark.django_db
 def test_v1_set_extra_credentials_assignment(get, patch, organization_factory, job_template_factory, credential, net_credential):
     objs = organization_factory("org", superusers=['admin'])
