@@ -1511,6 +1511,16 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
 
 
+class CredentialTypeCredentialList(SubListAPIView):
+
+    model = Credential
+    parent_model = CredentialType
+    relationship = 'credentials'
+    serializer_class = CredentialSerializer
+    new_in_320 = True
+    new_in_api_v2 = True
+
+
 class CredentialList(ListCreateAPIView):
 
     model = Credential

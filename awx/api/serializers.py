@@ -1867,6 +1867,15 @@ class CredentialTypeSerializer(BaseSerializer):
                 raise serializers.ValidationError({"inputs": _("'ask_at_runtime' is not supported for custom credentials.")})
         return super(CredentialTypeSerializer, self).validate(attrs)
 
+    def get_related(self, obj):
+        res = super(CredentialTypeSerializer, self).get_related(obj)
+        res['credentials'] = reverse(
+            'api:credential_type_credential_list',
+            kwargs={'pk': obj.pk},
+            request=self.context.get('request')
+        )
+        return res
+
 
 # TODO: remove when API v1 is removed
 @six.add_metaclass(BaseSerializerMetaclass)
