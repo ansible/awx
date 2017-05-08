@@ -1504,6 +1504,12 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     new_in_320 = True
     new_in_api_v2 = True
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.managed_by_tower or instance.credentials.exists():
+            raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted."))
+        return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
+
 
 class CredentialList(ListCreateAPIView):
 

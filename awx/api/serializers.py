@@ -1857,10 +1857,14 @@ class CredentialTypeSerializer(BaseSerializer):
         if self.instance and self.instance.managed_by_tower:
             raise serializers.ValidationError(
                 {"detail": _("Modifications not allowed for credential types managed by Tower")})
+        if self.instance and self.instance.credentials.exists():
+            if 'inputs' in attrs and attrs['inputs'] != self.instance.inputs:
+                raise serializers.ValidationError(
+                    {"inputs": _("Modifications to inputs are not allowed for credential types that are in use")})
         fields = attrs.get('inputs', {}).get('fields', [])
         for field in fields:
             if field.get('ask_at_runtime', False):
-                raise serializers.ValidationError({"detail": _("'ask_at_runtime' is not supported for custom credentials.")})
+                raise serializers.ValidationError({"inputs": _("'ask_at_runtime' is not supported for custom credentials.")})
         return super(CredentialTypeSerializer, self).validate(attrs)
 
 

@@ -809,8 +809,6 @@ class CredentialTypeAccess(BaseAccess):
      - I'm a superuser:
     I can change when:
      - I'm a superuser and the type is not "managed by Tower"
-    I can change/delete when:
-     - I'm a superuser and the type is not "managed by Tower"
     '''
 
     model = CredentialType

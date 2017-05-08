@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from awx.main.models.credential import CredentialType
+from awx.main.models.credential import CredentialType, Credential
 from awx.api.versioning import reverse
 
 
@@ -35,16 +35,55 @@ def test_create_as_unauthorized_xfail(get, post):
 
 
 @pytest.mark.django_db
-def test_update_as_unauthorized_xfail(patch):
+def test_update_as_unauthorized_xfail(patch, delete):
     ssh = CredentialType.defaults['ssh']()
     ssh.save()
-    response = patch(
-        reverse('api:credential_type_detail', kwargs={'pk': ssh.pk}),
-        {
-            'name': 'Some Other Name'
-        }
-    )
+    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    response = patch(url, {'name': 'Some Other Name'})
     assert response.status_code == 401
+    assert delete(url).status_code == 401
+
+
+@pytest.mark.django_db
+def test_update_managed_by_tower_xfail(patch, delete, admin):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    response = patch(url, {'name': 'Some Other Name'}, admin)
+    assert response.status_code == 400
+    assert delete(url, admin).status_code == 403
+
+
+@pytest.mark.django_db
+def test_update_credential_type_in_use_xfail(patch, delete, admin):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.managed_by_tower = False
+    ssh.save()
+    Credential(credential_type=ssh, name='My SSH Key').save()
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    response = patch(url, {'name': 'Some Other Name'}, admin)
+    assert response.status_code == 200
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    response = patch(url, {'inputs': {}}, admin)
+    assert response.status_code == 400
+
+    assert delete(url, admin).status_code == 403
+
+
+@pytest.mark.django_db
+def test_update_credential_type_success(get, patch, delete, admin):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.managed_by_tower = False
+    ssh.save()
+
+    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    response = patch(url, {'name': 'Some Other Name'}, admin)
+    assert response.status_code == 200
+
+    assert get(url, admin).data.get('name') == 'Some Other Name'
+    assert delete(url, admin).status_code == 204
 
 
 @pytest.mark.django_db
