@@ -52,6 +52,7 @@ def job_template_prompts(project, inventory, machine_credential):
             ask_inventory_on_launch=on_off,
             ask_limit_on_launch=on_off,
             ask_credential_on_launch=on_off,
+            ask_verbosity_on_launch=on_off,
         )
     return rf
 
@@ -71,6 +72,7 @@ def job_template_prompts_null(project):
         ask_inventory_on_launch=True,
         ask_limit_on_launch=True,
         ask_credential_on_launch=True,
+        ask_verbosity_on_launch=True,
     )
 
 

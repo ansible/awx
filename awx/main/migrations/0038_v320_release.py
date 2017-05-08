@@ -153,6 +153,13 @@ class Migration(migrations.Migration):
             field=models.PositiveIntegerField(default=1, blank=True, choices=[(0, b'0 (WARNING)'), (1, b'1 (INFO)'), (2, b'2 (DEBUG)')]),
         ),
 
+        # Job Templates
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='ask_verbosity_on_launch',
+            field=models.BooleanField(default=False),
+        ),
+
         # Workflows
         migrations.AddField(
             model_name='workflowjob',

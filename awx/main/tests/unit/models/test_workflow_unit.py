@@ -105,6 +105,7 @@ def jt_ask(job_template_factory):
     jt.ask_skip_tags_on_launch = True
     jt.ask_limit_on_launch = True
     jt.ask_tags_on_launch = True
+    jt.ask_verbosity_on_launch = True
     return jt
 
 

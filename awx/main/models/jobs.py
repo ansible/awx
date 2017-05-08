@@ -257,6 +257,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
+    ask_verbosity_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
     ask_inventory_on_launch = models.BooleanField(
         blank=True,
         default=False,
@@ -363,6 +367,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             job_tags=self.ask_tags_on_launch,
             skip_tags=self.ask_skip_tags_on_launch,
             job_type=self.ask_job_type_on_launch,
+            verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
             credential=self.ask_credential_on_launch
         )
@@ -546,6 +551,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def ask_job_type_on_launch(self):
         if self.job_template is not None:
             return self.job_template.ask_job_type_on_launch
+        return False
+
+    @property
+    def ask_verbosity_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_verbosity_on_launch
         return False
 
     @property
