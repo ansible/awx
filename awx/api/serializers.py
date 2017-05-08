@@ -2187,30 +2187,52 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             ret['network_credential'] = obj.network_credential
         return ret
 
+    def create(self, validated_data):
+        deprecated_fields = {}
+        for key in ('cloud_credential', 'network_credential'):
+            if key in validated_data:
+                deprecated_fields[key] = validated_data.pop(key)
+        obj = super(JobOptionsSerializer, self).create(validated_data)
+        if self.version == 1 and deprecated_fields:  # TODO: remove in 3.3
+            self._update_deprecated_fields(deprecated_fields, obj)
+        return obj
+
+    def update(self, obj, validated_data):
+        deprecated_fields = {}
+        for key in ('cloud_credential', 'network_credential'):
+            if key in validated_data:
+                deprecated_fields[key] = validated_data.pop(key)
+        obj = super(JobOptionsSerializer, self).update(obj, validated_data)
+        if self.version == 1 and deprecated_fields:  # TODO: remove in 3.3
+            self._update_deprecated_fields(deprecated_fields, obj)
+        return obj
+
+    def _update_deprecated_fields(self, fields, obj):
+        for key, existing in (
+            ('cloud_credential', obj.cloud_credentials),
+            ('network_credential', obj.network_credentials),
+        ):
+            if key in fields:
+                for cred in existing:
+                    obj.extra_credentials.remove(cred)
+                if fields[key]:
+                    obj.extra_credentials.add(fields[key])
+        obj.save()
+
     def validate(self, attrs):
+        v1_credentials = {}
         if self.version == 1:  # TODO: remove in 3.3
-            if 'cloud_credential' in attrs:
-                pk = attrs.pop('cloud_credential')
-                for cred in self.instance.cloud_credentials:
-                    self.instance.extra_credentials.remove(cred)
-                if pk:
-                    cred = Credential.objects.get(pk=pk)
-                    if cred.credential_type.kind != 'cloud':
-                        raise serializers.ValidationError({
-                            'cloud_credential': _('You must provide a cloud credential.'),
-                        })
-                    self.instance.extra_credentials.add(cred)
-            if 'network_credential' in attrs:
-                pk = attrs.pop('network_credential')
-                for cred in self.instance.network_credentials:
-                    self.instance.extra_credentials.remove(cred)
-                if pk:
-                    cred = Credential.objects.get(pk=pk)
-                    if cred.credential_type.kind != 'net':
-                        raise serializers.ValidationError({
-                            'network_credential': _('You must provide a network credential.'),
-                        })
-                    self.instance.extra_credentials.add(cred)
+            for attr, kind, error in (
+                ('cloud_credential', 'cloud', _('You must provide a cloud credential.')),
+                ('network_credential', 'net', _('You must provide a network credential.'))
+            ):
+                if attr in attrs:
+                    v1_credentials[attr] = None
+                    pk = attrs.pop(attr)
+                    if pk:
+                        cred = v1_credentials[attr] = Credential.objects.get(pk=pk)
+                        if cred.credential_type.kind != kind:
+                            raise serializers.ValidationError({attr: error})
 
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)
@@ -2225,7 +2247,9 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             if project and not playbook:
                 raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
 
-        return super(JobOptionsSerializer, self).validate(attrs)
+        ret = super(JobOptionsSerializer, self).validate(attrs)
+        ret.update(v1_credentials)
+        return ret
 
 
 class JobTemplateMixin(object):
