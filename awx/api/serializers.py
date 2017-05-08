@@ -28,7 +28,7 @@ from django.utils.timezone import now
 from django.utils.functional import cached_property
 
 # Django REST Framework
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import fields
 from rest_framework import serializers
 from rest_framework import validators
@@ -2248,6 +2248,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     def validate(self, attrs):
         v1_credentials = {}
+        view = self.context.get('view', None)
         if self.version == 1:  # TODO: remove in 3.3
             for attr, kind, error in (
                 ('cloud_credential', 'cloud', _('You must provide a cloud credential.')),
@@ -2260,6 +2261,8 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                         cred = v1_credentials[attr] = Credential.objects.get(pk=pk)
                         if cred.credential_type.kind != kind:
                             raise serializers.ValidationError({attr: error})
+                        if (not view) or (not view.request) or (view.request.user not in cred.use_role):
+                            raise PermissionDenied()
 
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)

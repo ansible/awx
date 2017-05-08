@@ -12,11 +12,21 @@ from awx.main.models.schedules import Schedule
 
 
 @pytest.fixture
-def jt_objects(job_template_factory):
+def jt_linked(job_template_factory, credential, net_credential, vault_credential):
+    '''
+    A job template with a reasonably complete set of related objects to
+    test RBAC and other functionality affected by related objects
+    '''
     objects = job_template_factory(
         'testJT', organization='org1', project='proj1', inventory='inventory1',
-        credential='cred1', cloud_credential='aws1', network_credential='juniper1')
-    return objects
+        credential='cred1')
+    jt = objects.job_template
+    jt.vault_credential = vault_credential
+    jt.save()
+    # Add AWS cloud credential and network credential
+    jt.extra_credentials.add(credential)
+    jt.extra_credentials.add(net_credential)
+    return jt
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
@@ -32,58 +42,86 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
 
 
 @pytest.mark.django_db
-def test_job_template_access_read_level(jt_objects, rando):
+def test_job_template_access_read_level(jt_linked, rando):
 
     access = JobTemplateAccess(rando)
-    jt_objects.project.read_role.members.add(rando)
-    jt_objects.inventory.read_role.members.add(rando)
-    jt_objects.credential.read_role.members.add(rando)
-    jt_objects.cloud_credential.read_role.members.add(rando)
-    jt_objects.network_credential.read_role.members.add(rando)
+    jt_linked.project.read_role.members.add(rando)
+    jt_linked.inventory.read_role.members.add(rando)
+    jt_linked.credential.read_role.members.add(rando)
 
-    proj_pk = jt_objects.project.pk
-    assert not access.can_add(dict(inventory=jt_objects.inventory.pk, project=proj_pk))
-    assert not access.can_add(dict(credential=jt_objects.credential.pk, project=proj_pk))
-    assert not access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
-    assert not access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
+    proj_pk = jt_linked.project.pk
+    assert not access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
+    assert not access.can_add(dict(credential=jt_linked.credential.pk, project=proj_pk))
+    assert not access.can_add(dict(vault_credential=jt_linked.vault_credential.pk, project=proj_pk))
+
+    for cred in jt_linked.extra_credentials.all():
+        assert not access.can_unattach(jt_linked, cred, 'extra_credentials', {})
 
 
 @pytest.mark.django_db
-def test_job_template_access_use_level(jt_objects, rando):
+def test_job_template_access_use_level(jt_linked, rando):
 
     access = JobTemplateAccess(rando)
-    jt_objects.project.use_role.members.add(rando)
-    jt_objects.inventory.use_role.members.add(rando)
-    jt_objects.credential.use_role.members.add(rando)
-    jt_objects.cloud_credential.use_role.members.add(rando)
-    jt_objects.network_credential.use_role.members.add(rando)
+    jt_linked.project.use_role.members.add(rando)
+    jt_linked.inventory.use_role.members.add(rando)
+    jt_linked.credential.use_role.members.add(rando)
+    jt_linked.vault_credential.use_role.members.add(rando)
 
-    proj_pk = jt_objects.project.pk
-    assert access.can_add(dict(inventory=jt_objects.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=jt_objects.credential.pk, project=proj_pk))
-    assert access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
-    assert access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
+    proj_pk = jt_linked.project.pk
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
+    assert access.can_add(dict(credential=jt_linked.credential.pk, project=proj_pk))
+    assert access.can_add(dict(vault_credential=jt_linked.vault_credential.pk, project=proj_pk))
+
+    for cred in jt_linked.extra_credentials.all():
+        assert not access.can_unattach(jt_linked, cred, 'extra_credentials', {})
 
 
 @pytest.mark.django_db
-def test_job_template_access_org_admin(jt_objects, rando):
+def test_job_template_access_org_admin(jt_linked, rando):
     access = JobTemplateAccess(rando)
     # Appoint this user as admin of the organization
-    jt_objects.inventory.organization.admin_role.members.add(rando)
+    jt_linked.inventory.organization.admin_role.members.add(rando)
     # Assign organization permission in the same way the create view does
-    organization = jt_objects.inventory.organization
-    jt_objects.credential.admin_role.parents.add(organization.admin_role)
-    jt_objects.cloud_credential.admin_role.parents.add(organization.admin_role)
-    jt_objects.network_credential.admin_role.parents.add(organization.admin_role)
+    organization = jt_linked.inventory.organization
+    jt_linked.credential.admin_role.parents.add(organization.admin_role)
 
-    proj_pk = jt_objects.project.pk
-    assert access.can_add(dict(inventory=jt_objects.inventory.pk, project=proj_pk))
-    assert access.can_add(dict(credential=jt_objects.credential.pk, project=proj_pk))
-    assert access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
-    assert access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
+    proj_pk = jt_linked.project.pk
+    assert access.can_add(dict(inventory=jt_linked.inventory.pk, project=proj_pk))
+    assert access.can_add(dict(credential=jt_linked.credential.pk, project=proj_pk))
 
-    assert access.can_read(jt_objects.job_template)
-    assert access.can_delete(jt_objects.job_template)
+    for cred in jt_linked.extra_credentials.all():
+        assert access.can_unattach(jt_linked, cred, 'extra_credentials', {})
+
+    assert access.can_read(jt_linked)
+    assert access.can_delete(jt_linked)
+
+
+@pytest.mark.django_db
+class TestJobTemplateCredentials:
+
+    def test_job_template_cannot_add_extra_credentials(self, job_template, credential, rando):
+        job_template.admin_role.members.add(rando)
+        credential.read_role.members.add(rando)
+        # without permission to credential, user can not attach it
+        assert not JobTemplateAccess(rando).can_attach(
+            job_template, credential, 'extra_credentials', {})
+
+    def test_job_template_can_add_extra_credentials(self, job_template, credential, rando):
+        job_template.admin_role.members.add(rando)
+        credential.use_role.members.add(rando)
+        # user has permission to apply credential
+        assert JobTemplateAccess(rando).can_attach(
+            job_template, credential, 'extra_credentials', {})
+
+    def test_job_template_vault_cred_check(self, job_template, vault_credential, rando):
+        job_template.admin_role.members.add(rando)
+        # not allowed to use the vault cred
+        assert not JobTemplateAccess(rando).can_change(
+            job_template, {'vault_credential': vault_credential})
+
+    def test_new_jt_with_vault(self, vault_credential, project, rando):
+        project.admin_role.members.add(rando)
+        assert not JobTemplateAccess(rando).can_add({'vault_credential': vault_credential, 'project': project.pk})
 
 
 @pytest.mark.django_db

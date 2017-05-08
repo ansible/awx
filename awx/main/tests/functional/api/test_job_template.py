@@ -41,6 +41,8 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
 def test_create_with_v1_deprecated_credentials(get, post, project, machine_credential, credential, net_credential, inventory, alice):
     project.use_role.members.add(alice)
     machine_credential.use_role.members.add(alice)
+    credential.use_role.members.add(alice)
+    net_credential.use_role.members.add(alice)
     inventory.use_role.members.add(alice)
 
     pk = post(reverse('api:job_template_list', kwargs={'version': 'v1'}), {
@@ -82,7 +84,27 @@ def test_create_with_empty_v1_deprecated_credentials(get, post, project, machine
     assert response.data.get('network_credential') is None
 
 
-# TODO: test this with RBAC and lower-priveleged users
+# TODO: remove in 3.3
+@pytest.mark.django_db
+def test_create_v1_rbac_check(get, post, project, credential, net_credential, rando):
+    project.use_role.members.add(rando)
+
+    base_kwargs = dict(
+        name = 'Made with cloud/net creds I have no access to',
+        project = project.id,
+        ask_inventory_on_launch = True,
+        ask_credential_on_launch = True,
+        playbook = 'helloworld.yml',
+    )
+
+    base_kwargs['cloud_credential'] = credential.pk
+    post(reverse('api:job_template_list', kwargs={'version': 'v1'}), base_kwargs, rando, expect=403)
+
+    base_kwargs.pop('cloud_credential')
+    base_kwargs['network_credential'] = net_credential.pk
+    post(reverse('api:job_template_list', kwargs={'version': 'v1'}), base_kwargs, rando, expect=403)
+
+
 @pytest.mark.django_db
 def test_extra_credential_creation(get, post, organization_factory, job_template_factory, credentialtype_aws):
     objs = organization_factory("org", superusers=['admin'])
@@ -140,7 +162,6 @@ def test_extra_credential_unique_type_xfail(get, post, organization_factory, job
     assert response.data.get('count') == 1
 
 
-# TODO: test this with RBAC and lower-priveleged users
 @pytest.mark.django_db
 def test_attach_extra_credential(get, post, organization_factory, job_template_factory, credential):
     objs = organization_factory("org", superusers=['admin'])
@@ -158,7 +179,6 @@ def test_attach_extra_credential(get, post, organization_factory, job_template_f
     assert response.data.get('count') == 1
 
 
-# TODO: test this with RBAC and lower-priveleged users
 @pytest.mark.django_db
 def test_detach_extra_credential(get, post, organization_factory, job_template_factory, credential):
     objs = organization_factory("org", superusers=['admin'])

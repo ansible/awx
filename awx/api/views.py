@@ -2586,7 +2586,7 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     capabilities_prefetch = [
         'admin', 'execute',
-        {'copy': ['project.use', 'inventory.use', 'credential.use']}
+        {'copy': ['project.use', 'inventory.use', 'credential.use', 'vault_credential.use']}
     ]
 
     def post(self, request, *args, **kwargs):
@@ -2838,6 +2838,17 @@ class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
     relationship = 'extra_credentials'
     new_in_320 = True
     new_in_api_v2 = True
+
+    def get_queryset(self):
+        # Return the full list of extra_credentials
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        sublist_qs = getattrd(parent, self.relationship)
+        sublist_qs = sublist_qs.prefetch_related(
+            'created_by', 'modified_by',
+            'admin_role', 'use_role', 'read_role',
+            'admin_role__parents', 'admin_role__members')
+        return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
         current_extra_types = [
@@ -4116,7 +4127,8 @@ class UnifiedJobTemplateList(ListAPIView):
     new_in_148 = True
     capabilities_prefetch = [
         'admin', 'execute',
-        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
+        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
+                  'jobtemplate.credential.use', 'jobtemplate.vault_credential.use',
                   'workflowjobtemplate.organization.admin']}
     ]
 

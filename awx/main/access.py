@@ -1111,14 +1111,7 @@ class ProjectUpdateAccess(BaseAccess):
 class JobTemplateAccess(BaseAccess):
     '''
     I can see job templates when:
-     - I am a superuser.
-     - I can read the inventory, project and credential (which means I am an
-       org admin or member of a team with access to all of the above).
-     - I have permission explicitly granted to check/deploy with the inventory
-       and project.
-
-    This does not mean I would be able to launch a job from the template or
-    edit the template.
+     - I have read role for the job template.
     '''
 
     model = JobTemplate
@@ -1133,8 +1126,10 @@ class JobTemplateAccess(BaseAccess):
 
     def can_add(self, data):
         '''
-        a user can create a job template if they are a superuser, an org admin
-        of any org that the project is a member, or if they have user or team
+        a user can create a job template if
+         - they are a superuser
+         - an org admin of any org that the project is a member
+         - if they have user or team
         based permissions tying the project to the inventory source for the
         given action as well as the 'create' deploy permission.
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
@@ -1170,8 +1165,9 @@ class JobTemplateAccess(BaseAccess):
         if not self.check_related('credential', Credential, data, role_field='use_role'):
             return False
 
-        # TODO: If a vault credential is provided, the user should have use access to it.
-        # TODO: If any credential in extra_credentials, the user must have access
+        # If a vault credential is provided, the user should have use access to it.
+        if not self.check_related('vault_credential', Credential, data, role_field='use_role'):
+            return False
 
         # If an inventory is provided, the user should have use access.
         inventory = get_value(Inventory, 'inventory')
@@ -1181,14 +1177,10 @@ class JobTemplateAccess(BaseAccess):
 
         project = get_value(Project, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            if inventory:
-                accessible = self.user in inventory.use_role
-            else:
-                accessible = False
-            if not project and accessible:
-                return True
-            elif not accessible:
+            if not inventory:
                 return False
+            elif not project:
+                return True
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         if project:
@@ -1237,8 +1229,7 @@ class JobTemplateAccess(BaseAccess):
                     self.check_license(feature='surveys')
                 return True
 
-            # TODO: handle vault_credential and extra_credentials
-            for required_field in ('credential', 'inventory', 'project'):
+            for required_field in ('credential', 'inventory', 'project', 'vault_credential'):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
@@ -1273,6 +1264,7 @@ class JobTemplateAccess(BaseAccess):
         project_id = data.get('project', obj.project.id if obj.project else None)
         inventory_id = data.get('inventory', obj.inventory.id if obj.inventory else None)
         credential_id = data.get('credential', obj.credential.id if obj.credential else None)
+        vault_credential_id = data.get('credential', obj.vault_credential.id if obj.vault_credential else None)
 
         if project_id and self.user not in Project.objects.get(pk=project_id).use_role:
             return False
@@ -1280,7 +1272,8 @@ class JobTemplateAccess(BaseAccess):
             return False
         if credential_id and self.user not in Credential.objects.get(pk=credential_id).use_role:
             return False
-        # TODO: handle vault_credential and extra_credentials
+        if vault_credential_id and self.user not in Credential.objects.get(pk=vault_credential_id).use_role:
+            return False
 
         return True
 
@@ -1300,15 +1293,21 @@ class JobTemplateAccess(BaseAccess):
         if isinstance(sub_obj, NotificationTemplate):
             return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
         if relationship == "instance_groups":
+            if not obj.project.organization:
+                return False
             return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role
+        if relationship == 'extra_credentials' and isinstance(sub_obj, Credential):
+            return self.user in obj.admin_role and self.user in sub_obj.use_role
         return super(JobTemplateAccess, self).can_attach(
             obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
+    @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        if relationship == 'extra_credentials' and isinstance(sub_obj, Credential):
+            return self.user in obj.admin_role
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
-
 
 
 class JobAccess(BaseAccess):
