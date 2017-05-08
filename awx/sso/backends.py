@@ -138,7 +138,9 @@ class RADIUSBackend(BaseRADIUSBackend):
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to get_user, license does not support RADIUS authentication")
             return None
-        return super(RADIUSBackend, self).get_user(user_id)
+        user = super(RADIUSBackend, self).get_user(user_id)
+        if not user.has_usable_password():
+            return user
 
     def get_django_user(self, username, password=None):
         try:
@@ -190,7 +192,9 @@ class TACACSPlusBackend(object):
             logger.exception("TACACS+ Authentication Error: %s" % (e.message,))
             return None
         if auth.valid:
-            return self._get_or_set_user(username, password)
+            user = self._get_or_set_user(username, password)
+            if not user.has_usable_password():
+                return user
         else:
             return None
         return None
