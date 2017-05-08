@@ -1,12 +1,11 @@
-<div class="at-Popover">
-    <span ng-if="config" class="at-Popover-icon">
+<div ng-show="config" class="at-Popover">
+    <span class="at-Popover-icon">
         <i class="fa fa-question-circle"></i>
     </span>
-    <div ng-show="show" class="at-Popover-container">
+    <div class="at-Popover-container">
         <div class="at-Popover-arrow">
             <i class="fa fa-caret-left fa-2x"></i>
         </div>
-        <div class="at-Popover-content">Bacon ipsum dolor amet cow shank tenderloin bresaola chicken picanha leberkas jerky shankle. Tri-tip t-bone bacon, flank jerky porchetta cow. Landjaeger ham tenderloin flank pork chop. Fatback landjaeger short ribs andouille meatloaf shank tri-tip. Flank chicken ham jerky leberkas.
-        </div>
+        <div class="at-Popover-content">{{ config.text }}</div>
     </div>
 </div>

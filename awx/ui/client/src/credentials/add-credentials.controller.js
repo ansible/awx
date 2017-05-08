@@ -5,7 +5,9 @@ function AddCredentialsController (credentialType) {
         label: {
             text: 'Name',
             required: true,
-            popover: {}
+            popover: {
+                text: 'a, b, c'
+            }
         }
     };
 
@@ -23,7 +25,9 @@ function AddCredentialsController (credentialType) {
         label: {
             text: 'Type',
             required: true,
-            popover: {}
+            popover: {
+                text: 'x, y, z'
+            }
         },
         placeholder: 'Select a Type',
         text: 'kind',

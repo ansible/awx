@@ -6,12 +6,25 @@
 }
 
 .at-Popover-container {
+    visibility: hidden;
+    opacity: 0;
     color: @at-white;
     background-color: @at-gray-dark;
     max-width: @at-popover-width;
-    height: 100%;
+    padding: @at-padding-md;
+    height: auto;
     position: fixed;
-    top: 0px;
-    left: 5px;
     z-index: 2000;
+    margin: 0 0 0 @at-margin-md;
+    border-radius: @at-border-radius-md;
+    box-shadow: 0 5px 10px rgba(0,0,0, 0.2);
+    transition: opacity .15s linear;
+}
+
+.at-Popover-arrow {
+    color: @at-gray-dark;
+    position: fixed;
+    z-index: 1999;
+    padding: 0;
+    margin: -@at-margin-xxs 0 0 0;
 }
