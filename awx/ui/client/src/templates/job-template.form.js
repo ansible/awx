@@ -332,8 +332,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         dataTitle: i18n._('Store Ansible Facts'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
-                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
-                        ngShow: "!job_type.value || job_type.value === 'run'"
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
                 },
                 callback_url: {
