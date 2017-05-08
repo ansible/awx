@@ -1603,6 +1603,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         update_on_launch = attrs.get('update_on_launch', self.instance and self.instance.update_on_launch)
         update_on_project_update = get_field_from_model_or_attrs('update_on_project_update')
         source = get_field_from_model_or_attrs('source')
+        overwrite_vars = get_field_from_model_or_attrs('overwrite_vars')
 
         if attrs.get('source_path', None) and source!='scm':
             raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
@@ -1611,6 +1612,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         elif not self.instance and attrs.get('inventory', None) and InventorySource.objects.filter(
                 inventory=attrs.get('inventory', None), update_on_project_update=True, source='scm').exists():
             raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
+        elif source=='scm' and not overwrite_vars:
+            raise serializers.ValidationError({"detail": _(
+                "SCM type sources must set `overwrite_vars` to `true` until a future Tower release.")})
 
         return super(InventorySourceSerializer, self).validate(attrs)
 

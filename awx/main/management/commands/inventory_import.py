@@ -68,11 +68,16 @@ class AnsibleInventoryLoader(object):
 
     def __init__(self, source, group_filter_re=None, host_filter_re=None, is_custom=False):
         self.source = source
+        self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
         self.group_filter_re = group_filter_re
         self.host_filter_re = host_filter_re
+
+        self.is_vendored_source = False
+        if self.source_dir == os.path.join(settings.BASE_DIR, 'plugins', 'inventory'):
+            self.is_vendored_source = True
 
     def build_env(self):
         # Use ansible venv if it's available and setup to use
@@ -93,9 +98,16 @@ class AnsibleInventoryLoader(object):
         for path in os.environ["PATH"].split(os.pathsep):
             potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
             if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
+                logger.debug('Using system install of ansible-inventory CLI: {}'.format(potential_path))
                 return [potential_path, '-i', self.source]
 
-        # ansible-inventory was not found, look for backported module
+        # Stopgap solution for group_vars, do not use backported module for official
+        # vendored cloud modules or custom scripts TODO: remove after Ansible 2.3 deprecation
+        if self.is_vendored_source or self.is_custom:
+            self.method = 'inventory script invocation'
+            return [self.source]
+
+        # ansible-inventory was not found, look for backported module TODO: remove after Ansible 2.3 deprecation
         abs_module_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', '..', 'plugins',
             'ansible_inventory', 'backport.py'))
@@ -103,10 +115,10 @@ class AnsibleInventoryLoader(object):
 
         if not os.path.exists(abs_module_path):
             raise ImproperlyConfigured('Can not find inventory module')
+        logger.debug('Using backported ansible-inventory module: {}'.format(abs_module_path))
         return [abs_module_path, '-i', self.source]
 
     def get_proot_args(self, cmd, env):
-        source_dir = functioning_dir(self.source)
         cwd = os.getcwd()
         if not check_proot_installed():
             raise RuntimeError("proot is not installed but is configured for use")
@@ -114,9 +126,9 @@ class AnsibleInventoryLoader(object):
         kwargs = {}
         if self.is_custom:
             # use source's tmp dir for proot, task manager will delete folder
-            logger.debug("Using provided directory '{}' for isolation.".format(source_dir))
-            kwargs['proot_temp_dir'] = source_dir
-            cwd = source_dir
+            logger.debug("Using provided directory '{}' for isolation.".format(self.source_dir))
+            kwargs['proot_temp_dir'] = self.source_dir
+            cwd = self.source_dir
         else:
             # we can not safely store tmp data in source dir or trust script contents
             if env['AWX_PRIVATE_DATA_DIR']:
@@ -147,11 +159,9 @@ class AnsibleInventoryLoader(object):
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
-        if proc.returncode != 0:
-            raise RuntimeError('%s failed (rc=%d) with output:\n%s' % (self.method, proc.returncode, stderr))
-        elif 'file not found' in stderr:
-            # File not visible to inventory module due proot (exit code 0, Ansible behavior)
-            raise IOError('Inventory module failed to find source {} with output:\n{}.'.format(self.source, stderr))
+        if proc.returncode != 0 or 'file not found' in stderr:
+            raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
+                self.method, proc.returncode, stdout, stderr))
 
         try:
             data = json.loads(stdout)
