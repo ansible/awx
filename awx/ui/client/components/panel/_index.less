@@ -1,6 +1,7 @@
 .at-Panel {
-    margin: @at-margin-md 0 0 0;
-    padding: @at-padding-md;
+    margin: @at-space-6x 0 0 0;
+    padding: @at-space-6x;
+    border-color: @at-gray-dark;
 }
 
 .at-Panel-heading {
@@ -9,20 +10,20 @@
 }
 
 .at-Panel-dismiss {
-    .at-IconButton();
+    .at-mixin-ButtonIcon();
     text-align: right;
 }
 
 .at-Panel-body {
-    margin: @at-margin-md 0 0 0;
+    margin: @at-space-6x 0 0 0;
     padding: 0;
 }
 
 .at-Panel-headingTitle {
-    color: @at-gray-dark;
-    font-size: @at-font-md;
-    font-weight: bold;
-    line-height: 0.9;
+    color: @at-gray-dark-4x;
+    font-size: @at-font-size-3x;
+    font-weight: @at-font-weight-2x;
+    line-height: @at-line-height-short;
     text-transform: uppercase;
     margin: 0;
     padding: 0;

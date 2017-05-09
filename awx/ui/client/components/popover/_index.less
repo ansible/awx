@@ -1,7 +1,7 @@
 .at-Popover-icon {
-    .at-IconButton();  
-    font-size: @at-font-md;
-    padding: 0 0 0 @at-padding-xxs;
+    .at-mixin-ButtonIcon();  
+    font-size: @at-font-size-3x;
+    padding: 0 0 0 @at-space-2x;
     margin: 0;
 }
 
@@ -9,22 +9,22 @@
     visibility: hidden;
     opacity: 0;
     color: @at-white;
-    background-color: @at-gray-dark;
+    background-color: @at-gray-dark-4x;
     max-width: @at-popover-width;
-    padding: @at-padding-md;
+    padding: @at-space-4x;
     height: auto;
     position: fixed;
     z-index: 2000;
-    margin: 0 0 0 @at-margin-md;
-    border-radius: @at-border-radius-md;
+    margin: 0 0 0 @at-space-6x;
+    border-radius: @at-border-radius;
     box-shadow: 0 5px 10px rgba(0,0,0, 0.2);
     transition: opacity .15s linear;
 }
 
 .at-Popover-arrow {
-    color: @at-gray-dark;
+    color: @at-gray-dark-4x;
     position: fixed;
     z-index: 1999;
     padding: 0;
-    margin: -@at-margin-xxs 0 0 0;
+    margin: -@at-space 0 0 0;
 }

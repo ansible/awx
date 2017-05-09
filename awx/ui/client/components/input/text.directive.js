@@ -1,5 +1,5 @@
 function link (scope, el, attrs, form) {
-    form.use(scope, el);
+    form.use('input', scope, el);
 }
 
 function atInputText (pathService) {

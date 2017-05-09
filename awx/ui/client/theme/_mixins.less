@@ -1,17 +1,4 @@
-.at-IconButton () {
-    line-height: 0.9;
-    color: @at-gray-light;
-
-    & > i {
-        cursor: pointer;
-    }
-
-    & > i:hover {
-        color: @at-gray;
-    }
-}
-
-.at-Placeholder (@color) {
+.at-mixin-Placeholder (@color) {
     &:-moz-placeholder {
         color: @color;
     }
@@ -23,13 +10,54 @@
     }
 }
 
-.at-Button (@bg, @color) {
-    color: @color;
-    background-color: @bg;
-    padding: @at-padding-xs @at-padding-md;
+.at-mixin-Button () {
+    padding: @at-space-2x @at-space-4x;
+}
 
-    &:hover {
-        color: @color;
-        background-color: '@{bg}-dark';
+.at-mixin-ButtonColor (@background, @color, @hover: '@{background}--hover') {
+    background-color: @@background;
+
+    &, &:hover, &:focus {
+        color: @@color;
+    }
+
+    &:hover, &:focus {
+        background-color: @@hover;
+    }
+
+    &[disabled] {
+        background-color: fade(@@background, 60%);
+    }
+}
+
+.at-mixin-ButtonHollow (@color, @hover: '@{color}--hover') {
+    background-color: @at-white;
+
+    color: @@color;
+    border-color: @@color;
+
+    &:hover, &:focus {
+        color: @@hover;
+        border-color: @@hover;
+        background-color: @at-white;
+    }
+
+    &[disabled] {
+        background-color: fade(@@color, 30%);
+        border-color: fade(@@color, 30%);
+        color: @at-white;
+    }
+}
+
+.at-mixin-ButtonIcon () {
+    line-height: @at-line-height-short;
+    color: @at-gray-dark-2x;
+
+    & > i {
+        cursor: pointer;
+    }
+
+    & > i:hover {
+        color: @at-gray-dark-3x;
     }
 }

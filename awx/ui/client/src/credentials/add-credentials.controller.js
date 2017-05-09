@@ -34,6 +34,14 @@ function AddCredentialsController (credentialType) {
         value: 'id',
         data: credentialType.categorizeByKind()
     };
+
+    vm.save = {
+        type: 'save'
+    };
+
+    vm.cancel = {
+        type: 'cancel'
+    };
 }
 
 AddCredentialsController.$inject = [

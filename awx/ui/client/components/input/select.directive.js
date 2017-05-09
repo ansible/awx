@@ -2,7 +2,7 @@ let eventService;
 let pathService;
 
 function link (scope, el, attrs, form) {
-    form.use(scope, el);
+    form.use('input', scope, el);
 
     let apply = eventService.listenWith(scope);
 
@@ -11,9 +11,8 @@ function link (scope, el, attrs, form) {
 
     input.addEventListener('focus', apply(select.focus));
     select.addEventListener('mousedown', apply(() => scope.open = !scope.open));
-    select.addEventListener('change', () => apply(() => scope.open = false));
+    select.addEventListener('change', apply(() => scope.open = false));
     select.addEventListener('focus', apply(() => input.classList.add('at-Input--focus')));
-
     select.addEventListener('blur', apply(() => {
         input.classList.remove('at-Input--focus');
         scope.open = scope.open && false;

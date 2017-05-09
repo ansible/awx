@@ -1,12 +1,23 @@
-function use (componentScope, componentElement) { 
+function use (type, componentScope, componentElement) { 
    let vm = this;
 
-   let input = vm.track(componentElement);
+   let component;
 
-   componentScope.meta = input;
+   switch (type) {
+        case 'input':
+            component = vm.trackInput(componentElement);
+            break;
+        case 'action':
+            component = vm.trackAction(componentElement);
+            break;
+        default:
+            throw new Error('An at-form cannot use component type:', type);
+   }
+
+   componentScope.meta = component;
 }
 
-function track (componentElement) {
+function trackInput (componentElement) {
     let vm = this;
 
     let input = {
@@ -24,12 +35,27 @@ function track (componentElement) {
     return input;
 }
 
-function controller () {
+function trackAction (componentElement) {
+    let vm = this;
+
+    let action = {
+       el: componentElement
+    };
+
+    vm.actions.push(action);
+
+    return action;
+}
+
+function AtFormController () {
     let vm = this;
 
     vm.inputs = [];
+    vm.actions = [];
+
     vm.use = use;
-    vm.track = track;
+    vm.trackInput = trackInput;
+    vm.trackAction = trackAction;
 }
 
 function atForm (pathService) {
@@ -37,7 +63,7 @@ function atForm (pathService) {
         restrict: 'E',
         transclude: true,
         templateUrl: pathService.getPartialPath('components/form/form'),
-        controller,
+        controller: AtFormController,
         controllerAs: 'vm',
         scope: {
             config: '='
