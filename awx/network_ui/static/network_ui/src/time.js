@@ -45,6 +45,7 @@ _Past.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceDestroy',
          'DeviceMove',
          'DeviceLabelEdit',
+         'GroupLabelEdit',
          'LinkLabelEdit',
          'InterfaceLabelEdit',
          'InterfaceCreate',
@@ -98,6 +99,7 @@ _Past.prototype.onRedo = function(controller, msg_type, message) {
             }
         }
 };
+_Past.prototype.onRedo.transitions = ['Present'];
 
 _Past.prototype.onCoverageRequest = function(controller) {
         controller.scope.send_coverage();
@@ -195,7 +197,7 @@ _Past.prototype.onMouseWheel = function (controller, msg_type, message) {
     }
 
 };
-_Past.prototype.onMouseWheel.transitions = ['Past'];
+_Past.prototype.onMouseWheel.transitions = ['Present'];
 
 _Past.prototype.onKeyDown = function(controller, msg_type, $event) {
 
@@ -217,7 +219,7 @@ _Past.prototype.onKeyDown = function(controller, msg_type, $event) {
         controller.next_controller.handle_message(msg_type, $event);
     }
 };
-_Past.prototype.onKeyDown.transitions = ['Past'];
+_Past.prototype.onKeyDown.transitions = ['Present'];
 
 
 _Past.prototype.undo = function(controller) {
@@ -271,18 +273,18 @@ _Present.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceDestroy',
          'DeviceMove',
          'DeviceLabelEdit',
-         'LinkLabelEdit',
-         'InterfaceLabelEdit',
+         'GroupLabelEdit',
          'InterfaceCreate',
+         'InterfaceLabelEdit',
          'LinkCreate',
          'LinkDestroy',
+         'LinkLabelEdit',
          'Snapshot'].indexOf(type) !== -1) {
 
         controller.scope.history.push(message.data);
     }
     controller.handle_message(type, data);
 };
-_Present.prototype.onMessage.transitions = ['Past'];
 
 _Present.prototype.onMultipleMessage = function(controller, msg_type, message) {
 
@@ -342,6 +344,11 @@ _Present.prototype.onDeviceLabelEdit = function(controller, msg_type, message) {
             controller.scope.onDeviceLabelEdit(message);
         }
 };
+_Present.prototype.onGroupLabelEdit = function(controller, msg_type, message) {
+        if (message.sender !== controller.scope.client_id) {
+            controller.scope.onGroupLabelEdit(message);
+        }
+};
 _Present.prototype.onLinkLabelEdit = function(controller, msg_type, message) {
         if (message.sender !== controller.scope.client_id) {
             controller.scope.onLinkLabelEdit(message);
@@ -369,6 +376,7 @@ _Present.prototype.onUndo = function(controller, msg_type, message) {
             controller.changeState(Past);
         }
 };
+_Present.prototype.onUndo.transitions = ['Past'];
 _Present.prototype.onSnapshot = function(controller, msg_type, message) {
         if (message.sender !== controller.scope.client_id) {
             controller.scope.onSnapshot(message);
@@ -471,7 +479,6 @@ _Present.prototype.onMouseWheelEvent = function(controller, msg_type, message) {
             controller.scope.onKeyDown(message);
         }
 };
-_Present.prototype.onMessage.transitions = ['Past'];
 
 _Present.prototype.onMouseWheel = function (controller, msg_type, message) {
 

@@ -1,3 +1,12 @@
+Array.prototype.extend = function (other_array) {
+    /* you should include a test to check whether other_array really is an array */
+    var i = 0;
+    for (i = 0; i < other_array.length; i++) {
+        this.push(other_array[i]);
+    }
+};
+
+
 var math = require('mathjs');
 
 function noop () {
@@ -9,6 +18,13 @@ function natural_numbers (start) {
     return function () {return counter += 1;};
 }
 exports.natural_numbers = natural_numbers;
+
+
+function distance (x1, y1, x2, y2) {
+
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+exports.distance = distance;
 
 // polarToCartesian
 // @wdebeaum, @opsb

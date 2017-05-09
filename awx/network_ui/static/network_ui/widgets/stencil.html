@@ -1,11 +1,13 @@
 
 
-                    <rect x=0
+                    <rect ng-attr-class="{{stencil.is_pressed ? 'NetworkUI__stencil--button-pressed' : stencil.mouse_over ? 'NetworkUI__stencil--button-hover' : 'NetworkUI__stencil'}}"
+                          x=0
                           y=0
-                          ng-attr-width={{stencil.size}}
-                          ng-attr-height={{stencil.size}}
-                          rx=3></rect>
-                    <text ng-attr-x="{{stencil.size/2}}"
-                          ng-attr-y="{{stencil.size/2}}"
+                          ng-attr-width={{stencil.width}}
+                          ng-attr-height={{stencil.height}}
+                          rx=5></rect>
+                    <text ng-attr-class="{{stencil.is_pressed ? 'NetworkUI__stencil-text--button-pressed' : stencil.mouse_over ? 'NetworkUI__stencil-text--button-hover' : 'NetworkUI__stencil-text'}}"
+                          ng-attr-x="{{stencil.width/2}}"
+                          ng-attr-y="{{stencil.height/2}}"
                           dy=".3em"
                           text-anchor="middle">{{stencil.name}}</text>

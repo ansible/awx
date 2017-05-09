@@ -1,28 +1,41 @@
 
+
 //console.log = function () { };
-var app = angular.module('triangular', ['monospaced.mousewheel', 'ngTouch']);
+var angular = require('angular');
 var fsm = require('./fsm.js');
+var null_fsm = require('./null.fsm.js');
+var hotkeys = require('./hotkeys.fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
 var link = require('./link.js');
+var group = require('./group.js');
 var buttons = require('./buttons.js');
 var time = require('./time.js');
 var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
 var svg_crowbar = require('../vendor/svg-crowbar.js');
+var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-app.controller('MainCtrl', function($scope, $document, $location, $window) {
+var NetworkUIController = function($scope, $document, $location, $window) {
 
   window.scope = $scope;
 
   $scope.api_token = '';
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
-  $scope.control_socket = new window.ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
+
+  if (!$scope.disconnected) {
+  $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
+  } else {
+      $scope.control_socket = {
+          on_message: util.noop
+      };
+  }
   $scope.history = [];
   $scope.client_id = 0;
   $scope.onMouseDownResult = "";
@@ -48,11 +61,15 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
   $scope.selected_links = [];
   $scope.selected_interfaces = [];
   $scope.selected_items = [];
+  $scope.selected_groups = [];
   $scope.new_link = null;
-  $scope.view_controller = new fsm.FSMController($scope, view.Start, null);
+  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
+  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
+  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
   $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
   $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.link_controller);
+  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
+  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
   $scope.first_controller = $scope.time_controller;
   $scope.last_key = "";
@@ -62,12 +79,15 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 
   $scope.debug = {'hidden': true};
   $scope.hide_buttons = false;
+  $scope.hide_links = false;
   $scope.hide_interfaces = false;
+  $scope.hide_groups = false;
   $scope.graph = {'width': window.innerWidth,
                   'right_column': window.innerWidth - 300,
                   'height': window.innerHeight};
   $scope.device_id_seq = util.natural_numbers(0);
   $scope.link_id_seq = util.natural_numbers(0);
+  $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
   $scope.time_pointer = -1;
   $scope.frame = 0;
@@ -75,25 +95,10 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
   $scope.replay = false;
   $scope.touch_data = {};
   $scope.touches = [];
-
-
-  $scope.devices = [
-  ];
-
-  $scope.stencils = [
-    //{"name": "router", "size":50, 'x':10, 'y':100},
-    //{"name": "switch", "size":50, 'x':10, 'y':160},
-    //{"name": "rack", "size":50, 'x':10, 'y':220},
-  ];
-
-  $scope.layers = [
-    //{"name": "Layer 3", "size":60, 'x':window.innerWidth - 70, 'y':10},
-    //{"name": "Layer 2", "size":60, 'x':window.innerWidth - 70, 'y':80},
-    //{"name": "Layer 1", "size":60, 'x':window.innerWidth - 70, 'y':150},
-  ];
-
-  $scope.links = [
-  ];
+  $scope.devices = [];
+  $scope.stencils = [];
+  $scope.links = [];
+  $scope.groups = [];
 
 
 
@@ -117,10 +122,12 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         var j = 0;
         var devices = $scope.devices;
         var links = $scope.links;
+        var groups = $scope.groups;
         $scope.selected_items = [];
         $scope.selected_devices = [];
         $scope.selected_links = [];
         $scope.selected_interfaces = [];
+        $scope.selected_groups = [];
         for (i = 0; i < devices.length; i++) {
             for (j = 0; j < devices[i].interfaces.length; j++) {
                 devices[i].interfaces[j].selected = false;
@@ -135,6 +142,9 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
                 $scope.send_control_message(new messages.LinkUnSelected($scope.client_id, links[i].id));
             }
             links[i].selected = false;
+        }
+        for (i = 0; i < groups.length; i++) {
+            groups[i].selected = false;
         }
     };
 
@@ -426,42 +436,95 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
     $scope.onDiscoverButton = function (button) {
         console.log(button.name);
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/12/launch/", true);
+        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/7/launch/", true);
         xhr.onload = function () {
             console.log(xhr.readyState);
         };
         xhr.onerror = function () {
             console.error(xhr.statusText);
         };
-        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
         xhr.send();
     };
 
     $scope.onConfigureButton = function (button) {
         console.log(button.name);
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/11/launch/", true);
+        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/9/launch/", true);
         xhr.onload = function () {
             console.log(xhr.readyState);
         };
         xhr.onerror = function () {
             console.error(xhr.statusText);
         };
-        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
         xhr.send();
+    };
+
+    $scope.onTogglePhysical = function () {
+        $scope.hide_links = false;
+    };
+
+    $scope.onUnTogglePhysical = function () {
+        $scope.hide_links = true;
+    };
+
+    $scope.onToggleGroup = function () {
+        $scope.hide_groups = false;
+    };
+
+    $scope.onUnToggleGroup = function () {
+        $scope.hide_groups = true;
+        $scope.group_controller.changeState(group.Ready);
     };
 
     // Buttons
 
     $scope.buttons = [
-      new models.Button("Deploy", 10, 10, 60, 50, $scope.onDeployButton),
-      new models.Button("Destroy", 80, 10, 60, 50, $scope.onDestroyButton),
-      new models.Button("Record", 150, 10, 60, 50, $scope.onRecordButton),
-      new models.Button("Export", 220, 10, 60, 50, $scope.onExportButton),
-      new models.Button("Discover", 290, 10, 80, 50, $scope.onDiscoverButton),
-      new models.Button("Layout", 380, 10, 60, 50, $scope.onLayoutButton),
-      new models.Button("Configure", 450, 10, 80, 50, $scope.onConfigureButton)
+      new models.Button("DEPLOY", 10, 10, 70, 30, $scope.onDeployButton),
+      new models.Button("DESTROY", 90, 10, 80, 30, $scope.onDestroyButton),
+      new models.Button("RECORD", 180, 10, 80, 30, $scope.onRecordButton),
+      new models.Button("EXPORT", 270, 10, 70, 30, $scope.onExportButton),
+      new models.Button("DISCOVER", 350, 10, 80, 30, $scope.onDiscoverButton),
+      new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
+      new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
     ];
+
+    var LAYERS_X = 160;
+
+    $scope.layers = [
+      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("PHYSICAL",
+                              $scope.graph.width - LAYERS_X, 250, 120, 30,
+                              $scope.onTogglePhysical,
+                              $scope.onUnTogglePhysical,
+                              true),
+      new models.ToggleButton("GROUP",
+                              $scope.graph.width - LAYERS_X, 290, 120, 30,
+                              $scope.onToggleGroup,
+                              $scope.onUnToggleGroup,
+                              true)
+    ];
+
+    var STENCIL_X = 10;
+    var STENCIL_Y = 100;
+    var STENCIL_SPACING = 40;
+
+    $scope.stencils = [
+      new models.Button("Switch", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));}),
+      new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
+      new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
+      new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
+      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup");}),
+    ];
+
+    $scope.all_buttons = [];
+    $scope.all_buttons.extend($scope.buttons);
+    $scope.all_buttons.extend($scope.layers);
+    $scope.all_buttons.extend($scope.stencils);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
@@ -513,18 +576,42 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         var k = 0;
         var device = null;
         var keys = null;
+        var peers = null;
         var ptm = null;
         var intf = null;
         for (i = 0; i < $scope.devices.length; i++) {
             device = $scope.devices[i];
             if (device.name === data.key) {
-                keys = Object.keys(data.value.ansible_local.ptm);
-                for (j = 0; j < keys.length; j++) {
-                    ptm = data.value.ansible_local.ptm[keys[j]];
-                    for (k = 0; k < device.interfaces.length; k++) {
-                        intf = device.interfaces[k];
-                        if (intf.name === ptm.port) {
-                            intf.link.status = ptm['cbl status'] === 'pass';
+
+                //Check PTM
+                if (data.value.ansible_local !== undefined &&
+                    data.value.ansible_local.ptm !== undefined) {
+                    keys = Object.keys(data.value.ansible_local.ptm);
+                    for (j = 0; j < keys.length; j++) {
+                        ptm = data.value.ansible_local.ptm[keys[j]];
+                        for (k = 0; k < device.interfaces.length; k++) {
+                            intf = device.interfaces[k];
+                            if (intf.name === ptm.port) {
+                                intf.link.status = ptm['cbl status'] === 'pass';
+                            }
+                        }
+                    }
+                }
+
+                //Check LLDP
+                if (data.value.ansible_net_neighbors !== undefined) {
+                    keys = Object.keys(data.value.ansible_net_neighbors);
+                    for (j = 0; j < keys.length; j++) {
+                        peers = data.value.ansible_net_neighbors[keys[j]];
+                        for (k = 0; k < peers.length; k++) {
+                            intf = $scope.getDeviceInterface(device.name, keys[j]);
+                            if (intf !== null && intf.link !== null) {
+                                if (intf.link.to_interface === intf) {
+                                    intf.link.status = ($scope.getDeviceInterface(peers[k].host, peers[k].port) === intf.link.from_interface);
+                                } else {
+                                    intf.link.status = ($scope.getDeviceInterface(peers[k].host, peers[k].port) === intf.link.to_interface);
+                                }
+                            }
                         }
                     }
                 }
@@ -532,6 +619,34 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         }
 
         $scope.$apply();
+    };
+
+    $scope.getDevice = function(name) {
+
+        var i = 0;
+        for (i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].name === name) {
+                return $scope.devices[i];
+            }
+        }
+
+        return null;
+    };
+
+    $scope.getDeviceInterface = function(device_name, interface_name) {
+
+        var i = 0;
+        var k = 0;
+        for (i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].name === device_name) {
+                for (k = 0; k < $scope.devices[i].interfaces.length; k++) {
+                    if ($scope.devices[i].interfaces[k].name === interface_name) {
+                        return $scope.devices[i].interfaces[k];
+                    }
+                }
+            }
+        }
+        return null;
     };
 
     $scope.onDeviceCreate = function(data) {
@@ -579,6 +694,16 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
                         break;
                     }
                 }
+            }
+        }
+    };
+
+    $scope.forGroup = function(group_id, data, fn) {
+        var i = 0;
+        for (i = 0; i < $scope.groups.length; i++) {
+            if ($scope.groups[i].id === group_id) {
+                fn($scope.groups[i], data);
+                break;
             }
         }
     };
@@ -674,7 +799,7 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
             link = $scope.links[i];
             if (link.id === data.id &&
                 link.from_device.id === data.from_device_id &&
-                link.to_device.id === data.to_device_id && 
+                link.to_device.id === data.to_device_id &&
                 link.to_interface.id === data.to_interface_id &&
                 link.from_interface.id === data.from_interface_id) {
                 link.from_interface.link = null;
@@ -749,6 +874,17 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
                 }
             }
         }
+    };
+
+
+    $scope.onGroupLabelEdit = function(data) {
+        $scope.edit_group_label(data);
+    };
+
+    $scope.edit_group_label = function(data) {
+        $scope.forGroup(data.id, data, function(group, data) {
+            group.name = data.name;
+        });
     };
 
     $scope.redo = function(type_data) {
@@ -831,6 +967,9 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         $scope.panX = data.panX;
         $scope.panY = data.panX;
         $scope.current_scale = data.scale;
+        $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
+        $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
+        $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
         $location.search({topology_id: data.topology_id});
     };
 
@@ -863,7 +1002,6 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 
     $scope.onSnapshot = function (data) {
 
-
         //Erase the existing state
         $scope.devices = [];
         $scope.links = [];
@@ -878,11 +1016,13 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         var new_intf = null;
         var max_device_id = null;
         var max_link_id = null;
+        var max_group_id = null;
         var min_x = null;
         var min_y = null;
         var max_x = null;
         var max_y = null;
         var new_link = null;
+        var new_group = null;
 
         //Build the devices
         for (i = 0; i < data.devices.length; i++) {
@@ -907,6 +1047,7 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
                                            device.x,
                                            device.y,
                                            device.type);
+            new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             $scope.devices.push(new_device);
             device_map[device.id] = new_device;
             device_interface_map[device.id] = {};
@@ -936,6 +1077,28 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
             $scope.links.push(new_link);
             device_interface_map[link.from_device_id][link.from_interface_id].link = new_link;
             device_interface_map[link.to_device_id][link.to_interface_id].link = new_link;
+        }
+
+        //Build the groups
+        var group = null;
+        for (i = 0; i < data.groups.length; i++) {
+            group = data.groups[i];
+            if (max_group_id === null || group.id > max_group_id) {
+                max_group_id = group.id;
+            }
+            new_group = new models.Group(group.id,
+                                         group.name,
+                                         group.x1,
+                                         group.y1,
+                                         group.x2,
+                                         group.y2,
+                                         false);
+            if (group.members !== undefined) {
+                for (j=0; j < group.members.length; j++) {
+                    new_group.devices.push(device_map[group.members[j]]);
+                }
+            }
+            $scope.groups.push(new_group);
         }
 
         var diff_x;
@@ -968,6 +1131,10 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         //Update the link_id_seq to be greater than all link ids to prevent duplicate ids.
         if (max_link_id !== null) {
             $scope.link_id_seq = util.natural_numbers(max_link_id);
+        }
+        //Update the group_id_seq to be greater than all group ids to prevent duplicate ids.
+        if (max_group_id !== null) {
+            $scope.group_id_seq = util.natural_numbers(max_group_id);
         }
 
         $scope.updateInterfaceDots();
@@ -1034,7 +1201,11 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
             }
         }
         var data = messages.serialize(message);
-        $scope.control_socket.send(data);
+        if (!$scope.disconnected) {
+            $scope.control_socket.send(data);
+        } else {
+            console.log(data);
+        }
     };
 
 
@@ -1047,6 +1218,8 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
 	  	$scope.graph.right_column = $window.innerWidth - 300;
 	  	$scope.graph.height = $window.innerHeight;
 
+        $scope.update_size();
+
 		// manuall $digest required as resize event
 		// is outside of angular
 	 	$scope.$digest();
@@ -1057,68 +1230,21 @@ app.controller('MainCtrl', function($scope, $document, $location, $window) {
         $scope.frame = Math.floor(window.performance.now());
         $scope.$apply();
     }, 17);
-});
 
-app.directive('cursor', function() {
-  return { restrict: 'A', templateUrl: 'widgets/cursor.html' };
-});
+    console.log("Network UI started");
 
-app.directive('touch', function() {
-  return { restrict: 'A', templateUrl: 'widgets/touch.html' };
-});
+    $scope.$on('$destroy', function () {
+        console.log("Network UI stopping");
+        $document.unbind('keydown', $scope.onKeyDown);
+    });
 
-app.directive('debug', function() {
-  return { restrict: 'A', templateUrl: 'widgets/debug.html' };
-});
+    $scope.update_size = function () {
+        var i = 0;
+        for (i = 0; i < $scope.layers.length; i++) {
+            $scope.layers[i].x = $scope.graph.width - 140;
+        }
+    };
+};
 
-app.directive('router', function() {
-  return { restrict: 'A', templateUrl: 'widgets/router.html' };
-});
-
-app.directive('switch', function() {
-  return { restrict: 'A', templateUrl: 'widgets/switch.html' };
-});
-
-app.directive('host', function() {
-  return { restrict: 'A', templateUrl: 'widgets/host.html' };
-});
-
-app.directive('link', function() {
-  return { restrict: 'A', templateUrl: 'widgets/link.html' };
-});
-
-app.directive('rack', function() {
-  return { restrict: 'A', templateUrl: 'widgets/rack.html' };
-});
-
-app.directive('default', function() {
-  return { restrict: 'A', templateUrl: 'widgets/default.html' };
-});
-
-app.directive('quadrants', function() {
-  return { restrict: 'A', templateUrl: 'widgets/quadrants.html' };
-});
-
-app.directive('stencil', function() {
-  return { restrict: 'A', templateUrl: 'widgets/stencil.html' };
-});
-
-app.directive('layer', function() {
-  return { restrict: 'A', templateUrl: 'widgets/layer.html' };
-});
-
-app.directive('button', function() {
-  return { restrict: 'A', templateUrl: 'widgets/button.html' };
-});
-
-app.directive('statusLight', function() {
-  return { restrict: 'A', templateUrl: 'widgets/status_light.html' };
-});
-
-app.directive('taskStatus', function() {
-  return { restrict: 'A', templateUrl: 'widgets/task_status.html' };
-});
-
-
-
-exports.app = app;
+exports.NetworkUIController = NetworkUIController;
+console.log("Network UI loaded");
