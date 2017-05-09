@@ -1391,6 +1391,15 @@ class RunProjectUpdate(BaseTask):
             except Exception as e:
                 # A failed file update does not block other actions
                 logger.error('Encountered error updating project dependent inventory: {}'.format(e))
+
+            # Stop all dependent inventory updates if project update was canceled
+            project_update.refresh_from_db()
+            if project_update.cancel_flag:
+                break
+            # Don't update inventory scm_revision if update was canceled
+            local_inv_update.refresh_from_db()
+            if local_inv_update.cancel_flag:
+                continue
             inv_src.scm_last_revision = scm_revision
             inv_src.save(update_fields=['scm_last_revision'])
 

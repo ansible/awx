@@ -1393,6 +1393,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation)
         if res:
             map(lambda x: x.cancel(job_explanation=self._build_job_explanation()), self.get_dependent_jobs())
+            if self.launch_type != 'scm' and self.source_project_update:
+                self.source_project_update.cancel(job_explanation=job_explanation)
         return res
 
 
