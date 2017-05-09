@@ -101,13 +101,15 @@ function LinkCreate(sender, id, from_device_id, to_device_id, from_interface_id,
 }
 exports.LinkCreate = LinkCreate;
 
-function LinkDestroy(sender, id, from_id, to_id) {
+function LinkDestroy(sender, id, from_device_id, to_device_id, from_interface_id, to_interface_id, name) {
     this.msg_type = "LinkDestroy";
     this.id = id;
     this.sender = sender;
-    this.from_id = from_id;
-    this.to_id = to_id;
-    this.name = '';
+    this.name = name;
+    this.from_device_id = from_device_id;
+    this.to_device_id = to_device_id;
+    this.from_interface_id = from_interface_id;
+    this.to_interface_id = to_interface_id;
 }
 exports.LinkDestroy = LinkDestroy;
 
@@ -239,3 +241,79 @@ function ViewPort(sender, scale, panX, panY) {
     this.panY = panY;
 }
 exports.ViewPort = ViewPort;
+
+function NewDevice(type) {
+    this.type = type;
+}
+exports.NewDevice = NewDevice;
+
+function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {
+    this.msg_type = "GroupMove";
+    this.sender = sender;
+    this.id = id;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.previous_x1 = previous_x1;
+    this.previous_y1 = previous_y1;
+    this.previous_x2 = previous_x2;
+    this.previous_y2 = previous_y2;
+}
+exports.GroupMove = GroupMove;
+
+function GroupCreate(sender, id, x1, y1, x2, y2, name) {
+    this.msg_type = "GroupCreate";
+    this.sender = sender;
+    this.id = id;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.name = name;
+}
+exports.GroupCreate = GroupCreate;
+
+function GroupDestroy(sender, id, previous_x1, previous_y1, previous_x2, previous_y2, previous_name, previous_type) {
+    this.msg_type = "GroupDestroy";
+    this.sender = sender;
+    this.id = id;
+    this.previous_x1 = previous_x1;
+    this.previous_y1 = previous_y1;
+    this.previous_x2 = previous_x2;
+    this.previous_y2 = previous_y2;
+    this.previous_name = previous_name;
+    this.previous_type = previous_type;
+}
+exports.GroupDestroy = GroupDestroy;
+
+function GroupLabelEdit(sender, id, name, previous_name) {
+    this.msg_type = "GroupLabelEdit";
+    this.sender = sender;
+    this.id = id;
+    this.name = name;
+    this.previous_name = previous_name;
+}
+exports.GroupLabelEdit = GroupLabelEdit;
+
+function GroupSelected(sender, id) {
+    this.msg_type = "GroupSelected";
+    this.sender = sender;
+    this.id = id;
+}
+exports.GroupSelected = GroupSelected;
+
+function GroupUnSelected(sender, id) {
+    this.msg_type = "GroupUnSelected";
+    this.sender = sender;
+    this.id = id;
+}
+exports.GroupUnSelected = GroupUnSelected;
+
+function GroupMembership(sender, id, members) {
+    this.msg_type = "GroupMembership";
+    this.sender = sender;
+    this.id = id;
+    this.members = members;
+}
+exports.GroupMembership = GroupMembership;

@@ -1,4 +1,17 @@
-/* Put your css in here */
+
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/static/assets/OpenSans-Regular.ttf);
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    font-style: bold;
+    font-weight: 600;
+    src: url(/static/assets/OpenSans-Bold.ttf);
+}
 
 @selected-red: #c9232c;
 @selected-mango: #ff5850;
@@ -8,308 +21,469 @@
 @dark-widget-detail: #707070;
 @widget-body: #D7D7D7;
 @link: #D7D7D7;
+@group: #707070;
 @debug-copynot: rgb(77,200,242);
-@button-body: #f6f6f6;
+@button-body: #ffffff;
 @button-text: #707070;
-@button-outline: #b4b6b4;
-@button-body-hover: #dfdfdf;
-@button-body-pressed: #d5d5d5;
+@button-outline: #b7b7b7;
+@button-body-hover: #f2f2f2;
+@button-body-pressed: #848992;
+@button-text-pressed: #ffffff;
 @green: #5CB85C;
 @red:  #D9534F;
 
-html {
-    overflow: hidden;
-}
-
-body {
-    background-color: yellow;
-    padding: 0;
-    margin: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-svg {
+.NetworkUI {
     background-color: @light-background;
     cursor: none;
 }
 
-svg text {
+.NetworkUI__text {
     fill: @button-text;
+    font-family: 'Open Sans';
 }
 
-.debug text {
+.NetworkUI__debug-text {
     fill: @debug-copynot;
+    font-family: 'Open Sans';
 }
 
-
-line.selected {
-    stroke: @selected-blue;
-    stroke-width: 6;
-}
-
-line.remote-selected {
-    stroke: @selected-mango;
-    stroke-width: 6;
-}
-
-line.selected-conflict {
-    stroke: @selected-red;
-    stroke-width: 6;
-}
-
-svg rect.debug {
+.NetworkUI--debug {
     fill-opacity: 0;
     stroke: @debug-copynot;
     stroke-width: 1;
 }
 
-svg line.link {
+
+.NetworkUI__link--selected {
+    stroke: @selected-blue;
+    stroke-width: 6;
+}
+
+.NetworkUI__link--remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 6;
+}
+
+.NetworkUI__link--selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 6;
+}
+
+
+.NetworkUI__link {
     stroke: @link;
     stroke-width: 2;
 }
 
-svg line.link-pass {
+.NetworkUI__link--link-pass {
     stroke: @green;
     stroke-width: 2;
 }
 
-svg line.link-fail {
+.NetworkUI__link--link-fail {
     stroke: @red;
     stroke-width: 2;
 }
 
-svg line.cursor {
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
-}
-
-svg line.debug {
+.NetworkUI__link--debug {
     stroke: @debug-copynot;
     stroke-width: 1;
 }
 
-.debug-cursor line {
+.NetworkUI__cursor {
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__debug-cursor {
     stroke: @debug-copynot;
     stroke-width: 4;
 }
 
-.hidden {
+.NetworkUI--hidden {
     display: none;
 }
 
-.router circle {
+.NetworkUI__router {
     fill: @widget-body;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.router circle.selected {
+.NetworkUI__router--selected {
     stroke: @selected-blue;
     stroke-width: 4;
 }
 
-.router circle.remote-selected {
+.NetworkUI__router--remote-selected {
     stroke: @selected-mango;
     stroke-width: 4;
 }
 
-.router circle.selected-conflict {
+.NetworkUI__router--selected-conflict {
     stroke: @selected-red;
     stroke-width: 4;
 }
 
-.router line {
+.NetworkUI__router line {
     stroke: @light-widget-detail;
     stroke-width: 20;
 }
 
-.router polygon {
+.NetworkUI__router polygon {
     fill: @light-widget-detail;
+    stroke: none;
 }
 
-.switch rect {
+.NetworkUI__router-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__router-text--selected {
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__switch {
     fill: @widget-body;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.switch rect.selected {
+.NetworkUI__switch--selected {
     stroke: @selected-blue;
     stroke-width: 10;
 }
 
-.switch rect.remote-selected {
+.NetworkUI__switch--remote-selected {
     stroke: @selected-mango;
     stroke-width: 10;
 }
 
-.switch rect.selected-conflict {
+.NetworkUI__switch--selected-conflict {
     stroke: @selected-red;
     stroke-width: 10;
 }
 
-.switch line {
+.NetworkUI__switch line {
     stroke: @light-widget-detail;
     stroke-width: 20;
 }
 
-.switch polygon {
+.NetworkUI__switch polygon {
     fill: @light-widget-detail;
+    stroke: none;
 }
 
-.rack rect {
+.NetworkUI__switch-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__switch-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__rack {
     fill: @widget-body;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.rack rect.background {
+.NetworkUI__rack-background {
     fill: @light-background;
     stroke: @light-background;
     stroke-width: 2;
 }
 
-.rack rect.selected {
+.NetworkUI__rack--selected {
     fill: @selected-blue;
     stroke: @selected-blue;
     stroke-width: 10;
 }
 
-.rack rect.remote-selected {
+.NetworkUI__rack--remote-selected {
     fill: @selected-mango;
     stroke: @selected-mango;
     stroke-width: 10;
 }
 
-.rack rect.selected-conflict {
+.NetworkUI__rack--selected-conflict {
     fill: @selected-red;
     stroke: @selected-red;
     stroke-width: 10;
 }
 
-.rack line {
+.NetworkUI__rack line {
     stroke: @light-widget-detail;
     stroke-width: 20;
 }
 
-.rack circle {
+.NetworkUI__rack circle {
     fill: @light-widget-detail;
+    stroke: none;
 }
 
-.button rect {
+.NetworkUI__button {
     fill: @button-body;
     stroke: @button-outline;
     stroke-width: 1;
 }
 
-.button text {
+.NetworkUI__button-text {
     fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
-.button-pressed rect {
+.NetworkUI__button--button-pressed {
     fill: @button-body-pressed;
     stroke: @button-outline;
     stroke-width: 1;
 }
 
-.button-pressed text {
-    fill: @button-text;
+.NetworkUI__button-text--button-pressed {
+    fill: @button-text-pressed;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
-.button-hover rect {
+.NetworkUI__button--button-hover {
     fill: @button-body-hover;
     stroke: @button-outline;
     stroke-width: 1;
 }
 
-.button-hover text {
+.NetworkUI__button-text--button-hover {
     fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
-.host rect {
+.NetworkUI__layer {
+    fill: @button-body;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__layer-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__layer--button-pressed {
+    fill: @button-body-pressed;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__layer-text--button-pressed {
+    fill: @button-text-pressed;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__layer--button-hover {
+    fill: @button-body-hover;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__layer-text--button-hover {
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__stencil {
+    fill: @button-body;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__stencil-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__stencil--button-pressed {
+    fill: @button-body-pressed;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__stencil-text--button-pressed {
+    fill: @button-text-pressed;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__stencil--button-hover {
+    fill: @button-body-hover;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.NetworkUI__stencil-text--button-hover {
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__host {
     fill: @widget-body;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.host rect.background {
+.NetworkUI__host-background {
     fill: @light-background;
     stroke: @light-background;
     stroke-width: 2;
 }
 
-.host rect.selected {
+.NetworkUI__host--selected {
     fill: @selected-blue;
     stroke: @selected-blue;
     stroke-width: 10;
 }
 
-.host rect.remote-selected {
+.NetworkUI__host--remote-selected {
     fill: @selected-mango;
     stroke: @selected-mango;
     stroke-width: 10;
 }
 
-.host rect.selected-conflict {
+.NetworkUI__host--selected-conflict {
     fill: @selected-red;
     stroke: @selected-red;
     stroke-width: 10;
 }
 
-.host line {
+.NetworkUI__host line {
     stroke: @light-widget-detail;
     stroke-width: 20;
 }
 
-.host circle {
+.NetworkUI__host circle {
     fill: @light-widget-detail;
+    stroke: none;
 }
 
-circle.status {
+
+.NetworkUI__host-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__host-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__status {
     fill: @widget-body;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-circle.pass {
+.NetworkUI__status--pass {
     fill: @green;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-circle.fail {
+.NetworkUI__status--fail {
     fill: @red;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-path.status {
+.NetworkUI__status-path {
     fill: none;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-circle.debug {
+.NetworkUI__circle-debug {
     fill: @debug-copynot;
 }
 
 
-circle.interface {
+.NetworkUI__interface {
     fill: @dark-widget-detail;
 }
 
-circle.selected {
+.NetworkUI__interface--selected {
     fill: @selected-blue;
 }
 
-text.interface {
+.NetworkUI__interface-text {
+    fill: @button-text;
     font-size: 8px;
+    font-family: 'Open Sans';
 }
 
-.touch circle {
+
+.NetworkUI__interface-text--selected {
+    font-size: 8px;
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__link-text {
+    fill: @button-text;
+    font-size: 8px;
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__touch {
     stroke: @debug-copynot;
     fill: none;
 }
 
+
+
+.NetworkUI__group--selected {
+    stroke: @selected-blue;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group--remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group--selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group {
+    stroke: @group;
+    stroke-width: 2;
+    fill: none;
+}
+
+.NetworkUI__group--debug {
+    stroke: @debug-copynot;
+    stroke-width: 1;
+    fill: none;
+}
+
+.NetworkUI__group-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__group-text--selected {
+    font-family: 'Open Sans';
+}

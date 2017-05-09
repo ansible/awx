@@ -59,6 +59,75 @@ inherits(_EditLabel, _State);
 var EditLabel = new _EditLabel();
 exports.EditLabel = EditLabel;
 
+
+function _Placing () {
+    this.name = 'Placing';
+}
+inherits(_Placing, _State);
+var Placing = new _Placing();
+exports.Placing = Placing;
+
+_Ready.prototype.onNewDevice = function (controller, msg_type, message) {
+
+	var scope = controller.scope;
+    var device = null;
+    var id = null;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    scope.clear_selections();
+
+	if (message.type === "router") {
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Router" + id,
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "router");
+	}
+    else if (message.type === "switch") {
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Switch" + id,
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "switch");
+	}
+    else if (message.type === "rack") {
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Rack" + id,
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "rack");
+	}
+    else if (message.type === "host") {
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Host" + id,
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "host");
+	}
+
+    if (device !== null) {
+        scope.devices.push(device);
+        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
+                                                             device.id,
+                                                             device.x,
+                                                             device.y,
+                                                             device.name,
+                                                             device.type));
+        scope.selected_devices.push(device);
+        device.selected = true;
+        controller.changeState(Placing);
+    }
+};
+_Ready.prototype.onNewDevice.transitions = ['Placing'];
+
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     var last_selected = controller.scope.select_items($event.shiftKey);
@@ -78,53 +147,6 @@ _Ready.prototype.onMouseDown.transitions = ['Selected1'];
 _Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
 
 
-_Ready.prototype.onKeyDown = function(controller, msg_type, $event) {
-
-	var scope = controller.scope;
-    var device = null;
-
-	if ($event.key === 'r') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Router",
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "router");
-	}
-    else if ($event.key === 's') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Switch",
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "switch");
-	}
-    else if ($event.key === 'a') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Rack",
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "rack");
-	}
-    else if ($event.key === 'h') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Host",
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "host");
-	}
-
-    if (device !== null) {
-        scope.devices.push(device);
-        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                             device.id,
-                                                             device.x,
-                                                             device.y,
-                                                             device.name,
-                                                             device.type));
-    }
-
-	controller.next_controller.handle_message(msg_type, $event);
-};
-
 _Start.prototype.start = function (controller) {
 
     controller.changeState(Ready);
@@ -133,6 +155,12 @@ _Start.prototype.start = function (controller) {
 _Start.prototype.start.transitions = ['Ready'];
 
 
+_Selected2.prototype.onNewDevice = function (controller, msg_type, message) {
+
+    controller.changeState(Ready);
+    controller.handle_message(msg_type, message);
+};
+_Selected2.prototype.onNewDevice.transitions = ['Ready'];
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -182,9 +210,25 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
         var j = 0;
         var index = -1;
         var devices = controller.scope.selected_devices;
+        var links = controller.scope.selected_links;
         var all_links = controller.scope.links.slice();
         controller.scope.selected_devices = [];
         controller.scope.selected_links = [];
+        for (i = 0; i < links.length; i++) {
+            index = controller.scope.links.indexOf(links[i]);
+            if (index !== -1) {
+                links[i].selected = false;
+                links[i].remote_selected = false;
+                controller.scope.links.splice(index, 1);
+                controller.scope.send_control_message(new messages.LinkDestroy(controller.scope.client_id,
+                                                                               links[i].id,
+                                                                               links[i].from_device.id,
+                                                                               links[i].to_device.id,
+                                                                               links[i].from_interface.id,
+                                                                               links[i].to_interface.id,
+                                                                               links[i].name));
+            }
+        }
         for (i = 0; i < devices.length; i++) {
             index = controller.scope.devices.indexOf(devices[i]);
             if (index !== -1) {
@@ -207,6 +251,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
             }
         }
     }
+
+    controller.next_controller.handle_message(msg_type, $event);
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
 
@@ -234,12 +280,14 @@ _Selected1.prototype.onMouseDown = util.noop;
 _Move.prototype.onMouseMove = function (controller) {
 
     var devices = controller.scope.selected_devices;
+    var groups = controller.scope.groups;
 
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
     var i = 0;
     var j = 0;
     var previous_x, previous_y;
+    var membership_old_new;
     for (i = 0; i < devices.length; i++) {
         previous_x = devices[i].x;
         previous_y = devices[i].y;
@@ -261,6 +309,15 @@ _Move.prototype.onMouseMove = function (controller) {
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
+
+
+    //TODO: Improve the performance of this code from O(n^2) to O(n) or better
+    for (i = 0; i < groups.length; i++) {
+        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
+                                                                           groups[i].id,
+                                                                           membership_old_new[2]));
+    }
 };
 
 _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
@@ -268,12 +325,18 @@ _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
 
 _Move.prototype.onMouseUp = function (controller, msg_type, $event) {
 
-    controller.changeState(Selected2);
+    controller.changeState(Selected1);
     controller.handle_message(msg_type, $event);
 };
-_Move.prototype.onMouseUp.transitions = ['Selected2'];
+_Move.prototype.onMouseUp.transitions = ['Selected1'];
 
 _Move.prototype.onTouchEnd = _Move.prototype.onMouseUp;
+
+_Move.prototype.onMouseDown = function (controller) {
+
+    controller.changeState(Selected1);
+};
+_Move.prototype.onMouseDown.transitions = ['Selected1'];
 
 _Selected3.prototype.onMouseUp = function (controller) {
     controller.changeState(EditLabel);
@@ -346,3 +409,20 @@ _EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
     }
 };
 _EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
+
+
+_Placing.prototype.onMouseDown = function (controller) {
+
+    controller.changeState(Selected1);
+
+};
+_Placing.prototype.onMouseDown.transitions = ['Selected1'];
+
+_Placing.prototype.onMouseMove = function (controller) {
+
+    controller.changeState(Move);
+
+};
+_Placing.prototype.onMouseMove.transitions = ['Move'];
+
+

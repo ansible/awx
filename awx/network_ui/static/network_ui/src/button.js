@@ -55,8 +55,8 @@ _Start.prototype.start.transitions = ['Ready'];
 
 _Clicked.prototype.start = function (controller) {
 
-    controller.scope.callback(controller.scope);
     controller.scope.is_pressed = false;
+    controller.scope.callback(controller.scope);
     controller.changeState(Ready);
 };
 _Clicked.prototype.start.transitions = ['Ready'];
