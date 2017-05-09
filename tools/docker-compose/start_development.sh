@@ -25,6 +25,7 @@ fi
 
 cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
 cp /tmp/ansible-tower.egg-link /venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+ln -s /tower_devel/tools/rdb.py /venv/tower/lib/python2.7/site-packages/rdb.py
 yes | cp -rf /tower_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 
 # Tower bootstrapping
