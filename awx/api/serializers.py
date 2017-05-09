@@ -1869,10 +1869,13 @@ class CredentialTypeSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(CredentialTypeSerializer, self).get_related(obj)
-        res['credentials'] = reverse(
+        res['credentials'] = self.reverse(
             'api:credential_type_credential_list',
-            kwargs={'pk': obj.pk},
-            request=self.context.get('request')
+            kwargs={'pk': obj.pk}
+        )
+        res['activity_stream'] = self.reverse(
+            'api:credential_type_activity_stream_list',
+            kwargs={'pk': obj.pk}
         )
         return res
 
