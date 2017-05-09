@@ -14,13 +14,13 @@ function svg_crowbar () {
     xmlns: "http://www.w3.org/2000/xmlns/",
     xlink: "http://www.w3.org/1999/xlink",
     svg: "http://www.w3.org/2000/svg"
-  }
+  };
 
   initialize();
 
   function initialize() {
     var documents = [window.document],
-        SVGSources = [];
+        SVGSources = [],
         iframes = document.querySelectorAll("iframe"),
         objects = document.querySelectorAll("object");
 
@@ -30,7 +30,7 @@ function svg_crowbar () {
           documents.push(el.contentDocument);
         }
       } catch(err) {
-        console.log(err)
+        console.log(err);
       }
     });
 
@@ -40,7 +40,7 @@ function svg_crowbar () {
           documents.push(el.contentDocument);
         }
       } catch(err) {
-        console.log(err)
+        console.log(err);
       }
     });
 
@@ -50,8 +50,8 @@ function svg_crowbar () {
       // because of prototype on NYT pages
       for (var i = 0; i < newSources.length; i++) {
         SVGSources.push(newSources[i]);
-      };
-    })
+      }
+    });
     if (SVGSources.length > 1) {
       createPopover(SVGSources);
     } else if (SVGSources.length > 0) {
@@ -72,7 +72,7 @@ function svg_crowbar () {
             s2.left += 38;
           }
         }
-      })
+      });
     });
 
     var buttonsContainer = document.createElement("div");
@@ -80,9 +80,9 @@ function svg_crowbar () {
 
     buttonsContainer.setAttribute("class", "svg-crowbar");
     buttonsContainer.style["z-index"] = 1e7;
-    buttonsContainer.style["position"] = "absolute";
-    buttonsContainer.style["top"] = 0;
-    buttonsContainer.style["left"] = 0;
+    buttonsContainer.style.position = "absolute";
+    buttonsContainer.style.top = 0;
+    buttonsContainer.style.left = 0;
 
 
 
@@ -90,40 +90,40 @@ function svg_crowbar () {
     body.appendChild(background);
 
     background.setAttribute("class", "svg-crowbar");
-    background.style["background"] = "rgba(255, 255, 255, 0.7)";
-    background.style["position"] = "fixed";
-    background.style["left"] = 0;
-    background.style["top"] = 0;
-    background.style["width"] = "100%";
-    background.style["height"] = "100%";
+    background.style.background = "rgba(255, 255, 255, 0.7)";
+    background.style.position = "fixed";
+    background.style.left = 0;
+    background.style.top = 0;
+    background.style.width = "100%";
+    background.style.height = "100%";
 
     sources.forEach(function(d, i) {
       var buttonWrapper = document.createElement("div");
       buttonsContainer.appendChild(buttonWrapper);
       buttonWrapper.setAttribute("class", "svg-crowbar");
-      buttonWrapper.style["position"] = "absolute";
-      buttonWrapper.style["top"] = (d.top + document.body.scrollTop) + "px";
-      buttonWrapper.style["left"] = (document.body.scrollLeft + d.left) + "px";
-      buttonWrapper.style["padding"] = "4px";
+      buttonWrapper.style.position = "absolute";
+      buttonWrapper.style.top = (d.top + document.body.scrollTop) + "px";
+      buttonWrapper.style.left = (document.body.scrollLeft + d.left) + "px";
+      buttonWrapper.style.padding = "4px";
       buttonWrapper.style["border-radius"] = "3px";
-      buttonWrapper.style["color"] = "white";
+      buttonWrapper.style.color = "white";
       buttonWrapper.style["text-align"] = "center";
       buttonWrapper.style["font-family"] = "'Helvetica Neue'";
-      buttonWrapper.style["background"] = "rgba(0, 0, 0, 0.8)";
+      buttonWrapper.style.background = "rgba(0, 0, 0, 0.8)";
       buttonWrapper.style["box-shadow"] = "0px 4px 18px rgba(0, 0, 0, 0.4)";
-      buttonWrapper.style["cursor"] = "move";
+      buttonWrapper.style.cursor = "move";
       buttonWrapper.textContent =  "SVG #" + i + ": " + (d.id ? "#" + d.id : "") + (d.class ? "." + d.class : "");
 
       var button = document.createElement("button");
       buttonWrapper.appendChild(button);
-      button.setAttribute("data-source-id", i)
-      button.style["width"] = "150px";
+      button.setAttribute("data-source-id", i);
+      button.style.width = "150px";
       button.style["font-size"] = "12px";
       button.style["line-height"] = "1.4em";
-      button.style["margin"] = "5px 0 0 0";
+      button.style.margin = "5px 0 0 0";
       button.textContent = "Download";
 
-      button.onclick = function(el) {
+      button.onclick = function() {
         // console.log(el, d, i, sources)
         download(d);
       };
@@ -155,7 +155,7 @@ function svg_crowbar () {
       svg.insertBefore(defsEl, svg.firstChild); //TODO   .insert("defs", ":first-child")
       // defsEl.setAttribute("class", "svg-crowbar");
 
-      var styleEl = document.createElement("style")
+      var styleEl = document.createElement("style");
       defsEl.appendChild(styleEl);
       styleEl.setAttribute("type", "text/css");
 
@@ -207,7 +207,7 @@ function svg_crowbar () {
     a.setAttribute("class", "svg-crowbar");
     a.setAttribute("download", filename + ".svg");
     a.setAttribute("href", url);
-    a.style["display"] = "none";
+    a.style.display = "none";
     a.click();
 
     setTimeout(function() {
