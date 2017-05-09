@@ -1,15 +1,18 @@
-.PHONY: all main lint lessc
+.PHONY: all main lint lessc install simple-server deploy
 
-all: clean lessc lint main istanbul
+all: clean install lessc lint main
 
 clean:
 	rm -rf src-instrumented
 	rm -f js/bundle.js
+	rm -f js/vendor.bundle.js
 	rm -f css/style.css
 
-main:
-	webpack src/main.js js/bundle.js
-	cp vendor/*.js js/
+install:
+	npm i
+
+main: install
+	webpack
 
 lint:
 	jshint --verbose src/*js
@@ -23,3 +26,11 @@ istanbul:
 	cp index.html index-instrumented.html
 	sed -i "s/bundle.js/bundle-instrumented.js/g" index-instrumented.html
 	cp vendor/*.js js/
+
+
+simple-server:
+	python -m SimpleHTTPServer
+
+
+deploy: main
+	rsync -av src/ ../../../../awx/ui/client/src/network_ui/

@@ -1,32 +1,35 @@
 
 
-        <g ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug">
-        <text ng-attr-x="{{graph.right_column}}" y="15">width: {{graph.width}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="35">height: {{graph.height}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="55">rc: {{graph.right_column}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="75">Mouse down: {{onMouseDownResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="95">Mouse up: {{onMouseUpResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="115">Mouse move: {{onMouseMoveResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="135">Mouse over: {{onMouseOverResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="155">Mouse enter: {{onMouseEnterResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="175">Mouse leave: {{onMouseLeaveResult}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="195">Current scale: {{current_scale.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="215">Pan X: {{panX.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="235">Pan Y: {{panY.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="255">View State: {{view_controller.state.name}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="275">Mouse X: {{mouseX.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="295">Mouse Y: {{mouseY.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="315">Scaled X: {{scaledX.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="335">Scaled Y: {{scaledY.toFixed(2)}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="355">Key: {{last_key}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="375">Key Code: {{last_key_code}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="395">Move State: {{move_controller.state.name}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="415">Selected devices: {{selected_devices.length}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="435">Selected links: {{selected_links.length}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="455">Link State: {{link_controller.state.name}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="475">Buttons State: {{buttons_controller.state.name}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="495">Time State: {{time_controller.state.name}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="515">Time Pointer: {{time_pointer}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="535">History: {{history.length}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="555">Touch Data: {{touch_data.xb}} {{touch_data.yb}} {{touch_data.d}}</text>
+        <g ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || ''}}">
+        <text ng-attr-x="{{graph.right_column}}" y="115" class="NetworkUI__debug-text">width: {{graph.width}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="135" class="NetworkUI__debug-text">height: {{graph.height}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="155" class="NetworkUI__debug-text">rc: {{graph.right_column}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="175" class="NetworkUI__debug-text">Mouse down: {{onMouseDownResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="195" class="NetworkUI__debug-text">Mouse up: {{onMouseUpResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="215" class="NetworkUI__debug-text">Mouse move: {{onMouseMoveResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="235" class="NetworkUI__debug-text">Mouse over: {{onMouseOverResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="255" class="NetworkUI__debug-text">Mouse enter: {{onMouseEnterResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="275" class="NetworkUI__debug-text">Mouse leave: {{onMouseLeaveResult}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="295" class="NetworkUI__debug-text">Current scale: {{current_scale.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="315" class="NetworkUI__debug-text">Pan X: {{panX.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="335" class="NetworkUI__debug-text">Pan Y: {{panY.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="355" class="NetworkUI__debug-text">View State: {{view_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="375" class="NetworkUI__debug-text">Mouse X: {{mouseX.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="395" class="NetworkUI__debug-text">Mouse Y: {{mouseY.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="415" class="NetworkUI__debug-text">Scaled X: {{scaledX.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="435" class="NetworkUI__debug-text">Scaled Y: {{scaledY.toFixed(2)}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="455" class="NetworkUI__debug-text">Key: {{last_key}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="475" class="NetworkUI__debug-text">Key Code: {{last_key_code}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="495" class="NetworkUI__debug-text">Move State: {{move_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="515" class="NetworkUI__debug-text">Selected devices: {{selected_devices.length}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="535" class="NetworkUI__debug-text">Selected links: {{selected_links.length}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="555" class="NetworkUI__debug-text">Link State: {{link_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="575" class="NetworkUI__debug-text">Buttons State: {{buttons_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="595" class="NetworkUI__debug-text">Time State: {{time_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="615" class="NetworkUI__debug-text">Time Pointer: {{time_pointer}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="635" class="NetworkUI__debug-text">History: {{history.length}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="655" class="NetworkUI__debug-text">Touch Data: {{touch_data.xb}} {{touch_data.yb}} {{touch_data.d}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="675" class="NetworkUI__debug-text">Group State: {{group_controller.state.name}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="695" class="NetworkUI__debug-text">Selected groups: {{selected_groups.length}}</text>
+        <text ng-attr-x="{{graph.right_column}}" y="715" class="NetworkUI__debug-text">Hotkeys State: {{hotkeys_controller.state.name}}</text>
         </g>
