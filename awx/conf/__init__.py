@@ -14,5 +14,9 @@ def register(setting, **kwargs):
     settings_registry.register(setting, **kwargs)
 
 
+def register_validate(category, func):
+    settings_registry.register_validate(category, func)
+
+
 def autodiscover():
     autodiscover_modules('conf', register_to=settings_registry)

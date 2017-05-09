@@ -65,6 +65,14 @@ class SettingSingletonSerializer(serializers.Serializer):
         assert instance is None or not hasattr(instance, 'pk')
         super(SettingSingletonSerializer, self).__init__(instance, data, **kwargs)
 
+    def validate(self, attrs):
+        try:
+            category_slug = self.context['view'].kwargs.get('category_slug', 'all')
+        except (KeyError, AttributeError):
+            category_slug = ''
+        custom_validate = settings_registry.get_registered_validate_func(category_slug)
+        return custom_validate(self, attrs) if custom_validate else attrs
+
     def get_fields(self):
         fields = super(SettingSingletonSerializer, self).get_fields()
         try:

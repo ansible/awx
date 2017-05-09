@@ -28,6 +28,7 @@ class SettingsRegistry(object):
         if settings is None:
             from django.conf import settings
         self._registry = OrderedDict()
+        self._validate_registry = {}
         self._dependent_settings = {}
         self.settings = settings
 
@@ -55,6 +56,12 @@ class SettingsRegistry(object):
         self._registry.pop(setting, None)
         for dependent_settings in self._dependent_settings.values():
             dependent_settings.discard(setting)
+
+    def register_validate(self, category_slug, func):
+        self._validate_registry[category_slug] = func
+
+    def unregister_validate(self, category_slug):
+        self._validate_registry.pop(category_slug, None)
 
     def get_dependent_settings(self, setting):
         return self._dependent_settings.get(setting, set())
@@ -98,6 +105,9 @@ class SettingsRegistry(object):
                     continue
             setting_names.append(setting)
         return setting_names
+
+    def get_registered_validate_func(self, category_slug):
+        return self._validate_registry.get(category_slug, None)
 
     def is_setting_encrypted(self, setting):
         return bool(self._registry.get(setting, {}).get('encrypted', False))
