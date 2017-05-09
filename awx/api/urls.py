@@ -167,6 +167,7 @@ credential_type_urls = patterns('awx.api.views',
     url(r'^$',                                          'credential_type_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'credential_type_detail'),
     url(r'^(?P<pk>[0-9]+)/credentials/$',               'credential_type_credential_list'),
+    url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'credential_type_activity_stream_list'),
 )
 
 credential_urls = patterns('awx.api.views',

@@ -1521,6 +1521,16 @@ class CredentialTypeCredentialList(SubListAPIView):
     new_in_api_v2 = True
 
 
+class CredentialTypeActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = CredentialType
+    relationship = 'activitystream_set'
+    new_in_320 = True
+    new_in_api_v2 = True
+
+
 class CredentialList(ListCreateAPIView):
 
     model = Credential
