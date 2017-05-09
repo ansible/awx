@@ -2181,7 +2181,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                 res['cloud_credential'] = self.reverse('api:credential_detail', kwargs={'pk': cloud_cred})
             net_cred = obj.network_credential
             if net_cred:
-                res['cloud_credential'] = self.reverse('api:credential_detail', kwargs={'pk': net_cred})
+                res['network_credential'] = self.reverse('api:credential_detail', kwargs={'pk': net_cred})
 
         return res
 
@@ -2299,7 +2299,15 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'allow_simultaneous')
+                  'ask_credential_on_launch', 'ask_extra_credentials_on_launch', 'survey_enabled', 'become_enabled',
+                  'allow_simultaneous')
+
+    # TODO: remove in 3.3
+    def get_fields(self):
+        ret = super(JobTemplateSerializer, self).get_fields()
+        if self.version == 1:
+            ret.pop('ask_extra_credentials_on_launch')
+        return ret
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -2969,24 +2977,33 @@ class JobLaunchSerializer(BaseSerializer):
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
-                  'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
+                  'credential', 'extra_credentials', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'survey_enabled', 'variables_needed_to_start',
+                  'ask_extra_credentials_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',
                   'job_template_data', 'defaults')
         read_only_fields = (
             'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
-            'ask_inventory_on_launch', 'ask_credential_on_launch')
+            'ask_inventory_on_launch', 'ask_credential_on_launch', 'ask_extra_credentials_on_launch')
         extra_kwargs = {
             'credential': {'write_only': True,},
+            'extra_credentials': {'write_only': True, 'default': [], 'allow_empty': True},
             'limit': {'write_only': True,},
             'job_tags': {'write_only': True,},
             'skip_tags': {'write_only': True,},
             'job_type': {'write_only': True,},
             'inventory': {'write_only': True,}
         }
+
+    # TODO: remove in 3.3
+    def get_fields(self):
+        ret = super(JobLaunchSerializer, self).get_fields()
+        if self.version == 1:
+            ret.pop('extra_credentials')
+            ret.pop('ask_extra_credentials_on_launch')
+        return ret
 
     def get_credential_needed_to_start(self, obj):
         return not (obj and obj.credential)
@@ -3007,6 +3024,9 @@ class JobLaunchSerializer(BaseSerializer):
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
                     id=getattrd(obj, '%s.pk' % field, None))
+            elif field == 'extra_credentials':
+                if self.version > 1:
+                    defaults_dict[field] = [cred.id for cred in obj.extra_credentials.all()]
             else:
                 defaults_dict[field] = getattr(obj, field)
         return defaults_dict
@@ -3057,6 +3077,15 @@ class JobLaunchSerializer(BaseSerializer):
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
 
+        extra_cred_kinds = []
+        for cred in data.get('extra_credentials', []):
+            cred = Credential.objects.get(id=cred)
+            if cred.credential_type.pk in extra_cred_kinds:
+                errors['extra_credentials'] = _('Cannot assign multiple %s credentials.' % cred.credential_type.name)
+            if cred.credential_type.kind not in ('net', 'cloud'):
+                errors['extra_credentials'] = _('Extra credentials must be network or cloud.')
+            extra_cred_kinds.append(cred.credential_type.pk)
+
         # Special prohibited cases for scan jobs
         errors.update(obj._extra_job_type_errors(data))
 
@@ -3070,6 +3099,7 @@ class JobLaunchSerializer(BaseSerializer):
         JT_skip_tags = obj.skip_tags
         JT_inventory = obj.inventory
         JT_credential = obj.credential
+        extra_credentials = attrs.pop('extra_credentials', None)
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = JT_extra_vars
         obj.limit = JT_limit
@@ -3078,6 +3108,8 @@ class JobLaunchSerializer(BaseSerializer):
         obj.job_tags = JT_job_tags
         obj.inventory = JT_inventory
         obj.credential = JT_credential
+        if extra_credentials is not None:
+            attrs['extra_credentials'] = extra_credentials
         return attrs
 
 

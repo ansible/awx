@@ -14,3 +14,18 @@
   [[#5741](https://github.com/ansible/ansible-tower/issues/5741)]
 * support sourcing inventory from a file inside of a project's source
   tree [[#2477](https://github.com/ansible/ansible-tower/issues/2477)]
+* added support for custom cloud and network credential types, which give the
+  customer the ability to modify environment variables, extra vars, and
+  generate file-based credentials (such as file-based certificates or .ini
+  files) at `ansible-playbook` runtime
+  [[#5876](https://github.com/ansible/ansible-tower/issues/5876)]
+* added support for assigning multiple cloud and network credential types on
+  `JobTemplates`.  ``JobTemplates`` can prompt for "extra credentials" at
+  launch time in the same manner as promptable machine credentials
+  [[#5807](https://github.com/ansible/ansible-tower/issues/5807)]
+  [[#2913](https://github.com/ansible/ansible-tower/issues/2913)]
+* custom inventory sources can now specify a ``Credential``; you
+  can store third-party credentials encrypted within Tower and use their
+  values from within your custom inventory script (by - for example - reading
+  an environment variable or a file's contents)
+  [[#5879](https://github.com/ansible/ansible-tower/issues/5879)]

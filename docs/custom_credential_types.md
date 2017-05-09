@@ -36,6 +36,11 @@ Important Changes
   Engine credential.  You cannot, however, create a ``Job Template`` that uses
   two OpenStack credentials.
 
+* In the same manner as "promptable SSH credentials", ``Job Templates`` can now
+  be flagged with ``ask_extra_credentials_on_launch = true``.  When this flag
+  is enabled, ``extra_credentials`` for a ``Job Template`` can be specified in
+  the launch payload.
+
 * Custom inventory sources can now utilize a ``Credential``; you
   can store third-party credentials encrypted within Tower and use their
   values from within your custom inventory script (by - for example - reading
