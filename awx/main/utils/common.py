@@ -381,6 +381,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
     """
     from django.db.models import Model
     from awx.main.models.credential import Credential
+    PASSWORD_FIELDS = ['password'] + Credential.PASSWORD_FIELDS
 
     if not(old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
@@ -395,13 +396,13 @@ def model_instance_diff(old, new, serializer_mapping=None):
         old_value = getattr(old, field, None)
         new_value = getattr(new, field, None)
 
-        if old_value != new_value and field not in Credential.PASSWORD_FIELDS:
+        if old_value != new_value and field not in PASSWORD_FIELDS:
             if type(old_value) not in (bool, int, type(None)):
                 old_value = smart_str(old_value)
             if type(new_value) not in (bool, int, type(None)):
                 new_value = smart_str(new_value)
             diff[field] = (old_value, new_value)
-        elif old_value != new_value and field in Credential.PASSWORD_FIELDS:
+        elif old_value != new_value and field in PASSWORD_FIELDS:
             diff[field] = (u"hidden", u"hidden")
 
     if len(diff) == 0:
@@ -417,6 +418,7 @@ def model_to_dict(obj, serializer_mapping=None):
     When provided, read-only fields will not be included in the resulting dictionary
     """
     from awx.main.models.credential import Credential
+    PASSWORD_FIELDS = ['password'] + Credential.PASSWORD_FIELDS
     attr_d = {}
 
     allowed_fields = get_allowed_fields(obj, serializer_mapping)
@@ -424,7 +426,7 @@ def model_to_dict(obj, serializer_mapping=None):
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
-        if field.name not in Credential.PASSWORD_FIELDS:
+        if field.name not in PASSWORD_FIELDS:
             field_val = getattr(obj, field.name, None)
             if type(field_val) not in (bool, int, type(None)):
                 attr_d[field.name] = smart_str(field_val)
