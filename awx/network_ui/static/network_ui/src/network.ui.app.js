@@ -18,7 +18,7 @@ var taskStatus = require('./task.status.directive.js');
 var debug = require('./debug.directive.js');
 var awxNetworkUI = require('./network.ui.directive.js');
 
-var app = angular.module('networkUI', [
+var networkUI = angular.module('networkUI', [
         'monospaced.mousewheel',
         'ngTouch'
     ])
@@ -40,4 +40,9 @@ var app = angular.module('networkUI', [
     .directive('awxNetTaskStatus', taskStatus.taskStatus)
     .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
 
-exports.app = app;
+exports.networkUI = networkUI;
+
+var tower = angular.module('tower', ['networkUI']);
+
+exports.tower = tower;
+
