@@ -5,11 +5,12 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'HostManageService', 'CopyMoveGroupList', 'host', 'Dataset',
-    function($scope, $state, $stateParams, HostManageService, CopyMoveGroupList, host, Dataset){
+    ['$scope', '$state', '$stateParams', 'HostManageService', 'CopyMoveGroupList', 'host', 'Dataset', '$rootScope',
+    function($scope, $state, $stateParams, HostManageService, CopyMoveGroupList, host, Dataset, $rootScope){
         var list = CopyMoveGroupList;
 
         $scope.item = host;
+        $rootScope.breadcrumb.copyMoveName = host.name;
         $scope.submitMode = 'copy';
         $scope.toggle_row = function(id){
             // toggle off anything else currently selected

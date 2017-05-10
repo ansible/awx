@@ -10,8 +10,8 @@
  * @description This form is for adding/editing a host on the inventory page
 */
 
-export default ['i18n', 'nestedGroupListState',
-function(i18n, nestedGroupListState) {
+export default ['i18n',
+function(i18n) {
         return {
 
             addTitle: i18n._('CREATE HOST'),
@@ -115,12 +115,11 @@ function(i18n, nestedGroupListState) {
                     name: 'nested_groups',
                     awToolTip: i18n._('Please save before defining groups'),
                     dataPlacement: 'top',
-                    ngClick: "groupsTab()",
+                    ngClick: "$state.go('hosts.edit.nested_groups')",
                     include: "NestedGroupListDefinition",
                     includeForm: "NestedGroupFormDefinition",
                     title: i18n._('Groups'),
-                    iterator: 'nested_group',
-                    listState: nestedGroupListState
+                    iterator: 'nested_group'
                 },
                 insights: {
                     name: 'insights',

@@ -13,7 +13,7 @@
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup) {
+    ParseVariableString, $state, OrgAdminLookup, $rootScope) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -82,6 +82,7 @@ function InventoriesEdit($scope, $location,
             });
 
             $scope.inventory_obj = data;
+            $rootScope.breadcrumb.inventory_name = data.name;
             $scope.name = data.name;
         })
         .error(function(data, status) {
@@ -127,5 +128,5 @@ export default ['$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
-    '$state', 'OrgAdminLookup', InventoriesEdit,
+    '$state', 'OrgAdminLookup', '$rootScope', InventoriesEdit,
 ];

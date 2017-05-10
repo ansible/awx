@@ -10,8 +10,8 @@
  * @description This form is for adding/editing a host on the inventory page
 */
 
-export default ['i18n', 'nestedGroupListState',
-function(i18n, nestedGroupListState) {
+export default ['i18n',
+function(i18n) {
         return {
 
             addTitle: i18n._('CREATE HOST'),
@@ -120,8 +120,7 @@ function(i18n, nestedGroupListState) {
                     include: "NestedGroupListDefinition",
                     includeForm: "NestedGroupFormDefinition",
                     title: i18n._('Groups'),
-                    iterator: 'nested_group',
-                    listState: nestedGroupListState
+                    iterator: 'nested_group'
                 },
                 insights: {
                     name: 'insights',

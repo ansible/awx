@@ -10,15 +10,8 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n', 'buildGroupsListState', 'buildGroupsAddState',
-    'buildGroupsEditState', 'buildHostListState', 'buildHostAddState',
-    'buildHostEditState', 'buildSourcesListState', 'buildSourcesAddState',
-    'buildSourcesEditState', 'buildInventoryCompletedJobsState',
-    'InventoryCompletedJobsList',
-function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
-    buildHostListState, buildHostAddState, buildHostEditState,
-    buildSourcesListState, buildSourcesAddState,buildSourcesEditState,
-    buildInventoryCompletedJobsState, InventoryCompletedJobsList) {
+export default ['i18n', 'InventoryCompletedJobsList',
+function(i18n, InventoryCompletedJobsList) {
 
     var completed_jobs_object = {
         name: 'completed_jobs',
@@ -28,7 +21,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
         title: i18n._('Completed Jobs'),
         iterator: 'completed_job',
         generateList: true,
-        listState: buildInventoryCompletedJobsState,
+        skipGenerator: true,
         search: {
             "or__job__inventory": ''
         }
@@ -164,9 +157,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 include: "GroupList",
                 title: i18n._('Groups'),
                 iterator: 'group',
-                listState: buildGroupsListState,
-                addState: buildGroupsAddState,
-                editState: buildGroupsEditState
+                skipGenerator: true
             },
             hosts: {
                 name: 'hosts',
@@ -175,9 +166,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 include: "RelatedHostsListDefinition",
                 title: i18n._('Hosts'),
                 iterator: 'host',
-                listState: buildHostListState,
-                addState: buildHostAddState,
-                editState: buildHostEditState
+                skipGenerator: true
             },
             inventory_sources: {
                 name: 'inventory_sources',
@@ -187,9 +176,7 @@ function(i18n, buildGroupsListState, buildGroupsAddState, buildGroupsEditState,
                 includeForm: "SourcesFormDefinition",
                 title: i18n._('Sources'),
                 iterator: 'inventory_source',
-                listState: buildSourcesListState,
-                addState: buildSourcesAddState,
-                editState: buildSourcesEditState
+                skipGenerator: true
             },
             completed_jobs: completed_jobs_object
         }

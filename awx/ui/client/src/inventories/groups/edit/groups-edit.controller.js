@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
-    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'groupData',
+    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'groupData', '$rootScope',
     function($state, $stateParams, $scope, ParseVariableString, rbacUiControlService, ToJSON,
-        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, groupData) {
+        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, groupData, $rootScope) {
 
         init();
 
@@ -18,6 +18,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbac
             });
 
             $scope = angular.extend($scope, groupData);
+
+            $rootScope.breadcrumb.group_name = groupData.name;
 
             $scope.$watch('summary_fields.user_capabilities.edit', function(val) {
                 $scope.canAdd = val;

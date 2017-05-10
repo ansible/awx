@@ -218,6 +218,8 @@ var tower = angular.module('Tower', [
                 $state.go('.', null, {reload: true});
             };
 
+            $rootScope.breadcrumb = {};
+
             function activateTab() {
                 // Make the correct tab active
                 var base = $location.path().replace(/^\//, '').split('/')[0];

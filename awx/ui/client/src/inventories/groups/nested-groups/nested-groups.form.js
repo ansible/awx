@@ -10,8 +10,8 @@
  * @description This form is for adding/editing a Group on the inventory page
 */
 
-export default ['i18n', 'nestedGroupListState',
-function(i18n, nestedGroupListState){
+export default ['i18n',
+function(i18n){
     return {
         addTitle: 'CREATE GROUP',
         editTitle: '{{ name }}',
@@ -87,8 +87,7 @@ function(i18n, nestedGroupListState){
                 include: "RelatedGroupListDefinition",
                 includeForm: "RelatedGroupFormDefinition",
                 title: i18n._('Groups'),
-                iterator: 'related_group',
-                listState: nestedGroupListState
+                iterator: 'related_group'
             },
 
         }
