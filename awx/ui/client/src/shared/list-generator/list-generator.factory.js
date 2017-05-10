@@ -72,10 +72,10 @@
  *
  * ##Field Actions
  *
- * A list contains a fieldActions object. Each icon found in the Actions column is defined as an object within the feildActions object. fieldActions can have a columnClass attribute,
+ * A list contains a fieldActions object. Each icon found in the Actions column is defined as an object within the fieldActions object. fieldActions can have a columnClass attribute,
  * which may contain a string of CSS class names to add to the action &lt;td&gt; element. It may also contain a label attribute, which can be set to false to suppress the Actions column header.
  *
- * Feld action items can have the following attributes:
+ * Field action items can have the following attributes:
  *
  * | Attribute | Description |
  * | --------- | ----------- |

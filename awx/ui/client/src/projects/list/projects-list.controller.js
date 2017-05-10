@@ -62,6 +62,13 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                             });
                         }
 
+                    if (list.fields.scm_revision && $scope.options && 
+                            $scope.options.hasOwnProperty('scm_revision')) {
+                                console.log(list.fields.scm_revision);
+                                itm.scm_revision = $filter('limitTo')(itm.scm_revision, 7, 0);
+
+                        }
+
                         buildTooltips(itm);
 
                 });

@@ -49,7 +49,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Revision'),
                 excludeModal: true,
                 columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
-                class: 'List-staticColumnAdjacent--monospace'
+                class: 'List-staticColumnAdjacent--monospace',
+                ngBind: 'project.scm_revision'
             },
             last_updated: {
                 label: i18n._('Last Updated'),
