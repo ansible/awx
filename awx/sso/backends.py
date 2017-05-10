@@ -146,9 +146,8 @@ class RADIUSBackend(BaseRADIUSBackend):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
+            logger.debug("Created RADIUS user %s" % (username,))
             user = User(username=username)
-
-        if password is not None:
             user.set_unusable_password()
             user.save()
 
@@ -166,7 +165,6 @@ class TACACSPlusBackend(object):
         )
         if created:
             logger.debug("Created TACACS+ user %s" % (username,))
-        if password is not None:
             user.set_unusable_password()
             user.save()
         return user
@@ -195,8 +193,6 @@ class TACACSPlusBackend(object):
             user = self._get_or_set_user(username, password)
             if not user.has_usable_password():
                 return user
-        else:
-            return None
         return None
 
     def get_user(self, user_id):

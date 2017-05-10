@@ -14,3 +14,6 @@ On the other hand, the rest of authentication methods use the same types of logi
 * SAML
 
 Tower will try authenticating against each enabled authentication method *in the specified order*, meaning if the same username and password is valid in multiple enabled auth methods (For example, both LDAP and TACACS+), Tower will only use the first positive match (In the above example, log a user in via LDAP and skip TACACS+).
+
+## Notes:
+* TACACS+/RADIUS users and normal Tower users are strictly separated. For example, suppose there is a TACACS+ user with username 'Alice' which is known to TACACS+ backend but not Tower. If a user record with the same username 'Alice' is created in Tower before any log in attempt, Tower will always use its own authentication backend to authenticate Alice, even if TACACS+ backend is also available. On the other hand, if a successful log in attempt is conducted before any explicit user creation in Tower, a TACACS+ user 'Alice' is automatically created and Tower will always use TACACS+ backend for authenticating 'Alice'.
