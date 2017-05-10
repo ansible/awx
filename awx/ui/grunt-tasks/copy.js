@@ -32,7 +32,7 @@ module.exports = {
     },
     views: {
         files: [{
-            cwd: 'client/src',
+            cwd: 'client/features',
             expand: true,
             src: ['**/*.view.html'],
             dest: 'static/views/'
@@ -50,7 +50,7 @@ module.exports = {
             src: ['*.html'],
             dest: 'static/partials/'
         }, {
-            cwd: 'client/components',
+            cwd: 'client/lib/components',
             expand: true,
             src: ['**/*.partial.html'],
             dest: 'static/partials/components/'

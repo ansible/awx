@@ -30,7 +30,7 @@ function trackInput (componentElement) {
        componentElement.find('input').focus();
     }
 
-    vm.inputs.push(input);
+    vm.inputs.push(input)
 
     return input;
 }
@@ -47,6 +47,18 @@ function trackAction (componentElement) {
     return action;
 }
 
+function update () {
+    let vm = this;
+    
+    vm.inputs.forEach(input => console.log(input));
+}
+
+function remove (id) {
+    let vm = this;
+
+    delete inputs[id];
+}
+
 function AtFormController () {
     let vm = this;
 
@@ -56,6 +68,8 @@ function AtFormController () {
     vm.use = use;
     vm.trackInput = trackInput;
     vm.trackAction = trackAction;
+    vm.update = update;
+    vm.remove = remove;
 }
 
 function atForm (pathService) {

@@ -14,7 +14,7 @@ import toggleButton from './toggle/button.directive';
 import toggleContent from './toggle/content.directive';
 
 angular
-    .module('at.components', [])
+    .module('at.lib.components', [])
     .directive('atAction', action)
     .directive('atActionGroup', actionGroup)
     .directive('atBadge', badge)

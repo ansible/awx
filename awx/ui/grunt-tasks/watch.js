@@ -5,13 +5,13 @@ module.exports = {
     },
     partials: {
         files: [
-            'client/components/**/*.partial.html',
+            'client/lib/components/**/*.partial.html',
             'client/src/**/*.partial.html'
         ],
         tasks: ['newer:copy:partials']
     },
     views: {
-        files: 'client/src/**/*.view.html',
+        files: 'client/features/**/*.view.html',
         tasks: ['newer:copy:views']
     },
     assets: {

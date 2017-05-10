@@ -72,10 +72,10 @@ import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
 
-import '../components';
-import '../models';
-import '../lib';
-import './credentials';
+import '../lib/components';
+import '../lib/models';
+import '../lib/services';
+import '../features';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -137,10 +137,10 @@ var tower = angular.module('Tower', [
     'features',
 
     'ngResource',
-    'at.components',
-    'at.models',
-    'at.lib',
-    'at.features.credentials'
+    'at.lib.components',
+    'at.lib.models',
+    'at.lib.services',
+    'at.features',
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

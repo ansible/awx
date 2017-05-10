@@ -10,7 +10,7 @@ module.exports = {
             src: [
                 'client/legacy-styles/*.less',
                 'client/src/**/*.less',
-                'client/theme/index.less'
+                'client/lib/theme/index.less'
             ]
         }],
         options: {
@@ -22,7 +22,7 @@ module.exports = {
             'static/tower.min.css': [
                 'client/legacy-styles/*.less',
                 'client/src/**/*.less',
-                'client/theme/index.less'
+                'client/lib/theme/index.less'
             ]
         },
         options: {

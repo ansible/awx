@@ -8,7 +8,7 @@ function config ($resourceProvider) {
 config.$inject = ['$resourceProvider'];
 
 angular
-    .module('at.models', [])
+    .module('at.lib.models', [])
     .config(config)
     .factory('Base', Base)
     .factory('CredentialType', CredentialType);

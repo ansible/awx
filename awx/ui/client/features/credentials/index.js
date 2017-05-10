@@ -1,7 +1,7 @@
 import CredentialList from './credentials.list.js';
 import ListController from './list/credentials-list.controller';
 import AddController from './add-credentials.controller.js';
-import { N_ } from '../i18n';
+import { N_ } from '../../src/i18n';
 
 function config ($stateExtenderProvider, pathServiceProvider) {
     let pathService = pathServiceProvider.$get();
