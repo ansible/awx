@@ -501,6 +501,13 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
                         update_fields.append('scm_delete_on_next_update')
             parent_instance.save(update_fields=update_fields)
 
+    def cancel(self, job_explanation=None):
+        res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation)
+        if res and self.launch_type != 'sync':
+            for inv_src in self.scm_inventory_updates.filter(status='running'):
+                inv_src.cancel(job_explanation='Source project update `{}` was canceled.'.format(self.name))
+        return res
+
     '''
     JobNotificationMixin
     '''
