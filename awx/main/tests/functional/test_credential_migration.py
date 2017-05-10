@@ -196,11 +196,6 @@ def test_openstack_migration():
     assert Credential.objects.count() == 1
 
 
-@pytest.mark.skip(reason="TODO: rackspace should be a custom type (we're removing official support)")
-def test_rackspace():
-    pass
-
-
 @pytest.mark.django_db
 def test_vmware_migration():
     cred = Credential(name='My Credential')

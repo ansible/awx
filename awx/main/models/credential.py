@@ -51,7 +51,6 @@ class V1Credential(object):
         ('net', 'Network'),
         ('scm', 'Source Control'),
         ('aws', 'Amazon Web Services'),
-        ('rax', 'Rackspace'),
         ('vmware', 'VMware vCenter'),
         ('satellite6', 'Red Hat Satellite 6'),
         ('cloudforms', 'Red Hat CloudForms'),
@@ -790,28 +789,6 @@ def openstack(cls):
                 'type': 'string',
             }],
             'required': ['username', 'password', 'host', 'project']
-        }
-    )
-
-
-@CredentialType.default
-def rackspace(cls):
-    return cls(
-        kind='cloud',
-        name='Rackspace',
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': 'Username',
-                'type': 'string'
-            }, {
-                'id': 'password',
-                'label': 'Password',
-                'type': 'string',
-                'secret': True,
-            }],
-            'required': ['username', 'password']
         }
     )
 

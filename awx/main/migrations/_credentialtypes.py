@@ -3,8 +3,54 @@ from awx.main.models import CredentialType
 from awx.main.utils.common import encrypt_field, decrypt_field
 
 
+DEPRECATED_CRED_KIND = {
+    'rax': {
+        'kind': 'cloud',
+        'name': 'Rackspace',
+        'inputs': {
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['username', 'password']
+        },
+        'injectors': {
+            'env': {
+                'RAX_USERNAME': '{{ username }}',
+                'RAX_API_KEY': '{{ password }}',
+                'CLOUD_VERIFY_SSL': 'False',
+            },
+        },
+    },
+}
+
+
+def _generate_deprecated_cred_types():
+    ret = {}
+    for deprecated_kind in DEPRECATED_CRED_KIND:
+        ret[deprecated_kind] = None
+    return ret
+
+
+def _populate_deprecated_cred_types(cred, kind):
+    if kind not in cred:
+        return None
+    if cred[kind] is None:
+        new_obj = CredentialType(**DEPRECATED_CRED_KIND[kind])
+        new_obj.save()
+        cred[kind] = new_obj
+    return cred[kind]
+
+
 def migrate_to_v2_credentials(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
+    deprecated_cred = _generate_deprecated_cred_types()
 
     # this monkey-patch is necessary to make the implicit role generation save
     # signal use the correct Role model (the version active at this point in
@@ -18,7 +64,7 @@ def migrate_to_v2_credentials(apps, schema_editor):
             data = {}
             if getattr(cred, 'vault_password', None):
                 data['vault_password'] = cred.vault_password
-            credential_type = CredentialType.from_v1_kind(cred.kind, data)
+            credential_type = _populate_deprecated_cred_types(deprecated_cred, cred.kind) or CredentialType.from_v1_kind(cred.kind, data)
             defined_fields = credential_type.defined_fields
             cred.credential_type = apps.get_model('main', 'CredentialType').objects.get(pk=credential_type.pk)
 

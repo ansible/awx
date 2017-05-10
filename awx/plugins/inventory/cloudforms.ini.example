@@ -1,16 +1,33 @@
-# Ansible CloudForms external inventory script settings
-#
-
 [cloudforms]
 
-# The version of CloudForms (this is not used yet)
-version = 3.1
+# the version of CloudForms ; currently not used, but tested with
+version = 4.1
 
-# The hostname of the CloudForms server
-hostname = #insert your hostname here
+# This should be the hostname of the CloudForms server
+url = https://cfme.example.com
 
-# Username for CloudForms
-username = #insert your cloudforms user here
+# This will more than likely need to be a local CloudForms username
+username = <set your username here>
 
-# Password for CloudForms user
-password = #password 
+# The password for said username
+password = <set your password here>
+
+# True = verify SSL certificate / False = trust anything
+ssl_verify = True
+
+# limit the number of vms returned per request
+limit = 100
+
+# purge the CloudForms actions from hosts
+purge_actions = True
+
+# Clean up group names (from tags and other groupings so Ansible doesn't complain)
+clean_group_keys = True
+
+# Explode tags into nested groups / subgroups
+nest_tags = False
+
+[cache]
+
+# Maximum time to trust the cache in seconds
+max_age = 600

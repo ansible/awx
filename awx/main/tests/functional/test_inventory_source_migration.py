@@ -17,6 +17,16 @@ def test_inv_src_manual_removal(inventory_source):
 
 
 @pytest.mark.django_db
+def test_rax_inv_src_removal(inventory_source):
+    inventory_source.source = 'rax'
+    inventory_source.save()
+
+    assert InventorySource.objects.filter(pk=inventory_source.pk).exists()
+    invsrc.remove_rax_inventory_sources(apps, None)
+    assert not InventorySource.objects.filter(pk=inventory_source.pk).exists()
+
+
+@pytest.mark.django_db
 def test_inv_src_rename(inventory_source_factory):
     inv_src01 = inventory_source_factory('t1')
 

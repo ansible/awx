@@ -600,7 +600,10 @@ class BaseTask(Task):
             job_timeout = 0 if local_timeout < 0 else job_timeout
         else:
             job_timeout = 0
-        child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
+        child = pexpect.spawn(
+            args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
+            encoding='utf-8', echo=False,
+        )
         child.logfile_read = logfile
         canceled = False
         timed_out = False
@@ -930,10 +933,6 @@ class RunJob(BaseTask):
                 if len(cloud_cred.security_token) > 0:
                     env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
                 # FIXME: Add EC2_URL, maybe EC2_REGION!
-            elif cloud_cred and cloud_cred.kind == 'rax':
-                env['RAX_USERNAME'] = cloud_cred.username
-                env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
-                env['CLOUD_VERIFY_SSL'] = str(False)
             elif cloud_cred and cloud_cred.kind == 'gce':
                 env['GCE_EMAIL'] = cloud_cred.username
                 env['GCE_PROJECT'] = cloud_cred.project
@@ -1154,7 +1153,7 @@ class RunJob(BaseTask):
                 job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
                 job = self.update_model(job.pk, status='failed',
-                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % 
+                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                                          ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
@@ -1425,7 +1424,7 @@ class RunProjectUpdate(BaseTask):
             os.close(self.lock_fd)
             logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
-    
+
     def pre_run_hook(self, instance, **kwargs):
         if instance.launch_type == 'sync':
             self.acquire_lock(instance)
@@ -1513,6 +1512,18 @@ class RunInventoryUpdate(BaseTask):
                 },
                 'cache': cache,
             }
+            ansible_variables = {
+                'use_hostnames': True,
+                'expand_hostvars': False,
+                'fail_on_errors': True,
+            }
+            provided_count = 0
+            for var_name in ansible_variables:
+                if var_name in inventory_update.source_vars_dict:
+                    ansible_variables[var_name] = inventory_update.source_vars_dict[var_name]
+                    provided_count += 1
+            if provided_count:
+                openstack_data['ansible'] = ansible_variables
             private_data['credentials'][credential] = yaml.safe_dump(
                 openstack_data, default_flow_style=False, allow_unicode=True
             )
@@ -1534,9 +1545,12 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('route53', 'False')
             ec2_opts.setdefault('all_instances', 'True')
             ec2_opts.setdefault('all_rds_instances', 'False')
+            # TODO: Include this option when boto3 support comes.
+            #ec2_opts.setdefault('include_rds_clusters', 'False')
             ec2_opts.setdefault('rds', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
             ec2_opts.setdefault('elasticache', 'False')
+            ec2_opts.setdefault('stack_filters', 'False')
             if inventory_update.instance_filters:
                 ec2_opts.setdefault('instance_filters', inventory_update.instance_filters)
             group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
@@ -1549,15 +1563,6 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('cache_max_age', '300')
             for k,v in ec2_opts.items():
                 cp.set(section, k, unicode(v))
-        # Build pyrax creds INI for rax inventory script.
-        elif inventory_update.source == 'rax':
-            section = 'rackspace_cloud'
-            cp.add_section(section)
-            credential = inventory_update.credential
-            if credential:
-                cp.set(section, 'username', credential.username)
-                cp.set(section, 'api_key', decrypt_field(credential,
-                                                         'password'))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
             credential = inventory_update.credential
@@ -1615,6 +1620,11 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, 'username', credential.username)
                 cp.set(section, 'password', decrypt_field(credential, 'password'))
                 cp.set(section, 'ssl_verify', "false")
+
+            cloudforms_opts = dict(inventory_update.source_vars_dict.items())
+            for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags']:
+                if opt in cloudforms_opts:
+                    cp.set(section, opt, cloudforms_opts[opt])
 
             section = 'cache'
             cp.add_section(section)
@@ -1688,14 +1698,6 @@ class RunInventoryUpdate(BaseTask):
                 if len(passwords['source_security_token']) > 0:
                     env['AWS_SECURITY_TOKEN'] = passwords['source_security_token']
             env['EC2_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'rax':
-            env['RAX_CREDS_FILE'] = cloud_credential
-            env['RAX_REGION'] = inventory_update.source_regions or 'all'
-            env['RAX_CACHE_MAX_AGE'] = "0"
-            env['CLOUD_VERIFY_SSL'] = str(False)
-            # Set this environment variable so the vendored package won't
-            # complain about not being able to determine its version number.
-            env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
             env['VMWARE_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'azure':

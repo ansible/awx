@@ -23,7 +23,7 @@ from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
 # Django-Polymorphic
-from polymorphic import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 
 # Django-Celery
 from djcelery.models import TaskMeta

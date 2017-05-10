@@ -381,25 +381,6 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_SECRET_KEY'] == 'secret'
         assert env['AWS_SECURITY_TOKEN'] == 'token'
 
-    def test_rax_credential(self):
-        rax = CredentialType.defaults['rackspace']()
-        credential = Credential(
-            pk=1,
-            credential_type=rax,
-            inputs = {'username': 'bob', 'password': 'secret'}
-        )
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
-        self.task.run(self.pk)
-
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
-
-        assert env['RAX_USERNAME'] == 'bob'
-        assert env['RAX_API_KEY'] == 'secret'
-        assert env['CLOUD_VERIFY_SSL'] == 'False'
-
     def test_gce_credentials(self):
         gce = CredentialType.defaults['gce']()
         credential = Credential(
@@ -1170,7 +1151,7 @@ def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
 
     logger = mock.Mock()
     logging_getLogger.return_value = logger
-    
+
     ProjectUpdate = tasks.RunProjectUpdate()
 
     with pytest.raises(OSError, errno=3, strerror='dummy message'):
@@ -1196,7 +1177,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
     logging_getLogger.return_value = logger
 
     fcntl_flock.side_effect = err
-    
+
     ProjectUpdate = tasks.RunProjectUpdate()
 
     with pytest.raises(IOError, errno=3, strerror='dummy message'):

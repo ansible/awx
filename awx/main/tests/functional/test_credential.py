@@ -18,7 +18,6 @@ def test_default_cred_types():
         'gce',
         'net',
         'openstack',
-        'rackspace',
         'satellite6',
         'scm',
         'ssh',

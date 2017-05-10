@@ -632,32 +632,6 @@ AD_HOC_COMMANDS = [
     'win_user',
 ]
 
-# Not possible to get list of regions without authenticating, so use this list
-# instead (based on docs from:
-# http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)
-RAX_REGION_CHOICES = [
-    ('ORD', _('Chicago')),
-    ('DFW', _('Dallas/Ft. Worth')),
-    ('IAD', _('Northern Virginia')),
-    ('LON', _('London')),
-    ('SYD', _('Sydney')),
-    ('HKG', _('Hong Kong')),
-]
-
-# Inventory variable name/values for determining if host is active/enabled.
-RAX_ENABLED_VAR = 'rax_status'
-RAX_ENABLED_VALUE = 'ACTIVE'
-
-# Inventory variable name containing unique instance ID.
-RAX_INSTANCE_ID_VAR = 'rax_id'
-
-# Filter for allowed group/host names when importing inventory from Rackspace.
-# By default, filter group of one created for each instance and exclude all
-# groups without children, hosts and variables.
-RAX_GROUP_FILTER = r'^(?!instance-.+).+$'
-RAX_HOST_FILTER = r'^.+$'
-RAX_EXCLUDE_EMPTY_GROUPS = True
-
 INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 
 # ----------------
