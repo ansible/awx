@@ -16,6 +16,7 @@ var button = require('./button.directive.js');
 var statusLight = require('./status.light.directive.js');
 var taskStatus = require('./task.status.directive.js');
 var debug = require('./debug.directive.js');
+var awxNetworkUI = require('./network.ui.directive.js');
 
 var app = angular.module('networkUI', [
         'monospaced.mousewheel',
@@ -36,6 +37,7 @@ var app = angular.module('networkUI', [
     .directive('layer', layer.layer)
     .directive('button', button.button)
     .directive('statusLight', statusLight.statusLight)
-    .directive('taskStatus', taskStatus.taskStatus);
+    .directive('taskStatus', taskStatus.taskStatus)
+    .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
 
 exports.app = app;
