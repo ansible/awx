@@ -11,6 +11,7 @@ var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
 var svg_crowbar = require('../vendor/svg-crowbar.js');
+var ReconnectingWebSocket = require('reconnectingwebsocket');
 
 var NetworkUIController = function($scope, $document, $location, $window) {
 
@@ -20,7 +21,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
-  $scope.control_socket = new window.ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
+  $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
   $scope.history = [];
