@@ -25,7 +25,7 @@
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
             <g ng-repeat="link in links">
-            <g link></g>
+            <g awx-net-link></g>
             </g>
             <g ng-repeat="link in links">
             <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
@@ -35,33 +35,33 @@
                ng-attr-class="{{device.type}}"
                ng-switch on="device.type">
             <g ng-switch-when="router"><!-- begin router -->
-                   <g router></g>
+                   <g awx-net-router></g>
                </g> <!-- end router -->
 
                <g ng-switch-when="switch"> <!-- begin switch -->
-                   <g switch> </g>
+                   <g awx-net-switch> </g>
                </g> <!-- end switch -->
 
                <g ng-switch-when="host"> <!-- begin host -->
-                    <g host> </g>
+                    <g awx-net-host> </g>
 
                </g> <!-- end host -->
 
                <g ng-switch-when="rack"> <!-- begin rack -->
-                    <g rack> </g>
+                    <g awx-net-rack> </g>
                </g> <!-- end rack -->
 
                <g ng-switch-default> <!-- begin default -->
-                    <g default></g>
+                    <g awx-net-default></g>
                </g> <!-- end default -->
-               <g status-light></g>
-               <g task-status></g>
+               <g awx-net-status-light></g>
+               <g awx-net-task-status></g>
             </g> <!-- end devices -->
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
                 <line x1="-5" y1="0" x2="5" y2="0"/>
                 <line x1="0" y1="-5" x2="0" y2="5"/>
             </g>
-            <g quadrants>
+            <g awx-net-quadrants>
             </g>
         </g>
         <g ng-if="!hide_buttons">
@@ -69,7 +69,7 @@
                 <g ng-repeat="button in buttons"
                    ng-attr-transform="translate({{button.x}},{{button.y}})"
                    ng-attr-class="{{button.is_pressed ? 'button-pressed' : button.mouse_over ? 'button-hover' : 'button'}}">
-                    <g button></g>
+                    <g awx-net-button></g>
                 </g>
             </g> <!-- end buttons -->
 
@@ -77,7 +77,7 @@
                 <g ng-repeat="stencil in stencils"
                    ng-attr-transform="translate({{stencil.x}},{{stencil.y}})"
                    class="button">
-                    <g stencil></g>
+                    <g awx-net-stencil></g>
                 </g>
             </g> <!-- end stencils -->
 
@@ -85,14 +85,14 @@
                 <g ng-repeat="layer in layers"
                    ng-attr-transform="translate({{layer.x}},{{layer.y}})"
                    class="button">
-                    <g layer> </g>
+                    <g awx-net-layer> </g>
                 </g>
             </g> <!-- end layers -->
         </g>
-        <g debug></g>
-        <g cursor></g>
+        <g awx-net-debug></g>
+        <g awx-net-cursor></g>
         <g ng-repeat="touch in touches">
-            <g touch></g>
+            <g awx-net-touch></g>
         </g>
     </svg>
     </div>
