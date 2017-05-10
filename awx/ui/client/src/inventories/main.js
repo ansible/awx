@@ -23,6 +23,29 @@ import ansibleFacts from './ansible_facts/main';
 import insights from './insights/main';
 import { copyMoveGroupRoute, copyMoveHostRoute } from './copy-move/copy-move.route';
 import copyMove from './copy-move/main';
+import inventoryCompletedJobsRoute from './completed_jobs/completed_jobs.route';
+import inventorySourceEditRoute from './sources/edit/sources-edit.route';
+import inventorySourceAddRoute from './sources/add/sources-add.route';
+import inventorySourceListRoute from './sources/list/sources-list.route';
+import inventorySourceListScheduleRoute from './sources/list/schedule/sources-schedule.route';
+import inventorySourceListScheduleAddRoute from './sources/list/schedule/sources-schedule-add.route';
+import inventorySourceListScheduleEditRoute from './sources/list/schedule/sources-schedule-edit.route';
+import inventoryAdhocCredential from './adhoc/adhoc-credential.route';
+import inventoryGroupsList from './groups/list/groups-list.route';
+import inventoryGroupsAdd from './groups/add/groups-add.route';
+import inventoryGroupsEdit from './groups/edit/groups-edit.route';
+import nestedGroups from './groups/nested-groups/nested-groups.route';
+import nestedGroupsAdd from './groups/nested-groups/nested-groups-add.route';
+import nestedHosts from './groups/nested-hosts/nested-hosts.route';
+import inventoryHosts from './related-hosts/related-host.route';
+import inventoriesList from './inventories.route';
+import inventoryHostsAdd from './related-hosts/add/host-add.route';
+import inventoryHostsEdit from './related-hosts/edit/host-edit.route';
+import nestedHostsAdd from './groups/nested-hosts/nested-hosts-add.route';
+import nestedHostsEdit from './groups/nested-hosts/nested-hosts-edit.route';
+import ansibleFactsRoute from './ansible_facts/ansible_facts.route';
+import insightsRoute from './insights/insights.route';
+
 export default
 angular.module('inventory', [
         adhoc.name,
@@ -46,62 +69,6 @@ angular.module('inventory', [
             let stateDefinitions = stateDefinitionsProvider.$get(),
             stateExtender = $stateExtenderProvider.$get();
 
-            function factsConfig(stateName) {
-                return {
-                    name: stateName,
-                    url: '/ansible_facts',
-                    ncyBreadcrumb: {
-                        label: N_("FACTS")
-                    },
-                    views: {
-                        'related': {
-                            controller: 'AnsibleFactsController',
-                            templateUrl: templateUrl('inventories/ansible_facts/ansible_facts')
-                        }
-                    },
-                    resolve: {
-                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
-                            function($stateParams, GetBasePath, Rest) {
-                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
-                                Rest.setUrl(ansibleFactsUrl);
-                                return Rest.get()
-                                    .success(function(data) {
-                                        return data;
-                                    });
-                            }
-                        ]
-                    }
-                };
-            }
-
-            function insightsConfig(stateName) {
-                return {
-                    name: stateName,
-                    url: '/insights',
-                    ncyBreadcrumb: {
-                        label: N_("INSIGHTS")
-                    },
-                    views: {
-                        'related': {
-                            controller: 'InsightsController',
-                            templateUrl: templateUrl('inventories/insights/insights')
-                        }
-                    },
-                    resolve: {
-                        Facts: ['$stateParams', 'GetBasePath', 'Rest',
-                            function($stateParams, GetBasePath, Rest) {
-                                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
-                                Rest.setUrl(ansibleFactsUrl);
-                                return Rest.get()
-                                    .success(function(data) {
-                                        return data;
-                                    });
-                            }
-                        ]
-                    }
-                };
-            }
-
             function generateInventoryStates() {
 
                 let basicInventoryAdd = stateDefinitions.generateTree({
@@ -121,6 +88,9 @@ angular.module('inventory', [
                     form: 'InventoryForm',
                     controllers: {
                         edit: 'InventoryEditController'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.inventory_name}}'
                     }
                 });
 
@@ -144,151 +114,38 @@ angular.module('inventory', [
                     }
                 });
 
-                let adhocCredentialLookup = {
-                    searchPrefix: 'credential',
-                    name: 'inventories.edit.adhoc.credential',
-                    url: '/credential',
-                    data: {
-                        formChildState: true
-                    },
-                    params: {
-                        credential_search: {
-                            value: {
-                                page_size: '5'
-                            },
-                            squash: true,
-                            dynamic: true
-                        }
-                    },
-                    ncyBreadcrumb: {
-                        skip: true
-                    },
-                    views: {
-                        'related': {
-                            templateProvider: function(ListDefinition, generateList) {
-                                let list_html = generateList.build({
-                                    mode: 'lookup',
-                                    list: ListDefinition,
-                                    input_type: 'radio'
-                                });
-                                return `<lookup-modal>${list_html}</lookup-modal>`;
-
-                            }
-                        }
-                    },
-                    resolve: {
-                        ListDefinition: ['CredentialList', function(CredentialList) {
-                            let list = _.cloneDeep(CredentialList);
-                            list.lookupConfirmText = 'SELECT';
-                            return list;
-                        }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
-                            (list, qs, $stateParams, GetBasePath) => {
-                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                            }
-                        ]
-                    },
-                    onExit: function($state) {
-                        if ($state.transition) {
-                            $('#form-modal').modal('hide');
-                            $('.modal-backdrop').remove();
-                            $('body').removeClass('modal-open');
-                        }
-                    }
+                let inventoryGroupsEditNestedGroups = _.cloneDeep(nestedGroups);
+                inventoryGroupsEditNestedGroups.name = "inventories.edit.groups.edit.nested_groups";
+                inventoryGroupsEditNestedGroups.ncyBreadcrumb = {
+                    parent: "inventories.edit.groups.edit",
+                    label: "ASSOCIATED GROUPS"
                 };
 
-                let listSchedules = {
-                    name: 'inventories.edit.inventory_sources.edit.schedules',
-                    url: '/schedules',
-                    searchPrefix: 'schedule',
-                    ncyBreadcrumb: {
-                        label: N_('SCHEDULES')
-                    },
-                    resolve: {
-                        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath', 'inventorySourceData',
-                            function(list, qs, $stateParams, GetBasePath, inventorySourceData) {
-                                let path = `${inventorySourceData.related.schedules}`;
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                            }
-                        ],
-                        ParentObject: ['inventorySourceData', function(inventorySourceData) {
-                            return inventorySourceData;
-                        }],
-                        UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
-                            function(Rest, GetBasePath, $stateParams, $q) {
-                                Rest.setUrl(GetBasePath('unified_jobs'));
-                                var val = $q.defer();
-                                Rest.options()
-                                    .then(function(data) {
-                                        val.resolve(data.data);
-                                    }, function(data) {
-                                        val.reject(data);
-                                    });
-                                return val.promise;
-                            }],
-                        ScheduleList: ['SchedulesList', 'inventorySourceData',
-                            (SchedulesList, inventorySourceData) => {
-                                let list = _.cloneDeep(SchedulesList);
-                                list.basePath = `${inventorySourceData.related.schedules}`;
-                                return list;
-                            }
-                        ]
-                    },
-                    views: {
-                        // clear form template when views render in this substate
-                        'form': {
-                            templateProvider: () => ''
-                        },
-                        // target the un-named ui-view @ root level
-                        '@': {
-                            templateProvider: function(ScheduleList, generateList, ParentObject) {
-                                // include name of parent resource in listTitle
-                                ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
-                                let html = generateList.build({
-                                    list: ScheduleList,
-                                    mode: 'edit'
-                                });
-                                html = generateList.wrapPanel(html);
-                                return "<div class='InventoryManage-container'>" + generateList.insertFormView() + html + "</div>";
-                            },
-                            controller: 'schedulerListController'
-                        }
-                    }
+                let inventoryGroupsEditNestedHostsEditGroups = _.cloneDeep(nestedGroups);
+                inventoryGroupsEditNestedHostsEditGroups.name = "inventories.edit.groups.edit.nested_hosts.edit.nested_groups";
+                inventoryGroupsEditNestedHostsEditGroups.ncyBreadcrumb = {
+                    parent: "inventories.edit.groups.edit.nested_hosts.edit",
+                    label: "ASSOCIATED GROUPS"
                 };
 
-                let addSchedule = {
-                    name: 'inventories.edit.inventory_sources.edit.schedules.add',
-                    url: '/add',
-                    ncyBreadcrumb: {
-                        label: N_("CREATE SCHEDULE")
-                    },
-                    views: {
-                        'form': {
-                            controller: 'schedulerAddController',
-                            templateUrl: templateUrl("scheduler/schedulerForm")
-                        }
-                    }
+                let inventoryHostsEditGroups = _.cloneDeep(nestedGroups);
+                inventoryHostsEditGroups.name = "inventories.edit.hosts.edit.nested_groups";
+                inventoryHostsEditGroups.ncyBreadcrumb = {
+                    parent: "inventories.edit.hosts.edit",
+                    label: "ASSOCIATED GROUPS"
                 };
 
-                let editSchedule = {
-                    name: 'inventories.edit.inventory_sources.edit.schedules.edit',
-                    url: '/:schedule_id',
-                    ncyBreadcrumb: {
-                        label: "{{schedule_obj.name}}"
-                    },
-                    views: {
-                        'form': {
-                            templateUrl: templateUrl("scheduler/schedulerForm"),
-                            controller: 'schedulerEditController',
-                        }
-                    }
-                };
+                let relatedHostsAnsibleFacts = _.cloneDeep(ansibleFactsRoute);
+                relatedHostsAnsibleFacts.name = 'inventories.edit.hosts.edit.ansible_facts';
 
-                let relatedHostsAnsibleFacts = factsConfig('inventories.edit.hosts.edit.ansible_facts');
-                let nestedHostsAnsibleFacts =  factsConfig('inventories.edit.groups.edit.nested_hosts.edit.ansible_facts');
-                let relatedHostsInsights = insightsConfig('inventories.edit.hosts.edit.insights');
-                let nestedHostsInsights =  insightsConfig('inventories.edit.groups.edit.nested_hosts.edit.insights');
+                let nestedHostsAnsibleFacts = _.cloneDeep(ansibleFactsRoute);
+                nestedHostsAnsibleFacts.name = 'inventories.edit.groups.edit.nested_hosts.edit.ansible_facts';
+
+                let relatedHostsInsights = _.cloneDeep(insightsRoute);
+                relatedHostsInsights.name = 'inventories.edit.hosts.edit.insights';
+
+                let nestedHostsInsights = _.cloneDeep(insightsRoute);
+                nestedHostsInsights.name = 'inventories.edit.groups.edit.nested_hosts.edit.insights';
 
                 return Promise.all([
                     basicInventoryAdd,
@@ -300,48 +157,35 @@ angular.module('inventory', [
                         states: _.reduce(generated, (result, definition) => {
                             return result.concat(definition.states);
                         }, [
-                            stateExtender.buildDefinition({
-                                name: 'inventories', // top-most node in the generated tree (will replace this state definition)
-                                route: '/inventories',
-                                ncyBreadcrumb: {
-                                    label: N_('INVENTORIES')
-                                },
-                                views: {
-                                    '@': {
-                                        templateUrl: templateUrl('inventories/inventories')
-                                    },
-                                    'list@inventories': {
-                                        templateProvider: function(InventoryList, generateList) {
-                                            let html = generateList.build({
-                                                list: InventoryList,
-                                                mode: 'edit'
-                                            });
-                                            return html;
-                                        },
-                                        controller: 'InventoryListController'
-                                    }
-                                },
-                                searchPrefix: 'inventory',
-                                resolve: {
-                                    Dataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
-                                        function(list, qs, $stateParams, GetBasePath) {
-                                            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                                        }
-                                    ]
-                                }
-                            }),
+                            stateExtender.buildDefinition(inventoriesList),
                             stateExtender.buildDefinition(adHocRoute),
-                            stateExtender.buildDefinition(adhocCredentialLookup),
-                            stateExtender.buildDefinition(listSchedules),
-                            stateExtender.buildDefinition(addSchedule),
-                            stateExtender.buildDefinition(editSchedule),
+                            stateExtender.buildDefinition(inventoryAdhocCredential),
+                            stateExtender.buildDefinition(inventorySourceListScheduleRoute),
+                            stateExtender.buildDefinition(inventorySourceListScheduleAddRoute),
+                            stateExtender.buildDefinition(inventorySourceListScheduleEditRoute),
                             stateExtender.buildDefinition(relatedHostsAnsibleFacts),
                             stateExtender.buildDefinition(nestedHostsAnsibleFacts),
                             stateExtender.buildDefinition(relatedHostsInsights),
                             stateExtender.buildDefinition(nestedHostsInsights),
                             stateExtender.buildDefinition(copyMoveGroupRoute),
-                            stateExtender.buildDefinition(copyMoveHostRoute)
+                            stateExtender.buildDefinition(copyMoveHostRoute),
+                            stateExtender.buildDefinition(inventoryGroupsList),
+                            stateExtender.buildDefinition(inventoryGroupsAdd),
+                            stateExtender.buildDefinition(inventoryGroupsEdit),
+                            stateExtender.buildDefinition(inventoryGroupsEditNestedGroups),
+                            stateExtender.buildDefinition(nestedGroupsAdd),
+                            stateExtender.buildDefinition(nestedHosts),
+                            stateExtender.buildDefinition(nestedHostsAdd),
+                            stateExtender.buildDefinition(nestedHostsEdit),
+                            stateExtender.buildDefinition(inventoryGroupsEditNestedHostsEditGroups),
+                            stateExtender.buildDefinition(inventoryHosts),
+                            stateExtender.buildDefinition(inventoryHostsAdd),
+                            stateExtender.buildDefinition(inventoryHostsEdit),
+                            stateExtender.buildDefinition(inventoryHostsEditGroups),
+                            stateExtender.buildDefinition(inventorySourceListRoute),
+                            stateExtender.buildDefinition(inventorySourceAddRoute),
+                            stateExtender.buildDefinition(inventorySourceEditRoute),
+                            stateExtender.buildDefinition(inventoryCompletedJobsRoute)
                         ])
                     };
                 });
@@ -357,6 +201,9 @@ angular.module('inventory', [
                     controllers: {
                         list: 'HostListController',
                         edit: 'HostEditController'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.host_name}}'
                     },
                     urls: {
                         list: '/hosts'
@@ -392,8 +239,18 @@ angular.module('inventory', [
                     }
                 });
 
-                let hostAnsibleFacts = factsConfig('hosts.edit.ansible_facts');
-                let hostInsights = insightsConfig('hosts.edit.insights');
+                let hostAnsibleFacts = _.cloneDeep(ansibleFactsRoute);
+                hostAnsibleFacts.name = 'hosts.edit.ansible_facts';
+
+                let hostInsights = _.cloneDeep(insightsRoute);
+                hostInsights.name = 'hosts.edit.insights';
+
+                let hostsEditGroups = _.cloneDeep(nestedGroups);
+                hostsEditGroups.name = "hosts.edit.nested_groups";
+                hostsEditGroups.ncyBreadcrumb = {
+                    parent: "hosts.edit",
+                    label: "ASSOCIATED GROUPS"
+                };
 
                 return Promise.all([
                     hostTree

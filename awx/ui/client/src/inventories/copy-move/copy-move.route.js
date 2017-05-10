@@ -26,7 +26,7 @@ var copyMoveGroupRoute = {
         }
     },
     ncyBreadcrumb: {
-        label: N_("COPY OR MOVE") + " {{item.name}}"
+        label: N_("COPY OR MOVE") + " {{breadcrumb.copyMoveName}}"
     },
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath', 'group',

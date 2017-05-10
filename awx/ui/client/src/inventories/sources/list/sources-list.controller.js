@@ -34,12 +34,6 @@
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-            // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
-            // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
-            // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
-            // problem that this solves.
-            $scope.ncyBreadcrumbIgnore = true;
-
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
 

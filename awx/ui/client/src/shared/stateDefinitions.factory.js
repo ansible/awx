@@ -181,12 +181,13 @@ function($injector, $stateExtender, $log, i18n) {
                     break;
                 case 'edit':
                     url = params.urls && params.urls.edit ? params.urls.edit : (params.url ? params.url : `/:${form.name}_id`);
+                    let breadcrumbLabel = params.breadcrumbs && params.breadcrumbs.edit ? params.breadcrumbs.edit : '{{parentObject.name || name}}';
                     let formNodeState = {
                         name: params.name || `${params.parent}.edit`,
                         url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: '{{parentObject.name || name}}'
+                            label: breadcrumbLabel
                         },
                         views: {
                             'form': {
@@ -246,7 +247,6 @@ function($injector, $stateExtender, $log, i18n) {
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
         generateFormListDefinitions: function(form, formStateDefinition, params) {
-            var that = this;
             function buildRbacUserTeamDirective(){
                 let states = [];
 
@@ -553,34 +553,7 @@ function($injector, $stateExtender, $log, i18n) {
             function buildListNodes(field) {
                 let states = [];
                 if(!field.skipGenerator) {
-                    if(field && (field.listState || field.addState || field.editState)){
-                        if(field && field.listState){
-                            states.push(field.listState(field, formStateDefinition));
-                            states = _.flatten(states);
-                        }
-                        if(field && field.addState){
-                            let formState = field.addState(field, formStateDefinition, params);
-                            states.push(formState);
-                            // intent below is to add lookup states for any add-forms
-                            if(field.includeForm){
-                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
-                                states.push(that.generateLookupNodes(form, formState));
-                            }
-                            states = _.flatten(states);
-                        }
-                        if(field && field.editState){
-                            let formState = field.editState(field, formStateDefinition, params);
-                            states.push(formState);
-                            // intent below is to add lookup states for any edit-forms
-                            if(field.includeForm){
-                                let form = field.includeForm ? $injector.get(field.includeForm) : field;
-                                states.push(that.generateLookupNodes(form, formState));
-                                states.push(that.generateFormListDefinitions(form, formState, params));
-                            }
-                            states = _.flatten(states);
-                        }
-                    }
-                    else if(field.iterator === 'notification'){
+                    if(field.iterator === 'notification'){
                         states.push(buildNotificationState(field));
                         states = _.flatten(states);
                     }

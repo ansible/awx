@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['i18n', 'buildHostListState', function(i18n, buildHostListState) {
+export default ['i18n', function(i18n) {
         return {
 
         addTitle: i18n._('NEW SMART INVENTORY'),
@@ -139,10 +139,7 @@ export default ['i18n', 'buildHostListState', function(i18n, buildHostListState)
                 name: 'hosts',
                 include: "RelatedHostsListDefinition",
                 title: i18n._('Hosts'),
-                iterator: 'host',
-                listState: buildHostListState,
-                // addState: buildGroupsAddState,
-                // editState: buildGroupsEditState
+                iterator: 'host'
             },
             //this is a placeholder for when we're ready for completed jobs
             completed_jobs: {
