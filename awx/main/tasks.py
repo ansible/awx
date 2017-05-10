@@ -1362,6 +1362,7 @@ class RunProjectUpdate(BaseTask):
     def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
         project_request_id = '' if self.request.id is None else self.request.id
         scm_revision = project_update.project.scm_revision
+        inv_update_class = InventoryUpdate._get_task_class()
         for inv_src in dependent_inventory_sources:
             if not inv_src.update_on_project_update:
                 continue
@@ -1382,9 +1383,8 @@ class RunProjectUpdate(BaseTask):
                         status='running',
                         celery_task_id=str(project_request_id),
                         source_project_update=project_update))
-            inv_update_task = local_inv_update._get_task_class()
             try:
-                task_instance = inv_update_task()
+                task_instance = inv_update_class()
                 # Runs in the same Celery task as project update
                 task_instance.request.id = project_request_id
                 task_instance.run(local_inv_update.id)
@@ -1443,7 +1443,6 @@ class RunProjectUpdate(BaseTask):
         if instance.launch_type == 'sync':
             self.release_lock(instance)
         p = instance.project
-        dependent_inventory_sources = p.scm_inventory_sources.all()
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             fd = open(self.revision_path, 'r')
             lines = fd.readlines()
@@ -1452,11 +1451,11 @@ class RunProjectUpdate(BaseTask):
             else:
                 logger.info("Could not find scm revision in check")
             p.playbook_files = p.playbooks
-            if len(dependent_inventory_sources) > 0:
-                p.inventory_files = p.inventories
+            p.inventory_files = p.inventories
             p.save()
 
         # Update any inventories that depend on this project
+        dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
