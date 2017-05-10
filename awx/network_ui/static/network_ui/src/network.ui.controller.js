@@ -1057,6 +1057,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.frame = Math.floor(window.performance.now());
         $scope.$apply();
     }, 17);
+
+    console.log('new NetworkUIController instance complete');
 };
 
 exports.NetworkUIController = NetworkUIController;
