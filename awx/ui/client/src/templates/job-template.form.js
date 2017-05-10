@@ -322,6 +322,17 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         dataContainer: "body",
                         labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    }, {
+                        name: 'store_facts',
+                        label: i18n._('Store Ansible Facts'),
+                        type: 'checkbox',
+                        column: 2,
+                        awPopOver: "<p>" + i18n._("If enabled, a fact scan will be done when this job is launched.") + "</p>",
+                        dataPlacement: 'right',
+                        dataTitle: i18n._('Store Ansible Facts'),
+                        dataContainer: "body",
+                        labelClass: 'stack-inline',
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
                 },
                 callback_url: {
