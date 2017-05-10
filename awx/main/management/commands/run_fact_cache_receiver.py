@@ -120,6 +120,12 @@ class FactBrokerWorker(ConsumerMixin):
             ret = self._do_fact_scan_create_update(host_obj, module_name, facts, self.timestamp)
 
         if job.store_facts is True:
+            if module_name == 'insights':
+                try:
+                    host_obj.insights_machine_id = facts['machine_id']
+                    host_obj.save()
+                except StandardError:
+                    logger.warn('Failed to find insights machine id in insights fact scan.')
             self._do_gather_facts_update(host_obj, module_name, facts, self.timestamp)
 
         message.ack()

@@ -350,7 +350,7 @@ class Host(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
-        unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
+        unique_together = (("name", "inventory"), ("insights_machine_id", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
 
     inventory = models.ForeignKey(
@@ -410,6 +410,13 @@ class Host(CommonModelNameNotUnique):
         blank=True,
         default={},
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
+    )
+    insights_machine_id = models.TextField(
+        blank=True,
+        default=None,
+        null=True,
+        db_index=True,
+        help_text=_('Red Hat Insights host unique identifier.'),
     )
 
     objects = HostManager()
