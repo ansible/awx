@@ -1,0 +1,98 @@
+    <div ng-controller="NetworkUIController">
+    <svg id="frame"
+         ng-attr-height="{{graph.height}}"
+         ng-attr-width="{{graph.width}}"
+         ng-mousedown="onMouseDown($event)"
+         ng-mouseup="onMouseUp($event)"
+         ng-mouseenter="onMouseEnter($event)"
+         ng-mouseleave="onMouseLeave($event)"
+         ng-mousemove="onMouseMove($event)"
+         ng-mouseover="onMouseOver($event)"
+         ng-touchstart="onTouchStart($event)"
+         ng-touchmove="onTouchMove($event)"
+         ng-touchend="onTouchEnd($event)"
+         ng-tap="onTap($event)"
+         msd-wheel="onMouseWheel($event, $delta, $deltaX, $deltaY)">
+        <defs>
+		<filter x="0" y="0" width="1" height="1" id="selected">
+		  <feFlood flood-color="#b3d8fd"/>
+		  <feComposite in="SourceGraphic" operator="xor"/>
+		</filter>
+		<filter x="0" y="0" width="1" height="1" id="background">
+		  <feFlood flood-color="#ffffff"/>
+		  <feComposite in="SourceGraphic" operator="xor"/>
+		</filter>
+		</defs>
+         <g transform="scale(1.0)" id="frame_g">
+            <g ng-repeat="link in links">
+            <g link></g>
+            </g>
+            <g ng-repeat="link in links">
+            <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
+            </g>
+            <g ng-repeat="device in devices"
+               ng-attr-transform="translate({{device.x}},{{device.y}})"
+               ng-attr-class="{{device.type}}"
+               ng-switch on="device.type">
+            <g ng-switch-when="router"><!-- begin router -->
+                   <g router></g>
+               </g> <!-- end router -->
+
+               <g ng-switch-when="switch"> <!-- begin switch -->
+                   <g switch> </g>
+               </g> <!-- end switch -->
+
+               <g ng-switch-when="host"> <!-- begin host -->
+                    <g host> </g>
+
+               </g> <!-- end host -->
+
+               <g ng-switch-when="rack"> <!-- begin rack -->
+                    <g rack> </g>
+               </g> <!-- end rack -->
+
+               <g ng-switch-default> <!-- begin default -->
+                    <g default></g>
+               </g> <!-- end default -->
+               <g status-light></g>
+               <g task-status></g>
+            </g> <!-- end devices -->
+            <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
+                <line x1="-5" y1="0" x2="5" y2="0"/>
+                <line x1="0" y1="-5" x2="0" y2="5"/>
+            </g>
+            <g quadrants>
+            </g>
+        </g>
+        <g ng-if="!hide_buttons">
+            <g> <!-- buttons -->
+                <g ng-repeat="button in buttons"
+                   ng-attr-transform="translate({{button.x}},{{button.y}})"
+                   ng-attr-class="{{button.is_pressed ? 'button-pressed' : button.mouse_over ? 'button-hover' : 'button'}}">
+                    <g button></g>
+                </g>
+            </g> <!-- end buttons -->
+
+            <g> <!-- stencils -->
+                <g ng-repeat="stencil in stencils"
+                   ng-attr-transform="translate({{stencil.x}},{{stencil.y}})"
+                   class="button">
+                    <g stencil></g>
+                </g>
+            </g> <!-- end stencils -->
+
+            <g> <!-- layers -->
+                <g ng-repeat="layer in layers"
+                   ng-attr-transform="translate({{layer.x}},{{layer.y}})"
+                   class="button">
+                    <g layer> </g>
+                </g>
+            </g> <!-- end layers -->
+        </g>
+        <g debug></g>
+        <g cursor></g>
+        <g ng-repeat="touch in touches">
+            <g touch></g>
+        </g>
+    </svg>
+    </div>
