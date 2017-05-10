@@ -131,3 +131,12 @@ class TestCredentialModels:
         entry = ActivityStream.objects.filter(credential=cred)[0]
         assert entry.operation == 'create'
         assert json.loads(entry.changes)['inputs'] == 'hidden'
+
+
+@pytest.mark.django_db
+class TestUserModels:
+
+    def test_user_hidden_information(self, alice):
+        entry = ActivityStream.objects.filter(user=alice)[0]
+        assert entry.operation == 'create'
+        assert json.loads(entry.changes)['password'] == 'hidden'
