@@ -15,7 +15,8 @@
     "require": "",
     "jshint": "",
     "less": "",
-    "mathjs": ""
+    "mathjs": "",
+    "reconnectingwebsocket": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^3.17.1",
