@@ -7,6 +7,7 @@ from awx.api.views import (
     ApiVersionRootView,
     JobTemplateLabelList,
     JobTemplateSurveySpec,
+    InventoryInventorySourcesUpdate,
 )
 
 
@@ -81,3 +82,38 @@ class TestJobTemplateSurveySpec(object):
             assert response == mock_response_new
             # which there was a better way to do this!
             assert response.call_args[0][1]['spec'][0]['default'] == '$encrypted$'
+
+
+class TestInventoryInventorySourcesUpdate:
+
+    @pytest.mark.parametrize("can_update, can_access, is_source, is_up_on_proj, expected", [
+        (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
+        (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
+        (True, False, "scm", True, [{'status': 'You do not have permission to update project `project`', 'inventory_source': 1}]),
+    ])
+    def test_post(self, mocker, can_update, can_access, is_source, is_up_on_proj, expected):
+        class InventoryUpdate:
+            id = 1
+
+        class Project:
+            name = 'project'
+
+        InventorySource = namedtuple('InventorySource', ['source', 'update_on_project_update', 'pk', 'can_update',
+                                                         'update', 'source_project'])
+
+        class InventorySources(object):
+            def all(self):
+                return [InventorySource(pk=1, source=is_source, source_project=Project,
+                                        update_on_project_update=is_up_on_proj,
+                                        can_update=can_update, update=lambda:InventoryUpdate)]
+
+        Inventory = namedtuple('Inventory', ['inventory_sources'])
+        obj = Inventory(inventory_sources=InventorySources())
+
+        mock_request = mocker.MagicMock()
+        mock_request.user.can_access.return_value = can_access
+
+        with mocker.patch.object(InventoryInventorySourcesUpdate, 'get_object', return_value=obj):
+            view = InventoryInventorySourcesUpdate()
+            response = view.post(mock_request)
+            assert response.data == expected

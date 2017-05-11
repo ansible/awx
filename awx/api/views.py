@@ -2333,7 +2333,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
             project_update = False
 
             if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
-                if not self.request.user or not self.request.user.can_access(Project, 'start', inventory_source.source_project):
+                if not request.user or not request.user.can_access(Project, 'start', inventory_source.source_project):
                     details['status'] = 'You do not have permission to update project `{}`'.format(inventory_source.source_project.name)
                     can_update = False
                 else:
