@@ -1113,7 +1113,7 @@ class ProjectSchedulesList(SubListCreateAPIView):
     new_in_148 = True
 
 
-class ProjectScmInventorySources(SubListCreateAPIView):
+class ProjectScmInventorySources(SubListAPIView):
 
     view_name = _("Project SCM Inventory Sources")
     model = InventorySource
@@ -1702,32 +1702,31 @@ class InventoryList(ListCreateAPIView):
 
 class ControlledByScmMixin(object):
     '''
-    Special method to lock-down items managed by SCM inventory source via
-    project update, which are not protected by the task manager.
+    Special method to reset SCM inventory commit hash
+    if anything that it manages changes.
     '''
 
-    def _raise_if_unallowed(self, obj):
-        if (self.request.method not in SAFE_METHODS and obj and
-                obj.inventory_sources.filter(
-                    update_on_project_update=True, source='scm').exists()):
+    def _reset_inv_src_rev(self, obj):
+        if self.request.method in SAFE_METHODS or not obj:
+            return
+        project_following_sources = obj.inventory_sources.filter(
+            update_on_project_update=True, source='scm')
+        if project_following_sources:
             # Allow inventory changes unrelated to variables
             if self.model == Inventory and (
                     not self.request or not self.request.data or
                     parse_yaml_or_json(self.request.data.get('variables', '')) == parse_yaml_or_json(obj.variables)):
                 return
-            raise PermissionDenied(detail=_(
-                'This object is managed by updates to the project '
-                'of its inventory source. Remove the inventory source '
-                'in order to make this edit.'))
+            project_following_sources.update(scm_last_revision='')
 
     def get_object(self):
         obj = super(ControlledByScmMixin, self).get_object()
-        self._raise_if_unallowed(obj)
+        self._reset_inv_src_rev(obj)
         return obj
 
     def get_parent_object(self):
         obj = super(ControlledByScmMixin, self).get_parent_object()
-        self._raise_if_unallowed(obj)
+        self._reset_inv_src_rev(obj)
         return obj
 
 
@@ -2301,6 +2300,8 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
     model = InventorySource
     serializer_class = InventorySourceSerializer
     parent_model = Inventory
+    # Sometimes creation blocked by SCM inventory source restrictions
+    always_allow_superuser = False
     relationship = 'inventory_sources'
     parent_key = 'inventory'
     new_in_14 = True
@@ -2310,6 +2311,7 @@ class InventorySourceList(ListCreateAPIView):
 
     model = InventorySource
     serializer_class = InventorySourceSerializer
+    always_allow_superuser = False
     new_in_14 = True
 
 

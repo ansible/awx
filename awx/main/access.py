@@ -376,8 +376,6 @@ class BaseAccess(object):
             return access_method(obj)
         elif method in ['start']:
             return self.can_start(obj, validate_license=False)
-        elif method in ['add']: # 2 args with data
-            return self.can_add({})
         elif method in ['attach', 'unattach']: # parent/sub-object call
             access_method = getattr(self, "can_%s" % method)
             if type(parent_obj) == Team:
@@ -739,21 +737,25 @@ class InventorySourceAccess(BaseAccess):
         else:
             return False
 
-    @check_superuser
     def can_add(self, data):
         if not data or 'inventory' not in data:
             return False
-        if not self.check_related('source_project', Project, data, role_field='admin_role'):
+        if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
         # Checks for admin or change permission on inventory.
-        return self.check_related('inventory', Inventory, data)
+        return (
+            self.check_related('inventory', Inventory, data) and
+            not InventorySource.objects.filter(
+                inventory=data.get('inventory'),
+                update_on_project_update=True, source='scm').exists())
 
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.inventory:
             return (
                 self.user.can_access(Inventory, 'change', obj.inventory, None) and
-                self.check_related('credential', Credential, data, obj=obj, role_field='use_role')
+                self.check_related('credential', Credential, data, obj=obj, role_field='use_role') and
+                self.check_related('source_project', Project, data, obj=obj, role_field='use_role')
             )
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
