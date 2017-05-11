@@ -240,11 +240,11 @@ class ApiV1PingView(APIView):
             response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
                                               capacity=instance.capacity, version=instance.version))
             response['instances'].sort()
-        response['rampart_groups'] = []
+        response['instance_groups'] = []
         for instance_group in InstanceGroup.objects.all():
-            response['rampart_groups'].append(dict(name=instance_group.name,
-                                                   capacity=instance_group.capacity,
-                                                   instances=[x.hostname for x in instance_group.instances.all()]))
+            response['instance_groups'].append(dict(name=instance_group.name,
+                                                    capacity=instance_group.capacity,
+                                                    instances=[x.hostname for x in instance_group.instances.all()]))
         return Response(response)
 
 
@@ -532,7 +532,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
     def get_queryset(self):
         po = self.get_parent_object()
         qs = get_user_queryset(self.request.user, UnifiedJob)
-        qs = qs.filter(execution_node=po.hostname, status__in=('running', 'waiting', 'pending'))
+        qs = qs.filter(execution_node=po.hostname)
         return qs
 
 
@@ -568,13 +568,8 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobSerializer
     parent_model = InstanceGroup
+    relationship = "instance_group"
     new_in_320 = True
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        qs = get_user_queryset(self.request.user, UnifiedJob)
-        qs = qs.filter(instance_group=po, status__in=('running', 'waiting', 'pending'))
-        return qs
 
 
 class InstanceGroupInstanceList(SubListAPIView):
