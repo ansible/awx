@@ -36,6 +36,7 @@ class TestDependentInventoryUpdate:
 
     def test_dependent_inventory_updates(self, scm_inventory_source):
         task = RunProjectUpdate()
+        scm_inventory_source.scm_last_revision = ''
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunInventoryUpdate, 'run') as iu_run_mock:
             task._update_dependent_inventories(proj_update, [scm_inventory_source])

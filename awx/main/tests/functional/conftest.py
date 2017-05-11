@@ -241,13 +241,17 @@ def inventory(organization):
 
 @pytest.fixture
 def scm_inventory_source(inventory, project):
-    return InventorySource.objects.create(
+    inv_src = InventorySource(
         name="test-scm-inv",
         source_project=project,
         source='scm',
         source_path='inventory_file',
         update_on_project_update=True,
-        inventory=inventory)
+        inventory=inventory,
+        scm_last_revision=project.scm_revision)
+    with mock.patch.object(inv_src.source_project, 'update'):
+        inv_src.save()
+    return inv_src
 
 
 @pytest.fixture

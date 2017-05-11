@@ -1723,10 +1723,7 @@ class RunInventoryUpdate(BaseTask):
             env['FOREMAN_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'cloudforms':
             env['CLOUDFORMS_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'scm':
-            # Parse source_vars to dict, update env.
-            env.update(parse_yaml_or_json(inventory_update.source_vars))
-        elif inventory_update.source == 'custom':
+        elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])

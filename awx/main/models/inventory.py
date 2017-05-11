@@ -1182,9 +1182,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             before_is = self.__class__.objects.get(pk=self.pk)
             if before_is.source_path != self.source_path or before_is.source_project_id != self.source_project_id:
                 # Reset the scm_revision if file changed to force update
-                self.scm_revision = None
-                if 'scm_revision' not in update_fields:
-                    update_fields.append('scm_revision')
+                self.scm_last_revision = ''
+                if 'scm_last_revision' not in update_fields:
+                    update_fields.append('scm_last_revision')
 
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)

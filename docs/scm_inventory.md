@@ -1,7 +1,7 @@
 # SCM Inventory
 
 Users can create inventory sources that use content in the source tree of
-a project as an Ansible inventory file.
+a project as an Ansible inventory source.
 
 ## Usage Details
 
@@ -34,7 +34,7 @@ _unless the scm revision of the project changes_.
 
 ### RBAC
 
-User needs `admin` role to the project in order to use it as a source
+User needs `use` role to the project in order to use it as a source
 project for inventory (this entails permission to run arbitrary scripts).
 To update the project, they need `update` permission to the project,
 even if the update is done indirectly.
@@ -58,6 +58,15 @@ inside of an inventory all update with a single button click. When this
 happens for an inventory containing an SCM inventory source, it should
 update the project.
 
+### Inventory Source Restriction
+
+Since automatic inventory updates (triggered by a project update) do not
+go through the task system, typical protection against conflicting updates
+is not available. To avoid problems, only 1 inventory source is allowed for
+inventories that use this feature. That means that if an inventory source
+has `source=scm` and `update_on_project_update=true`, it can be the only
+inventory source for its inventory.
+
 ## Supported File Syntax
 
 > Any Inventory Ansible supports should be supported by this feature
@@ -72,6 +81,25 @@ https://github.com/ansible/ansible-inventory-backport
 
 Because the internal mechanism is different, we need some coverage
 testing with Ansible versions pre-2.4 and after.
+
+### Vars Restrictions
+
+When creating any `scm` type inventory source, the `overwrite_vars` field
+must be set to `true`. This should be enforced by API validation and
+the UI should also force this setting.
+
+Why? This is because `ansible-inventory` is planned to
+return group vars at the group-level in its JSON output, but the backported
+script returns them on the host-level. In Ansible 2.4, inventory modules are
+being refactored into plugins, and showing vars on the group-level depends on
+this. Since it is not possible to _also_ backport the inventory module
+refactor to prior Ansible versions, this discrepancy can not be resolved.
+While "flattening" the group vars down to the host-level is functionally
+equivalent, upgrading Ansible would cause an anomaly in variable precedence.
+
+This future variable precedence problem is avoided by forcing overwriting
+of variables until Ansible 2.3 is deprecated, after which all updates
+will consistently utilize group-level variables.
 
 # Acceptance Criteria Use Cases
 
@@ -125,4 +153,19 @@ because the project does not transition to the completed state
 until the inventory update is finished.
 
 Note that a failed inventory update does not mark the project as failed.
+
+## Restricting Instance Group to Run Script On
+
+Since SCM inventory sources are running scripts written by people with
+access to the source-control, a user may want to restrict which instance
+groups the inventory update runs on.
+
+If the inventory source is set to update on project update, it will run
+on the same instance (inside of the Tower cluster) as the project update.
+This can be restricted by limiting the instance groups of the organization
+that contains the `source_project` of the inventory source.
+
+If the inventory source is not configured to update on project update,
+then it will inherit the allowed instance groups from its inventory,
+like all other inventory syncs.
 

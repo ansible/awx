@@ -23,6 +23,13 @@ class TestSCMUpdateFeatures:
             inv_src.save()
             mck_update.assert_called_once_with()
 
+    def test_reset_scm_revision(self, scm_inventory_source):
+        starting_rev = scm_inventory_source.scm_last_revision
+        assert starting_rev != ''
+        scm_inventory_source.source_path = '/newfolder/newfile.ini'
+        scm_inventory_source.save()
+        assert scm_inventory_source.scm_last_revision == ''
+
     def test_source_location(self, scm_inventory_source):
         # Combines project directory with the inventory file specified
         inventory_update = InventoryUpdate(
