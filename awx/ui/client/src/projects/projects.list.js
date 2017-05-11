@@ -50,7 +50,16 @@ export default ['i18n', function(i18n) {
                 excludeModal: true,
                 columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
                 class: 'List-staticColumnAdjacent--monospace',
-                ngBind: 'project.scm_revision'
+                ngBind: 'project.scm_revision',
+                badgeCustom: true,
+                badgePlacement: 'right',
+                badgeIcon: `<a href=""
+                    aw-tool-tip="{{'See More or See Less'|translate}}"
+                    ng-if="project.scm_revision.length > 5"
+                    data-placement="top">See More</a>
+                    <a href=""
+                    ng-if="project.scm_revision.length < 5"
+                    data-placement="top">See Less</a>`
             },
             last_updated: {
                 label: i18n._('Last Updated'),
