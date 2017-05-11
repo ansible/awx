@@ -111,15 +111,14 @@ function(i18n) {
                     title: i18n._('Facts'),
                     skipGenerator: true
                 },
-                nested_groups: {
-                    name: 'nested_groups',
+                groups: {
+                    name: 'groups',
                     awToolTip: i18n._('Please save before defining groups'),
                     dataPlacement: 'top',
-                    ngClick: "$state.go('hosts.edit.nested_groups')",
-                    include: "NestedGroupListDefinition",
-                    includeForm: "NestedGroupFormDefinition",
+                    ngClick: "$state.go('hosts.edit.groups')",
                     title: i18n._('Groups'),
-                    iterator: 'nested_group'
+                    iterator: 'group',
+                    skipGenerator: true
                 },
                 insights: {
                     name: 'insights',
