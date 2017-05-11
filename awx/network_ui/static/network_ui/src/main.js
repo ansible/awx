@@ -1,3 +1,4 @@
 var networkUI = require('./network.ui.app.js');
+var tower = require('./tower.app.js');
 exports.networkUI = networkUI.networkUI;
-exports.tower = networkUI.tower;
+exports.tower = tower.tower;

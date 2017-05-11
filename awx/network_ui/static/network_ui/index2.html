@@ -2,15 +2,11 @@
 <html ng-app="tower">
   <head>
     <link rel="stylesheet" href="css/style.css" />
-    <script data-require="angular.js@1.6.2" src="js/angular.js" data-semver="1.6.2"></script>
-    <script src="js/reconnecting-websocket.js"></script>
+    <script src="js/vendor.bundle.js"></script>
     <script src="js/bundle.js"></script>
-    <script src="js/hamster.js"></script>
-    <script src="js/ngTouch.js"></script>
-    <script src="js/mousewheel.js"></script>
   </head>
   <body>
-    <awx-network-ui></awx-network-ui>
+    <ui-view></ui-view>
   </body>
 </html>
 
