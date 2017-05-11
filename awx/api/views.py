@@ -2306,6 +2306,45 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
     new_in_14 = True
 
 
+class InventoryInventorySourcesUpdate(RetrieveAPIView):
+    view_name = _('Inventory Sources Update')
+
+    model = Inventory
+    serializer_class = InventorySourceUpdateSerializer
+    is_job_start = True
+    new_in_320 = True
+
+    def retrieve(self, request, *args, **kwargs):
+        inventory = self.get_object()
+        update_data = []
+        for inventory_source in inventory.inventory_sources.all():
+            details = {'inventory_source': inventory_source.pk,
+                       'can_update': inventory_source.can_update}
+            update_data.append(details)
+        return Response(update_data)
+
+    def post(self, request, *args, **kwargs):
+        inventory = self.get_object()
+        update_data = []
+        for inventory_source in inventory.inventory_sources.all():
+            details = {'inventory_source': inventory_source.pk, 'status': None, 'inventory_update': None}
+            can_update = inventory_source.can_update
+
+            if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
+                if not self.request.user or self.request.user.can_access(self.model, 'update', inventory_source):
+                    details['status'] = 'You do not have permission to update project `{}`'.format(inventory_source.source_project.name)
+                    can_update = False
+
+            if can_update:
+                details['status'] = 'started'
+                details['inventory_update'] = inventory_source.update().id
+            else:
+                if not details.get('status'):
+                    details['status'] = 'Could not start because `can_update` returned False'
+            update_data.append(details)
+        return Response(update_data, status=status.HTTP_202_ACCEPTED)
+
+
 class InventorySourceList(ListCreateAPIView):
 
     model = InventorySource
