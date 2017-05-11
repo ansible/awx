@@ -42,8 +42,3 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
 
 exports.networkUI = networkUI;
-
-var tower = angular.module('tower', ['networkUI']);
-
-exports.tower = tower;
-

@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "angular": "~1.6.2",
+    "angular-ui-router": "",
     "webpack": "",
     "browserify": "",
     "inherits": "",

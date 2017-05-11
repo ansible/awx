@@ -3,6 +3,7 @@ module.exports = {
     entry: {
         app: "./src/main.js",
         vendor: ["angular",
+                 "angular-ui-router",
                  "hamsterjs",
                  "angular-mousewheel",
                  "ngTouch",
