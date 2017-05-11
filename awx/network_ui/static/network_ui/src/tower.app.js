@@ -1,6 +1,6 @@
 
 var angular = require('angular');
-require('angular-ui-router');
+var ui_router = require('angular-ui-router');
 
 var tower = angular.module('tower', ['networkUI', 'ui.router']);
 
@@ -17,4 +17,5 @@ tower.config(function($stateProvider, $urlRouterProvider) {
 });
 
 exports.tower = tower;
+exports.ui_router = ui_router;
 
