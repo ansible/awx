@@ -502,9 +502,11 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 </td>
                 `;
             } else if (field.type === 'revision') {
+                classList = (field.columnClass) ?
+                Attr(field, 'columnClass') : "";
                 html += `
-                <td>
-                    <revisions></revisions>    
+                <td ${classList}>
+                    <revisions class=\"RevisionHash\"></revisions>    
                 </td>`;
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);

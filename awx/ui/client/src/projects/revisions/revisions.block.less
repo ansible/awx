@@ -1,0 +1,22 @@
+@import "./client/src/shared/branding/colors.default.less";
+
+.RevisionHash {
+    display: flex;
+    align-items: center;
+}
+
+.RevisionHash-name {
+    font-family: monospace; 
+}
+
+.RevisionHash-copy {
+    color: @default-link;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+.RevisionHash-copy:hover {
+    color: @default-link-hov;
+}
