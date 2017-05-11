@@ -1,6 +1,7 @@
 
 
 //console.log = function () { };
+var angular = require('angular');
 var fsm = require('./fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
