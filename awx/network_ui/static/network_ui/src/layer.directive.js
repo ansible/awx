@@ -1,5 +1,5 @@
 
 function layer () {
-  return { restrict: 'A', templateUrl: 'widgets/layer.html' };
+  return { restrict: 'A', templateUrl: '/static/network_ui/widgets/layer.html' };
 }
 exports.layer = layer;
