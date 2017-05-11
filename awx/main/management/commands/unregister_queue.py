@@ -1,5 +1,7 @@
 # Copyright (c) 2017 Ansible Tower by Red Hat
 # All Rights Reserved.
+import sys
+
 from awx.main.models import InstanceGroup
 
 from optparse import make_option
@@ -17,7 +19,7 @@ class Command(BaseCommand):
         ig = InstanceGroup.objects.filter(name=options.get('queuename'))
         if not ig.exists():
             print("Instance group doesn't exist")
-            return
+            sys.exit(1)
         ig = ig.first()
         ig.delete()
         print("Instance Group Removed")

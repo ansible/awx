@@ -14,7 +14,7 @@ class Command(BaseCommand):
         make_option('--queuename', dest='queuename', type='string',
                     help='Queue to create/update'),
         make_option('--hostnames', dest='hostnames', type='string',
-                    help='List of hosts to add to the queue'),
+                    help='Comma-Delimited Hosts to add to the Queue'),
     )
 
     def handle(self, **options):
