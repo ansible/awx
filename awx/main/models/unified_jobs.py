@@ -333,6 +333,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
         unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
+
         eager_fields = kwargs.get('_eager_fields', None)
         if eager_fields:
             for fd, val in eager_fields.items():
@@ -351,7 +352,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             unified_job.survey_passwords = hide_password_dict
 
         unified_job.save()
-        # Labels coppied here
+
+        # Labels and extra credentials copied here
         copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
         return unified_job
 

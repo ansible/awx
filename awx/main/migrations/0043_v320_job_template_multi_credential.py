@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 from awx.main.migrations import _credentialtypes as credentialtypes
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -22,6 +21,11 @@ class Migration(migrations.Migration):
             model_name='jobtemplate',
             name='extra_credentials',
             field=models.ManyToManyField(related_name='_jobtemplate_extra_credentials_+', to='main.Credential'),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='ask_extra_credentials_on_launch',
+            field=models.BooleanField(default=False),
         ),
         migrations.RunPython(credentialtypes.migrate_job_credentials),
         migrations.RemoveField(

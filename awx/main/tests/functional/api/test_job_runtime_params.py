@@ -330,6 +330,70 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('pks, error_msg', [
+    ([1], 'must be network or cloud'),
+    ([999], 'object does not exist'),
+])
+def test_job_launch_JT_with_invalid_extra_credentials(machine_credential, deploy_jobtemplate, pks, error_msg):
+    deploy_jobtemplate.ask_extra_credentials_on_launch = True
+    deploy_jobtemplate.save()
+
+    kv = dict(extra_credentials=pks, credential=machine_credential.id)
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data=kv,
+        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated is False
+
+
+@pytest.mark.django_db
+def test_job_launch_JT_enforces_unique_extra_credential_kinds(machine_credential, credentialtype_aws, deploy_jobtemplate):
+    """
+    JT launching should require that extra_credentials have distinct CredentialTypes
+    """
+    pks = []
+    for i in range(2):
+        aws = Credential.objects.create(
+            name='cred-%d' % i,
+            credential_type=credentialtype_aws,
+            inputs={
+                'username': 'test_user',
+                'password': 'pas4word'
+            }
+        )
+        aws.save()
+        pks.append(aws.pk)
+
+    kv = dict(extra_credentials=pks, credential=machine_credential.id)
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data=kv,
+        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated is False
+
+
+@pytest.mark.django_db
+def test_job_launch_JT_with_extra_credentials(machine_credential, credential, net_credential, deploy_jobtemplate):
+    deploy_jobtemplate.ask_extra_credentials_on_launch = True
+    deploy_jobtemplate.save()
+
+    kv = dict(extra_credentials=[credential.pk, net_credential.pk], credential=machine_credential.id)
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data=kv,
+        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated
+
+    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
+
+    extra_creds = job_obj.extra_credentials.all()
+    assert len(extra_creds) == 2
+    assert credential in extra_creds
+    assert net_credential in extra_creds
+
+
+@pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(False)

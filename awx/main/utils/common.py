@@ -25,7 +25,7 @@ import six
 
 # Django
 from django.utils.translation import ugettext_lazy as _
-from django.db.models import ManyToManyField
+from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -459,9 +459,7 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
         elif field_name in kwargs:
             if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
                 create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
-            # We can't get a hold of django.db.models.fields.related.ManyRelatedManager to compare
-            # so this is the next best thing.
-            elif kwargs[field_name].__class__.__name__ is not 'ManyRelatedManager':
+            elif not isinstance(Class2._meta.get_field(field_name), (ForeignObjectRel, ManyToManyField)):
                 create_kwargs[field_name] = kwargs[field_name]
         elif hasattr(obj1, field_name):
             field_obj = obj1._meta.get_field_by_name(field_name)[0]
@@ -491,6 +489,9 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 src_field_value = getattr(obj1, field_name)
                 if kwargs and field_name in kwargs:
                     override_field_val = kwargs[field_name]
+                    if isinstance(override_field_val, list):
+                        getattr(obj2, field_name).add(*override_field_val)
+                        continue
                     if override_field_val.__class__.__name__ is 'ManyRelatedManager':
                         src_field_value = override_field_val
                 dest_field = getattr(obj2, field_name)

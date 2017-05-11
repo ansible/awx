@@ -1192,7 +1192,8 @@ class JobTemplateAccess(BaseAccess):
             'name', 'description', 'forks', 'limit', 'verbosity', 'extra_vars',
             'job_tags', 'force_handlers', 'skip_tags', 'ask_variables_on_launch',
             'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_skip_tags_on_launch',
-            'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
+            'ask_inventory_on_launch', 'ask_credential_on_launch',
+            'ask_extra_credentials_on_launch', 'survey_enabled',
 
             # These fields are ignored, but it is convenient for QA to allow clients to post them
             'last_job_run', 'created', 'modified',
@@ -1352,7 +1353,11 @@ class JobAccess(BaseAccess):
                 job_fields[fd] = getattr(obj, fd)
             accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
             for fd in ignored_fields:
-                if fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
+                if fd == 'extra_credentials':
+                    if set(job_fields[fd].all()) != set(getattr(obj.job_template, fd).all()):
+                        # Job has field that is not promptable
+                        prompts_access = False
+                elif fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
                     # Job has field that is not promptable
                     prompts_access = False
             if obj.credential != obj.job_template.credential and not credential_access:

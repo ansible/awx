@@ -2526,29 +2526,41 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
                 data['extra_vars'] = extra_vars
             ask_for_vars_dict = obj._ask_for_vars_dict()
             ask_for_vars_dict.pop('extra_vars')
+            if get_request_version(self.request) == 1:  # TODO: remove in 3.3
+                ask_for_vars_dict.pop('extra_credentials')
             for field in ask_for_vars_dict:
                 if not ask_for_vars_dict[field]:
                     data.pop(field, None)
                 elif field == 'inventory' or field == 'credential':
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                elif field == 'extra_credentials':
+                    data[field] = [cred.id for cred in obj.extra_credentials.all()]
                 else:
                     data[field] = getattr(obj, field)
         return data
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        ignored_fields = {}
 
         if 'credential' not in request.data and 'credential_id' in request.data:
             request.data['credential'] = request.data['credential_id']
         if 'inventory' not in request.data and 'inventory_id' in request.data:
             request.data['inventory'] = request.data['inventory_id']
 
+        if get_request_version(self.request) == 1:  # TODO: remove in 3.3
+            extra_creds = request.data.pop('extra_credentials', None)
+            if extra_creds is not None:
+                ignored_fields['extra_credentials'] = extra_creds
+
         passwords = {}
         serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
+        _accepted_or_ignored = obj._accept_or_ignore_job_kwargs(**request.data)
+        prompted_fields = _accepted_or_ignored[0]
+        ignored_fields.update(_accepted_or_ignored[1])
 
         if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
             new_credential = get_object_or_400(Credential, pk=get_pk_from_dict(prompted_fields, 'credential'))
@@ -2558,6 +2570,11 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
             new_inventory = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, 'inventory'))
             if request.user not in new_inventory.use_role:
+                raise PermissionDenied()
+
+        for cred in prompted_fields.get('extra_credentials', []):
+            new_credential = get_object_or_400(Credential, pk=cred)
+            if request.user not in new_credential.use_role:
                 raise PermissionDenied()
 
         new_job = obj.create_unified_job(**prompted_fields)

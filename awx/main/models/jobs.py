@@ -169,16 +169,6 @@ class JobOptions(BaseModel):
             )
         return cred
 
-    def clean(self):
-        super(JobOptions, self).clean()
-        # extra_credentials M2M can't be accessed until a primary key exists
-        if self.pk:
-            for cred in self.extra_credentials.all():
-                if cred.credential_type.kind not in ('net', 'cloud'):
-                    raise ValidationError(
-                        _('Extra credentials must be network or cloud.'),
-                    )
-
     @property
     def all_credentials(self):
         credentials = list(self.extra_credentials.all())
@@ -266,6 +256,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
     )
     ask_credential_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_extra_credentials_on_launch = models.BooleanField(
         blank=True,
         default=False,
     )
@@ -369,7 +363,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             job_type=self.ask_job_type_on_launch,
             verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
-            credential=self.ask_credential_on_launch
+            credential=self.ask_credential_on_launch,
+            extra_credentials=self.ask_extra_credentials_on_launch
         )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):

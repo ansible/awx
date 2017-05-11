@@ -45,16 +45,3 @@ def test_clean_credential_with_custom_types(credentialtype_aws, credentialtype_n
     job_template.extra_credentials.add(aws)
     job_template.extra_credentials.add(net)
     job_template.full_clean()
-
-
-@pytest.mark.django_db
-def test_clean_credential_with_custom_types_xfail(credentialtype_ssh, job_template):
-    ssh = Credential(
-        name='SSH Credential',
-        credential_type=credentialtype_ssh
-    )
-    ssh.save()
-
-    with pytest.raises(ValidationError):
-        job_template.extra_credentials.add(ssh)
-        job_template.full_clean()
