@@ -8,7 +8,7 @@ clean:
 	rm -f css/style.css
 
 main:
-	webpack src/main.js js/bundle.js
+	webpack
 	cp vendor/*.js js/
 
 lint:
