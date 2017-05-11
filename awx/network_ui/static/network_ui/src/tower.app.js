@@ -1,6 +1,6 @@
 
 var angular = require('angular');
-var ui_router = require('angular-ui-router');
+require('angular-ui-router');
 
 var tower = angular.module('tower', ['networkUI', 'ui.router']);
 
