@@ -566,6 +566,10 @@ class InventoryAccess(BaseAccess):
         # inventory to a new organization.  Otherwise, just check for admin permission.
         return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
 
+    @check_superuser
+    def can_update(self, obj):
+        return self.user in obj.update_role
+
     def can_delete(self, obj):
         is_can_admin = self.can_admin(obj, None)
         if not is_can_admin:

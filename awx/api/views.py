@@ -2311,6 +2311,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
 
     model = Inventory
     serializer_class = InventorySourceUpdateSerializer
+    permission_classes = (InventoryInventorySourcesUpdatePermission,)
     is_job_start = True
     new_in_320 = True
 
@@ -2327,15 +2328,20 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         inventory = self.get_object()
         update_data = []
         for inventory_source in inventory.inventory_sources.all():
-            details = {'inventory_source': inventory_source.pk, 'status': None, 'inventory_update': None}
+            details = {'inventory_source': inventory_source.pk, 'status': None}
             can_update = inventory_source.can_update
+            project_update = False
 
             if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
-                if not self.request.user or self.request.user.can_access(self.model, 'update', inventory_source):
+                if not self.request.user or not self.request.user.can_access(Project, 'start', inventory_source.source_project):
                     details['status'] = 'You do not have permission to update project `{}`'.format(inventory_source.source_project.name)
                     can_update = False
+                else:
+                    project_update = True
 
             if can_update:
+                if project_update:
+                    details['project_update'] = inventory_source.source_project.update().id
                 details['status'] = 'started'
                 details['inventory_update'] = inventory_source.update().id
             else:
@@ -2462,7 +2468,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
         obj = self.get_object()
         if obj.can_update:
             if obj.source == 'scm' and obj.update_on_project_update:
-                if not self.request.user or self.request.user.can_access(self.model, 'update', obj):
+                if not self.request.user or not self.request.user.can_access(Project, 'start', obj.source_project):
                     raise PermissionDenied(detail=_(
                         'You do not have permission to update project `{}`.'.format(obj.source_project.name)))
                 return self._build_update_response(obj.source_project.update(), request)
