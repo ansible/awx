@@ -2,7 +2,8 @@ var webpack = require('webpack');
 module.exports = {
     entry: {
         app: "./src/main.js",
-        vendor: ["hamsterjs",
+        vendor: ["angular",
+                 "hamsterjs",
                  "angular-mousewheel",
                  "ngTouch",
                  "reconnectingwebsocket"],
