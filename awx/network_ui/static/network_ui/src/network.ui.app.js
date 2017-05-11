@@ -1,5 +1,6 @@
 
 //console.log = function () { };
+var angular = require('angular');
 var NetworkUIController = require('./network.ui.controller.js');
 var cursor = require('./cursor.directive.js');
 var touch = require('./touch.directive.js');
