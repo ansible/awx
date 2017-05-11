@@ -9,6 +9,7 @@
   "author": "Ben Thomasson",
   "license": "ISC",
   "dependencies": {
+    "angular": "~1.6.2",
     "webpack": "",
     "browserify": "",
     "inherits": "",
@@ -16,7 +17,9 @@
     "jshint": "",
     "less": "",
     "mathjs": "",
-    "reconnectingwebsocket": "^1.0.0"
+    "reconnectingwebsocket": "^1.0.0",
+    "hamsterjs": "~1.1.2",
+    "angular-mousewheel": "~1.0.5"
   },
   "devDependencies": {
     "eslint": "^3.17.1",
