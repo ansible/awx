@@ -2,9 +2,11 @@ function AddCredentialsController (credentialType) {
     let vm = this || {};
 
     vm.name = {
+        state: {
+            required: true
+        },
         label: {
             text: 'Name',
-            required: true,
             popover: {
                 text: 'a, b, c'
             }
@@ -22,9 +24,11 @@ function AddCredentialsController (credentialType) {
     };
 
     vm.kind = {
+        state: {
+            required: true,
+        },
         label: {
             text: 'Type',
-            required: true,
             popover: {
                 text: 'x, y, z'
             }

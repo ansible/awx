@@ -8,11 +8,9 @@ function addListeners (scope, list) {
     return listeners;
 }
 
-function addListener (scope, el, name, fn, type) {
-    type = type || '$apply';
-
+function addListener (scope, el, name, fn) {
     let listener = {
-        fn: () => scope[type](fn),
+        fn,
         name,
         el
     };

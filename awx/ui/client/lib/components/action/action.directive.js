@@ -1,30 +1,33 @@
 let $state;
 
-function applyCancelProperties (scope) {
-    scope.text = scope.config.text || 'CANCEL';
-    scope.fill = 'Hollow';
-    scope.color = 'white';
-    scope.disabled = false;
-    scope.action = () => $state.go('^');
-}
-
-function applySaveProperties (scope) {
-    scope.text = 'SAVE';
-    scope.fill = '';
-    scope.color = 'green';
-    scope.disabled = true;
-}
-
 function link (scope, el, attrs, form) {
-    form.use('action', scope, el);
+    scope.config.state = scope.config.state || {};
+    let state = scope.config.state;
+
+    scope.form = form.use('action', state);
 
     switch(scope.config.type) {
         case 'cancel':
-            applyCancelProperties(scope);
+            setCancelDefaults(scope);
             break;
         case 'save':
-            applySaveProperties(scope);
+            setSaveDefaults(scope);
             break;
+        default:
+            break;
+    }
+
+    function setCancelDefaults (scope) {
+        scope.text = 'CANCEL';
+        scope.fill = 'Hollow';
+        scope.color = 'white';
+        scope.action = () => $state.go('^');
+    }
+
+    function setSaveDefaults (scope) {
+        scope.text = 'SAVE';
+        scope.fill = '';
+        scope.color = 'green';
     }
 }
 

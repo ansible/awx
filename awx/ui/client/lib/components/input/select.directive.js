@@ -2,16 +2,24 @@ let eventService;
 let pathService;
 
 function link (scope, el, attrs, form) {
-    form.use('input', scope, el);  // avoid passing scope? assign to scope.meta instead or reference form properties in view
+    scope.config.state = scope.config.state || {};
 
     let input = el.find('input')[0];
     let select = el.find('select')[0];
+    let state = scope.config.state;
+
+    setDefaults();
+
+    scope.form = form.use('input', state);
 
     let listeners = eventService.addListeners(scope, [
-        [input, 'focus', () => select.focus()],
-        [select, 'mousedown', () => scope.open = !scope.open],
+        [input, 'focus', () => select.focus],
+        [select, 'mousedown', () => scope.$apply(scope.open = !scope.open)],
         [select, 'focus', () => input.classList.add('at-Input--focus')],
-        [select, 'change', () => scope.open = false],
+        [select, 'change', () => {
+            scope.open = false;
+            check();
+        }],
         [select, 'blur', () => {
             input.classList.remove('at-Input--focus');
             scope.open = scope.open && false;
@@ -20,13 +28,38 @@ function link (scope, el, attrs, form) {
 
     scope.$on('$destroy', () => eventService.remove(listeners));
 
-    /*
-     * Should notify form on:
-     *  - valid (required, passes validation) state change  
-     *
-     * Should get from form:
-     *  - display as disabled
-     */
+    function setDefaults () {
+        if (scope.tab === 1) {
+            select.focus();
+        }
+
+        state.isValid = state.isValid || false;
+        state.validate = state.validate ? validate.bind(null, state.validate) : validate;
+        state.check = state.check || check;
+        state.message = state.message || '';
+        state.required = state.required || false;
+    }
+
+    function validate (fn) {
+        let isValid = true;
+
+        if (state.required && !state.value) {
+            isValid = false;    
+        } else if (fn && !fn(scope.config.input)) {
+            isValid = false;  
+        }
+
+        return isValid;
+    }
+
+    function check () {
+        let isValid = state.validate();
+
+        if (isValid !== state.isValid) {
+            state.isValid = isValid;
+            form.check();
+        }
+    }
 }
 
 function atInputSelect (_eventService_, _pathService_) {
@@ -42,7 +75,8 @@ function atInputSelect (_eventService_, _pathService_) {
         link,
         scope: {
             config: '=',
-            col: '@'
+            col: '@',
+            tab: '@'
         }
     };
 }

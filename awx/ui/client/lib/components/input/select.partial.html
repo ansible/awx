@@ -1,14 +1,17 @@
 <div class="col-sm-{{ col }}">
     <div class="form-group at-u-flat">
-        <at-input-label config="config.label"></at-input-label>
+        <at-input-label config="config"></at-input-label>
         <div class="at-InputGroup at-InputSelect">
             <input type="text" class="form-control at-Input at-InputSelect-input"
-                   ng-attr-autofocus="{{ meta.autofocus || undefined }}"
-                   placeholder="{{ config.placeholder | uppercase }}" ng-model="config.input" />
 
-            <select class="form-control at-InputSelect-select" ng-model="config.input"
-                    tabindex="{{ meta.tabindex }}">
-                <optgroup ng-repeat="group in config.data" label="{{ group.category | uppercase }}">
+                   placeholder="{{ config.placeholder | uppercase }}"
+                   ng-model="config.state.value" ng-disabled="form.disabled"
+                   ng-change="config.state.check" />
+
+            <select class="form-control at-InputSelect-select" ng-model="config.state.value"
+                    tabindex="{{::tab}}" ng-attr-autofocus="{{ tab == 1 || undefined }}"
+                    ng-disabled="form.disabled">
+                <optgroup ng-repeat="group in config.data" label="{{::group.category | uppercase }}">
                     <option ng-repeat="item in group.data" value="{{ item.name }}">
                         {{ item.name }}
                     </option>

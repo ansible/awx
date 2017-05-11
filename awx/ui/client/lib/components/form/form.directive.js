@@ -1,56 +1,70 @@
-function use (type, componentScope, componentElement) { 
+function use (type, component, el) { 
    let vm = this;
 
-   let component;
+   let state;
 
    switch (type) {
         case 'input':
-            component = vm.trackInput(componentElement);
+            state = vm.trackInput(component, el);
             break;
         case 'action':
-            component = vm.trackAction(componentElement);
+            state = vm.trackAction(component, el);
             break;
         default:
             throw new Error('An at-form cannot use component type:', type);
    }
 
-   componentScope.meta = component;
+   return state;
 }
 
-function trackInput (componentElement) {
+function trackInput (component, el) {
     let vm = this;
 
-    let input = {
-       el: componentElement,
-       tabindex: vm.inputs.length + 1
+    let form = {
+        state: vm.state,
+        disabled: false
     };
 
-    if (vm.inputs.length === 0) {
-       input.autofocus = true;
-       componentElement.find('input').focus();
-    }
+    vm.inputs.push(component)
 
-    vm.inputs.push(input)
-
-    return input;
+    return form;
 }
 
-function trackAction (componentElement) {
+function trackAction (component) {
     let vm = this;
 
-    let action = {
-       el: componentElement
+    let form = {
+        state: vm.state,
+        disabled: false
     };
 
-    vm.actions.push(action);
+    vm.actions.push(component);
 
-    return action;
+    return form;
 }
 
-function update () {
+function validate () {
     let vm = this;
     
-    vm.inputs.forEach(input => console.log(input));
+    let isValid = true;
+
+    vm.inputs.forEach(input => {
+        if (!input.isValid) { 
+            isValid = false;
+        }
+    });
+
+    return isValid;
+}
+
+function check () {
+    let vm = this;
+
+    let isValid = vm.validate();
+
+    if (isValid !== vm.state.isValid) {
+        vm.state.isValid = isValid;
+    }
 }
 
 function remove (id) {
@@ -62,13 +76,18 @@ function remove (id) {
 function AtFormController () {
     let vm = this;
 
+    vm.state = {
+        isValid: false
+    };
+
     vm.inputs = [];
     vm.actions = [];
 
     vm.use = use;
     vm.trackInput = trackInput;
     vm.trackAction = trackAction;
-    vm.update = update;
+    vm.validate = validate;
+    vm.check = check;
     vm.remove = remove;
 }
 
