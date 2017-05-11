@@ -133,7 +133,7 @@ class DependencyGraph(object):
         if type(job) is ProjectUpdate:
             self.mark_project_update(job)
         elif type(job) is InventoryUpdate:
-            self.mark_inventory_update(job.inventory_source__inventory_id)
+            self.mark_inventory_update(job.inventory_source.inventory_id)
             self.mark_inventory_source_update(job.inventory_source_id)
         elif type(job) is Job:
             self.mark_job_template_job(job)

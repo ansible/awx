@@ -1384,12 +1384,12 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory is not None and self.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory.organization.instance_groups.all()]
+        if self.inventory_source.inventory is not None and self.inventory_source.inventory.organization is not None:
+            organization_groups = [x for x in self.inventory_source.inventory.organization.instance_groups.all()]
         else:
             organization_groups = []
-        if self.inventory is not None:
-            inventory_groups = [x for x in self.inventory.instance_groups.all()]
+        if self.inventory_source.inventory is not None:
+            inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
         template_groups = [x for x in super(InventoryUpdate, self).preferred_instance_groups]
         return template_groups + inventory_groups + organization_groups
 

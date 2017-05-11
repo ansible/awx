@@ -239,22 +239,14 @@ class TaskManager():
         return project_task
 
     def create_inventory_update(self, task, inventory_source_task):
-        dep = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(launch_type='dependency')
+        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(launch_type='inventory_taskendency')
 
-        dep.created = task.created - timedelta(seconds=2)
-        dep.status = 'pending'
-        dep.save()
-
-        '''
-        Update internal datastructures with the newly created inventory update
-        '''
-        # Should be only 1 inventory update. The one for the job (task)
-        latest_inventory_updates = self.get_latest_inventory_update_tasks([task])
-        self.process_latest_inventory_updates(latest_inventory_updates)
-
-        inventory_sources = self.get_inventory_source_tasks([task])
-        self.process_inventory_sources(inventory_sources)
-        return dep
+        inventory_task.created = task.created - timedelta(seconds=2)
+        inventory_task.status = 'pending'
+        inventory_task.save()
+        # inventory_sources = self.get_inventory_source_tasks([task])
+        # self.process_inventory_sources(inventory_sources)
+        return inventory_task
 
     def capture_chain_failure_dependencies(self, task, dependencies):
         for dep in dependencies:
