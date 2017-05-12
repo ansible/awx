@@ -41,7 +41,8 @@ function(i18n){
                 ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 tab: 'properties'
             },
-            variables: {
+            group_variables: {
+                realName: 'variables',
                 label: 'Variables',
                 type: 'textarea',
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -85,8 +86,6 @@ function(i18n){
                 awToolTip: i18n._('Please save before defining groups'),
                 dataPlacement: 'top',
                 ngClick: "$state.go('inventories.edit.groups.edit.nested_groups')",
-                include: "NestedGroupListDefinition",
-                includeForm: "NestedGroupFormDefinition",
                 title: i18n._('Groups'),
                 iterator: 'nested_group'
             },

@@ -116,8 +116,6 @@ function(i18n) {
                     awToolTip: i18n._('Please save before defining groups'),
                     dataPlacement: 'top',
                     ngClick: "$state.go('hosts.edit.nested_groups')",
-                    include: "NestedGroupListDefinition",
-                    includeForm: "NestedGroupFormDefinition",
                     title: i18n._('Groups'),
                     iterator: 'nested_group'
                 },

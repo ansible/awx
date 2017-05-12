@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
- 	['$scope', '$state', '$stateParams', 'DashboardHostsForm', 'GenerateForm', 'ParseTypeChange', 'DashboardHostService', 'host',
- 	function($scope, $state, $stateParams, DashboardHostsForm, GenerateForm, ParseTypeChange, DashboardHostService, host){
+ 	['$scope', '$state', '$stateParams', 'DashboardHostsForm', 'GenerateForm', 'ParseTypeChange', 'DashboardHostService', 'host', '$rootScope',
+ 	function($scope, $state, $stateParams, DashboardHostsForm, GenerateForm, ParseTypeChange, DashboardHostService, host, $rootScope){
  		$scope.parseType = 'yaml';
  		$scope.formCancel = function(){
  			$state.go('^', null, {reload: true});
@@ -23,7 +23,7 @@
  		$scope.formSave = function(){
  			var host = {
  				id: $scope.host.id,
- 				variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+ 				variables: $scope.host_variables === '---' || $scope.host_variables === '{}' ? null : $scope.host_variables,
  				name: $scope.name,
  				description: $scope.description,
  				enabled: $scope.host.enabled
@@ -36,12 +36,13 @@
  		var init = function(){
  			$scope.host = host;
  			$scope.name = host.name;
+            $rootScope.breadcrumb.host_name = host.name;
  			$scope.description = host.description;
-			$scope.variables = getVars(host.variables);
+			$scope.host_variables = getVars(host.variables);
         	ParseTypeChange({
         		scope: $scope,
-        		field_id: 'host_variables',
-        		variable: 'variables',
+        		field_id: 'host_host_variables',
+        		variable: 'host_variables',
         	});
  		};
 

@@ -64,7 +64,7 @@ function(i18n) {
                     ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)',
                     type: 'text'
                 },
-                variables: {
+                host_variables: {
                     label: i18n._('Variables'),
                     type: 'textarea',
                     rows: 6,
@@ -117,8 +117,6 @@ function(i18n) {
                     awToolTip: i18n._('Please save before defining groups'),
                     dataPlacement: 'top',
                     ngClick: "$state.go('inventories.edit.hosts.edit.nested_groups')",
-                    include: "NestedGroupListDefinition",
-                    includeForm: "NestedGroupFormDefinition",
                     title: i18n._('Groups'),
                     iterator: 'nested_group'
                 },

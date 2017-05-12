@@ -4,16 +4,16 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'GroupForm',
+export default ['$state', '$stateParams', '$scope', 'NestedGroupForm',
     'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2',
     'rbacUiControlService', 'ToJSON',
-    function($state, $stateParams, $scope, GroupForm,  ParseTypeChange,
+    function($state, $stateParams, $scope, NestedGroupForm,  ParseTypeChange,
         GenerateForm, inventoryData, GroupManageService, GetChoices,
         GetBasePath, CreateSelect2, rbacUiControlService,
         ToJSON) {
 
-        let form = GroupForm;
+        let form = NestedGroupForm;
         init();
 
         function init() {
@@ -28,8 +28,8 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm',
             $scope.envParseType = 'yaml';
             ParseTypeChange({
                 scope: $scope,
-                field_id: 'group_group_variables',
-                variable: 'group_variables',
+                field_id: 'nested_group_nested_group_variables',
+                variable: 'nested_group_variables',
             });
         }
 
@@ -39,7 +39,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm',
 
         $scope.formSave = function() {
             var json_data;
-            json_data = ToJSON($scope.parseType, $scope.group_variables, true);
+            json_data = ToJSON($scope.parseType, $scope.nested_group_variables, true);
 
             var group = {
                 variables: json_data,
