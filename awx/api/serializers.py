@@ -2164,7 +2164,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         fields = super(JobOptionsSerializer, self).get_fields()
 
         # TODO: remove when API v1 is removed
-        if self.version == 1:
+        if self.version == 1 and 'credential' in self.Meta.fields:
             fields.update(V1JobOptionsSerializer().get_fields())
         return fields
 
@@ -2206,7 +2206,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             ret['credential'] = None
         if 'vault_credential' in ret and not obj.vault_credential:
             ret['vault_credential'] = None
-        if self.version == 1:
+        if self.version == 1 and 'credential' in self.Meta.fields:
             ret['cloud_credential'] = obj.cloud_credential
             ret['network_credential'] = obj.network_credential
         return ret
