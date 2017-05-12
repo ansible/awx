@@ -6,7 +6,6 @@ module.exports = {
                  "angular-ui-router",
                  "hamsterjs",
                  "angular-mousewheel",
-                 "ngTouch",
                  "reconnectingwebsocket"],
     },
     output: {
@@ -16,10 +15,5 @@ module.exports = {
     plugins: [
          new webpack.ProvidePlugin({Hamster: 'hamsterjs'}),
          new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' })
-    ],
-    resolve: {
-        alias: {
-            ngTouch: __dirname + "/vendor/ngTouch.js"
-        }
-    }
+    ]
 };

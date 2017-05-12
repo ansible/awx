@@ -9,7 +9,6 @@ clean:
 
 main:
 	webpack
-	cp vendor/*.js js/
 
 lint:
 	jshint --verbose src/*js
