@@ -1,4 +1,4 @@
-export default 
+export default
     [   'templateUrl',
         'Rest',
         '$q',
@@ -38,18 +38,10 @@ export default
                         textArea.style.background = 'transparent';
 
                         textArea.value = full_revision;
-
                         document.body.appendChild(textArea);
-
                         textArea.select();
-
-                        try {
-                            var successful = document.execCommand('copy');
-                            var msg = successful ? 'successful' : 'unsuccessful';
-                            console.log('Copying text command was ' + msg);
-                        } catch (err) {
-                            console.log('Oops, unable to copy');
-                        }
+                        
+                        document.execCommand('copy');
 
                         document.body.removeChild(textArea);
                     };

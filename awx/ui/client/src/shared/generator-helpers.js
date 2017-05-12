@@ -506,7 +506,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 Attr(field, 'columnClass') : "";
                 html += `
                 <td ${classList}>
-                    <revisions class=\"RevisionHash\"></revisions>    
+                    <revisions class=\"RevisionHash\"></revisions>
                 </td>`;
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
