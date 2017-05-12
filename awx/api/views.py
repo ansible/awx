@@ -1827,8 +1827,8 @@ class HostList(ListCreateAPIView):
         qs = super(HostList, self).get_queryset()
         filter_string = self.request.query_params.get('host_filter', None)
         if filter_string:
-            filter_q = DynamicFilter.query_from_string(filter_string)
-            qs = qs.filter(filter_q)
+            filter_qs = DynamicFilter.query_from_string(filter_string)
+            qs &= filter_qs
         return qs
 
     def list(self, *args, **kwargs):

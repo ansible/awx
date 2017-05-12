@@ -8,8 +8,7 @@ from pyparsing import (
     CharsNotIn,
 )
 
-from django.db import models
-
+import django
 
 __all__ = ['DynamicFilter']
 
@@ -32,6 +31,10 @@ def string_to_type(t):
     return t
 
 
+def get_host_model():
+    return django.apps.apps.get_model('main', 'host')
+
+
 class DynamicFilter(object):
     SEARCHABLE_RELATIONSHIP = 'ansible_facts'
 
@@ -41,7 +44,10 @@ class DynamicFilter(object):
             k, v = self._extract_key_value(t)
             k, v = self._json_path_to_contains(k, v)
             kwargs[k] = v
-            self.result = models.Q(**kwargs)
+
+            # Avoid import circular dependency
+            Host = get_host_model()
+            self.result = Host.objects.filter(**kwargs)
 
         def strip_quotes_traditional_logic(self, v):
             if type(v) is unicode and v.startswith('"') and v.endswith('"'):
