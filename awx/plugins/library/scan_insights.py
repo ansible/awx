@@ -52,16 +52,13 @@ def main():
 
     system_uuid = get_system_uuid(INSIGHTS_SYSTEM_ID_FILE)
 
-    if system_uuid is not None:
-        results = {
-            'ansible_facts': {
-                'insights': {
-                    'system_id': system_uuid
-                }
+    results = {
+        'ansible_facts': {
+            'insights': {
+                'system_id': system_uuid
             }
         }
-    else:
-        results = dict(skipped=True, msg="Insights system id not found")
+    }
     module.exit_json(**results)
 
 
