@@ -1312,9 +1312,7 @@ class JobTemplateAccess(BaseAccess):
         if isinstance(sub_obj, NotificationTemplate):
             return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role:
-                return True
-            return False
+            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role
         return super(JobTemplateAccess, self).can_attach(
             obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
