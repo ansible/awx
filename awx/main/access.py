@@ -1307,7 +1307,7 @@ class JobTemplateAccess(BaseAccess):
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
-        return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
 
 
