@@ -1123,6 +1123,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             script        = self.reverse('api:inventory_script_view',       kwargs={'pk': obj.pk}),
             tree          = self.reverse('api:inventory_tree_view',         kwargs={'pk': obj.pk}),
             inventory_sources = self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk}),
+            update_inventory_sources = self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
             job_templates = self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
             scan_job_templates = self.reverse('api:inventory_scan_job_template_list', kwargs={'pk': obj.pk}),

@@ -16,8 +16,8 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',
-           'IsSuperUser']
+           'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
+           'UserPermission', 'IsSuperUser']
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -198,6 +198,12 @@ class ProjectUpdatePermission(ModelAccessPermission):
     def check_post_permissions(self, request, view, obj=None):
         project = get_object_or_400(view.model, pk=view.kwargs['pk'])
         return check_user_access(request.user, view.model, 'start', project)
+
+
+class InventoryInventorySourcesUpdatePermission(ModelAccessPermission):
+    def check_post_permissions(self, request, view, obj=None):
+        inventory = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'update', inventory)
 
 
 class UserPermission(ModelAccessPermission):
