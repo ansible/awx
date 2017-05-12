@@ -48,8 +48,8 @@ export default ['i18n', function(i18n) {
             scm_revision: {
                 label: i18n._('Revision'),
                 excludeModal: true,
-                columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
-                class: 'List-staticColumnAdjacent--monospace'
+                columnClass: 'List-tableCell col-lg-4 col-md-2 col-sm-3 hidden-xs',
+                type: 'revision'
             },
             last_updated: {
                 label: i18n._('Last Updated'),

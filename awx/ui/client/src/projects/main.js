@@ -13,9 +13,10 @@ import { N_ } from '../i18n';
 import GetProjectPath from './factories/get-project-path.factory';
 import GetProjectIcon from './factories/get-project-icon.factory';
 import GetProjectToolTip from './factories/get-project-tool-tip.factory';
+import revisions from './revisions/main';
 
 export default
-angular.module('Projects', [])
+angular.module('Projects', [revisions.name])
     .controller('ProjectsList', ProjectsList)
     .controller('ProjectsAdd', ProjectsAdd)
     .controller('ProjectsEdit', ProjectsEdit)
