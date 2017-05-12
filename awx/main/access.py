@@ -1425,7 +1425,7 @@ class JobAccess(BaseAccess):
             for fd in ignored_fields:
                 if fd == 'extra_credentials':
                     if set(job_fields[fd].all()) != set(getattr(obj.job_template, fd).all()):
-                        # Job has field that is not promptable
+                        # Job has extra_credentials that are not promptable
                         prompts_access = False
                 elif fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
                     # Job has field that is not promptable
@@ -1442,7 +1442,28 @@ class JobAccess(BaseAccess):
         project_access = obj.project is None or self.user in obj.project.admin_role
 
         # job can be relaunched if user could make an equivalent JT
-        return inventory_access and credential_access and (org_access or project_access)
+        ret = inventory_access and credential_access and (org_access or project_access)
+        if not ret and self.save_messages:
+            if not obj.job_template:
+                pretext = _('Job has been orphaned from its job template.')
+            elif prompts_access:
+                self.messages['detail'] = _('You do not have execute permission to related job template.')
+                return False
+            else:
+                pretext = _('Job was launched with prompted fields.')
+            if inventory_access and credential_access:
+                self.messages['detail'] = '{} {}'.format(pretext, _(' Organization level permissions required.'))
+            else:
+                self.messages['detail'] = '{} {}'.format(pretext, _(' You do not have permission to related resources.'))
+        return ret
+
+    def get_method_capability(self, method, obj, parent_obj):
+        if method == 'start':
+            # Return simplistic permission, will perform detailed check on POST
+            if not obj.job_template:
+                return True
+            return self.user in obj.job_template.execute_role
+        return super(JobAccess, self).get_method_capability(method, obj, parent_obj)
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
@@ -1967,6 +1988,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         #    'project',
         #    'inventory',
         #    'credential',
+        #    'credential__credential_type',
         #)
 
         return qs.all()
@@ -2014,6 +2036,7 @@ class UnifiedJobAccess(BaseAccess):
         #    'project',
         #    'inventory',
         #    'credential',
+        #    'credential__credential_type',
         #    'job_template',
         #    'inventory_source',
         #    'project___credential',

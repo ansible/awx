@@ -3722,6 +3722,13 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
 
+    def check_object_permissions(self, request, obj):
+        if request.method == 'POST' and obj:
+            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
+            if not relaunch_perm and 'detail' in messages:
+                self.permission_denied(request, message=messages['detail'])
+        return super(JobRelaunch, self).check_object_permissions(request, obj)
+
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
