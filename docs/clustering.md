@@ -42,8 +42,8 @@ The current standalone instance configuration doesn't change for a 3.1+ deploy. 
 
 * Since there is no primary/secondary configuration those inventory groups go away and are replaced with a
   single inventory group `tower`. The customer may, *optionally*, define other groups and group instances in those groups. These groups
-  should be prefixed with `rampart_`. Instances are not required to be in the `tower` group alongside other `rampart_` groups, but one
-  instance *must* be present in the `tower` group. Technically `tower` is a group like any other `rampart_` group but it must always be present
+  should be prefixed with `instance_group_`. Instances are not required to be in the `tower` group alongside other `instance_group_` groups, but one
+  instance *must* be present in the `tower` group. Technically `tower` is a group like any other `instance_group_` group but it must always be present
   and if a specific group is not associated with a specific resource then job execution will always fall back to the `tower` group:
   ```
   [tower]
@@ -51,11 +51,11 @@ The current standalone instance configuration doesn't change for a 3.1+ deploy. 
   hostB
   hostC
   
-  [rampart_east]
+  [instance_group_east]
   hostB
   hostC
   
-  [rampart_west]
+  [instance_group_west]
   hostC
   hostD
   ```
