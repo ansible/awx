@@ -20,7 +20,7 @@ angular.module("ngTouch", [])
             }
 
         }]
-    }
+    };
 })
 .directive("ngTouchmove", function () {
     return {
@@ -44,7 +44,7 @@ angular.module("ngTouch", [])
             }
 
         }]
-    }
+    };
 })
 .directive("ngTouchend", function () {
     return {
@@ -58,7 +58,7 @@ angular.module("ngTouch", [])
             }
 
         }]
-    }
+    };
 })
 .directive("ngTap", function () {
     return {
@@ -66,14 +66,14 @@ angular.module("ngTouch", [])
 
             var moved = false;
             $element.bind("touchstart", onTouchStart);
-            function onTouchStart(event) {
+            function onTouchStart() {
                 $element.bind("touchmove", onTouchMove);
                 $element.bind("touchend", onTouchEnd);
             }
-            function onTouchMove(event) {
+            function onTouchMove() {
                 moved = true;
             }
-            function onTouchEnd(event) {
+            function onTouchEnd() {
                 $element.unbind("touchmove", onTouchMove);
                 $element.unbind("touchend", onTouchEnd);
                 if (!moved) {
@@ -83,5 +83,5 @@ angular.module("ngTouch", [])
             }
 
         }]
-    }
+    };
 });
