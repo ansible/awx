@@ -568,7 +568,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobSerializer
     parent_model = InstanceGroup
-    relationship = "instance_group"
+    relationship = "unifiedjob_set"
     new_in_320 = True
 
 
