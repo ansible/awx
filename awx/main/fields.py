@@ -28,7 +28,8 @@ from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
 # jsonschema
-from jsonschema import Draft4Validator
+from jsonschema import Draft4Validator, FormatChecker
+import jsonschema.exceptions
 
 # Django-JSONField
 from jsonfield import JSONField as upstream_JSONField
@@ -36,6 +37,7 @@ from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # AWX
 from awx.main.utils.filters import DynamicFilter
+from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main import utils
 
@@ -349,6 +351,8 @@ class JSONSchemaField(JSONBField):
     defining `self.schema`.
     """
 
+    format_checker = FormatChecker()
+
     # If an empty {} is provided, we still want to perform this schema
     # validation
     empty_values=(None, '')
@@ -362,7 +366,10 @@ class JSONSchemaField(JSONBField):
     def validate(self, value, model_instance):
         super(JSONSchemaField, self).validate(value, model_instance)
         errors = []
-        for error in Draft4Validator(self.schema(model_instance)).iter_errors(value):
+        for error in Draft4Validator(
+            self.schema(model_instance),
+            format_checker=self.format_checker
+        ).iter_errors(value):
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'] % error.instance
             errors.append(error)
@@ -388,6 +395,24 @@ class JSONSchemaField(JSONBField):
         if isinstance(value, six.string_types):
             return json.loads(value)
         return value
+
+
+@JSONSchemaField.format_checker.checks('ssh_private_key')
+def format_ssh_private_key(value):
+    # Sanity check: GCE, in particular, provides JSON-encoded private
+    # keys, which developers will be tempted to copy and paste rather
+    # than JSON decode.
+    #
+    # These end in a unicode-encoded final character that gets double
+    # escaped due to being in a Python 2 bytestring, and that causes
+    # Python's key parsing to barf. Detect this issue and correct it.
+    if r'\u003d' in value:
+        value = value.replace(r'\u003d', '=')
+    try:
+        validate_ssh_private_key(value)
+    except jsonschema.exceptions.ValidationError as e:
+        raise jsonschema.exceptions.FormatError(e.message)
+    return value
 
 
 class CredentialInputField(JSONSchemaField):
@@ -428,8 +453,21 @@ class CredentialInputField(JSONSchemaField):
         }
 
     def validate(self, value, model_instance):
+        # decrypt secret values so we can validate their contents (i.e.,
+        # ssh_key_data format)
+        decrypted_values = {}
+        for k, v in value.items():
+            if all([
+                k in model_instance.credential_type.secret_fields,
+                v != '$encrypted$',
+                model_instance.pk
+            ]):
+                decrypted_values[k] = utils.common.decrypt_field(model_instance, k)
+            else:
+                decrypted_values[k] = v
+
         super(CredentialInputField, self).validate(
-            value, model_instance
+            decrypted_values, model_instance
         )
 
         errors = []
@@ -440,6 +478,18 @@ class CredentialInputField(JSONSchemaField):
                     _('%s required for %s credential.') % (
                         field, model_instance.credential_type.name
                     )
+                )
+
+        # `ssh_key_unlock` requirements are very specific and can't be
+        # represented without complicated JSON schema
+        if model_instance.credential_type.kind == 'ssh':
+            if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
+                errors.append(
+                    _('SSH key unlock must be set when SSH key is encrypted.')
+                )
+            if not model_instance.has_encrypted_ssh_key_data and value.get('ssh_key_unlock'):
+                errors.append(
+                    _('SSH key unlock should not be set when SSH key is not encrypted.')
                 )
 
         if errors:
@@ -466,7 +516,8 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'number', 'ssh_private_key']},
+                            'type': {'enum': ['string', 'number']},
+                            'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
                                 'minItems': 1,

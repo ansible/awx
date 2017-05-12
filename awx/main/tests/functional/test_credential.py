@@ -7,6 +7,9 @@ from django.core.exceptions import ValidationError
 from awx.main.utils.common import decrypt_field
 from awx.main.models import Credential, CredentialType
 
+EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
+EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
+
 
 @pytest.mark.django_db
 def test_default_cred_types():
@@ -60,7 +63,7 @@ def test_cloud_kind_uniqueness():
     ({'fields': [{'id': 'username', 'label': 'Username'}, {'id': 'username', 'label': 'Username 2'}]}, False),  # noqa
     ({'fields': [{'id': '$invalid$', 'label': 'Invalid'}]}, False),  # noqa
     ({'fields': [{'id': 'password', 'label': 'Password', 'type': 'number'}]}, True),
-    ({'fields': [{'id': 'ssh_key', 'label': 'SSH Key', 'type': 'ssh_private_key'}]}, True),  # noqa
+    ({'fields': [{'id': 'ssh_key', 'label': 'SSH Key', 'type': 'string', 'format': 'ssh_private_key'}]}, True),  # noqa
     ({'fields': [{'id': 'other', 'label': 'Other', 'type': 'boolean'}]}, False),
     ({'fields': [{'id': 'certificate', 'label': 'Cert', 'multiline': True}]}, True),
     ({'fields': [{'id': 'certificate', 'label': 'Cert', 'multiline': 'bad'}]}, False),  # noqa
@@ -179,6 +182,37 @@ def test_credential_creation_validation_failure(organization_factory):
                           inputs={'user': 'wrong-key'}, organization=org)
         cred.save()
         cred.full_clean()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('ssh_key_data, ssh_key_unlock, valid', [
+    [EXAMPLE_PRIVATE_KEY, None, True],  # unencrypted key, no unlock pass
+    [EXAMPLE_PRIVATE_KEY, 'super-secret', False],  # unencrypted key, unlock pass
+    [EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'super-secret', True],  # encrypted key, unlock pass
+    [EXAMPLE_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted key, no unlock pass
+    [None, None, True],  # no key, no unlock pass
+    [None, 'super-secret', False],  # no key, unlock pass
+    ['INVALID-KEY-DATA', None, False],  # invalid key data
+    [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
+])
+def test_ssh_key_data_validation(credentialtype_ssh, organization, ssh_key_data, ssh_key_unlock, valid):
+    inputs = {}
+    if ssh_key_data:
+        inputs['ssh_key_data'] = ssh_key_data
+    if ssh_key_unlock:
+        inputs['ssh_key_unlock'] = ssh_key_unlock
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name="Best credential ever",
+        inputs=inputs,
+        organization=organization
+    )
+    cred.save()
+    if valid:
+        cred.full_clean()
+    else:
+        with pytest.raises(ValidationError):
+            cred.full_clean()
 
 
 @pytest.mark.django_db
