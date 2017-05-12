@@ -20,29 +20,29 @@ EXAMPLES = '''
 # host | success >> {
 #    "ansible_facts": {
 #        "insights": {
-#           "machine_id": "4da7d1f8-14f3-4cdc-acd5-a3465a41f25d"
+#           "system_id": "4da7d1f8-14f3-4cdc-acd5-a3465a41f25d"
 #        }, ... }
 '''
 
 
-INSIGHTS_MACHINE_ID_FILE='/etc/redhat-access-insights/machine-id'
+INSIGHTS_SYSTEM_ID_FILE='/etc/redhat-access-insights/machine-id'
 
 
-def get_machine_uuid(filname):
-    machine_uuid = None
+def get_system_uuid(filname):
+    system_uuid = None
     try:
-        f = open(INSIGHTS_MACHINE_ID_FILE, "r")
+        f = open(INSIGHTS_SYSTEM_ID_FILE, "r")
     except IOError:
         return None
     else:
         try:
             data = f.readline()
-            machine_uuid = str(uuid.UUID(data))
+            system_uuid = str(uuid.UUID(data))
         except (IOError, ValueError):
             pass
         finally:
             f.close()
-            return machine_uuid
+            return system_uuid
 
 
 def main():
@@ -50,18 +50,18 @@ def main():
         argument_spec = dict()
     )
 
-    machine_uuid = get_machine_uuid(INSIGHTS_MACHINE_ID_FILE)
+    system_uuid = get_system_uuid(INSIGHTS_SYSTEM_ID_FILE)
 
-    if machine_uuid is not None:
+    if system_uuid is not None:
         results = {
             'ansible_facts': {
                 'insights': {
-                    'machine_id': machine_uuid
+                    'system_id': system_uuid
                 }
             }
         }
     else:
-        results = dict(skipped=True, msg="Insights machine id not found")
+        results = dict(skipped=True, msg="Insights system id not found")
     module.exit_json(**results)
 
 

@@ -350,7 +350,7 @@ class Host(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
-        unique_together = (("name", "inventory"), ("insights_machine_id", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
+        unique_together = (("name", "inventory"), ("insights_system_id", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
 
     inventory = models.ForeignKey(
@@ -411,7 +411,7 @@ class Host(CommonModelNameNotUnique):
         default={},
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
     )
-    insights_machine_id = models.TextField(
+    insights_system_id = models.TextField(
         blank=True,
         default=None,
         null=True,
