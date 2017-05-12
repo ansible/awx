@@ -11,7 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 # AWX
 from awx.api.generics import (
     ParentMixin,
-    SubListCreateAttachDetachAPIView,
+    SubListCreateAttachDetachAPIView, SubListAttachDetachAPIView,
     DeleteLastUnattachLabelMixin,
     ResourceAccessList
 )
@@ -138,6 +138,20 @@ class TestSubListCreateAttachDetachAPIView:
 
         view.unattach_validate.assert_called_with(mock_request)
         view.unattach_by_id.assert_not_called()
+
+
+def test_attach_detatch_only(mocker):
+    mock_request = mocker.MagicMock()
+    mock_request.data = {'name': 'name for my new model'}
+    view = SubListAttachDetachAPIView()
+    view.model = mocker.MagicMock()
+    view.model._meta = mocker.MagicMock()
+    view.model._meta.verbose_name = "Foo Bar"
+
+    resp = view.post(mock_request)
+
+    assert 'Foo Bar' in resp.data['msg']
+    assert 'field is missing' in resp.data['msg']
 
 
 class TestDeleteLastUnattachLabelMixin:

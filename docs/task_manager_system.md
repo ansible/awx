@@ -14,19 +14,10 @@ The `schedule()` function is ran (a) periodically by a celery task and (b) on jo
  
 ### Scheduler Algorithm
  * Get all non-completed jobs, `all_tasks`
- * Generate the hash tables from `all_tasks`:
-   * `<job_template_id, True/False>` indicates a job is running
-   * `<project_id, True/False>` indicates a project update is running
-   * `<inventory_id, True/False>` indicates a job template or inventory update is running
-   * `<inventory_source_id, True/False>` indiciates an inventory update is running
-   * `<workflow_job_template_id, True/False>` indiciates a workflow job is running
-   * `<project_id, latest_project_update_partial>` used to determine cache timeout
-   * `<inventory_id, [ inventory_source_partial, ... ]>`  used to determine cache timeout and dependencies to spawn
-   * `<inventory_source_id, latest_inventory_update_partial>` used to determine cache timeout
  * Detect finished workflow jobs
  * Spawn next workflow jobs if needed
- * For each pending jobs; start with oldest created job and stop when no capacity == 0
-   * If job is not blocked, determined using generated hash tables, and there is capacity, then mark the as `waiting` and submit the job to celery.
+ * For each pending jobs; start with oldest created job
+   * If job is not blocked, and there is capacity in the instance group queue, then mark the as `waiting` and submit the job to celery.
  
 ### Job Lifecycle
 | Job Status |                                                       State                                                      |
@@ -41,11 +32,8 @@ The `schedule()` function is ran (a) periodically by a celery task and (b) on jo
 ## Code Composition
 The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any tower node. To support this we need to remove any reliance on state between task manager schedule logic runs. We had a secondary goal in mind of designing the task manager to have limited/no access to the database for the future federation feature. This secondary requirement combined with performance needs led us to create partial models that wrap dict database model data.
 
-### Partials
-Partials wrap a subset of Django model dict data, provide a simple static query method that is purpose built to support the populating of the task manager hash tables,  have a link back to the model which they are wrapping so that the original Django ORM model for which the partial is wrapping can be easily gotten, and can be made serializable via `<type, self.data>` since `self.data` is a `dict` of the database record. 
-
 ### Blocking Logic
-The blocking logic has been moved from the respective ORM model to the code that manages the dependency hash tables. The blocking logic could easily be moved to the partials or even the ORM models. However, the per-model blocking logic code would be operating on the dependency hash tables; not on ORM models as in the previous design. The blocking logic is kept close to the data-structures required to operate on. 
+The blocking logic is handled by a mixture of ORM instance references and task manager local tracking data in the scheduler instance
 
 ## Acceptance Tests
 
@@ -53,8 +41,8 @@ The new task manager should, basically, work like the old one. Old task manager 
 
 ### Task Manager Rules
 * Groups of blocked tasks run in chronological order
-* Tasks that are not blocked run whenever there is capacity available***
- * ***1 job is always allowed to run, even if there isn't enough capacity.
+* Tasks that are not blocked run whenever there is capacity available in the instance group they are set to run in***
+ * ***1 job is always allowed to run per instance group, even if there isn't enough capacity.
 * Only 1 Project Updates for a Project may be running
 * Only 1 Inventory Update for an Inventory Source may be running
 * For a related Project, only a Job xor Project Update may be running

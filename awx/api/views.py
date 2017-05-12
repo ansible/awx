@@ -159,6 +159,8 @@ class ApiVersionRootView(APIView):
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
+        data['instances'] = reverse('api:instance_list', request=request)
+        data['instance_groups'] = reverse('api:instance_group_list', request=request)
         data['config'] = reverse('api:api_v1_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)
@@ -238,6 +240,11 @@ class ApiV1PingView(APIView):
             response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
                                               capacity=instance.capacity, version=instance.version))
             response['instances'].sort()
+        response['instance_groups'] = []
+        for instance_group in InstanceGroup.objects.all():
+            response['instance_groups'].append(dict(name=instance_group.name,
+                                                    capacity=instance_group.capacity,
+                                                    instances=[x.hostname for x in instance_group.instances.all()]))
         return Response(response)
 
 
@@ -489,6 +496,83 @@ class DashboardJobsGraphView(APIView):
             dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()),
                                                      element[1]])
         return Response(dashboard_data)
+
+
+class InstanceList(ListAPIView):
+
+    view_name = _("Instances")
+    model = Instance
+    serializer_class = InstanceSerializer
+    new_in_320 = True
+
+
+class InstanceDetail(RetrieveAPIView):
+
+    view_name = _("Instance Detail")
+    model = Instance
+    serializer_class = InstanceSerializer
+    new_in_320 = True
+
+
+class InstanceUnifiedJobsList(SubListAPIView):
+
+    view_name = _("Instance Running Jobs")
+    model = UnifiedJob
+    serializer_class = UnifiedJobSerializer
+    parent_model = Instance
+    new_in_320 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        qs = get_user_queryset(self.request.user, UnifiedJob)
+        qs = qs.filter(execution_node=po.hostname)
+        return qs
+
+
+class InstanceInstanceGroupsList(SubListAPIView):
+
+    view_name = _("Instance's Instance Groups")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Instance
+    new_in_320 = True
+    relationship = 'rampart_groups'
+
+
+class InstanceGroupList(ListAPIView):
+
+    view_name = _("Instance Groups")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    new_in_320 = True
+
+
+class InstanceGroupDetail(RetrieveAPIView):
+
+    view_name = _("Instance Group Detail")
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    new_in_320 = True
+
+    
+class InstanceGroupUnifiedJobsList(SubListAPIView):
+
+    view_name = _("Instance Group Running Jobs")
+    model = UnifiedJob
+    serializer_class = UnifiedJobSerializer
+    parent_model = InstanceGroup
+    relationship = "unifiedjob_set"
+    new_in_320 = True
+
+
+class InstanceGroupInstanceList(SubListAPIView):
+
+    view_name = _("Instance Group's Instances")
+    model = Instance
+    serializer_class = InstanceSerializer
+    parent_model = InstanceGroup
+    new_in_320 = True
+    relationship = "instances"
 
 
 class ScheduleList(ListAPIView):
@@ -897,6 +981,15 @@ class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIV
     new_in_300 = True
 
 
+class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Organization
+    relationship = 'instance_groups'
+    new_in_320 = True
+
+
 class OrganizationAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
@@ -942,7 +1035,7 @@ class TeamUsersList(BaseUsersList):
     relationship = 'member_role.members'
 
 
-class TeamRolesList(SubListCreateAttachDetachAPIView):
+class TeamRolesList(SubListAttachDetachAPIView):
 
     model = Role
     serializer_class = RoleSerializerWithParentAccess
@@ -958,11 +1051,9 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         return Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
 
     def post(self, request, *args, **kwargs):
-        # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg=_("Role 'id' field is missing."))
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            return super(TeamRolesList, self).post(request)
 
         role = get_object_or_400(Role, pk=sub_id)
         org_content_type = ContentType.objects.get_for_model(Organization)
@@ -1325,7 +1416,7 @@ class UserTeamsList(ListAPIView):
             Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
-class UserRolesList(SubListCreateAttachDetachAPIView):
+class UserRolesList(SubListAttachDetachAPIView):
 
     model = Role
     serializer_class = RoleSerializerWithParentAccess
@@ -1345,11 +1436,9 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
                    .exclude(content_type=content_type, object_id=u.id)
 
     def post(self, request, *args, **kwargs):
-        # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg=_("Role 'id' field is missing."))
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            return super(UserRolesList, self).post(request)
 
         if sub_id == self.request.user.admin_role.pk:
             raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
@@ -1763,6 +1852,15 @@ class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+
+class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = Inventory
+    relationship = 'instance_groups'
+    new_in_320 = True
 
 
 class InventoryAccessList(ResourceAccessList):
@@ -2945,6 +3043,15 @@ class JobTemplateJobsList(SubListCreateAPIView):
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
+
+
+class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = InstanceGroup
+    serializer_class = InstanceGroupSerializer
+    parent_model = JobTemplate
+    relationship = 'instance_groups'
+    new_in_320 = True
 
 
 class JobTemplateAccessList(ResourceAccessList):
@@ -4281,7 +4388,7 @@ class RoleDetail(RetrieveAPIView):
     new_in_300 = True
 
 
-class RoleUsersList(SubListCreateAttachDetachAPIView):
+class RoleUsersList(SubListAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -4298,8 +4405,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         # Forbid implicit user creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg=_("User 'id' field is missing."))
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            return super(RoleUsersList, self).post(request)
 
         user = get_object_or_400(User, pk=sub_id)
         role = self.get_parent_object()
@@ -4323,7 +4429,7 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
-class RoleTeamsList(SubListAPIView):
+class RoleTeamsList(SubListAttachDetachAPIView):
 
     model = Team
     serializer_class = TeamSerializer
@@ -4338,11 +4444,9 @@ class RoleTeamsList(SubListAPIView):
         return Team.objects.filter(member_role__children=role)
 
     def post(self, request, pk, *args, **kwargs):
-        # Forbid implicit team creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg=_("Team 'id' field is missing."))
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            return super(RoleTeamsList, self).post(request)
 
         team = get_object_or_400(Team, pk=sub_id)
         role = Role.objects.get(pk=self.kwargs['pk'])

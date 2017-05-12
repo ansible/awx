@@ -516,3 +516,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Project Update"
+
+    @property
+    def preferred_instance_groups(self):
+        if self.project is not None and self.project.organization is not None:
+            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]
+        return template_groups + organization_groups

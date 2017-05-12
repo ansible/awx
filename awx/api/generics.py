@@ -41,7 +41,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'SubDetailAPIView',
            'ResourceAccessList',
            'ParentMixin',
-           'DeleteLastUnattachLabelMixin',]
+           'DeleteLastUnattachLabelMixin',
+           'SubListAttachDetachAPIView',]
 
 logger = logging.getLogger('awx.api.generics')
 analytics_logger = logging.getLogger('awx.analytics.performance')
@@ -551,6 +552,21 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return self.unattach(request, *args, **kwargs)
         else:
             return self.attach(request, *args, **kwargs)
+
+
+
+class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
+    '''
+    Derived version of SubListCreateAttachDetachAPIView that prohibits creation
+    '''
+    def post(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            return Response(
+                dict(msg=_("{} 'id' field is missing.".format(
+                    self.model._meta.verbose_name.title()))),
+                status=status.HTTP_400_BAD_REQUEST)
+        return super(SubListAttachDetachAPIView, self).post(request, *args, **kwargs)
 
 
 class DeleteLastUnattachLabelMixin(object):

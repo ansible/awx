@@ -19,6 +19,8 @@ from .objects import (
 )
 
 from .fixtures import (
+    mk_instance,
+    mk_instance_group,
     mk_organization,
     mk_team,
     mk_user,
@@ -129,6 +131,14 @@ def generate_teams(organization, persisted, **kwargs):
     return teams
 
 
+def create_instance(name, instance_groups=None):
+    return mk_instance(hostname=name)
+
+
+def create_instance_group(name, instances=None):
+    return mk_instance_group(name=name, instance=instances)
+
+
 def create_survey_spec(variables=None, default_type='integer', required=True):
     '''
     Returns a valid survey spec for a job template, based on the input
@@ -234,6 +244,8 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
 
     if 'survey' in kwargs:
         spec = create_survey_spec(kwargs['survey'])
+    else:
+        spec = None
 
     jt = mk_job_template(name, project=proj,
                          inventory=inv, credential=cred,
@@ -248,8 +260,9 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
             else:
                 # Fill in default survey answers
                 job_extra_vars = {}
-                for question in spec['spec']:
-                    job_extra_vars[question['variable']] = question['default']
+                if spec is not None:
+                    for question in spec['spec']:
+                        job_extra_vars[question['variable']] = question['default']
                 jobs[i] = mk_job(job_template=jt, project=proj, inventory=inv, credential=cred,
                                  extra_vars=job_extra_vars,
                                  job_type=job_type, persisted=persisted)

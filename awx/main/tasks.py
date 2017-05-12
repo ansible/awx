@@ -102,7 +102,7 @@ def _clear_cache_keys(set_of_keys):
     cache.delete_many(set_of_keys)
 
 
-@task(queue='broadcast_all')
+@task(queue='tower_broadcast_all')
 def process_cache_changes(cache_keys):
     logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
         process_cache_changes.request))
@@ -114,7 +114,7 @@ def process_cache_changes(cache_keys):
             break
 
 
-@task(queue='default')
+@task(queue='tower')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -138,7 +138,7 @@ def send_notifications(notification_list, job_id=None):
             notification.save()
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def run_administrative_checks(self):
     logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
@@ -160,7 +160,7 @@ def run_administrative_checks(self):
                   fail_silently=True)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def cleanup_authtokens(self):
     logger.warn("Cleaning up expired authtokens.")
     AuthToken.objects.filter(expires__lt=now()).delete()
@@ -201,7 +201,7 @@ def cluster_node_heartbeat(self):
 
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def tower_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
@@ -251,7 +251,7 @@ def _send_notification_templates(instance, status_str):
                                      job_id=instance.id)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def handle_work_success(self, result, task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -267,7 +267,7 @@ def handle_work_success(self, result, task_actual):
     run_job_complete.delay(instance.id)
 
 
-@task(bind=True, queue='default')
+@task(bind=True, queue='tower')
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
@@ -307,7 +307,7 @@ def handle_work_error(self, task_id, subtasks=None):
         pass
 
 
-@task(queue='default')
+@task(queue='tower')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -1140,6 +1140,7 @@ class RunJob(BaseTask):
                 _eager_fields=dict(
                     job_type='run',
                     status='running',
+                    instance_group = job.instance_group,
                     celery_task_id=job_request_id))
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update

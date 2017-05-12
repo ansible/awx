@@ -4,6 +4,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import ugettext_lazy as _
 
 from solo.models import SingletonModel
 
@@ -13,13 +14,11 @@ from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
 
-__all__ = ('Instance', 'JobOrigin', 'TowerScheduleState',)
+__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
-    """A model representing an Ansible Tower instance, primary or secondary,
-    running against this database.
-    """
+    """A model representing an Ansible Tower instance running against this database."""
     objects = InstanceManager()
 
     uuid = models.CharField(max_length=40)
@@ -36,9 +35,39 @@ class Instance(models.Model):
         app_label = 'main'
 
     @property
+    def consumed_capacity(self):
+        return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname,
+                                                                    status__in=('running', 'waiting')))
+
+    @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
+
+
+class InstanceGroup(models.Model):
+    """A model representing a Queue/Group of Tower Instances."""
+    name = models.CharField(max_length=250, unique=True)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    instances = models.ManyToManyField(
+        'Instance',
+        related_name='rampart_groups',
+        editable=False,
+        help_text=_('Instances that are members of this InstanceGroup'),
+    )
+
+    @property
+    def capacity(self):
+        return sum([x[0] for x in self.instances.values_list('capacity')])
+
+    @property
+    def consumed_capacity(self):
+        return sum(x.task_impact for x in UnifiedJob.objects.filter(instance_group=self,
+                                                                    status__in=('running', 'waiting')))
+
+    class Meta:
+        app_label = 'main'
 
 
 class TowerScheduleState(SingletonModel):

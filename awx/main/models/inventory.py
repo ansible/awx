@@ -121,7 +121,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
-
+    instance_groups = models.ManyToManyField(
+        'InstanceGroup',
+        blank=True,
+    )
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',
     )
@@ -1366,6 +1369,17 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Inventory Update"
+
+    @property
+    def preferred_instance_groups(self):
+        if self.inventory_source.inventory is not None and self.inventory_source.inventory.organization is not None:
+            organization_groups = [x for x in self.inventory_source.inventory.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        if self.inventory_source.inventory is not None:
+            inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
+        template_groups = [x for x in super(InventoryUpdate, self).preferred_instance_groups]
+        return template_groups + inventory_groups + organization_groups
 
     def _build_job_explanation(self):
         if not self.job_explanation:

@@ -488,7 +488,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     )
 
 
-
     @classmethod
     def _get_parent_field_name(cls):
         return 'job_template'
@@ -653,6 +652,25 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if artifacts.get('_ansible_no_log', False):
             return "$hidden due to Ansible no_log flag$"
         return artifacts
+
+    @property
+    def preferred_instance_groups(self):
+        if self.project is not None and self.project.organization is not None:
+            organization_groups = [x for x in self.project.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        if self.inventory is not None:
+            inventory_groups = [x for x in self.inventory.instance_groups.all()]
+        else:
+            inventory_groups = []
+        if self.job_template is not None:
+            template_groups = [x for x in self.job_template.instance_groups.all()]
+        else:
+            template_groups = []
+        selected_groups = template_groups + inventory_groups + organization_groups
+        if not selected_groups:
+            return super(Job, self).preferred_instance_groups
+        return selected_groups
 
     # Job Credential required
     @property

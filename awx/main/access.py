@@ -387,6 +387,43 @@ class BaseAccess(object):
         return False
 
 
+class InstanceAccess(BaseAccess):
+
+    model = Instance
+
+    def get_queryset(self):
+        return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup))
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
+class InstanceGroupAccess(BaseAccess):
+
+    model = InstanceGroup
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return InstanceGroup.objects.all()
+        else:
+            return InstanceGroup.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role'))
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
 class UserAccess(BaseAccess):
     '''
     I can see user records when:
@@ -511,6 +548,18 @@ class OrganizationAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+    def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.admin_role:
+                return True
+            return False
+        return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
 
 class InventoryAccess(BaseAccess):
     '''
@@ -580,6 +629,18 @@ class InventoryAccess(BaseAccess):
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
+
+    def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role:
+                return True
+            return False
+        return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
 
 class HostAccess(BaseAccess):
@@ -1238,8 +1299,16 @@ class JobTemplateAccess(BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if isinstance(sub_obj, NotificationTemplate):
             return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
+        if relationship == "instance_groups":
+            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role
         return super(JobTemplateAccess, self).can_attach(
             obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
 
 
 class JobAccess(BaseAccess):
@@ -2303,3 +2372,5 @@ register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
 register_access(WorkflowJobNode, WorkflowJobNodeAccess)
 register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
 register_access(WorkflowJob, WorkflowJobAccess)
+register_access(Instance, InstanceAccess)
+register_access(InstanceGroup, InstanceGroupAccess)
