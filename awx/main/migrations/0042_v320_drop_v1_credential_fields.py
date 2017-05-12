@@ -106,4 +106,20 @@ class Migration(migrations.Migration):
             name='inputs',
             field=awx.main.fields.CredentialInputField(default={}, help_text='Data structure used to specify input values (e.g., {"username": "jane-doe", "password": "secret"}).  Valid fields and their requirements vary depending on the fields defined on the chosen CredentialType.', blank=True),
         ),
+        migrations.RemoveField(
+            model_name='job',
+            name='cloud_credential',
+        ),
+        migrations.RemoveField(
+            model_name='job',
+            name='network_credential',
+        ),
+        migrations.RemoveField(
+            model_name='jobtemplate',
+            name='cloud_credential',
+        ),
+        migrations.RemoveField(
+            model_name='jobtemplate',
+            name='network_credential',
+        ),
     ]
