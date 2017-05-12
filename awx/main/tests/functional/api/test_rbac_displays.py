@@ -307,24 +307,27 @@ def test_prefetch_group_capabilities(group, rando):
 
 
 @pytest.mark.django_db
-def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_credential, rando):
+def test_prefetch_jt_copy_capability(job_template, project, inventory,
+                                     machine_credential, vault_credential, rando):
     job_template.project = project
     job_template.inventory = inventory
     job_template.credential = machine_credential
+    job_template.vault_credential = vault_credential
     job_template.save()
 
     qs = JobTemplate.objects.all()
     cache_list_capabilities(qs, [{'copy': [
-        'project.use', 'inventory.use', 'credential.use',
+        'project.use', 'inventory.use', 'credential.use', 'vault_credential.use'
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': False}
 
     project.use_role.members.add(rando)
     inventory.use_role.members.add(rando)
     machine_credential.use_role.members.add(rando)
+    vault_credential.use_role.members.add(rando)
 
     cache_list_capabilities(qs, [{'copy': [
-        'project.use', 'inventory.use', 'credential.use',
+        'project.use', 'inventory.use', 'credential.use', 'vault_credential.use'
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': True}
 

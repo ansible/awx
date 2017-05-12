@@ -123,6 +123,7 @@ def job_template_with_ids(job_template_factory):
     credential = Credential(id=1, pk=1, name='testcred', kind='ssh')
     net_cred = Credential(id=2, pk=2, name='testnetcred', kind='net')
     cloud_cred = Credential(id=3, pk=3, name='testcloudcred', kind='aws')
+    vault_cred = Credential(id=4, pk=4, name='testnetcred', kind='vault')
     inv = Inventory(id=11, pk=11, name='testinv')
     proj = Project(id=14, pk=14, name='testproj')
 
@@ -130,6 +131,7 @@ def job_template_with_ids(job_template_factory):
         'testJT', project=proj, inventory=inv, credential=credential,
         cloud_credential=cloud_cred, network_credential=net_cred,
         persisted=False)
+    jt_objects.job_template.vault_credential = vault_cred
     return jt_objects.job_template
 
 
@@ -159,7 +161,6 @@ def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     assert access.changes_are_non_sensitive(job_template_with_ids, data)
 
 
-@pytest.mark.xfail  # TODO: update this to respect JT.extra_credentials
 def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     """Assure that can_add is called with all ForeignKeys."""
 
@@ -178,8 +179,7 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
         'inventory': data['inventory'],
         'project': job_template_with_ids.project.id,
         'credential': job_template_with_ids.credential.id,
-        'cloud_credential': job_template_with_ids.cloud_credential.id,
-        'network_credential': job_template_with_ids.network_credential.id
+        'vault_credential': job_template_with_ids.vault_credential.id
     })
 
 

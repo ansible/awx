@@ -210,6 +210,13 @@ def credentialtype_net():
 
 
 @pytest.fixture
+def credentialtype_vault():
+    vault_type = CredentialType.defaults['vault']()
+    vault_type.save()
+    return vault_type
+
+
+@pytest.fixture
 def credential(credentialtype_aws):
     return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'})
@@ -219,6 +226,12 @@ def credential(credentialtype_aws):
 def net_credential(credentialtype_net):
     return Credential.objects.create(credential_type=credentialtype_net, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'})
+
+
+@pytest.fixture
+def vault_credential(credentialtype_vault):
+    return Credential.objects.create(credential_type=credentialtype_vault, name='test-cred',
+                                     inputs={'vault_password': 'secret'})
 
 
 @pytest.fixture
