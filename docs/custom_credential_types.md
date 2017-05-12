@@ -126,7 +126,11 @@ ordered fields for that type:
 
             "help_text": "User-facing short text describing the field.",
 
-            "type": ("string" | "number" | "ssh_private_key")   # required,
+            "type": ("string" | "number")                       # required,
+
+            "format": "ssh_private_key"                         # optional, can be used to enforce data
+                                                                # format validity for SSH private keys
+                                                                # data
 
             "secret": true,                                     # if true, the field will be treated
                                                                 # as sensitive and stored encrypted

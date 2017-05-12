@@ -275,8 +275,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def kind(self):
-        # TODO: remove the need for this helper property by removing its usage
-        # throughout the codebase
+        # TODO 3.3: remove the need for this helper property by removing its
+        # usage throughout the codebase
         type_ = self.credential_type
         if type_.kind != 'cloud':
             return type_.kind
@@ -300,7 +300,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     #
     @property
     def needs_ssh_password(self):
-        return self.kind == 'ssh' and self.password == 'ASK'
+        return self.credential_type.kind == 'ssh' and self.password == 'ASK'
 
     @property
     def has_encrypted_ssh_key_data(self):
@@ -319,17 +319,17 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def needs_ssh_key_unlock(self):
-        if self.kind == 'ssh' and self.ssh_key_unlock in ('ASK', ''):
+        if self.credential_type.kind == 'ssh' and self.ssh_key_unlock in ('ASK', ''):
             return self.has_encrypted_ssh_key_data
         return False
 
     @property
     def needs_become_password(self):
-        return self.kind == 'ssh' and self.become_password == 'ASK'
+        return self.credential_type.kind == 'ssh' and self.become_password == 'ASK'
 
     @property
     def needs_vault_password(self):
-        return self.kind == 'vault' and self.vault_password == 'ASK'
+        return self.credential_type.kind == 'vault' and self.vault_password == 'ASK'
 
     @property
     def passwords_needed(self):
@@ -338,41 +338,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
         return needed
-
-    #
-    # TODO: all of these required fields should be captured in schema
-    # definitions and these clean_ methods should be removed
-    #
-    def clean_ssh_key_data(self):
-        if self.pk:
-            ssh_key_data = decrypt_field(self, 'ssh_key_data')
-        else:
-            ssh_key_data = self.ssh_key_data
-        if ssh_key_data:
-            # Sanity check: GCE, in particular, provides JSON-encoded private
-            # keys, which developers will be tempted to copy and paste rather
-            # than JSON decode.
-            #
-            # These end in a unicode-encoded final character that gets double
-            # escaped due to being in a Python 2 bytestring, and that causes
-            # Python's key parsing to barf. Detect this issue and correct it.
-            if r'\u003d' in ssh_key_data:
-                ssh_key_data = ssh_key_data.replace(r'\u003d', '=')
-                self.ssh_key_data = ssh_key_data
-
-            # Validate the private key to ensure that it looks like something
-            # that we can accept.
-            validate_ssh_private_key(ssh_key_data)
-        return self.ssh_key_data # No need to return decrypted version here.
-
-    def clean_ssh_key_unlock(self):
-        if self.has_encrypted_ssh_key_data and not self.ssh_key_unlock:
-            raise ValidationError(_('SSH key unlock must be set when SSH key '
-                                    'is encrypted.'))
-        if not self.has_encrypted_ssh_key_data and self.ssh_key_unlock:
-            raise ValidationError(_('SSH key unlock should not be set when '
-                                    'SSH key is not encrypted.'))
-        return self.ssh_key_unlock
 
     def _password_field_allows_ask(self, field):
         return field in self.credential_type.askable_fields
@@ -621,6 +586,7 @@ def ssh(cls):
                 'id': 'ssh_key_data',
                 'label': 'SSH Private Key',
                 'type': 'string',
+                'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
