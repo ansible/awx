@@ -60,6 +60,21 @@ class Migration(migrations.Migration):
             name='vault_credential',
             field=models.ForeignKey(related_name='jobtemplates_as_vault_credential+', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
         ),
+        migrations.AddField(
+            model_name='job',
+            name='extra_credentials',
+            field=models.ManyToManyField(related_name='_job_extra_credentials_+', to='main.Credential'),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='extra_credentials',
+            field=models.ManyToManyField(related_name='_jobtemplate_extra_credentials_+', to='main.Credential'),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='ask_extra_credentials_on_launch',
+            field=models.BooleanField(default=False),
+        ),
         migrations.AlterUniqueTogether(
             name='credential',
             unique_together=set([('organization', 'name', 'credential_type')]),

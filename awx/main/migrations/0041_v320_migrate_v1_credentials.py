@@ -13,4 +13,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(credentialtypes.migrate_to_v2_credentials),
+        migrations.RunPython(credentialtypes.migrate_job_credentials),
     ]

@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0043_v320_job_template_multi_credential'),
+        ('main', '0042_v320_drop_v1_credential_fields'),
     ]
 
     operations = [
