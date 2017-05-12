@@ -8,10 +8,12 @@ from awx.main.access import (
 )
 from awx.main.models import (
     Job,
+    JobTemplate,
     AdHocCommand,
     InventoryUpdate,
     InventorySource,
-    ProjectUpdate
+    ProjectUpdate,
+    User
 )
 
 
@@ -122,6 +124,45 @@ def test_project_org_admin_delete_allowed(normal_job, org_admin):
     normal_job.inventory = None # do this so we test job->project->org->admin connection
     access = JobAccess(org_admin)
     assert access.can_delete(normal_job)
+
+
+@pytest.mark.django_db
+class TestJobRelaunchAccess:
+
+    def test_job_relaunch_normal_resource_access(self, user, inventory, machine_credential):
+        job_with_links = Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+        inventory_user = user('user1', False)
+        credential_user = user('user2', False)
+        both_user = user('user3', False)
+
+        # Confirm that a user with inventory & credential access can launch
+        job_with_links.credential.use_role.members.add(both_user)
+        job_with_links.inventory.use_role.members.add(both_user)
+        assert both_user.can_access(Job, 'start', job_with_links, validate_license=False)
+
+        # Confirm that a user with credential access alone cannot launch
+        job_with_links.credential.use_role.members.add(credential_user)
+        assert not credential_user.can_access(Job, 'start', job_with_links, validate_license=False)
+
+        # Confirm that a user with inventory access alone cannot launch
+        job_with_links.inventory.use_role.members.add(inventory_user)
+        assert not inventory_user.can_access(Job, 'start', job_with_links, validate_license=False)
+
+    def test_job_relaunch_extra_credential_access(
+            self, post, inventory, project, credential, net_credential):
+        jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
+        jt.extra_credentials.add(credential)
+        job = jt.create_unified_job()
+
+        # Job is unchanged from JT, user has ability to launch
+        jt_user = User.objects.create(username='jobtemplateuser')
+        jt.execute_role.members.add(jt_user)
+        assert jt_user in job.job_template.execute_role
+        assert jt_user.can_access(Job, 'start', job, validate_license=False)
+
+        # Job has prompted extra_credential, launch denied w/ message
+        job.extra_credentials.add(net_credential)
+        assert not jt_user.can_access(Job, 'start', job, validate_license=False)
 
 
 @pytest.mark.django_db

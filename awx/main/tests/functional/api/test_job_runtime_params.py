@@ -272,43 +272,6 @@ def test_job_block_scan_job_inv_change(mocker, bad_scan_JT, runtime_data, post, 
 
 
 @pytest.mark.django_db
-@pytest.mark.job_runtime_vars
-def test_job_relaunch_copy_vars(job_with_links, machine_credential, inventory,
-                                deploy_jobtemplate, post, mocker):
-    job_with_links.job_template = deploy_jobtemplate
-    job_with_links.limit = "my_server"
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
-                      return_value=['inventory', 'credential', 'limit']):
-        second_job = job_with_links.copy_unified_job()
-
-    # Check that job data matches the original variables
-    assert second_job.credential == job_with_links.credential
-    assert second_job.inventory == job_with_links.inventory
-    assert second_job.limit == 'my_server'
-
-
-@pytest.mark.django_db
-@pytest.mark.job_runtime_vars
-def test_job_relaunch_resource_access(job_with_links, user):
-    inventory_user = user('user1', False)
-    credential_user = user('user2', False)
-    both_user = user('user3', False)
-
-    # Confirm that a user with inventory & credential access can launch
-    job_with_links.credential.use_role.members.add(both_user)
-    job_with_links.inventory.use_role.members.add(both_user)
-    assert both_user.can_access(Job, 'start', job_with_links)
-
-    # Confirm that a user with credential access alone cannot launch
-    job_with_links.credential.use_role.members.add(credential_user)
-    assert not credential_user.can_access(Job, 'start', job_with_links)
-
-    # Confirm that a user with inventory access alone cannot launch
-    job_with_links.inventory.use_role.members.add(inventory_user)
-    assert not inventory_user.can_access(Job, 'start', job_with_links)
-
-
-@pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
     deploy_jobtemplate.ask_credential_on_launch = True

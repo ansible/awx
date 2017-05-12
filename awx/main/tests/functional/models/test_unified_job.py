@@ -4,7 +4,7 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, JobTemplate, WorkflowJobTemplate, Project
+from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project
 
 
 @pytest.mark.django_db
@@ -16,11 +16,11 @@ def test_subclass_types(rando):
     ])
 
 
+@pytest.mark.django_db
 class TestCreateUnifiedJob:
     '''
     Ensure that copying a job template to a job handles many to many field copy
     '''
-    @pytest.mark.django_db
     def test_many_to_many(self, mocker, job_template_labels):
         jt = job_template_labels
         _get_unified_job_field_names = mocker.patch('awx.main.models.jobs.JobTemplate._get_unified_job_field_names', return_value=['labels'])
@@ -34,7 +34,6 @@ class TestCreateUnifiedJob:
     '''
     Ensure that data is looked for in parameter list before looking at the object
     '''
-    @pytest.mark.django_db
     def test_many_to_many_kwargs(self, mocker, job_template_labels):
         jt = job_template_labels
         mocked = mocker.MagicMock()
@@ -47,3 +46,22 @@ class TestCreateUnifiedJob:
 
         _get_unified_job_field_names.assert_called_with()
         mocked.all.assert_called_with()
+
+    '''
+    Ensure that extra_credentials m2m field is copied to new relaunched job
+    '''
+    def test_job_relaunch_copy_vars(self, machine_credential, inventory,
+                                    deploy_jobtemplate, post, mocker, net_credential):
+        job_with_links = Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+        job_with_links.job_template = deploy_jobtemplate
+        job_with_links.limit = "my_server"
+        job_with_links.extra_credentials.add(net_credential)
+        with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
+                          return_value=['inventory', 'credential', 'limit']):
+            second_job = job_with_links.copy_unified_job()
+
+        # Check that job data matches the original variables
+        assert second_job.credential == job_with_links.credential
+        assert second_job.inventory == job_with_links.inventory
+        assert second_job.limit == 'my_server'
+        assert net_credential in second_job.extra_credentials.all()
