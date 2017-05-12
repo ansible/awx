@@ -14,3 +14,8 @@
   [[#5741](https://github.com/ansible/ansible-tower/issues/5741)]
 * support sourcing inventory from a file inside of a project's source
   tree [[#2477](https://github.com/ansible/ansible-tower/issues/2477)]
+* Added support for configuring groups of instance nodes to run tower
+  jobs [[#5898](https://github.com/ansible/ansible-tower/issues/5898)]
+* Fixed an issue installing Tower on multiple nodes where cluster
+  internal node references are used
+  [[#6231](https://github.com/ansible/ansible-tower/pull/6231)]
