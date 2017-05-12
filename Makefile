@@ -938,7 +938,7 @@ docker-compose-cluster: docker-auth
 	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
-	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+	cd tools && DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
 
 docker-compose-build:
 	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
