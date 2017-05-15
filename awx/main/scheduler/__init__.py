@@ -239,7 +239,7 @@ class TaskManager():
         return project_task
 
     def create_inventory_update(self, task, inventory_source_task):
-        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(launch_type='inventory_taskendency')
+        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(launch_type='dependency')
 
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'
