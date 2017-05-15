@@ -3382,10 +3382,13 @@ class ScheduleSerializer(BaseSerializer):
 class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
+    percent_capacity_remaining = serializers.SerializerMethodField()
+    jobs_running = serializers.SerializerMethodField()
 
     class Meta:
         model = Instance
-        fields = ("related", "id", "uuid", "hostname", "created", "modified", "version", "capacity", "consumed_capacity")
+        fields = ("related", "id", "uuid", "hostname", "created", "modified",
+                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running")
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
@@ -3396,18 +3399,41 @@ class InstanceSerializer(BaseSerializer):
     def get_consumed_capacity(self, obj):
         return obj.consumed_capacity
 
+    def get_percent_capacity_remaining(self, obj):
+        return float("{0:.2f}".format((float(obj.consumed_capacity) / float(obj.capacity)) * 100.0))
+
+    def get_jobs_running(self, obj):
+        return UnifiedJob.objects.filter(execution_node=obj.hostname, status__in=('running', 'waiting',)).count()
+
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    percent_capacity_remaining = serializers.SerializerMethodField()
+    jobs_running = serializers.SerializerMethodField()
+    instances = serializers.SerializerMethodField()
+
     class Meta:
         model = InstanceGroup
-        fields = ("related", "id", "name", "created", "modified", "capacity", "consumed_capacity")
+        fields = ("related", "id", "name", "created", "modified", "capacity", "consumed_capacity",
+                  "percent_capacity_remaining", "jobs_running", "instances")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
         return res
+
+    def get_consumed_capacity(self, obj):
+        return obj.consumed_capacity
+
+    def get_percent_capacity_remaining(self, obj):
+        return float("{0:.2f}".format((float(obj.consumed_capacity) / float(obj.capacity)) * 100.0))
+
+    def get_jobs_running(self, obj):
+        return UnifiedJob.objects.filter(instance_group=obj, status__in=('running', 'waiting',)).count()
+
+    def get_instances(self, obj):
+        return obj.instances.count()
 
         
 class ActivityStreamSerializer(BaseSerializer):
