@@ -1,44 +1,60 @@
-function link (scope, el, attrs, form) {
-    scope.config.state = scope.config.state || {};
-    let state = scope.config.state;
+function link (scope, el, attrs, controllers) {
+    let formController = controllers[0];
+    let inputController = controllers[1];
     let input = el.find('input')[0];
 
-    setDefaults();
+    inputController.init(formController, scope, input);
+}
 
-    scope.form = form.use('input', state, input);
+function AtInputTextController () {
+    let vm = this || {};
 
-    function setDefaults () {
+    let state;
+    let scope;
+    let input;
+    let form;
+
+    vm.init = (_form_, _scope_, _input_) => {
+        form = _form_;
+        scope = _scope_;
+        input = _input_;
+
+        scope.config.state = scope.config.state || {};
+        state = scope.config.state;
+
         if (scope.tab === '1') {
             input.focus();
         }
 
         state.isValid = state.isValid || false;
-        state.validate = state.validate ? validate.bind(null, state.validate) : validate;
-        state.check = state.check || check;
         state.message = state.message || '';
         state.required = state.required || false;
-    }
 
-    function validate (fn) {
+        scope.form = form.use('input', state, input);
+
+        vm.check();
+    };
+
+    vm.validate = () => {
         let isValid = true;
 
         if (state.required && !state.value) {
             isValid = false;    
-        } else if (fn && !fn(scope.config.input)) {
+        } else if (state.validate && !state.validate(scope.config.input)) {
             isValid = false;  
         }
 
         return isValid;
-    }
+    };
 
-    function check () {
-        let isValid = state.validate();
+    vm.check = () => {
+        let isValid = vm.validate();
 
         if (isValid !== state.isValid) {
             state.isValid = isValid;
             form.check();
         }
-    }
+    };
 }
 
 function atInputText (pathService) {
@@ -46,8 +62,10 @@ function atInputText (pathService) {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: '^^at-form',
+        require: ['^^atForm', 'atInputText'],
         templateUrl: pathService.getPartialPath('components/input/text'),
+        controller: AtInputTextController,
+        controllerAs: 'vm',
         link,
         scope: {
             config: '=',

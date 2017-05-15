@@ -4,6 +4,6 @@
         <input type="text" class="form-control at-Input" ng-model="config.state.value"
                ng-attr-autofocus="{{tab == 1 || undefined }}"
                tabindex="{{::tab}}" placeholder="{{::config.placeholder}}"
-               ng-change="config.state.check()" ng-disabled="form.disabled" />
+               ng-change="vm.check()" ng-disabled="form.disabled" />
     </div>
 </div>

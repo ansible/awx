@@ -6,7 +6,7 @@
 
                    placeholder="{{ config.placeholder | uppercase }}"
                    ng-model="config.state.value" ng-disabled="form.disabled"
-                   ng-change="config.state.check" />
+                   ng-change="vm.check()" />
 
             <select class="form-control at-InputSelect-select" ng-model="config.state.value"
                     tabindex="{{::tab}}" ng-attr-autofocus="{{ tab == 1 || undefined }}"

@@ -12,14 +12,14 @@ function categorizeByKind () {
     }));
 }
 
-function CredentialType (Base) {
-    let base = Base('credential_types');
+function CredentialType (BaseModel) {
+    Object.assign(this, BaseModel);
 
-    return Object.assign(base, {
-        categorizeByKind
-    });
+    this.path = this.normalizePath('credential_types');
+
+    this.categorizeByKind = categorizeByKind;
 }
 
-CredentialType.$inject = ['Base'];
+CredentialType.$inject = ['BaseModel'];
 
 export default CredentialType;

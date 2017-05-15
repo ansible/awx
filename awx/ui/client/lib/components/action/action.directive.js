@@ -1,45 +1,64 @@
-let $state;
+function link (scope, el, attrs, controllers) {
+    let formController = controllers[0];
+    let actionController = controllers[1];
 
-function link (scope, el, attrs, form) {
-    scope.config.state = scope.config.state || {};
-    let state = scope.config.state;
+    actionController.init(formController, scope);
+}
 
-    scope.form = form.use('action', state);
+function atActionController ($state) {
+    let vm = this || {};
 
-    switch(scope.config.type) {
-        case 'cancel':
-            setCancelDefaults(scope);
-            break;
-        case 'save':
-            setSaveDefaults(scope);
-            break;
-        default:
-            break;
-    }
+    let form;
+    let scope;
+    let el;
+    let state;
 
-    function setCancelDefaults (scope) {
+    vm.init = (_form_, _scope_) => {
+        form = _form_;
+        scope = _scope_;
+
+        scope.config.state = scope.config.state || {};
+        state = scope.config.state;
+
+        scope.form = form.use('action', state);
+
+        switch(scope.config.type) {
+            case 'cancel':
+                vm.setCancelDefaults();
+                break;
+            case 'save':
+                vm.setSaveDefaults();
+                break;
+            default:
+                // TODO: custom type (when needed)
+        }
+    };
+
+    vm.setCancelDefaults = () => {
         scope.text = 'CANCEL';
         scope.fill = 'Hollow';
         scope.color = 'white';
         scope.action = () => $state.go('^');
-    }
+    };
 
-    function setSaveDefaults (scope) {
+    vm.setSaveDefaults = () => {
         scope.text = 'SAVE';
         scope.fill = '';
         scope.color = 'green';
-    }
+    };
 }
 
-function atFormAction (_$state_, pathService) {
-    $state = _$state_;
+atActionController.$inject = ['$state'];
 
+function atAction (pathService) {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: '^^at-form',
+        require: ['^^atForm', 'atAction'],
         templateUrl: pathService.getPartialPath('components/action/action'),
+        controller: atActionController,
+        controllerAs: 'vm',
         link,
         scope: {
             config: '='
@@ -47,6 +66,6 @@ function atFormAction (_$state_, pathService) {
     };
 }
 
-atFormAction.$inject = ['$state', 'PathService'];
+atAction.$inject = ['PathService'];
 
-export default atFormAction;
+export default atAction;

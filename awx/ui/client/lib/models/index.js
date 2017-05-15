@@ -10,6 +10,6 @@ config.$inject = ['$resourceProvider'];
 angular
     .module('at.lib.models', [])
     .config(config)
-    .factory('Base', Base)
-    .factory('CredentialType', CredentialType);
+    .service('BaseModel', Base)
+    .service('CredentialType', CredentialType);
 

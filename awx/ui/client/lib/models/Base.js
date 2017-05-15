@@ -1,5 +1,15 @@
+let $resource;
+
+function options () {
+    return this.model.query().$promise
+        .then(response => {
+            this.response = response;
+            this.data = this.response.results;
+        });
+}
+
 function get () {
-    return this.model.get().$promise
+    return $resource(this.path).get().$promise
         .then(response => {
             this.response = response;
             this.data = this.response.results;
@@ -12,17 +22,12 @@ function normalizePath (resource) {
     return `${version}${resource}/`;
 }
 
-function Base ($resource) {
-    return (resource, params, actions) => {
-        let path = normalizePath(resource);
+function Base (_$resource_) {
+    $resource = _$resource_;
 
-        return {
-            data: null,
-            response: null,
-            model: $resource(path, params, actions),
-            get
-        };
-    };
+    this.options = options;
+    this.get = get;
+    this.normalizePath = normalizePath;
 }
 
 Base.$inject = ['$resource'];

@@ -1,77 +1,95 @@
-let eventService;
-let pathService;
-
-function link (scope, el, attrs, form) {
-    scope.config.state = scope.config.state || {};
-
+function link (scope, el, attrs, controllers) {
+    let formController = controllers[0];
+    let inputController = controllers[1];
     let input = el.find('input')[0];
     let select = el.find('select')[0];
-    let state = scope.config.state;
 
-    setDefaults();
+    inputController.init(formController, scope, input, select);
+}
 
-    scope.form = form.use('input', state);
+function AtInputSelectController (eventService) { 
+    let vm = this || {};
 
-    let listeners = eventService.addListeners(scope, [
-        [input, 'focus', () => select.focus],
-        [select, 'mousedown', () => scope.$apply(scope.open = !scope.open)],
-        [select, 'focus', () => input.classList.add('at-Input--focus')],
-        [select, 'change', () => {
-            scope.open = false;
-            check();
-        }],
-        [select, 'blur', () => {
-            input.classList.remove('at-Input--focus');
-            scope.open = scope.open && false;
-        }]
-    ]);
+    let scope;
+    let state;
+    let input;
+    let select;
+    let form;
 
-    scope.$on('$destroy', () => eventService.remove(listeners));
+    vm.init = (_form_, _scope_, _input_, _select_) => {
+        form = _form_;
+        scope = _scope_;
+        input = _input_;
+        select = _select_;
 
-    function setDefaults () {
+        scope.config.state = scope.config.state || {};
+        state = scope.config.state;
+
         if (scope.tab === 1) {
             select.focus();
         }
 
         state.isValid = state.isValid || false;
-        state.validate = state.validate ? validate.bind(null, state.validate) : validate;
-        state.check = state.check || check;
         state.message = state.message || '';
         state.required = state.required || false;
-    }
 
-    function validate (fn) {
+        scope.form = form.use('input', state);
+
+        vm.setListeners();
+        vm.check();
+    };
+
+    vm.setListeners = () => {
+        let listeners = eventService.addListeners(scope, [
+            [input, 'focus', () => select.focus],
+            [select, 'mousedown', () => scope.$apply(() => scope.open = !scope.open)],
+            [select, 'focus', () => input.classList.add('at-Input--focus')],
+            [select, 'change', () => scope.$apply(() => {
+                scope.open = false;
+                vm.check();
+            })],
+            [select, 'blur', () => {
+                input.classList.remove('at-Input--focus');
+                scope.open = scope.open && false;
+            }]
+        ]);
+
+        scope.$on('$destroy', () => eventService.remove(listeners));
+    };
+
+    vm.validate = () => {
         let isValid = true;
 
         if (state.required && !state.value) {
             isValid = false;    
-        } else if (fn && !fn(scope.config.input)) {
+        } else if (state.validate && !state.validate(scope.config.input)) {
             isValid = false;  
         }
 
         return isValid;
-    }
+    };
 
-    function check () {
-        let isValid = state.validate();
+    vm.check = () => {
+        let isValid = vm.validate();
 
         if (isValid !== state.isValid) {
             state.isValid = isValid;
             form.check();
         }
-    }
+    };
 }
 
-function atInputSelect (_eventService_, _pathService_) {
-    eventService = _eventService_;
-    pathService = _pathService_;
+AtInputSelectController.$inject = ['EventService'];
 
+function atInputSelect (pathService) {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: '^^at-form',
+        require: ['^^at-form', 'atInputSelect'],
         templateUrl: pathService.getPartialPath('components/input/select'),
+        controller: AtInputSelectController,
+        controllerAs: 'vm',
         link,
         scope: {
             config: '=',
@@ -81,9 +99,6 @@ function atInputSelect (_eventService_, _pathService_) {
     };
 }
 
-atInputSelect.$inject = [
-    'EventService',
-    'PathService'
-];
+atInputSelect.$inject = ['PathService'];
 
 export default atInputSelect;
