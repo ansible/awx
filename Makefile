@@ -268,7 +268,6 @@ virtualenv_ansible:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			pip install $(PIP_OPTIONS) --ignore-installed -U virtualenv && \
 			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
@@ -282,7 +281,6 @@ virtualenv_tower:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
-			pip install $(PIP_OPTIONS) --ignore-installed -U virtualenv && \
 			virtualenv --system-site-packages $(VENV_BASE)/tower && \
 			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
 			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
