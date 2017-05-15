@@ -45,6 +45,8 @@ import nestedHostsAdd from './groups/nested-hosts/nested-hosts-add.route';
 import nestedHostsEdit from './groups/nested-hosts/nested-hosts-edit.route';
 import ansibleFactsRoute from './ansible_facts/ansible_facts.route';
 import insightsRoute from './insights/insights.route';
+import inventorySourcesCredentialRoute from './sources/lookup/sources-lookup-credential.route';
+import inventorySourcesInventoryScriptRoute from './sources/lookup/sources-lookup-inventory-script.route';
 
 export default
 angular.module('inventory', [
@@ -147,6 +149,22 @@ angular.module('inventory', [
                 let nestedHostsInsights = _.cloneDeep(insightsRoute);
                 nestedHostsInsights.name = 'inventories.edit.groups.edit.nested_hosts.edit.insights';
 
+                let addSourceCredential = _.cloneDeep(inventorySourcesCredentialRoute);
+                addSourceCredential.name = 'inventories.edit.inventory_sources.add.credential';
+                addSourceCredential.url = '/credential';
+
+                let addSourceInventoryScript = _.cloneDeep(inventorySourcesInventoryScriptRoute);
+                addSourceInventoryScript.name = 'inventories.edit.inventory_sources.add.inventory_script';
+                addSourceInventoryScript.url = '/inventory_script';
+
+                let editSourceCredential = _.cloneDeep(inventorySourcesCredentialRoute);
+                editSourceCredential.name = 'inventories.edit.inventory_sources.edit.credential';
+                editSourceCredential.url = '/credential';
+
+                let editSourceInventoryScript = _.cloneDeep(inventorySourcesInventoryScriptRoute);
+                editSourceInventoryScript.name = 'inventories.edit.inventory_sources.edit.inventory_script';
+                editSourceInventoryScript.url = '/inventory_script';
+
                 return Promise.all([
                     basicInventoryAdd,
                     basicInventoryEdit,
@@ -185,7 +203,11 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(inventorySourceListRoute),
                             stateExtender.buildDefinition(inventorySourceAddRoute),
                             stateExtender.buildDefinition(inventorySourceEditRoute),
-                            stateExtender.buildDefinition(inventoryCompletedJobsRoute)
+                            stateExtender.buildDefinition(inventoryCompletedJobsRoute),
+                            stateExtender.buildDefinition(addSourceCredential),
+                            stateExtender.buildDefinition(addSourceInventoryScript),
+                            stateExtender.buildDefinition(editSourceCredential),
+                            stateExtender.buildDefinition(editSourceInventoryScript)
                         ])
                     };
                 });
