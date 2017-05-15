@@ -1071,3 +1071,4 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         template_groups = [x for x in self.unified_job_template.instance_groups.all()]
         if not template_groups and default_instance_group.exists():
             return [default_instance_group.first()]
+        return template_groups
