@@ -524,4 +524,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         else:
             organization_groups = []
         template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]
-        return template_groups + organization_groups
+        selected_groups = template_groups + organization_groups
+        if not selected_groups:
+            return self.global_instance_groups
+        return selected_groups

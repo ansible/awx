@@ -1066,9 +1066,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         '''
         Return Instance/Rampart Groups preferred by this unified job templates
         '''
+        if not self.unified_job_template:
+            return []
+        template_groups = [x for x in self.unified_job_template.instance_groups.all()]
+        return template_groups
+
+    @property
+    def global_instance_groups(self):
         from awx.main.models.ha import InstanceGroup
         default_instance_group = InstanceGroup.objects.filter(name='tower')
-        template_groups = [x for x in self.unified_job_template.instance_groups.all()]
-        if not template_groups and default_instance_group.exists():
+        if default_instance_group.exists():
             return [default_instance_group.first()]
-        return template_groups
+        return []

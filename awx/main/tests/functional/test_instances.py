@@ -1,5 +1,7 @@
 import pytest
 
+from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate
+
 
 @pytest.mark.django_db
 def test_default_tower_instance_group(default_instance_group, job_factory):
@@ -38,3 +40,52 @@ def test_instance_group_capacity(instance_factory, instance_group_factory):
     assert ig_all.capacity == 300
     ig_single = instance_group_factory("single", instances=[i1])
     assert ig_single.capacity == 100
+
+
+@pytest.mark.django_db
+class TestInstanceGroupOrdering:
+
+    def test_ad_hoc_instance_groups(self, instance_group_factory, inventory, default_instance_group):
+        ad_hoc = AdHocCommand.objects.create(inventory=inventory)
+        assert ad_hoc.preferred_instance_groups == [default_instance_group]
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])
+        inventory.organization.instance_groups.add(ig_org)
+        assert ad_hoc.preferred_instance_groups == [ig_org]
+        inventory.instance_groups.add(ig_inv)
+        assert ad_hoc.preferred_instance_groups == [ig_inv, ig_org]
+
+    def test_inventory_update_instance_groups(self, instance_group_factory, inventory_source, default_instance_group):
+        iu = InventoryUpdate.objects.create(inventory_source=inventory_source)
+        assert iu.preferred_instance_groups == [default_instance_group]
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        inventory_source.inventory.organization.instance_groups.add(ig_org)
+        inventory_source.inventory.instance_groups.add(ig_inv)
+        assert iu.preferred_instance_groups == [ig_inv, ig_org]
+        inventory_source.instance_groups.add(ig_tmp)
+        assert iu.preferred_instance_groups == [ig_tmp, ig_inv, ig_org]
+
+    def test_project_update_instance_groups(self, instance_group_factory, project, default_instance_group):
+        pu = ProjectUpdate.objects.create(project=project)
+        assert pu.preferred_instance_groups == [default_instance_group]
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        project.organization.instance_groups.add(ig_org)
+        assert pu.preferred_instance_groups == [ig_org]
+        project.instance_groups.add(ig_tmp)
+        assert pu.preferred_instance_groups == [ig_tmp, ig_org]
+
+    def test_job_instance_groups(self, instance_group_factory, inventory, project, default_instance_group):
+        jt = JobTemplate.objects.create(inventory=inventory, project=project)
+        job = Job.objects.create(inventory=inventory, job_template=jt, project=project)
+        assert job.preferred_instance_groups == [default_instance_group]
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        project.organization.instance_groups.add(ig_org)
+        inventory.instance_groups.add(ig_inv)
+        assert job.preferred_instance_groups == [ig_inv, ig_org]
+        job.job_template.instance_groups.add(ig_tmp)
+        assert job.preferred_instance_groups == [ig_tmp, ig_inv, ig_org]
