@@ -1,7 +1,7 @@
 <section class="SystemTrackingContainer Panel" ng-if="noModuleData">
     <section class="FactDataError SystemTrackingContainer-main">
         <p class="FactDataError-note--full">
-            To set up scan jobs, create a <a ui-sref="inventoryJobTemplateAdd({inventory_id: inventory.id})">job template</a> of type 'scan' that targets the "<a ui-sref="inventories.edit({inventory_id: inventory.id})">{{inventory.name}}</a>" inventory.
+            To set up scan jobs, create a <a ui-sref="inventoryJobTemplateAdd({inventory_id: inventory.id})">job template</a> that targets the "<a ui-sref="inventories.edit({inventory_id: inventory.id})">{{inventory.name}}</a>" inventory and check "Store Ansible Facts."
         </p>
     </section>
 </section>
@@ -57,7 +57,7 @@
             The two fact scans were identical for this module.
         </p>
         <p class="FactDataError-note" ng-switch-default>
-            We were not able to find any facts collected for this inventory or module. To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Job Templates."
+            We were not able to find any facts collected for this inventory or module. To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and check "Store Ansible Facts."
         </p>
     </section>
     <fact-data-table ng-if="!error" left-hostname="leftHostname" right-hostname="rightHostname" left-scan-date="leftScanDate" right-scan-date="rightScanDate" left-data-no-scans="leftDataNoScans" right-data-no-scans="rightDataNoScans" is-nested-display="isNestedDisplay"

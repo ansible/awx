@@ -127,12 +127,6 @@ export default
             };
 
             $scope.jobTypeChange = function() {
-                if ($scope.job_type && $scope.project_name === "Default") {
-                    $scope.project_name = null;
-                    $scope.playbook_options = [];
-                    $scope.playbook = "";
-                    $scope.job_template_form.playbook.$setPristine();
-                }
                 sync_playbook_select2();
             };
 

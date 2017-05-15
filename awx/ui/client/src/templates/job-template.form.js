@@ -55,13 +55,12 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         " on the selected hosts."), "<em>run</em>") + "</p> <p>" +
                         i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook."), "<em>check</em>") + " " +
                         i18n.sprintf(i18n._("Instead, %s will check playbook " +
-                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p> <p>",
+                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_job_type_on_launch',
-                        ngShow: true,
                         text: i18n._('Prompt on launch'),
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     },
@@ -88,7 +87,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     subCheckbox: {
                         variable: 'ask_inventory_on_launch',
                         ngChange: 'job_template_form.inventory_name.$validate()',
-                        ngShow: true,
                         text: i18n._('Prompt on launch')
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
