@@ -315,10 +315,9 @@ class TaskManager():
 
     def generate_dependencies(self, task):
         dependencies = []
-        # TODO: What if the project is null ?
         if type(task) is Job:
-
-            if task.project.scm_update_on_launch is True and \
+            # TODO: Can remove task.project None check after scan-job-default-playbook is removed
+            if task.project is not None and task.project.scm_update_on_launch is True and \
                     self.should_update_related_project(task):
                 project_task = self.create_project_update(task)
                 dependencies.append(project_task)
