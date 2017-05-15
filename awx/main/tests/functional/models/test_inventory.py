@@ -3,6 +3,7 @@ import mock
 
 # AWX
 from awx.main.models import (
+    Host,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -48,8 +49,7 @@ class TestSCMUpdateFeatures:
 
 @pytest.fixture
 def setup_ec2_gce(organization):
-    ec2_inv = Inventory(name='test_ec2', organization=organization)
-    ec2_inv.save()
+    ec2_inv = Inventory.objects.create(name='test_ec2', organization=organization)
 
     ec2_source = ec2_inv.inventory_sources.create(name='test_ec2_source', source='ec2')
     for i in range(2):
@@ -57,13 +57,27 @@ def setup_ec2_gce(organization):
         ec2_host.inventory_sources.add(ec2_source)
     ec2_inv.save()
 
-    gce_inv = Inventory(name='test_gce', organization=organization)
-    gce_inv.save()
+    gce_inv = Inventory.objects.create(name='test_gce', organization=organization)
 
     gce_source = gce_inv.inventory_sources.create(name='test_gce_source', source='gce')
     gce_host = gce_inv.hosts.create(name='test_gce_host')
     gce_host.inventory_sources.add(gce_source)
     gce_inv.save()
+
+
+@pytest.fixture
+def setup_inventory_groups(inventory, group_factory):
+
+    groupA = group_factory('test_groupA')
+    groupB = group_factory('test_groupB')
+
+    host = Host.objects.create(name='single_host', inventory=inventory)
+
+    groupA.hosts.add(host)
+    groupA.save()
+
+    groupB.hosts.add(host)
+    groupB.save()
 
 
 @pytest.mark.django_db
@@ -97,3 +111,11 @@ class TestHostManager:
         assert len(hosts) == 2
         assert hosts[0].inventory_sources.first().source == 'ec2'
         assert hosts[1].inventory_sources.first().source == 'ec2'
+
+    def test_host_objects_no_dupes(self, setup_inventory_groups, organization):
+        dynamic_inventory = Inventory(name='dynamic',
+                                      kind='dynamic',
+                                      organization=organization,
+                                      host_filter='groups__name=test_groupA or groups__name=test_groupB')
+        dynamic_inventory.save()
+        assert len(dynamic_inventory.hosts.all()) == 1
