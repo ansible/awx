@@ -41,7 +41,8 @@ class HostManager(models.Manager):
                     # If we don't disable this, a filter of {'inventory': self.instance} gets automatically
                     # injected by the related object mapper.
                     self.core_filters = {}
-                    return qs & q
+                    qs = qs & q
+                    return qs.distinct()
         return qs
 
 
