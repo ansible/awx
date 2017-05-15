@@ -203,6 +203,19 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
                 update_fields.append('name')
         super(AdHocCommand, self).save(*args, **kwargs)
 
+    @property
+    def preferred_instance_groups(self):
+        if self.inventory is not None and self.inventory.organization is not None:
+            organization_groups = [x for x in self.inventory.organization.instance_groups.all()]
+        else:
+            organization_groups = []
+        if self.inventory is not None:
+            inventory_groups = [x for x in self.inventory.instance_groups.all()]
+        selected_groups = inventory_groups + organization_groups
+        if not selected_groups:
+            return self.global_instance_groups
+        return selected_groups
+
     '''
     JobNotificationMixin
     '''

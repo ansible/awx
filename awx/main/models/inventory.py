@@ -1379,7 +1379,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         if self.inventory_source.inventory is not None:
             inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
         template_groups = [x for x in super(InventoryUpdate, self).preferred_instance_groups]
-        return template_groups + inventory_groups + organization_groups
+        selected_groups = template_groups + inventory_groups + organization_groups
+        if not selected_groups:
+            return self.global_instance_groups
+        return selected_groups
 
     def _build_job_explanation(self):
         if not self.job_explanation:

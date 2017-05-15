@@ -669,7 +669,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             template_groups = []
         selected_groups = template_groups + inventory_groups + organization_groups
         if not selected_groups:
-            return super(Job, self).preferred_instance_groups
+            return self.global_instance_groups
         return selected_groups
 
     # Job Credential required
