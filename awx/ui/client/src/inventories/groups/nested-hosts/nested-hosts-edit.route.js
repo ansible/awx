@@ -2,8 +2,8 @@ export default {
     name: "inventories.edit.groups.edit.nested_hosts.edit",
     url: "/edit/:host_id",
     ncyBreadcrumb: {
-        parent: "inventories.edit.groups.edit",
-        label: "ASSOCIATED HOSTS"
+        parent: "inventories.edit.groups.edit.nested_hosts",
+        label: "{{breadcrumb.host_name}}"
     },
     views: {
         'hostForm@inventories': {

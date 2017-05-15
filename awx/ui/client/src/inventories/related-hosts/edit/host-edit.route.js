@@ -3,7 +3,7 @@ export default {
     url: "/edit/:host_id",
     ncyBreadcrumb: {
         parent: "inventories.edit.hosts",
-        label: "HOSTS"
+        label: "{{breadcrumb.host_name}}"
     },
     views: {
         'hostForm@inventories': {
