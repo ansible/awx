@@ -1,7 +1,7 @@
 function categorizeByKind () {
     let group = {};
 
-    this.data.forEach(result => {
+    this.model.data.results.forEach(result => {
         group[result.kind] = group[result.kind] || [];
         group[result.kind].push(result);
     });
@@ -12,12 +12,19 @@ function categorizeByKind () {
     }));
 }
 
+function getTypeFromName (name) {
+    let type = this.model.data.results.filter(result => result.name === name);
+
+    return type.length ? type[0] : null;
+}
+
 function CredentialType (BaseModel) {
-    Object.assign(this, BaseModel);
+    Object.assign(this, BaseModel());
 
     this.path = this.normalizePath('credential_types');
 
     this.categorizeByKind = categorizeByKind;
+    this.getTypeFromName = getTypeFromName;
 }
 
 CredentialType.$inject = ['BaseModel'];

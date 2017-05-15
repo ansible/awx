@@ -1,4 +1,5 @@
 import Base from './Base';
+import Credential from './Credential';
 import CredentialType from './CredentialType';
 
 function config ($resourceProvider) {
@@ -11,5 +12,6 @@ angular
     .module('at.lib.models', [])
     .config(config)
     .service('BaseModel', Base)
-    .service('CredentialType', CredentialType);
+    .service('CredentialModel', Credential)
+    .service('CredentialTypeModel', CredentialType);
 

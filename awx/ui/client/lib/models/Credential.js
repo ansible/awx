@@ -1,5 +1,7 @@
 function Credential (BaseModel) {
-    return Object.assign({}, BaseModel);
+    Object.assign(this, BaseModel());
+
+    this.path = this.normalizePath('credentials');
 }
 
 Credential.$inject = ['BaseModel'];

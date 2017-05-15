@@ -17,12 +17,14 @@ function atActionController ($state) {
         form = _form_;
         scope = _scope_;
 
+        scope.config = scope.config || {};
         scope.config.state = scope.config.state || {};
+
         state = scope.config.state;
 
         scope.form = form.use('action', state);
 
-        switch(scope.config.type) {
+        switch(scope.type) {
             case 'cancel':
                 vm.setCancelDefaults();
                 break;
@@ -61,7 +63,7 @@ function atAction (pathService) {
         controllerAs: 'vm',
         link,
         scope: {
-            config: '='
+            type: '@'
         }
     };
 }

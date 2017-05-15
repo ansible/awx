@@ -1,4 +1,4 @@
-<div ng-show="config" class="at-Popover">
+<div ng-show="config.options.help_text" class="at-Popover">
     <span class="at-Popover-icon">
         <i class="fa fa-question-circle"></i>
     </span>
@@ -6,6 +6,6 @@
         <div class="at-Popover-arrow">
             <i class="fa fa-caret-left fa-2x"></i>
         </div>
-        <div class="at-Popover-content">{{::config.text}}</div>
+        <div class="at-Popover-content">{{::config.options.help_text}}</div>
     </div>
 </div>

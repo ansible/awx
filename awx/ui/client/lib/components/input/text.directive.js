@@ -21,6 +21,7 @@ function AtInputTextController () {
 
         scope.config.state = scope.config.state || {};
         state = scope.config.state;
+        state.required = scope.config.options.required;
 
         if (scope.tab === '1') {
             input.focus();
