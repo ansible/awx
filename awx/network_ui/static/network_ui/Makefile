@@ -1,11 +1,15 @@
-.PHONY: all main lint lessc
+.PHONY: all main lint lessc install simple-server
 
-all: clean lessc lint main istanbul
+all: clean install lessc lint main
 
 clean:
 	rm -rf src-instrumented
 	rm -f js/bundle.js
+	rm -f js/vendor.bundle.js
 	rm -f css/style.css
+
+install:
+	npm i
 
 main:
 	webpack
@@ -22,3 +26,7 @@ istanbul:
 	cp index.html index-instrumented.html
 	sed -i "s/bundle.js/bundle-instrumented.js/g" index-instrumented.html
 	cp vendor/*.js js/
+
+
+simple-server:
+	python -m SimpleHTTPServer

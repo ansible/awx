@@ -19,12 +19,20 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   window.scope = $scope;
 
   $scope.api_token = '';
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
+
+  if (!$scope.disconnected) {
   $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
+  } else {
+      $scope.control_socket = {
+          on_message: util.noop
+      };
+  }
   $scope.history = [];
   $scope.client_id = 0;
   $scope.onMouseDownResult = "";
@@ -1036,7 +1044,11 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             }
         }
         var data = messages.serialize(message);
-        $scope.control_socket.send(data);
+        if (!$scope.disconnected) {
+            $scope.control_socket.send(data);
+        } else {
+            console.log(data);
+        }
     };
 
 
