@@ -187,6 +187,38 @@ prior to running the job.
 If an Instance Group is configured but all instances in that group are offline or unavailable, any jobs that are launched targeting only that group will be stuck
 in a waiting state until instances become available. Fallback or backup resources should be provisioned to handle any work that might encounter this scenario.
 
+#### Controlling where a particular job runs
+
+By default, a job will be submitted to the `tower` queue, meaning that it can be
+picked up by any of the workers.
+
+##### How to restrict the instances a job will run on
+
+If any of the job template, inventory,
+or organization has instance groups associated with them, a job ran from that job template
+will not be eligible for the default behavior. That means that if all of the
+instance associated with these 3 resources are out of capacity, the job will
+remain in the `pending` state until capacity frees up.
+
+##### How to set up a preferred instance group
+
+The order of preference in determining which instance group to submit the job to
+goes:
+
+1. job template
+2. inventory
+3. organization (by way of inventory)
+
+If instance groups are associated with the job template, and all of these
+are at capacity, then the job will be submitted to instance groups specified
+on inventory, and then organization.
+
+The global `tower` group can still be associated with a resource, just like
+any of the custom instance groups defined in the playbook. This can be
+used to specify a preferred instance group on the job template or inventory,
+but still allow the job to be submitted to any instance if those are out of
+capacity.
+
 ## Acceptance Criteria
 
 When verifying acceptance we should ensure the following statements are true
