@@ -125,7 +125,7 @@ class TaskManager():
         for task in all_sorted_tasks:
             if isinstance(task, Job):
                 inventory_ids.add(task.inventory_id)
-        return [invsrc for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids)]
+        return [invsrc for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True)]
 
     def spawn_workflow_graph_jobs(self, workflow_jobs):
         for workflow_job in workflow_jobs:
