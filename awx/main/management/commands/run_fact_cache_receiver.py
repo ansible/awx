@@ -12,6 +12,7 @@ from kombu.mixins import ConsumerMixin
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
 from django.utils import timezone
+from django.db import IntegrityError
 
 # AWX
 from awx.main.models.jobs import Job
@@ -120,6 +121,14 @@ class FactBrokerWorker(ConsumerMixin):
             ret = self._do_fact_scan_create_update(host_obj, module_name, facts, self.timestamp)
 
         if job.store_facts is True:
+            if module_name == 'insights':
+                system_id = facts.get('system_id', None)
+                host_obj.insights_system_id = system_id
+                try:
+                    host_obj.save()
+                except IntegrityError:
+                    host_obj.insights_system_id = None
+                    logger.warn('Inisghts system_id %s not assigned to host %s because it already exists.' % (system_id, host_obj.pk))
             self._do_gather_facts_update(host_obj, module_name, facts, self.timestamp)
 
         message.ack()

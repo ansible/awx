@@ -17,6 +17,9 @@
         get_checksum: '{{ scan_use_checksum }}'
         recursive: '{{ scan_use_recursive }}'
       when: scan_file_paths is defined and ansible_os_family != "Windows"
+    - name: "Scan Insights for Machine ID (Unix/Linux)"
+      scan_insights:
+      when: ansible_os_family != "Windows"
 
     - name: "Scan packages (Windows)"
       win_scan_packages:
