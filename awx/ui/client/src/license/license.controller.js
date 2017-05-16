@@ -25,11 +25,9 @@ export default
 			return duration;
 	 	};
 
-
-        var calcExpiresOn = function(days){
+        var calcExpiresOn = function(seconds){
             // calculate the expiration date of the license
-            days = parseInt(days);
-            return moment().add(days, 'days').calendar();
+            return moment.unix(seconds).calendar();
         };
 
         var reset = function(){
@@ -47,7 +45,7 @@ export default
                 $scope.license.version = config.version.split('-')[0];
                 $scope.time = {};
                 $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
-                $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
+                $scope.time.expiresOn = calcExpiresOn($scope.license.license_info.license_date);
                 $scope.valid = CheckLicense.valid($scope.license.license_info);
                 $scope.compliant = $scope.license.license_info.compliant;
                 Wait('stop');
