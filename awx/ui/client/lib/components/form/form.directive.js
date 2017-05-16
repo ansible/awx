@@ -1,59 +1,44 @@
 function AtFormController () {
     let vm = this || {};
 
-    vm.inputs = [];
-    vm.actions = [];
+    vm.components = [];
+
     vm.state = {
         isValid: false
     };
 
     vm.use = (type, component, el) => { 
-       let state;
-
-       switch (type) {
-            case 'input':
-                state = vm.trackInput(component, el);
-                break;
-            case 'action':
-                state = vm.trackAction(component, el);
-                break;
-            default:
-                throw new Error('An at-form cannot use component type:', type);
-       }
-
-       return state;
+        return vm.trackComponent(type, component, el);
     };
 
-    vm.trackInput = (input, el) => {
-        let form = {
+    vm.trackComponent = (type, component, el) => {
+        let meta = {
+            el,
+            type,
             state: vm.state,
-            disabled: false
+            disabled: false,
+            tabindex: vm.components.length + 1
         };
 
-        vm.inputs.push(input)
+        if (!vm.components.length) {
+            el.focus();
+        }
 
-        return form;
-    };
+        vm.components.push(meta)
 
-    vm.trackAction = action => {
-        let form = {
-            state: vm.state,
-            disabled: false
-        };
-
-        vm.actions.push(action);
-
-        return form;
+        return meta;
     };
 
     vm.validate = () => {
         let isValid = true;
 
-        vm.inputs.forEach(input => {
-            if (!input.isValid) { 
-                isValid = false;
-            }
-        });
+        vm.components
+            .filter(component => component.type === 'input')
+            .forEach(input => {
+                if (input.isValid) {
+                    isValid = false;
+                }
+            });
 
         return isValid;
     };
@@ -71,6 +56,10 @@ function AtFormController () {
     };
 }
 
+function link (scope, el, attrs, controller, fn) {
+    //console.log(fn);
+}
+
 function atForm (pathService) {
     return {
         restrict: 'E',
@@ -78,6 +67,7 @@ function atForm (pathService) {
         templateUrl: pathService.getPartialPath('components/form/form'),
         controller: AtFormController,
         controllerAs: 'vm',
+        link, 
         scope: {
             config: '='
         }

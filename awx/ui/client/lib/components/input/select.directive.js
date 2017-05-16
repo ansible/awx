@@ -25,15 +25,11 @@ function AtInputSelectController (eventService) {
         scope.config.state = scope.config.state || {};
         state = scope.config.state;
 
-        if (scope.tab === 1) {
-            select.focus();
-        }
-
         state.isValid = state.isValid || false;
         state.message = state.message || '';
         state.required = scope.config.options.required || false;
 
-        scope.form = form.use('input', state);
+        scope.form = form.use('input', state, input);
 
         vm.setListeners();
         vm.check();

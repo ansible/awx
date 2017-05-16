@@ -23,10 +23,6 @@ function AtInputTextController () {
         state = scope.config.state;
         state.required = scope.config.options.required;
 
-        if (scope.tab === '1') {
-            input.focus();
-        }
-
         state.isValid = state.isValid || false;
         state.message = state.message || '';
         state.required = state.required || false;

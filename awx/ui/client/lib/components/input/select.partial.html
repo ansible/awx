@@ -8,7 +8,8 @@
                    ng-change="vm.check()" />
 
             <select class="form-control at-InputSelect-select" ng-model="config.state.value"
-                    tabindex="{{::tab}}" ng-attr-autofocus="{{ tab == 1 || undefined }}"
+                    ng-attr-tabindex="{{ form.tabindex || undefined }}" 
+                    ng-attr-autofocus="{{ form.autofocus || undefined }}"
                     ng-disabled="form.disabled">
                 <optgroup ng-repeat="group in config.data" label="{{::group.category | uppercase }}">
                     <option ng-repeat="item in group.data" value="{{ item.name }}">

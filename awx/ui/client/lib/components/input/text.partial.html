@@ -2,9 +2,10 @@
     <div class="form-group at-u-flat">
         <at-input-label config="config"></at-input-label>
         <input type="text" class="form-control at-Input" ng-model="config.state.value"
-               ng-attr-autofocus="{{ tab == 1 || undefined }}"
+               ng-attr-autofocus="{{ form.autofocus || undefined }}"
                ng-attr-maxlength="{{ config.options.max_length || undefined }}"
-               tabindex="{{::tab}}" placeholder="{{::config.placeholder}}"
+               tabindex="{{ form.tabindex || undefined }}"
+               placeholder="{{::config.placeholder}}"
                ng-change="vm.check()" ng-disabled="form.disabled" />
     </div>
 </div>

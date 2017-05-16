@@ -10,7 +10,6 @@ function atFormActionController ($state) {
 
     let form;
     let scope;
-    let el;
     let state;
 
     vm.init = (_form_, _scope_) => {

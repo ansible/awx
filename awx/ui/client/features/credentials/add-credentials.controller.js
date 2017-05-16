@@ -23,7 +23,9 @@ function AddCredentialsController (models) {
     };
 
     vm.dynamic = {
-        model: credential
+        getInputs: credentialType.getTypeFromName,
+        source: vm.kind,
+        reference: 'vm.dynamic'
     };
 }
 
