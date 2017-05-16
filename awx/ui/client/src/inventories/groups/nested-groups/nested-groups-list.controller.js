@@ -38,6 +38,22 @@
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
 
+            $scope.$on('selectedOrDeselected', function(e, value) {
+                let item = value.value;
+
+                if (value.isSelected) {
+                    if(!$scope.groupsSelected) {
+                        $scope.groupsSelected = [];
+                    }
+                    $scope.groupsSelected.push(item);
+                } else {
+                    _.remove($scope.groupsSelected, { id: item.id });
+                    if($scope.groupsSelected.length === 0) {
+                        $scope.groupsSelected = null;
+                    }
+                }
+            });
+
         }
 
         function buildStatusIndicators(group){
@@ -61,83 +77,9 @@
         $scope.createGroup = function(){
             $state.go('inventories.edit.groups.edit.nested_groups.add');
         };
+
         $scope.editGroup = function(id){
             $state.go('inventories.edit.groups.edit', {group_id: id});
-        };
-        // $scope.editGroup = function(id){
-        //     $state.go('inventories.edit.groups.edit.nested_groups.edit', {nested_group_id: id});
-        // };
-        $scope.deleteGroup = function(group){
-            $scope.toDelete = {};
-            angular.extend($scope.toDelete, group);
-            if($scope.toDelete.total_groups === 0 && $scope.toDelete.total_hosts === 0) {
-                // This group doesn't have any child groups or hosts - the user is just trying to delete
-                // the group
-                $scope.deleteOption = "delete";
-            }
-            $('#group-delete-modal').modal('show');
-        };
-        $scope.confirmDelete = function(){
-
-            // Bind an even listener for the modal closing.  Trying to $state.go() before the modal closes
-            // will mean that these two things are running async and the modal may not finish closing before
-            // the state finishes transitioning.
-            $('#group-delete-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                // Remove the event handler so that we don't end up with multiple bindings
-                $('#group-delete-modal').off('hidden.bs.modal');
-                // Reload the inventory manage page and show that the group has been removed
-                $state.go('.', null, {reload: true});
-            });
-
-            switch($scope.deleteOption){
-                case 'promote':
-                    GroupManageService.promote($scope.toDelete.id, $stateParams.inventory_id)
-                        .then(() => {
-                            if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                                $state.go("^", null, {reload: true});
-                            } else {
-                                $state.go($state.current, null, {reload: true});
-                            }
-                            $('#group-delete-modal').modal('hide');
-                            $('body').removeClass('modal-open');
-                            $('.modal-backdrop').remove();
-                        });
-                    break;
-                default:
-                    GroupManageService.delete($scope.toDelete.id).then(() => {
-                        if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                            $state.go("^", null, {reload: true});
-                        } else {
-                            $state.go($state.current, null, {reload: true});
-                        }
-                        $('#group-delete-modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                    });
-            }
-        };
-        $scope.updateGroup = function(group) {
-            GroupManageService.getInventorySource({group: group.id}).then(res =>InventoryUpdate({
-                scope: $scope,
-                group_id: group.id,
-                url: res.data.results[0].related.update,
-                group_name: group.name,
-                group_source: res.data.results[0].source
-            }));
-        };
-
-        $scope.cancelUpdate = function (id) {
-            CancelSourceUpdate({ scope: $scope, id: id });
-        };
-
-        // $scope.$parent governed by InventoryManageController, for unified multiSelect options
-        $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
-            $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
-            $scope.$parent.groupsSelectedItems = selection.selectedItems;
-        });
-
-        $scope.copyMoveGroup = function(){
-            // TODO: implement
         };
 
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
