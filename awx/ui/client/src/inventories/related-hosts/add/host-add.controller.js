@@ -25,8 +25,8 @@ export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition'
 
             ParseTypeChange({
                 scope: $scope,
-                field_id: 'host_variables',
-                variable: 'variables',
+                field_id: 'host_host_variables',
+                variable: 'host_variables',
                 parse_variable: 'parseType'
             });
         }
@@ -40,7 +40,7 @@ export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition'
             $scope.host.enabled = !$scope.host.enabled;
         };
         $scope.formSave = function(){
-            var json_data = ToJSON($scope.parseType, $scope.variables, true),
+            var json_data = ToJSON($scope.parseType, $scope.host_variables, true),
             params = {
                 variables: json_data,// $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
