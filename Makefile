@@ -1,6 +1,6 @@
 PYTHON = python
-PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print get_python_version()")
-SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
+SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
 PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
@@ -8,7 +8,7 @@ NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-DOCKER_HOST_IP=`python -c "import socket; print socket.gethostbyname(socket.gethostname())"`
+DOCKER_HOST_IP=`python -c "import socket; print(socket.gethostbyname(socket.gethostname()))"`
 
 GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
 # NOTE: This defaults the container image version to the branch that's active
