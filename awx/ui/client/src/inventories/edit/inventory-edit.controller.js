@@ -13,23 +13,46 @@
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup, $rootScope) {
+    ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm,
-        inventory_id = $stateParams.inventory_id,
-        master = {},
-        fld, data;
+        fld, data,
+        inventoryData = resourceData.data;
 
-    ClearScope();
     init();
 
     function init() {
-        ClearScope();
         form.formLabelSize = null;
         form.formFieldSize = null;
-        $scope.inventory_id = inventory_id;
+
+        $scope = angular.extend($scope, inventoryData);
+
+        $scope.organization_name = inventoryData.summary_fields.organization.name;
+
+        $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
+
+        $scope.parseType = 'yaml';
+
+        $rootScope.$on('$stateChangeSuccess', function(event, toState) {
+            if(toState.name === 'inventories.edit') {
+                ParseTypeChange({
+                    scope: $scope,
+                    variable: 'inventory_variables',
+                    parse_variable: 'parseType',
+                    field_id: 'inventory_inventory_variables'
+                });
+            }
+        });
+
+        OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})
+        .then(function(canEditOrg){
+            $scope.canEditOrg = canEditOrg;
+        });
+
+        $scope.inventory_obj = inventoryData;
+        $rootScope.breadcrumb.inventory_name = inventoryData.name;
 
         $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
@@ -38,59 +61,6 @@ function InventoriesEdit($scope, $location,
         });
     }
 
-
-    Wait('start');
-    Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
-    Rest.get()
-        .success(function(data) {
-            var fld;
-            for (fld in form.fields) {
-                if (fld === 'inventory_variables') {
-                    $scope.inventory_variables = ParseVariableString(data.variables);
-                    master.inventory_variables = $scope.variables;
-                } else if (fld === 'inventory_name') {
-                    $scope[fld] = data.name;
-                    master[fld] = $scope[fld];
-                } else if (fld === 'inventory_description') {
-                    $scope[fld] = data.description;
-                    master[fld] = $scope[fld];
-                } else if (data[fld]) {
-                    $scope[fld] = data[fld];
-                    master[fld] = $scope[fld];
-                }
-                if (form.fields[fld].sourceModel && data.summary_fields &&
-                    data.summary_fields[form.fields[fld].sourceModel]) {
-                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                }
-            }
-
-            Wait('stop');
-            $scope.parseType = 'yaml';
-            ParseTypeChange({
-                scope: $scope,
-                variable: 'inventory_variables',
-                parse_variable: 'parseType',
-                field_id: 'inventory_inventory_variables'
-            });
-
-            OrgAdminLookup.checkForAdminAccess({organization: data.organization})
-            .then(function(canEditOrg){
-                $scope.canEditOrg = canEditOrg;
-            });
-
-            $scope.inventory_obj = data;
-            $rootScope.breadcrumb.inventory_name = data.name;
-            $scope.name = data.name;
-        })
-        .error(function(data, status) {
-            ProcessErrors($scope, data, status, null, {
-                hdr: 'Error!',
-                msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status
-            });
-        });
     // Save
     $scope.formSave = function() {
         Wait('start');
@@ -104,7 +74,7 @@ function InventoriesEdit($scope, $location,
             }
         }
 
-        Rest.setUrl(defaultUrl + inventory_id + '/');
+        Rest.setUrl(defaultUrl + $stateParams.inventory_id + '/');
         Rest.put(data)
             .success(function() {
                 Wait('stop');
@@ -128,5 +98,5 @@ export default ['$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
-    '$state', 'OrgAdminLookup', '$rootScope', InventoriesEdit,
+    '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', InventoriesEdit,
 ];

@@ -40,7 +40,7 @@ function(i18n, InventoryCompletedJobsList) {
         tabs: true,
 
         fields: {
-            inventory_name: {
+            name: {
                 realName: 'name',
                 label: i18n._('Name'),
                 type: 'text',
@@ -48,7 +48,7 @@ function(i18n, InventoryCompletedJobsList) {
                 capitalize: false,
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
-            inventory_description: {
+            description: {
                 realName: 'description',
                 label: i18n._('Description'),
                 type: 'text',
@@ -172,8 +172,6 @@ function(i18n, InventoryCompletedJobsList) {
                 name: 'inventory_sources',
                 awToolTip: i18n._('Please save before defining inventory sources'),
                 dataPlacement: 'top',
-                include: "SourcesListDefinition",
-                includeForm: "SourcesFormDefinition",
                 title: i18n._('Sources'),
                 iterator: 'inventory_source',
                 skipGenerator: true

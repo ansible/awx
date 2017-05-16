@@ -42,7 +42,8 @@ function(i18n){
                 ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 tab: 'properties'
             },
-            variables: {
+            nested_group_variables: {
+                realName: 'variables',
                 label: 'Variables',
                 type: 'textarea',
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -84,8 +85,6 @@ function(i18n){
             nested_groups: {
                 name: 'related_groups',
                 ngClick: "$state.go('inventories.edit.groups.edit.related_groups')",
-                include: "RelatedGroupListDefinition",
-                includeForm: "RelatedGroupFormDefinition",
                 title: i18n._('Groups'),
                 iterator: 'related_group'
             },
