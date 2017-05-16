@@ -36,7 +36,10 @@
             }
 
             $scope.inventory_id = $stateParams.inventory_id;
-            _.forEach($scope[list.name], buildStatusIndicators);
+            
+            $scope.$watchCollection(list.name, function(){
+                _.forEach($scope[list.name], buildStatusIndicators);
+            });
 
             $scope.$on('selectedOrDeselected', function(e, value) {
                 let item = value.value;

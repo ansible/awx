@@ -13,6 +13,7 @@ import inventoryCompletedJobs from './completed_jobs/main';
 import inventoryAdd from './add/main';
 import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
+import hostGroups from './host-groups/main';
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
 import InventoryList from './inventory.list';
@@ -45,6 +46,8 @@ import nestedHostsAdd from './groups/nested-hosts/nested-hosts-add.route';
 import nestedHostsEdit from './groups/nested-hosts/nested-hosts-edit.route';
 import ansibleFactsRoute from './ansible_facts/ansible_facts.route';
 import insightsRoute from './insights/insights.route';
+import hostGroupsRoute from './host-groups/host-groups.route';
+import hostGroupsAssociateRoute from './host-groups/host-groups-associate/host-groups-associate.route';
 
 export default
 angular.module('inventory', [
@@ -59,7 +62,8 @@ angular.module('inventory', [
         inventoryList.name,
         ansibleFacts.name,
         insights.name,
-        copyMove.name
+        copyMove.name,
+        hostGroups.name
     ])
     .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
@@ -245,13 +249,6 @@ angular.module('inventory', [
                 let hostInsights = _.cloneDeep(insightsRoute);
                 hostInsights.name = 'hosts.edit.insights';
 
-                let hostsEditGroups = _.cloneDeep(nestedGroups);
-                hostsEditGroups.name = "hosts.edit.nested_groups";
-                hostsEditGroups.ncyBreadcrumb = {
-                    parent: "hosts.edit",
-                    label: "ASSOCIATED GROUPS"
-                };
-
                 return Promise.all([
                     hostTree
                 ]).then((generated) => {
@@ -260,7 +257,9 @@ angular.module('inventory', [
                             return result.concat(definition.states);
                         }, [
                             stateExtender.buildDefinition(hostAnsibleFacts),
-                            stateExtender.buildDefinition(hostInsights)
+                            stateExtender.buildDefinition(hostInsights),
+                            stateExtender.buildDefinition(hostGroupsRoute),
+                            stateExtender.buildDefinition(hostGroupsAssociateRoute)
                         ])
                     };
                 });
