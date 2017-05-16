@@ -24,24 +24,24 @@ function AtFormController () {
        return state;
     };
 
-    vm.trackInput = (component, el) => {
+    vm.trackInput = (input, el) => {
         let form = {
             state: vm.state,
             disabled: false
         };
 
-        vm.inputs.push(component)
+        vm.inputs.push(input)
 
         return form;
     };
 
-    vm.trackAction = component => {
+    vm.trackAction = action => {
         let form = {
             state: vm.state,
             disabled: false
         };
 
-        vm.actions.push(component);
+        vm.actions.push(action);
 
         return form;
     };

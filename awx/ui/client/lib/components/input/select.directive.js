@@ -24,7 +24,6 @@ function AtInputSelectController (eventService) {
 
         scope.config.state = scope.config.state || {};
         state = scope.config.state;
-        state.required = scope.config.options.required;
 
         if (scope.tab === 1) {
             select.focus();
@@ -32,7 +31,7 @@ function AtInputSelectController (eventService) {
 
         state.isValid = state.isValid || false;
         state.message = state.message || '';
-        state.required = state.required || false;
+        state.required = scope.config.options.required || false;
 
         scope.form = form.use('input', state);
 
@@ -76,10 +75,6 @@ function AtInputSelectController (eventService) {
         if (isValid !== state.isValid) {
             state.isValid = isValid;
             form.check();
-        }
-
-        if (scope.config.notify) {
-            scope.config.notify(state.value); 
         }
     };
 }

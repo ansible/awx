@@ -16,17 +16,14 @@ function AddCredentialsController (models) {
         options: credential.getPostOptions('description')
     };
 
-    vm.dynamic = {
-        update: type => {
-            this.inputs = type ? type.inputs.fields : null;
-        }
-    };
-
     vm.kind = {
         options: credential.getPostOptions('credential_type'),
         data: credentialType.categorizeByKind(),
-        notify: vm.dynamic.update,
         placeholder: 'Select a Type'
+    };
+
+    vm.dynamic = {
+        model: credential
     };
 }
 

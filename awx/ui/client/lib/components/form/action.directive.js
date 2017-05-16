@@ -5,7 +5,7 @@ function link (scope, el, attrs, controllers) {
     actionController.init(formController, scope);
 }
 
-function atActionController ($state) {
+function atFormActionController ($state) {
     let vm = this || {};
 
     let form;
@@ -50,16 +50,16 @@ function atActionController ($state) {
     };
 }
 
-atActionController.$inject = ['$state'];
+atFormAction.$inject = ['$state'];
 
-function atAction (pathService) {
+function atFormAction (pathService) {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: ['^^atForm', 'atAction'],
-        templateUrl: pathService.getPartialPath('components/action/action'),
-        controller: atActionController,
+        require: ['^^atForm', 'atFormAction'],
+        templateUrl: pathService.getPartialPath('components/form/action'),
+        controller: atFormActionController,
         controllerAs: 'vm',
         link,
         scope: {
@@ -68,6 +68,6 @@ function atAction (pathService) {
     };
 }
 
-atAction.$inject = ['PathService'];
+atFormAction.$inject = ['PathService'];
 
-export default atAction;
+export default atFormAction;
