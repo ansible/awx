@@ -52,7 +52,7 @@ export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition'
                 // assign the host to current group if not at the root level
                 if ($stateParams.group_id) {
                     HostManageService.associateGroup(res.data, $stateParams.group_id).then(function() {
-                        $state.go('inventories.edit.groups.edit.nested_hosts', { group_id: $stateParams.group_id }, { reload: true });
+                        $state.go('^.edit', { group_id: $stateParams.group_id, host_id: res.data.id }, { reload: true });
                     });
                 } else {
                     $state.go('^.edit', { host_id: res.data.id }, { reload: true });

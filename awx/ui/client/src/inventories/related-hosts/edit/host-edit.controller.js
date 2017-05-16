@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
- 	['$scope', '$state', '$stateParams', 'DashboardHostsForm', 'GenerateForm', 'ParseTypeChange', 'DashboardHostService', 'host',
- 	function($scope, $state, $stateParams, DashboardHostsForm, GenerateForm, ParseTypeChange, DashboardHostService, host){
+ 	['$scope', '$state', '$stateParams', 'DashboardHostsForm', 'GenerateForm', 'ParseTypeChange', 'DashboardHostService', 'host', '$rootScope',
+ 	function($scope, $state, $stateParams, DashboardHostsForm, GenerateForm, ParseTypeChange, DashboardHostService, host, $rootScope){
  		$scope.parseType = 'yaml';
  		$scope.formCancel = function(){
  			$state.go('^', null, {reload: true});
@@ -36,6 +36,7 @@
  		var init = function(){
  			$scope.host = host;
  			$scope.name = host.name;
+            $rootScope.breadcrumb.host_name = host.name;
  			$scope.description = host.description;
 			$scope.variables = getVars(host.variables);
         	ParseTypeChange({

@@ -18,6 +18,9 @@ export default ['$rootScope', function($rootScope) {
                         if(index+1 > scope.maxPanels) {
                             $(this).addClass('Panel-hidden');
                         }
+                        else {
+                            $(this).removeClass('Panel-hidden');
+                        }
                     });
                 }
                 else {
