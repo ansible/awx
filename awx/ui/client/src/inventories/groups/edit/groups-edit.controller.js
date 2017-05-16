@@ -26,16 +26,19 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbac
             });
 
             // init codemirror(s)
-            $scope.variables = $scope.variables === null || $scope.variables === '' ? '---' : ParseVariableString($scope.variables);
+            $scope.group_variables = $scope.variables === null || $scope.variables === '' ? '---' : ParseVariableString($scope.variables);
             $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';
 
-            ParseTypeChange({
-                scope: $scope,
-                field_id: 'group_variables',
-                variable: 'variables',
+            $rootScope.$on('$stateChangeSuccess', function(event, toState) {
+                if(toState.name === 'inventories.edit.groups.edit') {
+                    ParseTypeChange({
+                        scope: $scope,
+                        field_id: 'group_group_variables',
+                        variable: 'group_variables',
+                    });
+                }
             });
-
         }
 
         $scope.formCancel = function() {
@@ -44,7 +47,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbac
 
         $scope.formSave = function() {
             var json_data;
-            json_data = ToJSON($scope.parseType, $scope.variables, true);
+            json_data = ToJSON($scope.parseType, $scope.group_variables, true);
             // group fields
             var group = {
                 variables: json_data,

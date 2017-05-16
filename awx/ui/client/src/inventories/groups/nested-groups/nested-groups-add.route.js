@@ -9,14 +9,14 @@ export default {
     },
     views: {
         'nestedGroupForm@inventories': {
-            templateProvider: function(GenerateForm, GroupForm) {
-                let form = GroupForm;
+            templateProvider: function(GenerateForm, NestedGroupForm) {
+                let form = NestedGroupForm;
                 return GenerateForm.buildHTML(form, {
                     mode: 'add',
                     related: false
                 });
             },
-            controller: 'GroupAddController'
+            controller: 'NestedGroupsAddController'
         }
     }
 };
