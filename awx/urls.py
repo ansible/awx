@@ -14,6 +14,7 @@ urlpatterns = patterns(
     url(r'^api/', include('awx.api.urls', namespace='api', app_name='api')),
     url(r'^sso/', include('awx.sso.urls', namespace='sso', app_name='sso')),
     url(r'^sso/', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^network_ui/', include('awx.network_ui.urls', namespace='network_uiui', app_name='network_ui')),
 )
 
 urlpatterns += patterns(
