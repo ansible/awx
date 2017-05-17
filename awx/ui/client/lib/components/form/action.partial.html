@@ -1,5 +1,5 @@
 <button class="btn at-Button{{ fill }}--{{ color }}"
-        ng-disabled="type !== 'cancel' && !form.state.isValid"
-        ng-class="{ 'at-Button--disabled': form.disabled }" ng-click="action()">
+        ng-disabled="type !== 'cancel' && !form.isValid"
+        ng-class="{ 'at-Button--disabled': !form.isValid }" ng-click="action()">
     {{::text}}
 </button>

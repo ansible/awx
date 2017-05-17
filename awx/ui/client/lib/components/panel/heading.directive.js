@@ -6,12 +6,10 @@ function atPanelHeading (pathService) {
     return {
         restrict: 'E',
         require: '^^atPanel',
+        replace: true,
         transclude: true,
         templateUrl: pathService.getPartialPath('components/panel/heading'),
-        link,
-        scope: {
-            config: '='
-        }
+        link
     };
 }
 

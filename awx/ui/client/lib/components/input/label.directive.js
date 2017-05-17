@@ -5,7 +5,7 @@ function atInputLabel (pathService) {
         replace: true,
         templateUrl: pathService.getPartialPath('components/input/label'),
         scope: {
-            config: '='
+            state: '='
         }
     };
 }

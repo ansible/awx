@@ -1,5 +1,12 @@
 let $resource;
 
+function get() {
+    return $resource(this.path).get().$promise
+        .then(response => {
+            this.model.data = response;
+        });
+}
+
 function options () {
     let actions = {
         options: {    
@@ -13,13 +20,6 @@ function options () {
         });
 }
 
-function get () {
-    return $resource(this.path).get().$promise
-        .then(response => {
-            this.model.data = response;
-        });
-}
-
 function getPostOptions (name) {
     return this.model.options.actions.POST[name];
 }
@@ -30,18 +30,20 @@ function normalizePath (resource) {
     return `${version}${resource}/`;
 }
 
-function Base (_$resource_) {
+function BaseModel (_$resource_) {
     $resource = _$resource_;
 
-    return () => ({
-        model: {},
-        get,
-        options,
-        getPostOptions,
-        normalizePath
-    });
+    return function extend (path) {
+        this.get = get;
+        this.options = options;
+        this.getPostOptions = getPostOptions;
+        this.normalizePath = normalizePath;
+
+        this.model = {};
+        this.path = this.normalizePath(path);
+    };
 }
 
-Base.$inject = ['$resource'];
+BaseModel.$inject = ['$resource'];
 
-export default Base;
+export default BaseModel;

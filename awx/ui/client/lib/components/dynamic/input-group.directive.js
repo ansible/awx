@@ -1,44 +1,49 @@
 function link (scope, el, attrs, controllers) {
-    let formController = controllers[0];
-    let dynamicController = controllers[1];
-    el = el[0];
+    let dynamicController = controllers[0];
+    let element = el[0].getElementsByClassName('at-DynamicInputGroup-container')[0];
 
-    dynamicController.init(scope, formController, el);
+    dynamicController.init(scope, element);
 }
 
-function atDynamicInputGroupController ($scope, $compile) {
+function AtDynamicInputGroupController ($scope, $compile) {
     let vm = this || {};
 
-    let state;
     let scope;
+    let state;
     let source;
-    let form;
-    let el;
+    let element;
 
-    vm.init = (_scope_, _form_, _el_) => {
-        form = _form_;
+    vm.init = (_scope_, _element_) => {
         scope = _scope_;
-        el = _el_;
+        element = _element_;
+        state = scope.state || {};
+        source = state.source;
 
-        scope.config.state = scope.config.state || {};
-        state = scope.config.state;
-        source = scope.config.source;
+        $scope.$watch('state.source.value', vm.update);
+    };
 
-        $scope.$watch('config.source.state.value', vm.update);
+    vm.isValidSource = () => {
+        if (!source.value || source.value === state.value) {
+            return false;
+        }
+        
+        return true;
     };
 
     vm.update = () => {
-        if (!source.state.value || source.state.value === state.value) {
+        if (!vm.isValidSource()) {
             return;
         }
 
-        state.value = source.state.value;
+        vm.clear();
 
-        let inputs = scope.config.getInputs(source.state.value);
+        state.value = source.value;
+
+        let inputs = state.getInputs(source.value);
         let components = vm.createComponentConfigs(inputs);
 
         vm.insert(components);
-        scope.config.components = components;
+        state.components = components;
         vm.compile(components);
     };
 
@@ -56,45 +61,61 @@ function atDynamicInputGroupController ($scope, $compile) {
                 }
             }
 
-            let html = angular.element(`
-                <${input.component}
-                    col="${scope.col}"
-                    config="${scope.config.reference}.components[${i}]">
-                </${input.component}>
-            `);
-
             components.push({
                 options: input,
-                html
+                element: vm.createElement(input, i)
             });
         });
 
         return components;
     };
 
+    vm.createElement = (input, index) => {
+        let tabindex = Number(scope.tab) + index;
+
+        let element =
+            `<${input.component} col="${scope.col}" tab="${tabindex}"
+                state="${state.reference}.components[${index}]">
+            </${input.component}>`;
+
+        return angular.element(element);
+    };
+
     vm.insert = components => {
-        components.forEach(component => el.appendChild(component.html[0]));
+        let group = document.createElement('div');
+
+        components.forEach(component => {
+            group.appendChild(component.element[0]);
+        });
+
+        element.appendChild(group);
     };
 
     vm.compile = components => {
-        components.forEach(component => $compile(component.html[0])(scope.$parent));
+        components.forEach(component => $compile(component.element[0])(scope.$parent));
+    };
+
+    vm.clear = () => {
+        element.innerHTML = '';
     };
 }
 
-atDynamicInputGroupController.$inject = ['$scope', '$compile'];
+AtDynamicInputGroupController.$inject = ['$scope', '$compile'];
 
 function atDynamicInputGroup (pathService) {
     return {
         restrict: 'E',
         replace: true,
-        require: ['^^atForm', 'atDynamicInputGroup'],
+        transclude: true,
+        require: ['atDynamicInputGroup'],
         templateUrl: pathService.getPartialPath('components/dynamic/input-group'),
-        controller: atDynamicInputGroupController,
+        controller: AtDynamicInputGroupController,
         controllerAs: 'vm',
         link,
         scope: {
-            config: '=',
-            col: '@'
+            state: '=',
+            col: '@',
+            tab: '@'
         }
     };
 }

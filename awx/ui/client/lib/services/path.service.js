@@ -1,16 +1,11 @@
-function getPartialPath (path) {
-    return `/static/partials/${path}.partial.html`;
-}
-
-function getViewPath (path) {
-    return `/static/views/${path}.view.html`;
-}
-
 function PathService () {
-    return {
-        getPartialPath,
-        getViewPath
+    this.getPartialPath = path => {
+        return `/static/partials/${path}.partial.html`;
     };
+
+    this.getViewPath = path => {
+        return `/static/views/${path}.view.html`;
+    }
 }
 
 export default PathService;

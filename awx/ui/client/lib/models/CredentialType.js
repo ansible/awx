@@ -1,7 +1,5 @@
-function CredentialType (BaseModel) {
-    Object.assign(this, BaseModel());
-
-    this.path = this.normalizePath('credential_types');
+function CredentialTypeModel (BaseModel) {
+    BaseModel.call(this, 'credential_types');
 
     this.categorizeByKind = () => {
         let group = {};
@@ -40,6 +38,6 @@ function CredentialType (BaseModel) {
     };
 }
 
-CredentialType.$inject = ['BaseModel'];
+CredentialTypeModel.$inject = ['BaseModel'];
 
-export default CredentialType;
+export default CredentialTypeModel;

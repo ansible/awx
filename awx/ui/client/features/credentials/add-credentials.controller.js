@@ -4,23 +4,13 @@ function AddCredentialsController (models) {
     let credential = models.credential;
     let credentialType = models.credentialType;
     
-    vm.heading = {
-        text: 'Create Credentials'
-    };
+    vm.name = credential.getPostOptions('name');
+    vm.description = credential.getPostOptions('description');
 
-    vm.name = {
-        options: credential.getPostOptions('name')
-    };
-
-    vm.description = {
-        options: credential.getPostOptions('description')
-    };
-
-    vm.kind = {
-        options: credential.getPostOptions('credential_type'),
+    vm.kind = Object.assign({
         data: credentialType.categorizeByKind(),
         placeholder: 'Select a Type'
-    };
+    }, credential.getPostOptions('credential_type'));
 
     vm.dynamic = {
         getInputs: credentialType.getTypeFromName,

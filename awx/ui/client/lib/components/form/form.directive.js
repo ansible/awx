@@ -11,34 +11,26 @@ function AtFormController () {
         return vm.trackComponent(type, component, el);
     };
 
-    vm.trackComponent = (type, component, el) => {
-        let meta = {
-            el,
-            type,
-            state: vm.state,
-            disabled: false,
-            tabindex: vm.components.length + 1
-        };
+    vm.trackComponent = (type, component) => {
+        component.type = type;
+        component.form = vm.state;
 
-        if (!vm.components.length) {
-            el.focus();
-        }
-
-        vm.components.push(meta)
-
-        return meta;
+        vm.components.push(component)
     };
 
     vm.validate = () => {
         let isValid = true;
 
-        vm.components
-            .filter(component => component.type === 'input')
-            .forEach(input => {
-                if (input.isValid) {
-                    isValid = false;
-                }
-            });
+        for (let i = 0; i < vm.components.length; i++) {
+            if (vm.components[i].type !== 'input') {
+                continue;
+            }
+
+            if (!vm.components[i].state.isValid) {
+                isValid = false;
+                break;
+            }
+        }
 
         return isValid;
     };
@@ -56,20 +48,16 @@ function AtFormController () {
     };
 }
 
-function link (scope, el, attrs, controller, fn) {
-    //console.log(fn);
-}
-
 function atForm (pathService) {
     return {
         restrict: 'E',
+        replace: true,
         transclude: true,
         templateUrl: pathService.getPartialPath('components/form/form'),
         controller: AtFormController,
         controllerAs: 'vm',
-        link, 
         scope: {
-            config: '='
+            state: '='
         }
     };
 }

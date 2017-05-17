@@ -1,17 +1,16 @@
-<div class="col-sm-{{ col }}">
+<div class="col-sm-{{::col}}">
     <div class="form-group at-u-flat">
-        <at-input-label config="config"></at-input-label>
+        <at-input-label state="state"></at-input-label>
         <div class="at-InputGroup at-InputSelect">
             <input type="text" class="form-control at-Input at-InputSelect-input"
-                   placeholder="{{ config.placeholder | uppercase }}"
-                   ng-model="config.state.value" ng-disabled="form.disabled"
+                   placeholder="{{ state.placeholder | uppercase }}"
+                   ng-model="state.value" ng-disabled="state.disabled"
                    ng-change="vm.check()" />
 
-            <select class="form-control at-InputSelect-select" ng-model="config.state.value"
-                    ng-attr-tabindex="{{ form.tabindex || undefined }}" 
-                    ng-attr-autofocus="{{ form.autofocus || undefined }}"
-                    ng-disabled="form.disabled">
-                <optgroup ng-repeat="group in config.data" label="{{::group.category | uppercase }}">
+            <select class="form-control at-InputSelect-select" ng-model="state.value"
+                    ng-attr-tabindex="{{ tab || undefined }}" 
+                    ng-disabled="state.disabled">
+                <optgroup ng-repeat="group in state.data" label="{{::group.category | uppercase }}">
                     <option ng-repeat="item in group.data" value="{{ item.name }}">
                         {{ item.name }}
                     </option>

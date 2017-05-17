@@ -1,10 +1,16 @@
-function link (scope, el, attrs, controllers) {
+function atInputSelectLink (scope, el, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
-    let input = el.find('input')[0];
-    let select = el.find('select')[0];
+    let elements = {
+        input: el.find('input')[0],
+        select: el.find('select')[0]
+    };
 
-    inputController.init(formController, scope, input, select);
+    if (scope.tab === '1') {
+        elements.select.focus();
+    }
+
+    inputController.init(formController, scope, elements);
 }
 
 function AtInputSelectController (eventService) { 
@@ -12,31 +18,29 @@ function AtInputSelectController (eventService) {
 
     let scope;
     let state;
+    let form;
     let input;
     let select;
-    let form;
 
-    vm.init = (_form_, _scope_, _input_, _select_) => {
+    vm.init = (_form_, _scope_, elements) => {
         form = _form_;
+        input = elements.input;
+        select = elements.select;
         scope = _scope_;
-        input = _input_;
-        select = _select_;
+        state = scope.state || {};
 
-        scope.config.state = scope.config.state || {};
-        state = scope.config.state;
-
+        state.required = state.required || false;
         state.isValid = state.isValid || false;
-        state.message = state.message || '';
-        state.required = scope.config.options.required || false;
+        state.disabled = state.disabled || false;
 
-        scope.form = form.use('input', state, input);
+        form.use('input', scope);
 
         vm.setListeners();
         vm.check();
     };
 
     vm.setListeners = () => {
-        let listeners = eventService.addListeners(scope, [
+        let listeners = eventService.addListeners([
             [input, 'focus', () => select.focus],
             [select, 'mousedown', () => scope.$apply(() => scope.open = !scope.open)],
             [select, 'focus', () => input.classList.add('at-Input--focus')],
@@ -58,7 +62,9 @@ function AtInputSelectController (eventService) {
 
         if (state.required && !state.value) {
             isValid = false;    
-        } else if (state.validate && !state.validate(scope.config.input)) {
+        } 
+        
+        if (state.validate && !state.validate(state.value)) {
             isValid = false;  
         }
 
@@ -86,9 +92,9 @@ function atInputSelect (pathService) {
         templateUrl: pathService.getPartialPath('components/input/select'),
         controller: AtInputSelectController,
         controllerAs: 'vm',
-        link,
+        link: atInputSelectLink,
         scope: {
-            config: '=',
+            state: '=',
             col: '@',
             tab: '@'
         }

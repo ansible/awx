@@ -1,35 +1,28 @@
-function addListeners (scope, list) {
-    let listeners = [];
+function EventService () {
+    this.addListeners = list => {
+        let listeners = [];
 
-    list.forEach(args => {
-        listeners.push(addListener.call(null, scope, ...args));
-    });
+        list.forEach(args => listeners.push(this.addListener(...args)));
 
-    return listeners;
-}
-
-function addListener (scope, el, name, fn) {
-    let listener = {
-        fn,
-        name,
-        el
+        return listeners;
     };
 
-    listener.el.addEventListener(listener.name, listener.fn);
+    this.addListener = (el, name, fn) => {
+        let listener = {
+            fn,
+            name,
+            el
+        };
 
-    return listener;
-}
+        listener.el.addEventListener(listener.name, listener.fn);
 
-function remove (listeners) {
-    listeners.forEach(listener => {
-        listener.el.removeEventListener(listener.name, listener.fn);
-    });
-}
+        return listener;
+    };
 
-function EventService () {
-    return {
-        addListeners,
-        remove
+    this.remove = listeners => {
+        listeners.forEach(listener => {
+            listener.el.removeEventListener(listener.name, listener.fn);
+        });
     };
 }
 

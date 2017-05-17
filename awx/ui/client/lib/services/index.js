@@ -3,5 +3,5 @@ import PathService from './path.service';
 
 angular
     .module('at.lib.services', [])
-    .factory('EventService', EventService)
-    .factory('PathService', PathService); 
+    .service('EventService', EventService)
+    .service('PathService', PathService); 

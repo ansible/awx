@@ -1,9 +1,7 @@
-function Credential (BaseModel) {
-    Object.assign(this, BaseModel());
-
-    this.path = this.normalizePath('credentials');
+function CredentialModel (BaseModel) {
+    BaseModel.call(this, 'credentials');
 }
 
-Credential.$inject = ['BaseModel'];
+CredentialModel.$inject = ['BaseModel'];
 
-export default Credential;
+export default CredentialModel;

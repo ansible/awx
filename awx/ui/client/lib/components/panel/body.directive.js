@@ -1,9 +1,12 @@
 function atPanelBody (pathService) {
     return {
         restrict: 'E',
-        require: '^^atPanel',
+        replace: true,
         transclude: true,
         templateUrl: pathService.getPartialPath('components/panel/body'),
+        scope: {
+            state: '='
+        }
     };
 }
 

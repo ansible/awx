@@ -10,18 +10,10 @@ function atFormActionController ($state) {
 
     let form;
     let scope;
-    let state;
 
     vm.init = (_form_, _scope_) => {
         form = _form_;
         scope = _scope_;
-
-        scope.config = scope.config || {};
-        scope.config.state = scope.config.state || {};
-
-        state = scope.config.state;
-
-        scope.form = form.use('action', state);
 
         switch(scope.type) {
             case 'cancel':
@@ -31,8 +23,14 @@ function atFormActionController ($state) {
                 vm.setSaveDefaults();
                 break;
             default:
-                // TODO: custom type (when needed)
+                vm.setCustomDefaults();
         }
+
+        form.use('action', scope);
+    };
+
+    vm.setCustomDefaults = () => {
+        
     };
 
     vm.setCancelDefaults = () => {
@@ -62,6 +60,7 @@ function atFormAction (pathService) {
         controllerAs: 'vm',
         link,
         scope: {
+            state: '=',
             type: '@'
         }
     };

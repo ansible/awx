@@ -1,33 +1,31 @@
-function link (scope, el, attrs, controllers) {
+function atInputTextLink (scope, el, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
-    let input = el.find('input')[0];
 
-    inputController.init(formController, scope, input);
+    if (scope.tab === '1') {
+        el.find('input')[0].focus();
+    }
+
+    inputController.init(formController, scope);
 }
 
 function AtInputTextController () {
     let vm = this || {};
 
-    let state;
     let scope;
-    let input;
+    let state;
     let form;
 
-    vm.init = (_form_, _scope_, _input_) => {
+    vm.init = (_form_, _scope_) => {
         form = _form_;
         scope = _scope_;
-        input = _input_;
+        state = scope.state || {};
 
-        scope.config.state = scope.config.state || {};
-        state = scope.config.state;
-        state.required = scope.config.options.required;
-
-        state.isValid = state.isValid || false;
-        state.message = state.message || '';
         state.required = state.required || false;
+        state.isValid = state.isValid || false;
+        state.disabled = state.disabled || false;
 
-        scope.form = form.use('input', state, input);
+        form.use('input', scope);
 
         vm.check();
     };
@@ -37,7 +35,9 @@ function AtInputTextController () {
 
         if (state.required && !state.value) {
             isValid = false;    
-        } else if (state.validate && !state.validate(scope.config.input)) {
+        }
+
+        if (state.validate && !state.validate(state.value)) {
             isValid = false;  
         }
 
@@ -63,9 +63,9 @@ function atInputText (pathService) {
         templateUrl: pathService.getPartialPath('components/input/text'),
         controller: AtInputTextController,
         controllerAs: 'vm',
-        link,
+        link: atInputTextLink,
         scope: {
-            config: '=',
+            state: '=',
             col: '@',
             tab: '@'
         }

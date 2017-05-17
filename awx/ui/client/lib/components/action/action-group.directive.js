@@ -1,8 +1,8 @@
 function atActionGroup (pathService) {
     return {
         restrict: 'E',
-        transclude: true,
         replace: true,
+        transclude: true,
         templateUrl: pathService.getPartialPath('components/action/action-group'),
         scope: {
             col: '@',

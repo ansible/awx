@@ -60,7 +60,7 @@ function atPopover (_pathService_) {
         templateUrl: pathService.getPartialPath('components/popover/popover'),
         link,
         scope: {
-            config: '='
+            state: '='
         }
     };
 }
