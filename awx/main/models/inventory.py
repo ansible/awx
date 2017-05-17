@@ -23,7 +23,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import (
     ImplicitRoleField,
     JSONBField,
-    DynamicFilterField,
+    SmartFilterField,
 )
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
@@ -47,8 +47,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     '''
 
     KIND_CHOICES = [
-        ('standard', _('Hosts have a direct link to this inventory.')),
-        ('dynamic', _('Hosts for inventory generated using the host_filter property.')),
+        ('', _('Hosts have a direct link to this inventory.')),
+        ('smart', _('Hosts for inventory generated using the host_filter property.')),
     ]
 
     class Meta:
@@ -111,11 +111,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     kind = models.CharField(
         max_length=32,
         choices=KIND_CHOICES,
-        blank=False,
-        default='standard',
+        blank=True,
+        default='',
         help_text=_('Kind of inventory being represented.'),
     )
-    host_filter = DynamicFilterField(
+    host_filter = SmartFilterField(
         blank=True,
         null=True,
         default=None,

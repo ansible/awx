@@ -45,7 +45,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json)
-from awx.main.utils.filters import DynamicFilter
+from awx.main.utils.filters import SmartFilter
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -1144,11 +1144,11 @@ class InventorySerializer(BaseSerializerWithVariables):
 
     def validate(self, attrs):
         kind = attrs.get('kind', 'standard')
-        if kind == 'dynamic':
+        if kind == 'smart':
             host_filter = attrs.get('host_filter')
             if host_filter is not None:
                 try:
-                    DynamicFilter().query_from_string(host_filter)
+                    SmartFilter().query_from_string(host_filter)
                 except RuntimeError, e:
                     raise models.base.ValidationError(e)
         return super(InventorySerializer, self).validate(attrs)
@@ -3437,7 +3437,7 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_instances(self, obj):
         return obj.instances.count()
 
-        
+
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()

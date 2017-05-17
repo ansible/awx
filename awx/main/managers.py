@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from django.db.models import Sum
 from django.conf import settings
 
-from awx.main.utils.filters import DynamicFilter
+from awx.main.utils.filters import SmartFilter
 
 ___all__ = ['HostManager', 'InstanceManager']
 
@@ -25,15 +25,15 @@ class HostManager(models.Manager):
             return len(set(self.values_list('name', flat=True)))
 
     def get_queryset(self):
-        """When the parent instance of the host query set has a `kind` of dynamic and a `host_filter`
+        """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
         qs = super(HostManager, self).get_queryset()
         if (hasattr(self, 'instance') and
            hasattr(self.instance, 'host_filter') and
            hasattr(self.instance, 'kind')):
-            if self.instance.kind == 'dynamic' and self.instance.host_filter is not None:
-                    q = DynamicFilter.query_from_string(self.instance.host_filter)
+            if self.instance.kind == 'smart' and self.instance.host_filter is not None:
+                    q = SmartFilter.query_from_string(self.instance.host_filter)
                     # If we are using host_filters, disable the core_filters, this allows
                     # us to access all of the available Host entries, not just the ones associated
                     # with a specific FK/relation.

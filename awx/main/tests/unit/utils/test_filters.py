@@ -4,7 +4,7 @@ import pytest
 import mock
 
 # AWX
-from awx.main.utils.filters import DynamicFilter
+from awx.main.utils.filters import SmartFilter
 
 # Django
 from django.db.models import Q
@@ -22,7 +22,7 @@ class mockHost:
 
 
 @mock.patch('awx.main.utils.filters.get_host_model', return_value=mockHost())
-class TestDynamicFilterQueryFromString():
+class TestSmartFilterQueryFromString():
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
         ('"facts__facts__ space "="f"', Q(**{u"facts__facts__ space ": u"f"})),
@@ -36,7 +36,7 @@ class TestDynamicFilterQueryFromString():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_query_generated(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string", [
@@ -45,7 +45,7 @@ class TestDynamicFilterQueryFromString():
     ])
     def test_invalid_filter_strings(self, mock_get_host_model, filter_string):
         with pytest.raises(RuntimeError) as e:
-            DynamicFilter.query_from_string(filter_string)
+            SmartFilter.query_from_string(filter_string)
         assert e.value.message == u"Invalid query " + filter_string
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -53,7 +53,7 @@ class TestDynamicFilterQueryFromString():
         (u'(ansible_facts__a=abc\u1F5E3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1F5E3def"}})),
     ])
     def test_unicode(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -67,7 +67,7 @@ class TestDynamicFilterQueryFromString():
         ('a=b or a=d or a=e or a=z and b=h and b=i and b=j and b=k', Q(**{u"a": u"b"}) | Q(**{u"a": u"d"}) | Q(**{u"a": u"e"}) | Q(**{u"a": u"z"}) & Q(**{u"b": u"h"}) & Q(**{u"b": u"i"}) & Q(**{u"b": u"j"}) & Q(**{u"b": u"k"}))
     ])
     def test_boolean_parenthesis(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -87,7 +87,7 @@ class TestDynamicFilterQueryFromString():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_contains_query_generated(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -97,7 +97,7 @@ class TestDynamicFilterQueryFromString():
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
     def test_contains_query_generated_unicode(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -105,7 +105,7 @@ class TestDynamicFilterQueryFromString():
         ('ansible_facts__c="null"', Q(**{u"ansible_facts__contains": {u"c": u"\"null\""}})),
     ])
     def test_contains_query_generated_null(self, mock_get_host_model, filter_string, q_expected):
-        q = DynamicFilter.query_from_string(filter_string)
+        q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
 
