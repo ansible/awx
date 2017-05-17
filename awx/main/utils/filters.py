@@ -10,7 +10,7 @@ from pyparsing import (
 
 import django
 
-__all__ = ['DynamicFilter']
+__all__ = ['SmartFilter']
 
 unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
 unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
@@ -35,7 +35,7 @@ def get_host_model():
     return django.apps.apps.get_model('main', 'host')
 
 
-class DynamicFilter(object):
+class SmartFilter(object):
     SEARCHABLE_RELATIONSHIP = 'ansible_facts'
 
     class BoolOperand(object):
@@ -68,20 +68,20 @@ class DynamicFilter(object):
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):
-            if not k.startswith(DynamicFilter.SEARCHABLE_RELATIONSHIP):
+            if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
 
             # Strip off leading relationship key
-            if k.startswith(DynamicFilter.SEARCHABLE_RELATIONSHIP + '__'):
-                strip_len = len(DynamicFilter.SEARCHABLE_RELATIONSHIP) + 2
+            if k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP + '__'):
+                strip_len = len(SmartFilter.SEARCHABLE_RELATIONSHIP) + 2
             else:
-                strip_len = len(DynamicFilter.SEARCHABLE_RELATIONSHIP)
+                strip_len = len(SmartFilter.SEARCHABLE_RELATIONSHIP)
             k = k[strip_len:]
 
             pieces = k.split(u'__')
 
-            assembled_k = u'%s__contains' % (DynamicFilter.SEARCHABLE_RELATIONSHIP)
+            assembled_k = u'%s__contains' % (SmartFilter.SEARCHABLE_RELATIONSHIP)
             assembled_v = None
 
             last_v = None

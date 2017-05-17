@@ -36,13 +36,13 @@ from jsonfield import JSONField as upstream_JSONField
 from jsonbfield.fields import JSONField as upstream_JSONBField
 
 # AWX
-from awx.main.utils.filters import DynamicFilter
+from awx.main.utils.filters import SmartFilter
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main import utils
 
 
-__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'DynamicFilterField']
+__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'SmartFilterField']
 
 
 class JSONField(upstream_JSONField):
@@ -331,17 +331,17 @@ class ImplicitRoleField(models.ForeignKey):
         Role.rebuild_role_ancestor_list([], child_ids)
 
 
-class DynamicFilterField(models.TextField):
+class SmartFilterField(models.TextField):
     def get_prep_value(self, value):
         # Change any false value to none.
         # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
         if not value:
             return None
         try:
-            DynamicFilter().query_from_string(value)
+            SmartFilter().query_from_string(value)
         except RuntimeError, e:
             raise models.base.ValidationError(e)
-        return super(DynamicFilterField, self).get_prep_value(value)
+        return super(SmartFilterField, self).get_prep_value(value)
 
 
 class JSONSchemaField(JSONBField):

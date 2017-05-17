@@ -72,7 +72,7 @@ from awx.main.utils import * # noqa
 from awx.main.utils import (
     callback_filter_out_ansible_extra_vars
 )
-from awx.main.utils.filters import DynamicFilter
+from awx.main.utils.filters import SmartFilter
 
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
@@ -554,7 +554,7 @@ class InstanceGroupDetail(RetrieveAPIView):
     serializer_class = InstanceGroupSerializer
     new_in_320 = True
 
-    
+
 class InstanceGroupUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Group Running Jobs")
@@ -1924,7 +1924,7 @@ class HostList(ListCreateAPIView):
         qs = super(HostList, self).get_queryset()
         filter_string = self.request.query_params.get('host_filter', None)
         if filter_string:
-            filter_qs = DynamicFilter.query_from_string(filter_string)
+            filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
         return qs
 
