@@ -54,7 +54,7 @@ export default
             // Retrieve the custom logo information - update configSettings from above
             $http({
                 method: 'GET',
-                url: '/api',
+                url: '/api/',
             })
                 .success(function(response) {
                     if(response.custom_logo) {
