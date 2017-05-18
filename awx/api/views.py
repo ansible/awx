@@ -13,6 +13,7 @@ import socket
 import subprocess
 import sys
 import logging
+import requests
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -70,7 +71,8 @@ from awx.conf.license import get_license, feature_enabled, feature_exists, Licen
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.main.utils import (
-    callback_filter_out_ansible_extra_vars
+    callback_filter_out_ansible_extra_vars,
+    decrypt_field,
 )
 from awx.main.utils.filters import SmartFilter
 
@@ -2065,6 +2067,44 @@ class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
         if not fact_entry:
             return Response({'detail': _('Fact not found.')}, status=status.HTTP_404_NOT_FOUND)
         return Response(self.serializer_class(instance=fact_entry).data)
+
+
+class HostInsights(GenericAPIView):
+
+    model = Host
+    serializer_class = EmptySerializer
+
+    def get(self, request, *args, **kwargs):
+        host = self.get_object()
+        cred = None
+
+        if host.insights_system_id is None:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        creds = Credential.objects.filter(credential_type__name='Red Hat Satellite 6', credential_type__kind='cloud', credential_type__managed_by_tower=True)
+        if creds.count() > 0:
+            cred = creds[0]
+        else:
+            '''
+            TODO: Different ERROR code? .. definately add more information feedback in 'errors' key
+            '''
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        username = cred.inputs['username']
+        password = decrypt_field(cred, 'password')
+
+        session = requests.Session()
+        session.auth = requests.auth.HTTPBasicAuth(username, password)
+        headers = {'Content-Type': 'application/json'}
+        res = session.get('https://access.redhat.com/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id), headers=headers)
+
+        if res.status_code != 200:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        try:
+            return Response(res.json())
+        except ValueError:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GroupList(ListCreateAPIView):

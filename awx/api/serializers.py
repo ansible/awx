@@ -1205,6 +1205,7 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
+            insights = self.reverse('api:host_insights', kwargs={'pk': obj.pk}),
         ))
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
