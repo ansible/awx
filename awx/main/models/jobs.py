@@ -1344,6 +1344,10 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
     def task_impact(self):
         return 150
 
+    @property
+    def preferred_instance_groups(self):
+        return self.global_instance_groups
+
     '''
     JobNotificationMixin
     '''
