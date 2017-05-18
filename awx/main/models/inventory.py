@@ -353,7 +353,7 @@ class Host(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
-        unique_together = (("name", "inventory"), ("insights_system_id", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
+        unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
 
     inventory = models.ForeignKey(
