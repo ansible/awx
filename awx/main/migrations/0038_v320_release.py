@@ -243,8 +243,4 @@ class Migration(migrations.Migration):
             name='insights_system_id',
             field=models.TextField(default=None, help_text='Red Hat Insights host unique identifier.', null=True, db_index=True, blank=True),
         ),
-        migrations.AlterUniqueTogether(
-            name='host',
-            unique_together=set([('insights_system_id', 'inventory'), ('name', 'inventory')]),
-        ),
     ]
