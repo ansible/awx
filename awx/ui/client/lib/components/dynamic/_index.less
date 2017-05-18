@@ -1,12 +1,27 @@
 .at-DynamicInputGroup {
     padding: 0;
+    margin: 0;
     margin: @at-space-6x 0 0 0;
 }
 
-.at-DynamicInputGroup-inset {
+.at-DynamicInputGroup-border {
     position: absolute;
     width: @at-inset-width;
     height: 100%;
     background: @at-gray;
     left: -@at-inset-width;
+}
+
+.at-DynamicInputGroup-title {
+    .at-mixin-Heading(@at-font-size-2x);
+    margin-top: 0;
+    margin-left: @at-space-5x;
+    margin-bottom: @at-space-4x;
+}
+
+.at-DynamicInputGroup-divider {
+    clear: both;
+    margin: 0;
+    padding: 0;
+    height: @at-space-6x;
 }

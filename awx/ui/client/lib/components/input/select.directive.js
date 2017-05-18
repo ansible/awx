@@ -13,27 +13,19 @@ function atInputSelectLink (scope, el, attrs, controllers) {
     inputController.init(formController, scope, elements);
 }
 
-function AtInputSelectController (eventService) { 
+function AtInputSelectController (baseInputController, eventService) { 
     let vm = this || {};
 
     let scope;
-    let state;
-    let form;
     let input;
     let select;
 
-    vm.init = (_form_, _scope_, elements) => {
-        form = _form_;
+    vm.init = (form, _scope_, elements) => {
+        baseInputController.call(vm, 'input', _scope_, form);
+
+        scope = _scope_;
         input = elements.input;
         select = elements.select;
-        scope = _scope_;
-        state = scope.state || {};
-
-        state.required = state.required || false;
-        state.isValid = state.isValid || false;
-        state.disabled = state.disabled || false;
-
-        form.use('input', scope);
 
         vm.setListeners();
         vm.check();
@@ -56,32 +48,9 @@ function AtInputSelectController (eventService) {
 
         scope.$on('$destroy', () => eventService.remove(listeners));
     };
-
-    vm.validate = () => {
-        let isValid = true;
-
-        if (state.required && !state.value) {
-            isValid = false;    
-        } 
-        
-        if (state.validate && !state.validate(state.value)) {
-            isValid = false;  
-        }
-
-        return isValid;
-    };
-
-    vm.check = () => {
-        let isValid = vm.validate();
-
-        if (isValid !== state.isValid) {
-            state.isValid = isValid;
-            form.check();
-        }
-    };
 }
 
-AtInputSelectController.$inject = ['EventService'];
+AtInputSelectController.$inject = ['BaseInputController', 'EventService'];
 
 function atInputSelect (pathService) {
     return {

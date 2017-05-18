@@ -52,7 +52,9 @@ function AtDynamicInputGroupController ($scope, $compile) {
 
         inputs.forEach((input, i) => {
             if (input.type === 'string') {
-                if (input.secret) {
+                if (input.secret && input.multiline) {
+                    input.component = 'at-input-textarea';
+                } else if (input.secret) {
                     input.component = 'at-input-secret';
                 } else if (input.multiline) {
                     input.component = 'at-input-textarea';
@@ -61,10 +63,9 @@ function AtDynamicInputGroupController ($scope, $compile) {
                 }
             }
 
-            components.push({
-                options: input,
+            components.push(Object.assign({
                 element: vm.createElement(input, i)
-            });
+            }, input));
         });
 
         return components;
@@ -83,10 +84,15 @@ function AtDynamicInputGroupController ($scope, $compile) {
 
     vm.insert = components => {
         let group = document.createElement('div');
+        let divider = angular.element(`<div class="at-DynamicInputGroup-divider"></div>`)[0];
 
-        components.forEach(component => {
-            group.appendChild(component.element[0]);
-        });
+        for (let i = 0; i < components.length; i++) {
+            if (i !== 0 && (i % (12 / scope.col)) === 0) {
+                group.appendChild(divider);
+            }
+
+            group.appendChild(components[i].element[0]);
+        }
 
         element.appendChild(group);
     };

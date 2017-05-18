@@ -1,4 +1,4 @@
-function atInputTextLink (scope, el, attrs, controllers) {
+function atInputSecretLink (scope, el, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
 
@@ -9,7 +9,7 @@ function atInputTextLink (scope, el, attrs, controllers) {
     inputController.init(scope, formController);
 }
 
-function AtInputTextController (baseInputController) {
+function AtInputSecretController (baseInputController) {
     let vm = this || {};
 
     vm.init = (scope, form) => {
@@ -19,18 +19,18 @@ function AtInputTextController (baseInputController) {
     };
 }
 
-AtInputTextController.$inject = ['BaseInputController'];
+AtInputSecretController.$inject = ['BaseInputController'];
 
-function atInputText (pathService) {
+function atInputSecret (pathService) {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: ['^^atForm', 'atInputText'],
-        templateUrl: pathService.getPartialPath('components/input/text'),
-        controller: AtInputTextController,
+        require: ['^^atForm', 'atInputSecret'],
+        templateUrl: pathService.getPartialPath('components/input/secret'),
+        controller: AtInputSecretController,
         controllerAs: 'vm',
-        link: atInputTextLink,
+        link: atInputSecretLink,
         scope: {
             state: '=',
             col: '@',
@@ -39,6 +39,6 @@ function atInputText (pathService) {
     };
 }
 
-atInputText.$inject = ['PathService'];
+atInputSecret.$inject = ['PathService'];
 
-export default atInputText;
+export default atInputSecret;

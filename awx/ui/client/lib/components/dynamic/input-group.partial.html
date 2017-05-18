@@ -1,4 +1,11 @@
-<div class="col-sm-12 at-DynamicInputGroup">
-    <div class="at-DynamicInputGroup-inset"></div>
-    <div class="at-DynamicInputGroup-container"></div>
+<div ng-show="state.value" class="col-sm-12 at-DynamicInputGroup">
+    <div class="at-DynamicInputGroup-border"></div>
+    <div class="at-DynamicInputGroup-inset">
+        <div class="row">
+            <div class="col-xs-12">
+                <h4 class="at-DynamicInputGroup-title"><ng-transclude></ng-transclude></h4>
+            </div>
+        </div>
+        <div class="at-DynamicInputGroup-container"></div>
+    </div>
 </div>
