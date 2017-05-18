@@ -737,8 +737,10 @@ class BaseTask(Task):
             # handle custom injectors specified on the CredentialType
             if hasattr(instance, 'all_credentials'):
                 credentials = instance.all_credentials
-            else:
+            elif hasattr(instance, 'credential'):
                 credentials = [instance.credential]
+            else:
+                credentials = []
             for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
