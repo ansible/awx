@@ -91,6 +91,12 @@ class LDAPBackend(BaseLDAPBackend):
             logger.error("Unable to authenticate, license does not support LDAP authentication")
             return None
         try:
+            user = User.objects.get(username=username)
+            if user and (not user.profile or not user.profile.ldap_dn):
+                return None
+        except User.DoesNotExist:
+            pass
+        try:
             return super(LDAPBackend, self).authenticate(username, password)
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
