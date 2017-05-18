@@ -786,7 +786,8 @@ class UserSerializer(BaseSerializer):
                 getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
                 getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
             new_password = None
-        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
+        if (getattr(settings, 'RADIUS_SERVER', None) or
+                getattr(settings, 'TACACSPLUS_HOST', None)) and obj.enterprise_auth.all():
             new_password = None
         if new_password:
             obj.set_password(new_password)
@@ -809,8 +810,9 @@ class UserSerializer(BaseSerializer):
                 getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
                 getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
             account_type = "social"
-        if obj.pk and getattr(settings, 'RADIUS_SERVER', '') and not obj.has_usable_password():
-            account_type = "radius"
+        if (getattr(settings, 'RADIUS_SERVER', None) or
+                getattr(settings, 'TACACSPLUS_HOST', None)) and obj.enterprise_auth.all():
+            account_type = "enterprise"
         return account_type
 
     def create(self, validated_data):
@@ -3437,7 +3439,7 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_instances(self, obj):
         return obj.instances.count()
 
-        
+
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()

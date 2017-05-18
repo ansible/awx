@@ -50,23 +50,6 @@ def test_client_return_invalid_fails_auth(tacacsplus_backend, feature_enabled):
         assert ret_user is None
 
 
-def test_user_with_password_fails_auth(tacacsplus_backend, feature_enabled):
-    auth = mock.MagicMock()
-    auth.valid = True
-    client = mock.MagicMock()
-    client.authenticate.return_value = auth
-    user = mock.MagicMock()
-    user.has_usable_password = mock.MagicMock(return_value=True)
-    with mock.patch('awx.sso.backends.django_settings') as settings,\
-            mock.patch('awx.sso.backends.feature_enabled', feature_enabled('enterprise_auth')),\
-            mock.patch('tacacs_plus.TACACSClient', return_value=client),\
-            mock.patch.object(tacacsplus_backend, '_get_or_set_user', return_value=user):
-        settings.TACACSPLUS_HOST = 'localhost'
-        settings.TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-        ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
-        assert ret_user is None
-
-
 def test_client_return_valid_passes_auth(tacacsplus_backend, feature_enabled):
     auth = mock.MagicMock()
     auth.valid = True
@@ -77,7 +60,7 @@ def test_client_return_valid_passes_auth(tacacsplus_backend, feature_enabled):
     with mock.patch('awx.sso.backends.django_settings') as settings,\
             mock.patch('awx.sso.backends.feature_enabled', feature_enabled('enterprise_auth')),\
             mock.patch('tacacs_plus.TACACSClient', return_value=client),\
-            mock.patch.object(tacacsplus_backend, '_get_or_set_user', return_value=user):
+            mock.patch('awx.sso.backends._get_or_set_enterprise_user', return_value=user):
         settings.TACACSPLUS_HOST = 'localhost'
         settings.TACACSPLUS_AUTH_PROTOCOL = 'ascii'
         ret_user = tacacsplus_backend.authenticate(u"user", u"pass")
