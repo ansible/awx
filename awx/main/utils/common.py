@@ -45,7 +45,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter',
-           'callback_filter_out_ansible_extra_vars',]
+           'callback_filter_out_ansible_extra_vars', 'get_search_fields',]
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -862,3 +862,12 @@ def callback_filter_out_ansible_extra_vars(extra_vars):
         if not key.startswith('ansible_'):
             extra_vars_redacted[key] = value
     return extra_vars_redacted
+
+
+def get_search_fields(model):
+    fields = []
+    for field in model._meta.fields:
+        if field.name in ('username', 'first_name', 'last_name', 'email',
+                          'name', 'description'):
+            fields.append(field.name)
+    return fields

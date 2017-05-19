@@ -6,9 +6,12 @@ from pyparsing import (
     Optional,
     Literal,
     CharsNotIn,
+    ParseException,
 )
 
 import django
+
+from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter']
 
@@ -31,8 +34,8 @@ def string_to_type(t):
     return t
 
 
-def get_host_model():
-    return django.apps.apps.get_model('main', 'host')
+def get_model(name):
+    return django.apps.apps.get_model('main', name)
 
 
 class SmartFilter(object):
@@ -43,11 +46,16 @@ class SmartFilter(object):
             kwargs = dict()
             k, v = self._extract_key_value(t)
             k, v = self._json_path_to_contains(k, v)
-            kwargs[k] = v
 
-            # Avoid import circular dependency
-            Host = get_host_model()
-            self.result = Host.objects.filter(**kwargs)
+            Host = get_model('host')
+            search_kwargs = self._expand_search(k, v)
+            if search_kwargs:
+                kwargs.update(search_kwargs)
+                q = reduce(lambda x, y: x | y, [django.db.models.Q(**{u'%s' % _k:_v}) for _k, _v in kwargs.items()])
+                self.result = Host.objects.filter(q)
+            else:
+                kwargs[k] = v
+                self.result = Host.objects.filter(**kwargs)
 
         def strip_quotes_traditional_logic(self, v):
             if type(v) is unicode and v.startswith('"') and v.endswith('"'):
@@ -145,6 +153,31 @@ class SmartFilter(object):
 
             return (k, v)
 
+        def _expand_search(self, k, v):
+            if 'search' not in k:
+                return None
+
+            model, relation = None, None
+            if k == 'search':
+                model = get_model('host')
+            elif k.endswith('__search'):
+                relation = k.split('__')[0]
+                try:
+                    model = get_model(relation)
+                except LookupError:
+                    raise ParseException('No related field named %s' % relation)
+
+            search_kwargs = {}
+            if model is not None:
+                search_fields = get_search_fields(model)
+                for field in search_fields:
+                    if relation is not None:
+                        k = '{0}__{1}'.format(relation, field)
+                    else:
+                        k = field
+                    search_kwargs[k] = v
+            return search_kwargs
+
 
     class BoolBinOp(object):
         def __init__(self, t):
@@ -195,8 +228,7 @@ class SmartFilter(object):
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
-        #except ParseException as e:
-        except Exception:
+        except ParseException:
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:

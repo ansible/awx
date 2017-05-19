@@ -293,12 +293,7 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
 
     @property
     def search_fields(self):
-        fields = []
-        for field in self.model._meta.fields:
-            if field.name in ('username', 'first_name', 'last_name', 'email',
-                              'name', 'description'):
-                fields.append(field.name)
-        return fields
+        return get_search_fields(self.model)
 
     @property
     def related_search_fields(self):
