@@ -52,7 +52,7 @@ class SmartFilter(object):
             if search_kwargs:
                 kwargs.update(search_kwargs)
                 q = reduce(lambda x, y: x | y, [django.db.models.Q(**{u'%s' % _k:_v}) for _k, _v in kwargs.items()])
-                self.result = q
+                self.result = Host.objects.filter(q)
             else:
                 kwargs[k] = v
                 self.result = Host.objects.filter(**kwargs)
@@ -162,7 +162,10 @@ class SmartFilter(object):
                 model = get_model('host')
             elif k.endswith('__search'):
                 relation = k.split('__')[0]
-                model = get_model(relation)
+                try:
+                    model = get_model(relation)
+                except LookupError:
+                    raise ParseException('No related field named %s' % relation)
 
             search_kwargs = {}
             if model is not None:
