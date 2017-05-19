@@ -702,6 +702,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
             continue
+        path = os.path.realpath(path)
         if os.path.isdir(path):
             new_path = tempfile.mkdtemp(dir=kwargs['proot_temp_dir'])
             os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
@@ -722,6 +723,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue
+        path = os.path.realpath(path)
         new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
     new_args.extend(['--chdir', cwd])
     new_args.extend(args)
