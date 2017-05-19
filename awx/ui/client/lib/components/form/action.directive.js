@@ -1,18 +1,20 @@
-function link (scope, el, attrs, controllers) {
+function link (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let actionController = controllers[1];
 
-    actionController.init(formController, scope);
+    actionController.init(formController, element, scope);
 }
 
 function atFormActionController ($state) {
     let vm = this || {};
 
+    let element;
     let form;
     let scope;
 
-    vm.init = (_form_, _scope_) => {
+    vm.init = (_form_, _element_, _scope_) => {
         form = _form_;
+        element = _element_;
         scope = _scope_;
 
         switch(scope.type) {
@@ -26,7 +28,7 @@ function atFormActionController ($state) {
                 vm.setCustomDefaults();
         }
 
-        form.use('action', scope);
+        form.register('action', scope);
     };
 
     vm.setCustomDefaults = () => {
@@ -44,6 +46,7 @@ function atFormActionController ($state) {
         scope.text = 'SAVE';
         scope.fill = '';
         scope.color = 'green';
+        scope.action = () => form.submit();
     };
 }
 

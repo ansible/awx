@@ -27,7 +27,7 @@ function CredentialTypeModel (BaseModel) {
 
     this.mergeInputProperties = type => {
         return type.inputs.fields.map(field => {
-            if (!type.inputs.required || type.inputs.required.indexOf(field.id) !== -1) {
+            if (!type.inputs.required || type.inputs.required.indexOf(field.id) === -1) {
                 field.required = false;
             } else {
                 field.required = true;

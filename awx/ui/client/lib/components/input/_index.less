@@ -1,5 +1,5 @@
 .at-Input {
-    .at-mixin-Placeholder(@at-gray-dark-3x);
+    .at-mixin-Placeholder(@at-gray-dark-2x);
 
     height: @at-input-height;
     background: @at-white;
@@ -32,9 +32,9 @@
 .at-InputLabel-required {
     color: @at-red;
     font-weight: @at-font-weight-2x;
-    font-size: @at-font-size-4x;
+    font-size: @at-font-size-2x;
     line-height: @at-line-height-short;
-    margin: @at-space @at-space 0 0;
+    margin: @at-space-3x @at-space 0 0;
 }
 
 .at-InputGroup {
@@ -42,12 +42,13 @@
     width: 100%;
 
     & > i {
+        font-size: @at-font-size;
         position: absolute;  
         z-index: 3;
         pointer-events: none;
-        top: 9px;
+        top: @at-space-4x;
         right: @at-space-4x;
-        color: @at-gray-dark-4x;
+        color: @at-gray-dark-2x;
     }
 }
 
@@ -70,7 +71,9 @@
 }
 
 .at-Input-button {
-    background-color: @at-white;
-    border-color: @at-gray-dark-2x;
-    color: @at-gray-dark-5x;
+    width: 72px;
+
+    &, &:active, &:hover, &:focus {
+        background-color: @at-white;
+    }
 }

@@ -1,5 +1,5 @@
 function BaseInputController () {
-    return function extend (type, scope, form) {
+    return function extend (type, scope, element, form) {
         let vm = this;
 
         scope.state = scope.state || {};
@@ -8,7 +8,7 @@ function BaseInputController () {
         scope.state.isValid = scope.state.isValid || false;
         scope.state.disabled = scope.state.disabled || false;
 
-        form.use(type, scope);
+        form.register(type, scope);
 
         vm.validate = () => {
             let isValid = true;

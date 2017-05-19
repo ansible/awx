@@ -1,18 +1,20 @@
 function atPopoverLink (scope, el, attr, controllers) {
     let popoverController = controllers[0];
-    let icon = el[0];
-    let popover = icon.getElementsByClassName('at-Popover-container')[0];
+    let container = el[0];
+    let popover = container.getElementsByClassName('at-Popover-container')[0];
+    let icon = container.getElementsByTagName('i')[0];
 
-    popoverController.init(icon, popover);
+    popoverController.init(container, icon, popover);
 }
 
 function AtPopoverController () {
     let vm = this;
 
+    let container;
     let icon;
     let popover;
 
-    vm.init = (_icon_, _popover_) => {
+    vm.init = (_container_, _icon_, _popover_) => {
         icon = _icon_;
         popover = _popover_;
 
@@ -71,6 +73,9 @@ function AtPopoverController () {
             let cx = Math.floor(iPos.left + (iPos.width / 2));
             let cy = Math.floor(iPos.top + (iPos.height / 2));
 
+            arrow.style.top = (iPos.top - iPos.height) + 'px'; 
+            arrow.style.left = iPos.right + 'px'; 
+
             if (cy < (pHeight / 2)) {
                 popover.style.top = '10px';
             } else {
@@ -78,10 +83,6 @@ function AtPopoverController () {
             }
 
             popover.style.left = cx + 'px';
-
-            arrow.style.top = iPos.top + 'px'; 
-            arrow.style.left = iPos.left + 20 + 'px'; 
-
             popover.style.visibility = 'visible';
             popover.style.opacity = 1;
 

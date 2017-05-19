@@ -1,19 +1,19 @@
-function atInputTextLink (scope, el, attrs, controllers) {
+function atInputTextLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
 
     if (scope.tab === '1') {
-        el.find('input')[0].focus();
+        element.find('input')[0].focus();
     }
 
-    inputController.init(scope, formController);
+    inputController.init(scope, element, formController);
 }
 
 function AtInputTextController (baseInputController) {
     let vm = this || {};
 
-    vm.init = (scope, form) => {
-        baseInputController.call(vm, 'input', scope, form);
+    vm.init = (scope, element, form) => {
+        baseInputController.call(vm, 'input', scope, element, form);
 
         vm.check();
     };

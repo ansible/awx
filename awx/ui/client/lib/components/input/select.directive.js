@@ -1,31 +1,28 @@
-function atInputSelectLink (scope, el, attrs, controllers) {
+function atInputSelectLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
-    let elements = {
-        input: el.find('input')[0],
-        select: el.find('select')[0]
-    };
-
     if (scope.tab === '1') {
         elements.select.focus();
     }
 
-    inputController.init(formController, scope, elements);
+    inputController.init(scope, element, formController);
 }
 
 function AtInputSelectController (baseInputController, eventService) { 
     let vm = this || {};
 
     let scope;
+    let element;
     let input;
     let select;
 
-    vm.init = (form, _scope_, elements) => {
-        baseInputController.call(vm, 'input', _scope_, form);
+    vm.init = (_scope_, _element_, form) => {
+        baseInputController.call(vm, 'input', _scope_, _element_, form);
 
         scope = _scope_;
-        input = elements.input;
-        select = elements.select;
+        element = _element_;
+        input = element.find('input')[0];
+        select = element.find('select')[0];
 
         vm.setListeners();
         vm.check();

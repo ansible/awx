@@ -1,19 +1,22 @@
-function link (scope, el, attrs, controllers) {
+function atDynamicInputGroupLink (scope, el, attrs, controllers) {
     let dynamicController = controllers[0];
+    let formController = controllers[1];
     let element = el[0].getElementsByClassName('at-DynamicInputGroup-container')[0];
 
-    dynamicController.init(scope, element);
+    dynamicController.init(scope, formController, element);
 }
 
 function AtDynamicInputGroupController ($scope, $compile) {
     let vm = this || {};
 
+    let form;
     let scope;
     let state;
     let source;
     let element;
 
-    vm.init = (_scope_, _element_) => {
+    vm.init = (_scope_, _form_, _element_) => {
+        form = _form_;
         scope = _scope_;
         element = _element_;
         state = scope.state || {};
@@ -35,7 +38,9 @@ function AtDynamicInputGroupController ($scope, $compile) {
             return;
         }
 
-        vm.clear();
+        if (state.components) {
+            vm.clear();
+        }
 
         state.value = source.value;
 
@@ -64,7 +69,8 @@ function AtDynamicInputGroupController ($scope, $compile) {
             }
 
             components.push(Object.assign({
-                element: vm.createElement(input, i)
+                element: vm.createElement(input, i),
+                dynamic: true
             }, input));
         });
 
@@ -102,6 +108,7 @@ function AtDynamicInputGroupController ($scope, $compile) {
     };
 
     vm.clear = () => {
+        form.deregisterDynamicComponents(state.components);
         element.innerHTML = '';
     };
 }
@@ -113,11 +120,11 @@ function atDynamicInputGroup (pathService) {
         restrict: 'E',
         replace: true,
         transclude: true,
-        require: ['atDynamicInputGroup'],
+        require: ['atDynamicInputGroup', '^^atForm'],
         templateUrl: pathService.getPartialPath('components/dynamic/input-group'),
         controller: AtDynamicInputGroupController,
         controllerAs: 'vm',
-        link,
+        link: atDynamicInputGroupLink,
         scope: {
             state: '=',
             col: '@',
