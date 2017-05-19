@@ -168,16 +168,6 @@ class SmartFilter(object):
             return left | right
 
 
-    class BoolNot(object):
-        def __init__(self, t):
-            self.right = t[0][1].result
-
-            self.result = self.execute_logic(self.right)
-
-        def execute_logic(self, right):
-            return ~right
-
-
     @classmethod
     def query_from_string(cls, filter_string):
 
@@ -199,7 +189,6 @@ class SmartFilter(object):
         grammar.setParseAction(cls.BoolOperand)
 
         boolExpr = infixNotation(grammar, [
-            #("not", 1, opAssoc.RIGHT, cls.BoolNot),
             ("and", 2, opAssoc.LEFT, cls.BoolAnd),
             ("or",  2, opAssoc.LEFT, cls.BoolOr),
         ])
