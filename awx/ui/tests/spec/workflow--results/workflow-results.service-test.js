@@ -23,7 +23,7 @@ describe('workflowResultsService', () => {
             let ticks = 0;
             let ticks_expected = 10;
 
-            workflowResultsService.createOneSecondTimer(moment(), function(time) {
+            workflowResultsService.createOneSecondTimer(moment(), function() {
                 ticks += 1;
                 if (ticks >= ticks_expected) {
                     expect(ticks).toBe(ticks_expected);
@@ -36,7 +36,7 @@ describe('workflowResultsService', () => {
             $interval.flush(ticks_expected * 1000);
         });
     });
-    
+
     describe('destroyTimer()', () => {
         beforeEach(() => {
             $interval.cancel = jasmine.createSpy('cancel');

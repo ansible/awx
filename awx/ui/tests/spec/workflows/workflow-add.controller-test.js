@@ -80,8 +80,8 @@ describe('Controller: WorkflowAdd', () => {
         ParseTypeChange = _ParseTypeChange_;
         ToJSON = _ToJSON_;
 
-        httpBackend
-            .whenGET('/api')
+        $httpBackend
+            .whenGET(/^\/api\/?$/)
             .respond(200, '');
 
         $httpBackend
