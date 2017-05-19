@@ -15,6 +15,8 @@ function AtInputSecretController (baseInputController) {
     vm.init = (scope, form) => {
         baseInputController.call(vm, 'input', scope, form);
 
+        scope.type = 'password';
+
         vm.check();
     };
 }

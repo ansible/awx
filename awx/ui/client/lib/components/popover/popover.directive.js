@@ -23,6 +23,10 @@ function AtPopoverController () {
         return event => {
             event.stopPropagation();
 
+            if (vm.isClickWithinPopover(event, popover)) {
+                return;
+            }
+
             vm.open = false;
 
             popover.style.visibility = 'hidden';
@@ -31,6 +35,19 @@ function AtPopoverController () {
             window.removeEventListener('click', vm.dismissListener);
             window.removeEventListener('resize', vm.dismissListener);
         };
+    };
+
+    vm.isClickWithinPopover = (event, popover) => {
+        let box = popover.getBoundingClientRect();
+
+        let x = event.clientX;
+        let y = event.clientY;
+
+        if ((x <= box.right && x >= box.left) && (y >= box.top && y <= box.bottom)) {
+            return true;
+        }
+
+        return false;
     };
 
     vm.createDisplayListener = () => {
