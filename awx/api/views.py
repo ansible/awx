@@ -2077,6 +2077,7 @@ class HostInsights(GenericAPIView):
     def get(self, request, *args, **kwargs):
         host = self.get_object()
         cred = None
+        ret = {}
 
         if host.insights_system_id is None:
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -2102,7 +2103,8 @@ class HostInsights(GenericAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         try:
-            return Response(res.json())
+            ret['insights_content'] = res.json()
+            return Response(ret)
         except ValueError:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
