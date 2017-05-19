@@ -129,6 +129,7 @@ class TestSmartFilterQueryFromString():
         q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
+
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
 #('facts__facts__arr[]="foo"', 1),

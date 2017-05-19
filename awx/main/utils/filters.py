@@ -6,6 +6,7 @@ from pyparsing import (
     Optional,
     Literal,
     CharsNotIn,
+    ParseException,
 )
 
 import django
@@ -235,7 +236,7 @@ class SmartFilter(object):
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
-        except Exception:
+        except ParseException:
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:
