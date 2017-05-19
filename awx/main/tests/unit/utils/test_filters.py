@@ -2,12 +2,17 @@
 # Python
 import pytest
 import mock
+from collections import namedtuple
 
 # AWX
 from awx.main.utils.filters import SmartFilter
 
 # Django
 from django.db.models import Q
+
+
+Field = namedtuple('Field', 'name')
+Meta = namedtuple('Meta', 'fields')
 
 
 class mockObjects:
@@ -19,9 +24,10 @@ class mockHost:
     def __init__(self):
         print("Host mock created")
         self.objects = mockObjects()
+        self._meta = Meta(fields=(Field(name='name'), Field(name='description')))
 
 
-@mock.patch('awx.main.utils.filters.get_host_model', return_value=mockHost())
+@mock.patch('awx.main.utils.filters.get_model', return_value=mockHost())
 class TestSmartFilterQueryFromString():
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
@@ -108,6 +114,20 @@ class TestSmartFilterQueryFromString():
         q = SmartFilter.query_from_string(filter_string)
         assert unicode(q) == unicode(q_expected)
 
+
+    @pytest.mark.parametrize("filter_string,q_expected", [
+        ('search=foo', Q(**{u"name": u"foo"}) | Q(**{ u"description": u"foo"})),
+        ('group__search=foo', Q(**{u"group__name": u"foo"}) | Q(**{u"group__description": u"foo"})),
+        ('search=foo and group__search=foo', Q(
+            Q(**{u"name": u"foo"}) | Q(**{ u"description": u"foo"}),
+            Q(**{u"group__name": u"foo"}) | Q(**{u"group__description": u"foo"}))),
+        ('search=foo or ansible_facts__a=null',
+         (Q(**{u"name": u"foo"}) | Q(**{u"description": u"foo"})) |
+         Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
+    ])
+    def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
+        q = SmartFilter.query_from_string(filter_string)
+        assert unicode(q) == unicode(q_expected)
 
 '''
 #('"facts__quoted_val"="f\"oo"', 1),
