@@ -293,6 +293,15 @@ def notification_template(organization):
 
 
 @pytest.fixture
+def notification_template_with_encrypt(organization):
+    return NotificationTemplate.objects.create(name='test-notification_template_with_encrypt',
+                                               organization=organization,
+                                               notification_type="slack",
+                                               notification_configuration=dict(channels=["Foo", "Bar"],
+                                                                               token="token"))
+
+
+@pytest.fixture
 def notification(notification_template):
     return Notification.objects.create(notification_template=notification_template,
                                        status='successful',

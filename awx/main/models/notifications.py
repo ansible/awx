@@ -6,7 +6,7 @@ import logging
 from django.db import models
 from django.core.mail.message import EmailMessage
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, force_text
 
 # AWX
 from awx.api.versioning import reverse
@@ -118,6 +118,13 @@ class NotificationTemplate(CommonModelNameNotUnique):
         backend_obj = self.notification_class(**self.notification_configuration)
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         return backend_obj.send_messages([notification_obj])
+
+    def display_notification_configuration(self):
+        field_val = self.notification_configuration.copy()
+        for field in self.notification_class.init_parameters:
+            if field in field_val and force_text(field_val[field]).startswith('$encrypted$'):
+                field_val[field] = '$encrypted$'
+        return field_val
 
 
 class Notification(CreatedModifiedModel):

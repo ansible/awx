@@ -15,6 +15,7 @@ from jinja2 import Template
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.utils.encoding import force_text
 
 # AWX
 from awx.api.versioning import reverse
@@ -369,6 +370,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             # self.inputs
             field = 'inputs'
         super(Credential, self).mark_field_for_save(update_fields, field)
+
+    def display_inputs(self):
+        field_val = self.inputs.copy()
+        for k, v in field_val.items():
+            if force_text(v).startswith('$encrypted$'):
+                field_val[k] = '$encrypted$'
+        return field_val
 
 
 class CredentialType(CommonModelNameNotUnique):
