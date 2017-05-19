@@ -199,7 +199,7 @@ class SmartFilter(object):
         grammar.setParseAction(cls.BoolOperand)
 
         boolExpr = infixNotation(grammar, [
-            ("not", 1, opAssoc.RIGHT, cls.BoolNot),
+            #("not", 1, opAssoc.RIGHT, cls.BoolNot),
             ("and", 2, opAssoc.LEFT, cls.BoolAnd),
             ("or",  2, opAssoc.LEFT, cls.BoolOr),
         ])
