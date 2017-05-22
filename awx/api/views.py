@@ -14,6 +14,7 @@ import subprocess
 import sys
 import logging
 import requests
+import urlparse
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -2087,9 +2088,11 @@ class HostInsights(GenericAPIView):
         try:
             res = self._get_insights(url, username, password)
         except requests.exceptions.SSLError:
-            return (dict(error='SSLError while trying to connect to https://access.redhat.com/'), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error='SSLError while trying to connect to {}'.format(url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
         except requests.exceptions.Timeout:
-            return (dict(error='Request to {} timed out'.format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
+            return (dict(error='Request to {} timed out.'.format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
+        except requests.exceptions.RequestException as e:
+            return (dict(error='Unkown exception {} while trying to GET {}'.format(e, url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         if res.status_code != 200:
             return (dict(error='Failed to gather reports and maintenance plans from Insights API. Server responded with {} status code and message {}'.format(res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -2097,7 +2100,7 @@ class HostInsights(GenericAPIView):
         try:
             return (dict(insights_content=res.json()), status.HTTP_200_OK)
         except ValueError:
-            return (None, status.HTTP_204_NO_CONTENT)
+            return (dict(error='Expected JSON response from Insights but instead got {}'.format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()

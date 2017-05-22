@@ -1,5 +1,6 @@
 import mock
 import pytest
+import requests
 
 from collections import namedtuple
 
@@ -8,6 +9,7 @@ from awx.api.views import (
     JobTemplateLabelList,
     JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
+    HostInsights,
 )
 
 
@@ -117,3 +119,48 @@ class TestInventoryInventorySourcesUpdate:
             view = InventoryInventorySourcesUpdate()
             response = view.post(mock_request)
             assert response.data == expected
+
+
+class TestHostInsights():
+
+    @pytest.fixture
+    def patch_parent(self, mocker):
+        mocker.patch('awx.api.generics.GenericAPIView')
+
+    @pytest.mark.parametrize("status_code, exception, error, message", [
+        (500, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
+        (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
+        (500, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+    ])
+    def test_get_insights_request_exception(self, patch_parent, mocker, status_code, exception, error, message):
+        view = HostInsights()
+        mocker.patch.object(view, '_get_insights', side_effect=exception(error))
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert code == status_code
+        assert msg['error'] == message or error
+
+    def test_get_insights_non_200(self, patch_parent, mocker):
+        view = HostInsights()
+        Response = namedtuple('Response', 'status_code content')
+        mocker.patch.object(view, '_get_insights', return_value=Response(500, 'hello world!'))
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API. Server responded with 500 status code and message hello world!'
+
+    def test_get_insights_malformed_json_content(self, patch_parent, mocker):
+        view = HostInsights()
+        
+        class Response():
+            status_code = 200
+            content = 'booo!'
+
+            def json(self):
+                raise ValueError('we do not care what this is')
+        
+        mocker.patch.object(view, '_get_insights', return_value=Response())
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert msg['error'] == 'Expected JSON response from Insights but instead got booo!'
+        assert code == 500
+
