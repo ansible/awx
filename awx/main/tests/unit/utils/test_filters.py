@@ -114,13 +114,13 @@ class TestSmartFilterQueryFromString():
 
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('search=foo', Q(Q(**{u"name": u"foo"}) | Q(**{ u"description": u"foo"}))),
-        ('group__search=foo', Q(Q(**{u"group__name": u"foo"}) | Q(**{u"group__description": u"foo"}))),
+        ('search=foo', Q(Q(**{u"name__contains": u"foo"}) | Q(**{ u"description__contains": u"foo"}))),
+        ('group__search=foo', Q(Q(**{u"group__name__contains": u"foo"}) | Q(**{u"group__description__contains": u"foo"}))),
         ('search=foo and group__search=foo', Q(
-            Q(**{u"name": u"foo"}) | Q(**{ u"description": u"foo"}),
-            Q(**{u"group__name": u"foo"}) | Q(**{u"group__description": u"foo"}))),
+            Q(**{u"name__contains": u"foo"}) | Q(**{ u"description__contains": u"foo"}),
+            Q(**{u"group__name__contains": u"foo"}) | Q(**{u"group__description__contains": u"foo"}))),
         ('search=foo or ansible_facts__a=null',
-            Q(Q(**{u"name": u"foo"}) | Q(**{u"description": u"foo"})) |
+            Q(Q(**{u"name__contains": u"foo"}) | Q(**{u"description__contains": u"foo"})) |
             Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
     ])
     def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
