@@ -2074,39 +2074,48 @@ class HostInsights(GenericAPIView):
     model = Host
     serializer_class = EmptySerializer
 
+    def _extract_insights_creds(self, credential):
+        return (credential.inputs['username'], decrypt_field(credential, 'password'))
+
+    def _get_insights(self, url, username, password):
+        session = requests.Session()
+        session.auth = requests.auth.HTTPBasicAuth(username, password)
+        headers = {'Content-Type': 'application/json'}
+        return session.get(url, headers=headers, timeout=120)
+
+    def get_insights(self, url, username, password):
+        try:
+            res = self._get_insights(url, username, password)
+        except requests.exceptions.SSLError:
+            return (dict(error='SSLError while trying to connect to https://access.redhat.com/'), status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except requests.exceptions.Timeout:
+            return (dict(error='Request to {} timed out'.format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
+
+        if res.status_code != 200:
+            return (dict(error='Failed to gather reports and maintenance plans from Insights API. Server responded with {} status code and message {}'.format(res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        try:
+            return (dict(insights_content=res.json()), status.HTTP_200_OK)
+        except ValueError:
+            return (None, status.HTTP_204_NO_CONTENT)
+
     def get(self, request, *args, **kwargs):
         host = self.get_object()
         cred = None
-        ret = {}
 
         if host.insights_system_id is None:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(dict(error='This host is not recognized as an Insights host.'), status=status.HTTP_404_NOT_FOUND)
 
         creds = Credential.objects.filter(credential_type__name='Red Hat Satellite 6', credential_type__kind='cloud', credential_type__managed_by_tower=True)
         if creds.count() > 0:
             cred = creds[0]
         else:
-            '''
-            TODO: Different ERROR code? .. definately add more information feedback in 'errors' key
-            '''
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(dict(error='No Insights Credential found for the Inventory, "{}", that this host belongs to.'.format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
 
-        username = cred.inputs['username']
-        password = decrypt_field(cred, 'password')
-
-        session = requests.Session()
-        session.auth = requests.auth.HTTPBasicAuth(username, password)
-        headers = {'Content-Type': 'application/json'}
-        res = session.get('https://access.redhat.com/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id), headers=headers)
-
-        if res.status_code != 200:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        try:
-            ret['insights_content'] = res.json()
-            return Response(ret)
-        except ValueError:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        url = 'https://access.redhat.com/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id)
+        (username, password) = self._extract_insights_creds(cred)
+        (msg, status) = self.get_insights(url, username, password)
+        return Response(msg, status=status)
 
 
 class GroupList(ListCreateAPIView):
