@@ -1,0 +1,103 @@
+/*************************************************
+ * Copyright (c) 2017 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+function SmartInventoryEdit($scope, $location,
+    $stateParams, InventoryForm, Rest, ProcessErrors,
+    ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    ParseVariableString, $state, OrgAdminLookup, resourceData, $rootScope) {
+
+    // Inject dynamic view
+    var defaultUrl = GetBasePath('inventory'),
+        form = InventoryForm,
+        inventory_id = $stateParams.smartinventory_id,
+        inventoryData = resourceData.data;
+
+    ClearScope();
+    init();
+
+    function init() {
+        ClearScope();
+        form.formLabelSize = null;
+        form.formFieldSize = null;
+        $scope.inventory_id = inventory_id;
+
+        $scope = angular.extend($scope, inventoryData);
+
+        $scope.smartinventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
+        $scope.organization_name = inventoryData.summary_fields.organization.name;
+
+        $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
+        $scope.parseType = 'yaml';
+
+        $rootScope.$on('$stateChangeSuccess', function(event, toState) {
+            if(toState.name === 'inventories.editSmartInventory') {
+                ParseTypeChange({
+                    scope: $scope,
+                    variable: 'smartinventory_variables',
+                    parse_variable: 'parseType',
+                    field_id: 'smartinventory_smartinventory_variables'
+                });
+            }
+        });
+
+        OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})
+        .then(function(canEditOrg){
+            $scope.canEditOrg = canEditOrg;
+        });
+
+        $scope.inventory_obj = inventoryData;
+        $rootScope.breadcrumb.inventory_name = inventoryData.name;
+
+        $scope.smart_hosts = {
+            host_filter: encodeURIComponent($scope.host_filter)
+        };
+    }
+
+    // Save
+    $scope.formSave = function() {
+        Wait('start');
+
+        let fld, data = {};
+
+        for (fld in form.fields) {
+            data[fld] = $scope[fld];
+        }
+
+        data.variables = ToJSON($scope.parseType, $scope.smartinventory_variables, true);
+        data.host_filter = decodeURIComponent($scope.smart_hosts.host_filter);
+        data.kind = "smart";
+
+        Rest.setUrl(defaultUrl + inventory_id + '/');
+        Rest.put(data)
+            .success(function() {
+                Wait('stop');
+                $state.go($state.current, {}, { reload: true });
+            })
+            .error(function(data, status) {
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to update inventory. PUT returned status: ' + status
+                });
+            });
+    };
+
+    $scope.formCancel = function() {
+        $state.go('inventories');
+    };
+
+}
+
+export default [ '$scope', '$location',
+    '$stateParams', 'InventoryForm', 'Rest',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
+    'ToJSON', 'ParseVariableString',
+    '$state', 'OrgAdminLookup', 'resourceData', '$rootScope', SmartInventoryEdit
+];

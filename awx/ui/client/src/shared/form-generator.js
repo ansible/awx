@@ -1464,6 +1464,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html+= "<span class=\"Form-title--is_external_account\" "+
                             "ng-show='external_account'>{{external_account}}</span>";
                     }
+                    if(this.form.name === "smartinventory"){
+                        html+= "<span class=\"Form-title--is_smartinventory\" "+
+                            ">" + i18n._("Smart Inventory") + "</span>";
+                    }
                     html += "</div>\n";
                     html += "<div class=\"Form-header--fields\">";
                     if(this.form.headerFields){

@@ -109,14 +109,6 @@ export default {
             tooltipInnerClass: "Tooltip-wide",
             ngShow: true
         },
-        refresh: {
-            mode: 'all',
-            awToolTip: "Refresh the page",
-            ngClick: "refreshGroups()",
-            ngShow: "socketStatus == 'error'",
-            actionClass: 'btn List-buttonDefault',
-            buttonContent: 'REFRESH'
-        },
         create: {
             mode: 'all',
             ngClick: "createHost()",

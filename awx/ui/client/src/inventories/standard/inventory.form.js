@@ -31,7 +31,7 @@ function(i18n, InventoryCompletedJobsList) {
 
     return {
 
-        addTitle: i18n._('NEW INVENTORY'),
+        addTitle: i18n._('NEW STANDARD INVENTORY'),
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
         basePath: 'inventory',

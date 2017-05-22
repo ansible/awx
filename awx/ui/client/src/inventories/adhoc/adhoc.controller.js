@@ -22,7 +22,7 @@ function adhocController($q, $scope, $stateParams,
     var privateFn = {};
     this.privateFn = privateFn;
 
-    var id = $stateParams.inventory_id,
+    var id = $stateParams.inventory_id ? $stateParams.inventory_id : $stateParams.smartinventory_id,
         hostPattern = $stateParams.pattern;
 
     // note: put any urls that the controller will use in here!!!!
@@ -189,7 +189,7 @@ function adhocController($q, $scope, $stateParams,
 
     // launch the job with the provided form data
     $scope.launchJob = function () {
-        var adhocUrl = GetBasePath('inventory') + $stateParams.inventory_id +
+        var adhocUrl = GetBasePath('inventory') + id +
         '/ad_hoc_commands/', fld, data={}, html;
 
         html = '<form class="ng-valid ng-valid-required" ' +
@@ -233,8 +233,7 @@ function adhocController($q, $scope, $stateParams,
                     ];
                 }
                 // Launch the adhoc job
-                Rest.setUrl(GetBasePath('inventory') +
-                    $stateParams.inventory_id + '/ad_hoc_commands/');
+                Rest.setUrl(GetBasePath('inventory') + id + '/ad_hoc_commands/');
                 Rest.post(data)
                     .success(function (data) {
                          Wait('stop');

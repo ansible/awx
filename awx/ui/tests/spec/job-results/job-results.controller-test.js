@@ -10,9 +10,15 @@ describe('Controller: jobResultsController', () => {
     statusSocket = function() {
         var fn = function() {};
         return fn;
-    }
+    };
     jobData = {
-        related: {}
+        related: {},
+        summary_fields: {
+            inventory: {
+                id: null,
+                kind: ''
+            }
+        }
     };
     jobDataOptions = {
         actions: {
@@ -85,7 +91,7 @@ describe('Controller: jobResultsController', () => {
             $provide.value('ParseVariableString', ParseVariableString);
             $provide.value('jobResultsService', jobResultsService);
             $provide.value('eventQueue', eventQueue);
-            $provide.value('Dataset', Dataset)
+            $provide.value('Dataset', Dataset);
             $provide.value('Rest', Rest);
             $provide.value('$state', $state);
             $provide.value('QuerySet', QuerySet);
@@ -140,7 +146,7 @@ describe('Controller: jobResultsController', () => {
             eventQueue.populate.and
                 .returnValue(populateResolve);
 
-            jobResultsService.getJobData = function(blah) {
+            jobResultsService.getJobData = function() {
                 var deferred = $q.defer();
                 deferred.resolve({});
                 return deferred.promise;
@@ -200,12 +206,17 @@ describe('Controller: jobResultsController', () => {
                 "network_credential": "api/v1/credentials/14",
             };
 
+            jobData.summary_fields.inventory = {
+                id: 12,
+                kind: ''
+            };
+
             bootstrapTest();
         });
 
         it('should transform related links and set to scope var', () => {
             expect($scope.created_by_link).toBe('/#/users/12');
-            expect($scope.inventory_link).toBe('/#/inventories/12');
+            expect($scope.inventory_link).toBe('/#/inventories/standard_inventory/12');
             expect($scope.project_link).toBe('/#/projects/12');
             expect($scope.machine_credential_link).toBe('/#/credentials/12');
             expect($scope.cloud_credential_link).toBe('/#/credentials/13');

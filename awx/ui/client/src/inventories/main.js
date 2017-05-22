@@ -10,28 +10,25 @@ import group from './groups/main';
 import sources from './sources/main';
 import relatedHost from './related-hosts/main';
 import inventoryCompletedJobs from './completed_jobs/main';
-import inventoryAdd from './add/main';
-import inventoryEdit from './edit/main';
 import inventoryList from './list/main';
 import hostGroups from './host-groups/main';
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
 import InventoryList from './inventory.list';
-import InventoryForm from './inventory.form';
 import InventoryManageService from './inventory-manage.service';
 import adHocRoute from './adhoc/adhoc.route';
 import ansibleFacts from './ansible_facts/main';
 import insights from './insights/main';
 import { copyMoveGroupRoute, copyMoveHostRoute } from './copy-move/copy-move.route';
 import copyMove from './copy-move/main';
-import inventoryCompletedJobsRoute from './completed_jobs/completed_jobs.route';
+import completedJobsRoute from './completed_jobs/completed_jobs.route';
 import inventorySourceEditRoute from './sources/edit/sources-edit.route';
 import inventorySourceAddRoute from './sources/add/sources-add.route';
 import inventorySourceListRoute from './sources/list/sources-list.route';
 import inventorySourceListScheduleRoute from './sources/list/schedule/sources-schedule.route';
 import inventorySourceListScheduleAddRoute from './sources/list/schedule/sources-schedule-add.route';
 import inventorySourceListScheduleEditRoute from './sources/list/schedule/sources-schedule-edit.route';
-import inventoryAdhocCredential from './adhoc/adhoc-credential.route';
+import adhocCredentialRoute from './adhoc/adhoc-credential.route';
 import inventoryGroupsList from './groups/list/groups-list.route';
 import inventoryGroupsAdd from './groups/add/groups-add.route';
 import inventoryGroupsEdit from './groups/edit/groups-edit.route';
@@ -39,6 +36,7 @@ import nestedGroups from './groups/nested-groups/nested-groups.route';
 import nestedGroupsAdd from './groups/nested-groups/nested-groups-add.route';
 import nestedHosts from './groups/nested-hosts/nested-hosts.route';
 import inventoryHosts from './related-hosts/related-host.route';
+import smartInventoryHosts from './smart-inventory/smart-inventory-hosts.route';
 import inventoriesList from './inventories.route';
 import inventoryHostsAdd from './related-hosts/add/host-add.route';
 import inventoryHostsEdit from './related-hosts/edit/host-edit.route';
@@ -50,6 +48,8 @@ import hostGroupsRoute from './host-groups/host-groups.route';
 import hostGroupsAssociateRoute from './host-groups/host-groups-associate/host-groups-associate.route';
 import inventorySourcesCredentialRoute from './sources/lookup/sources-lookup-credential.route';
 import inventorySourcesInventoryScriptRoute from './sources/lookup/sources-lookup-inventory-script.route';
+import SmartInventory from './smart-inventory/main';
+import StandardInventory from './standard/main';
 
 export default
 angular.module('inventory', [
@@ -59,15 +59,14 @@ angular.module('inventory', [
         sources.name,
         relatedHost.name,
         inventoryCompletedJobs.name,
-        inventoryAdd.name,
-        inventoryEdit.name,
         inventoryList.name,
         ansibleFacts.name,
         insights.name,
         copyMove.name,
-        hostGroups.name
+        hostGroups.name,
+        SmartInventory.name,
+        StandardInventory.name
     ])
-    .factory('InventoryForm', InventoryForm)
     .factory('InventoryList', InventoryList)
     .service('InventoryManageService', InventoryManageService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
@@ -79,7 +78,7 @@ angular.module('inventory', [
 
                 let basicInventoryAdd = stateDefinitions.generateTree({
                     name: 'inventories.add', // top-most node in the generated tree (will replace this state definition)
-                    url: '/basic_inventory/add',
+                    url: '/standard_inventory/add',
                     modes: ['add'],
                     form: 'InventoryForm',
                     controllers: {
@@ -89,7 +88,7 @@ angular.module('inventory', [
 
                 let basicInventoryEdit = stateDefinitions.generateTree({
                     name: 'inventories.edit',
-                    url: '/basic_inventory/:inventory_id',
+                    url: '/standard_inventory/:inventory_id',
                     modes: ['edit'],
                     form: 'InventoryForm',
                     controllers: {
@@ -102,9 +101,9 @@ angular.module('inventory', [
 
                 let smartInventoryAdd = stateDefinitions.generateTree({
                     name: 'inventories.addSmartInventory', // top-most node in the generated tree (will replace this state definition)
-                    url: '/smart_inventory/add?hostfilter',
+                    url: '/smart/add?hostfilter',
                     modes: ['add'],
-                    form: 'SmartInventoryForm',
+                    form: 'smartInventoryForm',
                     controllers: {
                         add: 'SmartInventoryAddController'
                     }
@@ -112,11 +111,14 @@ angular.module('inventory', [
 
                 let smartInventoryEdit = stateDefinitions.generateTree({
                     name: 'inventories.editSmartInventory',
-                    url: '/smart_inventory/:inventory_id',
+                    url: '/smart/:smartinventory_id',
                     modes: ['edit'],
-                    form: 'SmartInventoryForm',
+                    form: 'smartInventoryForm',
                     controllers: {
                         edit: 'SmartInventoryEditController'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.inventory_name}}'
                     }
                 });
 
@@ -169,6 +171,24 @@ angular.module('inventory', [
                 editSourceInventoryScript.name = 'inventories.edit.inventory_sources.edit.inventory_script';
                 editSourceInventoryScript.url = '/inventory_script';
 
+                let inventoryCompletedJobsRoute = _.cloneDeep(completedJobsRoute);
+                inventoryCompletedJobsRoute.name = 'inventories.edit.completed_jobs';
+
+                let smartInventoryCompletedJobsRoute = _.cloneDeep(completedJobsRoute);
+                smartInventoryCompletedJobsRoute.name = 'inventories.editSmartInventory.completed_jobs';
+
+                let inventoryAdhocRoute = _.cloneDeep(adHocRoute);
+                inventoryAdhocRoute.name = 'inventories.edit.adhoc';
+
+                let smartInventoryAdhocRoute = _.cloneDeep(adHocRoute);
+                smartInventoryAdhocRoute.name = 'inventories.editSmartInventory.adhoc';
+
+                let inventoryAdhocCredential = _.cloneDeep(adhocCredentialRoute);
+                inventoryAdhocCredential.name = 'inventories.edit.adhoc.credential';
+
+                let smartInventoryAdhocCredential = _.cloneDeep(adhocCredentialRoute);
+                smartInventoryAdhocCredential.name = 'inventories.editSmartInventory.adhoc.credential';
+
                 return Promise.all([
                     basicInventoryAdd,
                     basicInventoryEdit,
@@ -180,8 +200,10 @@ angular.module('inventory', [
                             return result.concat(definition.states);
                         }, [
                             stateExtender.buildDefinition(inventoriesList),
-                            stateExtender.buildDefinition(adHocRoute),
+                            stateExtender.buildDefinition(inventoryAdhocRoute),
+                            stateExtender.buildDefinition(smartInventoryAdhocRoute),
                             stateExtender.buildDefinition(inventoryAdhocCredential),
+                            stateExtender.buildDefinition(smartInventoryAdhocCredential),
                             stateExtender.buildDefinition(inventorySourceListScheduleRoute),
                             stateExtender.buildDefinition(inventorySourceListScheduleAddRoute),
                             stateExtender.buildDefinition(inventorySourceListScheduleEditRoute),
@@ -201,6 +223,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(nestedHostsEdit),
                             stateExtender.buildDefinition(inventoryGroupsEditNestedHostsEditGroups),
                             stateExtender.buildDefinition(inventoryHosts),
+                            stateExtender.buildDefinition(smartInventoryHosts),
                             stateExtender.buildDefinition(inventoryHostsAdd),
                             stateExtender.buildDefinition(inventoryHostsEdit),
                             stateExtender.buildDefinition(inventoryHostsEditGroups),
@@ -208,6 +231,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(inventorySourceAddRoute),
                             stateExtender.buildDefinition(inventorySourceEditRoute),
                             stateExtender.buildDefinition(inventoryCompletedJobsRoute),
+                            stateExtender.buildDefinition(smartInventoryCompletedJobsRoute),
                             stateExtender.buildDefinition(addSourceCredential),
                             stateExtender.buildDefinition(addSourceInventoryScript),
                             stateExtender.buildDefinition(editSourceCredential),
@@ -225,7 +249,6 @@ angular.module('inventory', [
                     list: 'HostsList',
                     form: 'HostsForm',
                     controllers: {
-                        list: 'HostListController',
                         edit: 'HostEditController'
                     },
                     breadcrumbs: {
@@ -245,23 +268,14 @@ angular.module('inventory', [
                             ]
                         }
                     },
-                    ncyBreadcrumb: {
-                        label: N_('HOSTS')
-                    },
                     views: {
                         '@': {
-                            templateUrl: templateUrl('inventories/inventories')
-                        },
-                        'list@hosts': {
-                            templateProvider: function(HostsList, generateList) {
-                                let html = generateList.build({
-                                    list: HostsList,
-                                    mode: 'edit'
-                                });
-                                return html;
-                            },
+                            templateUrl: templateUrl('inventories/hosts/hosts'),
                             controller: 'HostListController'
                         }
+                    },
+                    ncyBreadcrumb: {
+                        label: N_('HOSTS')
                     }
                 });
 

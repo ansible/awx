@@ -39,22 +39,17 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         });
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toState.name === 'hosts.addSmartInventory') {
-                $scope.enableSmartInventoryButton = false;
+            if(toParams && toParams.host_search) {
+                let hasMoreThanDefaultKeys = false;
+                angular.forEach(toParams.host_search, function(value, key) {
+                    if(key !== 'order_by' && key !== 'page_size') {
+                        hasMoreThanDefaultKeys = true;
+                    }
+                });
+                $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
             }
             else {
-                if(toParams && toParams.host_search) {
-                    let hasMoreThanDefaultKeys = false;
-                    angular.forEach(toParams.host_search, function(value, key) {
-                        if(key !== 'order_by' && key !== 'page_size') {
-                            hasMoreThanDefaultKeys = true;
-                        }
-                    });
-                    $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
-                }
-                else {
-                    $scope.enableSmartInventoryButton = false;
-                }
+                $scope.enableSmartInventoryButton = false;
             }
         });
 
@@ -129,6 +124,17 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         });
 
         $state.go('inventories.addSmartInventory', {hostfilter: JSON.stringify(stateParamsCopy)});
+    };
+
+    $scope.editInventory = function(host) {
+        if(host.summary_fields && host.summary_fields.inventory) {
+            if(host.summary_fields.inventory.kind && host.summary_fields.inventory.kind === 'smart') {
+                $state.go('inventories.editSmartInventory', {smartinventory_id: host.inventory});
+            }
+            else {
+                $state.go('inventories.edit', {inventory_id: host.inventory});
+            }
+        }
     };
 
 }

@@ -163,9 +163,9 @@ export default [
                         Rest.setUrl(schedule.related.unified_job_template);
                         Rest.get().then( (res) => {
                             deferred.resolve({
-                                name: 'inventoryManage.editGroup.schedules.edit',
+                                name: 'inventories.edit.inventory_sources.edit.schedules.edit',
                                 params: {
-                                    group_id: res.data.group,
+                                    inventory_source_id: res.data.id,
                                     inventory_id: res.data.inventory,
                                     schedule_id: schedule.id,
                                 }
@@ -198,23 +198,8 @@ export default [
             }
 
             function routeToScheduleForm(schedule){
-
-                buildStateMap(schedule).then( (state) =>{
-                    $state.go(state.name, state.params).catch((err) =>{
-                        // stateDefinition.lazyLoad'd state name matcher is not configured to match inventoryManage.* state names
-                        // However, the stateDefinition.lazyLoad url matcher will load the correct tree.
-                        // Expected error:
-                        // Transition rejection error
-                        // type: 4  // SUPERSEDED = 2, ABORTED = 3, INVALID = 4, IGNORED = 5, ERROR = 6
-                        // detail : "Could not resolve 'inventoryManage.editGroup.schedules.edit' from state 'jobs.schedules'"
-                        // message: "This transition is invalid"
-                        if (err.type === 4 && err.detail.includes('inventoryManage.editGroup.schedules.edit')){
-                            $location.path(`/inventories/${state.params.inventory_id}/manage/edit-group/${state.params.group_id}/schedules/${state.params.schedule_id}`);
-                        }
-                        else {
-                            throw err;
-                        }
-                    });
+                buildStateMap(schedule).then((state) =>{
+                    $state.go(state.name, state.params);
                 });
             }
         };

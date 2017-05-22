@@ -5,14 +5,14 @@
  *************************************************/
 
 // import HostManageService from './../hosts/host.service';
-export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePath',
+export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
     'HostManageService', 'SetStatus',
-    function($scope, RelatedHostsListDefinition, $rootScope, GetBasePath,
+    function($scope, ListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
     HostManageService, SetStatus) {
 
-    let list = RelatedHostsListDefinition;
+    let list = ListDefinition;
 
     init();
 
@@ -42,22 +42,17 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
         });
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toState.name === 'hosts.addSmartInventory') {
-                $scope.enableSmartInventoryButton = false;
+            if(toParams && toParams.host_search) {
+                let hasMoreThanDefaultKeys = false;
+                angular.forEach(toParams.host_search, function(value, key) {
+                    if(key !== 'order_by' && key !== 'page_size') {
+                        hasMoreThanDefaultKeys = true;
+                    }
+                });
+                $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
             }
             else {
-                if(toParams && toParams.host_search) {
-                    let hasMoreThanDefaultKeys = false;
-                    angular.forEach(toParams.host_search, function(value, key) {
-                        if(key !== 'order_by' && key !== 'page_size') {
-                            hasMoreThanDefaultKeys = true;
-                        }
-                    });
-                    $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
-                }
-                else {
-                    $scope.enableSmartInventoryButton = false;
-                }
+                $scope.enableSmartInventoryButton = false;
             }
         });
 
@@ -142,7 +137,7 @@ export default ['$scope', 'RelatedHostsListDefinition', '$rootScope', 'GetBasePa
     $scope.systemTracking = function(){
         var hostIds = _.map($scope.hostsSelected, (host) => host.id);
         $state.go('systemTracking', {
-            inventoryId: $state.params.inventory_id,
+            inventoryId: $state.params.inventory_id ? $state.params.inventory_id : $state.params.smartinventory_id,
             hosts: $scope.hostsSelected,
             hostIds: hostIds
         });

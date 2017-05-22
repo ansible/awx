@@ -1,7 +1,6 @@
 import { N_ } from '../../i18n';
 
 export default {
-    name: "inventories.edit.completed_jobs",
     url: "/completed_jobs",
     params: {
         completed_job_search: {
@@ -14,7 +13,6 @@ export default {
         }
     },
     ncyBreadcrumb: {
-        parent: "inventories.edit",
         label: N_("COMPLETED JOBS")
     },
     views: {
@@ -46,9 +44,11 @@ export default {
                     path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
                 }
 
-                $stateParams[`${list.iterator}_search`].or__job__inventory = $stateParams.inventory_id;
-                $stateParams[`${list.iterator}_search`].or__adhoccommand__inventory = $stateParams.inventory_id;
-                $stateParams[`${list.iterator}_search`].or__inventoryupdate__inventory_source__inventory = $stateParams.inventory_id;
+                let inventory_id = $stateParams.inventory_id ? $stateParams.inventory_id : $stateParams.smartinventory_id;
+
+                $stateParams[`${list.iterator}_search`].or__job__inventory = inventory_id;
+                $stateParams[`${list.iterator}_search`].or__adhoccommand__inventory = inventory_id;
+                $stateParams[`${list.iterator}_search`].or__inventoryupdate__inventory_source__inventory = inventory_id;
 
                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
             }
