@@ -198,7 +198,7 @@ register(
     min_value=0,
     default=0,
     label=_('Default Job Timeout'),
-    help_text=_('Maximum time to allow jobs to run. Use value of 0 to indicate that no '
+    help_text=_('Maximum time in seconds to allow jobs to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual job template will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
