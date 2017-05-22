@@ -40,6 +40,7 @@
         $scope.closeHostEvent = function() {
             // Unbind the listener so it doesn't fire when we close the modal via navigation
             $('#HostEvent').off('hidden.bs.modal');
+            $('#HostEvent').modal('hide');
             $state.go('jobDetail');
         };
 
@@ -51,8 +52,8 @@
             // event's "res" object, for things like Ansible modules
             try{
                 $scope.module_name = hostEvent.event_data.task_action ||  "No result found";
-                $scope.stdout = hostEvent.event_data.res.stdout ? hostEvent.event_data.res.stdout : hostEvent.event_data.res.stdout === "" ? " " : undefined;
-                $scope.stderr = hostEvent.event_data.res.stderr ? hostEvent.event_data.res.stderr : hostEvent.event_data.res.stderr === "" ? " " : undefined;
+                $scope.stdout = (hostEvent.event_data.res.stdout === "" || " ") ? undefined : hostEvent.event_data.res.stdout;
+                $scope.stderr = (hostEvent.event_data.res.stderr === "" || " ") ? undefined : hostEvent.event_data.res.stderr;
                 $scope.json = hostEvent.event_data.res;
             }
             catch(err){
