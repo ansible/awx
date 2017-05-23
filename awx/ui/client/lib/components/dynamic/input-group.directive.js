@@ -44,7 +44,7 @@ function AtDynamicInputGroupController ($scope, $compile) {
 
         state.value = source.value;
 
-        let inputs = state.getInputs(source.value);
+        let inputs = state.get(source.value);
         let components = vm.createComponentConfigs(inputs);
 
         vm.insert(components);
@@ -70,6 +70,7 @@ function AtDynamicInputGroupController ($scope, $compile) {
 
             components.push(Object.assign({
                 element: vm.createElement(input, i),
+                key: 'inputs',
                 dynamic: true
             }, input));
         });

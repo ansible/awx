@@ -136,7 +136,6 @@ var tower = angular.module('Tower', [
     'AWDirectives',
     'features',
 
-    'ngResource',
     'at.lib.components',
     'at.lib.models',
     'at.lib.services',

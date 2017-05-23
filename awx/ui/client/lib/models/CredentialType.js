@@ -4,7 +4,7 @@ function CredentialTypeModel (BaseModel) {
     this.categorizeByKind = () => {
         let group = {};
 
-        this.model.data.results.forEach(result => {
+        this.model.get.data.results.forEach(result => {
             group[result.kind] = group[result.kind] || [];
             group[result.kind].push(result);
         });
@@ -16,7 +16,7 @@ function CredentialTypeModel (BaseModel) {
     };
 
     this.getTypeFromName = name => {
-        let type = this.model.data.results.filter(result => result.name === name);
+        let type = this.model.get.data.results.filter(result => result.name === name);
 
         if (!type.length) {
             return null;
@@ -35,6 +35,10 @@ function CredentialTypeModel (BaseModel) {
 
             return field;
         });
+    };
+
+    this.getResults = () => {
+        return this.model.get.data.results;
     };
 }
 

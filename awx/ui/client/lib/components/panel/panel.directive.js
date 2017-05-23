@@ -1,16 +1,13 @@
-function use (scope) {
-    scope.dismiss = this.dismiss;
-}
-
-function dismiss ($state) {
-    $state.go('^');
-}
-
 function AtPanelController ($state) {
     let vm = this;
 
-    vm.dismiss = dismiss.bind(vm, $state);
-    vm.use = use;
+    vm.dismiss = () => {
+        $state.go('^');
+    };
+
+    vm.use = scope => {
+        scope.dismiss = this.dismiss;
+    };
 }
 
 AtPanelController.$inject = ['$state'];

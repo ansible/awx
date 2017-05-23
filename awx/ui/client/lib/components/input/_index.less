@@ -19,7 +19,10 @@
     border-color: @at-blue;
 }
 
-.at-InputLabel {
+.at-Input--rejected {
+    &, &:focus {
+        border-color: @at-red;
+    }
 }
 
 .at-InputLabel-name {
@@ -76,4 +79,11 @@
     &, &:active, &:hover, &:focus {
         background-color: @at-white;
     }
+}
+
+.at-InputMessage--rejected {
+    font-size: @at-font-size; 
+    color: @at-red;
+    margin: @at-space-3x 0 0 0;
+    padding: 0;
 }

@@ -13,7 +13,9 @@ function AtFormController (eventService) {
 
     vm.components = [];
     vm.state = {
-        isValid: false
+        isValid: false,
+        disabled: false,
+        value: {}
     };
 
     vm.init = (_scope_, _form_) => {
@@ -27,10 +29,6 @@ function AtFormController (eventService) {
         component.category = category;
         component.form = vm.state;
 
-        if (category === 'input') {
-            component.state.index = vm.components.length;
-        }
-
         vm.components.push(component)
     };
 
@@ -43,13 +41,12 @@ function AtFormController (eventService) {
     };
 
     vm.submitOnEnter = event => {
-        if (event.key !== 'Enter') {
+        if (event.key !== 'Enter' || event.srcElement.type === 'textarea') {
             return;
         }
 
         event.preventDefault();
-        
-        vm.submit();
+        scope.$apply(vm.submit);
     };
 
     vm.submit = event => {
@@ -57,7 +54,58 @@ function AtFormController (eventService) {
             return;
         }
 
-        console.log('submit', event, vm.components);
+        vm.state.disabled = true;
+
+        let data = vm.components
+            .filter(component => component.category === 'input')
+            .reduce((values, component) => {
+                if (!component.state.value) {
+                    return values;
+                }
+
+                if (component.state.dynamic) {
+                    values[component.state.key] = values[component.state.key] || [];
+                    values[component.state.key].push({
+                        [component.state.id]: component.state.value
+                    });
+                } else {
+                    values[component.state.id] = component.state.value;
+                }
+
+                return values;
+            }, {});
+
+
+        scope.state.save(data)
+            .then(res => vm.onSaveSuccess(res))
+            .catch(err => vm.onSaveError(err))
+            .finally(() => vm.state.disabled = false);
+    };
+
+    vm.onSaveSuccess = res => {
+        console.info(res);
+    };
+
+    vm.onSaveError = err => {
+        if (err.status === 400) {
+            vm.setValidationErrors(err.data);
+        }
+    };
+
+    vm.setValidationErrors = errors => {
+        for (let id in errors) {
+            vm.components
+                .filter(component => component.category === 'input')
+                .forEach(component => {
+                    if (component.state.id === id) {
+                        component.state.rejected = true;
+                        component.state.isValid = false;
+                        component.state.message = errors[id].join(' ');
+                    }
+                });
+        }
+
+        vm.check();
     };
 
     vm.validate = () => {
@@ -86,12 +134,14 @@ function AtFormController (eventService) {
     };
 
     vm.deregisterDynamicComponents = components => {
-        let offset = 0;
-
-        components.forEach(component => {
-            vm.components.splice(component.index - offset, 1);
-            offset++;
-        });
+        for (let i = 0; i < components.length; i++) {
+            for (let j = 0; j < vm.components.length; j++) {
+                if (components[i] === vm.components[j].state) {
+                    vm.components.splice(j, 1);
+                    break;
+                }
+            }
+        }
     };
 }
 

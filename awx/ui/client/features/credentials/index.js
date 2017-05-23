@@ -40,7 +40,7 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         }
     });
 
-    function credentialTypeResolve ($q, credentialModel, credentialTypeModel) {
+    function CredentialsAddResolve ($q, credentialModel, credentialTypeModel) {
         let promises = [
             credentialModel.options(),
             credentialTypeModel.get()
@@ -53,7 +53,7 @@ function config ($stateExtenderProvider, pathServiceProvider) {
             }));
     }
 
-    credentialTypeResolve.$inject = ['$q', 'CredentialModel', 'CredentialTypeModel'];
+    CredentialsAddResolve.$inject = ['$q', 'CredentialModel', 'CredentialTypeModel'];
 
     stateExtender.addState({
         name: 'credentials.add',
@@ -69,7 +69,7 @@ function config ($stateExtenderProvider, pathServiceProvider) {
             }
         },
         resolve: {
-            credentialType: credentialTypeResolve
+            resolvedModels: CredentialsAddResolve
         }
     });
 

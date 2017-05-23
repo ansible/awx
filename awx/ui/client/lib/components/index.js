@@ -18,7 +18,6 @@ import toggleContent from './toggle/content.directive';
 
 import BaseInputController from './input/base.controller';
 
-
 angular
     .module('at.lib.components', [])
     .directive('atActionGroup', actionGroup)
