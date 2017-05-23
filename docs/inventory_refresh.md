@@ -5,6 +5,11 @@ rather than merely maintaining inventory for automation.
 ## Inventory Source Promotion
 Starting with Tower 3.2, `InventorySource` will be associated directly with an `Inventory`.
 
+### API Concerns / Deprecation
+The `group` field for `InventorySource` has been renamed to `deprecated_group` and will be removed
+from `InventorySource` completely in Tower 3.3. As a result the related field on `Group` ,
+`inventory_source` has been renamed `deprecated_inventory_source` and will also be removed in Tower 3.3.
+
 
 ## Fact Searching and Caching
 
@@ -90,7 +95,7 @@ sources and if they will be updated when a POST to the same endpoint is made. Th
 this request will look like this:
 
     {
-        [
+        results: [
             {"inventory_source": 1, "can_update": True},
             {"inventory_source": 2, "can_update": False},
         ]
@@ -101,13 +106,13 @@ When making a POST to the same endpoint, the response will contain a status as w
     POST /api/v2/inventories/:id/update_inventory_sources
 
     {
-        [
+        results: [
             {"inventory_update": 20, "inventory_source": 1, "status": "started"},
             {"inventory_update": 21, "inventory_source": 2, "status": "Could not start because `can_update` returned False"}
         ]
     }
 
 
-### Background deleition of Inventory
+### Background deletion of Inventory
 
 ### InventorySource Hosts and Groups read-only
