@@ -77,10 +77,7 @@ export default ['$scope', '$rootScope',
                 $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
             });
         });
-        $scope.addJobTemplate = function() {
-            $state.go('jobTemplates.add');
-        };
-
+        
         $scope.editJobTemplate = function(template) {
             if(template) {
                     if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {

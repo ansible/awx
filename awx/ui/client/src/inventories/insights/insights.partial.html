@@ -1,20 +1,79 @@
+<div class="InsightsLastCheck"
+    ng-show="last_check_in<49">
+    <i class="fa icon-job-failed InsightsIcon-warning"></i>
+    This machine has not checked in with Insights in {{last_check_in}} hours
+</div>
 <div class="InsightsNav">
     <div class="InsightsNav-rightSide">
-        <div class="JobResults-badgeTitle">Total Issues</div>
-        <span class="badge List-titleBadge InsightsNav-totalIssues">4</span>
-        <div class="JobResults-badgeTitle">Critical</div>
-        <span class="badge List-titleBadge InsightsNav-criticalIssues">1</span>
-        <div class="JobResults-badgeTitle">High</div>
-        <span class="badge List-titleBadge InsightsNav-highIssues">1</span>
-        <div class="JobResults-badgeTitle">Medium</div>
-        <span class="badge List-titleBadge InsightsNav-mediumIssues">1</span>
-        <div class="JobResults-badgeTitle">Low</div>
-        <span class="badge List-titleBadge InsightsNav-lowIssues">1</span>
+        <div class="InsightsNav-anchor" ng-click="filter('total')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'total')}">
+            <div class="InsightsNav-badgeTitle">Total Issues</div>
+            <span class="badge List-titleBadge InsightsNav-totalIssues">{{reports_dataset.reports.length}}</span>
+        </div>
+
+        <div class="InsightsNav-anchor" ng-click="filter('critical')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'critical')}"
+            ng-show="critical_count>0">
+            <div class="InsightsNav-badgeTitle">Critical</div>
+            <span class="badge List-titleBadge InsightsNav-criticalIssues">{{critical_count}}</span>
+        </div>
+        <div class="InsightsNav-anchor" ng-click="filter('high')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'high')}"
+            ng-show="high_count>0">
+            <div class="InsightsNav-badgeTitle">High</div>
+            <span class="badge List-titleBadge InsightsNav-highIssues">{{high_count}}</span>
+        </div>
+        <div class="InsightsNav-anchor" ng-click="filter('medium')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'medium')}"
+            ng-show="med_count>0">
+            <div class="InsightsNav-badgeTitle">Medium</div>
+            <span class="badge List-titleBadge InsightsNav-mediumIssues">{{med_count}}</span>
+        </div>
+        <div class="InsightsNav-anchor" ng-click="filter('low')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'low')}"
+            ng-show="low_count>0">
+            <div class="InsightsNav-badgeTitle">Low</div>
+            <span class="badge List-titleBadge InsightsNav-lowIssues">{{low_count}}</span>
+        </div>
     </div>
     <div class="InsightsNav-leftSide">
-        <div class="JobResults-badgeTitle">Solvable With Playbook</div>
-        <span class="badge List-titleBadge InsightsNav-solvableBadge">4</span>
-        <div class="JobResults-badgeTitle">Not Solvable With Playbook</div>
-        <span class="badge List-titleBadge InsightsNav-solvableBadge">1</span>
+
+        <div class="InsightsNav-anchor" ng-click="filter('solvable')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'solvable')}"
+            ng-show="solvable_count>0">
+            <div class="InsightsNav-badgeTitle">Solvable With Playbook</div>
+            <span class="badge List-titleBadge InsightsNav-solvableBadge">{{solvable_count}}</span>
+        </div>
+        <div class="InsightsNav-anchor" ng-click="filter('not_solvable')"
+            ng-class="{'is-currentFilter' : (currentFilter === 'not_solvable')}"
+            ng-show="not_solvable_count>0">
+            <div class="InsightsNav-badgeTitle">Not Solvable With Playbook</div>
+            <span class="badge List-titleBadge InsightsNav-solvableBadge">{{not_solvable_count}}</span>
+        </div>
     </div>
+</div>
+
+<div class="InsightsBody">
+    <div class="InsightsRow" ng-repeat="report in reports">
+        <div class="InsightsRow-title">
+            <img class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
+                aw-tool-tip="Critical Risk" data-placement="right" data-original-title="" title="">
+            <img class="InsightsIcon" src="/static/assets/i_severity_high.svg" ng-show="report.rule.severity === 'ERROR'"
+                aw-tool-tip="High Risk" data-placement="top" data-original-title="" title="">
+            <img class="InsightsIcon" src="/static/assets/i_severity_med.svg" ng-show="report.rule.severity === 'WARN'"
+                aw-tool-tip="Medium Risk" data-placement="top">
+            <img class="InsightsIcon" src="/static/assets/i_severity_low.svg" ng-show="report.rule.severity === 'INFO'"
+                aw-tool-tip="Low Risk" data-placement="top">
+            <div class="InsightsRow-description">ISSUE: {{report.rule.description}}</div>
+            <span class="Form-title--is_superuser">{{report.rule.category}}</span>
+        </div>
+        <div class="InsightsRow-body">{{report.rule.summary}}</div>
+        <div class="InsightsRow-plan" ng-bind-html="report.maintenance_actions | planFilter"></div>
+    </div>
+</div>
+
+<div class="buttons Form-buttons">
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="viewDataInInsights()"> <i class="fa fa-sign-out"></i> VIEW DATA IN INSIGHTS</button>
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory()"> REMEDIATE INVENTORY</button>
+    <button type="button" class="btn btn-sm Form-cancelButton" ng-click="formCancel()"> Close</button>
 </div>
