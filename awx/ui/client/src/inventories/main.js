@@ -76,9 +76,9 @@ angular.module('inventory', [
 
             function generateInventoryStates() {
 
-                let basicInventoryAdd = stateDefinitions.generateTree({
+                let standardInventoryAdd = stateDefinitions.generateTree({
                     name: 'inventories.add', // top-most node in the generated tree (will replace this state definition)
-                    url: '/standard_inventory/add',
+                    url: '/inventory/add',
                     modes: ['add'],
                     form: 'InventoryForm',
                     controllers: {
@@ -86,9 +86,9 @@ angular.module('inventory', [
                     }
                 });
 
-                let basicInventoryEdit = stateDefinitions.generateTree({
+                let standardInventoryEdit = stateDefinitions.generateTree({
                     name: 'inventories.edit',
-                    url: '/standard_inventory/:inventory_id',
+                    url: '/inventory/:inventory_id',
                     modes: ['edit'],
                     form: 'InventoryForm',
                     controllers: {
@@ -190,8 +190,8 @@ angular.module('inventory', [
                 smartInventoryAdhocCredential.name = 'inventories.editSmartInventory.adhoc.credential';
 
                 return Promise.all([
-                    basicInventoryAdd,
-                    basicInventoryEdit,
+                    standardInventoryAdd,
+                    standardInventoryEdit,
                     smartInventoryAdd,
                     smartInventoryEdit
                 ]).then((generated) => {

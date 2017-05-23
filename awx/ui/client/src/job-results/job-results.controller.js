@@ -60,7 +60,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     return '/#/inventories/smart_inventory/' + $scope.job.summary_fields.inventory.id;
                 }
                 else {
-                    return '/#/inventories/standard_inventory/' + $scope.job.summary_fields.inventory.id;
+                    return '/#/inventories/inventory/' + $scope.job.summary_fields.inventory.id;
                 }
             }
             else {

@@ -56,7 +56,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.job_template_url = '/#/templates/' + data.unified_job_template;
                 if($scope.inventory_name && data.inventory && data.summary_fields.inventory && data.summary_fields.inventory.kind) {
                     if(data.summary_fields.inventory.kind === '') {
-                        $scope.inventory_url = '/#/inventories/standard_inventory' + data.inventory;
+                        $scope.inventory_url = '/#/inventories/inventory' + data.inventory;
                     }
                     else if(data.summary_fields.inventory.kind === 'smart') {
                         $scope.inventory_url = '/#/inventories/smart_inventory' + data.inventory;

@@ -216,7 +216,7 @@ describe('Controller: jobResultsController', () => {
 
         it('should transform related links and set to scope var', () => {
             expect($scope.created_by_link).toBe('/#/users/12');
-            expect($scope.inventory_link).toBe('/#/inventories/standard_inventory/12');
+            expect($scope.inventory_link).toBe('/#/inventories/inventory/12');
             expect($scope.project_link).toBe('/#/projects/12');
             expect($scope.machine_credential_link).toBe('/#/credentials/12');
             expect($scope.cloud_credential_link).toBe('/#/credentials/13');
