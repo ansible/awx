@@ -22,7 +22,7 @@ for normal inventories and set to `smart` for smart inventories.
 for normal inventories. When `host_filter` is set AND the inventory `kind` is set to `smart`
 is the combination that makes a _Smart Inventory_.
 
-### Smart Filter (host__filter)
+### Smart Filter (host_filter)
 The `SmartFilter` class handles our translation of the smart search string. We store the
 filter value in the `host_filter` field for an inventory. This value should be expressed
 the same way we express our existing smart searches.
@@ -43,6 +43,25 @@ Creating a new _Smart Inventory_ for all of our GCE and EC2 groups might look li
         ...
     }
 
+### More On Searching
+The `host_filter` you set will search over the entirety of the hosts you have
+access to in Tower. If you want to restrict your search in anyway, you will
+want to declare that in your host filter.
+
+For example, if you want to restrict the search to only hosts in an inventory
+named "US-East", you would create a `host_filter` that looked something like this:
+
+    {
+        "name": "NYC Hosts",
+        "kind": "smart",
+        "host_filter": "inventory__name='US-East' and search='nyc'",
+        ...
+    }
+
+In the above example, you are limiting the search to the "US-East" inventory and
+hosts with a name containing "nyc".
+
+
 ### Acceptance Critera
 When verifying acceptance we should ensure the following statements are true:
 
@@ -51,8 +70,8 @@ can only be set to `smart`.
 * `Inventory` has a new field named `host_filter` to empty and can only be
 set to a valid _SmartFilter_ string.
 * `Inventory` with a `host_filter` set and a `kind` of `smart` will have
-a `hosts` list reflecting the results of searching `/hosts` with the same
-smart search that is set in the `host_filter`.
+a `hosts` list reflecting the results of searching `/api/v2/hosts` with the same
+search that is set in the `host_filter`.
 
 ### API Concerns
 There are no breaking or backwards incompatible changes for this feature.
@@ -60,7 +79,7 @@ There are no breaking or backwards incompatible changes for this feature.
 
 ## Other Changes
 
-### Inventory update all inventory__sources
+### Inventory update all inventory_sources
 A new endpoint `/api/v2/inventories/:id/update_inventory_sources` has been added. This endpoint
 functions in the same way that `/api/v2/inventory_source/:id/update` functions for a single
 `InventorySource` with the exception that it updates all of the inventory sources for the
