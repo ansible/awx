@@ -54,6 +54,13 @@ export default
                     .error(this.error.bind(this))
                     .finally(Wait('stop'));
             },
+            options: function(){
+                this.url = GetBasePath('inventory_sources');
+                Rest.setUrl(this.url);
+                return Rest.options()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this));
+            },
             getCredential: function(id){
                 Wait('start');
                 this.url = GetBasePath('credentials') + id;

@@ -8,12 +8,12 @@
     'InventoryUpdate', 'GroupManageService', 'CancelSourceUpdate',
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
-    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService',
+    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, GroupManageService, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService){
+        Wait, SourcesService, inventorySourceOptions){
 
         let list = SourcesListDefinition;
 
@@ -36,6 +36,7 @@
 
             $scope.inventory_id = $stateParams.inventory_id;
             _.forEach($scope[list.name], buildStatusIndicators);
+            optionsRequestDataProcessing();
 
             $scope.$on(`ws-jobs`, function(e, data){
                 var inventory_source = Find({ list: $scope.inventory_sources, key: 'id', val: data.inventory_source_id });
@@ -52,6 +53,7 @@
                         $scope[`${list.iterator}_dataset`] = searchResponse.data;
                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
                         _.forEach($scope[list.name], buildStatusIndicators);
+                        optionsRequestDataProcessing();
                     });
                 } else {
                     var status = GetSyncStatusMsg({
@@ -64,6 +66,28 @@
                     inventory_source.launch_class = status.launch_class;
                 }
             });
+
+            $scope.$watchCollection(`${$scope.list.name}`, function() {
+                _.forEach($scope[list.name], buildStatusIndicators);
+                optionsRequestDataProcessing();
+            });
+        }
+
+        function optionsRequestDataProcessing(){
+            if ($scope[list.name] !== undefined) {
+                $scope[list.name].forEach(function(item, item_idx) {
+                    var itm = $scope[list.name][item_idx];
+
+                    // Set the item source label
+                    if (list.fields.source && inventorySourceOptions && inventorySourceOptions.hasOwnProperty('source')) {
+                            inventorySourceOptions.source.choices.forEach(function(choice) {
+                                if (choice[0] === item.source) {
+                                itm.source_label = choice[1];
+                            }
+                        });
+                    }
+                });
+            }
         }
 
         function buildStatusIndicators(inventory_source){

@@ -12,7 +12,8 @@
 
 function InventoriesList($scope, $rootScope, $location,
     $compile, $filter, Rest, InventoryList, Prompt,
-    ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
+    ProcessErrors, GetBasePath, Wait, Find, Empty, $state,
+    rbacUiControlService, Dataset, InventoryUpdate) {
 
     let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
@@ -37,15 +38,16 @@ function InventoriesList($scope, $rootScope, $location,
         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
         $rootScope.flashMessage = null;
-
     }
 
     function buildStatusIndicators(inventory){
             inventory.launch_class = "";
+            inventory.host_status_class = "Inventories-hostStatus";
+
             if (inventory.has_inventory_sources) {
                 if (inventory.inventory_sources_with_failures > 0) {
                     inventory.syncStatus = 'error';
-                    inventory.syncTip = inventory.inventory_sources_with_failures + ' groups with sync failures. Click for details';
+                    inventory.syncTip = inventory.inventory_sources_with_failures + ' sources with sync failures. Click for details';
                 }
                 else {
                     inventory.syncStatus = 'successful';
@@ -57,6 +59,7 @@ function InventoriesList($scope, $rootScope, $location,
                 inventory.syncTip = 'Not configured for inventory sync.';
                 inventory.launch_class = "btn-disabled";
             }
+
             if (inventory.has_active_failures) {
                 inventory.hostsStatus = 'error';
                 inventory.hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
@@ -139,10 +142,10 @@ function InventoriesList($scope, $rootScope, $location,
         attachElem(event, html, title);
     });
 
-    if ($scope.removeGroupSummaryReady) {
-        $scope.removeGroupSummaryReady();
+    if ($scope.removeSourceSummaryReady) {
+        $scope.removeSourceSummaryReady();
     }
-    $scope.removeGroupSummaryReady = $scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
+    $scope.removeSourceSummaryReady = $scope.$on('SourceSummaryReady', function(e, event, inventory, data) {
         var html, title;
 
         Wait('stop');
@@ -153,7 +156,7 @@ function InventoriesList($scope, $rootScope, $location,
         html += "<tr>";
         html += "<th>Status</th>";
         html += "<th>Last Sync</th>";
-        html += "<th>Group</th>";
+        html += "<th>Source</th>";
         html += "</tr>";
         html += "</thead>\n";
         html += "<tbody>\n";
@@ -162,14 +165,14 @@ function InventoriesList($scope, $rootScope, $location,
                 html += "<tr>";
                 html += `<td><a href="" ng-click="viewJob('${row.related.last_update}')" aw-tool-tip="${row.status.charAt(0).toUpperCase() + row.status.slice(1)}. Click for details" aw-tip-placement="top"><i class="SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></a></td>`;
                 html += "<td>" + ($filter('longDate')(row.last_updated)).replace(/ /,'<br />') + "</td>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + $filter('sanitize')(ellipsis(row.summary_fields.group.name)) + "</a></td>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                 html += "</tr>\n";
             }
             else {
                 html += "<tr>";
                 html += "<td><a href=\"\" aw-tool-tip=\"No sync data\" aw-tip-placement=\"top\"><i class=\"fa icon-job-none\"></i></a></td>";
                 html += "<td>NA</td>";
-                html += "<td><a href=\"\">" + $filter('sanitize')(ellipsis(row.summary_fields.group.name)) + "</a></td>";
+                html += "<td><a href=\"\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                 html += "</tr>\n";
             }
         });
@@ -179,7 +182,7 @@ function InventoriesList($scope, $rootScope, $location,
         attachElem(event, html, title);
     });
 
-    $scope.showGroupSummary = function(event, id) {
+    $scope.showSourceSummary = function(event, id) {
         try{
             var elem = $(event.target).parent();
             // if the popover is visible already, then exit the function here
@@ -193,10 +196,10 @@ function InventoriesList($scope, $rootScope, $location,
                 inventory = Find({ list: $scope.inventories, key: 'id', val: id });
                 if (inventory.syncStatus !== 'na') {
                     Wait('start');
-                    Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
+                    Rest.setUrl(inventory.related.inventory_sources + '?order_by=-last_job_run&page_size=5');
                     Rest.get()
                         .success(function(data) {
-                            $scope.$emit('GroupSummaryReady', event, inventory, data);
+                            $scope.$emit('SourceSummaryReady', event, inventory, data);
                         })
                         .error(function(data, status) {
                             ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
@@ -300,9 +303,18 @@ function InventoriesList($scope, $rootScope, $location,
     $scope.viewFailedJobs = function (id) {
         $location.url('/jobs/?inventory__int=' + id + '&status=failed');
     };
+
+    $scope.syncInventory = function(inventory) {
+        InventoryUpdate({
+            scope: $scope,
+            url: inventory.related.update_inventory_sources,
+            updateAllSources: true
+        });
+    };
 }
 
 export default ['$scope', '$rootScope', '$location',
-    '$compile', '$filter', 'Rest', 'InventoryList',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
+    '$compile', '$filter', 'Rest', 'InventoryList', 'Prompt',
+    'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty',
+    '$state', 'rbacUiControlService', 'Dataset', 'InventoryUpdate', InventoriesList
 ];

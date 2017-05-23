@@ -42,6 +42,9 @@ export default {
         }
     },
     resolve: {
+        inventorySourceOptions: ['SourcesService', (SourcesService) => {
+            return SourcesService.options().then(res => res.data.actions.GET);
+        }],
         Dataset: ['SourcesListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
             (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
                 // allow related list definitions to use interpolated $rootScope / $stateParams in basePath field

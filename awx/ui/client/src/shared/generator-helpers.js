@@ -134,6 +134,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'group_update':
                 icon = 'fa-refresh';
                 break;
+            case 'inventory_update':
+                icon = 'fa-refresh';
+                break;
             case 'scm_update':
                 icon = 'fa-cloud-download';
                 break;
