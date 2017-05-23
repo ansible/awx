@@ -1,6 +1,5 @@
 export default {
     searchPrefix: 'credential',
-    name: 'inventories.edit.adhoc.credential',
     url: '/credential',
     data: {
         formChildState: true

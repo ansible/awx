@@ -18,7 +18,6 @@ export default {
     data: {
         formChildState: true
     },
-    name: 'inventories.edit.adhoc',
     views: {
         'adhocForm@inventories': {
             templateUrl: templateUrl('inventories/adhoc/adhoc'),

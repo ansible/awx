@@ -41,22 +41,17 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
         });
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toState.name === 'hosts.addSmartInventory') {
-                $scope.enableSmartInventoryButton = false;
+            if(toParams && toParams.host_search) {
+                let hasMoreThanDefaultKeys = false;
+                angular.forEach(toParams.host_search, function(value, key) {
+                    if(key !== 'order_by' && key !== 'page_size') {
+                        hasMoreThanDefaultKeys = true;
+                    }
+                });
+                $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
             }
             else {
-                if(toParams && toParams.host_search) {
-                    let hasMoreThanDefaultKeys = false;
-                    angular.forEach(toParams.host_search, function(value, key) {
-                        if(key !== 'order_by' && key !== 'page_size') {
-                            hasMoreThanDefaultKeys = true;
-                        }
-                    });
-                    $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
-                }
-                else {
-                    $scope.enableSmartInventoryButton = false;
-                }
+                $scope.enableSmartInventoryButton = false;
             }
         });
 

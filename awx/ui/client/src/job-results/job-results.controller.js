@@ -55,6 +55,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     return null;
                 }
             }
+            else if(key === 'inventory') {
+                if($scope.job.summary_fields.inventory && $scope.job.summary_fields.inventory.kind && $scope.job.summary_fields.inventory.kind === 'smart') {
+                    return '/#/inventories/smart_inventory/' + $scope.job.summary_fields.inventory.id;
+                }
+                else {
+                    return '/#/inventories/inventory/' + $scope.job.summary_fields.inventory.id;
+                }
+            }
             else {
                 if ($scope.job.related[key]) {
                     return '/#/' + $scope.job.related[key]

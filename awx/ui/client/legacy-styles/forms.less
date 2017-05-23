@@ -59,6 +59,7 @@
     min-height: 40px;
 }
 
+.Form-title--is_smartinventory,
 .Form-title--is_superuser,
 .Form-title--is_system_auditor,
 .Form-title--is_ldap_user,
@@ -663,6 +664,19 @@ input[type='radio']:checked:before {
     font-size: small;
     color: @default-interface-txt;
     .noselect;
+}
+
+.Form-textInput--variableHeight {
+    height: inherit;
+    min-height: 30px;
+}
+
+.Form-variableHeightButtonGroup {
+    height: 100%;
+}
+
+.Form-lookupButton--variableHeight {
+    height: 100%;
 }
 
 @media only screen and (max-width: 650px) {

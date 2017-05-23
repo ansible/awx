@@ -28,7 +28,7 @@ function InventoriesList($scope, $rootScope, $location,
             });
 
         $scope.$watchCollection(list.name, function(){
-            _.forEach($scope[list.name], buildStatusIndicators);
+            _.forEach($scope[list.name], processInventoryRow);
         });
 
         // Search init
@@ -38,6 +38,11 @@ function InventoriesList($scope, $rootScope, $location,
 
         $rootScope.flashMessage = null;
 
+    }
+
+    function processInventoryRow(inventory) {
+        buildStatusIndicators(inventory);
+        buildInventoryTypeLabel(inventory);
     }
 
     function buildStatusIndicators(inventory){
@@ -69,6 +74,10 @@ function InventoriesList($scope, $rootScope, $location,
                 inventory.hostsStatus = 'none';
                 inventory.hostsTip = 'Inventory contains 0 hosts.';
             }
+    }
+
+    function buildInventoryTypeLabel(inventory) {
+        inventory.kind_label = inventory.kind === '' ? 'Inventory' : (inventory.kind === 'smart' ? 'Smart Inventory': 'Inventory');
     }
 
     function ellipsis(a) {
@@ -249,12 +258,13 @@ function InventoriesList($scope, $rootScope, $location,
 
     };
 
-    $scope.addInventory = function () {
-        $state.go('inventories.add');
-    };
-
-    $scope.editInventory = function (id) {
-        $state.go('inventories.edit', {inventory_id: id});
+    $scope.editInventory = function (inventory) {
+        if(inventory.kind && inventory.kind === 'smart') {
+            $state.go('inventories.editSmartInventory', {smartinventory_id: inventory.id});
+        }
+        else {
+            $state.go('inventories.edit', {inventory_id: inventory.id});
+        }
     };
 
     $scope.manageInventory = function(id){

@@ -56,7 +56,7 @@ export default ['i18n', function(i18n) {
                         'used by Projects.') + '</dd>\n' +
                         '<dt>' + i18n._('Cloud') + '</dt>\n' +
                         '<dd>' + i18n._('Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
-                        'provider. These are used for dynamic inventory sources and for cloud provisioning and deployment ' +
+                        'provider. These are used for smart inventory sources and for cloud provisioning and deployment ' +
                         'in playbook runs.') + '</dd>\n' +
                         '</dl>\n',
                 dataTitle: i18n._('Kind'),

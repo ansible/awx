@@ -30,9 +30,7 @@ function InventoriesEdit($scope, $location,
         $scope = angular.extend($scope, inventoryData);
 
         $scope.organization_name = inventoryData.summary_fields.organization.name;
-
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
-
         $scope.parseType = 'yaml';
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState) {

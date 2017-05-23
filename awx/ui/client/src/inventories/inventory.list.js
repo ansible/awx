@@ -37,11 +37,16 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-5 col-sm-4 col-xs-6 List-staticColumnAdjacent',
+                columnClass: 'col-md-4 col-sm-3 col-xs-6 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
                 awToolTip: "{{ inventory.description }}",
                 awTipPlacement: "top",
-                linkTo: '/#/inventories/basic_inventory/{{inventory.id}}'
+                ngClick: 'editInventory(inventory)'
+            },
+            kind: {
+                label: i18n._('Type'),
+                ngBind: 'inventory.kind_label',
+                columnClass: 'col-md-2 col-sm-2 hidden-xs'
             },
             organization: {
                 label: i18n._('Organization'),
@@ -50,7 +55,7 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-4 col-sm-2 hidden-xs'
+                columnClass: 'col-md-3 col-sm-2 hidden-xs'
             }
         },
 
@@ -71,7 +76,6 @@ export default ['i18n', function(i18n) {
                     {
                         optionContent: i18n._('Smart Inventory'),
                         optionSref: 'inventories.addSmartInventory',
-                        //TODO: this should have its own permission
                         ngShow: 'canAddInventory'
                     }
                 ],
@@ -81,18 +85,18 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
 
-            columnClass: 'col-md-2 col-sm-4 col-xs-4',
+            columnClass: 'col-md-2 col-sm-3 col-xs-4',
 
             edit: {
                 label: i18n._('Edit'),
-                ngClick: 'editInventory(inventory.id)',
+                ngClick: 'editInventory(inventory)',
                 awToolTip: i18n._('Edit inventory'),
                 dataPlacement: 'top',
                 ngShow: 'inventory.summary_fields.user_capabilities.edit'
             },
             view: {
                 label: i18n._('View'),
-                ngClick: 'editInventory(inventory.id)',
+                ngClick: 'editInventory(inventory)',
                 awToolTip: i18n._('View inventory'),
                 dataPlacement: 'top',
                 ngShow: '!inventory.summary_fields.user_capabilities.edit'

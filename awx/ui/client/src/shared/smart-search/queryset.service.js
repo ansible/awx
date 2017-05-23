@@ -29,23 +29,6 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 return defer.promise;
             },
 
-            /* @extendme
-            // example:
-            // retrieving options from a polymorphic model (unified_job)
-            getPolymorphicModelOptions(path, name) {
-                let defer = $q.defer(),
-                    paths = {
-                        project_update: GetBasePath('project_update'),
-                        inventory_update: GetBasePath('inventory_update'),
-                        job: GetBasePath('jobs'),
-                        ad_hoc_command: GetBasePath('ad_hoc_commands'),
-                        system_job: GetBasePath('system_jobs')
-                    };
-                defer.all( // for each getCommonModelOptions() );
-                return defer.promise;
-            },
-            */
-
             // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
             encodeQueryset(params) {
                 let queryset;
@@ -57,10 +40,11 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                 function encodeTerm(value, key){
 
-                    let root = key.split("__")[0].replace(/^-/, '');
+                    key = key.toString().replace(/__icontains_DEFAULT/g, "__icontains");
+                    key = key.toString().replace(/__search_DEFAULT/g, "__search");
 
-                    key = key.replace(/__icontains_DEFAULT/g, "__icontains");
-                    key = key.replace(/__search_DEFAULT/g, "__search");
+                    value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
+                    value = value.toString().replace(/__search_DEFAULT/g, "__search");
 
                     if (Array.isArray(value)){
                         value = _.uniq(_.flattenDeep(value));
@@ -72,26 +56,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                             concated += `${key}=${item}&`;
                         });
 
-                        if(root === 'ansible_facts') {
-                            return `host_filter=${encodeURIComponent(concated)}&`;
-                        }
-                        else {
-                            return concated;
-                        }
+                        return concated;
                     }
                     else {
-                        if(value && typeof value === 'string') {
-                            value = decodeURIComponent(value).replace(/"|'/g, "");
-                        }
-
-                        if(root === 'ansible_facts') {
-                            let foobar = encodeURIComponent(`${key}=${value}`);
-                            return `host_filter=${foobar}&`;
-                        }
-                        else {
-                            return `${key}=${value}&`;
-                        }
-
+                        return `${key}=${value}&`;
                     }
                 }
             },
@@ -144,7 +112,12 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                 }
 
-                return {[paramString] : encodeURIComponent(valueString)};
+                if(params.singleSearchParam) {
+                    return {[params.singleSearchParam]: encodeURIComponent(paramString + "=" + valueString)};
+                }
+                else {
+                    return {[paramString] : encodeURIComponent(valueString)};
+                }
             },
             // decodes a django queryset param into a ui smart-search tag or set of tags
             decodeParam(value, key){
@@ -155,8 +128,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         return decodeURIComponent(`${searchString}`);
                     }
                     else {
-                        key = key.replace(/__icontains_DEFAULT/g, "");
-                        key = key.replace(/__search_DEFAULT/g, "");
+                        key = key.toString().replace(/__icontains_DEFAULT/g, "");
+                        key = key.toString().replace(/__search_DEFAULT/g, "");
                         let split = key.split('__');
                         let decodedParam = searchString;
                         let exclude = false;

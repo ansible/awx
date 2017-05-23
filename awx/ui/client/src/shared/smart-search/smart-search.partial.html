@@ -3,11 +3,11 @@
     <div class="SmartSearch-bar">
         <div class="SmartSearch-searchTermContainer">
             <!-- string search input -->
-            <form name="smartSearch" class="SmartSearch-form" aw-enter-key="add(searchTerm)" novalidate>
+            <form name="smartSearch" class="SmartSearch-form" aw-enter-key="addTerm(searchTerm)" novalidate>
                 <input class="SmartSearch-input" ng-model="searchTerm" placeholder="{{searchPlaceholder}}"
                 ng-disabled="disableSearch">
             </form>
-            <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="add(searchTerm)">
+            <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="addTerm(searchTerm)">
                 <i class="fa fa-search"></i>
             </div>
         </div>
@@ -20,14 +20,14 @@
         <div class="SmartSearch-tagSection">
             <div class="SmartSearch-flexContainer">
                 <div class="SmartSearch-tagContainer" ng-repeat="tag in searchTags track by $index">
-                    <div class="SmartSearch-deleteContainer" ng-click="remove($index)">
+                    <div class="SmartSearch-deleteContainer" ng-click="removeTerm($index)">
                         <i class="fa fa-times SmartSearch-tagDelete"></i>
                     </div>
                     <div class="SmartSearch-tag SmartSearch-tag--deletable">
                         <span class="SmartSearch-name">{{tag}}</span>
                     </div>
                 </div>
-                <a href class="SmartSearch-clearAll" ng-click="clearAll()" ng-show="!(searchTags | isEmpty)" translate>CLEAR ALL</a>
+                <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" ng-show="!(searchTags | isEmpty)" translate>CLEAR ALL</a>
             </div>
         </div>
     </div>

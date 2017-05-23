@@ -10,8 +10,7 @@ export default ['i18n', function(i18n) {
         iterator: 'host',
         editTitle: '{{ selected_group }}',
         searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-        nonstandardSearchParam: {
-            root: 'ansible_facts',
+        singleSearchParam: {
             param: 'host_filter'
         },
         showTitle: false,
@@ -67,13 +66,13 @@ export default ['i18n', function(i18n) {
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
             },
-            inventory_name: {
+            inventory: {
                 label: i18n._('Inventory'),
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
-                linkTo: "{{ '/#/inventories/' + host.inventory_id }}"
-            },
+                ngClick: "editInventory(host)"
+            }
         },
 
         fieldActions: {

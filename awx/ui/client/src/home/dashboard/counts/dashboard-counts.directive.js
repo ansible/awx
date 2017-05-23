@@ -34,12 +34,12 @@ export default
                     function createCounts(data) {
                         scope.counts = _.map([
                             {
-                                url: "/#/home/hosts",
+                                url: "/#/hosts",
                                 number: scope.data.hosts.total,
                                 label: i18n._("Hosts")
                             },
                             {
-                                url: "/#/home/hosts?host_search=has_active_failures:true",
+                                url: "/#/hosts?host_search=has_active_failures:true",
                                 number: scope.data.hosts.failed,
                                 label: i18n._("Failed Hosts"),
                                 isFailureCount: true

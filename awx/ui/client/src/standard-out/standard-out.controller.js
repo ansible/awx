@@ -54,7 +54,17 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
                 $scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
                 $scope.job_template_url = '/#/templates/' + data.unified_job_template;
-                $scope.inventory_url = ($scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
+                if($scope.inventory_name && data.inventory && data.summary_fields.inventory && data.summary_fields.inventory.kind) {
+                    if(data.summary_fields.inventory.kind === '') {
+                        $scope.inventory_url = '/#/inventories/inventory' + data.inventory;
+                    }
+                    else if(data.summary_fields.inventory.kind === 'smart') {
+                        $scope.inventory_url = '/#/inventories/smart_inventory' + data.inventory;
+                    }
+                }
+                else {
+                    $scope.inventory_url = '';
+                }
                 $scope.project_url = ($scope.project_name && data.project) ? '/#/projects/' + data.project : '';
                 $scope.credential_name = (data.summary_fields.credential) ? data.summary_fields.credential.name : '';
                 $scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';

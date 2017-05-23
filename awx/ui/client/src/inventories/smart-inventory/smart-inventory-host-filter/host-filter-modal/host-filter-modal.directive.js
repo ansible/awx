@@ -4,7 +4,7 @@ export default ['templateUrl', function(templateUrl) {
         scope: {
             hostFilter: '='
         },
-        templateUrl: templateUrl('inventories/hosts/smart-inventory/dynamic-inventory-host-filter/host-filter-modal/host-filter-modal'),
+        templateUrl: templateUrl('inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal'),
         link: function(scope, element) {
 
             $('#host-filter-modal').on('hidden.bs.modal', function () {
@@ -44,7 +44,7 @@ export default ['templateUrl', function(templateUrl) {
                         let hostList = _.cloneDeep(HostsList);
                         delete hostList.fields.toggleHost;
                         delete hostList.fields.active_failures;
-                        delete hostList.fields.inventory_name;
+                        delete hostList.fields.inventory;
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'foobar',

@@ -11,7 +11,7 @@
  */
 
 function SmartInventoryAdd($scope, $location,
-    GenerateForm, SmartInventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
+    GenerateForm, smartInventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state) {
 
@@ -34,7 +34,7 @@ function SmartInventoryAdd($scope, $location,
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = SmartInventoryForm;
+        form = smartInventoryForm;
 
     init();
 
@@ -49,37 +49,39 @@ function SmartInventoryAdd($scope, $location,
         $scope.parseType = 'yaml';
         ParseTypeChange({
             scope: $scope,
-            variable: 'variables',
+            variable: 'smartinventory_variables',
             parse_variable: 'parseType',
-            field_id: 'smartinventory_variables'
+            field_id: 'smartinventory_smartinventory_variables'
         });
 
-        $scope.dynamic_hosts = $state.params.hostfilter ? JSON.parse($state.params.hostfilter) : '';
+        $scope.smart_hosts = $state.params.hostfilter ? JSON.parse($state.params.hostfilter) : '';
     }
 
     // Save
     $scope.formSave = function() {
         Wait('start');
         try {
-            var fld, json_data, data;
+            let fld, data = {};
 
-            json_data = ToJSON($scope.parseType, $scope.variables, true);
-
-            data = {};
             for (fld in form.fields) {
-                if (form.fields[fld].realName) {
-                    data[form.fields[fld].realName] = $scope[fld];
-                } else {
-                    data[fld] = $scope[fld];
-                }
+                data[fld] = $scope[fld];
             }
+
+            data.variables = ToJSON($scope.parseType, $scope.smartinventory_variables, true);
+
+            let decodedHostFilter = decodeURIComponent($scope.smart_hosts.host_filter);
+            decodedHostFilter = decodedHostFilter.replace(/__icontains_DEFAULT/g, "__icontains");
+            decodedHostFilter = decodedHostFilter.replace(/__search_DEFAULT/g, "__search");
+            data.host_filter = decodedHostFilter;
+
+            data.kind = "smart";
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
                 .success(function(data) {
                     var inventory_id = data.id;
                     Wait('stop');
-                    $location.path('/inventories/' + inventory_id);
+                    $state.go('inventories.editSmartInventory', {smartinventory_id: inventory_id}, {reload: true});
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, form, {
@@ -95,12 +97,12 @@ function SmartInventoryAdd($scope, $location,
     };
 
     $scope.formCancel = function() {
-        $state.go('hosts');
+        $state.go('inventories');
     };
 }
 
 export default ['$scope', '$location',
-    'GenerateForm', 'SmartInventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
+    'GenerateForm', 'smartInventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
     'Wait', 'ToJSON', '$state', SmartInventoryAdd
 ];
