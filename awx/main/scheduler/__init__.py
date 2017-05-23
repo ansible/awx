@@ -383,6 +383,8 @@ class TaskManager():
                 # list of task id's from celery and now.
                 # Note: This is an actual fix, not a reduction in the time 
                 # window that this can happen.
+                if isinstance(task, WorkflowJob):
+                    continue
                 if task.status != 'running':
                     continue
                 task.status = 'failed'
