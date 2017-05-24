@@ -6,7 +6,14 @@ var tower = angular.module('tower', ['networkUI', 'ui.router']);
 
 tower.config(function($stateProvider, $urlRouterProvider) {
 
-    $urlRouterProvider.otherwise('/topology');
+    $urlRouterProvider.otherwise('/index');
+
+    $stateProvider
+        .state({
+            name: 'index',
+            url: '/index',
+            template: '<a href="#!/topology">Topology</a>'
+        });
 
     $stateProvider
         .state({
