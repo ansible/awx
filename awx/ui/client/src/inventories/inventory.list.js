@@ -22,16 +22,22 @@ export default ['i18n', function(i18n) {
         fields: {
             status: {
                 label: '',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus',
+                columnClass: 'List-staticColumn--mediumStatus',
                 nosort: true,
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
                 icons: [{
+                    icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
+                    awToolTip: "{{ inventory.syncTip }}",
+                    awTipPlacement: "right",
+                    ngClick: "showSourceSummary($event, inventory.id)",
+                    ngClass: "inventory.launch_class"
+                },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
-                    ngClass: ""
+                    ngClass: "inventory.host_status_class"
                 }]
             },
             name: {
@@ -87,6 +93,13 @@ export default ['i18n', function(i18n) {
 
             columnClass: 'col-md-2 col-sm-3 col-xs-4',
 
+            inventory_update: {
+                mode: 'all',
+                ngClick: 'syncInventory(inventory)',
+                awToolTip: i18n._('Sync all inventory sources'),
+                ngShow: "inventory.kind === '' && inventory.has_inventory_sources",
+                dataPlacement: "top",
+            },
             edit: {
                 label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory)',

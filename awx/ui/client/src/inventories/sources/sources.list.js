@@ -33,8 +33,13 @@ export default {
             label: 'Sources',
             key: true,
             ngClick: "editSource(inventory_source.id)",
-            columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
             class: 'InventoryManage-breakWord',
+        },
+        source: {
+            label: 'Type',
+            ngBind: 'inventory_source.source_label',
+            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
         }
     },
 
@@ -60,7 +65,7 @@ export default {
 
     fieldActions: {
 
-        columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
+        columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right',
 
         group_update: {
             //label: 'Sync',

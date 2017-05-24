@@ -43,19 +43,33 @@ export default
             Rest.setUrl(url);
             Rest.get()
             .success(function (data) {
-                inventory_source = data;
-                if (data.can_update) {
-                    if (data.passwords_needed_to_update) {
-                        Wait('stop');
-                        scope.$emit('PromptForPasswords');
-                    }
-                    else {
+                if(params.updateAllSources) {
+                    let userCanUpdateAllSources = true;
+                    _.forEach(data, function(inventory_source){
+                        if (!inventory_source.can_update) {
+                            userCanUpdateAllSources = false;
+                        }
+                    });
+
+                    if(userCanUpdateAllSources) {
                         scope.$emit('StartTheUpdate', {});
                     }
-                } else {
-                    Wait('stop');
-                    Alert('Permission Denied', 'You do not have access to run the inventory sync. Please contact your system administrator.',
-                    'alert-danger');
+                }
+                else {
+                    inventory_source = data;
+                    if (data.can_update) {
+                        if (data.passwords_needed_to_update) {
+                            Wait('stop');
+                            scope.$emit('PromptForPasswords');
+                        }
+                        else {
+                            scope.$emit('StartTheUpdate', {});
+                        }
+                    } else {
+                        Wait('stop');
+                        Alert('Permission Denied', 'You do not have access to run the inventory sync. Please contact your system administrator.',
+                        'alert-danger');
+                    }
                 }
             })
             .error(function (data, status) {
