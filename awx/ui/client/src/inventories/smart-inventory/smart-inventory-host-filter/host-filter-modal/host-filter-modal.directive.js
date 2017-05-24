@@ -48,8 +48,7 @@ export default ['templateUrl', function(templateUrl) {
                         hostList.well = false;
                         let html = GenerateList.build({
                             list: hostList,
-                            input_type: 'host-filter-modal-body',
-                            //mode: 'lookup'
+                            input_type: 'host-filter-modal-body'
                         });
 
                         $scope.list = hostList;
