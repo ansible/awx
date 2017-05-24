@@ -31,6 +31,7 @@ from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvide
 
 # Ansible Tower
 from awx.conf.license import feature_enabled
+from awx.sso.models import UserEnterpriseAuth
 
 logger = logging.getLogger('awx.sso.backends')
 
@@ -125,6 +126,27 @@ class LDAPBackend(BaseLDAPBackend):
         return set()
 
 
+def _get_or_set_enterprise_user(username, password, provider):
+    created = False
+    try:
+        user = User.objects.all().prefetch_related('enterprise_auth').get(username=username)
+    except User.DoesNotExist:
+        user = User(username=username)
+        user.set_unusable_password()
+        user.save()
+        enterprise_auth = UserEnterpriseAuth(user=user, provider=provider)
+        enterprise_auth.save()
+        logger.debug("Created enterprise user %s via %s backend." %
+                     (username, enterprise_auth.get_provider_display()))
+        created = True
+    # NOTE: remove has_usable_password logic in a future release.
+    if created or\
+            not user.has_usable_password() or\
+            (provider,) in user.enterprise_auth.all().values_list('provider') and not user.has_usable_password():
+        return user
+    logger.warn("Enterprise user %s already defined in Tower." % username)
+
+
 class RADIUSBackend(BaseRADIUSBackend):
     '''
     Custom Radius backend to verify license status
@@ -149,31 +171,13 @@ class RADIUSBackend(BaseRADIUSBackend):
             return user
 
     def get_django_user(self, username, password=None):
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            logger.debug("Created RADIUS user %s" % (username,))
-            user = User(username=username)
-            user.set_unusable_password()
-            user.save()
-
-        return user
+        return _get_or_set_enterprise_user(username, password, 'radius')
 
 
 class TACACSPlusBackend(object):
     '''
     Custom TACACS+ auth backend for AWX
     '''
-    def _get_or_set_user(self, username, password):
-        user, created = User.objects.get_or_create(
-            username=username,
-            defaults={'is_superuser': False},
-        )
-        if created:
-            logger.debug("Created TACACS+ user %s" % (username,))
-            user.set_unusable_password()
-            user.save()
-        return user
 
     def authenticate(self, username, password):
         if not django_settings.TACACSPLUS_HOST:
@@ -196,10 +200,7 @@ class TACACSPlusBackend(object):
             logger.exception("TACACS+ Authentication Error: %s" % (e.message,))
             return None
         if auth.valid:
-            user = self._get_or_set_user(username, password)
-            if not user.has_usable_password():
-                return user
-        return None
+            return _get_or_set_enterprise_user(username, password, 'tacacs+')
 
     def get_user(self, user_id):
         if not django_settings.TACACSPLUS_HOST:
