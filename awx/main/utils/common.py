@@ -372,6 +372,26 @@ def get_allowed_fields(obj, serializer_mapping):
     return allowed_fields
 
 
+def _convert_model_field_for_display(obj, field_name, password_fields=None):
+    # NOTE: Careful modifying the value of field_val, as it could modify
+    # underlying model object field value also.
+    field_val = getattr(obj, field_name, None)
+    if password_fields is None:
+        password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
+    if field_name in password_fields:
+        return u'hidden'
+    if hasattr(obj, 'display_%s' % field_name):
+        field_val = getattr(obj, 'display_%s' % field_name)()
+    if isinstance(field_val, (list, dict)):
+        try:
+            field_val = json.dumps(field_val, ensure_ascii=False)
+        except Exception:
+            pass
+    if type(field_val) not in (bool, int, type(None)):
+        field_val = smart_str(field_val)
+    return field_val
+
+
 def model_instance_diff(old, new, serializer_mapping=None):
     """
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
@@ -380,13 +400,13 @@ def model_instance_diff(old, new, serializer_mapping=None):
     When provided, read-only fields will not be included in the resulting dictionary
     """
     from django.db.models import Model
-    from awx.main.models.credential import Credential
-    PASSWORD_FIELDS = ['password'] + Credential.PASSWORD_FIELDS
 
     if not(old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
     if not(new is None or isinstance(new, Model)):
         raise TypeError('The supplied new instance is not a valid model instance.')
+    old_password_fields = set(getattr(type(old), 'PASSWORD_FIELDS', [])) | set(['password'])
+    new_password_fields = set(getattr(type(new), 'PASSWORD_FIELDS', [])) | set(['password'])
 
     diff = {}
 
@@ -395,15 +415,11 @@ def model_instance_diff(old, new, serializer_mapping=None):
     for field in allowed_fields:
         old_value = getattr(old, field, None)
         new_value = getattr(new, field, None)
-
-        if old_value != new_value and field not in PASSWORD_FIELDS:
-            if type(old_value) not in (bool, int, type(None)):
-                old_value = smart_str(old_value)
-            if type(new_value) not in (bool, int, type(None)):
-                new_value = smart_str(new_value)
-            diff[field] = (old_value, new_value)
-        elif old_value != new_value and field in PASSWORD_FIELDS:
-            diff[field] = (u"hidden", u"hidden")
+        if old_value != new_value:
+            diff[field] = (
+                _convert_model_field_for_display(old, field, password_fields=old_password_fields),
+                _convert_model_field_for_display(new, field, password_fields=new_password_fields),
+            )
 
     if len(diff) == 0:
         diff = None
@@ -417,8 +433,7 @@ def model_to_dict(obj, serializer_mapping=None):
     serializer_mapping are used to determine read-only fields.
     When provided, read-only fields will not be included in the resulting dictionary
     """
-    from awx.main.models.credential import Credential
-    PASSWORD_FIELDS = ['password'] + Credential.PASSWORD_FIELDS
+    password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     attr_d = {}
 
     allowed_fields = get_allowed_fields(obj, serializer_mapping)
@@ -426,14 +441,8 @@ def model_to_dict(obj, serializer_mapping=None):
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
-        if field.name not in PASSWORD_FIELDS:
-            field_val = getattr(obj, field.name, None)
-            if type(field_val) not in (bool, int, type(None)):
-                attr_d[field.name] = smart_str(field_val)
-            else:
-                attr_d[field.name] = field_val
-        else:
-            attr_d[field.name] = "hidden"
+        attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
+
     return attr_d
 
 

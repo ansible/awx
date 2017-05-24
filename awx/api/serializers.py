@@ -1948,9 +1948,8 @@ class CredentialSerializer(BaseSerializer):
                 if field in value and force_text(value[field]).startswith('$encrypted$'):
                     value[field] = '$encrypted$'
 
-        for k, v in value.get('inputs', {}).items():
-            if force_text(v).startswith('$encrypted$'):
-                value['inputs'][k] = '$encrypted$'
+        if 'inputs' in value:
+            value['inputs'] = data.display_inputs()
         return value
 
     def get_related(self, obj):
@@ -3207,11 +3206,8 @@ class NotificationTemplateSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(NotificationTemplateSerializer, self).to_representation(obj)
-        for field in obj.notification_class.init_parameters:
-            config = obj.notification_configuration
-            if field in config and force_text(config[field]).startswith('$encrypted$'):
-                config[field] = '$encrypted$'
-        ret['notification_configuration'] = config
+        if 'notification_configuration' in ret:
+            ret['notification_configuration'] = obj.display_notification_configuration()
         return ret
 
     def get_related(self, obj):
