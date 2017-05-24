@@ -1095,10 +1095,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(!field.multiSelect && !field.disableChooseOption){
                             html += "<option value=\"\">";
                             // some languages use "Playbook" as a proper noun
-                            var chosen_item = field.label;
-                            if (i18n._("playbook") !== i18n._("Playbook")) {
-                                chosen_item = label.toLowerCase();
-                            }
+                            var chosen_item = (i18n._("playbook") !== i18n._("Playbook")) ? field.label.toLowerCase() : field.label;
                             // Add a custom default select 'value' (default text)
                             html += (field.defaultText) ? field.defaultText : i18n.sprintf(i18n._("Choose a %s"), chosen_item);
                             html += "</option>\n";

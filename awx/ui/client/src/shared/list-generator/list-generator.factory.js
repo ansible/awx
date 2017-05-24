@@ -319,9 +319,6 @@ export default ['$compile', 'Attr', 'Icon',
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
                         innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator}.id)"></td>`;
                     }
-                    else if (options.input_type === "foobar") {
-
-                    }
                     else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
@@ -489,8 +486,8 @@ export default ['$compile', 'Attr', 'Icon',
 
                 if (list.multiSelect) {
                     html += buildSelectAll().prop('outerHTML');
-                } else if (options.mode === 'lookup' && options.input_type !== 'foobar') {
-                    html += "<th class=\"List-tableHeader  select-column List-staticColumn--smallStatus\"></th>";
+                } else if (options.mode === 'lookup') {
+                    html += "<th class=\"List-tableHeader select-column List-staticColumn--smallStatus\"></th>";
                 }
 
                 if (options.mode !== 'lookup'){

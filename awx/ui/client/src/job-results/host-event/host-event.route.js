@@ -12,6 +12,9 @@ var hostEventModal = {
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-modal'),
     'abstract': false,
+    ncyBreadcrumb: {
+        skip: true
+    },
     resolve: {
         hostEvent: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
             return jobResultsService.getRelatedJobEvents($stateParams.id, {
@@ -34,21 +37,30 @@ var hostEventJson = {
     name: 'jobResult.host-event.json',
     url: '/json',
     controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-codemirror')
+    templateUrl: templateUrl('job-results/host-event/host-event-codemirror'),
+    ncyBreadcrumb: {
+        skip: true
+    },
 };
 
 var hostEventStdout = {
     name: 'jobResult.host-event.stdout',
     url: '/stdout',
     controller: 'HostEventController',
-        templateUrl: templateUrl('job-results/host-event/host-event-stdout')
+    templateUrl: templateUrl('job-results/host-event/host-event-stdout'),
+    ncyBreadcrumb: {
+        skip: true
+    },
 };
 
 var hostEventStderr = {
     name: 'jobResult.host-event.stderr',
     url: '/stderr',
     controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-stderr')
+    templateUrl: templateUrl('job-results/host-event/host-event-stderr'),
+    ncyBreadcrumb: {
+        skip: true
+    },
 };
 
 
