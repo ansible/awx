@@ -137,7 +137,7 @@
                 callback: 'choicesReadyVerbosity'
             });
 
-            Rest.setUrl('api/v1/labels');
+            Rest.setUrl(GetBasePath('labels'));
             Rest.get()
                 .success(function (data) {
                     $scope.labelOptions = data.results

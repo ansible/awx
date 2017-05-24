@@ -19,8 +19,8 @@
  * Note that $http will automaticall encode the URL, replacing spaces and special characters with appropriate %hex codes. Example URL values might include:
  *
  * ```
- *    /api/v1/inventories/9/
- *    /api/v1/credentials/?name=SSH Key&kind=ssh
+ *    /api/v2/inventories/9/
+ *    /api/v2/credentials/?name=SSH Key&kind=ssh
  * ```
  *
  * When constructing the URL be sure to use the GetBasePath() method found in js/shared/Utilities.js. GetBasePath uses the response objects from /api and

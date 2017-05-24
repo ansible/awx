@@ -339,7 +339,7 @@ export default
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
                         }
                     ],
-                    ParentObject: [() =>{return {endpoint:'/api/v1/schedules'}; }],
+                    ParentObject: ['GetBasePath', (GetBasePath) =>{return {endpoint:GetBasePath('schedules')}; }],
                     UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
                         function(Rest, GetBasePath, $stateParams, $q) {
                             Rest.setUrl(GetBasePath('unified_jobs'));

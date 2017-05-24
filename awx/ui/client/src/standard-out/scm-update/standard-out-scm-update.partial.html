@@ -98,7 +98,7 @@
                         <button class="StandardOut-actionButton" aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}" data-tip-watch="toggleStdoutFullscreenTooltip" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
-                        <a href="/api/v1/project_updates/{{ job.id }}/stdout?format=txt_download">
+                        <a href="/api/v2/project_updates/{{ job.id }}/stdout?format=txt_download">
                             <button class="StandardOut-actionButton" aw-tool-tip="{{'Download Output'|translate}}" data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>

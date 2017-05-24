@@ -1,17 +1,17 @@
 export default {
     "id": 109,
     "type": "workflow_job",
-    "url": "/api/v1/workflow_jobs/109/",
+    "url": "/api/v2/workflow_jobs/109/",
     "related": {
-        "created_by": "/api/v1/users/1/",
-        "unified_job_template": "/api/v1/workflow_job_templates/27/",
-        "workflow_job_template": "/api/v1/workflow_job_templates/27/",
-        "notifications": "/api/v1/workflow_jobs/109/notifications/",
-        "workflow_nodes": "/api/v1/workflow_jobs/109/workflow_nodes/",
-        "labels": "/api/v1/workflow_jobs/109/labels/",
-        "activity_stream": "/api/v1/workflow_jobs/109/activity_stream/",
-        "relaunch": "/api/v1/workflow_jobs/109/relaunch/",
-        "cancel": "/api/v1/workflow_jobs/109/cancel/"
+        "created_by": "/api/v2/users/1/",
+        "unified_job_template": "/api/v2/workflow_job_templates/27/",
+        "workflow_job_template": "/api/v2/workflow_job_templates/27/",
+        "notifications": "/api/v2/workflow_jobs/109/notifications/",
+        "workflow_nodes": "/api/v2/workflow_jobs/109/workflow_nodes/",
+        "labels": "/api/v2/workflow_jobs/109/labels/",
+        "activity_stream": "/api/v2/workflow_jobs/109/activity_stream/",
+        "relaunch": "/api/v2/workflow_jobs/109/relaunch/",
+        "cancel": "/api/v2/workflow_jobs/109/cancel/"
     },
     "summary_fields": {
         "workflow_job_template": {

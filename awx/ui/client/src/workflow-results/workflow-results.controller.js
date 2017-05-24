@@ -10,7 +10,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             var getTowerLink = function(key) {
                 if(key === 'schedule') {
                     if($scope.workflow.related.schedule) {
-                        return '/#/templates/workflow_job_template/' + $scope.workflow.workflow_job_template + '/schedules' + $scope.workflow.related.schedule.split('api/v1/schedules')[1];
+                        return '/#/templates/workflow_job_template/' + $scope.workflow.workflow_job_template + '/schedules' + $scope.workflow.related.schedule.split(/api\/v\d+\/schedules/)[1];
                     }
                     else {
                         return null;
@@ -19,7 +19,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                 else {
                     if ($scope.workflow.related[key]) {
                         return '/#/' + $scope.workflow.related[key]
-                            .split('api/v1/')[1];
+                            .split(/api\/v\d+\//)[1];
                     } else {
                         return null;
                     }

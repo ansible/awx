@@ -119,7 +119,7 @@ export default ['i18n', function(i18n) {
                 organizations: {
                     name: 'organizations',
                     awToolTip: i18n._('Please save before assigning to organizations'),
-                    basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
+                    basePath: 'api/v2/users/{{$stateParams.user_id}}/organizations',
                     emptyListText: i18n._('Please add user to an Organization.'),
                     search: {
                         page_size: '10'
@@ -147,7 +147,7 @@ export default ['i18n', function(i18n) {
                 teams: {
                     name: 'teams',
                     awToolTip: i18n._('Please save before assigning to teams'),
-                    basePath: 'api/v1/users/{{$stateParams.user_id}}/teams',
+                    basePath: 'api/v2/users/{{$stateParams.user_id}}/teams',
                     search: {
                         page_size: '10'
                     },
@@ -172,7 +172,7 @@ export default ['i18n', function(i18n) {
                 },
                 permissions: {
                     name: 'permissions',
-                    basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
+                    basePath: 'api/v2/users/{{$stateParams.user_id}}/roles/',
                     search: {
                         page_size: '10',
                         order_by: 'id'

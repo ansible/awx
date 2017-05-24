@@ -63,7 +63,7 @@ angular.module('ApiLoader', ['Utilities'])
 .factory('GetBasePath', ['$rootScope', 'Store', 'LoadBasePaths', 'Empty',
     function ($rootScope, Store, LoadBasePaths, Empty) {
         return function (set) {
-            // use /api/v1/ results to construct API URLs.
+            // use /api/v2/ results to construct API URLs.
             if (Empty($rootScope.defaultUrls)) {
                 // browser refresh must have occurred. load from local storage
                 if (Store('api')) {

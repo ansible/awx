@@ -152,7 +152,7 @@ export default
             getUser: function () {
                 return $http({
                     method: 'GET',
-                    url: '/api/v1/me/',
+                    url: GetBasePath('me'),
                     headers: {
                         'Authorization': 'Token ' + this.getToken(),
                         "X-Auth-Token": 'Token ' + this.getToken()

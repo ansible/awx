@@ -60,8 +60,8 @@ describe('Service: QuerySet', () => {
 
 
     describe('fn search', () => {
-        let pattern = /\/api\/v1\/inventories\/(.+)\/groups\/*/,
-            endpoint = '/api/v1/inventories/1/groups/',
+        let pattern = /\/api\/v2\/inventories\/(.+)\/groups\/*/,
+            endpoint = '/api/v2/inventories/1/groups/',
             params = {
             or__name: 'borg',
             or__description__icontains: 'assimilate'
@@ -72,7 +72,7 @@ describe('Service: QuerySet', () => {
                 .expectGET(pattern)
                 .respond(200, {});
             QuerySet.search(endpoint, params).then((data) =>{
-                expect(data.config.url).toEqual('/api/v1/inventories/1/groups/?or__name=borg&or__description__icontains=assimilate');
+                expect(data.config.url).toEqual('/api/v2/inventories/1/groups/?or__name=borg&or__description__icontains=assimilate');
             });
             $httpBackend.flush();
         });

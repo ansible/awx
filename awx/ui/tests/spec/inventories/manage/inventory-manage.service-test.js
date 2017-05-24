@@ -20,7 +20,7 @@ describe('Service: InventoryManageService', () => {
             spyOn(InventoryManageService, 'error');
         });
         it('InventoryManageService.getInventory should handle errors', () => {
-            Rest.expectGET('/api/v1/inventory:id/').respond(400, {});
+            Rest.expectGET('/api/v2/inventory:id/').respond(400, {});
             Rest.flush();
             expect(InventoryManageService.error).toHaveBeenCalled();
         });

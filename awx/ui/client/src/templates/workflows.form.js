@@ -108,7 +108,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
-                    basePath: 'api/v1/workflow_job_templates/{{$stateParams.workflow_job_template_id}}/access_list/',
+                    basePath: 'api/v2/workflow_job_templates/{{$stateParams.workflow_job_template_id}}/access_list/',
                     search: {
                         order_by: 'username'
                     },

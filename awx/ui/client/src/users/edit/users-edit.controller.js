@@ -128,7 +128,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
 
         $scope.convertApiUrl = function(str) {
             if (str) {
-                return str.replace("api/v1", "#");
+                return str.replace(/api\/v\d+/, "#");
             } else {
                 return null;
             }

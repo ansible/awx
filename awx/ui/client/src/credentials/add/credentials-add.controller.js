@@ -61,7 +61,7 @@ export default ['$scope', '$rootScope',
             if ($rootScope.current_user && $rootScope.current_user.is_superuser) {
                 $scope.canShareCredential = true;
             } else {
-                Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+                Rest.setUrl(GetBasePath('users') + `${$rootScope.current_user.id}/admin_of_organizations`);
                 Rest.get()
                     .success(function(data) {
                         $scope.canShareCredential = (data.count) ? true : false;
