@@ -93,7 +93,7 @@ export default ['i18n', function(i18n) {
                 mode: 'all',
                 ngClick: 'syncInventory(inventory)',
                 awToolTip: i18n._('Sync all inventory sources'),
-                ngShow: "inventory.kind === ''",
+                ngShow: "inventory.kind === '' && inventory.has_inventory_sources",
                 dataPlacement: "top",
             },
             edit: {
