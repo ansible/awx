@@ -243,6 +243,16 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     dataContainer: "body",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                instance_groups: {
+                    label: i18n._('Instance Groups'),
+                    type: 'select',
+                    awPopOver: "<p>" + i18n._("Select the Instance Groups for this Job Template to run on.") + "</p>",
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    dataTitle: i18n._('Instance Groups'),
+                    multiSelect: true,
+                    ngOptions: 'group.name for group in instanceGroupOptions track by group.id',
+                },
                 job_tags: {
                     label: i18n._('Job Tags'),
                     type: 'textarea',

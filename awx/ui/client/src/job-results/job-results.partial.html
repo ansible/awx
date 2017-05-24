@@ -357,6 +357,17 @@
                         </div>
                     </div>
 
+                    <!-- IG DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.instance_group">
+                        <label class="JobResults-resultRowLabel">
+                            Instance Group
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            {{ job.summary_fields.instance_group.name }}
+                        </div>
+                    </div>
+
                     <!-- TAGS DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.job_tags">

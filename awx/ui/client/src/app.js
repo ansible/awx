@@ -70,6 +70,7 @@ import access from './access/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
+import instanceGroups from './instance-groups/main';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -123,6 +124,7 @@ var tower = angular.module('Tower', [
     users.name,
     projects.name,
     scheduler.name,
+    instanceGroups.name,
 
     'Utilities',
     'templates',

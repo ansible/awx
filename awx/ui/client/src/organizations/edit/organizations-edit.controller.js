@@ -6,18 +6,19 @@
 
 export default ['$scope', '$location', '$stateParams',
     'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', 'ClearScope',
-    'GetBasePath', 'Wait', '$state', 'ToggleNotification',
+    'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData',
     function($scope, $location, $stateParams,
         OrganizationForm, Rest, ProcessErrors, Prompt, ClearScope,
-        GetBasePath, Wait, $state, ToggleNotification) {
+        GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
 
         ClearScope();
 
-        var form = OrganizationForm(),
+        let form = OrganizationForm(),
             defaultUrl = GetBasePath('organizations'),
             base = $location.path().replace(/^\//, '').split('/')[0],
             master = {},
-            id = $stateParams.organization_id;
+            id = $stateParams.organization_id,
+            instance_group_url = defaultUrl + id + '/instance_groups/';
 
         init();
 
@@ -30,14 +31,46 @@ export default ['$scope', '$location', '$stateParams',
 
             $scope.$emit("HideOrgListHeader");
             $scope.organization_id = id;
+
+            $scope.instanceGroupOptions = InstanceGroupsData;
+            CreateSelect2({
+                element: '#organization_instance_groups',
+                multiple: true,
+                addNew: false
+            });
+
+            Rest.setUrl(instance_group_url);
+            Rest.get()
+                .then(({data}) => {
+                    if (data.results.length > 0) {
+                        let opts = data.results
+                            .map(i => ({id: i.id + "",
+                                name: i.name}));
+                        CreateSelect2({
+                            element: '#organization_instance_groups',
+                            multiple: true,
+                            addNew: false,
+                            opts: opts
+                        });
+                    }
+                })
+                .catch(({data, status}) => {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get instance groups. GET returned ' +
+                            'status: ' + status
+                    });
+                });
         }
+
 
         // Retrieve detail record and prepopulate the form
         Wait('start');
         Rest.setUrl(defaultUrl + id + '/');
         Rest.get()
             .success(function(data) {
-                var fld;
+                let fld;
+
                 $scope.organization_name = data.name;
                 for (fld in form.fields) {
                     if (data[fld]) {
@@ -45,16 +78,11 @@ export default ['$scope', '$location', '$stateParams',
                         master[fld] = data[fld];
                     }
                 }
+
                 $scope.organization_obj = data;
                 $scope.$emit('organizationLoaded');
                 Wait('stop');
-            })
-            .error(function(data, status) {
-                ProcessErrors($scope, data, status, form, {
-                    hdr: 'Error!',
-                    msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status
-                });
-            });
+        });
 
         $scope.toggleNotification = function(event, id, column) {
             var notifier = this.notification;
@@ -82,13 +110,22 @@ export default ['$scope', '$location', '$stateParams',
             }
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(params)
-                .success(function() {
-                    Wait('stop');
+                .then(() => {
+                    InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                        .then(() => {
+                            Wait('stop');
+                            $state.go($state.current, {}, { reload: true });
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to update instance groups. POST returned status: ' + status
+                            });
+                        });
                     $scope.organization_name = $scope.name;
                     master = params;
-                    $state.go($state.current, {}, { reload: true });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, OrganizationForm, {
                         hdr: 'Error!',
                         msg: 'Failed to update organization: ' + id + '. PUT status: ' + status

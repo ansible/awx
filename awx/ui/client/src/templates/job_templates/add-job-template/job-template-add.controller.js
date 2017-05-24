@@ -9,13 +9,14 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
-         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project',
+         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'InstanceGroupsData',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, CreateSelect2, $q, i18n, Inventory, Project
+             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
+             InstanceGroupsData
          ) {
 
              Rest.setUrl(GetBasePath('job_templates'));
@@ -29,7 +30,7 @@
 
             ClearScope();
             // Inject dynamic view
-            var defaultUrl = GetBasePath('job_templates'),
+            let defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),
                 generator = GenerateForm,
                 master = {},
@@ -46,6 +47,13 @@
                 $scope.playbook_options = [];
                 $scope.mode = "add";
                 $scope.parseType = 'yaml';
+
+                $scope.instanceGroupOptions = InstanceGroupsData;
+                CreateSelect2({
+                    element: '#job_template_instance_groups',
+                    multiple: true,
+                    addNew: false
+                });
 
                 md5Setup({
                     scope: $scope,
@@ -93,7 +101,6 @@
                         element:'#playbook-select',
                         multiple: false
                     });
-
                     CreateSelect2({
                         element:'#job_template_verbosity',
                         multiple: false
@@ -266,9 +273,10 @@
                         'alert-danger', saveCompleted, null, null,
                         null, true);
                 }
+
+
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
-
                 Rest.setUrl(data.related.labels);
 
                 var currentLabels = Rest.get()
@@ -433,21 +441,29 @@
 
                     Rest.setUrl(defaultUrl);
                     Rest.post(data)
-                        .success(function(data) {
-                            $scope.$emit('templateSaveSuccess',
-                                data
-                            );
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors($scope, data, status, form,
-                                {
-                                    hdr: 'Error!',
-                                    msg: 'Failed to add new job ' +
-                                    'template. POST returned status: ' +
-                                    status
-                                });
-                        });
+                        .then(({data}) => {
+                            $scope.$emit('templateSaveSuccess', data);
 
+                            const instance_group_url = data.related.instance_groups;
+                            InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                                .then(() => {
+                                    Wait('stop');
+                                })
+                                .catch(({data, status}) => {
+                                    ProcessErrors($scope, data, status, form, {
+                                        hdr: 'Error!',
+                                        msg: 'Failed to post instance groups. POST returned ' +
+                                            'status: ' + status
+                                    });
+                                });
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to add new job ' +
+                                'template. POST returned status: ' + status
+                            });
+                        });
                 } catch (err) {
                     Wait('stop');
                     Alert("Error", "Error parsing extra variables. " +

@@ -42,6 +42,20 @@ export default {
                 .catch(function() {
                     return false;
                 });
+        }],
+        InstanceGroupsData: ['Rest', 'GetBasePath', 'ProcessErrors', (Rest, GetBasePath, ProcessErrors) => {
+                const url = GetBasePath('instance_groups');
+                Rest.setUrl(url);
+                return Rest.get()
+                    .then(({data}) => {
+                        return data.results.map((i) => ({name: i.name, id: i.id}));
+                    })
+                    .catch(({data, status}) => {
+                    ProcessErrors(null, data, status, null, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get instance groups info. GET returned status: ' + status
+                    });
+                });
         }]
     }
 };

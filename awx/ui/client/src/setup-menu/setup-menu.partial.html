@@ -56,6 +56,12 @@
           View and edit your license information.
           </p>
         </a>
+        <a ui-sref="instanceGroups" class="SetupItem">
+          <h4 class="SetupItem-title" translate>Instance Groups</h4>
+          <p class="SetupItem-description" translate>
+          View list and capacity of Tower instances.
+          </p>
+        </a>
         <a ui-sref="configuration" class="SetupItem" ng-if="user_is_superuser || user_is_system_auditor">
           <h4 class="SetupItem-title" translate>Configure Tower</h4>
           <p class="SetupItem-description" translate>
