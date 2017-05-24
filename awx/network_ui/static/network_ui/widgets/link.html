@@ -2,19 +2,19 @@
       ng-attr-y1="{{link.from_device.y}}"
       ng-attr-x2="{{link.to_device !== null ? link.to_device.x : scaledX}}"
       ng-attr-y2="{{link.to_device !== null ? link.to_device.y : scaledY}}"
-      ng-attr-class="{{link.selected && 'selected' || 'hidden'}}"/>
+      ng-attr-class="{{link.selected && 'NetworkUI__link--selected' || 'NetworkUI--hidden'}}"/>
 <line ng-attr-x1="{{link.from_device.x}}"
       ng-attr-y1="{{link.from_device.y}}"
       ng-attr-x2="{{link.to_device !== null ? link.to_device.x : scaledX}}"
       ng-attr-y2="{{link.to_device !== null ? link.to_device.y : scaledY}}"
-      class="{{link.status === null ? 'link' : link.status ? 'link-pass' : 'link-fail'}}"/>
+      class="{{link.status === null ? 'NetworkUI__link' : link.status ? 'NetworkUI__link--link-pass' : 'NetworkUI__link--link-fail'}}"/>
 <g ng-if="!debug.hidden && current_scale > 0.5">
 <line ng-if="link.to_device !== null && link.plength(scaledX, scaledY) < 100"
       ng-attr-x1="{{link.pDistanceLine(scaledX, scaledY).x2}}"
       ng-attr-y1="{{link.pDistanceLine(scaledX, scaledY).y2}}"
       ng-attr-x2="{{scaledX}}"
       ng-attr-y2="{{scaledY}}"
-      ng-attr-class="debug" />
+      ng-attr-class="NetworkUI__link--debug" />
 <g ng-if="link.to_device !== null"  ng-attr-transform="translate({{link.to_device.x}},
                                 {{link.to_device.y}})
                       rotate({{link.slope()}})
@@ -22,13 +22,13 @@
 <circle ng-attr-cx="0"
         ng-attr-cy="0"
         r=10
-        class="debug" ></circle>
+        class="NetworkUI__circle-debug" ></circle>
 </g>
 <g ng-if="link.to_device !== null"  ng-attr-transform="translate({{link.to_device.x}},
                                 {{link.to_device.y}})
                       rotate({{link.slope()}})
                       translate({{link.length()/2}}, 0)">
-<line x1="0" y1=-20  x2=0 y2=20 class="debug"/>
+<line x1="0" y1=-20  x2=0 y2=20 class="NetworkUI__link--debug"/>
 </g>
 <g ng-if="link.to_device !== null"  ng-attr-transform="translate({{link.to_device.x}},
                                 {{link.to_device.y}})
@@ -37,7 +37,7 @@
 <circle ng-attr-cx="0"
         ng-attr-cy="0"
         r=10
-        class="debug" ></circle>
+        class="NetworkUI__circle-debug" ></circle>
 </g>
 <g ng-if="link.to_device !== null" ng-attr-transform="translate({{link.from_device.x}},
                                 {{link.from_device.y}})
@@ -46,7 +46,7 @@
 <circle ng-attr-cx="0"
         ng-attr-cy="0"
         r=10
-        class="debug" ></circle>
+        class="NetworkUI__circle-debug" ></circle>
 </g>
 </g>
 <g ng-if="link.to_device !== null"  ng-attr-transform="translate({{link.to_device.x}},
@@ -67,12 +67,12 @@
                       rotate({{-link.slope()}})
                       translate(0, -5)
                       ">
-<text ng-attr-class="{{link.selected && ! link.edit_label ? 'selected' : 'hidden'}}"
+<text ng-attr-class="{{link.selected && ! link.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       x="0"
       y="0"> {{link.name}}</text>
-<text text-anchor="middle" x="0" y="0">{{link.name}}{{link.edit_label?'_':''}}</text>
+<text class="NetworkUI__link--text" text-anchor="middle" x="0" y="0">{{link.name}}{{link.edit_label?'_':''}}</text>
 </g>
 
 <g ng-if="current_scale > 1.0 && link.to_device !== null"
@@ -82,12 +82,12 @@
                       translate({{-link.from_interface.dot_d - 20}}, 0)
                       rotate({{-link.slope()}})
                       ">
-<text ng-attr-class="interface {{link.from_interface.selected && ! link.from_interface.edit_label ? 'selected' : 'hidden'}}"
+<text ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       x="0"
       y="0"> {{link.from_interface.name}}</text>
-<text class="interface" text-anchor="middle" x="0" y="0">{{link.from_interface.name}}{{link.from_interface.edit_label ?'_':''}}</text>
+<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="0">{{link.from_interface.name}}{{link.from_interface.edit_label ?'_':''}}</text>
 </g>
 
 <g ng-if="current_scale > 1.0 && link.to_device !== null"
@@ -97,29 +97,29 @@
                       translate({{-link.length() + link.to_interface.dot_d + 20}}, 0)
                       rotate({{-link.slope()}})
                       ">
-<text ng-attr-class="interface {{link.to_interface.selected && ! link.to_interface.edit_label ? 'selected' : 'hidden'}}"
+<text ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       x="0"
       y="0"> {{link.to_interface.name}}</text>
-<text class="interface" text-anchor="middle" x="0" y="0">{{link.to_interface.name}}{{link.to_interface.edit_label?'_':''}}</text>
+<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="0">{{link.to_interface.name}}{{link.to_interface.edit_label?'_':''}}</text>
 </g>
 <g ng-if="current_scale > 1.0 && link.to_device !== null">
 <circle ng-attr-cx="{{link.from_interface.dot_x}}"
         ng-attr-cy="{{link.from_interface.dot_y}}"
         r=14
-        ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'selected' : 'hidden'}}" ></circle>
+        ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
 <circle ng-attr-cx="{{link.from_interface.dot_x}}"
         ng-attr-cy="{{link.from_interface.dot_y}}"
         r=10
-        class="interface" ></circle>
+        class="NetworkUI__interface" ></circle>
 <circle ng-attr-cx="{{link.to_interface.dot_x}}"
         ng-attr-cy="{{link.to_interface.dot_y}}"
         r=14
-        ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'selected' : 'hidden'}}" ></circle>
+        ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
 <circle ng-attr-cx="{{link.to_interface.dot_x}}"
         ng-attr-cy="{{link.to_interface.dot_y}}"
         r=10
-        class="interface" ></circle>
+        class="NetworkUI__interface" ></circle>
 </g>
 </g> <!-- end hide_interfaces -->

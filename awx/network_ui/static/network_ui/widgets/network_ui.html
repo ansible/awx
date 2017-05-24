@@ -1,5 +1,5 @@
     <div ng-controller="NetworkUIController">
-    <svg id="frame"
+    <svg id="frame" class="NetworkUI"
          ng-attr-height="{{graph.height}}"
          ng-attr-width="{{graph.width}}"
          ng-mousedown="onMouseDown($event)"
@@ -67,8 +67,7 @@
         <g ng-if="!hide_buttons">
             <g> <!-- buttons -->
                 <g ng-repeat="button in buttons"
-                   ng-attr-transform="translate({{button.x}},{{button.y}})"
-                   ng-attr-class="{{button.is_pressed ? 'button-pressed' : button.mouse_over ? 'button-hover' : 'button'}}">
+                   ng-attr-transform="translate({{button.x}},{{button.y}})">
                     <g awx-net-button></g>
                 </g>
             </g> <!-- end buttons -->
