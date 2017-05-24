@@ -45,15 +45,15 @@ export default ['templateUrl', function(templateUrl) {
                         delete hostList.fields.toggleHost;
                         delete hostList.fields.active_failures;
                         delete hostList.fields.inventory;
+                        hostList.well = false;
                         let html = GenerateList.build({
                             list: hostList,
-                            input_type: 'foobar',
-                            mode: 'lookup'
+                            input_type: 'host-filter-modal-body'
                         });
 
                         $scope.list = hostList;
 
-                        $('#foobar').append($compile(html)($scope));
+                        $('#host-filter-modal-body').append($compile(html)($scope));
 
                         $scope.showModal();
                     });

@@ -41,7 +41,7 @@
             // Unbind the listener so it doesn't fire when we close the modal via navigation
             $('#HostEvent').off('hidden.bs.modal');
             $('#HostEvent').modal('hide');
-            $state.go('jobDetail');
+            $state.go('jobResult');
         };
 
         var init = function(){
