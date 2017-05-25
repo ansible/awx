@@ -7,20 +7,15 @@
 
 function HostsList($scope, HostsList, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostManageService, SetStatus) {
+    HostManageService, SetStatus, canAdd) {
 
     let list = HostsList;
 
     init();
 
     function init(){
-        $scope.canAdd = false;
+        $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
-
-        rbacUiControlService.canAdd('hosts')
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
 
         // Search init
         $scope.list = list;
@@ -141,5 +136,5 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
 export default ['$scope', 'HostsList', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostManageService', 'SetStatus', HostsList
+    'HostManageService', 'SetStatus', 'canAdd', HostsList
 ];

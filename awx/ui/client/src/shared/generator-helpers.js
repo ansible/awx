@@ -551,116 +551,128 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += (field.awEllipsis) ? "aw-ellipsis " : "";
                 html += ">\n";
 
-                // Add ngShow
-                html += (field.ngShow) ? "<span " + Attr(field, 'ngShow') + ">" : "";
-
-                //Add ngHide
-                //html += (field.ngHide) ? "<span " + Attr(field, 'ngHide') + ">" : "";
-
-                // Badge
-                if (options.mode !== 'lookup' && (field.badges || (field.badgeIcon && field.badgePlacement && field.badgePlacement === 'left'))) {
-                    html += Badge(field);
+                if(field.template) {
+                    html += field.template;
                 }
+                else {
 
-                // Add collapse/expand icon  --used on job_events page
-                if (list.hasChildren && field.hasChildren) {
-                    html += "<div class=\"level level-{{ " + list.iterator + ".event_level }}\"><a href=\"\" ng-click=\"toggle(" +
-                        list.iterator + ".id)\"> " +
-                        "<i class=\"{{ " + list.iterator + ".ngicon }}\"></i></a></div>";
-                }
+                    // Add ngShow
+                    html += (field.ngShow) ? "<span " + Attr(field, 'ngShow') + ">" : "";
 
-                if (list.name === 'groups') {
-                    html += "<div class=\"group-name\">";
-                }
-                if (list.name === 'hosts') {
-                    html += "<div class=\"host-name\">";
-                }
+                    //Add ngHide
+                    //html += (field.ngHide) ? "<span " + Attr(field, 'ngHide') + ">" : "";
 
-                // Start the Link
-                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
-                    options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
-                    if(field.noLink === true){
-                        // provide an override here in case we want key=true for sorting purposes but don't want links -- see: portal mode,
+                    // Badge
+                    if (options.mode !== 'lookup' && (field.badges || (field.badgeIcon && field.badgePlacement && field.badgePlacement === 'left'))) {
+                        html += Badge(field);
                     }
-                    else if (field.icons) {
-                        field.icons.forEach(function(icon, idx) {
-                            var key, i = field.icons[idx];
-                            for (key in i) {
-                                field[key] = i[key];
-                            }
+
+                    // Add collapse/expand icon  --used on job_events page
+                    if (list.hasChildren && field.hasChildren) {
+                        html += "<div class=\"level level-{{ " + list.iterator + ".event_level }}\"><a href=\"\" ng-click=\"toggle(" +
+                            list.iterator + ".id)\"> " +
+                            "<i class=\"{{ " + list.iterator + ".ngicon }}\"></i></a></div>";
+                    }
+
+                    if (list.name === 'groups') {
+                        html += "<div class=\"group-name\">";
+                    }
+                    if (list.name === 'hosts') {
+                        html += "<div class=\"host-name\">";
+                    }
+
+                    // Start the Link
+                    if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
+                        options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
+                        if(field.noLink === true){
+                            // provide an override here in case we want key=true for sorting purposes but don't want links -- see: portal mode,
+                        }
+                        else if (field.icons) {
+                            field.icons.forEach(function(icon, idx) {
+                                var key, i = field.icons[idx];
+                                for (key in i) {
+                                    field[key] = i[key];
+                                }console.log(BuildLink({
+                                    list: list,
+                                    field: field,
+                                    fld: fld,
+                                    base: field.linkBase || base
+                                }) + ' ');
+                                html += BuildLink({
+                                    list: list,
+                                    field: field,
+                                    fld: fld,
+                                    base: field.linkBase || base
+                                }) + ' ';
+                            });
+                        }
+                        else if(field.smartStatus){
+                          html += '<aw-smart-status></aw-smart-status>';
+                        }
+                        else {
                             html += BuildLink({
                                 list: list,
                                 field: field,
                                 fld: fld,
                                 base: field.linkBase || base
-                            }) + ' ';
-                        });
-                    }
-                    else if(field.smartStatus){
-                      html += '<aw-smart-status></aw-smart-status>';
+                            });
+                        }
                     }
                     else {
-                        html += BuildLink({
-                            list: list,
-                            field: field,
-                            fld: fld,
-                            base: field.linkBase || base
-                        });
-                    }
-                }
-                else {
-                    if(field.simpleTip) {
-                        html += `<span aw-tool-tip="${field.simpleTip.awToolTip}" data-placement=${field.simpleTip.dataPlacement}>`;
-                    }
-                    // Add icon:
-                    if (field.ngShowIcon) {
-                        html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
-                    } else if (field.icon) {
-                        html += Icon(field.icon) + " ";
-                    }
-                    // Add data binds
-                    if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
-                        if (field.ngBind) {
-                            html += "{{ " + field.ngBind;
-                        } else {
-                            html += "{{ " + list.iterator + "." + fld;
+                        if(field.simpleTip) {
+                            html += `<span aw-tool-tip="${field.simpleTip.awToolTip}" data-placement=${field.simpleTip.dataPlacement}>`;
                         }
-                        if (field.filter) {
-                            html += " | " + field.filter + " }}";
+                        // Add icon:
+                        if (field.ngShowIcon) {
+                            html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
+                        } else if (field.icon) {
+                            html += Icon(field.icon) + " ";
                         }
-                        else {
-                            html += " }}";
+                        // Add data binds
+                        if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
+                            if (field.ngBind) {
+                                html += "{{ " + field.ngBind;
+                            } else {
+                                html += "{{ " + list.iterator + "." + fld;
+                            }
+                            if (field.filter) {
+                                html += " | " + field.filter + " }}";
+                            }
+                            else {
+                                html += " }}";
+                            }
+                        }
+                        // Add additional text:
+                        if (field.text) {
+                            html += field.text;
+                        }
+                        if(field.simpleTip) {
+                            html += `</span>`;
                         }
                     }
-                    // Add additional text:
-                    if (field.text) {
-                        html += field.text;
+
+                    if (list.name === 'hosts' || list.name === 'groups') {
+                        html += "</div>";
                     }
-                    if(field.simpleTip) {
-                        html += `</span>`;
+
+                    // close ngShow
+                    html += (field.ngShow) ? "</span>" : "";
+
+                    //close ngHide
+                    //html += (field.ngHide) ? "</span>" : "";
+
+                    // Specific to Job Events page -showing event detail/results
+                    html += (field.appendHTML) ? "<div ng-show=\"" + field.appendHTML + " !== null\" " +
+                        "ng-bind-html=\"" + field.appendHTML + "\" " +
+                        "class=\"level-{{ " + list.iterator + ".event_level }}-detail\" " +
+                        "></div>\n" : "";
+
+                    // Badge
+                    if (options.mode !== 'lookup' && field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
+                        html += Badge(field);
                     }
                 }
 
-                if (list.name === 'hosts' || list.name === 'groups') {
-                    html += "</div>";
-                }
-
-                // close ngShow
-                html += (field.ngShow) ? "</span>" : "";
-
-                //close ngHide
-                //html += (field.ngHide) ? "</span>" : "";
-
-                // Specific to Job Events page -showing event detail/results
-                html += (field.appendHTML) ? "<div ng-show=\"" + field.appendHTML + " !== null\" " +
-                    "ng-bind-html=\"" + field.appendHTML + "\" " +
-                    "class=\"level-{{ " + list.iterator + ".event_level }}-detail\" " +
-                    "></div>\n" : "";
-
-                // Badge
-                if (options.mode !== 'lookup' && field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
-                    html += Badge(field);
-                }
             }
             return html += "</td>\n";
         };

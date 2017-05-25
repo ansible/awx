@@ -27,17 +27,20 @@ export default ['i18n', function(i18n) {
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
+                template: `<source-summary-popover inventory="inventory"></source-summary-popover><host-summary-popover inventory="inventory"></host-summary-popover>`,
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
                     awTipPlacement: "right",
                     ngClick: "showSourceSummary($event, inventory.id)",
-                    ngClass: "inventory.launch_class"
+                    ngClass: "inventory.launch_class",
+                    extraTemplate: "<source-summary-popover inventory='inventory'></source-summary-popover>"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
-                    ngClass: "inventory.host_status_class"
+                    ngClass: "inventory.host_status_class",
+                    extraTemplate: "<host-summary-popover inventory='inventory'></host-summary-popover>"
                 }]
             },
             name: {
@@ -85,7 +88,7 @@ export default ['i18n', function(i18n) {
                         ngShow: 'canAddInventory'
                     }
                 ],
-                ngShow: 'canAddInventory || canAddSmartInventory || canAddSCMInventory'
+                ngShow: 'canAddInventory'
             }
         },
 

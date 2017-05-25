@@ -239,10 +239,6 @@ export default ['$scope', '$rootScope', '$location',
             $state.go('inventories.edit', { inventory_id: id });
         };
 
-        $scope.manageInventory = function(id) {
-            $location.path($location.path() + '/' + id + '/manage');
-        };
-
         // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
         $scope.viewJobs = function(id) {
             $location.url('/jobs/?inventory__int=' + id);

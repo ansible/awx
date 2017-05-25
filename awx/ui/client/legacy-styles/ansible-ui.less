@@ -1032,12 +1032,6 @@ input[type="checkbox"].checkbox-no-label {
   border-top: none;
 }
 
-/* Less padding on .table-condensed */
-.table-condensed>tbody>tr>td,
-.table-condensed>thead>tr>th {
-    padding: 0.5em 0.6em;
-}
-
 .table > tbody > tr > td{
   padding: 0.5em 0.6em;
   &.actions{
@@ -1047,6 +1041,17 @@ input[type="checkbox"].checkbox-no-label {
       display: inline-block;
     }
   }
+}
+
+/* Less padding on .table-condensed */
+.table-condensed>tbody>tr>td:not(:last-child),
+.table-condensed>thead>tr>th:not(:last-child) {
+    padding: 0.5em 20px 0.5em 0px;
+}
+
+.table-condensed>tbody>tr>td:last-child,
+.table-condensed>thead>tr>th:last-child {
+    padding: 0.5em 0px;
 }
 
 .table.table-condensed.flyout {

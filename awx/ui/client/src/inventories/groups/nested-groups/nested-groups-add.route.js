@@ -18,5 +18,16 @@ export default {
             },
             controller: 'NestedGroupsAddController'
         }
+    },
+    resolve: {
+        canAdd: ['rbacUiControlService', '$state', 'GetBasePath', '$stateParams', function(rbacUiControlService, $state, GetBasePath, $stateParams) {
+            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
+        }]
     }
 };

@@ -5,19 +5,14 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition', 'ParseTypeChange',
-                'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath', 'ToJSON',
+                'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath', 'ToJSON', 'canAdd',
                 function($state, $stateParams, $scope, RelatedHostsFormDefinition, ParseTypeChange,
-                         GenerateForm, HostManageService, rbacUiControlService, GetBasePath, ToJSON) {
+                         GenerateForm, HostManageService, rbacUiControlService, GetBasePath, ToJSON, canAdd) {
 
         init();
 
         function init() {
-            $scope.canAdd = false;
-
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/hosts")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
-                });
+            $scope.canAdd = canAdd;
             $scope.parseType = 'yaml';
             $scope.host = { enabled: true };
             // apply form definition's default field values

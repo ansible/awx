@@ -7,11 +7,11 @@
 export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
     'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'rbacUiControlService', 'ToJSON', 'SourcesService',
+    'rbacUiControlService', 'ToJSON', 'SourcesService', 'canAdd',
     function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
         GenerateForm, inventoryData, GroupManageService, GetChoices,
         GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
-        ToJSON, SourcesService) {
+        ToJSON, SourcesService, canAdd) {
 
         let form = SourcesFormDefinition;
         init();
@@ -19,11 +19,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         function init() {
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
-
-        rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
+            $scope.canAdd = canAdd;
             $scope.envParseType = 'yaml';
             initSources();
         }
