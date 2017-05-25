@@ -23,6 +23,7 @@ import { copyMoveGroupRoute, copyMoveHostRoute } from './copy-move/copy-move.rou
 import copyMove from './copy-move/main';
 import completedJobsRoute from './completed_jobs/completed_jobs.route';
 import inventorySourceEditRoute from './sources/edit/sources-edit.route';
+import inventorySourceEditNotificationsRoute from './sources/edit/sources-notifications.route';
 import inventorySourceAddRoute from './sources/add/sources-add.route';
 import inventorySourceListRoute from './sources/list/sources-list.route';
 import inventorySourceListScheduleRoute from './sources/list/schedule/sources-schedule.route';
@@ -230,6 +231,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(inventorySourceListRoute),
                             stateExtender.buildDefinition(inventorySourceAddRoute),
                             stateExtender.buildDefinition(inventorySourceEditRoute),
+                            stateExtender.buildDefinition(inventorySourceEditNotificationsRoute),
                             stateExtender.buildDefinition(inventoryCompletedJobsRoute),
                             stateExtender.buildDefinition(smartInventoryCompletedJobsRoute),
                             stateExtender.buildDefinition(addSourceCredential),
