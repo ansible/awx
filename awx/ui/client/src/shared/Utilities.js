@@ -624,7 +624,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     addNew = params.addNew,
                     scope = params.scope,
                     options = params.options,
-                    model = params.model;
+                    model = params.model,
+                    original_options;
+
+                    if (scope && options) {
+                        original_options = _.cloneDeep(scope[options]);
+                    }
 
                 $.fn.select2.amd.require([
                     'select2/utils',
@@ -664,7 +669,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         config.tokenSeparators = [];
 
                         if (!multiple) {
-                            scope["original_" + options] = scope[options];
                             config.minimumResultsForSearch = 1;
                         }
                     }
@@ -691,13 +695,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                     if (addNew && !multiple) {
                         $(element).on('select2:select', (e) => {
-                            var opt = $(e.target).find("[data-select2-tag='true']");
-                            if (opt.length) {
-                                scope[model] = e.params.data.id;
-                                scope[options] = scope["original_" + options];
-                                scope[options].push($(opt[0]).attr("value"));
+                            scope[model] = e.params.data.text;
+                            scope[options] = _.cloneDeep(original_options);
+                            if (scope[options].indexOf(e.params.data.text) === -1) {
+                                scope[options].push(e.params.data.text);
                             }
-                            $(element).trigger('change');
+                            $(element).select2(config);
                         });
                     }
 
