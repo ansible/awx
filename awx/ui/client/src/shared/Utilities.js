@@ -665,6 +665,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                         if (!multiple) {
                             scope["original_" + options] = scope[options];
+                            config.minimumResultsForSearch = 1;
                         }
                     }
 
