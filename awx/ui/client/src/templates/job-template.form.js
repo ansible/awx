@@ -426,7 +426,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
-                    basePath: 'api/v1/job_templates/{{$stateParams.job_template_id}}/access_list/',
+                    basePath: 'api/v2/job_templates/{{$stateParams.job_template_id}}/access_list/',
                     search: {
                         order_by: 'username'
                     },

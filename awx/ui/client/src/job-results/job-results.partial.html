@@ -505,7 +505,7 @@
                             <a ng-show="job.status === 'failed' ||
                                 job.status === 'successful' ||
                                 job.status === 'canceled'"
-                                href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download">
+                                href="/api/v2/jobs/{{ job.id }}/stdout?format=txt_download">
                                 <button class="StandardOut-actionButton"
                                     aw-tool-tip="{{ standardOutTooltip }}"
                                     data-tip-watch="standardOutTooltip"

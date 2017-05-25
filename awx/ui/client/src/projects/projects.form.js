@@ -225,7 +225,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 awToolTip: i18n._('Please save before assigning permissions'),
                 djangoModel: 'access_list',
                 dataPlacement: 'top',
-                basePath: 'api/v1/projects/{{$stateParams.project_id}}/access_list/',
+                basePath: 'api/v2/projects/{{$stateParams.project_id}}/access_list/',
                 search: {
                     order_by: 'username'
                 },

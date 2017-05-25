@@ -198,12 +198,12 @@ describe('Controller: jobResultsController', () => {
     describe('getTowerLinks()', () => {
         beforeEach(() => {
             jobData.related = {
-                "created_by": "api/v1/users/12",
-                "inventory": "api/v1/inventories/12",
-                "project": "api/v1/projects/12",
-                "credential": "api/v1/credentials/12",
-                "cloud_credential": "api/v1/credentials/13",
-                "network_credential": "api/v1/credentials/14",
+                "created_by": "api/v2/users/12",
+                "inventory": "api/v2/inventories/12",
+                "project": "api/v2/projects/12",
+                "credential": "api/v2/credentials/12",
+                "cloud_credential": "api/v2/credentials/13",
+                "network_credential": "api/v2/credentials/14",
             };
 
             jobData.summary_fields.inventory = {

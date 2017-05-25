@@ -15,7 +15,7 @@ export default ['$window', '$scope', 'thirdPartySignOnService',
     function ($window, $scope, thirdPartySignOnService) {
 
         thirdPartySignOnService(
-            {scope: $scope, url: "api/v1/auth/"}).then(function (data) {
+            {scope: $scope, url: "api/v2/auth/"}).then(function (data) {
             if (data && data.options && data.options.length > 0) {
                 $scope.thirdPartyLoginSupported = true;
                 $scope.loginItems = data.options;

@@ -30,14 +30,10 @@ export default
                     // smartStatus?, launchUrl, editUrl, name
                     scope.templates = _.map(list, function(template){ return {
                         recent_jobs: template.summary_fields.recent_jobs,
-                        launch_url: template.url,
-                        edit_url: template.url.replace('api/v1', '#'),
                         name: template.name,
                         id: template.id,
                         type: template.type
                     }; });
-
-                    scope.snapRows = (list.length < 4);
                 }
 
                 scope.isSuccessful = function (status) {

@@ -29,14 +29,12 @@ export default
                 // detailsUrl, status, name, time
                 scope.jobs = _.map(list, function(job){
                 return {
-                    detailsUrl: job.type && job.type === 'workflow_job' ? job.url.replace("api/v1/workflow_jobs", "#/workflows") : job.url.replace("api/v1", "#"),
+                    detailsUrl: job.type && job.type === 'workflow_job' ? job.url.replace(/api\/v\d+\/workflow_jobs/, "#/workflows") : job.url.replace(/api\/v\d+/, "#"),
                     status: job.status,
                     name: job.name,
                     id: job.id,
                     time: $filter('longDate')(job.finished)
                 }; });
-
-                scope.snapRows = (list.length < 4);
             }
 
             scope.isSuccessful = function (status) {

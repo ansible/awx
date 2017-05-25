@@ -47,7 +47,7 @@ export default [
                 templateType: 'workflow_job_template'
             });
 
-            Rest.setUrl('api/v1/labels');
+            Rest.setUrl(GetBasePath('labels'));
             Wait("start");
             Rest.get()
                 .success(function (data) {

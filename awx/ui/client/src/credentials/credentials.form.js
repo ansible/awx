@@ -431,7 +431,7 @@ export default ['i18n', function(i18n) {
                     dataTipWatch: 'permissionsTooltip',
                     awToolTipTabEnabledInEditMode: true,
                     dataPlacement: 'right',
-                    basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
+                    basePath: 'api/v2/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {
                         order_by: 'username'
                     },

@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket', 'GetBasePath',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket, GetBasePath) {
     var toDestroy = [];
     var cancelRequests = false;
     var runTimeElapsedTimer = null;
@@ -49,7 +49,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         var getTowerLink = function(key) {
             if(key === 'schedule') {
                 if($scope.job.related.schedule) {
-                    return '/#/templates/job_template/' + $scope.job.job_template + '/schedules' + $scope.job.related.schedule.split('api/v1/schedules')[1];
+                    return '/#/templates/job_template/' + $scope.job.job_template + '/schedules' + $scope.job.related.schedule.split(/api\/v\d+\/schedules/)[1];
                 }
                 else {
                     return null;
@@ -66,7 +66,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             else {
                 if ($scope.job.related[key]) {
                     return '/#/' + $scope.job.related[key]
-                        .split('api/v1/')[1];
+                        .split(/api\/v\d+\//)[1];
                 } else {
                     return null;
                 }
@@ -132,7 +132,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             // return a promise from the options request with the permission type choices (including adhoc) as a param
             var fieldChoice = fieldChoices({
                 $scope: $scope,
-                url: 'api/v1/unified_jobs/',
+                url: GetBasePath('unified_jobs'),
                 field: 'type'
             });
 

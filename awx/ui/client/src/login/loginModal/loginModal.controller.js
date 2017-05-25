@@ -38,10 +38,10 @@
  *
  * When the the login button is clicked, the following occurs:
  *
- * - Call Authorization.retrieveToken(username, password) - sends a POST request to /api/v1/authtoken to get a new token value.
+ * - Call Authorization.retrieveToken(username, password) - sends a POST request to /api/v2/authtoken to get a new token value.
  * - Call Authorization.setToken(token, expires) to store the token and exipration time in a session cookie.
  * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
- * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v1/me
+ * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v2/me
  * - Store user information in the session cookie by calling Authorization.setUser().
  * - Get the Tower license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
  * - Stores the license object in memory by calling CheckLicense.test(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
