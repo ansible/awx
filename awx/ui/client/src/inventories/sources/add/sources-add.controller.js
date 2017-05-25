@@ -134,8 +134,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
               source = "";
             }
 
-            http://localhost:8013/api/v2/credentials/?credential_type__kind__in=cloud,network
-
             $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
 
             if (source === 'custom'){
