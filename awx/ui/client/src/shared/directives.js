@@ -515,6 +515,10 @@ function(ConfigurationUtils, i18n, $rootScope) {
                         _doAutoPopulate();
                     }
                 });
+
+                if (attrs.watchbasepath === 'projectBasePath') {
+                    _doAutoPopulate();
+                }
             }
 
             function _doAutoPopulate() {
@@ -522,7 +526,11 @@ function(ConfigurationUtils, i18n, $rootScope) {
 
                 if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
                     basePath = scope[attrs.watchbasepath];
-                    query = '&role_level=use_role';
+                    if (attrs.watchbasepath !== "projectBasePath") {
+                        query = '&role_level=use_role';
+                    } else {
+                        query = '';
+                    }
                 }
                 else {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');

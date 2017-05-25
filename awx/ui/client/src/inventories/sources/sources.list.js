@@ -62,7 +62,7 @@ export default {
 
         columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
 
-        group_update: {
+        source_update: {
             //label: 'Sync',
             mode: 'all',
             ngClick: 'updateSource(inventory_source)',
@@ -97,7 +97,7 @@ export default {
             awToolTip: "{{ inventory_source.group_schedule_tooltip }}",
             ngClass: "inventory_source.scm_type_class",
             dataPlacement: 'top',
-            ngShow: "!(inventory_source.summary_fields.inventory_source.source === '')"
+            ngShow: "!(inventory_source.summary_fields.inventory_source.source === '') && inventory_source.summary_fields.user_capabilities.schedule"
         },
         edit: {
             //label: 'Edit',

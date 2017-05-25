@@ -618,9 +618,13 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 var element = params.element,
                     options = params.opts,
                     multiple = (params.multiple !== undefined) ? params.multiple : true,
+                    createNew = (params.createNew !== undefined) ? params.createNew : false,
                     placeholder = params.placeholder,
                     customDropdownAdapter = (params.customDropdownAdapter !== undefined) ? params.customDropdownAdapter : true,
-                    addNew = params.addNew;
+                    addNew = params.addNew,
+                    scope = params.scope,
+                    options = params.options,
+                    model = params.model;
 
                 $.fn.select2.amd.require([
                     'select2/utils',
@@ -658,6 +662,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     if (addNew) {
                         config.tags = true;
                         config.tokenSeparators = [];
+
+                        if (!multiple) {
+                            scope["original_" + options] = scope[options];
+                        }
                     }
 
                     $(element).select2(config);
@@ -677,6 +685,18 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             }
                         }).on('select2:unselecting', (e) => {
                             $(e.target).data('select2-unselecting', true);
+                        })
+                    }
+
+                    if (addNew && !multiple) {
+                        $(element).on('select2:select', (e) => {
+                            var opt = $(e.target).find("[data-select2-tag='true']");
+                            if (opt.length) {
+                                scope[model] = e.params.data.id;
+                                scope[options] = scope["original_" + options];
+                                scope[options].push($(opt[0]).attr("value"));
+                            }
+                            $(element).trigger('change');
                         });
                     }
 

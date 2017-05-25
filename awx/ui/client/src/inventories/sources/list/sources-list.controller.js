@@ -101,11 +101,11 @@
                 Wait('start');
                 SourcesService.delete(inventory_source.id).then(() => {
                     $('#prompt-modal').modal('hide');
-                    // if (parseInt($state.params.source_id) === id) {
-                    //     $state.go("sources", null, {reload: true});
-                    // } else {
+                    if (parseInt($state.params.source_id) === invnetory_source) {
+                        $state.go("sources", null, {reload: true});
+                    } else {
                         $state.go($state.current.name, null, {reload: true});
-                    // }
+                    }
                     Wait('stop');
                 });
             };

@@ -17,6 +17,7 @@ export default ['i18n', function(i18n) {
             '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>',
         index: false,
         hover: true,
+        emptyListText: i18n._('No Projects Have Been Created'),
 
         fields: {
             status: {

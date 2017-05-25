@@ -66,16 +66,11 @@ return {
             ngModel: 'source'
         },
         credential: {
-            // initializes a default value for this search param
-            // search params with default values set will not generate user-interactable search tags
-            search: {
-                kind: null
-            },
-            label: 'Cloud Credential',
+            label: 'Credential',
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
-            ngShow: "source && source.value !== '' && source.value !== 'custom'",
+            ngShow: "source && source.value !== ''",
             sourceModel: 'credential',
             sourceField: 'name',
             ngClick: 'lookupCredential()',
@@ -85,6 +80,42 @@ return {
             },
             ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
             watchBasePath: "credentialBasePath"
+        },
+        project: {
+            // initializes a default value for this search param
+            // search params with default values set will not generate user-interactable search tags
+            label: 'Project',
+            type: 'lookup',
+            list: 'ProjectList',
+            basePath: 'projects',
+            ngShow: "source && source.value === 'scm'",
+            sourceModel: 'project',
+            sourceField: 'name',
+            ngClick: 'lookupProject()',
+            awRequiredWhen: {
+                reqExpression: "projectRequired",
+                init: "false"
+            },
+            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            watchBasePath: "projectBasePath"
+        },
+        inventory_file: {
+            label: i18n._('Inventory File'),
+            type:'select',
+            ngOptions: 'file for file in inventory_files track by file',
+            ngShow: "source && source.value === 'scm'",
+            ngDisabled: "!(group_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
+            id: 'inventory-file-select',
+            awRequiredWhen: {
+                reqExpression: "inventoryfilerequired",
+                init: "true"
+            },
+            column: 1,
+            awPopOver: "<p>" + i18n._("Select the inventory file to be synced by this source.  You can select from the dropdown or enter a file within the input.") + "</p>",
+            dataTitle: i18n._('Inventory File'),
+            dataPlacement: 'right',
+            dataContainer: "body",
+            includeInventoryFileNotFoundError: true
         },
         source_regions: {
             label: 'Regions',
@@ -162,7 +193,7 @@ return {
         custom_variables: {
             id: 'custom_variables',
             label: 'Environment Variables', //"{{vars_label}}" ,
-            ngShow: "source && source.value=='custom' ",
+            ngShow: "source && source.value=='custom' || source.value === 'scm'",
             type: 'textarea',
             class: 'Form-textAreaLabel Form-formGroup--fullWidth',
             rows: 6,
@@ -249,6 +280,20 @@ return {
                 '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
             dataContainer: 'body'
         },
+        verbosity: {
+            label: i18n._('Verbosity'),
+            type: 'select',
+            ngOptions: 'v.label for v in verbosity_options track by v.value',
+            ngShow: "source && (source.value !== '' && source.value !== null)",
+            "default": 0,
+            required: true,
+            column: 1,
+            awPopOver: "<p>" + i18n._("Control the level of output ansible will produce for inventory source update jobs.") + "</p>",
+            dataTitle: i18n._('Verbosity'),
+            dataPlacement: 'right',
+            dataContainer: "body",
+            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+        },
         checkbox_group: {
             label: 'Update Options',
             type: 'checkbox_group',
@@ -268,7 +313,7 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: "(!(group_obj.summary_fields.user_capabilities.edit || canAdd))"
             }, {
                 name: 'overwrite_vars',
                 label: 'Overwrite Variables',
@@ -283,7 +328,7 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: "(!(group_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
             }, {
                 name: 'update_on_launch',
                 label: 'Update on Launch',
@@ -292,6 +337,17 @@ return {
                 awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
                     'executing job tasks.</p>',
                 dataTitle: 'Update on Launch',
+                dataContainer: 'body',
+                dataPlacement: 'right',
+                labelClass: 'checkbox-options',
+                ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            }, {
+                name: 'update_on_project_update',
+                label: 'Update on Project Update',
+                type: 'checkbox',
+                ngShow: "source.value === 'scm'",
+                awPopOver: '<p>TODO</p>',
+                dataTitle: 'Update on Project Update',
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',

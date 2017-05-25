@@ -132,6 +132,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 icon = "fa-trash-o";
                 break;
             case 'group_update':
+            case 'source_update':
                 icon = 'fa-refresh';
                 break;
             case 'scm_update':
