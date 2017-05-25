@@ -64,14 +64,14 @@ function AtFormController (eventService) {
                 }
 
                 if (component.state._key && typeof component.state._value === 'object') {
-                    values[component.state._id] = component.state._value[component.state._key];
+                    values[component.state.id] = component.state._value[component.state._key];
                 } else if (component.state._group) {
                     values[component.state._key] = values[component.state._key] || [];
                     values[component.state._key].push({
-                        [component.state._id]: component.state._value
+                        [component.state.id]: component.state._value
                     });
                 } else {
-                    values[component.state._id] = component.state._value;
+                    values[component.state.id] = component.state._value;
                 }
 
                 return values;

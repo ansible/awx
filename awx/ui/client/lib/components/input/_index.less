@@ -1,5 +1,5 @@
 .at-Input {
-    .at-mixin-Placeholder(@at-gray-dark-2x);
+    .at-mixin-Placeholder(@at-gray-dark-3x);
 
     height: @at-input-height;
     background: @at-white;
@@ -7,7 +7,7 @@
     color: @at-gray-dark-5x;
 
     &, &:active {
-        border-color: @at-gray-dark-2x;
+        border-color: @at-gray-dark-3x;
     }
 
     &:focus {
@@ -19,7 +19,10 @@
     width: 72px;
 
     &, &:active, &:hover, &:focus {
+        color: @at-gray-dark-3x;
+        border-color: @at-gray-dark-3x;
         background-color: @at-white;
+        cursor: pointer;
     }
 }
 

@@ -1,0 +1,26 @@
+.at-TabGroup {
+    margin-top: @at-space-6x;
+}
+
+.at-Tab {
+    margin: 0 @at-space-5x 0 0;
+}
+
+.at-Tab--active {
+    &, &:hover, &:active, &:focus {
+        color: @at-white;
+        background-color: @at-gray-dark-2x;
+        border-color: @at-gray-dark-2x;
+        cursor: default;
+    }
+}
+
+.at-Tab--disabled {
+    &, &:hover, &:active, &:focus {
+        background-color: @at-white;
+        color: @at-gray-dark-3x;
+        border-color: @at-gray-dark-3x;
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+}

@@ -13,6 +13,8 @@ import panel from './panel/panel.directive';
 import panelHeading from './panel/heading.directive';
 import panelBody from './panel/body.directive';
 import popover from './popover/popover.directive';
+import tab from './tabs/tab.directive';
+import tabGroup from './tabs/group.directive';
 
 import BaseInputController from './input/base.controller';
 
@@ -33,6 +35,8 @@ angular
     .directive('atPanelHeading', panelHeading)
     .directive('atPanelBody', panelBody)
     .directive('atPopover', popover)
+    .directive('atTab', tab)
+    .directive('atTabGroup', tabGroup)
     .service('BaseInputController', BaseInputController);
 
 

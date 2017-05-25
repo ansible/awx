@@ -2,7 +2,7 @@ function atInputGroupLink (scope, el, attrs, controllers) {
     let groupController = controllers[0];
     let formController = controllers[1];
     let element = el[0].getElementsByClassName('at-InputGroup-container')[0];
-
+    
     groupController.init(scope, formController, element);
 }
 

@@ -41,22 +41,26 @@
     }
 }
 
-.at-mixin-ButtonHollow (@color, @hover: '@{color}--hover') {
+.at-mixin-ButtonHollow (@color, @accent) {
     background-color: @at-white;
-
     color: @@color;
     border-color: @@color;
 
-    &:hover, &:focus {
-        color: @@hover;
-        border-color: @@hover;
-        background-color: @at-white;
+    &:hover, &:active {
+        color: @@color;
+        background-color: @at-white--hover;
+        box-shadow: none;
+    }
+
+    &:focus {
+        color: @at-white;
+        background-color: @@accent;
+        border-color: @@accent;
+        cursor: default;
     }
 
     &[disabled] {
-        background-color: fade(@@color, 30%);
-        border-color: fade(@@color, 30%);
-        color: @at-white;
+        opacity: 0.65;
     }
 }
 

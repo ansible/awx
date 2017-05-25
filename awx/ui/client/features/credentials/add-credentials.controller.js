@@ -1,4 +1,4 @@
-function AddCredentialsController (models) {
+function AddCredentialsController (models, $state) {
     let vm = this || {};
 
     let credential = models.credential;
@@ -25,7 +25,8 @@ function AddCredentialsController (models) {
 }
 
 AddCredentialsController.$inject = [
-    'resolvedModels'
+    'resolvedModels',
+    '$state'
 ];
 
 export default AddCredentialsController;
