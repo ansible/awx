@@ -1755,52 +1755,41 @@ class RunInventoryUpdate(BaseTask):
             args.append('--overwrite')
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
-        args.append('--source')
-        # If this is a cloud-based inventory (e.g. from AWS, Rackspace, etc.)
-        # then we need to set some extra flags based on settings in
-        # Tower.
-        #
-        # These settings are "per-cloud-provider"; it's entirely possible that
+        src = inventory_update.source
+
+        # Add several options to the shell arguments based on the
+        # inventory-source-specific setting in the Tower configuration.
+        # These settings are "per-source"; it's entirely possible that
         # they will be different between cloud providers if a Tower user
         # actively uses more than one.
-        if inventory_update.source in CLOUD_PROVIDERS:
-            # We need to reference the source's code frequently, assign it
-            # to a shorter variable. :)
-            src = inventory_update.source
-
+        if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
+            args.extend(['--enabled-var',
+                        getattr(settings, '%s_ENABLED_VAR' % src.upper())])
+        if getattr(settings, '%s_ENABLED_VALUE' % src.upper(), False):
+            args.extend(['--enabled-value',
+                        getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
+        if getattr(settings, '%s_GROUP_FILTER' % src.upper(), False):
+            args.extend(['--group-filter',
+                         getattr(settings, '%s_GROUP_FILTER' % src.upper())])
+        if getattr(settings, '%s_HOST_FILTER' % src.upper(), False):
+            args.extend(['--host-filter',
+                         getattr(settings, '%s_HOST_FILTER' % src.upper())])
+        if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
+            args.append('--exclude-empty-groups')
+        if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
+            args.extend(['--instance-id-var',
+                        getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),])
+        # Add arguments for the source inventory script
+        args.append('--source')
+        if src in CLOUD_PROVIDERS:
             # Get the path to the inventory plugin, and append it to our
             # arguments.
             plugin_path = self.get_path_to('..', 'plugins', 'inventory',
                                            '%s.py' % src)
             args.append(plugin_path)
-
-            # Add several options to the shell arguments based on the
-            # cloud-provider-specific setting in the Tower configuration.
-            args.extend(['--enabled-var',
-                         getattr(settings, '%s_ENABLED_VAR' % src.upper())])
-            args.extend(['--enabled-value',
-                         getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
-            args.extend(['--group-filter',
-                         getattr(settings, '%s_GROUP_FILTER' % src.upper())])
-            args.extend(['--host-filter',
-                         getattr(settings, '%s_HOST_FILTER' % src.upper())])
-
-            # We might have a flag set to exclude empty groups; if we do,
-            # add that flag to the shell arguments.
-            if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
-                args.append('--exclude-empty-groups')
-
-            # We might have a flag for an instance ID variable; if we do,
-            # add it to the shell arguments.
-            if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
-                args.extend([
-                    '--instance-id-var',
-                    getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),
-                ])
-
-        elif inventory_update.source == 'scm':
+        elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
-        elif inventory_update.source == 'custom':
+        elif src == 'custom':
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')

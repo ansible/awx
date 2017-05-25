@@ -806,6 +806,16 @@ CLOUDFORMS_EXCLUDE_EMPTY_GROUPS = True
 CLOUDFORMS_INSTANCE_ID_VAR = 'id'
 
 # ---------------------
+# ----- Custom -----
+# ---------------------
+#CUSTOM_ENABLED_VAR =
+#CUSTOM_ENABLED_VALUE =
+CUSTOM_GROUP_FILTER = r'^.+$'
+CUSTOM_HOST_FILTER = r'^.+$'
+CUSTOM_EXCLUDE_EMPTY_GROUPS = True
+#CUSTOM_INSTANCE_ID_VAR =
+
+# ---------------------
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.
