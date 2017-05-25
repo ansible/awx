@@ -2,11 +2,13 @@
     <div class="form-group at-u-flat">
         <at-input-label></at-input-label>
 
-        <input type="text"
+        <input type="number" 
                class="form-control at-Input" 
-               ng-class="{ 'at-Input--rejected': state._rejected }"
+               ng-class="{ 'at-Input--rejected': state.rejected }"
                ng-model="state._value"
-               ng-attr-maxlength="{{ state.max_length || undefined }}"
+               ng-attr-min="state._min"
+               ng-attr-max="state._max"
+               ng-attr-step="state._step"
                ng-attr-tabindex="{{ tab || undefined }}"
                ng-attr-placeholder="{{::state._placeholder || undefined }}"
                ng-change="vm.check()"

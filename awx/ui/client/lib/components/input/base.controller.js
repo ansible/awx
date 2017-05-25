@@ -7,9 +7,9 @@ function BaseInputController () {
 
         scope.state = scope.state || {};
 
-        scope.state.required = scope.state.required || false;
-        scope.state.isValid = scope.state.isValid || false;
-        scope.state.disabled = scope.state.disabled || false;
+        scope.state._required = scope.state.required || false;
+        scope.state._isValid = scope.state.isValid || false;
+        scope.state._disabled = scope.state.disabled || false;
 
         form.register(type, scope);
 
@@ -17,13 +17,13 @@ function BaseInputController () {
             let isValid = true;
             let message = '';
 
-            if (scope.state.required && !scope.state.value) {
+            if (scope.state._required && !scope.state._value) {
                 isValid = false;    
                 message = REQUIRED_INPUT_MISSING_MESSAGE;
             }
 
             if (scope.state.validate) {
-                let result = scope.state.validate(scope.state.value);
+                let result = scope.state._validate(scope.state._value);
 
                 if (!result.isValid) {
                     isValid = false;
@@ -40,10 +40,10 @@ function BaseInputController () {
         vm.check = () => {
             let result = vm.validate();
 
-            if (result.isValid !== scope.state.isValid) {
-                scope.state.rejected = !result.isValid;
-                scope.state.isValid = result.isValid;
-                scope.state.message = result.message;
+            if (result.isValid !== scope.state._isValid) {
+                scope.state._rejected = !result.isValid;
+                scope.state._isValid = result.isValid;
+                scope.state._message = result.message;
 
                 form.check();
             }

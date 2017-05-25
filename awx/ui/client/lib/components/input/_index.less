@@ -15,6 +15,14 @@
     }
 }
 
+.at-Input-button {
+    width: 72px;
+
+    &, &:active, &:hover, &:focus {
+        background-color: @at-white;
+    }
+}
+
 .at-Input--focus {
     border-color: @at-blue;
 }
@@ -25,11 +33,46 @@
     }
 }
 
+.at-InputGroup {
+    padding: 0;
+    margin: 0;
+    margin: @at-space-6x 0 0 0;
+}
+
+.at-InputGroup-border {
+    position: absolute;
+    width: @at-inset-width;
+    height: 100%;
+    background: @at-gray;
+    left: -@at-inset-width;
+}
+
+.at-InputGroup-title {
+    .at-mixin-Heading(@at-font-size-2x);
+    margin-top: 0;
+    margin-left: @at-space-5x;
+    margin-bottom: @at-space-4x;
+}
+
+.at-InputGroup-divider {
+    clear: both;
+    margin: 0;
+    padding: 0;
+    height: @at-space-6x;
+}
+
 .at-InputLabel-name {
     color: @at-gray-dark-4x;
     font-size: @at-font-size-2x;
     font-weight: @at-font-weight;
     text-transform: uppercase;
+}
+
+.at-InputMessage--rejected {
+    font-size: @at-font-size; 
+    color: @at-red;
+    margin: @at-space-3x 0 0 0;
+    padding: 0;
 }
 
 .at-InputLabel-required {
@@ -40,7 +83,7 @@
     margin: @at-space-3x @at-space 0 0;
 }
 
-.at-InputGroup {
+.at-InputSelect {
     position: relative;
     width: 100%;
 
@@ -55,10 +98,6 @@
     }
 }
 
-.at-InputSelect {
-    position: relative;
-}
-
 .at-InputSelect-input {
     position: relative;
     z-index: 2;
@@ -71,19 +110,13 @@
     position: absolute;
     z-index: 1;
     top: 0;
-}
 
-.at-Input-button {
-    width: 72px;
+    & > optgroup {
+        text-transform: uppercase;
 
-    &, &:active, &:hover, &:focus {
-        background-color: @at-white;
+        & > option {
+            text-transform: none;
+        }
     }
 }
 
-.at-InputMessage--rejected {
-    font-size: @at-font-size; 
-    color: @at-red;
-    margin: @at-space-3x 0 0 0;
-    padding: 0;
-}

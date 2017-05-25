@@ -3,10 +3,7 @@ function atPanelBody (pathService) {
         restrict: 'E',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/panel/body'),
-        scope: {
-            state: '='
-        }
+        templateUrl: pathService.getPartialPath('components/panel/body')
     };
 }
 

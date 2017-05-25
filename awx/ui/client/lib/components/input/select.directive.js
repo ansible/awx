@@ -1,6 +1,7 @@
 function atInputSelectLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
+
     if (scope.tab === '1') {
         elements.select.focus();
     }

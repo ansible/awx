@@ -1,16 +1,16 @@
 <div class="col-sm-{{::col}}">
     <div class="form-group at-u-flat">
-        <at-input-label state="state"></at-input-label>
-        <textarea class="form-control at-Input" ng-model="state.value"
-                  ng-class="{ 'at-Input--rejected': state.rejected }"
-                  ng-attr-maxlength="{{ state.options.max_length || undefined }}"
+        <at-input-label></at-input-label>
+
+        <textarea class="form-control at-Input"
+                  ng-model="state._value"
+                  ng-class="{ 'at-Input--rejected': state._rejected }"
+                  ng-attr-maxlength="{{ state.max_length || undefined }}"
                   ng-attr-tabindex="{{ tab || undefined }}"
-                  ng-attr-placeholder="{{::state.placeholder || undefined }}"
+                  ng-attr-placeholder="{{::state._placeholder || undefined }}"
                   ng-change="vm.check()"
-                  ng-disabled="state.disabled || form.disabled" />
-        </textarea>
-        <p ng-if="state.rejected && !state.isValid" class="at-InputMessage--rejected">
-            {{ state.message }}
-        </p>
+                  ng-disabled="state._disabled || form.disabled" /></textarea>
+
+        <at-input-message></at-input-message>
     </div>
 </div>

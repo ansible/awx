@@ -72,6 +72,7 @@ import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
 
+import 'angular-animate';
 import '../lib/components';
 import '../lib/models';
 import '../lib/services';
@@ -136,6 +137,7 @@ var tower = angular.module('Tower', [
     'AWDirectives',
     'features',
 
+    'ngAnimate',
     'at.lib.components',
     'at.lib.models',
     'at.lib.services',

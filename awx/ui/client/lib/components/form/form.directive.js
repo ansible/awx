@@ -59,17 +59,19 @@ function AtFormController (eventService) {
         let data = vm.components
             .filter(component => component.category === 'input')
             .reduce((values, component) => {
-                if (!component.state.value) {
+                if (!component.state._value) {
                     return values;
                 }
 
-                if (component.state.dynamic) {
-                    values[component.state.key] = values[component.state.key] || [];
-                    values[component.state.key].push({
-                        [component.state.id]: component.state.value
+                if (component.state._key && typeof component.state._value === 'object') {
+                    values[component.state._id] = component.state._value[component.state._key];
+                } else if (component.state._group) {
+                    values[component.state._key] = values[component.state._key] || [];
+                    values[component.state._key].push({
+                        [component.state._id]: component.state._value
                     });
                 } else {
-                    values[component.state.id] = component.state.value;
+                    values[component.state._id] = component.state._value;
                 }
 
                 return values;
@@ -87,25 +89,39 @@ function AtFormController (eventService) {
     };
 
     vm.onSaveError = err => {
+        let handled;
+
         if (err.status === 400) {
-            vm.setValidationErrors(err.data);
+            handled = vm.setValidationErrors(err.data);
+        }
+
+        if (!handled) {
+            // TODO: launch modal for unexpected error type
         }
     };
 
     vm.setValidationErrors = errors => {
+        let errorMessageSet = false;
+
         for (let id in errors) {
             vm.components
                 .filter(component => component.category === 'input')
                 .forEach(component => {
-                    if (component.state.id === id) {
-                        component.state.rejected = true;
-                        component.state.isValid = false;
-                        component.state.message = errors[id].join(' ');
+                    if (component.state._id === id) {
+                        errorMessageSet = true;
+
+                        component.state._rejected = true;
+                        component.state._isValid = false;
+                        component.state._message = errors[id].join(' ');
                     }
                 });
         }
 
-        vm.check();
+        if (errorMessageSet) {
+            vm.check();
+        }
+
+        return errorMessageSet;
     };
 
     vm.validate = () => {
@@ -116,7 +132,7 @@ function AtFormController (eventService) {
                 continue;
             }
 
-            if (!vm.components[i].state.isValid) {
+            if (!vm.components[i].state._isValid) {
                 isValid = false;
                 break;
             }
@@ -133,7 +149,7 @@ function AtFormController (eventService) {
         }
     };
 
-    vm.deregisterDynamicComponents = components => {
+    vm.deregisterInputGroup = components => {
         for (let i = 0; i < components.length; i++) {
             for (let j = 0; j < vm.components.length; j++) {
                 if (components[i] === vm.components[j].state) {

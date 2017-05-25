@@ -15,16 +15,6 @@ function CredentialTypeModel (BaseModel) {
         }));
     };
 
-    this.getTypeFromName = name => {
-        let type = this.model.get.data.results.filter(result => result.name === name);
-
-        if (!type.length) {
-            return null;
-        }
-
-        return this.mergeInputProperties(type[0]);
-    };
-
     this.mergeInputProperties = type => {
         return type.inputs.fields.map(field => {
             if (!type.inputs.required || type.inputs.required.indexOf(field.id) === -1) {

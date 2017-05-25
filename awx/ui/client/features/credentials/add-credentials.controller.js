@@ -8,14 +8,17 @@ function AddCredentialsController (models) {
         omit: ['user', 'team', 'inputs']
     });
 
-    vm.form.credential_type.data = credentialType.categorizeByKind();
-    vm.form.credential_type.placeholder = 'Select A Type';
+    vm.form.credential_type._data = credentialType.getResults();
+    vm.form.credential_type._placeholder = 'Select A Type';
+    vm.form.credential_type._display = 'name';
+    vm.form.credential_type._key = 'id';
+    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
 
     vm.form.inputs = {
-        get: credentialType.getTypeFromName,
-        source: vm.form.credential_type,
-        reference: 'vm.form.inputs',
-        key: 'inputs'
+        _get: credentialType.mergeInputProperties,
+        _source: vm.form.credential_type,
+        _reference: 'vm.form.inputs',
+        _key: 'inputs'
     };
 
     vm.form.save = credential.post;
