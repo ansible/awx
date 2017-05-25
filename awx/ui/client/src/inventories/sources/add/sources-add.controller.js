@@ -99,9 +99,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 options: 'inventory_files',
                 model: 'inventory_file'
             });
-
-            // TODO: figure out why the inventory file model is being set to
-            // dirty
         }
 
         $scope.lookupCredential = function(){
@@ -160,6 +157,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
 
             if (source === 'scm') {
               $scope.overwrite_vars = true;
+              $scope.inventory_source_form.inventory_file.$setPristine();
             } else {
               $scope.overwrite_vars = false;
             }
