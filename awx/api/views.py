@@ -14,7 +14,6 @@ import subprocess
 import sys
 import logging
 import requests
-import urlparse
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -2088,37 +2087,36 @@ class HostInsights(GenericAPIView):
         try:
             res = self._get_insights(url, username, password)
         except requests.exceptions.SSLError:
-            return (dict(error='SSLError while trying to connect to {}'.format(url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
         except requests.exceptions.Timeout:
-            return (dict(error='Request to {} timed out.'.format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
+            return (dict(error=_('Request to {} timed out.').format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
         except requests.exceptions.RequestException as e:
-            return (dict(error='Unkown exception {} while trying to GET {}'.format(e, url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Unkown exception {} while trying to GET {}').format(e, url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         if res.status_code != 200:
-            return (dict(error='Failed to gather reports and maintenance plans from Insights API. Server responded with {} status code and message {}'.format(res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         try:
             return (dict(insights_content=res.json()), status.HTTP_200_OK)
         except ValueError:
-            return (dict(error='Expected JSON response from Insights but instead got {}'.format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()
         cred = None
 
         if host.insights_system_id is None:
-            return Response(dict(error='This host is not recognized as an Insights host.'), status=status.HTTP_404_NOT_FOUND)
+            return Response(dict(error=_('This host is not recognized as an Insights host.')), status=status.HTTP_404_NOT_FOUND)
 
-        creds = Credential.objects.filter(credential_type__name='Red Hat Satellite 6', credential_type__kind='cloud', credential_type__managed_by_tower=True)
-        if creds.count() > 0:
-            cred = creds[0]
+        if host.inventory and host.inventory.insights_credential:
+            cred = host.inventory.insights_credential
         else:
-            return Response(dict(error='No Insights Credential found for the Inventory, "{}", that this host belongs to.'.format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
+            return Response(dict(error=_('No Insights Credential found for the Inventory, "{}", that this host belongs to.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
 
-        url = 'https://access.redhat.com/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id)
+        url = settings.INSIGHTS_URL_BASE + '/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id)
         (username, password) = self._extract_insights_creds(cred)
-        (msg, status) = self.get_insights(url, username, password)
-        return Response(msg, status=status)
+        (msg, err_code) = self.get_insights(url, username, password)
+        return Response(msg, status=err_code)
 
 
 class GroupList(ListCreateAPIView):

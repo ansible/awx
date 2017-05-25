@@ -287,3 +287,17 @@ class TestControlledBySCM:
         r = options(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
                     admin_user, expect=200)
         assert 'POST' not in r.data['actions']
+
+
+@pytest.mark.django_db
+class TestInsightsCredential:
+    def test_insights_credential(self, patch, insights_inventory, admin_user, insights_credential):
+        patch(insights_inventory.get_absolute_url(), 
+              {'insights_credential': insights_credential.id}, admin_user,
+              expect=200)
+
+    def test_non_insights_credential(self, patch, insights_inventory, admin_user, scm_credential):
+        patch(insights_inventory.get_absolute_url(), 
+              {'insights_credential': scm_credential.id}, admin_user,
+              expect=400)
+

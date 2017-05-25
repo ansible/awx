@@ -243,4 +243,14 @@ class Migration(migrations.Migration):
             name='insights_system_id',
             field=models.TextField(default=None, help_text='Red Hat Insights host unique identifier.', null=True, db_index=True, blank=True),
         ),
+        migrations.AddField(
+            model_name='inventory',
+            name='insights_credential',
+            field=models.ForeignKey(related_name='insights_credential', default=None, blank=True, on_delete=models.deletion.SET_NULL, to='main.Credential', help_text='Credentials to be used by hosts belonging to this invtory when accessing Red Hat Insights API.', null=True),
+        ),
+        migrations.AlterField(
+            model_name='inventory',
+            name='kind',
+            field=models.CharField(default=b'', help_text='Kind of inventory being represented.', max_length=32, blank=True, choices=[(b'', 'Hosts have a direct link to this inventory.'), (b'smart', 'Hosts for inventory generated using the host_filter property.')]),
+        ),
     ]

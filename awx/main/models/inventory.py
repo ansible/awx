@@ -143,6 +143,16 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         'use_role',
         'admin_role',
     ])
+    insights_credential = models.ForeignKey(
+        'Credential',
+        related_name='insights_credential',
+        help_text=_('Credentials to be used by hosts belonging to this invtory when accessing Red Hat Insights API.'),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        default=None,
+    )
+
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
@@ -344,6 +354,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     def root_groups(self):
         group_pks = self.groups.values_list('pk', flat=True)
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
+
+    def clean_insights_credential(self):
+        if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
+            raise ValidationError(_('Invalid CredentialType'))
+        return self.insights_credential
 
 
 class Host(CommonModelNameNotUnique):

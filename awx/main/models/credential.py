@@ -399,7 +399,8 @@ class CredentialType(CommonModelNameNotUnique):
         ('vault', _('Vault')),
         ('net', _('Network')),
         ('scm', _('Source Control')),
-        ('cloud', _('Cloud'))
+        ('cloud', _('Cloud')),
+        ('insights', _('Insights')),
     )
 
     kind = models.CharField(
@@ -919,3 +920,32 @@ def azure_rm(cls):
             }]
         }
     )
+
+
+@CredentialType.default
+def insights(cls):
+    return cls(
+        kind='insights',
+        name='Insights Basic Auth',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Basic Auth Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Basic Auth Password',
+                'type': 'string',
+                'secret': True
+            }],
+            'required': ['username', 'password'],
+        },
+        injectors={
+            'extra_vars': {
+                "scm_username": "{{username}}",
+                "scm_password": "{{password}}",
+            },
+        },
+    )
+

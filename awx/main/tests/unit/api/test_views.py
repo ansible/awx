@@ -12,6 +12,11 @@ from awx.api.views import (
     HostInsights,
 )
 
+from awx.main.models import (
+    Host,
+    Inventory,
+)
+
 
 @pytest.fixture
 def mock_response_new(mocker):
@@ -143,10 +148,10 @@ class TestHostInsights():
     def test_get_insights_non_200(self, patch_parent, mocker):
         view = HostInsights()
         Response = namedtuple('Response', 'status_code content')
-        mocker.patch.object(view, '_get_insights', return_value=Response(500, 'hello world!'))
+        mocker.patch.object(view, '_get_insights', return_value=Response(500, 'mock 500 err msg'))
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
-        assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API. Server responded with 500 status code and message hello world!'
+        assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API at URL https://myexample.com/whocares/me/. Server responded with 500 status code and message mock 500 err msg'
 
     def test_get_insights_malformed_json_content(self, patch_parent, mocker):
         view = HostInsights()
@@ -164,3 +169,36 @@ class TestHostInsights():
         assert msg['error'] == 'Expected JSON response from Insights but instead got booo!'
         assert code == 500
 
+    #def test_get_not_insights_host(self, patch_parent, mocker, mock_response_new):
+    #def test_get_not_insights_host(self, patch_parent, mocker):
+    def test_get_not_insights_host(self, mocker):
+
+        view = HostInsights()
+
+        host = Host()
+        host.insights_system_id = None
+        
+        mocker.patch.object(view, 'get_object', return_value=host)
+
+        resp = view.get(None)
+        
+        assert resp.data['error'] == 'This host is not recognized as an Insights host.'
+        assert resp.status_code == 404
+
+    def test_get_no_credential(self, patch_parent, mocker):
+        view = HostInsights()
+
+        class MockInventory():
+            insights_credential = None
+            name = 'inventory_name_here'
+
+        class MockHost():
+            insights_system_id = 'insights_system_id_value'
+            inventory = MockInventory()
+
+        mocker.patch.object(view, 'get_object', return_value=MockHost())
+
+        resp = view.get(None)
+
+        assert resp.data['error'] == 'No Insights Credential found for the Inventory, "inventory_name_here", that this host belongs to.'
+        assert resp.status_code == 404
