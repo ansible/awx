@@ -22,7 +22,6 @@ RUN mkdir -p /data/db
 ADD tools/docker-compose/license /etc/tower/license
 RUN pip2 install honcho
 RUN pip2 install supervisor
-RUN curl -LO https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 && chmod +x ./dumb-init_1.1.3_amd64 && mv ./dumb-init_1.1.3_amd64 /usr/bin/dumb-init
 ADD tools/docker-compose/ansible-tower.egg-link /tmp/ansible-tower.egg-link
 ADD tools/docker-compose/tower-manage /usr/local/bin/tower-manage
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
@@ -38,7 +37,9 @@ RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
+RUN chmod +x /tini
 WORKDIR /
 EXPOSE 8043 8013 8080 22
-ENTRYPOINT ["/usr/bin/dumb-init"]
+ENTRYPOINT ["/tini", "--"]
 CMD /start_development.sh
