@@ -2073,6 +2073,8 @@ class HostInsights(GenericAPIView):
 
     model = Host
     serializer_class = EmptySerializer
+    new_in_320 = True
+    new_in_api_v2 = True
 
     def _extract_insights_creds(self, credential):
         return (credential.inputs['username'], decrypt_field(credential, 'password'))
