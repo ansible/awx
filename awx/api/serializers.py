@@ -1114,7 +1114,8 @@ class InventorySerializer(BaseSerializerWithVariables):
         fields = ('*', 'organization', 'kind', 'host_filter', 'variables', 'has_active_failures',
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
                   'groups_with_active_failures', 'has_inventory_sources',
-                  'total_inventory_sources', 'inventory_sources_with_failures')
+                  'total_inventory_sources', 'inventory_sources_with_failures',
+                  'insights_credential',)
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
@@ -1135,6 +1136,8 @@ class InventorySerializer(BaseSerializerWithVariables):
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
         ))
+        if obj.insights_credential:
+            res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         return res
@@ -1208,6 +1211,8 @@ class HostSerializer(BaseSerializerWithVariables):
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),
         ))
+        if self.version > 1:
+            res['insights'] = self.reverse('api:host_insights', kwargs={'pk': obj.pk})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:

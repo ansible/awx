@@ -1,5 +1,6 @@
 import mock
 import pytest
+import requests
 
 from collections import namedtuple
 
@@ -8,6 +9,11 @@ from awx.api.views import (
     JobTemplateLabelList,
     JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
+    HostInsights,
+)
+
+from awx.main.models import (
+    Host,
 )
 
 
@@ -117,3 +123,81 @@ class TestInventoryInventorySourcesUpdate:
             view = InventoryInventorySourcesUpdate()
             response = view.post(mock_request)
             assert response.data == expected
+
+
+class TestHostInsights():
+
+    @pytest.fixture
+    def patch_parent(self, mocker):
+        mocker.patch('awx.api.generics.GenericAPIView')
+
+    @pytest.mark.parametrize("status_code, exception, error, message", [
+        (500, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
+        (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
+        (500, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+    ])
+    def test_get_insights_request_exception(self, patch_parent, mocker, status_code, exception, error, message):
+        view = HostInsights()
+        mocker.patch.object(view, '_get_insights', side_effect=exception(error))
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert code == status_code
+        assert msg['error'] == message or error
+
+    def test_get_insights_non_200(self, patch_parent, mocker):
+        view = HostInsights()
+        Response = namedtuple('Response', 'status_code content')
+        mocker.patch.object(view, '_get_insights', return_value=Response(500, 'mock 500 err msg'))
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API at URL https://myexample.com/whocares/me/. Server responded with 500 status code and message mock 500 err msg'
+
+    def test_get_insights_malformed_json_content(self, patch_parent, mocker):
+        view = HostInsights()
+        
+        class Response():
+            status_code = 200
+            content = 'booo!'
+
+            def json(self):
+                raise ValueError('we do not care what this is')
+        
+        mocker.patch.object(view, '_get_insights', return_value=Response())
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert msg['error'] == 'Expected JSON response from Insights but instead got booo!'
+        assert code == 500
+
+    #def test_get_not_insights_host(self, patch_parent, mocker, mock_response_new):
+    #def test_get_not_insights_host(self, patch_parent, mocker):
+    def test_get_not_insights_host(self, mocker):
+
+        view = HostInsights()
+
+        host = Host()
+        host.insights_system_id = None
+        
+        mocker.patch.object(view, 'get_object', return_value=host)
+
+        resp = view.get(None)
+        
+        assert resp.data['error'] == 'This host is not recognized as an Insights host.'
+        assert resp.status_code == 404
+
+    def test_get_no_credential(self, patch_parent, mocker):
+        view = HostInsights()
+
+        class MockInventory():
+            insights_credential = None
+            name = 'inventory_name_here'
+
+        class MockHost():
+            insights_system_id = 'insights_system_id_value'
+            inventory = MockInventory()
+
+        mocker.patch.object(view, 'get_object', return_value=MockHost())
+
+        resp = view.get(None)
+
+        assert resp.data['error'] == 'No Insights Credential found for the Inventory, "inventory_name_here", that this host belongs to.'
+        assert resp.status_code == 404

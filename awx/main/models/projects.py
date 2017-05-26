@@ -141,7 +141,10 @@ class ProjectOptions(models.Model):
             return None
         cred = self.credential
         if cred:
-            if cred.kind != 'scm':
+            if self.scm_type == 'insights':
+                if cred.kind != 'insights':
+                    raise ValidationError(_("Credential kind must be 'insights'."))
+            elif cred.kind != 'scm':
                 raise ValidationError(_("Credential kind must be 'scm'."))
             try:
                 if self.scm_type == 'insights':

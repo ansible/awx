@@ -179,6 +179,11 @@ def user_project(user):
 
 
 @pytest.fixture
+def insights_project():
+    return Project.objects.create(name="test-insights-project", scm_type="insights")
+
+
+@pytest.fixture
 def instance(settings):
     return Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org", capacity=100)
 
@@ -217,6 +222,20 @@ def credentialtype_vault():
 
 
 @pytest.fixture
+def credentialtype_scm():
+    scm_type = CredentialType.defaults['scm']()
+    scm_type.save()
+    return scm_type
+
+
+@pytest.fixture
+def credentialtype_insights():
+    insights_type = CredentialType.defaults['insights']()
+    insights_type.save()
+    return insights_type
+
+
+@pytest.fixture
 def credential(credentialtype_aws):
     return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'})
@@ -241,6 +260,18 @@ def machine_credential(credentialtype_ssh):
 
 
 @pytest.fixture
+def scm_credential(credentialtype_scm):
+    return Credential.objects.create(credential_type=credentialtype_scm, name='scm-cred',
+                                     inputs={'username': 'optimus', 'password': 'prime'})
+
+
+@pytest.fixture
+def insights_credential(credentialtype_insights):
+    return Credential.objects.create(credential_type=credentialtype_insights, name='insights-cred',
+                                     inputs={'username': 'morocco_mole', 'password': 'secret_squirrel'})
+
+
+@pytest.fixture
 def org_credential(organization, credentialtype_aws):
     return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'},
@@ -250,6 +281,13 @@ def org_credential(organization, credentialtype_aws):
 @pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
+
+
+@pytest.fixture
+def insights_inventory(inventory):
+    inventory.scm_type = 'insights'
+    inventory.save()
+    return inventory
 
 
 @pytest.fixture

@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 from ansible.module_utils.basic import * # noqa
-import uuid
 
 DOCUMENTATION = '''
 ---
 module: scan_insights
-short_description: Return insights UUID as fact data
+short_description: Return insights id as fact data
 description:
-    - Inspects the /etc/redhat-access-insights/machine-id file for insights uuid and returns the found UUID as fact data
+    - Inspects the /etc/redhat-access-insights/machine-id file for insights id and returns the found id as fact data
 version_added: "2.3"
 options:
 requirements: [ ]
@@ -28,8 +27,8 @@ EXAMPLES = '''
 INSIGHTS_SYSTEM_ID_FILE='/etc/redhat-access-insights/machine-id'
 
 
-def get_system_uuid(filname):
-    system_uuid = None
+def get_system_id(filname):
+    system_id = None
     try:
         f = open(INSIGHTS_SYSTEM_ID_FILE, "r")
     except IOError:
@@ -37,12 +36,12 @@ def get_system_uuid(filname):
     else:
         try:
             data = f.readline()
-            system_uuid = str(uuid.UUID(data))
+            system_id = str(data)
         except (IOError, ValueError):
             pass
         finally:
             f.close()
-            return system_uuid
+            return system_id
 
 
 def main():
@@ -50,12 +49,12 @@ def main():
         argument_spec = dict()
     )
 
-    system_uuid = get_system_uuid(INSIGHTS_SYSTEM_ID_FILE)
+    system_id = get_system_id(INSIGHTS_SYSTEM_ID_FILE)
 
     results = {
         'ansible_facts': {
             'insights': {
-                'system_id': system_uuid
+                'system_id': system_id
             }
         }
     }
