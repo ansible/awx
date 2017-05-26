@@ -443,7 +443,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         xhr.onerror = function () {
             console.error(xhr.statusText);
         };
-        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
         xhr.send();
     };
 
@@ -457,7 +456,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         xhr.onerror = function () {
             console.error(xhr.statusText);
         };
-        xhr.setRequestHeader('Authorization', 'Token ' + $scope.api_token);
         xhr.send();
     };
 
