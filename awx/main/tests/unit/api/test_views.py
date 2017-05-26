@@ -14,7 +14,6 @@ from awx.api.views import (
 
 from awx.main.models import (
     Host,
-    Inventory,
 )
 
 
