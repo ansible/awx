@@ -1204,6 +1204,7 @@ class HostSerializer(BaseSerializerWithVariables):
             job_host_summaries = self.reverse('api:host_job_host_summaries_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:host_activity_stream_list', kwargs={'pk': obj.pk}),
             inventory_sources = self.reverse('api:host_inventory_sources_list', kwargs={'pk': obj.pk}),
+            smart_inventories = self.reverse('api:host_smart_inventories_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:host_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             ad_hoc_command_events = self.reverse('api:host_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             fact_versions = self.reverse('api:host_fact_versions_list', kwargs={'pk': obj.pk}),

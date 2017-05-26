@@ -38,7 +38,7 @@ from celery.signals import celeryd_init, worker_process_init
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -62,8 +62,8 @@ from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error',
-           'handle_work_success', 'update_inventory_computed_fields',
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
            'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
 HIDDEN_PASSWORD = '**********'
@@ -319,6 +319,22 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
         return
     i = i[0]
     i.update_computed_fields(update_hosts=should_update_hosts)
+
+
+@task(queue='tower')
+def update_host_smart_inventory_memberships():
+    try:
+        with transaction.atomic():
+            smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False)
+            SmartInventoryMembership.objects.all().delete()
+            memberships = []
+            for smart_inventory in smart_inventories:
+                memberships.extend([SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
+                                    for host_id in smart_inventory.hosts.values_list('id')])
+            SmartInventoryMembership.objects.bulk_create(memberships)
+    except IntegrityError as e:
+        logger.error("Update Host Smart Inventory Memberships failed due to an exception: " + str(e))
+        return
 
 
 class BaseTask(Task):

@@ -58,7 +58,7 @@ import ansiconv
 from social.backends.utils import load_backends
 
 # AWX
-from awx.main.tasks import send_notifications
+from awx.main.tasks import send_notifications, update_host_smart_inventory_memberships
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
@@ -2004,6 +2004,22 @@ class HostInventorySourcesList(SubListAPIView):
     parent_model = Host
     relationship = 'inventory_sources'
     new_in_148 = True
+
+
+class HostSmartInventoriesList(SubListAPIView):
+    model = Inventory
+    serializer_class = InventorySerializer
+    parent_model = Host
+    relationship = 'smart_inventories'
+    new_in_320 = True
+
+    def list(self, *args, **kwargs):
+        try:
+            if settings.AWX_REBUILD_SMART_MEMBERSHIP:
+                update_host_smart_inventory_memberships.delay()
+            return super(HostSmartInventoriesList, self).list(*args, **kwargs)
+        except Exception as e:
+            return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
