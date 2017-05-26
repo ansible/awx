@@ -9,6 +9,8 @@ function BaseModel ($http) {
             return $http(request)
                 .then(response => {
                     this.model.get = response;
+
+                    return response;
                 });
         };
 
@@ -22,6 +24,8 @@ function BaseModel ($http) {
             return $http(request)
                 .then(response => {
                     this.model.post = response;
+
+                    return response;
                 });
         };
 
@@ -34,6 +38,8 @@ function BaseModel ($http) {
             return $http(request)
                 .then(response => {
                     this.model.options = response;
+
+                    return response;
                 });
         };
 

@@ -40,20 +40,27 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         }
     });
 
-    function CredentialsAddResolve ($q, credentialModel, credentialTypeModel) {
+    function CredentialsAddResolve ($q, meModel, credentialModel, credentialTypeModel) {
         let promises = [
+            meModel.get(),
             credentialModel.options(),
             credentialTypeModel.get()
         ];
 
         return $q.all(promises)
             .then(() => ({
+                me: meModel,
                 credential: credentialModel,
                 credentialType: credentialTypeModel
             }));
     }
 
-    CredentialsAddResolve.$inject = ['$q', 'CredentialModel', 'CredentialTypeModel'];
+    CredentialsAddResolve.$inject = [
+        '$q',
+        'MeModel',
+        'CredentialModel',
+        'CredentialTypeModel'
+    ];
 
     stateExtender.addState({
         name: 'credentials.add',
@@ -73,20 +80,25 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         }
     });
 
-    stateExtender.addState({
-        name: 'credentials.edit',
-        route: '/edit',
-        ncyBreadcrumb: {
-            label: N_('EDIT')
-        },
-        views: {
-            'edit@credentials': {
-                templateProvider: function() {
-                    return '<span>test-edit</span>';
-                }
-            }
-        }
-    });
+    /*
+     *stateExtender.addState({
+     *    name: 'credentials.edit',
+     *    route: '/edit/:id',
+     *    ncyBreadcrumb: {
+     *        label: N_('EDIT')
+     *    },
+     *    views: {
+     *        'edit@credentials': {
+     *            templateUrl: pathService.getViewPath('credentials/add-credentials'),
+     *            controller: AddController,
+     *            controllerAs: 'vm'
+     *        },
+     *        resolve: {
+     *            resolvedModels: CredentialsAddResolve
+     *        }
+     *    }
+     *});
+     */
 }
 
 config.$inject = [

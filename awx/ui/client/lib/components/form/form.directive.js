@@ -66,10 +66,8 @@ function AtFormController (eventService) {
                 if (component.state._key && typeof component.state._value === 'object') {
                     values[component.state.id] = component.state._value[component.state._key];
                 } else if (component.state._group) {
-                    values[component.state._key] = values[component.state._key] || [];
-                    values[component.state._key].push({
-                        [component.state.id]: component.state._value
-                    });
+                    values[component.state._key] = values[component.state._key] || {};
+                    values[component.state._key][component.state.id] = component.state._value;
                 } else {
                     values[component.state.id] = component.state._value;
                 }
@@ -77,15 +75,10 @@ function AtFormController (eventService) {
                 return values;
             }, {});
 
-
         scope.state.save(data)
-            .then(res => vm.onSaveSuccess(res))
+            .then(scope.state.created)
             .catch(err => vm.onSaveError(err))
             .finally(() => vm.state.disabled = false);
-    };
-
-    vm.onSaveSuccess = res => {
-        console.info(res);
     };
 
     vm.onSaveError = err => {
