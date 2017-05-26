@@ -469,6 +469,8 @@ class CredentialType(CommonModelNameNotUnique):
                 requirements['kind'] = 'vault'
             else:
                 requirements['kind'] = 'ssh'
+        elif kind == 'scm' and data.get('is_insights', False):
+            requirements['kind'] = 'insights'
         elif kind in ('net', 'scm'):
             requirements['kind'] = kind
         elif kind in kind_choices:

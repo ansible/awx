@@ -8,6 +8,7 @@ from django.apps import apps
 from awx.main.models import Credential, CredentialType
 from awx.main.migrations._credentialtypes import migrate_to_v2_credentials
 from awx.main.utils.common import decrypt_field
+from awx.main.migrations._credentialtypes import _disassociate_non_insights_projects
 
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
@@ -15,12 +16,12 @@ EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-
 
 
 @contextmanager
-def migrate(credential, kind):
+def migrate(credential, kind, is_insights=False):
     with mock.patch.object(Credential, 'kind', kind), \
             mock.patch.object(Credential, 'objects', mock.Mock(
                 get=lambda **kw: deepcopy(credential),
-                all=lambda: [credential]
-            )):
+                all=lambda: [credential],
+            )), mock.patch('awx.main.migrations._credentialtypes._is_insights_scm', return_value=is_insights):
                 class Apps(apps.__class__):
                     def get_model(self, app, model):
                         if model == 'Credential':
@@ -307,3 +308,40 @@ def test_azure_rm_migration():
     assert decrypt_field(cred, 'secret') == 'some-secret'
     assert cred.inputs['tenant'] == 'some-tenant'
     assert Credential.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_insights_migration():
+    cred = Credential(name='My Credential')
+
+    with migrate(cred, 'scm', is_insights=True):
+        cred.__dict__.update({
+            'username': 'bob',
+            'password': 'some-password',
+        })
+    
+    assert cred.credential_type.name == 'Insights Basic Auth'
+    assert cred.inputs['username'] == 'bob'
+    assert cred.inputs['password'].startswith('$encrypted$')
+
+
+@pytest.mark.skip(reason="Need some more mocking here or something.")
+@pytest.mark.django_db
+def test_insights_project_migration():
+    cred1 = apps.get_model('main', 'Credential').objects.create(name='My Credential')
+    cred2 = apps.get_model('main', 'Credential').objects.create(name='My Credential')
+    projA1 = apps.get_model('main', 'Project').objects.create(name='Insights Project A1', scm_type='insights', credential=cred1)
+
+    projB1 = apps.get_model('main', 'Project').objects.create(name='Git Project B1', scm_type='git', credential=cred1)
+    projB2 = apps.get_model('main', 'Project').objects.create(name='Git Project B2', scm_type='git', credential=cred1)
+
+    projC1 = apps.get_model('main', 'Project').objects.create(name='Git Project C1', scm_type='git', credential=cred2)
+
+    _disassociate_non_insights_projects(apps, cred1)
+    _disassociate_non_insights_projects(apps, cred2)
+
+    assert apps.get_model('main', 'Project').objects.get(pk=projA1).credential is None
+    assert apps.get_model('main', 'Project').objects.get(pk=projB1).credential is None
+    assert apps.get_model('main', 'Project').objects.get(pk=projB2).credential is None
+    assert apps.get_model('main', 'Project').objects.get(pk=projC1).credential == cred2
+

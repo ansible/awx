@@ -1,6 +1,7 @@
 from awx.main import utils
 from awx.main.models import CredentialType
 from awx.main.utils.common import encrypt_field, decrypt_field
+from django.db.models import Q
 
 
 DEPRECATED_CRED_KIND = {
@@ -48,6 +49,14 @@ def _populate_deprecated_cred_types(cred, kind):
     return cred[kind]
 
 
+def _is_insights_scm(apps, cred):
+    return apps.get_model('main', 'Credential').objects.filter(id=cred.id, projects__scm_type='insights').exists()
+
+
+def _disassociate_non_insights_projects(apps, cred):
+    apps.get_model('main', 'Project').objects.filter(~Q(scm_type='insights') & Q(credential=cred)).update(credential=None)
+
+
 def migrate_to_v2_credentials(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
     deprecated_cred = _generate_deprecated_cred_types()
@@ -64,7 +73,11 @@ def migrate_to_v2_credentials(apps, schema_editor):
             data = {}
             if getattr(cred, 'vault_password', None):
                 data['vault_password'] = cred.vault_password
+            if _is_insights_scm(apps, cred):
+                data['is_insights'] = True
+                _disassociate_non_insights_projects(apps, cred)
             credential_type = _populate_deprecated_cred_types(deprecated_cred, cred.kind) or CredentialType.from_v1_kind(cred.kind, data)
+
             defined_fields = credential_type.defined_fields
             cred.credential_type = apps.get_model('main', 'CredentialType').objects.get(pk=credential_type.pk)
 
@@ -80,6 +93,8 @@ def migrate_to_v2_credentials(apps, schema_editor):
                     job.credential = None
                     job.vault_credential = cred
                     job.save()
+            if data.get('is_insights', False):
+                cred.kind = 'insights'
             cred.save()
 
             #
@@ -145,3 +160,4 @@ def migrate_job_credentials(apps, schema_editor):
                 obj.save()
     finally:
         utils.get_current_apps = orig_current_apps
+
