@@ -1,5 +1,5 @@
 <g ng-if="device.working">
-    <path ng-attr-transform="translate({{-device.width}}, {{-device.height}}) rotate({{frame/3}})" class="NetworkUI__status" ng-attr-d="{{device.describeArc(0, 0, 10, 0, 270)}}"/>
+    <path ng-attr-transform="translate({{-device.width}}, {{-device.height}}) rotate({{frame/3}})" class="NetworkUI__status-path" ng-attr-d="{{device.describeArc(0, 0, 10, 0, 270)}}"/>
 </g>
 <g ng-if="!device.working">
 <circle ng-attr-cx="{{-device.width}}"
