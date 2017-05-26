@@ -146,7 +146,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     insights_credential = models.ForeignKey(
         'Credential',
         related_name='insights_credential',
-        help_text=_('Credentials to be used by hosts belonging to this invtory when accessing Red Hat Insights API.'),
+        help_text=_('Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.'),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -357,7 +357,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
 
     def clean_insights_credential(self):
         if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
-            raise ValidationError(_('Invalid CredentialType'))
+            raise ValidationError(_("Credential kind must be 'insights'."))
         return self.insights_credential
 
 

@@ -49,6 +49,10 @@ def _populate_deprecated_cred_types(cred, kind):
     return cred[kind]
 
 
+def _get_insights_credential_type():
+    return CredentialType.objects.get(kind='insights')
+
+
 def _is_insights_scm(apps, cred):
     return apps.get_model('main', 'Credential').objects.filter(id=cred.id, projects__scm_type='insights').exists()
 
@@ -74,9 +78,10 @@ def migrate_to_v2_credentials(apps, schema_editor):
             if getattr(cred, 'vault_password', None):
                 data['vault_password'] = cred.vault_password
             if _is_insights_scm(apps, cred):
-                data['is_insights'] = True
                 _disassociate_non_insights_projects(apps, cred)
-            credential_type = _populate_deprecated_cred_types(deprecated_cred, cred.kind) or CredentialType.from_v1_kind(cred.kind, data)
+                credential_type = _get_insights_credential_type()
+            else:
+                credential_type = _populate_deprecated_cred_types(deprecated_cred, cred.kind) or CredentialType.from_v1_kind(cred.kind, data)
 
             defined_fields = credential_type.defined_fields
             cred.credential_type = apps.get_model('main', 'CredentialType').objects.get(pk=credential_type.pk)
