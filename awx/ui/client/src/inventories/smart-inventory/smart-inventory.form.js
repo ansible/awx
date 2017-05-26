@@ -62,7 +62,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
                 },
                 smart_hosts: {
-                    label: i18n._('Smart Hosts'),
+                    label: i18n._('Smart Host Filter'),
                     type: 'custom',
                     control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
                     basePath: 'hosts',
