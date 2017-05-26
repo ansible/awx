@@ -5,17 +5,18 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'SourcesListDefinition',
-    'InventoryUpdate', 'GroupManageService', 'CancelSourceUpdate',
+    'InventoryUpdate', 'CancelSourceUpdate',
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
     'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
-        InventoryUpdate, GroupManageService, CancelSourceUpdate,
+        InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
         Wait, SourcesService){
 
         let list = SourcesListDefinition;
+        var inventory_source;
 
         init();
 
@@ -24,7 +25,7 @@
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
             $scope.canAdd = false;
 
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/inventory_sources")
                 .then(function(canAdd) {
                     $scope.canAdd = canAdd;
                 });
@@ -38,7 +39,7 @@
             _.forEach($scope[list.name], buildStatusIndicators);
 
             $scope.$on(`ws-jobs`, function(e, data){
-                var inventory_source = Find({ list: $scope.inventory_sources, key: 'id', val: data.inventory_source_id });
+                inventory_source = Find({ list: $scope.inventory_sources, key: 'id', val: data.inventory_source_id });
 
                 if (inventory_source === undefined || inventory_source === null) {
                     inventory_source = {};
@@ -101,7 +102,7 @@
                 Wait('start');
                 SourcesService.delete(inventory_source.id).then(() => {
                     $('#prompt-modal').modal('hide');
-                    if (parseInt($state.params.source_id) === invnetory_source) {
+                    if (parseInt($state.params.source_id) === inventory_source) {
                         $state.go("sources", null, {reload: true});
                     } else {
                         $state.go($state.current.name, null, {reload: true});
@@ -136,7 +137,7 @@
             });
         };
         $scope.scheduleSource = function(id) {
-            // Add this group's id to the array of group id's so that it gets
+            // Add this inv source's id to the array of inv source id's so that it gets
             // added to the breadcrumb trail
             $state.go('inventories.edit.inventory_sources.edit.schedules', {inventory_source_id: id}, {reload: true});
         };

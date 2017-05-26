@@ -5,13 +5,11 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
-    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupManageService',
-    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'inventorySourceData', 'SourcesService', 'inventoryData', 'Empty', 'Wait', 'Rest',
+    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'inventorySourceData', 'SourcesService', 'inventoryData', 'Empty', 'Wait', 'Rest', 'Alert', 'ProcessErrors',
     function($state, $stateParams, $scope, ParseVariableString,
-        rbacUiControlService, ToJSON,ParseTypeChange, GroupManageService,
-        GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
-        inventorySourceData, SourcesService, inventoryData, Empty, Wait, Rest) {
+        rbacUiControlService, ToJSON,ParseTypeChange, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
+        inventorySourceData, SourcesService, inventoryData, Empty, Wait, Rest, Alert, ProcessErrors) {
 
         init();
 
@@ -31,6 +29,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 {instance_filters: inventorySourceData.instance_filters},
                 {inventory_script: inventorySourceData.source_script},
                 {verbosity: inventorySourceData.verbosity});
+
+            $scope.inventory_source_obj = inventorySourceData;
             if (inventorySourceData.credential) {
                 $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
@@ -73,7 +73,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                         sync_inventory_file_select2();
                         Wait('stop');
                     })
-                    .error(function (ret,status_code) {
+                    .error(function () {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
                     });
@@ -104,7 +104,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                         }
                     })
                     .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                     });
             }

@@ -5,13 +5,12 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
-    'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
-    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'Empty',
-    'rbacUiControlService', 'ToJSON', 'SourcesService', 'Wait', 'Rest',
+    'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'Empty',
+    'rbacUiControlService', 'ToJSON', 'SourcesService', 'Wait', 'Rest', 'Alert', 'ProcessErrors',
     function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
-        GenerateForm, inventoryData, GroupManageService, GetChoices,
+        GenerateForm, inventoryData, GetChoices,
         GetBasePath, CreateSelect2, GetSourceTypeOptions, Empty, rbacUiControlService,
-        ToJSON, SourcesService, Wait, Rest) {
+        ToJSON, SourcesService, Wait, Rest, Alert, ProcessErrors) {
 
         let form = SourcesFormDefinition;
         init();
@@ -42,7 +41,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                         sync_inventory_file_select2();
                         Wait('stop');
                     })
-                    .error(function (ret,status_code) {
+                    .error(function () {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
                     });

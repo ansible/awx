@@ -618,17 +618,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 var element = params.element,
                     options = params.opts,
                     multiple = (params.multiple !== undefined) ? params.multiple : true,
-                    createNew = (params.createNew !== undefined) ? params.createNew : false,
                     placeholder = params.placeholder,
                     customDropdownAdapter = (params.customDropdownAdapter !== undefined) ? params.customDropdownAdapter : true,
                     addNew = params.addNew,
                     scope = params.scope,
-                    options = params.options,
+                    selectOptions = params.options,
                     model = params.model,
                     original_options;
 
-                    if (scope && options) {
-                        original_options = _.cloneDeep(scope[options]);
+                    if (scope && selectOptions) {
+                        original_options = _.cloneDeep(scope[selectOptions]);
                     }
 
                 $.fn.select2.amd.require([
@@ -690,15 +689,15 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             }
                         }).on('select2:unselecting', (e) => {
                             $(e.target).data('select2-unselecting', true);
-                        })
+                        });
                     }
 
                     if (addNew && !multiple) {
                         $(element).on('select2:select', (e) => {
                             scope[model] = e.params.data.text;
-                            scope[options] = _.cloneDeep(original_options);
-                            if (scope[options].indexOf(e.params.data.text) === -1) {
-                                scope[options].push(e.params.data.text);
+                            scope[selectOptions] = _.cloneDeep(original_options);
+                            if (scope[selectOptions].indexOf(e.params.data.text) === -1) {
+                                scope[selectOptions].push(e.params.data.text);
                             }
                             $(element).select2(config);
                         });

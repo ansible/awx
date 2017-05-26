@@ -5,7 +5,7 @@
                   <div class="Modal-title ng-binding">
                       Delete Group
                       <a href="" id="awp-promote" href=""
-                          aw-pop-over="<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the group being deleted. If a group or host is associated with other groups, it will still exist within those groups. Otherwise, the associated groups and hosts will no longer appear in the inventory.</dd>\n<dt style='margin-top: 5px;'>Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted root level. Note: groups already associated with other groups cannot be promoted.</dd></dl>\n" aw-tool-tip="Click for help"
+                          aw-pop-over="<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the inventory source being deleted. If a group or host is associated with other inventory sources, it will still exist within those inventory sources. Otherwise, the associated groups and hosts will no longer appear in the inventory.</dd>\n<dt style='margin-top: 5px;'>Promote</dt><dd>Groups and hosts associated with the inventory source being removed will be promoted root level. Note: groups already associated with other inventory sources cannot be promoted.</dd></dl>\n" aw-tool-tip="Click for help"
                           data-placement="right"
                           data-container="body"
                           data-title="Delete Group"
@@ -66,7 +66,7 @@
 
                 </div>
                 <div ng-show="toDelete.total_groups == 0 && toDelete.total_hosts == 0">
-                    <div class="Prompt-bodyQuery">Are you sure you want to permanently delete the group below from the inventory?</div>
+                    <div class="Prompt-bodyQuery">Are you sure you want to permanently delete the inventory source below from the inventory?</div>
                     <div class="Prompt-bodyTarget">{{ toDelete.name }}</div>
                 </div>
                 <div class="Modal-footer">

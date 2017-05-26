@@ -47,14 +47,14 @@ return {
         name: {
             label: 'Name',
             type: 'text',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             required: true,
             tab: 'properties'
         },
         description: {
             label: 'Description',
             type: 'text',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             tab: 'properties'
         },
         source: {
@@ -62,7 +62,7 @@ return {
             type: 'select',
             ngOptions: 'source.label for source in source_type_options track by source.value',
             ngChange: 'sourceChange(source)',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             ngModel: 'source'
         },
         credential: {
@@ -78,7 +78,7 @@ return {
                 reqExpression: "cloudCredentialRequired",
                 init: "false"
             },
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             watchBasePath: "credentialBasePath"
         },
         project: {
@@ -96,7 +96,7 @@ return {
                 reqExpression: "projectRequired",
                 init: "false"
             },
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             watchBasePath: "projectBasePath"
         },
         inventory_file: {
@@ -104,7 +104,7 @@ return {
             type:'select',
             ngOptions: 'file for file in inventory_files track by file',
             ngShow: "source && source.value === 'scm'",
-            ngDisabled: "!(group_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
+            ngDisabled: "!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
             id: 'inventory-file-select',
             awRequiredWhen: {
                 reqExpression: "inventoryfilerequired",
@@ -131,7 +131,7 @@ return {
                 "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                 "</p>",
             dataContainer: 'body',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         instance_filters: {
             label: 'Instance Filters',
@@ -150,7 +150,7 @@ return {
                 "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                 "for a complete list of supported filters.</p>",
             dataContainer: 'body',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         group_by: {
             label: 'Only Group By',
@@ -174,7 +174,7 @@ return {
                 "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                 "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
             dataContainer: 'body',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         inventory_script: {
             label :  "Custom Inventory Script",
@@ -188,7 +188,7 @@ return {
                 reqExpression: "source && source.value === 'custom'",
                 init: "false"
             },
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
         },
         custom_variables: {
             id: 'custom_variables',
@@ -292,7 +292,7 @@ return {
             dataTitle: i18n._('Verbosity'),
             dataPlacement: 'right',
             dataContainer: "body",
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
         },
         checkbox_group: {
             label: 'Update Options',
@@ -313,7 +313,7 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: "(!(group_obj.summary_fields.user_capabilities.edit || canAdd))"
+                ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
             }, {
                 name: 'overwrite_vars',
                 label: 'Overwrite Variables',
@@ -328,7 +328,7 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: "(!(group_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
+                ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
             }, {
                 name: 'update_on_launch',
                 label: 'Update on Launch',
@@ -340,7 +340,7 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }, {
                 name: 'update_on_project_update',
                 label: 'Update on Project Update',
@@ -351,14 +351,14 @@ return {
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
-                ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }]
         },
         update_cache_timeout: {
             label: "Cache Timeout <span class=\"small-text\"> (seconds)</span>",
             id: 'source-cache-timeout',
             type: 'number',
-            ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             integer: true,
             min: 0,
             ngShow: "source && source.value !== '' && update_on_launch",
@@ -376,16 +376,16 @@ return {
     buttons: {
         cancel: {
             ngClick: 'formCancel()',
-            ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngShow: '(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         close: {
             ngClick: 'formCancel()',
-            ngShow: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngShow: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         save: {
             ngClick: 'formSave()',
             ngDisabled: true,
-            ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngShow: '(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         }
     },
 
