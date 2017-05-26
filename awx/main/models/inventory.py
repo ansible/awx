@@ -36,7 +36,8 @@ from awx.main.models.notifications import (
 )
 from awx.main.utils import _inventory_updates
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
+           'CustomInventoryScript', 'SmartInventoryMembership']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -361,6 +362,19 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         return self.insights_credential
 
 
+class SmartInventoryMembership(BaseModel):
+    '''
+    A lookup table for Host membership in Smart Inventory
+    '''
+
+    class Meta:
+        app_label = 'main'
+        unique_together = (('host', 'inventory'),)
+
+    inventory = models.ForeignKey('Inventory', related_name='+', on_delete=models.CASCADE)
+    host = models.ForeignKey('Host', related_name='+', on_delete=models.CASCADE)
+
+
 class Host(CommonModelNameNotUnique):
     '''
     A managed node
@@ -375,6 +389,11 @@ class Host(CommonModelNameNotUnique):
         'Inventory',
         related_name='hosts',
         on_delete=models.CASCADE,
+    )
+    smart_inventories = models.ManyToManyField(
+        'Inventory',
+        related_name='+',
+        through='SmartInventoryMembership',
     )
     enabled = models.BooleanField(
         default=True,

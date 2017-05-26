@@ -568,6 +568,9 @@ AWX_TASK_ENV = {}
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
+# Rebuild Host Smart Inventory memberships.
+AWX_REBUILD_SMART_MEMBERSHIP = False
+
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True

@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
             name='inventory',
             field=models.ForeignKey(related_name='inventory_sources', default=None, to='main.Inventory', null=True),
         ),
+
+        # Smart Inventory
         migrations.AddField(
             model_name='inventory',
             name='host_filter',
@@ -44,7 +46,28 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventory',
             name='kind',
-            field=models.CharField(default=b'', help_text='Kind of inventory being represented.', max_length=32, choices=[(b'', 'Hosts have a direct link to this inventory.'), (b'smart', 'Hosts for inventory generated using the host_filter property.')]),
+            field=models.CharField(default=b'', help_text='Kind of inventory being represented.', max_length=32, blank=True, choices=[(b'', 'Hosts have a direct link to this inventory.'), (b'smart', 'Hosts for inventory generated using the host_filter property.')]),
+        ),
+        migrations.CreateModel(
+            name='SmartInventoryMembership',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('host', models.ForeignKey(related_name='+', to='main.Host')),
+            ],
+        ),
+        migrations.AddField(
+            model_name='smartinventorymembership',
+            name='inventory',
+            field=models.ForeignKey(related_name='+', to='main.Inventory'),
+        ),
+        migrations.AddField(
+            model_name='host',
+            name='smart_inventories',
+            field=models.ManyToManyField(related_name='_host_smart_inventories_+', through='main.SmartInventoryMembership', to='main.Inventory'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='smartinventorymembership',
+            unique_together=set([('host', 'inventory')]),
         ),
 
         # Facts
