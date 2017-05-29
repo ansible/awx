@@ -27,32 +27,8 @@ class SocialAuthCallbackURL(object):
 SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _('''\
 Mapping to organization admins/users from social auth accounts. This setting
 controls which users are placed into which Tower organizations based on
-their username and email address.  Dictionary keys are organization names.
-organizations will be created if not present if the license allows for
-multiple organizations, otherwise the single default organization is used
-regardless of the key.  Values are dictionaries defining the options for
-each organization's membership.  For each organization it is possible to
-specify which users are automatically users of the organization and also
-which users can administer the organization.
-
-- admins: None, True/False, string or list of strings.
-  If None, organization admins will not be updated.
-  If True, all users using social auth will automatically be added as admins
-  of the organization.
-  If False, no social auth users will be automatically added as admins of
-  the organization.
-  If a string or list of strings, specifies the usernames and emails for
-  users who will be added to the organization. Strings in the format
-  "/<pattern>/<flags>" will be interpreted as JavaScript regular expressions and
-  may also be used instead of string literals; only "i" and "m" are supported
-  for flags.
-- remove_admins: True/False. Defaults to True.
-  If True, a user who does not match will be removed from the organization's
-  administrative list.
-- users: None, True/False, string or list of strings. Same rules apply as for
-  admins.
-- remove_users: True/False. Defaults to True. Same rules as apply for
-  remove_admins.\
+their username and email address. Configuration details are available in
+Tower documentation.\
 ''')
 
 # FIXME: /regex/gim (flags)
@@ -74,26 +50,8 @@ SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER = collections.OrderedDict([
 ])
 
 SOCIAL_AUTH_TEAM_MAP_HELP_TEXT = _('''\
-Mapping of team members (users) from social auth accounts. Keys are team
-names (will be created if not present). Values are dictionaries of options
-for each team's membership, where each can contain the following parameters:
-
-- organization: string. The name of the organization to which the team
-  belongs.  The team will be created if the combination of organization and
-  team name does not exist.  The organization will first be created if it
-  does not exist.  If the license does not allow for multiple organizations,
-  the team will always be assigned to the single default organization.
-- users: None, True/False, string or list of strings.
-  If None, team members will not be updated.
-  If True/False, all social auth users will be added/removed as team
-  members.
-  If a string or list of strings, specifies expressions used to match users.
-  User will be added as a team member if the username or email matches.
-  Strings in the format "/<pattern>/<flags>" will be interpreted as JavaScript
-  regular expressions and may also be used instead of string literals; only "i"
-  and "m" are supported for flags.
-- remove: True/False. Defaults to True. If True, a user who does not match
-  the rules above will be removed from the team.\
+Mapping of team members (users) from social auth accounts. Configuration
+details are available in Tower documentation.\
 ''')
 
 SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict([
@@ -395,29 +353,8 @@ register(
     label=_('LDAP Organization Map'),
     help_text=_('Mapping between organization admins/users and LDAP groups. This '
                 'controls what users are placed into what Tower organizations '
-                'relative to their LDAP group memberships. Keys are organization '
-                'names. Organizations will be created if not present. Values are '
-                'dictionaries defining the options for each organization\'s '
-                'membership.  For each organization it is possible to specify '
-                'what groups are automatically users of the organization and also '
-                'what groups can administer the organization.\n\n'
-                ' - admins: None, True/False, string or list of strings.\n'
-                '   If None, organization admins will not be updated based on '
-                'LDAP values.\n'
-                '   If True, all users in LDAP will automatically be added as '
-                'admins of the organization.\n'
-                '   If False, no LDAP users will be automatically added as admins '
-                'of the organization.\n'
-                '   If a string or list of strings, specifies the group DN(s) '
-                'that will be added of the organization if they match any of the '
-                'specified groups.\n'
-                ' - remove_admins: True/False. Defaults to True.\n'
-                '   If True, a user who is not an member of the given groups will '
-                'be removed from the organization\'s administrative list.\n'
-                ' - users: None, True/False, string or list of strings. '
-                'Same rules apply as for admins.\n'
-                ' - remove_users: True/False. Defaults to True. Same rules apply '
-                'as for remove_admins.'),
+                'relative to their LDAP group memberships. Configuration details '
+                'are available in Tower documentation.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
@@ -442,23 +379,8 @@ register(
     field_class=fields.LDAPTeamMapField,
     default={},
     label=_('LDAP Team Map'),
-    help_text=_('Mapping between team members (users) and LDAP groups. Keys are '
-                'team names (will be created if not present). Values are '
-                'dictionaries of options for each team\'s membership, where each '
-                'can contain the following parameters:\n\n'
-                ' - organization: string. The name of the organization to which '
-                'the team belongs. The team will be created if the combination of '
-                'organization and team name does not exist. The organization will '
-                'first be created if it does not exist.\n'
-                ' - users: None, True/False, string or list of strings.\n'
-                '   If None, team members will not be updated.\n'
-                '   If True/False, all LDAP users will be added/removed as team '
-                'members.\n'
-                '   If a string or list of strings, specifies the group DN(s). '
-                'User will be added as a team member if the user is a member of '
-                'ANY of these groups.\n'
-                '- remove: True/False. Defaults to True. If True, a user who is '
-                'not a member of the given groups will be removed from the team.'),
+    help_text=_('Mapping between team members (users) and LDAP groups.'
+                'Configuration details are available in Tower documentation.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
