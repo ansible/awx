@@ -29,6 +29,15 @@ export default {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
             }
-        ]
+        ],
+        canAdd: ['rbacUiControlService', function(rbacUiControlService) {
+            return rbacUiControlService.canAdd('inventory')
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
+        }]
     }
 };

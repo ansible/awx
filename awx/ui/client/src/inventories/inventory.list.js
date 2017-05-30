@@ -27,6 +27,7 @@ export default ['i18n', function(i18n) {
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
+                template: `<source-summary-popover inventory="inventory"></source-summary-popover><host-summary-popover inventory="inventory"></host-summary-popover>`,
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
@@ -85,7 +86,7 @@ export default ['i18n', function(i18n) {
                         ngShow: 'canAddInventory'
                     }
                 ],
-                ngShow: 'canAddInventory || canAddSmartInventory || canAddSCMInventory'
+                ngShow: 'canAddInventory'
             }
         },
 

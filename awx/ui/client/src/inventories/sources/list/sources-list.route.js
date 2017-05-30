@@ -60,6 +60,15 @@ export default {
         ],
         inventoryData: ['InventoryManageService', '$stateParams', function(InventoryManageService, $stateParams) {
             return InventoryManageService.getInventory($stateParams.inventory_id).then(res => res.data);
+        }],
+        canAdd: ['rbacUiControlService', 'GetBasePath', '$stateParams', function(rbacUiControlService, GetBasePath, $stateParams) {
+            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
         }]
     }
 };

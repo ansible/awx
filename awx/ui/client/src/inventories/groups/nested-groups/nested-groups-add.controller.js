@@ -7,11 +7,11 @@
 export default ['$state', '$stateParams', '$scope', 'NestedGroupForm',
     'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2',
-    'rbacUiControlService', 'ToJSON',
+    'rbacUiControlService', 'ToJSON', 'canAdd',
     function($state, $stateParams, $scope, NestedGroupForm,  ParseTypeChange,
         GenerateForm, inventoryData, GroupManageService, GetChoices,
         GetBasePath, CreateSelect2, rbacUiControlService,
-        ToJSON) {
+        ToJSON, canAdd) {
 
         let form = NestedGroupForm;
         init();
@@ -19,11 +19,7 @@ export default ['$state', '$stateParams', '$scope', 'NestedGroupForm',
         function init() {
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
-
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
-                });
+            $scope.canAdd = canAdd;
             $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';
             ParseTypeChange({

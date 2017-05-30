@@ -5,12 +5,14 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
-    'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'Empty',
-    'rbacUiControlService', 'ToJSON', 'SourcesService', 'Wait', 'Rest', 'Alert', 'ProcessErrors',
+    'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
+    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'rbacUiControlService', 'ToJSON', 'SourcesService', 'canAdd', 'Empty',
+    'Wait', 'Rest', 'Alert', 'ProcessErrors',
     function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
-        GenerateForm, inventoryData, GetChoices,
-        GetBasePath, CreateSelect2, GetSourceTypeOptions, Empty, rbacUiControlService,
-        ToJSON, SourcesService, Wait, Rest, Alert, ProcessErrors) {
+        GenerateForm, inventoryData, GroupManageService, GetChoices,
+        GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
+        ToJSON, SourcesService, canAdd, Empty, Wait, Rest, Alert, ProcessErrors) {
 
         let form = SourcesFormDefinition;
         init();
@@ -18,12 +20,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         function init() {
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
-
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
-                });
-
+            $scope.canAdd = canAdd;
+            $scope.envParseType = 'yaml';
             initSources();
         }
 

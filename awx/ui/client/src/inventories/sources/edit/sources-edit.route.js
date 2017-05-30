@@ -22,6 +22,15 @@ export default {
     resolve: {
         inventorySourceData: ['$stateParams', 'SourcesService', function($stateParams, SourcesService) {
             return SourcesService.get({id: $stateParams.inventory_source_id }).then(res => res.data.results[0]);
+        }],
+        canAdd: ['rbacUiControlService', 'GetBasePath', '$stateParams', function(rbacUiControlService, GetBasePath, $stateParams) {
+            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
         }]
     }
 };

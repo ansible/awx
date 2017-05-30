@@ -84,6 +84,19 @@ angular.module('inventory', [
                     form: 'InventoryForm',
                     controllers: {
                         add: 'InventoryAddController'
+                    },
+                    resolve: {
+                        add: {
+                            canAdd: ['rbacUiControlService', '$state', function(rbacUiControlService, $state) {
+                                return rbacUiControlService.canAdd('inventory')
+                                    .then(function(res) {
+                                        return res.canAdd;
+                                    })
+                                    .catch(function() {
+                                        $state.go('inventories');
+                                    });
+                            }]
+                        }
                     }
                 });
 
@@ -107,6 +120,19 @@ angular.module('inventory', [
                     form: 'smartInventoryForm',
                     controllers: {
                         add: 'SmartInventoryAddController'
+                    },
+                    resolve: {
+                        add: {
+                            canAdd: ['rbacUiControlService', '$state', function(rbacUiControlService, $state) {
+                                return rbacUiControlService.canAdd('inventory')
+                                    .then(function(res) {
+                                        return res.canAdd;
+                                    })
+                                    .catch(function() {
+                                        $state.go('inventories');
+                                    });
+                            }]
+                        }
                     }
                 });
 
@@ -268,6 +294,17 @@ angular.module('inventory', [
                                     return Rest.get();
                                 }
                             ]
+                        },
+                        list: {
+                            canAdd: ['rbacUiControlService', function(rbacUiControlService) {
+                                return rbacUiControlService.canAdd('hosts')
+                                    .then(function(res) {
+                                        return res.canAdd;
+                                    })
+                                    .catch(function() {
+                                        return false;
+                                    });
+                            }]
                         }
                     },
                     views: {

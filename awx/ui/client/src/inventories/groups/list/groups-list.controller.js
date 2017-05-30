@@ -6,10 +6,10 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
     'GroupManageService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
-    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData',
+    'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd',
     function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
         GroupManageService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData){
+        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd){
 
         let list = GroupList;
 
@@ -18,12 +18,7 @@
         function init(){
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
-            $scope.canAdd = false;
-
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
-                });
+            $scope.canAdd = canAdd;
 
             // Search init
             $scope.list = list;
@@ -36,7 +31,7 @@
             }
 
             $scope.inventory_id = $stateParams.inventory_id;
-            
+
             $scope.$watchCollection(list.name, function(){
                 _.forEach($scope[list.name], buildStatusIndicators);
             });
