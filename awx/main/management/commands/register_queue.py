@@ -26,7 +26,10 @@ class Command(BaseCommand):
             print("Creating instance group {}".format(options.get('queuename')))
             ig = InstanceGroup(name=options.get('queuename'))
             ig.save()
-        instance_list = [x.strip() for x in options.get('hostnames').split(",")]
+        hostname_list = []
+        if options.get('hostnames'):
+            hostname_list = options.get('hostnames').split(",")
+        instance_list = [x.strip() for x in hostname_list]
         for inst_name in instance_list:
             instance = Instance.objects.filter(hostname=inst_name)
             if instance.exists() and instance not in ig.instances.all():
