@@ -220,9 +220,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         $scope.sourceChange = function(source) {
             $scope.source = source;
-            if (source.value === 'ec2' || source.value === 'custom' ||
-                source.value === 'vmware' || source.value === 'openstack' ||
-                source.value === 'scm') {
+
+            source = source.value;
+
+            if (source === 'ec2' || source === 'custom' ||
+                source === 'vmware' || source === 'openstack' ||
+                source === 'scm') {
 
                 var varName;
                 if (source === 'scm') {
@@ -253,20 +256,31 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         function initSourceSelect() {
             $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
+            var source = $scope.source.value;
+
             CreateSelect2({
                 element: '#inventory_source_source',
                 multiple: false
             });
-            // After the source is set, conditional fields will be visible
-            // CodeMirror is buggy if you instantiate it in a not-visible element
-            // So we initialize it here instead of the init() routine
-            if (inventorySourceData.source === 'ec2' || inventorySourceData.source === 'openstack' ||
-                inventorySourceData.source === 'custom' || inventorySourceData.source === 'vmware') {
-                $scope[inventorySourceData.source + '_variables'] = inventorySourceData.source_vars === null || inventorySourceData.source_vars === '' ? '---' : ParseVariableString(inventorySourceData.source_vars);
+
+            if (source === 'ec2' || source === 'custom' ||
+                source === 'vmware' || source === 'openstack' ||
+                source === 'scm') {
+
+                var varName;
+                if (source === 'scm') {
+                    varName = 'custom_variables';
+                } else {
+                    varName = source + '_variables';
+                }
+
+                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
+
+                ParseVariableString(inventorySourceData.source_vars);
                 ParseTypeChange({
                     scope: $scope,
-                    field_id: inventorySourceData.source + '_variables',
-                    variable: inventorySourceData.source + '_variables',
+                    field_id: varName,
+                    variable: varName,
                     parse_variable: 'envParseType',
                 });
             }
