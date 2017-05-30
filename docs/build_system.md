@@ -4,7 +4,7 @@ Build and Release Process
 This document describes the Ansible Tower Software build and release process.
 This process includes the automation of the packaging for Debian/Ubuntu and
 Fedora/EL (Enterprise Linux), as well as the creation of various software
-repositories which are used by the default playbook setup. 
+repositories which are used by the default playbook setup.
 
 Packaging Details
 -----------------------------
@@ -38,12 +38,12 @@ string:
     -0.gitYYYYmmDDHHMM
 
 Non-official builds should only be used for development purposes, and are
-copied into the nightly repos. Official builds will be copied out to the 
+copied into the nightly repos. Official builds will be copied out to the
 production servers via the automated Jenkins build process (described below).
 
 ### Python sdist Process ###
 
-The sdist build is the first step in the packaging process. This step is 
+The sdist build is the first step in the packaging process. This step is
 responsible for assembling the files to be packaged into a .tar.gz, which
 can then be installed itself via pip or used later for the RPM/DEB builds.
 
@@ -53,20 +53,20 @@ The resulting tar.gz file will be named:
 
 ### RPM Build Process ###
 
-The first step of the RPM build process is to remove the `$RELEASE` from the 
-tar.gz, since the spec file does not like to include the release. This is 
+The first step of the RPM build process is to remove the `$RELEASE` from the
+tar.gz, since the spec file does not like to include the release. This is
 handled by the `rpmtar` Makefile target, which first unpacks the file, renames
 the contained directory to simply be `ansible-tower-${VERSION}`, and finally re-
 packages the file as `ansible-tower-${VERSION}.tar.gz`.
 
 The main Makefile target for the rpm build is (unsurprisingly) `rpm`. This copies
 the re-formed sdist .tar.gz file into the rpm-build directory and then calls
-the rpmbuild command to create the RPM. 
+the rpmbuild command to create the RPM.
 
 The spec file for this command is `packaging/rpm/ansible-tower.spec`. This file is currently
 maintained by hand, so any changelog entries must be added to it manually. All
 other aspects of the file (source, version, release, etc.) are picked up via
-variables that are set by the Makefile and do not need to be updated during 
+variables that are set by the Makefile and do not need to be updated during
 packaging.
 
 ### DEB Build Process ###
@@ -81,7 +81,7 @@ in this packaging are (all found in `packaging/deb/`):
     - rules
     - {pre,post}{inst,rm}
 
-The `ansible-tower.dirs` file contains the directories (listed as paths relative to the 
+The `ansible-tower.dirs` file contains the directories (listed as paths relative to the
 build root) that will be created during the packaging.
 
 The `ansible-tower.install` file contains a list of files that will be installed directly
@@ -92,25 +92,25 @@ relative to the build root).
 The `control` file is functionally similar to the header of a spec file, and
 contains things like the package name, requirements, etc.
 
-The `rules` file is really a Makefile, and contains the rules for the build 
+The `rules` file is really a Makefile, and contains the rules for the build
 process. These rules are based on the type of build you're executing (binary
 vs. source, for instance). Since we are building a binary-only .deb package,
 the only target we use is the `binary` target.
 
 The pre/post scripts are analogous to the %pre/%post macros in the RPM spec,
-and are executed at the various stages of the installation/removal. For 
-Debian/Ubuntu, these scripts do quite a bit more than the corresponding RPM 
-stages, since RPM packaging guidelines are generally more strict about 
+and are executed at the various stages of the installation/removal. For
+Debian/Ubuntu, these scripts do quite a bit more than the corresponding RPM
+stages, since RPM packaging guidelines are generally more strict about
 starting/stopping services, etc. during the RPM installation.
 
-In the main `Makefile`, just as with the RPM target, the target for building 
-the .deb's is `deb`. This target begins similarly to the rpm target, in that 
-it copies the sdist file into the deb-build directory. It then unpacks that 
+In the main `Makefile`, just as with the RPM target, the target for building
+the .deb's is `deb`. This target begins similarly to the rpm target, in that
+it copies the sdist file into the deb-build directory. It then unpacks that
 file there and calls the `dh_make` helper function. This creates several new
 directories that are used by the `dpkg-buildpackage` command, most importantly
-the `debian` and `DEBIAN` directories (used for the source and binary builds, 
-respectively). The generated `debian` directory is removed and replaced with 
-the files that are in `packaging/deb/` and the target package name is inserted 
+the `debian` and `DEBIAN` directories (used for the source and binary builds,
+respectively). The generated `debian` directory is removed and replaced with
+the files that are in `packaging/deb/` and the target package name is inserted
 into a file that will be used as a command-line argument to `dpkg-buildpackage`.
 This is required, otherwise the build process will try and figure out the
 name automatically (and not always successfully).
@@ -124,11 +124,11 @@ Jenkins
 
 The Ansible Jenkins server can be found at http://jenkins.testing.ansible.com
 
-This is a standard Jenkins installation, with the following additional 
+This is a standard Jenkins installation, with the following additional
 plugins installed:
 
- - Build Authorization Token Root Plugin: 
-   This plugin allows build and related REST build triggers be accessed even 
+ - Build Authorization Token Root Plugin:
+   This plugin allows build and related REST build triggers be accessed even
    when anonymous users cannot see Jenkins.
  - Git Client Plugin:
    The standard git client plugin.
@@ -148,7 +148,7 @@ The base Jenkins server was installed via apt:
 
     $ apt-get install jenkins
 
-Since the server OS for the Jenkins server is Ubuntu Raring (13.04). In order to 
+Since the server OS for the Jenkins server is Ubuntu Raring (13.04). In order to
 execute RPM builds on this server, mock was installed from source as follows:
 
     $ apt-get install \
@@ -169,8 +169,8 @@ execute RPM builds on this server, mock was installed from source as follows:
       python-urlgrabber \
       usermode \
       yum \
-      yum-utils 
-    
+      yum-utils
+
     $ git clone git://git.fedorahosted.org/git/mock.git mock
     $ cd mock
     $ ./autogen.sh
@@ -200,13 +200,13 @@ There are currently three classes of jobs configured in Jenkins:
 
 The automated scans work by checking for new tags in the git repository for
 the given project, and when a new one is found, starting the appropriate jobs.
-For RPMs, a job is started for each of the supported distributions while for 
+For RPMs, a job is started for each of the supported distributions while for
 DEBs only one job is started. All of these jobs are started with `OFFICIAL=yes`
 so that an official package is produced, which will be copied out to the production
 repositories (documented below).
 
 > NOTE: The nightly jobs are currently triggered by a cron job in the exact same
-> manner as the above jobs, the only difference being that they set OFFICIAL=no 
+> manner as the above jobs, the only difference being that they set OFFICIAL=no
 > and use HEAD as the target tag for the job, so they are always built off of
 > the most recent commit at that time. Likewise, the resultant packages are only
 > copied to the relevant nightlies repo (also documented below).
@@ -218,16 +218,16 @@ appropriate job, and then click on the "Build with Parameters" link to the left
 (or select it from the drop-down that is available from the main jobs list).
 
 You will be presented with a form to enter parameters. The `TARGET_TAG` and `OFFICIAL`
-parameters are the same for both RPM and DEB builds, the function of which is 
+parameters are the same for both RPM and DEB builds, the function of which is
 described above. For RPM builds, there is an addition parameter named `TARGET_DIST`,
 which controls the mock environment for the build.
 
 > WARNING: Take extra care when manually triggering an `OFFICIAL` build at this
 > time, as the resultant package will automatically be copied to the production
-> server and made available for customers to download. 
+> server and made available for customers to download.
 
-> NOTE: As of this writing, using the combination of `TARGET_TAG=HEAD` and `OFFICIAL=yes` 
-> is allowed, however this will not be the case in the future. This will either be 
+> NOTE: As of this writing, using the combination of `TARGET_TAG=HEAD` and `OFFICIAL=yes`
+> is allowed, however this will not be the case in the future. This will either be
 > disallowed by failing the job, or the resultant package will be copied to a third
 > repository to be used for user-acceptance testing (UAT).
 
@@ -271,3 +271,8 @@ found at the following location:
 
 The Ansible Tower setup playbook will use this repo location by default.
 
+### NOTES ###
+* When implementing new features, please keep an eye on the contents of `/packaging/remove_tower_source.py`,
+which determines which python source files should be deleted and which should be
+preserved. There are some source files that we want to keep in production for special
+purposes, like source files of migrations. Ignoring those might lead to bugs.
