@@ -162,7 +162,11 @@ def test_credential_creation(organization_factory):
 
 
 @pytest.mark.django_db
-def test_credential_creation_validation_failure(organization_factory):
+@pytest.mark.parametrize('inputs', [
+    ['must-be-a-dict'],
+    {'user': 'wrong-key'},
+])
+def test_credential_creation_validation_failure(organization_factory, inputs):
     org = organization_factory('test').organization
     type_ = CredentialType(
         kind='cloud',
@@ -180,7 +184,7 @@ def test_credential_creation_validation_failure(organization_factory):
 
     with pytest.raises(ValidationError):
         cred = Credential(credential_type=type_, name="Bob's Credential",
-                          inputs={'user': 'wrong-key'}, organization=org)
+                          inputs=inputs, organization=org)
         cred.save()
         cred.full_clean()
 

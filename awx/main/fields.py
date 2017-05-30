@@ -455,6 +455,11 @@ class CredentialInputField(JSONSchemaField):
     def validate(self, value, model_instance):
         # decrypt secret values so we can validate their contents (i.e.,
         # ssh_key_data format)
+
+        if not isinstance(value, dict):
+            return super(CredentialInputField, self).validate(value,
+                                                              model_instance)
+
         decrypted_values = {}
         for k, v in value.items():
             if all([
@@ -466,9 +471,8 @@ class CredentialInputField(JSONSchemaField):
             else:
                 decrypted_values[k] = v
 
-        super(CredentialInputField, self).validate(
-            decrypted_values, model_instance
-        )
+        super(CredentialInputField, self).validate(decrypted_values,
+                                                   model_instance)
 
         errors = []
         inputs = model_instance.credential_type.inputs
