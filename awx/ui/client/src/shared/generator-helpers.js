@@ -592,12 +592,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                                 var key, i = field.icons[idx];
                                 for (key in i) {
                                     field[key] = i[key];
-                                }console.log(BuildLink({
-                                    list: list,
-                                    field: field,
-                                    fld: fld,
-                                    base: field.linkBase || base
-                                }) + ' ');
+                                }
                                 html += BuildLink({
                                     list: list,
                                     field: field,
