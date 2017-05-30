@@ -1,23 +1,36 @@
-function CredentialModel (BaseModel, CredentialTypeModel) {
-    BaseModel.call(this, 'credentials');
-    
-    this.createFormSchema = (type, config) => {
-        let schema = Object.assign({}, this.getOptions(type));
+let BaseModel;
 
-        if (config && config.omit) {
-            config.omit.forEach(key => {
-                delete schema[key];
-            });
-        }
+function createFormSchema (type, config) {
+    let schema = Object.assign({}, this.get('actions.POST'));
 
-        for (let key in schema) {
-            schema[key].id = key;
-        }
+    if (config && config.omit) {
+        config.omit.forEach(key => {
+            delete schema[key];
+        });
+    }
 
-        return schema;
-    };
+    for (let key in schema) {
+        schema[key].id = key;
+    }
+
+    return schema;
 }
 
-CredentialModel.$inject = ['BaseModel', 'CredentialTypeModel'];
+function CredentialModel (method, id) {
+    BaseModel.call(this, 'credentials');
+    
+    this.createFormSchema = createFormSchema;
 
-export default CredentialModel;
+    return this.request(method, id)
+        .then(() => this);
+}
+
+function CredentialModelLoader (_BaseModel_ ) {
+    BaseModel = _BaseModel_;
+
+    return CredentialModel;
+}
+
+CredentialModelLoader.$inject = ['BaseModel'];
+
+export default CredentialModelLoader;

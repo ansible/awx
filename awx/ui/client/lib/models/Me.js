@@ -1,11 +1,18 @@
-function MeModel (BaseModel) {
+let BaseModel;
+
+function MeModel (method) {
     BaseModel.call(this, 'me');
 
-    this.getId = () => {
-        return this.model.get.data.results[0].id;
-    };
+    return this.request(method)
+        .then(() => this);
 }
 
-MeModel.$inject = ['BaseModel'];
+function MeModelLoader (_BaseModel_) {
+    BaseModel = _BaseModel_;
 
-export default MeModel;
+    return MeModel;
+}
+
+MeModelLoader.$inject = ['BaseModel'];
+
+export default MeModelLoader;

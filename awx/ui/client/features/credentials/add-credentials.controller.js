@@ -1,7 +1,6 @@
 function AddCredentialsController (models, $state) {
     let vm = this || {};
 
-    console.log($state.get());
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
@@ -10,7 +9,7 @@ function AddCredentialsController (models, $state) {
         omit: ['user', 'team', 'inputs']
     });
 
-    vm.form.credential_type._data = credentialType.getResults();
+    vm.form.credential_type._data = credentialType.get('results');
     vm.form.credential_type._placeholder = 'SELECT A TYPE';
     vm.form.credential_type._display = 'name';
     vm.form.credential_type._key = 'id';
@@ -24,9 +23,9 @@ function AddCredentialsController (models, $state) {
     };
 
     vm.form.save = data => {
-        data.user = me.getId();
-        
-        return credential.post(data);
+        data.user = me.get('results[0].id');
+                
+        return credential.request('post', data);
     };
 
     vm.form.saveSuccess = res => {

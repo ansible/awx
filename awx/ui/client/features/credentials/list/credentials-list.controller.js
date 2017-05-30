@@ -65,7 +65,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
         };
 
         $scope.editCredential = function(id) {
-            $state.go('credentials.edit', { credential_id: id });
+            $state.go('credentials.edit', { id: id });
         };
 
         $scope.deleteCredential = function(id, name) {

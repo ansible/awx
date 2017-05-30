@@ -40,23 +40,38 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         }
     });
 
-    function CredentialsAddResolve ($q, meModel, credentialModel, credentialTypeModel) {
-        let promises = [
-            meModel.get(),
-            credentialModel.options(),
-            credentialTypeModel.get()
-        ];
+    function CredentialsResolve ($q, params, Me, Credential, CredentialType) {
+        let models;
+        let id = params.id;
+        let promises = {
+            me: new Me('get')
+        };
+
+        if (!id) {
+            promises.credential = new Credential('options');
+            promises.credentialType = new CredentialType('get');
+
+            return $q.all(promises).then(models => models);
+        }
+        
+        promises.credential = new Credential('get', id);
 
         return $q.all(promises)
-            .then(() => ({
-                me: meModel,
-                credential: credentialModel,
-                credentialType: credentialTypeModel
-            }));
+            .then(_models_ => {
+                models = _models_;
+
+                return new CredentialType('get', models.credential.get('id'));
+            })
+            .then(credentialType => {
+                models.credentialType = credentialType;
+
+                return models;
+            });
     }
 
-    CredentialsAddResolve.$inject = [
+    CredentialsResolve.$inject = [
         '$q',
+        '$stateParams',
         'MeModel',
         'CredentialModel',
         'CredentialTypeModel'
@@ -76,29 +91,27 @@ function config ($stateExtenderProvider, pathServiceProvider) {
             }
         },
         resolve: {
-            resolvedModels: CredentialsAddResolve
+            resolvedModels: CredentialsResolve
         }
     });
 
-    /*
-     *stateExtender.addState({
-     *    name: 'credentials.edit',
-     *    route: '/edit/:id',
-     *    ncyBreadcrumb: {
-     *        label: N_('EDIT')
-     *    },
-     *    views: {
-     *        'edit@credentials': {
-     *            templateUrl: pathService.getViewPath('credentials/add-credentials'),
-     *            controller: AddController,
-     *            controllerAs: 'vm'
-     *        },
-     *        resolve: {
-     *            resolvedModels: CredentialsAddResolve
-     *        }
-     *    }
-     *});
-     */
+    stateExtender.addState({
+        name: 'credentials.edit',
+        route: '/edit/:id',
+        ncyBreadcrumb: {
+            label: N_('EDIT')
+        },
+        views: {
+            'edit@credentials': {
+                templateUrl: pathService.getViewPath('credentials/add-credentials'),
+                controller: AddController,
+                controllerAs: 'vm'
+            }
+        },
+        resolve: {
+            resolvedModels: CredentialsResolve
+        }
+    });
 }
 
 config.$inject = [
