@@ -1291,7 +1291,8 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'scm_revision_output': self.revision_path
+            'scm_revision_output': self.revision_path,
+            'scm_revision': project_update.project.scm_revision,
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
