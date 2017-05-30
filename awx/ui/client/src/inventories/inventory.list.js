@@ -33,14 +33,12 @@ export default ['i18n', function(i18n) {
                     awToolTip: "{{ inventory.syncTip }}",
                     awTipPlacement: "right",
                     ngClick: "showSourceSummary($event, inventory.id)",
-                    ngClass: "inventory.launch_class",
-                    extraTemplate: "<source-summary-popover inventory='inventory'></source-summary-popover>"
+                    ngClass: "inventory.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
-                    ngClass: "inventory.host_status_class",
-                    extraTemplate: "<host-summary-popover inventory='inventory'></host-summary-popover>"
+                    ngClass: "inventory.host_status_class"
                 }]
             },
             name: {
