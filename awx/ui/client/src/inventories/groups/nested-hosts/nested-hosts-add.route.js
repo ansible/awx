@@ -18,5 +18,16 @@ export default {
             },
             controller: 'RelatedHostAddController'
         }
+    },
+    resolve: {
+        canAdd: ['rbacUiControlService', 'GetBasePath', '$stateParams', function(rbacUiControlService, GetBasePath, $stateParams) {
+            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/hosts")
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
+        }]
     }
 };

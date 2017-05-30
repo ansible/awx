@@ -7,11 +7,21 @@
  export default
     ['$scope', '$state', '$stateParams', 'HostManageService', 'CopyMoveGroupList', 'host', 'Dataset', '$rootScope',
     function($scope, $state, $stateParams, HostManageService, CopyMoveGroupList, host, Dataset, $rootScope){
-        var list = CopyMoveGroupList;
+        let list = CopyMoveGroupList;
 
-        $scope.item = host;
-        $rootScope.breadcrumb.copyMoveName = host.name;
-        $scope.submitMode = 'copy';
+        let init = function(){
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+            $scope.item = host;
+            $rootScope.breadcrumb.copyMoveName = host.name;
+            $scope.submitMode = 'copy';
+        };
+
+        init();
+
         $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
@@ -40,12 +50,4 @@
                     break;
             }
         };
-        var init = function(){
-            // search init
-            $scope.list = list;
-            $scope[`${list.iterator}_dataset`] = Dataset.data;
-            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-
-        };
-        init();
     }];

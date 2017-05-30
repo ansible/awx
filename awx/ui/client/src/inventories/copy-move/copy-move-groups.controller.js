@@ -7,20 +7,34 @@
  export default
     ['$scope', '$state', '$stateParams', 'GroupManageService', 'CopyMoveGroupList', 'group', 'Dataset', '$rootScope',
     function($scope, $state, $stateParams, GroupManageService, CopyMoveGroupList, group, Dataset, $rootScope){
-        var list = CopyMoveGroupList;
+        let list = CopyMoveGroupList;
 
-        $scope.item = group;
-        $rootScope.breadcrumb.copyMoveName = group.name;
-        $scope.submitMode = $stateParams.groups === undefined ? 'move' : 'copy';
+        function init(){
+            $scope.atRootLevel = $stateParams.group ? false : true;
+
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+            $scope.item = group;
+            $rootScope.breadcrumb.copyMoveName = group.name;
+            $scope.submitMode = $stateParams.groups === undefined ? 'move' : 'copy';
+        }
+
+        init();
+
         $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
             $scope.selected = _.find($scope.groups, (item) => {return item.id === id;});
         };
+
         $scope.formCancel = function(){
             $state.go('^');
         };
+
         $scope.formSave = function(){
             switch($scope.submitMode) {
                 case 'copy':
@@ -48,6 +62,7 @@
                     }
             }
         };
+        
         $scope.toggleTargetRootGroup = function(){
             $scope.selected = !$scope.selected;
             // cannot perform copy operations to root group level
@@ -60,14 +75,4 @@
             });
         };
 
-        function init(){
-            $scope.atRootLevel = $stateParams.group ? false : true;
-
-            // search init
-            $scope.list = list;
-            $scope[`${list.iterator}_dataset`] = Dataset.data;
-            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-        }
-
-        init();
     }];

@@ -13,22 +13,9 @@
 function SmartInventoryAdd($scope, $location,
     GenerateForm, smartInventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    $state) {
+    $state, canAdd) {
 
-    $scope.canAdd = false;
-    rbacUiControlService.canAdd(GetBasePath('inventory'))
-        .then(function(canAdd) {
-            $scope.canAdd = canAdd;
-        });
-
-    Rest.setUrl(GetBasePath('inventory'));
-    Rest.options()
-        .success(function(data) {
-            if (!data.actions.POST) {
-                $state.go("^");
-                Alert('Permission Error', 'You do not have permission to add an inventory.', 'alert-info');
-            }
-        });
+    $scope.canAdd = canAdd;
 
     ClearScope();
 
@@ -104,5 +91,5 @@ function SmartInventoryAdd($scope, $location,
 export default ['$scope', '$location',
     'GenerateForm', 'smartInventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
-    'Wait', 'ToJSON', '$state', SmartInventoryAdd
+    'Wait', 'ToJSON', '$state', 'canAdd', SmartInventoryAdd
 ];

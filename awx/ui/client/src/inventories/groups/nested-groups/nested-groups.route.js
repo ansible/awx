@@ -59,6 +59,15 @@ export default {
         inventoryData: ['InventoryManageService', '$stateParams', 'host', function(InventoryManageService, $stateParams, host) {
             var id = ($stateParams.inventory_id) ? $stateParams.inventory_id : host.summary_fields.inventory.id;
             return InventoryManageService.getInventory(id).then(res => res.data);
+        }],
+        canAdd: ['rbacUiControlService', '$state', 'GetBasePath', '$stateParams', function(rbacUiControlService, $state, GetBasePath, $stateParams) {
+            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
         }]
     }
 };

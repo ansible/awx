@@ -8,12 +8,12 @@
     'InventoryUpdate', 'CancelSourceUpdate',
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
-    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
+    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions', 'canAdd',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService, inventorySourceOptions){
+        Wait, SourcesService, inventorySourceOptions, canAdd){
 
         let list = SourcesListDefinition;
         var inventory_source;
@@ -23,12 +23,7 @@
         function init(){
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
-            $scope.canAdd = false;
-
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/inventory_sources")
-                .then(function(canAdd) {
-                    $scope.canAdd = canAdd;
-                });
+            $scope.canAdd = canAdd;
 
             // Search init
             $scope.list = list;

@@ -5,20 +5,20 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
-    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'inventorySourceData', 'SourcesService', 'inventoryData', 'Empty', 'Wait', 'Rest', 'Alert', 'ProcessErrors',
+    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupManageService',
+    'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'inventorySourceData', 'SourcesService', 'inventoryData', 'canAdd', 'Empty',
+    'Wait', 'Rest', 'Alert', 'ProcessErrors',
     function($state, $stateParams, $scope, ParseVariableString,
-        rbacUiControlService, ToJSON,ParseTypeChange, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
-        inventorySourceData, SourcesService, inventoryData, Empty, Wait, Rest, Alert, ProcessErrors) {
+        rbacUiControlService, ToJSON,ParseTypeChange, GroupManageService,
+        GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
+        inventorySourceData, SourcesService, inventoryData, canAdd, Empty,
+        Wait, Rest, Alert, ProcessErrors) {
 
         init();
 
         function init() {
-            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
-                .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
-
+            $scope.canAdd = canAdd;
             // instantiate expected $scope values from inventorySourceData
             _.assign($scope,
                 {credential: inventorySourceData.credential},

@@ -6,23 +6,18 @@
 
 export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostManageService', 'SetStatus',
+    'HostManageService', 'SetStatus', 'canAdd',
     function($scope, NestedHostsListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostManageService, SetStatus) {
+    HostManageService, SetStatus, canAdd) {
 
     let list = NestedHostsListDefinition;
 
     init();
 
     function init(){
-        $scope.canAdd = false;
+        $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
-
-        rbacUiControlService.canAdd('hosts')
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
 
         // Search init
         $scope.list = list;

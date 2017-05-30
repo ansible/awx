@@ -69,6 +69,15 @@ export default {
         }],
         inventoryData: ['InventoryManageService', '$stateParams', function(InventoryManageService, $stateParams) {
             return InventoryManageService.getInventory($stateParams.inventory_id).then(res => res.data);
+        }],
+        canAdd: ['rbacUiControlService', function(rbacUiControlService) {
+            return rbacUiControlService.canAdd('hosts')
+                .then(function(res) {
+                    return res.canAdd;
+                })
+                .catch(function() {
+                    return false;
+                });
         }]
     }
 };

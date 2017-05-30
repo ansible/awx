@@ -7,23 +7,18 @@
 // import HostManageService from './../hosts/host.service';
 export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostManageService', 'SetStatus',
+    'HostManageService', 'SetStatus', 'canAdd',
     function($scope, ListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostManageService, SetStatus) {
+    HostManageService, SetStatus, canAdd) {
 
     let list = ListDefinition;
 
     init();
 
     function init(){
-        $scope.canAdd = false;
+        $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
-
-        rbacUiControlService.canAdd('hosts')
-            .then(function(canAdd) {
-                $scope.canAdd = canAdd;
-            });
 
         // Search init
         $scope.list = list;
