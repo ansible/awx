@@ -5,6 +5,8 @@ from awx.main.models.credential import Credential, CredentialType
 from awx.main.utils.common import decrypt_field
 from awx.api.versioning import reverse
 
+EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('kind, total', [
@@ -664,7 +666,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
         'name': 'Best credential ever',
         'username': 'some_username',
         'password': 'some_password',
-        'ssh_key_data': 'some_key_data',
+        'ssh_key_data': EXAMPLE_PRIVATE_KEY,
         'ssh_key_unlock': 'some_key_unlock',
     }],
     ['v2', {
@@ -673,7 +675,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
         'inputs': {
             'username': 'some_username',
             'password': 'some_password',
-            'ssh_key_data': 'some_key_data',
+            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
             'ssh_key_unlock': 'some_key_unlock',
         }
     }]
@@ -693,7 +695,7 @@ def test_scm_create_ok(post, organization, admin, version, params):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
     assert decrypt_field(cred, 'password') == 'some_password'
-    assert decrypt_field(cred, 'ssh_key_data') == 'some_key_data'
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
 
 
@@ -796,7 +798,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
         'name': 'Best credential ever',
         'username': 'some_username',
         'password': 'some_password',
-        'ssh_key_data': 'some_key_data',
+        'ssh_key_data': EXAMPLE_PRIVATE_KEY,
         'ssh_key_unlock': 'some_key_unlock',
         'authorize': True,
         'authorize_password': 'some_authorize_password',
@@ -807,7 +809,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
         'inputs': {
             'username': 'some_username',
             'password': 'some_password',
-            'ssh_key_data': 'some_key_data',
+            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
             'ssh_key_unlock': 'some_key_unlock',
             'authorize': True,
             'authorize_password': 'some_authorize_password',
@@ -829,7 +831,7 @@ def test_net_create_ok(post, organization, admin, version, params):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
     assert decrypt_field(cred, 'password') == 'some_password'
-    assert decrypt_field(cred, 'ssh_key_data') == 'some_key_data'
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
     assert decrypt_field(cred, 'authorize_password') == 'some_authorize_password'
     assert cred.inputs['authorize'] is True
@@ -885,7 +887,7 @@ def test_cloudforms_create_ok(post, organization, admin, version, params):
         'name': 'Best credential ever',
         'username': 'some_username',
         'project': 'some_project',
-        'ssh_key_data': 'XYZ'
+        'ssh_key_data': EXAMPLE_PRIVATE_KEY,
     }],
     ['v2', {
         'credential_type': 1,
@@ -893,7 +895,7 @@ def test_cloudforms_create_ok(post, organization, admin, version, params):
         'inputs': {
             'username': 'some_username',
             'project': 'some_project',
-            'ssh_key_data': 'XYZ'
+            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
         }
     }]
 ])
@@ -912,7 +914,7 @@ def test_gce_create_ok(post, organization, admin, version, params):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
     assert cred.inputs['project'] == 'some_project'
-    assert decrypt_field(cred, 'ssh_key_data') == 'XYZ'
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
 
 
 #
@@ -924,14 +926,14 @@ def test_gce_create_ok(post, organization, admin, version, params):
         'kind': 'azure',
         'name': 'Best credential ever',
         'username': 'some_username',
-        'ssh_key_data': 'XYZ'
+        'ssh_key_data': EXAMPLE_PRIVATE_KEY
     }],
     ['v2', {
         'credential_type': 1,
         'name': 'Best credential ever',
         'inputs': {
             'username': 'some_username',
-            'ssh_key_data': 'XYZ'
+            'ssh_key_data': EXAMPLE_PRIVATE_KEY
         }
     }]
 ])
@@ -949,7 +951,7 @@ def test_azure_create_ok(post, organization, admin, version, params):
     assert Credential.objects.count() == 1
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
-    assert decrypt_field(cred, 'ssh_key_data') == 'XYZ'
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
 
 
 #

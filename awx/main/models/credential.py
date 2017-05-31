@@ -644,6 +644,7 @@ def scm(cls):
                 'id': 'ssh_key_data',
                 'label': 'SCM Private Key',
                 'type': 'string',
+                'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
@@ -694,6 +695,7 @@ def net(cls):
                 'id': 'ssh_key_data',
                 'label': 'SSH Private Key',
                 'type': 'string',
+                'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
@@ -871,6 +873,7 @@ def gce(cls):
                 'id': 'ssh_key_data',
                 'label': 'RSA Private Key',
                 'type': 'string',
+                'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }]
@@ -893,6 +896,7 @@ def azure(cls):
                 'id': 'ssh_key_data',
                 'label': 'Management Certificate',
                 'type': 'string',
+                'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }]
