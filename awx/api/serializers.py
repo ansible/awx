@@ -287,8 +287,21 @@ class BaseSerializer(serializers.ModelSerializer):
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
 
+    def _generate_named_url(self, url_path, obj, node):
+        url_units = url_path.split('/')
+        named_url = node.generate_named_url(obj)
+        url_units[4] = named_url
+        return '/'.join(url_units)
+
     def get_related(self, obj):
         res = OrderedDict()
+        view = self.context.get('view', None)
+        if view and hasattr(view, 'retrieve') and type(obj) in settings.NAMED_URL_GRAPH:
+            original_url = self.get_url(obj)
+            if not original_url.startswith('/api/v1'):
+                res['named_url'] = self._generate_named_url(
+                    original_url, obj, settings.NAMED_URL_GRAPH[type(obj)]
+                )
         if getattr(obj, 'created_by', None):
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):

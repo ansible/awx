@@ -48,7 +48,8 @@ class TestCustomInventoryScriptSerializer(object):
                 user = User(username="root", is_superuser=superuser)
                 roles = [user] if admin_role else []
 
-                with mock.patch('awx.main.models.CustomInventoryScript.admin_role', new_callable=PropertyMock, return_value=roles):
+                with mock.patch('awx.main.models.CustomInventoryScript.admin_role', new_callable=PropertyMock, return_value=roles),\
+                        mock.patch('awx.api.serializers.settings'):
                     cis = CustomInventoryScript(pk=1, script=value)
                     serializer = CustomInventoryScriptSerializer()
 
