@@ -29,6 +29,7 @@ function InventoriesEdit($scope, $location,
 
         $scope = angular.extend($scope, inventoryData);
 
+        $scope.credential_name = (inventoryData.summary_fields.credential && inventoryData.summary_fields.credential.name) ? inventoryData.summary_fields.credential.name : null;
         $scope.organization_name = inventoryData.summary_fields.organization.name;
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.parseType = 'yaml';

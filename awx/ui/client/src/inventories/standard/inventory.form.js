@@ -68,6 +68,17 @@ function(i18n, InventoryCompletedJobsList) {
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
+            insights_credential: {
+                label: i18n._('Insights Credential'),
+                type: 'lookup',
+                list: 'CredentialList',
+                basePath: 'credentials',
+                sourceModel: 'credential',
+                sourceField: 'name',
+                search: {
+                    credential_type: 13 //insights
+                }
+            },
             inventory_variables: {
                 realName: 'variables',
                 label: i18n._('Variables'),
