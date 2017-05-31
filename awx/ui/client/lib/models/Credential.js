@@ -19,7 +19,7 @@ function createFormSchema (type, config) {
 function CredentialModel (method, id) {
     BaseModel.call(this, 'credentials');
     
-    this.createFormSchema = createFormSchema;
+    this.createFormSchema = createFormSchema.bind(this);
 
     return this.request(method, id)
         .then(() => this);

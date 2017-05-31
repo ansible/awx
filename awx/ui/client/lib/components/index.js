@@ -9,6 +9,7 @@ import inputSelect from './input/select.directive';
 import inputSecret from './input/secret.directive';
 import inputText from './input/text.directive';
 import inputTextarea from './input/textarea.directive';
+import inputTextareaSecret from './input/textarea-secret.directive';
 import panel from './panel/panel.directive';
 import panelHeading from './panel/heading.directive';
 import panelBody from './panel/body.directive';
@@ -31,6 +32,7 @@ angular
     .directive('atInputSelect', inputSelect)
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
+    .directive('atInputTextareaSecret', inputTextareaSecret)
     .directive('atPanel', panel)
     .directive('atPanelHeading', panelHeading)
     .directive('atPanelBody', panelBody)

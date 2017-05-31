@@ -11,6 +11,7 @@ function AddCredentialsController (models, $state) {
 
     vm.form.credential_type._data = credentialType.get('results');
     vm.form.credential_type._placeholder = 'SELECT A TYPE';
+    vm.form.credential_type._format = 'grouped-object';
     vm.form.credential_type._display = 'name';
     vm.form.credential_type._key = 'id';
     vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';

@@ -29,8 +29,8 @@ function mergeInputProperties (type) {
 function CredentialTypeModel (method, id) {
     BaseModel.call(this, 'credential_types');
 
-    this.categorizeByKind = categorizeByKind;
-    this.mergeInputProperties = mergeInputProperties;
+    this.categorizeByKind = categorizeByKind.bind(this);
+    this.mergeInputProperties = mergeInputProperties.bind(this);
 
     return this.request(method, id)
         .then(() => this);

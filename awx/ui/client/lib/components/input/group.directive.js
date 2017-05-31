@@ -56,33 +56,62 @@ function AtInputGroupController ($scope, $compile) {
         let group = [];
 
         inputs.forEach((input, i) => {
-            if (input.type === 'string') {
-                if (input.secret && input.multiline) {
-                    input._component = 'at-input-textarea';
-                } else if (input.secret) {
-                    input._component = 'at-input-secret';
-                } else if (input.multiline) {
-                    input._component = 'at-input-textarea';
-                } else {
-                    input._component = 'at-input-text';
-                }
-            }
+            input = Object.assign(input, vm.getComponentType(input));
 
             group.push(Object.assign({
                 _element: vm.createElement(input, i),
                 _key: 'inputs',
-                _group: true
+                _group: true,
+                _groupIndex: i
             }, input));
         });
 
         return group;
     };
 
+    vm.getComponentType = input => {
+        let config = {};
+
+        if (input.type === 'string') {
+            if (!input.multiline) {
+                if (input.secret) {
+                    config._component = 'at-input-text';
+                } else {
+                    config._component = 'at-input-secret';
+                }
+            } else {
+                config._expand = true;
+
+                if (input.secret) {
+                    config._component = 'at-input-textarea-secret';
+                } else {
+                    config._component = 'at-input-textarea';
+                }
+            }
+
+            if (input.format === 'ssh_private_key') {
+                config._format = 'ssh-key';
+            }
+        } else if (input.type === 'number') {
+            config._component = 'at-input-number';
+        } else if (input.choices) {
+            config._component = 'at-input-select';
+            config._format = 'array';
+            config._data = input.choices;
+            config._exp = 'index as choice for (index, choice) in state._data';
+        } else {
+            throw new Error('Unsupported input type: ' + input.type)
+        }
+
+        return config;
+    };
+
     vm.createElement = (input, index) => {
         let tabindex = Number(scope.tab) + index;
+        let col = input._expand ? 12 : scope.col;
 
         let element =
-            `<${input._component} col="${scope.col}" tab="${tabindex}"
+            `<${input._component} col="${col}" tab="${tabindex}"
                 state="${state._reference}._group[${index}]">
             </${input._component}>`;
 
@@ -91,17 +120,33 @@ function AtInputGroupController ($scope, $compile) {
 
     vm.insert = group => {
         let container = document.createElement('div');
-        let divider = angular.element(`<div class="at-InputGroup-divider"></div>`)[0];
+        let col = 1;
+        let colPerRow = 12 / scope.col;
+        let isDivided = true;
 
-        for (let i = 0; i < group.length; i++) {
-            if (i !== 0 && (i % (12 / scope.col)) === 0) {
-                container.appendChild(divider);
+        group.forEach((input, i) => {
+            if (input._expand && !isDivided) {
+                container.appendChild(vm.createInputDivider());
             }
 
-            container.appendChild(group[i]._element[0]);
-        }
+            container.appendChild(input._element[0]);
+
+            if ((input._expand || col % colPerRow === 0) && i !== group.length -1) {
+                container.appendChild(vm.createInputDivider());
+                isDivided = true;
+                col = 0;
+            } else {
+                isDivided = false;
+            }
+
+            col++;
+        });
 
         element.appendChild(container);
+    };
+
+    vm.createInputDivider = () => {
+        return angular.element(`<div class="at-InputGroup-divider"></div>`)[0];
     };
 
     vm.compile = group => {

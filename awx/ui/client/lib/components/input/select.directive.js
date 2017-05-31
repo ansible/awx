@@ -46,6 +46,16 @@ function AtInputSelectController (baseInputController, eventService) {
 
         scope.$on('$destroy', () => eventService.remove(listeners));
     };
+
+    vm.updateDisplayModel = () => {
+        if (scope.state._format === 'array') {
+            scope.displayModel = scope.state._data[scope.state._value];
+        } else if (scope.state._format === 'grouped-object') {
+            scope.displayModel = scope.state._value[scope.state._display];
+        } else {
+            throw new Error('Unsupported display model type');
+        }
+    };
 }
 
 AtInputSelectController.$inject = ['BaseInputController', 'EventService'];
