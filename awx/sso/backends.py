@@ -194,7 +194,7 @@ class TACACSPlusBackend(object):
                 timeout=django_settings.TACACSPLUS_SESSION_TIMEOUT,
             ).authenticate(
                 username.encode('utf-8'), password.encode('utf-8'),
-                tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL],
+                authen_type=tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL],
             )
         except Exception as e:
             logger.exception("TACACS+ Authentication Error: %s" % (e.message,))
