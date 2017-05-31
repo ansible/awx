@@ -473,7 +473,7 @@ class CredentialType(CommonModelNameNotUnique):
         kind_choices = dict(V1Credential.KIND_CHOICES)
         requirements = {}
         if kind == 'ssh':
-            if 'vault_password' in data:
+            if data.get('vault_password'):
                 requirements['kind'] = 'vault'
             else:
                 requirements['kind'] = 'ssh'
