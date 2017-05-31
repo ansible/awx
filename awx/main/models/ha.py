@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from solo.models import SingletonModel
 
+from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
@@ -34,6 +35,9 @@ class Instance(models.Model):
     class Meta:
         app_label = 'main'
 
+    def get_absolute_url(self, request=None):
+        return reverse('api:instance_detail', kwargs={'pk': self.pk}, request=request)
+
     @property
     def consumed_capacity(self):
         return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname,
@@ -56,6 +60,9 @@ class InstanceGroup(models.Model):
         editable=False,
         help_text=_('Instances that are members of this InstanceGroup'),
     )
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:instance_group_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def capacity(self):
