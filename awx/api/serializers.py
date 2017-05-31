@@ -3053,7 +3053,14 @@ class JobLaunchSerializer(BaseSerializer):
                     id=getattrd(obj, '%s.pk' % field, None))
             elif field == 'extra_credentials':
                 if self.version > 1:
-                    defaults_dict[field] = [cred.id for cred in obj.extra_credentials.all()]
+                    defaults_dict[field] = [
+                        dict(
+                            id=cred.id,
+                            name=cred.name,
+                            credential_type=cred.credential_type.pk
+                        )
+                        for cred in obj.extra_credentials.all()
+                    ]
             else:
                 defaults_dict[field] = getattr(obj, field)
         return defaults_dict
