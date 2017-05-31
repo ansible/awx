@@ -720,11 +720,11 @@ def aws(cls):
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': 'Access Key',
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': 'Secret Key',
                 'type': 'string',
                 'secret': True,
             }, {
