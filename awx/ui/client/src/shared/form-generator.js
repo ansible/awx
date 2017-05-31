@@ -1507,6 +1507,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             collection = this.form.related[itm];
                             html += `<div id="${itm}_tab" `+
                                 `class="Form-tab" `;
+                            html += (this.form.related[itm].ngIf) ? ` ng-if="${this.form.related[itm].ngIf}" ` :  "";
                             html += (this.form.related[itm].ngClick) ? `ng-click="` + this.form.related[itm].ngClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
                             if (collection.awToolTip && collection.awToolTipTabEnabledInEditMode === true) {
                                 html += `aw-tool-tip="${collection.awToolTip}" ` +
