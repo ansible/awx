@@ -751,17 +751,21 @@ def openstack(cls):
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': 'Password (API Key)',
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'host',
-                'label': 'Host',
+                'label': 'Host (Authentication URL)',
                 'type': 'string',
             }, {
                 'id': 'project',
-                'label': 'Project',
+                'label': 'Project (Tenant Name)',
                 'type': 'string',
+            }, {
+                'id': 'domain',
+                'label': 'Domain Name',
+                'type': 'string'
             }],
             'required': ['username', 'password', 'host', 'project']
         }

@@ -122,7 +122,7 @@ def test_openstack_client_config_generation(mocker):
         'credential.username': 'demo',
         'credential.password': 'secrete',
         'credential.project': 'demo-project',
-        'credential.domain': None,
+        'credential.domain': 'my-demo-domain',
         'source_vars_dict': {}
     })
     cloud_config = update.build_private_data(inventory_update)
@@ -135,7 +135,8 @@ def test_openstack_client_config_generation(mocker):
                 'auth_url': 'https://keystone.openstack.example.org',
                 'password': 'secrete',
                 'project_name': 'demo-project',
-                'username': 'demo'
+                'username': 'demo',
+                'domain_name': 'my-demo-domain',
             },
             'private': True
         }
