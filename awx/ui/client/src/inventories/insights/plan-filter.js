@@ -5,11 +5,12 @@
  *************************************************/
 
  export default function(){
-     return function(input) {
-         if(input === null || input === undefined || Array.isArray(input) && input.length === 0){
+     return function(plan) {
+         if(plan === null || plan === undefined){
              return "PLAN: Not Available <a href='https://access.redhat.com/insights/info/' target='_blank'>CREATE A NEW PLAN IN INSIGHTS</a>";
          } else {
-             return `<a href="https://access.redhat.com/insights/info/" target="_blank">${input[0].maintenance_plan.name} (${input[0].id})</a>`;
+             let name = (plan.maintenance_plan.name === null) ? "Unnamed Plan" : plan.maintenance_plan.name;
+             return `<a href="https://access.redhat.com/insights/planner/${plan.maintenance_plan.maintenance_id}" target="_blank">${name} (${plan.maintenance_plan.maintenance_id})</a>`;
          }
      };
  }

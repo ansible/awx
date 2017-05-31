@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ 'data', '$scope', 'moment', '$state',
+export default [ 'InsightsData', '$scope', 'moment', '$state',
 function (data, $scope, moment, $state) {
 
     function init() {
@@ -73,7 +73,7 @@ function (data, $scope, moment, $state) {
         }
     };
     $scope.viewDataInInsights = function(){
-        window.open('https://access.redhat.com/insights/info/', '_blank');
+        window.open(`https://access.redhat.com/insights/inventory?machine=${$scope.$parent.host.insights_system_id}`, '_blank');
     };
     $scope.remediateInventory = function(){
         $state.go('templates.addJobTemplate');

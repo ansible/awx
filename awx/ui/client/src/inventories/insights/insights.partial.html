@@ -1,5 +1,5 @@
 <div class="InsightsLastCheck"
-    ng-show="last_check_in<49">
+    ng-show="isCheckingIn=false">
     <i class="fa icon-job-failed InsightsIcon-warning"></i>
     This machine has not checked in with Insights in {{last_check_in}} hours
 </div>
@@ -68,7 +68,9 @@
             <span class="Form-title--is_superuser">{{report.rule.category}}</span>
         </div>
         <div class="InsightsRow-body">{{report.rule.summary}}</div>
-        <div class="InsightsRow-plan" ng-bind-html="report.maintenance_actions | planFilter"></div>
+        <div ng-repeat="plan in report.maintenance_actions">
+            <div class="InsightsRow-plan" ng-bind-html="plan | planFilter"></div>
+        </div>
     </div>
 </div>
 
