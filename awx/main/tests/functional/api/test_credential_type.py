@@ -50,7 +50,7 @@ def test_update_managed_by_tower_xfail(patch, delete, admin):
     ssh.save()
     url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
     response = patch(url, {'name': 'Some Other Name'}, admin)
-    assert response.status_code == 400
+    assert response.status_code == 403
     assert delete(url, admin).status_code == 403
 
 
@@ -67,7 +67,7 @@ def test_update_credential_type_in_use_xfail(patch, delete, admin):
 
     url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
     response = patch(url, {'inputs': {}}, admin)
-    assert response.status_code == 400
+    assert response.status_code == 403
 
     assert delete(url, admin).status_code == 403
 

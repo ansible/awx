@@ -1590,8 +1590,10 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.managed_by_tower or instance.credentials.exists():
-            raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted."))
+        if instance.managed_by_tower:
+            raise PermissionDenied(detail=_("Deletion not allowed for credential types managed by Tower"))
+        if instance.credentials.exists():
+            raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted"))
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
 
 
