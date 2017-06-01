@@ -2087,7 +2087,19 @@ class CredentialSerializerCreate(CredentialSerializer):
                     attrs.pop(field)
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
-        return super(CredentialSerializerCreate, self).validate(attrs)
+        try:
+            return super(CredentialSerializerCreate, self).validate(attrs)
+        except ValidationError as e:
+            # TODO: remove when API v1 is removed
+            # If we have an `inputs` error on `/api/v1/`:
+            # {'inputs': {'username': [...]}}
+            # ...instead, send back:
+            # {'username': [...]}
+            if self.version == 1 and isinstance(e.detail.get('inputs'), dict):
+                e.detail = e.detail['inputs']
+                raise e
+            else:
+                raise
 
     def create(self, validated_data):
         user = validated_data.pop('user', None)

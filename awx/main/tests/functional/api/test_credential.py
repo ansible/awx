@@ -1,4 +1,3 @@
-import json
 import mock # noqa
 import pytest
 
@@ -636,7 +635,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
         admin
     )
     assert response.status_code == 400
-    assert "'invalid_field' was unexpected" in json.dumps(response.data)
+    assert "'invalid_field' was unexpected" in response.data['inputs'][0]
 
 
 #
@@ -1032,8 +1031,11 @@ def test_aws_create_fail_required_fields(post, organization, admin, version, par
     assert response.status_code == 400
 
     assert Credential.objects.count() == 0
-    assert 'username' in json.dumps(response.data)
-    assert 'password' in json.dumps(response.data)
+    errors = response.data
+    if version == 'v2':
+        errors = response.data['inputs']
+    assert errors['username'] == ['required for %s' % aws.name]
+    assert errors['password'] == ['required for %s' % aws.name]
 
 
 #
@@ -1100,9 +1102,12 @@ def test_vmware_create_fail_required_fields(post, organization, admin, version, 
     assert response.status_code == 400
 
     assert Credential.objects.count() == 0
-    assert 'username' in json.dumps(response.data)
-    assert 'password' in json.dumps(response.data)
-    assert 'host' in json.dumps(response.data)
+    errors = response.data
+    if version == 'v2':
+        errors = response.data['inputs']
+    assert errors['username'] == ['required for %s' % vmware.name]
+    assert errors['password'] == ['required for %s' % vmware.name]
+    assert errors['host'] == ['required for %s' % vmware.name]
 
 
 #
@@ -1160,10 +1165,13 @@ def test_openstack_create_fail_required_fields(post, organization, admin, versio
         admin
     )
     assert response.status_code == 400
-    assert 'username' in json.dumps(response.data)
-    assert 'password' in json.dumps(response.data)
-    assert 'host' in json.dumps(response.data)
-    assert 'project' in json.dumps(response.data)
+    errors = response.data
+    if version == 'v2':
+        errors = response.data['inputs']
+    assert errors['username'] == ['required for %s' % openstack.name]
+    assert errors['password'] == ['required for %s' % openstack.name]
+    assert errors['host'] == ['required for %s' % openstack.name]
+    assert errors['project'] == ['required for %s' % openstack.name]
 
 
 @pytest.mark.django_db
