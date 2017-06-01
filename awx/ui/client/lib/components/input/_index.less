@@ -15,8 +15,14 @@
     }
 }
 
+.at-InputGroup-button {
+    height: 100%;
+}
+
 .at-Input-button {
-    width: 72px;
+    width: @at-input-button-width;
+    display: block;
+    height: 100%;
 
     &, &:active, &:hover, &:focus {
         color: @at-gray-dark-3x;
@@ -35,6 +41,21 @@
         border-color: @at-red;
     }
 }
+
+.at-InputFile--hidden {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    right: @at-input-button-width;
+    z-index: -2;
+    opacity: 0;
+}
+
+.at-InputFile--drag {
+    z-index: 3;
+}
+
 
 .at-InputGroup {
     padding: 0;
@@ -64,11 +85,23 @@
     height: @at-space-6x;
 }
 
+.at-InputLabel {
+    display: inline-block;
+}
+
 .at-InputLabel-name {
     color: @at-gray-dark-4x;
     font-size: @at-font-size-2x;
     font-weight: @at-font-weight;
     text-transform: uppercase;
+}
+
+.at-InputLabel-hint {
+    margin-left: @at-space-4x;
+    color: @at-gray-dark-3x;
+    font-size: @at-font-size;
+    font-weight: @at-font-weight;
+    line-height: @at-line-height-short;
 }
 
 .at-InputMessage--rejected {
@@ -82,8 +115,7 @@
     color: @at-red;
     font-weight: @at-font-weight-2x;
     font-size: @at-font-size-2x;
-    line-height: @at-line-height-short;
-    margin: @at-space-3x @at-space 0 0;
+    margin: 0;
 }
 
 .at-InputSelect {
@@ -123,3 +155,6 @@
     }
 }
 
+.at-Textarea {
+    .at-mixin-FontFixedWidth();
+}

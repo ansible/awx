@@ -4,7 +4,7 @@ function atPopoverLink (scope, el, attr, controllers) {
     let popover = container.getElementsByClassName('at-Popover-container')[0];
     let icon = container.getElementsByTagName('i')[0];
 
-    popoverController.init(container, icon, popover);
+    popoverController.init(scope, container, icon, popover);
 }
 
 function AtPopoverController () {
@@ -14,9 +14,10 @@ function AtPopoverController () {
     let icon;
     let popover;
 
-    vm.init = (_container_, _icon_, _popover_) => {
+    vm.init = (scope, _container_, _icon_, _popover_) => {
         icon = _icon_;
         popover = _popover_;
+        scope.inline = scope.state._inline || true;
 
         icon.addEventListener('click', vm.createDisplayListener());
     };

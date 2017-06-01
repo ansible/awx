@@ -75,9 +75,9 @@ function AtInputGroupController ($scope, $compile) {
         if (input.type === 'string') {
             if (!input.multiline) {
                 if (input.secret) {
-                    config._component = 'at-input-text';
-                } else {
                     config._component = 'at-input-secret';
+                } else {
+                    config._component = 'at-input-text';
                 }
             } else {
                 config._expand = true;

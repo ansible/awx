@@ -14,14 +14,22 @@ function EventService () {
             el
         };
 
-        listener.el.addEventListener(listener.name, listener.fn);
+        if (Array.isArray(name)) {
+            name.forEach(e => listener.el.addEventListener(e, listener.fn));
+        } else {
+            listener.el.addEventListener(listener.name, listener.fn);
+        }
 
         return listener;
     };
 
     this.remove = listeners => {
         listeners.forEach(listener => {
-            listener.el.removeEventListener(listener.name, listener.fn);
+            if (Array.isArray(listener.name)) {
+                listener.name.forEach(name => listener.el.removeEventListener(name, listener.fn));
+            } else {
+                listener.el.removeEventListener(listener.name, listener.fn);
+            }
         });
     };
 }

@@ -85,7 +85,7 @@ function AtFormController (eventService) {
         let handled;
 
         if (err.status === 400) {
-            handled = vm.setValidationErrors(err.data);
+            handled = vm.handleValidationErrors(err.data);
         }
 
         if (!handled) {
@@ -93,25 +93,35 @@ function AtFormController (eventService) {
         }
     };
 
-    vm.setValidationErrors = errors => {
-        let errorMessageSet = false;
-
-        for (let id in errors) {
-            vm.components
-                .filter(component => component.category === 'input')
-                .forEach(component => {
-                    if (component.state._id === id) {
-                        errorMessageSet = true;
-
-                        component.state._rejected = true;
-                        component.state._isValid = false;
-                        component.state._message = errors[id].join(' ');
-                    }
-                });
-        }
+    vm.handleValidationErrors = errors => {
+        let errorMessageSet = vm.setValidationMessages(errors);
 
         if (errorMessageSet) {
             vm.check();
+        }
+
+        return errorMessageSet;
+    };
+
+    vm.setValidationMessages = (errors, errorSet) => {
+        let errorMessageSet = errorSet || false;
+
+        for (let id in errors) {
+            if (!Array.isArray(errors[id]) && typeof errors[id] === 'object') {
+                errorMessageSet = vm.setValidationMessages(errors[id], errorMessageSet);
+                continue;
+            }
+
+            vm.components
+                .filter(component => component.category === 'input')
+                .filter(component => errors[component.state.id])
+                .forEach(component => {
+                    errorMessageSet = true;
+
+                    component.state._rejected = true;
+                    component.state._isValid = false;
+                    component.state._message = errors[component.state.id].join(' ');
+                });
         }
 
         return errorMessageSet;
