@@ -105,7 +105,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'source_script': ('name', 'description'),
     'role': ('id', 'role_field'),
     'notification_template': DEFAULT_SUMMARY_FIELDS,
-    'instance_group': {'id', 'name'}
+    'instance_group': {'id', 'name'},
+    'insights_credential': DEFAULT_SUMMARY_FIELDS,
 }
 
 
