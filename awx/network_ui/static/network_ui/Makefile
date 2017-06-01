@@ -1,4 +1,4 @@
-.PHONY: all main lint lessc install simple-server
+.PHONY: all main lint lessc install simple-server deploy
 
 all: clean install lessc lint main
 
@@ -30,3 +30,7 @@ istanbul:
 
 simple-server:
 	python -m SimpleHTTPServer
+
+
+deploy:
+	rsync -av src/ ../../../../awx/ui/client/src/network_ui/
