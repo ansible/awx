@@ -188,6 +188,14 @@ function(i18n, InventoryCompletedJobsList) {
                 skipGenerator: true
             },
             completed_jobs: completed_jobs_object
+        },
+        relatedButtons: {
+            remediate_inventory: {
+                ngClick: 'remediateInventory()',
+                ngShow: 'insights_credential!==null',
+                label: i18n._('Remediate Inventory'),
+                class: 'Form-primaryButton'
+            }
         }
 
     };}];

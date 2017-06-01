@@ -91,6 +91,10 @@ function InventoriesEdit($scope, $location,
         $state.go('inventories');
     };
 
+    $scope.remediateInventory = function(){
+        $state.go('templates.addJobTemplate');
+    };
+
 }
 
 export default ['$scope', '$location',
