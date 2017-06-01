@@ -620,6 +620,22 @@ def test_list_cannot_order_by_encrypted_field(post, get, organization, org_admin
 
 
 @pytest.mark.django_db
+def test_v1_credential_kind_validity(get, post, organization, admin, credentialtype_ssh):
+    params = {
+        'name': 'Best credential ever',
+        'organization': organization.id,
+        'kind': 'nonsense'
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v1'}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['kind'] == ['"nonsense" is not a valid choice']
+
+
+@pytest.mark.django_db
 def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, credentialtype_ssh):
     params = {
         'name': 'Best credential ever',

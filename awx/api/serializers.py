@@ -2045,6 +2045,8 @@ class CredentialSerializer(BaseSerializer):
             # CredentialType based on the provided values
             kind = data.get('kind', 'ssh')
             credential_type = CredentialType.from_v1_kind(kind, data)
+            if credential_type is None:
+                raise serializers.ValidationError({"kind": _('"%s" is not a valid choice' % kind)})
             data['credential_type'] = credential_type.pk
             value = OrderedDict(
                 {'credential_type': credential_type}.items() +
