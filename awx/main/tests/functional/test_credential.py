@@ -60,15 +60,18 @@ def test_cloud_kind_uniqueness():
     ({'fields': {}}, False),
     ({'fields': 123}, False),
     ({'fields': [{'id': 'username', 'label': 'Username', 'foo': 'bar'}]}, False),
+    ({'fields': [{'id': 'username', 'label': 'Username'}]}, True),
     ({'fields': [{'id': 'username', 'label': 'Username', 'type': 'string'}]}, True),
     ({'fields': [{'id': 'username', 'label': 'Username', 'help_text': 1}]}, False),
     ({'fields': [{'id': 'username', 'label': 'Username', 'help_text': 'Help Text'}]}, True),  # noqa
     ({'fields': [{'id': 'username', 'label': 'Username'}, {'id': 'username', 'label': 'Username 2'}]}, False),  # noqa
-    ({'fields': [{'id': '$invalid$', 'label': 'Invalid'}]}, False),  # noqa
-    ({'fields': [{'id': 'password', 'label': 'Password', 'type': 'number'}]}, True),
+    ({'fields': [{'id': '$invalid$', 'label': 'Invalid', 'type': 'string'}]}, False),  # noqa
+    ({'fields': [{'id': 'password', 'label': 'Password', 'type': 'invalid-type'}]}, False),
     ({'fields': [{'id': 'ssh_key', 'label': 'SSH Key', 'type': 'string', 'format': 'ssh_private_key'}]}, True),  # noqa
-    ({'fields': [{'id': 'other', 'label': 'Other', 'type': 'boolean'}]}, False),
+    ({'fields': [{'id': 'flag', 'label': 'Some Flag', 'type': 'boolean'}]}, True),
+    ({'fields': [{'id': 'flag', 'label': 'Some Flag', 'type': 'boolean', 'choices': ['a', 'b']}]}, False),
     ({'fields': [{'id': 'certificate', 'label': 'Cert', 'multiline': True}]}, True),
+    ({'fields': [{'id': 'certificate', 'label': 'Cert', 'multiline': True, 'type': 'boolean'}]}, False),  # noqa
     ({'fields': [{'id': 'certificate', 'label': 'Cert', 'multiline': 'bad'}]}, False),  # noqa
     ({'fields': [{'id': 'token', 'label': 'Token', 'secret': True}]}, True),
     ({'fields': [{'id': 'token', 'label': 'Token', 'secret': 'bad'}]}, False),

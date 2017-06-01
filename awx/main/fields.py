@@ -529,7 +529,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'number']},
+                            'type': {'enum': ['string', 'boolean']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -577,6 +577,18 @@ class CredentialTypeInputField(JSONSchemaField):
                     params={'value': value},
                 )
             ids[id_] = True
+
+            if 'type' not in field:
+                # If no type is specified, default to string
+                field['type'] = 'string'
+
+            for key in ('choices', 'multiline', 'format'):
+                if key in field and field['type'] != 'string':
+                    raise django_exceptions.ValidationError(
+                        _('%s not allowed for %s type (%s)' % (key, field['type'], field['id'])),
+                        code='invalid',
+                        params={'value': value},
+                    )
 
 
 
