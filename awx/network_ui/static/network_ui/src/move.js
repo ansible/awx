@@ -182,9 +182,25 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
         var j = 0;
         var index = -1;
         var devices = controller.scope.selected_devices;
+        var links = controller.scope.selected_links;
         var all_links = controller.scope.links.slice();
         controller.scope.selected_devices = [];
         controller.scope.selected_links = [];
+        for (i = 0; i < links.length; i++) {
+            index = controller.scope.links.indexOf(links[i]);
+            if (index !== -1) {
+                links[i].selected = false;
+                links[i].remote_selected = false;
+                controller.scope.links.splice(index, 1);
+                controller.scope.send_control_message(new messages.LinkDestroy(controller.scope.client_id,
+                                                                               links[i].id,
+                                                                               links[i].from_device.id,
+                                                                               links[i].to_device.id,
+                                                                               links[i].from_interface.id,
+                                                                               links[i].to_interface.id,
+                                                                               links[i].name));
+            }
+        }
         for (i = 0; i < devices.length; i++) {
             index = controller.scope.devices.indexOf(devices[i]);
             if (index !== -1) {

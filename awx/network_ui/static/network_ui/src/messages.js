@@ -101,13 +101,15 @@ function LinkCreate(sender, id, from_device_id, to_device_id, from_interface_id,
 }
 exports.LinkCreate = LinkCreate;
 
-function LinkDestroy(sender, id, from_id, to_id) {
+function LinkDestroy(sender, id, from_device_id, to_device_id, from_interface_id, to_interface_id, name) {
     this.msg_type = "LinkDestroy";
     this.id = id;
     this.sender = sender;
-    this.from_id = from_id;
-    this.to_id = to_id;
-    this.name = '';
+    this.name = name;
+    this.from_device_id = from_device_id;
+    this.to_device_id = to_device_id;
+    this.from_interface_id = from_interface_id;
+    this.to_interface_id = to_interface_id;
 }
 exports.LinkDestroy = LinkDestroy;
 
