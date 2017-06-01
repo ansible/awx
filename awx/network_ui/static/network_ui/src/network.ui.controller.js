@@ -521,18 +521,42 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var k = 0;
         var device = null;
         var keys = null;
+        var peers = null;
         var ptm = null;
         var intf = null;
         for (i = 0; i < $scope.devices.length; i++) {
             device = $scope.devices[i];
             if (device.name === data.key) {
-                keys = Object.keys(data.value.ansible_local.ptm);
-                for (j = 0; j < keys.length; j++) {
-                    ptm = data.value.ansible_local.ptm[keys[j]];
-                    for (k = 0; k < device.interfaces.length; k++) {
-                        intf = device.interfaces[k];
-                        if (intf.name === ptm.port) {
-                            intf.link.status = ptm['cbl status'] === 'pass';
+
+                //Check PTM
+                if (data.value.ansible_local !== undefined &&
+                    data.value.ansible_local.ptm !== undefined) {
+                    keys = Object.keys(data.value.ansible_local.ptm);
+                    for (j = 0; j < keys.length; j++) {
+                        ptm = data.value.ansible_local.ptm[keys[j]];
+                        for (k = 0; k < device.interfaces.length; k++) {
+                            intf = device.interfaces[k];
+                            if (intf.name === ptm.port) {
+                                intf.link.status = ptm['cbl status'] === 'pass';
+                            }
+                        }
+                    }
+                }
+
+                //Check LLDP
+                if (data.value.ansible_net_neighbors !== undefined) {
+                    keys = Object.keys(data.value.ansible_net_neighbors);
+                    for (j = 0; j < keys.length; j++) {
+                        peers = data.value.ansible_net_neighbors[keys[j]];
+                        for (k = 0; k < peers.length; k++) {
+                            intf = $scope.getDeviceInterface(device.name, keys[j]);
+                            if (intf !== null && intf.link !== null) {
+                                if (intf.link.to_interface === intf) {
+                                    intf.link.status = ($scope.getDeviceInterface(peers[k].host, peers[k].port) === intf.link.from_interface);
+                                } else {
+                                    intf.link.status = ($scope.getDeviceInterface(peers[k].host, peers[k].port) === intf.link.to_interface);
+                                }
+                            }
                         }
                     }
                 }
@@ -540,6 +564,34 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         }
 
         $scope.$apply();
+    };
+
+    $scope.getDevice = function(name) {
+
+        var i = 0;
+        for (i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].name === name) {
+                return $scope.devices[i];
+            }
+        }
+
+        return null;
+    };
+
+    $scope.getDeviceInterface = function(device_name, interface_name) {
+
+        var i = 0;
+        var k = 0;
+        for (i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].name === device_name) {
+                for (k = 0; k < $scope.devices[i].interfaces.length; k++) {
+                    if ($scope.devices[i].interfaces[k].name === interface_name) {
+                        return $scope.devices[i].interfaces[k];
+                    }
+                }
+            }
+        }
+        return null;
     };
 
     $scope.onDeviceCreate = function(data) {
@@ -1033,6 +1085,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 	}
 
     $scope.send_control_message = function (message) {
+        console.log(message);
         var i = 0;
         message.sender = $scope.client_id;
         message.message_id = $scope.message_id_seq();
@@ -1042,6 +1095,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             }
         }
         var data = messages.serialize(message);
+        console.log(data);
         if (!$scope.disconnected) {
             $scope.control_socket.send(data);
         } else {
