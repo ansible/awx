@@ -35,6 +35,9 @@ import jsonschema.exceptions
 from jsonfield import JSONField as upstream_JSONField
 from jsonbfield.fields import JSONField as upstream_JSONBField
 
+# DRF
+from rest_framework import serializers
+
 # AWX
 from awx.main.utils.filters import SmartFilter
 from awx.main.validators import validate_ssh_private_key
@@ -410,7 +413,7 @@ def format_ssh_private_key(value):
         value = value.replace(r'\u003d', '=')
     try:
         validate_ssh_private_key(value)
-    except jsonschema.exceptions.ValidationError as e:
+    except django_exceptions.ValidationError as e:
         raise jsonschema.exceptions.FormatError(e.message)
     return value
 
@@ -445,7 +448,7 @@ class CredentialInputField(JSONSchemaField):
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
-            properties[field.pop('id')] = field
+            properties[field['id']] = field
         return {
             'type': 'object',
             'properties': properties,
@@ -471,37 +474,43 @@ class CredentialInputField(JSONSchemaField):
             else:
                 decrypted_values[k] = v
 
-        super(CredentialInputField, self).validate(decrypted_values,
-                                                   model_instance)
+        super(JSONSchemaField, self).validate(decrypted_values, model_instance)
+        errors = {}
+        for error in Draft4Validator(
+            self.schema(model_instance),
+            format_checker=self.format_checker
+        ).iter_errors(decrypted_values):
+            if error.validator == 'pattern' and 'error' in error.schema:
+                error.message = error.schema['error'] % error.instance
+            if 'id' not in error.schema:
+                # If the error is not for a specific field, it's specific to
+                # `inputs` in general
+                raise django_exceptions.ValidationError(
+                    error.message,
+                    code='invalid',
+                    params={'value': value},
+                )
+            errors[error.schema['id']] = [error.message]
 
-        errors = []
         inputs = model_instance.credential_type.inputs
         for field in inputs.get('required', []):
             if not value.get(field, None):
-                errors.append(
-                    _('%s required for %s credential.') % (
-                        field, model_instance.credential_type.name
-                    )
-                )
+                errors[field] = [_('required for %s') % (
+                    model_instance.credential_type.name
+                )]
 
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
         if model_instance.credential_type.kind == 'ssh':
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
-                errors.append(
-                    _('SSH key unlock must be set when SSH key is encrypted.')
-                )
+                errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
             if not model_instance.has_encrypted_ssh_key_data and value.get('ssh_key_unlock'):
-                errors.append(
-                    _('SSH key unlock should not be set when SSH key is not encrypted.')
-                )
+                errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
 
         if errors:
-            raise django_exceptions.ValidationError(
-                errors,
-                code='invalid',
-                params={'value': value},
-            )
+            raise serializers.ValidationError({
+                'inputs': errors
+            })
 
 
 class CredentialTypeInputField(JSONSchemaField):

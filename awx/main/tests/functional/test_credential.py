@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from awx.main.utils.common import decrypt_field
 from awx.main.models import Credential, CredentialType
 
+from rest_framework import serializers
+
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
 
@@ -86,8 +88,9 @@ def test_cred_type_input_schema_validity(input_, valid):
         inputs=input_
     )
     if valid is False:
-        with pytest.raises(ValidationError):
+        with pytest.raises(Exception) as e:
             type_.full_clean()
+        assert e.type in (ValidationError, serializers.ValidationError)
     else:
         type_.full_clean()
 
@@ -216,8 +219,9 @@ def test_ssh_key_data_validation(credentialtype_ssh, organization, ssh_key_data,
     if valid:
         cred.full_clean()
     else:
-        with pytest.raises(ValidationError):
+        with pytest.raises(Exception) as e:
             cred.full_clean()
+        assert e.type in (ValidationError, serializers.ValidationError)
 
 
 @pytest.mark.django_db
