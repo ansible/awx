@@ -91,8 +91,8 @@ function InventoriesEdit($scope, $location,
         $state.go('inventories');
     };
 
-    $scope.remediateInventory = function(){
-        $state.go('templates.addJobTemplate');
+    $scope.remediateInventory = function(inv_id, inv_name, insights_credential){
+        $state.go('templates.addJobTemplate', {inventory_id: inv_id, inventory_name:inv_name, credential_id: insights_credential});
     };
 
 }

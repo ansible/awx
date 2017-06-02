@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ 'InsightsData', '$scope', 'moment', '$state',
-function (data, $scope, moment, $state) {
+export default [ 'InsightsData', '$scope', 'moment', '$state', 'resourceData',
+function (data, $scope, moment, $state, resourceData) {
 
     function init() {
 
@@ -20,6 +20,8 @@ function (data, $scope, moment, $state) {
         $scope.low_count = _.filter($scope.reports_dataset.reports, (report) => {return report.rule.severity === "INFO"; }).length;
         let a = moment(), b = moment($scope.reports_dataset.last_check_in);
         $scope.last_check_in = a.diff(b, 'hours');
+        $scope.inventory = resourceData.data;
+        $scope.insights_credential = resourceData.data.summary_fields.insights_credential.id;
     }
 
     init();
@@ -75,8 +77,8 @@ function (data, $scope, moment, $state) {
     $scope.viewDataInInsights = function(){
         window.open(`https://access.redhat.com/insights/inventory?machine=${$scope.$parent.host.insights_system_id}`, '_blank');
     };
-    $scope.remediateInventory = function(){
-        $state.go('templates.addJobTemplate');
+    $scope.remediateInventory = function(inv_id, inv_name, insights_credential){
+        $state.go('templates.addJobTemplate', {inventory_id: inv_id, inventory_name:inv_name, credential_id: insights_credential});
     };
     $scope.formCancel = function(){
         $state.go('inventories', null, {reload: true});
