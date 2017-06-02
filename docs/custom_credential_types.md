@@ -118,40 +118,40 @@ ordered fields for that type:
 
     "inputs": {
         "fields": [{
-            "id": "api_token",                                  # required - a unique name used to
-                                                                # reference the field value
+            "id": "api_token",               # required - a unique name used to
+                                             # reference the field value
 
-            "label": "API Token",                               # required - a unique label for the
-                                                                # field
+            "label": "API Token",            # required - a unique label for the
+                                             # field
 
             "help_text": "User-facing short text describing the field.",
 
-            "type": ("string" | "number")                       # required,
+            "type": ("string" | "boolean")   # defaults to 'string'
 
-            "format": "ssh_private_key"                         # optional, can be used to enforce data
-                                                                # format validity for SSH private keys
-                                                                # data
+            "format": "ssh_private_key"      # optional, can be used to enforce data
+                                             # format validity for SSH private key
+                                             # data (only applicable to `type=string`)
 
-            "secret": true,                                     # if true, the field will be treated
-                                                                # as sensitive and stored encrypted
+            "secret": true,                  # if true, the field value will be encrypted
 
-            "multiline": false                                  # if true, the field should be rendered
-                                                                # as multi-line for input entry
+            "multiline": false               # if true, the field should be rendered
+                                             # as multi-line for input entry
+                                             # (only applicable to `type=string`)
         },{
             # field 2...
         },{
             # field 3...
         }]
-        "required": ["api_token"]  # optional; one or more fields can be marked as required
+        "required": ["api_token"]            # optional; one or more fields can be marked as required
     },
 
-As an alternative to static types, fields can also specify multiple choice
-strings:
+When `type=string`, fields can optionally specify multiple choice options:
 
     "inputs": {
         "fields": [{
             "id": "api_token",          # required - a unique name used to reference the field value
             "label": "API Token",       # required - a unique label for the field
+            "type": "string",
             "choices": ["A", "B", "C"]
         }]
     },
