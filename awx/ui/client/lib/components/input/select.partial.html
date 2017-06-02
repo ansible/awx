@@ -16,7 +16,9 @@
                     ng-attr-tabindex="{{ tab || undefined }}" 
                     ng-disabled="state._disabled || form.disabled"
                     ng-change="vm.updateDisplayModel()"
-                    ng-options="{{ state._exp }}"></select>
+                    ng-options="{{ state._exp }}">
+                <option style="display:none"></option>
+            </select>
 
             <i class="fa" ng-class="{ 'fa-chevron-down': !open, 'fa-chevron-up': open }"></i>
         </div>
