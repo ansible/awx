@@ -6,14 +6,14 @@
 
 export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
     function($rootScope, GetBasePath, ProcessErrors, $q, $http, Rest) {
-        var url = GetBasePath('settings');
+        var url = GetBasePath('settings') + 'all';
 
         return {
             getConfigurationOptions: function() {
                 var deferred = $q.defer();
                 var returnData = {};
 
-                Rest.setUrl(url + '/all');
+                Rest.setUrl(url);
                 Rest.options()
                     .success(function(data) {
                         // Compare GET actions with PUT actions and flag discrepancies
@@ -45,7 +45,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
             patchConfiguration: function(body) {
                 var deferred = $q.defer();
 
-                Rest.setUrl(url + 'all');
+                Rest.setUrl(url);
                 Rest.patch(body)
                     .success(function(data) {
                         deferred.resolve(data);
@@ -59,7 +59,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
 
             getCurrentValues: function() {
                 var deferred = $q.defer();
-                Rest.setUrl(url + '/all');
+                Rest.setUrl(url);
                 Rest.get()
                     .success(function(data) {
                         deferred.resolve(data);
@@ -74,7 +74,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
             resetAll: function() {
                 var deferred = $q.defer();
 
-                Rest.setUrl(url + '/all');
+                Rest.setUrl(url);
                 Rest.destroy()
                     .success(function(data) {
                         deferred.resolve(data);
