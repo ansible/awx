@@ -1,4 +1,4 @@
-<div id="job-launch-modal" class="JobSubmission">
+<div id="job-launch-modal" class="JobSubmission modal">
     <div class="JobSubmission-container">
         <div class="JobSubmission-header">
             <div class="JobSubmission-title">
@@ -21,7 +21,7 @@
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
                         <div class="JobSubmission-selectedItemInfo">
-                            <span class="JobSubmission-selectedItemLabel">SELECTED INVENTORY:</span>
+                            <span class="JobSubmission-label">SELECTED INVENTORY:</span>
                             <span ng-show="selected_inventory" ng-bind="selected_inventory.name"></span>
                             <span class="JobSubmission-selectedItemNone" ng-show="!selected_inventory">None selected</span>
                         </div>
@@ -36,15 +36,32 @@
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
                         <div class="JobSubmission-selectedItemInfo">
-                            <span class="JobSubmission-selectedItemLabel">SELECTED CREDENTIAL:</span>
-                            <span ng-show="selected_inventory" ng-bind="selected_credential.name"></span>
-                            <span class="JobSubmission-selectedItemNone" ng-show="!selected_credential">None selected</span>
-                        </div>
-                        <div class="JobSubmission-selectedItemRevert" ng-if="ask_credential_on_launch && has_default_credential">
-                            <a class="Form-labelAction JobSubmission-revertLink" href="" ng-hide="selected_credential.id === defaults.credential.id" ng-click="revertToDefaultCredential()">REVERT</a>
+                            <div class="JobSubmission-selectedItemLabel">
+                                <span class="JobSubmission-label">SELECTED CREDENTIAL</span>
+                            </div>
+                            <div>
+                                <span ng-show="selected_credentials.machine" class="JobSubmission-selectedItemInfoSubTitle">Machine:&nbsp;</span>
+                                <span ng-show="selected_credentials.machine">{{selected_credentials.machine.name}}</span>
+                                <span ng-show="selected_credentials.machine && selected_credentials.extra.length > 0">,&nbsp;</span>
+                                <span ng-repeat="extraCredential in selected_credentials.extra">
+                                    <span class="JobSubmission-previewItemSubTitle">{{credential_types[extraCredential.credential_type].name}}:&nbsp;</span>
+                                    <span>{{extraCredential.name}}{{$last ? '' : ',&nbsp;'}}</span>
+                                </span>
+                                <span class="JobSubmission-selectedItemNone" ng-show="!selected_credentials.machine && selected_credentials.extra.length === 0">None selected</span>
+                                <span ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch">
+                                    <a class="JobSubmission-revertLink" href="" ng-show="showRevertCredentials()" ng-click="revertToDefaultCredentials()">REVERT</a>
+                                </span>
+                            </div>
+
                         </div>
                     </div>
-                    <job-sub-cred-list ng-if="includeCredentialList" selected-credential="$parent.selected_credential"></job-sub-cred-list>
+                    <div class="JobSubmission-credentialSubSection" ng-show="ask_extra_credentials_on_launch">
+                        <span class="JobSubmission-label">CREDENTIAL TYPE:</span>
+                        <select ng-model="credentialKind">
+                            <option ng-repeat="option in credentialKindOptions" value="{{option.value}}">{{option.name}}</option>
+                        </select>
+                    </div>
+                    <job-sub-cred-list ng-if="includeCredentialList" selected-credentials="selected_credentials" credential-types="::credential_types" credential-kind="credentialKind"></job-sub-cred-list>
                     <div ng-show="ssh_password_required || ssh_key_unlock_required || become_password_required || vault_password_required">
                         <div class="JobSubmission-instructions">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>
                         <form name="forms.credentialpasswords" autocomplete="off" novalidate>
@@ -237,8 +254,17 @@
                 </div>
                 <div class="JobSubmission-previewItem" ng-show="submitJobType === 'job_template'">
                     <div class="JobSubmission-previewItemTitle">CREDENTIAL</div>
-                    <div ng-show="selected_credential" ng-bind="selected_credential.name"></div>
-                    <div class="JobSubmission-previewItemNone" ng-show="!selected_credential">None selected</div>
+                    <div>
+                        <span ng-show="!selected_credentials.machine && selected_credentials.extra.length === 0" class="JobSubmission-selectedItemNone">None selected</span>
+                    </div>
+                    <div>
+                        <span ng-show="selected_credentials.machine" class="JobSubmission-previewItemSubTitle">Machine:&nbsp;</span>
+                        <span ng-show="selected_credentials.machine">{{selected_credentials.machine.name}}</span>
+                    </div>
+                    <div ng-repeat="extraCredential in selected_credentials.extra">
+                        <span class="JobSubmission-previewItemSubTitle">{{credential_types[extraCredential.credential_type].name}}:&nbsp;</span>
+                        <span>{{extraCredential.name}}</span>
+                    </div>
                 </div>
             </div>
             <div class="JobSubmission-footerButtons">

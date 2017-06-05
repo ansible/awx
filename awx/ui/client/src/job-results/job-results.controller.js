@@ -1,5 +1,12 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket', 'GetBasePath',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket, GetBasePath) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange',
+            'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q',
+            'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels',
+            'workflowResultsService', 'statusSocket', 'GetBasePath', '$state', 'jobExtraCredentials',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange,
+    ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q,
+    QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels,
+    workflowResultsService, statusSocket, GetBasePath, $state, jobExtraCredentials) {
+
     var toDestroy = [];
     var cancelRequests = false;
     var runTimeElapsedTimer = null;
@@ -44,6 +51,8 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // used for tag search
     $scope.job_events = $scope.job_event_dataset.results;
+
+    $scope.jobExtraCredentials = jobExtraCredentials;
 
     var getTowerLinks = function() {
         var getTowerLink = function(key) {

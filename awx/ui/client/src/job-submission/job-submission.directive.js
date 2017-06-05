@@ -6,8 +6,8 @@
 
 import jobSubmissionController from './job-submission.controller';
 
-export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange',
-    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange) {
+export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions',
+    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions) {
     return {
         scope: {
             submitJobId: '=',
@@ -25,7 +25,22 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                 }
                 scope.removeLaunchJobModalReady = scope.$on('LaunchJobModalReady', function() {
                     // Go get the list/survey data that we need from the server
-                    scope.getListsAndSurvey();
+                    if(scope.ask_inventory_on_launch) {
+                        scope.includeInventoryList = true;
+                    }
+                    if(scope.ask_credential_on_launch || scope.ask_extra_credentials_on_launch) {
+                        scope.credentialKind = (scope.ask_credential_on_launch) ? "1" : "1";
+
+                        scope.includeCredentialList = true;
+                    }
+                    if(scope.survey_enabled) {
+                        GetSurveyQuestions({
+                            scope: scope,
+                            id: scope.submitJobId,
+                            submitJobType: scope.submitJobType
+                        });
+
+                    }
 
                     $('#job-launch-modal').dialog('open');
 

@@ -7,11 +7,11 @@
 export default
     [   '$scope',
         function($scope) {
-            $scope.toggle_row = function(rowId) {
+            $scope.toggle_row = function(selectedRow) {
                 let list = $scope.list;
                 let count = 0;
                 $scope[list.name].forEach(function(row) {
-                    if (row.id === rowId) {
+                    if (row.id === selectedRow.id) {
                         if (row.checked) {
                             row.success_class = 'success';
                         } else {

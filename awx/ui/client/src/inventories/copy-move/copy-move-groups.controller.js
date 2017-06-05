@@ -24,11 +24,11 @@
 
         init();
 
-        $scope.toggle_row = function(id){
+        $scope.toggle_row = function(selectedRow){
             // toggle off anything else currently selected
-            _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
+            _.forEach($scope.groups, (item) => {return item.id === selectedRow.id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
-            $scope.selected = _.find($scope.groups, (item) => {return item.id === id;});
+            $scope.selected = _.find($scope.groups, (item) => {return item.id === selectedRow.id;});
         };
 
         $scope.formCancel = function(){
@@ -62,7 +62,7 @@
                     }
             }
         };
-        
+
         $scope.toggleTargetRootGroup = function(){
             $scope.selected = !$scope.selected;
             // cannot perform copy operations to root group level
