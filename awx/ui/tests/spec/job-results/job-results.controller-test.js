@@ -5,7 +5,7 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService, statusSocket;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService, statusSocket, jobExtraCredentials;
 
     statusSocket = function() {
         var fn = function() {};
@@ -98,6 +98,7 @@ describe('Controller: jobResultsController', () => {
             $provide.value('i18n', i18n);
             $provide.value('fieldChoices', fieldChoices);
             $provide.value('fieldLabels', fieldLabels);
+            $provide.value('jobExtraCredentials', jobExtraCredentials);
         });
     };
 
