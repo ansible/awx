@@ -7,6 +7,10 @@ export default {
     ncyBreadcrumb: {
         label: N_('INVENTORIES')
     },
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'inventory'
+    },
     views: {
         '@': {
             templateUrl: templateUrl('inventories/inventories')

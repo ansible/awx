@@ -110,6 +110,10 @@ angular.module('inventory', [
                     },
                     breadcrumbs: {
                         edit: '{{breadcrumb.inventory_name}}'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'inventory'
                     }
                 });
 
@@ -146,6 +150,10 @@ angular.module('inventory', [
                     },
                     breadcrumbs: {
                         edit: '{{breadcrumb.inventory_name}}'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'inventory'
                     }
                 });
 
@@ -284,6 +292,10 @@ angular.module('inventory', [
                     },
                     urls: {
                         list: '/hosts'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'host'
                     },
                     resolve: {
                         edit: {
