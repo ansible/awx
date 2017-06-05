@@ -474,7 +474,7 @@ export default
                 let machineCredentialMatches = true;
                 let extraCredentialsMatch = true;
 
-                if($scope.defaults.credential) {
+                if($scope.defaults.credential && $scope.defaults.credential.id) {
                     if(!$scope.selected_credentials.machine || ($scope.selected_credentials.machine && $scope.selected_credentials.machine.id !== $scope.defaults.credential.id)) {
                         machineCredentialMatches = false;
                     }
