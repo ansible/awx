@@ -7,12 +7,12 @@
 export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
     'ParseTypeChange', 'GenerateForm', 'inventoryData', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'rbacUiControlService', 'ToJSON', 'SourcesService', 'canAdd', 'Empty',
-    'Wait', 'Rest', 'Alert', 'ProcessErrors',
+    'rbacUiControlService', 'ToJSON', 'SourcesService', 'Empty',
+    'Wait', 'Rest', 'Alert', 'ProcessErrors', 'inventorySourcesOptions',
     function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
         GenerateForm, inventoryData, GroupManageService, GetChoices,
         GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
-        ToJSON, SourcesService, canAdd, Empty, Wait, Rest, Alert, ProcessErrors) {
+        ToJSON, SourcesService, Empty, Wait, Rest, Alert, ProcessErrors, inventorySourcesOptions) {
 
         let form = SourcesFormDefinition;
         init();
@@ -20,7 +20,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         function init() {
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
-            $scope.canAdd = canAdd;
+            $scope.canAdd = inventorySourcesOptions.actions.POST;
             $scope.envParseType = 'yaml';
             initSources();
         }
@@ -213,61 +213,61 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         function initSources(){
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'rax_regions',
                 choice_name: 'rax_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
 
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'ec2_regions',
                 choice_name: 'ec2_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
 
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'gce_regions',
                 choice_name: 'gce_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
 
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'azure_regions',
                 choice_name: 'azure_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
 
             // Load options for group_by
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'group_by',
                 variable: 'ec2_group_by',
                 choice_name: 'ec2_group_by_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
 
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'verbosity',
                 variable: 'verbosity_options',
-                callback: 'choicesReadyVerbosity'
+                callback: 'choicesReadyVerbosity',
+                options: inventorySourcesOptions
             });
 
             GetSourceTypeOptions({
                 scope: $scope,
-                variable: 'source_type_options',
+                variable: 'source_type_options'
                 //callback: 'sourceTypeOptionsReady' this callback is hard-coded into GetSourceTypeOptions(), included for ref
             });
         }
