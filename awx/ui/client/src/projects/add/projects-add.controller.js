@@ -7,9 +7,10 @@
 export default ['$scope', '$location', '$stateParams', 'GenerateForm',
     'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
     'GetProjectPath', 'GetChoices', 'Wait', '$state', 'CreateSelect2', 'i18n',
+    'CredentialTypes',
     function($scope, $location, $stateParams, GenerateForm, ProjectsForm, Rest,
     Alert, ProcessErrors, GetBasePath, GetProjectPath, GetChoices, Wait, $state,
-    CreateSelect2, i18n) {
+    CreateSelect2, i18n, CredentialTypes) {
 
         var form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],
@@ -153,7 +154,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                     break;
                     default:
                         $scope.credentialLabel = "SCM Credential";
-                        $scope.urlPopover = '<p> ' + i18n._('URL popover text');
+                        $scope.urlPopover = '<p> ' + i18n._('URL popover text') + '</p>';
                 }
             }
 
@@ -162,10 +163,15 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             $state.go('projects');
         };
         $scope.lookupCredential = function(){
-            let credType = ($scope.scm_type.value === "insights") ? 13 : 2; //insights cred type is 13, SCM is 2
+            // Perform a lookup on the credential_type. Git, Mercurial, and Subversion 
+            // all use SCM as their credential type.
+            let credType = _.filter(CredentialTypes, function(credType){
+                return ($scope.scm_type.value !== "insights" && credType.kind === "scm" ||
+                    $scope.scm_type.value === "insights" && credType.kind === "insights");
+            });
             $state.go('.credential', {
                 credential_search: {
-                    credential_type: credType,
+                    credential_type: credType[0].id,
                     page_size: '5',
                     page: '1'
                 }

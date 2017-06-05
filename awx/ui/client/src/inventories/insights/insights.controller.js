@@ -33,44 +33,32 @@ function (data, $scope, moment, $state, resourceData) {
         }
         if(filter === "solvable"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.maintenance_actions.length > 0){
-                    return report;
-                }
+                return (report.maintenance_actions.length > 0);
             });
         }
         if(filter === "not_solvable"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.maintenance_actions.length === 0){
-                    return report;
-                }
+                return (report.maintenance_actions.length === 0);
             });
         }
         if(filter === "critical"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.rule.severity === 'CRITICAL'){
-                    return report;
-                }
+                return (report.rule.severity === 'CRITICAL');
             });
         }
         if(filter === "high"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.rule.severity === 'ERROR'){
-                    return report;
-                }
+                return (report.rule.severity === 'ERROR');
             });
         }
         if(filter === "medium"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.rule.severity === 'WARN'){
-                    return report;
-                }
+                return (report.rule.severity === 'WARN');
             });
         }
         if(filter === "low"){
             $scope.reports = _.filter($scope.reports_dataset.reports, function(report){
-                if(report.rule.severity === 'INFO'){
-                    return report;
-                }
+                return (report.rule.severity === 'INFO');
             });
         }
     };
