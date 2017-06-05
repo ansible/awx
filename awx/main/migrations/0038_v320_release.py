@@ -269,7 +269,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='inventory',
             name='insights_credential',
-            field=models.ForeignKey(related_name='insights_credential', default=None, blank=True, on_delete=models.deletion.SET_NULL, to='main.Credential', help_text='Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.', null=True),
+            field=models.ForeignKey(related_name='insights_inventories', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', help_text='Credentials to be used by hosts belonging to this inventory when accessing Red Hat Insights API.', null=True),
         ),
         migrations.AlterField(
             model_name='inventory',
