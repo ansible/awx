@@ -125,7 +125,8 @@ function(i18n) {
                     awToolTip: i18n._('Please save before viewing Insights'),
                     dataPlacement: 'top',
                     title: i18n._('Insights'),
-                    skipGenerator: true
+                    skipGenerator: true,
+                    ngIf: 'host.insights_system_id!==null'
                 }
             }
         };

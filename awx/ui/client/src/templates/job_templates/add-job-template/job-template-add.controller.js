@@ -9,13 +9,13 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
-         'CreateSelect2', '$q', 'i18n',
+         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, CreateSelect2, $q, i18n
+             $state, CreateSelect2, $q, i18n, Inventory, Project
          ) {
 
              Rest.setUrl(GetBasePath('job_templates'));
@@ -80,24 +80,6 @@
                     }
                     $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
 
-                    // if you're getting to the form from the scan job section on inventories,
-                    // set the job type select to be scan
-                    if ($stateParams.inventory_id) {
-                        // This means that the job template form was accessed via inventory prop's
-                        // This also means the job is a scan job.
-                        $scope.job_type.value = 'scan';
-                        $scope.jobTypeChange();
-                        $scope.inventory = $stateParams.inventory_id;
-                        Rest.setUrl(GetBasePath('inventory') + $stateParams.inventory_id + '/');
-                        Rest.get()
-                            .success(function (data) {
-                                $scope.inventory_name = data.name;
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
-                            });
-                    }
                     CreateSelect2({
                         element:'#job_template_job_type',
                         multiple: false
@@ -253,6 +235,17 @@
                         });
                 }
             };
+
+            if(Inventory){
+                $scope.inventory = Inventory.inventory_id;
+                $scope.inventory_name = Inventory.inventory_name;
+            }
+            if(Project){
+                $scope.project = Project.id;
+                $scope.project_name = Project.name;
+                selectPlaybook('force_load');
+                checkSCMStatus();
+            }
 
             // Register a watcher on project_name
             if ($scope.selectPlaybookUnregister) {

@@ -13,15 +13,21 @@ export default {
         }
     },
     resolve: {
-        Facts: ['$stateParams', 'GetBasePath', 'Rest',
-            function($stateParams, GetBasePath, Rest) {
-                let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
-                Rest.setUrl(ansibleFactsUrl);
+        InsightsData: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
+            (Rest, $stateParams, GetBasePath, ProcessErrors) => {
+                var path = `${GetBasePath('hosts')}${$stateParams.host_id}/insights`;
+                Rest.setUrl(path);
                 return Rest.get()
-                    .success(function(data) {
-                        return data;
+                    .then(function(data) {
+                        return (data.data.insights_content);
+                    }).catch(function(response) {
+                        ProcessErrors(null, response.data, response.status, null, {
+                            hdr: 'Error!',
+                            msg: 'Failed to get insights info. GET returned status: ' +
+                                response.status
+                        });
                     });
             }
-        ]
+        ],
     }
 };

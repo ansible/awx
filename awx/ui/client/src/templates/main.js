@@ -52,11 +52,41 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
 
                 addJobTemplate = stateDefinitions.generateTree({
                     name: 'templates.addJobTemplate',
-                    url: '/add_job_template',
+                    url: '/add_job_template?inventory_id&inventory_name&credential_id',
                     modes: ['add'],
                     form: 'JobTemplateForm',
                     controllers: {
                         add: 'JobTemplateAdd'
+                    },
+                    resolve: {
+                        add: {
+                            Inventory: ['$stateParams',
+                                function($stateParams){
+                                    if($stateParams.inventory_id){
+                                        let obj = {};
+                                        obj.inventory_id = Number($stateParams.inventory_id);
+                                        obj.inventory_name = $stateParams.inventory_name;
+                                        return obj;
+                                    }
+                            }],
+                            Project: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    if($stateParams.credential_id){
+                                        let path = `${GetBasePath('projects')}?credential__id=${Number($stateParams.credential_id)}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get().
+                                            then(function(data){
+                                                return data.data.results[0];
+                                            }).catch(function(response) {
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get project info. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
+                                    }
+                            }]
+                        }
                     }
                 });
 

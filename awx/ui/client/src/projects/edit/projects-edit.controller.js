@@ -8,11 +8,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
     'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt', 'ClearScope',
     'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
-    'i18n',
+    'i18n', 'CredentialTypes',
     function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
     ProcessErrors, GenerateForm, Prompt, ClearScope, GetBasePath,
     GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
-    $state, CreateSelect2, ToggleNotification, i18n) {
+    $state, CreateSelect2, ToggleNotification, i18n, CredentialTypes) {
 
         ClearScope('htmlTemplate');
 
@@ -254,6 +254,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             if ($scope.scm_type.value) {
                 switch ($scope.scm_type.value) {
                     case 'git':
+                        $scope.credentialLabel = "SCM Credential";
                         $scope.urlPopover = '<p>' + i18n._('Example URLs for GIT SCM include:') + '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                             '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
                             '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
@@ -261,11 +262,13 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                         break;
                     case 'svn':
+                        $scope.credentialLabel = "SCM Credential";
                         $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                             '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                             '<li>svn+ssh://servername.example.com/path</li></ul>';
                         break;
                     case 'hg':
+                        $scope.credentialLabel = "SCM Credential";
                         $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                             '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                             '<li>ssh://server.example.com/path</li></ul>' +
@@ -273,10 +276,33 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             'Do not put the username and key in the URL. ' +
                             'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                         break;
+                    case 'insights':
+                        $scope.pathRequired = false;
+                        $scope.scmRequired = false;
+                        $scope.credRequired = true;
+                        $scope.credentialLabel = "Credential";
+                    break;
                     default:
+                        $scope.credentialLabel = "SCM Credential";
                         $scope.urlPopover = '<p> ' + i18n._('URL popover text');
                 }
             }
+        };
+
+        $scope.lookupCredential = function(){
+            // Perform a lookup on the credential_type. Git, Mercurial, and Subversion
+            // all use SCM as their credential type.
+            let credType = _.filter(CredentialTypes, function(credType){
+                return ($scope.scm_type.value !== "insights" && credType.kind === "scm" ||
+                    $scope.scm_type.value === "insights" && credType.kind === "insights");
+            });
+            $state.go('.credential', {
+                credential_search: {
+                    credential_type: credType[0].id,
+                    page_size: '5',
+                    page: '1'
+                }
+            });
         };
 
         $scope.SCMUpdate = function() {

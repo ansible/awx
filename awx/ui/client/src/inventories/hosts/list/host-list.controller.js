@@ -65,6 +65,9 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     $scope.editHost = function(id){
         $state.go('hosts.edit', {host_id: id});
     };
+    $scope.goToInsights = function(id){
+        $state.go('hosts.edit.insights', {host_id:id});
+    };
     $scope.deleteHost = function(id, name){
         var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
         var action = function(){

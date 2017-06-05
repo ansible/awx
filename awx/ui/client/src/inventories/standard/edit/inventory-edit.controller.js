@@ -29,6 +29,7 @@ function InventoriesEdit($scope, $location,
 
         $scope = angular.extend($scope, inventoryData);
 
+        $scope.credential_name = (inventoryData.summary_fields.insights_credential && inventoryData.summary_fields.insights_credential.name) ? inventoryData.summary_fields.insights_credential.name : null;
         $scope.organization_name = inventoryData.summary_fields.organization.name;
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.parseType = 'yaml';
@@ -88,6 +89,10 @@ function InventoriesEdit($scope, $location,
 
     $scope.formCancel = function() {
         $state.go('inventories');
+    };
+
+    $scope.remediateInventory = function(inv_id, inv_name, insights_credential){
+        $state.go('templates.addJobTemplate', {inventory_id: inv_id, inventory_name:inv_name, credential_id: insights_credential});
     };
 
 }

@@ -1,5 +1,12 @@
 @import "../../shared/branding/colors.default.less";
 
+.InsightsLastCheck{
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 20px;
+    align-items: baseline;
+}
+
 .InsightsNav{
     width: 100%;
     display: flex;
@@ -8,7 +15,6 @@
     flex-wrap: wrap;
     font-size: 14px;
     font-weight: bold;
-
 }
 
 .InsightsNav-rightSide{
@@ -16,7 +22,8 @@
     display: flex;
     flex: 1 0 auto;
     flex-wrap: wrap;
-    padding: 10px 0px 10px 0px
+    max-width: 100%;
+    padding-left: 10px;
 }
 
 .InsightsNav-leftSide{
@@ -26,6 +33,45 @@
     justify-content: flex-end;
     flex-wrap: wrap;
     max-width: 100%;
+    padding-right: 10px;
+}
+
+.InsightsNav-badgeTitle{
+    color: #707070;
+    font-size: 14px;
+    margin-right: 10px;
+    font-weight: normal;
+    text-transform: uppercase;
+    margin-left: 10px;
+}
+
+.InsightsIcon{
+    height: 30px;
+    width:30px;
+}
+
+.InsightsIcon-warning{
+    color:@default-warning;
+    padding-right: 7px;
+}
+
+.InsightsNav-anchor{
+    display:flex;
+    align-items: center;
+    cursor:pointer;
+    height: 40px;
+    padding-right:10px;
+}
+
+.InsightsNav-anchor.is-currentFilter{
+    padding-top: 5px;
+    border-bottom: 5px solid @menu-link-btm-hov;
+}
+
+.InsightsNav-anchor:hover{
+    background-color: @menu-link-bg-hov;
+    padding-top: 5px;
+    border-bottom: 5px solid @menu-link-btm-hov;
 }
 
 .InsightsNav-totalIssues{
@@ -42,7 +88,7 @@
 }
 
 .InsightsNav-mediumIssues{
-    background-color: @default-succ;
+    background-color: @insights-yellow;
 }
 
 .InsightsNav-lowIssues{
@@ -52,6 +98,29 @@
 .InsightsNav-solvableBadge{
     background-color: @b7grey;
 }
-.InsightsNav-solvableBadge:last-of-type{
-    margin-right: 20px;
+
+.InsightsRow{
+    margin-top:10px;
+}
+.InsightsRow-title{
+    display: flex;
+    align-items: center;
+}
+
+.InsightsRow-description{
+    font-size:14px;
+    font-weight: bold;
+    padding-left: 5px;
+}
+
+.InsightsRow-category{
+    margin-left: 10px;
+}
+
+.InsightsRow-body{
+    padding-left: 35px;
+}
+
+.InsightsRow-plan{
+    padding-left: 35px;
 }

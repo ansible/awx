@@ -28,7 +28,24 @@ angular.module('Projects', [revisions.name])
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
-
+            var projectResolve = {
+                    CredentialTypes: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
+                    (Rest, $stateParams, GetBasePath, ProcessErrors) => {
+                        var path = GetBasePath('credential_types');
+                        Rest.setUrl(path);
+                        return Rest.get()
+                            .then(function(data) {
+                                return (data.data.results);
+                            }).catch(function(response) {
+                                ProcessErrors(null, response.data, response.status, null, {
+                                    hdr: 'Error!',
+                                    msg: 'Failed to get credential tpyes. GET returned status: ' +
+                                        response.status
+                                });
+                            });
+                    }
+                ]
+            };
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
             $stateProvider.state({
@@ -55,6 +72,10 @@ angular.module('Projects', [revisions.name])
                     },
                     ncyBreadcrumb: {
                         label: N_('PROJECTS')
+                    },
+                    resolve: {
+                        add: projectResolve,
+                        edit: projectResolve
                     }
                 })
             });

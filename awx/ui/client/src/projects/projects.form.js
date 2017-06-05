@@ -131,9 +131,10 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 basePath: 'credentials',
                 list: 'CredentialList',
                 // apply a default search filter to show only scm credentials
-                search: {
-                    kind: 'scm'
-                },
+                // search: {
+                //     kind: 'scm'
+                // },
+                ngClick: 'lookupCredential()',
                 autopopulateLookup: false,
                 awRequiredWhen: {
                     reqExpression: "credRequired",

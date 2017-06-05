@@ -74,6 +74,9 @@
                             </td>
                             <td class="List-actionsContainer">
                                 <div class="List-actionButtonCell List-tableCell">
+                                    <button id="insights-action" class="List-actionButton " data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="View Insights Data" ng-show="host.insights_system_id">
+                                        <i class="fa fa-info"></i>
+                                    </button>
                                     <button id="edit-action" class="List-actionButton " ng-class="{'List-editButton--selected' : $stateParams['host_id'] == host.id}" data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="Edit host" ng-show="host.summary_fields.user_capabilities.edit">
                                         <i class="fa fa-pencil"></i>
                                     </button>

@@ -50,6 +50,13 @@ export default {
     fieldActions: {
 
         columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+        insights: {
+            ngClick: "goToInsights(host.id)",
+            icon: 'fa-info',
+            awToolTip: 'View Insights Data',
+            dataPlacement: 'top',
+            ngShow: 'host.insights_system_id'
+        },
         copy: {
             mode: 'all',
             ngClick: "copyMoveHost(host.id)",
