@@ -111,7 +111,7 @@ def _customize_graph():
 class URLModificationMiddleware(object):
 
     def __init__(self):
-        models = apps.get_app_config('main').get_models()
+        models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
         generate_graph(models)
         _customize_graph()
         register(
