@@ -171,6 +171,16 @@ def test_credential_creation(organization_factory):
 @pytest.mark.parametrize('inputs', [
     ['must-be-a-dict'],
     {'user': 'wrong-key'},
+    {'username': 1},
+    {'username': 1.5},
+    {'username': ['a', 'b', 'c']},
+    {'username': {'a': 'b'}},
+    {'username': False},
+    {'flag': 1},
+    {'flag': 1.5},
+    {'flag': ['a', 'b', 'c']},
+    {'flag': {'a': 'b'}},
+    {'flag': 'some-string'},
 ])
 def test_credential_creation_validation_failure(organization_factory, inputs):
     org = organization_factory('test').organization
@@ -183,16 +193,21 @@ def test_credential_creation_validation_failure(organization_factory, inputs):
                 'id': 'username',
                 'label': 'Username for SomeCloud',
                 'type': 'string'
+            },{
+                'id': 'flag',
+                'label': 'Some Boolean Flag',
+                'type': 'boolean'
             }]
         }
     )
     type_.save()
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(Exception) as e:
         cred = Credential(credential_type=type_, name="Bob's Credential",
                           inputs=inputs, organization=org)
         cred.save()
         cred.full_clean()
+        assert e.type in (ValidationError, serializers.ValidationError)
 
 
 @pytest.mark.django_db

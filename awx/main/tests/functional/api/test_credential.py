@@ -743,6 +743,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
         'password': 'some_password',
         'ssh_key_data': 'some_key_data',
         'ssh_key_unlock': 'some_key_unlock',
+        'authorize': True,
         'authorize_password': 'some_authorize_password',
     }],
     ['v2', {
@@ -753,6 +754,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
             'password': 'some_password',
             'ssh_key_data': 'some_key_data',
             'ssh_key_unlock': 'some_key_unlock',
+            'authorize': True,
             'authorize_password': 'some_authorize_password',
         }
     }]
@@ -775,6 +777,7 @@ def test_net_create_ok(post, organization, admin, version, params):
     assert decrypt_field(cred, 'ssh_key_data') == 'some_key_data'
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
     assert decrypt_field(cred, 'authorize_password') == 'some_authorize_password'
+    assert cred.inputs['authorize'] is True
 
 
 #
