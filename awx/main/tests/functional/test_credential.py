@@ -211,6 +211,7 @@ def test_credential_creation_validation_failure(organization_factory, inputs):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('kind',  ['ssh', 'net', 'scm'])
 @pytest.mark.parametrize('ssh_key_data, ssh_key_unlock, valid', [
     [EXAMPLE_PRIVATE_KEY, None, True],  # unencrypted key, no unlock pass
     [EXAMPLE_PRIVATE_KEY, 'super-secret', False],  # unencrypted key, unlock pass
@@ -221,14 +222,16 @@ def test_credential_creation_validation_failure(organization_factory, inputs):
     ['INVALID-KEY-DATA', None, False],  # invalid key data
     [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
 ])
-def test_ssh_key_data_validation(credentialtype_ssh, organization, ssh_key_data, ssh_key_unlock, valid):
+def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unlock, valid):
     inputs = {}
     if ssh_key_data:
         inputs['ssh_key_data'] = ssh_key_data
     if ssh_key_unlock:
         inputs['ssh_key_unlock'] = ssh_key_unlock
+    cred_type = CredentialType.defaults[kind]()
+    cred_type.save()
     cred = Credential(
-        credential_type=credentialtype_ssh,
+        credential_type=cred_type,
         name="Best credential ever",
         inputs=inputs,
         organization=organization

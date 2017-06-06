@@ -6,6 +6,7 @@ from awx.main.utils.common import decrypt_field
 from awx.api.versioning import reverse
 
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
+EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
 
 
 @pytest.mark.django_db
@@ -666,7 +667,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
         'name': 'Best credential ever',
         'username': 'some_username',
         'password': 'some_password',
-        'ssh_key_data': EXAMPLE_PRIVATE_KEY,
+        'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
         'ssh_key_unlock': 'some_key_unlock',
     }],
     ['v2', {
@@ -675,7 +676,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
         'inputs': {
             'username': 'some_username',
             'password': 'some_password',
-            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
+            'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
             'ssh_key_unlock': 'some_key_unlock',
         }
     }]
@@ -695,7 +696,7 @@ def test_scm_create_ok(post, organization, admin, version, params):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
     assert decrypt_field(cred, 'password') == 'some_password'
-    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_ENCRYPTED_PRIVATE_KEY
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
 
 
@@ -798,7 +799,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
         'name': 'Best credential ever',
         'username': 'some_username',
         'password': 'some_password',
-        'ssh_key_data': EXAMPLE_PRIVATE_KEY,
+        'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
         'ssh_key_unlock': 'some_key_unlock',
         'authorize': True,
         'authorize_password': 'some_authorize_password',
@@ -809,7 +810,7 @@ def test_vault_create_ok(post, organization, admin, version, params):
         'inputs': {
             'username': 'some_username',
             'password': 'some_password',
-            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
+            'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
             'ssh_key_unlock': 'some_key_unlock',
             'authorize': True,
             'authorize_password': 'some_authorize_password',
@@ -831,7 +832,7 @@ def test_net_create_ok(post, organization, admin, version, params):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'some_username'
     assert decrypt_field(cred, 'password') == 'some_password'
-    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
+    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_ENCRYPTED_PRIVATE_KEY
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
     assert decrypt_field(cred, 'authorize_password') == 'some_authorize_password'
     assert cred.inputs['authorize'] is True
