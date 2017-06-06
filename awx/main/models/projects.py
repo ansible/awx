@@ -114,7 +114,7 @@ class ProjectOptions(models.Model):
     timeout = models.IntegerField(
         blank=True,
         default=0,
-        help_text=_("The amount of time to run before the task is canceled."),
+        help_text=_("The amount of time (in seconds) to run before the task is canceled."),
     )
 
     def clean_scm_type(self):

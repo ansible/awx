@@ -145,6 +145,7 @@ class JobOptions(BaseModel):
     timeout = models.IntegerField(
         blank=True,
         default=0,
+        help_text=_("The amount of time (in seconds) to run before the task is canceled."),
     )
     store_facts = models.BooleanField(
         default=False,
