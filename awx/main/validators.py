@@ -57,7 +57,7 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
     while data:
         match = pem_obj_re.match(data)
         if not match:
-            raise ValidationError(_('Invalid certificate or key: %r...') % data[:100])
+            raise ValidationError(_('Invalid certificate or key: %s...') % data[:100])
         data = match.group(4).lstrip()
 
         # Check PEM object type, check key type if private key.
