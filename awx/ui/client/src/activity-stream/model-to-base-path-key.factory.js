@@ -51,6 +51,9 @@ export default function ModelToBasePathKey() {
             case 'workflow_job_template':
                 basePathKey = 'workflow_job_templates';
                 break;
+            case 'host':
+                basePathKey = 'hosts';
+                break;
         }
 
         return basePathKey;

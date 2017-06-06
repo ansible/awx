@@ -34,10 +34,6 @@ angular.module('Organizations', [
             $stateProvider.state({
                 name: 'organizations',
                 url: '/organizations',
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'organization'
-                },
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'organizations', // top-most node in the generated tree
                     modes: ['add', 'edit'], // form nodes to generate
@@ -54,6 +50,10 @@ angular.module('Organizations', [
                     ncyBreadcrumb: {
                         parent: 'setup',
                         label: N_('ORGANIZATIONS')
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'organization'
                     },
                     // concat manually-defined state definitions with generated defintions
                 }).then((generated) => {
