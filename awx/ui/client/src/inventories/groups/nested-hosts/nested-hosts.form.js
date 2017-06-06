@@ -64,7 +64,7 @@ function(i18n) {
                     ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)',
                     type: 'text'
                 },
-                variables: {
+                host_variables: {
                     label: i18n._('Variables'),
                     type: 'textarea',
                     rows: 6,
