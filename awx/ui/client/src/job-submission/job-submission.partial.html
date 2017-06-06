@@ -15,7 +15,7 @@
         <div class="JobSubmission-stepsContainer">
             <div class="JobSubmission-steps">
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='inventory'}" ng-if="ask_inventory_on_launch" ng-click="setStep('inventory')" translate>Inventory</div>
-                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='credential', 'JobSubmission-step--disabled': !credentialTabEnabled}" ng-if="ask_credential_on_launch || password_needed" ng-click="!credentialTabEnabled || setStep('credential')" translate>Credential</div>
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='credential', 'JobSubmission-step--disabled': !credentialTabEnabled}" ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch || password_needed" ng-click="!credentialTabEnabled || setStep('credential')" translate>Credential</div>
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='otherprompts', 'JobSubmission-step--disabled': !otherPromptsTabEnabled}" ng-if="has_other_prompts" ng-click="!otherPromptsTabEnabled || setStep('otherprompts')" translate>Other Prompts</div>
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='survey', 'JobSubmission-step--disabled': !surveyTabEnabled}" ng-if="survey_enabled" ng-click="!surveyTabEnabled || setStep('survey')" translate>Survey</div>
             </div>
@@ -36,7 +36,7 @@
                     <job-sub-inv-list ng-if="includeInventoryList" selected-inventory="$parent.selected_inventory"></job-sub-inv-list>
                 </div>
             </div>
-            <div ng-if="ask_credential_on_launch  || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
+            <div ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
                         <div class="JobSubmission-selectedItemInfo">

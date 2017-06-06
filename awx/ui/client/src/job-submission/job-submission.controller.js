@@ -210,7 +210,7 @@ export default
                         $scope.selected_credentials.machine = angular.copy($scope.defaults.credential);
                     }
 
-                    if($scope.has_default_extra_credentials) {
+                    if($scope.ask_extra_credentials_on_launch) {
                         // Go out and get the credential types
                         Rest.setUrl(GetBasePath('credential_types'));
                         Rest.get()
@@ -219,13 +219,17 @@ export default
                             $scope.credentialKindOptions = [];
                             credentialTypeData.results.forEach((credentialType => {
                                 credential_types[credentialType.id] = credentialType;
-                                $scope.credentialKindOptions.push({
-                                    name: credentialType.name,
-                                    value: credentialType.id
-                                });
+                                if($scope.ask_credential_on_launch || (!$scope.ask_credential_on_launch && credentialType.id !== 1)) {
+                                    $scope.credentialKindOptions.push({
+                                        name: credentialType.name,
+                                        value: credentialType.id
+                                    });
+                                }
                             }));
                             $scope.credential_types = credential_types;
-                            $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
+                            if($scope.has_default_extra_credentials) {
+                                $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
+                            }
                         });
                     }
 
