@@ -55,6 +55,13 @@
             rootGroupsUrl: function(id){
                 var url = GetBasePath('inventory') + id+ '/root_groups';
                 return url;
+            },
+            inventorySourcesOptions: function(inventoryId) {
+                this.url = GetBasePath('inventory') + inventoryId + '/inventory_sources';
+                Rest.setUrl(this.url);
+                return Rest.options()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this));
             }
         };
     }];

@@ -93,7 +93,7 @@ return {
             sourceField: 'name',
             ngClick: 'lookupProject()',
             awRequiredWhen: {
-                reqExpression: "projectRequired",
+                reqExpression: "source && source.value === 'scm'",
                 init: "false"
             },
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
@@ -107,7 +107,7 @@ return {
             ngDisabled: "!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
             id: 'inventory-file-select',
             awRequiredWhen: {
-                reqExpression: "inventoryfilerequired",
+                reqExpression: "source && source.value === 'scm'",
                 init: "true"
             },
             column: 1,

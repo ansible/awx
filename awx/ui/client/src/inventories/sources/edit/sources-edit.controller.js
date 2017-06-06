@@ -7,18 +7,18 @@
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
     'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupManageService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'inventorySourceData', 'SourcesService', 'inventoryData', 'canAdd', 'Empty',
+    'inventorySourceData', 'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
     'Wait', 'Rest', 'Alert', 'ProcessErrors',
     function($state, $stateParams, $scope, ParseVariableString,
         rbacUiControlService, ToJSON,ParseTypeChange, GroupManageService,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
-        inventorySourceData, SourcesService, inventoryData, canAdd, Empty,
+        inventorySourceData, SourcesService, inventoryData, inventorySourcesOptions, Empty,
         Wait, Rest, Alert, ProcessErrors) {
 
         init();
 
         function init() {
-            $scope.canAdd = canAdd;
+            $scope.canAdd = inventorySourcesOptions.actions.POST;
             // instantiate expected $scope values from inventorySourceData
             _.assign($scope,
                 {credential: inventorySourceData.credential},
@@ -316,43 +316,43 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             });
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'rax_regions',
                 choice_name: 'rax_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'ec2_regions',
                 choice_name: 'ec2_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'gce_regions',
                 choice_name: 'gce_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'source_regions',
                 variable: 'azure_regions',
                 choice_name: 'azure_region_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
             GetChoices({
                 scope: $scope,
-                url: GetBasePath('inventory_sources'),
                 field: 'group_by',
                 variable: 'ec2_group_by',
                 choice_name: 'ec2_group_by_choices',
-                callback: 'choicesReadyGroup'
+                callback: 'choicesReadyGroup',
+                options: inventorySourcesOptions
             });
         }
 
@@ -385,10 +385,10 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         GetChoices({
             scope: $scope,
-            url: GetBasePath('inventory_sources'),
             field: 'verbosity',
             variable: 'verbosity_options',
-            callback: 'choicesReadyVerbosity'
+            callback: 'choicesReadyVerbosity',
+            options: inventorySourcesOptions
         });
 
         // region / source options callback

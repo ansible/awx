@@ -20,13 +20,10 @@ export default {
         }
     },
     resolve: {
-        canAdd: ['rbacUiControlService', 'GetBasePath', '$stateParams', function(rbacUiControlService, GetBasePath, $stateParams) {
-            return rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/inventory_sources")
+        inventorySourcesOptions: ['InventoryManageService', '$stateParams', function(InventoryManageService, $stateParams) {
+            return InventoryManageService.inventorySourcesOptions($stateParams.inventory_id)
                 .then(function(res) {
-                    return res.canAdd;
-                })
-                .catch(function() {
-                    return false;
+                    return res.data;
                 });
         }]
     }
