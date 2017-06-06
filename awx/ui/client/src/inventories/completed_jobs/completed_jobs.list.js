@@ -32,6 +32,7 @@ export default ['i18n', function(i18n) {
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
                 ngClick:"viewjobResults(completed_job)",
+                nosort: true
             },
             id: {
                 label: 'ID',
