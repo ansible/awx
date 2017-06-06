@@ -170,6 +170,17 @@ export default {
                 });
             return val.promise;
         }],
+        jobExtraCredentials: ['Rest', 'GetBasePath', '$stateParams', '$q', function(Rest, GetBasePath, $stateParams, $q) {
+            Rest.setUrl(GetBasePath('jobs') + $stateParams.id + '/extra_credentials');
+            var val = $q.defer();
+            Rest.get()
+                .then(function(res) {
+                    val.resolve(res.data.results);
+                }, function(res) {
+                    val.reject(res);
+                });
+            return val.promise;
+        }]
     },
     templateUrl: templateUrl('job-results/job-results'),
     controller: 'jobResultsController'

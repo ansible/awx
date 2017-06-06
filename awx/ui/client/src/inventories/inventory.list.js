@@ -45,7 +45,7 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-4 col-sm-3 col-xs-6 List-staticColumnAdjacent',
-                modalColumnClass: 'col-md-11',
+                modalColumnClass: 'col-md-12',
                 awToolTip: "{{ inventory.description }}",
                 awTipPlacement: "top",
                 ngClick: 'editInventory(inventory)'

@@ -140,7 +140,7 @@
     font-weight: normal;
     font-size: small;
 }
-.JobSubmission-previewItemTitle {
+.JobSubmission-previewItemTitle, .JobSubmission-previewItemSubTitle, .JobSubmission-selectedItemInfoSubTitle {
     color: @default-interface-txt;
 }
 .JobSubmission-previewItemNone {
@@ -189,13 +189,18 @@
 }
 .JobSubmission-selectedItemInfo {
     display: flex;
-    flex: 0 0 auto;
+    flex: 0 0 100%;
 }
 .JobSubmission-selectedItemRevert {
     display: flex;
     flex: 0 0 auto;
 }
-.JobSubmission-selectedItemLabel {
+.JobSubmission-credentialSubSection {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+.JobSubmission-label {
     color: @default-interface-txt;
     margin-right: 10px;
 }
@@ -213,4 +218,10 @@
 }
 .JobSubmission-passwordButton {
     padding: 5px 13px!important;
+}
+.JobSubmission .List-noItems {
+    margin-top: auto;
+}
+.JobSubmission-selectedItemLabel {
+    flex: 0 0 165px;
 }

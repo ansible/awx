@@ -64,10 +64,8 @@
 export default
     [   '$scope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
         'LaunchJob', '$state', 'InventoryList', 'CredentialList', 'ParseTypeChange',
-        'GetSurveyQuestions',
         function($scope, GetBasePath, Wait, Rest, ProcessErrors,
-            LaunchJob, $state, InventoryList, CredentialList, ParseTypeChange,
-            GetSurveyQuestions) {
+            LaunchJob, $state, InventoryList, CredentialList, ParseTypeChange) {
 
             var launch_url;
 
@@ -84,8 +82,8 @@ export default
             };
 
             var updateRequiredPasswords = function() {
-                if($scope.selected_credential) {
-                    if($scope.selected_credential.id === $scope.defaults.credential.id) {
+                if($scope.selected_credentials.machine) {
+                    if($scope.selected_credentials.machine.id === $scope.defaults.credential.id) {
                         clearRequiredPasswords();
                         for(var i=0; i<$scope.passwords_needed_to_start.length; i++) {
                             var password = $scope.passwords_needed_to_start[i];
@@ -106,11 +104,11 @@ export default
                         }
                     }
                     else {
-                        if($scope.selected_credential.kind === "ssh"){
-                            $scope.ssh_password_required = ($scope.selected_credential.password === "ASK") ? true : false;
-                            $scope.ssh_key_unlock_required = ($scope.selected_credential.ssh_key_unlock === "ASK") ? true : false;
-                            $scope.become_password_required = ($scope.selected_credential.become_password === "ASK") ? true : false;
-                            $scope.vault_password_required = ($scope.selected_credential.vault_password === "ASK") ? true : false;
+                        if($scope.selected_credentials.machine.kind === "ssh"){
+                            $scope.ssh_password_required = ($scope.selected_credentials.machine.password === "ASK") ? true : false;
+                            $scope.ssh_key_unlock_required = ($scope.selected_credentials.machine.ssh_key_unlock === "ASK") ? true : false;
+                            $scope.become_password_required = ($scope.selected_credentials.machine.become_password === "ASK") ? true : false;
+                            $scope.vault_password_required = ($scope.selected_credentials.machine.vault_password === "ASK") ? true : false;
                         }
                         else {
                             clearRequiredPasswords();
@@ -133,6 +131,10 @@ export default
             $scope.init = function() {
                 $scope.forms = {};
                 $scope.passwords = {};
+                $scope.selected_credentials = {
+                    machine: null,
+                    extra: []
+                };
 
                 // As of 3.0, the only place the user can relaunch a
                 // playbook is on jobTemplates.edit (completed_jobs tab),
@@ -155,6 +157,10 @@ export default
                     }
                 }
 
+                $scope.$watch('selected_credentials.machine', function(){
+                    updateRequiredPasswords();
+                });
+
                 // Get the job or job_template record
                 Wait('start');
                 Rest.setUrl(launch_url);
@@ -170,6 +176,7 @@ export default
                     $scope.password_needed = data.passwords_needed_to_start && data.passwords_needed_to_start.length > 0;
                     $scope.has_default_inventory = data.defaults && data.defaults.inventory && data.defaults.inventory.id;
                     $scope.has_default_credential = data.defaults && data.defaults.credential && data.defaults.credential.id;
+                    $scope.has_default_extra_credentials = data.defaults && data.defaults.extra_credentials && data.defaults.extra_credentials.length > 0;
 
                     $scope.other_prompt_data = {};
 
@@ -200,11 +207,33 @@ export default
                     }
 
                     if($scope.has_default_credential) {
-                        $scope.selected_credential = angular.copy($scope.defaults.credential);
-                        updateRequiredPasswords();
+                        $scope.selected_credentials.machine = angular.copy($scope.defaults.credential);
                     }
 
-                    if( ($scope.submitJobType === 'workflow_job_template' && !$scope.survey_enabled) || ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                    if($scope.ask_extra_credentials_on_launch) {
+                        // Go out and get the credential types
+                        Rest.setUrl(GetBasePath('credential_types'));
+                        Rest.get()
+                        .success(function (credentialTypeData) {
+                            let credential_types = {};
+                            $scope.credentialKindOptions = [];
+                            credentialTypeData.results.forEach((credentialType => {
+                                credential_types[credentialType.id] = credentialType;
+                                if(($scope.ask_credential_on_launch || (!$scope.ask_credential_on_launch && credentialType.id !== 1)) && credentialType.kind.match(/^(cloud|network|ssh)$/)) {
+                                    $scope.credentialKindOptions.push({
+                                        name: credentialType.name,
+                                        value: credentialType.id
+                                    });
+                                }
+                            }));
+                            $scope.credential_types = credential_types;
+                            if($scope.has_default_extra_credentials) {
+                                $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
+                            }
+                        });
+                    }
+
+                    if( ($scope.submitJobType === 'workflow_job_template' && !$scope.survey_enabled) || ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.ask_extra_credentials_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
                         // The job can be launched if
                         // a) It's a relaunch and no passwords are needed
                         // or
@@ -219,7 +248,7 @@ export default
                             if($scope.ask_inventory_on_launch) {
                                 $scope.setStep("inventory", true);
                             }
-                            else if($scope.ask_credential_on_launch || $scope.password_needed) {
+                            else if($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed) {
                                 $scope.setStep("credential", true);
                             }
                             else if($scope.has_other_prompts) {
@@ -247,8 +276,7 @@ export default
                                 }
                                 if(jobResultData.summary_fields.credential) {
                                     $scope.defaults.credential = angular.copy(jobResultData.summary_fields.credential);
-                                    $scope.selected_credential = angular.copy(jobResultData.summary_fields.credential);
-                                    updateRequiredPasswords();
+                                    $scope.selected_credentials.machine = angular.copy(jobResultData.summary_fields.credential);
                                 }
                                 initiateModal();
                             })
@@ -296,33 +324,24 @@ export default
 
             };
 
-            $scope.getListsAndSurvey = function() {
-                if($scope.ask_inventory_on_launch) {
-                    $scope.includeInventoryList = true;
-                }
-                if($scope.ask_credential_on_launch) {
-                    $scope.includeCredentialList = true;
-                }
-                if($scope.survey_enabled) {
-                    GetSurveyQuestions({
-                        scope: $scope,
-                        id: $scope.submitJobId,
-                        submitJobType: $scope.submitJobType
-                    });
-
-                }
-            };
-
             $scope.revertToDefaultInventory = function() {
                 if($scope.has_default_inventory) {
                     $scope.selected_inventory = angular.copy($scope.defaults.inventory);
                 }
             };
 
-            $scope.revertToDefaultCredential = function() {
+            $scope.revertToDefaultCredentials = function() {
                 if($scope.has_default_credential) {
-                    $scope.selected_credential = angular.copy($scope.defaults.credential);
-                    updateRequiredPasswords();
+                    $scope.selected_credentials.machine = angular.copy($scope.defaults.credential);
+                }
+                else {
+                    $scope.selected_credentials.machine = null;
+                }
+                if($scope.has_default_extra_credentials) {
+                    $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
+                }
+                else {
+                    $scope.selected_credentials.extra = [];
                 }
             };
 
@@ -340,8 +359,7 @@ export default
             $scope.toggle_credential = function(id) {
                 $scope.credentials.forEach(function(row, i) {
                     if (row.id === id) {
-                        $scope.selected_credential = angular.copy(row);
-                        updateRequiredPasswords();
+                        $scope.selected_credentials.machine = angular.copy(row);
                         $scope.credentials[i].checked = 1;
                     } else {
                         $scope.credentials[i].checked = 0;
@@ -351,7 +369,7 @@ export default
 
             $scope.getActionButtonText = function() {
                 if($scope.step === "inventory") {
-                    return ($scope.ask_credential_on_launch || $scope.password_needed || $scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
+                    return ($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed || $scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
                 }
                 else if($scope.step === "credential") {
                     return ($scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
@@ -377,7 +395,7 @@ export default
                     }
                 }
                 else if($scope.step === "credential") {
-                    if($scope.selected_credential && $scope.forms.credentialpasswords && $scope.forms.credentialpasswords.$valid) {
+                    if($scope.selected_credentials.machine && $scope.forms.credentialpasswords && $scope.forms.credentialpasswords.$valid) {
                         return false;
                     }
                     else {
@@ -409,7 +427,7 @@ export default
             $scope.takeAction = function() {
                 if($scope.step === "inventory") {
                     // Check to see if there's another step after this one
-                    if($scope.ask_credential_on_launch || $scope.password_needed) {
+                    if($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed) {
                         $scope.setStep("credential");
                     }
                     else if($scope.has_other_prompts) {
@@ -456,13 +474,56 @@ export default
                 $scope.parseTypeChange('parseType', 'jobLaunchVariables');
             };
 
+            $scope.showRevertCredentials = function(){
+                let machineCredentialMatches = true;
+                let extraCredentialsMatch = true;
+
+                if($scope.defaults.credential && $scope.defaults.credential.id) {
+                    if(!$scope.selected_credentials.machine || ($scope.selected_credentials.machine && $scope.selected_credentials.machine.id !== $scope.defaults.credential.id)) {
+                        machineCredentialMatches = false;
+                    }
+                }
+                else {
+                    if($scope.selected_credentials.machine && $scope.selected_credentials.machine.id) {
+                        machineCredentialMatches = false;
+                    }
+                }
+
+                if($scope.defaults.extra_credentials && $scope.defaults.extra_credentials.length > 0) {
+                    if($scope.selected_credentials.extra && $scope.selected_credentials.extra.length > 0) {
+                        if($scope.defaults.extra_credentials.length !== $scope.selected_credentials.extra.length) {
+                            extraCredentialsMatch = false;
+                        }
+                        else {
+                            $scope.defaults.extra_credentials.forEach((defaultExtraCredential) =>{
+                                let matchesSelected = false;
+                                $scope.selected_credentials.extra.forEach((selectedExtraCredential) =>{
+                                    if(defaultExtraCredential.id === selectedExtraCredential.id) {
+                                        matchesSelected = true;
+                                    }
+                                });
+                                if(!matchesSelected) {
+                                    extraCredentialsMatch = false;
+                                }
+                            });
+                        }
+
+                    }
+                    else {
+                        extraCredentialsMatch = false;
+                    }
+                }
+                else {
+                    if($scope.selected_credentials.extra && $scope.selected_credentials.extra.length > 0) {
+                        extraCredentialsMatch = false;
+                    }
+                }
+
+                return machineCredentialMatches && extraCredentialsMatch ? false : true;
+            };
+
             $scope.$on('inventorySelected', function(evt, selectedRow){
                 $scope.selected_inventory = _.cloneDeep(selectedRow);
-            });
-
-            $scope.$on('credentialSelected', function(evt, selectedRow){
-                $scope.selected_credential = _.cloneDeep(selectedRow);
-                updateRequiredPasswords();
             });
 
         }

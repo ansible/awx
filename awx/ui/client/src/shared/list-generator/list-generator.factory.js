@@ -317,7 +317,7 @@ export default ['$compile', 'Attr', 'Icon',
                 // Change layout if a lookup list, place radio buttons before labels
                 if (options.mode === 'lookup') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator}.id)"></td>`;
+                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})"></td>`;
                     }
                     else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +

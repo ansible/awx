@@ -278,6 +278,22 @@
                         </div>
                     </div>
 
+                    <!-- EXTRA CREDENTIALS DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="jobExtraCredentials.length > 0">
+                        <label class="JobResults-resultRowLabel">
+                            Extra Credentials
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            <span ng-repeat="extraCredential in jobExtraCredentials">
+                                <a ui-sref="credentials.edit({credential_id: extraCredential.id})" aw-tool-tip="Edit the credential" data-placement="top">
+                                    {{ extraCredential.name }}
+                                </a>
+                                {{$last ? '' : ', '}}
+                            </span>
+                        </div>
+                    </div>
+
                     <!-- CLOUD CREDENTIAL DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.summary_fields.cloud_credential.name">

@@ -210,10 +210,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         });
                                     }
 
-                                    $scope.toggle_row = function(id) {
+                                    $scope.toggle_row = function(selectedRow) {
 
                                         $scope.job_templates.forEach(function(row, i) {
-                                            if (row.id === id) {
+                                            if (row.id === selectedRow.id) {
                                                 $scope.job_templates[i].checked = 1;
                                                 $scope.selection[list.iterator] = {
                                                     id: row.id,
@@ -288,10 +288,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         });
                                     }
 
-                                    $scope.toggle_row = function(id) {
+                                    $scope.toggle_row = function(selectedRow) {
 
                                         $scope.workflow_inventory_sources.forEach(function(row, i) {
-                                            if (row.id === id) {
+                                            if (row.id === selectedRow.id) {
                                                 $scope.workflow_inventory_sources[i].checked = 1;
                                                 $scope.selection[list.iterator] = {
                                                     id: row.id,
@@ -366,10 +366,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         });
                                     }
 
-                                    $scope.toggle_row = function(id) {
+                                    $scope.toggle_row = function(selectedRow) {
 
                                         $scope.projects.forEach(function(row, i) {
-                                            if (row.id === id) {
+                                            if (row.id === selectedRow.id) {
                                                 $scope.projects[i].checked = 1;
                                                 $scope.selection[list.iterator] = {
                                                     id: row.id,
