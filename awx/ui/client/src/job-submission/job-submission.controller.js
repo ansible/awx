@@ -219,7 +219,7 @@ export default
                             $scope.credentialKindOptions = [];
                             credentialTypeData.results.forEach((credentialType => {
                                 credential_types[credentialType.id] = credentialType;
-                                if($scope.ask_credential_on_launch || (!$scope.ask_credential_on_launch && credentialType.id !== 1)) {
+                                if(($scope.ask_credential_on_launch || (!$scope.ask_credential_on_launch && credentialType.id !== 1)) && credentialType.kind.match(/^(cloud|network|ssh)$/)) {
                                     $scope.credentialKindOptions.push({
                                         name: credentialType.name,
                                         value: credentialType.id
