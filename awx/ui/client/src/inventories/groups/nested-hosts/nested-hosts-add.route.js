@@ -10,10 +10,7 @@ export default {
     views: {
         'hostForm@inventories': {
             templateProvider: function(GenerateForm, RelatedHostsFormDefinition, NestedHostsFormDefinition, $stateParams) {
-                let form = RelatedHostsFormDefinition;
-                if($stateParams.group_id){
-                    form = NestedHostsFormDefinition;
-                }
+                let form = ($stateParams.group_id) ? NestedHostsFormDefinition : RelatedHostsFormDefinition;
                 return GenerateForm.buildHTML(form, {
                     mode: 'add',
                     related: false
