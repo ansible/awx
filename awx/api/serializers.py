@@ -1895,11 +1895,14 @@ class CredentialTypeSerializer(BaseSerializer):
                 raise PermissionDenied(
                     detail= _("Modifications to inputs are not allowed for credential types that are in use")
                 )
+        ret = super(CredentialTypeSerializer, self).validate(attrs)
+
         fields = attrs.get('inputs', {}).get('fields', [])
         for field in fields:
             if field.get('ask_at_runtime', False):
                 raise serializers.ValidationError({"inputs": _("'ask_at_runtime' is not supported for custom credentials.")})
-        return super(CredentialTypeSerializer, self).validate(attrs)
+
+        return ret
 
     def get_related(self, obj):
         res = super(CredentialTypeSerializer, self).get_related(obj)
