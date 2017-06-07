@@ -52,6 +52,15 @@ export default {
             actionClass: 'btn List-buttonDefault',
             buttonContent: 'REFRESH'
         },
+        sync_all: {
+            mode: 'all',
+            awToolTip: "Sync all inventory sources",
+            ngClick: "syncAllSources()",
+            ngShow: "showSyncAll",
+            actionClass: 'btn List-buttonDefault',
+            buttonContent: 'SYNC ALL',
+            dataPlacement: "top"
+        },
         create: {
             mode: 'all',
             ngClick: "createSource()",

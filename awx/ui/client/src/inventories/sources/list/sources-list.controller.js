@@ -8,12 +8,13 @@
     'InventoryUpdate', 'CancelSourceUpdate',
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
-    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions', 'canAdd',
+    'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
+    'canAdd', 'hasSyncableSources',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService, inventorySourceOptions, canAdd){
+        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources){
 
         let list = SourcesListDefinition;
         var inventory_source;
@@ -24,6 +25,7 @@
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
             $scope.canAdd = canAdd;
+            $scope.showSyncAll = hasSyncableSources;
 
             // Search init
             $scope.list = list;
@@ -121,8 +123,8 @@
                 Wait('start');
                 SourcesService.delete(inventory_source.id).then(() => {
                     $('#prompt-modal').modal('hide');
-                    if (parseInt($state.params.source_id) === inventory_source) {
-                        $state.go("sources", null, {reload: true});
+                    if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
+                        $state.go("inventories.edit.inventory_sources", {inventory_id: $scope.inventory_id}, {reload: true});
                     } else {
                         $state.go($state.current.name, null, {reload: true});
                     }
@@ -159,6 +161,14 @@
             // Add this inv source's id to the array of inv source id's so that it gets
             // added to the breadcrumb trail
             $state.go('inventories.edit.inventory_sources.edit.schedules', {inventory_source_id: id}, {reload: true});
+        };
+
+        $scope.syncAllSources = function() {
+            InventoryUpdate({
+                scope: $scope,
+                url: inventoryData.related.update_inventory_sources,
+                updateAllSources: true
+            });
         };
 
     }];

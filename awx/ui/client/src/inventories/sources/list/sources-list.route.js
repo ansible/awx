@@ -69,6 +69,24 @@ export default {
                 .catch(function() {
                     return false;
                 });
+        }],
+        hasSyncableSources: ['InventoryManageService', '$stateParams', function(InventoryManageService, $stateParams) {
+            return InventoryManageService.updateInventorySourcesGet($stateParams.inventory_id)
+                .then(function(res) {
+                    let canUpdateFound = false;
+                    if(res.data && res.data.length > 0) {
+                        res.data.forEach(function(source) {
+                            if(source.can_update) {
+                                canUpdateFound = true;
+                            }
+                        });
+                    }
+
+                    return canUpdateFound;
+                })
+                .catch(function() {
+                    return false;
+                });
         }]
     }
 };

@@ -91,16 +91,7 @@ export default ['i18n', function(i18n) {
         },
 
         fieldActions: {
-
             columnClass: 'col-md-2 col-sm-3 col-xs-4',
-
-            inventory_update: {
-                mode: 'all',
-                ngClick: 'syncInventory(inventory)',
-                awToolTip: i18n._('Sync all inventory sources'),
-                ngShow: "inventory.kind === '' && inventory.has_inventory_sources",
-                dataPlacement: "top",
-            },
             edit: {
                 label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory)',

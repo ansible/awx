@@ -13,7 +13,7 @@
 function InventoriesList($scope,
     $filter, Rest, InventoryList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state,
-    Dataset, InventoryUpdate, canAdd) {
+    Dataset, canAdd) {
 
     let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
@@ -107,18 +107,10 @@ function InventoriesList($scope,
             actionText: 'DELETE'
         });
     };
-
-    $scope.syncInventory = function(inventory) {
-        InventoryUpdate({
-            scope: $scope,
-            url: inventory.related.update_inventory_sources,
-            updateAllSources: true
-        });
-    };
 }
 
 export default ['$scope',
     '$filter', 'Rest', 'InventoryList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'Dataset', 'InventoryUpdate', 'canAdd', InventoriesList
+    '$state', 'Dataset', 'canAdd', InventoriesList
 ];

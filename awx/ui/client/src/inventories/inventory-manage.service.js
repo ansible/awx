@@ -62,6 +62,13 @@
                 return Rest.options()
                     .success(this.success.bind(this))
                     .error(this.error.bind(this));
+            },
+            updateInventorySourcesGet: function(inventoryId) {
+                this.url = GetBasePath('inventory') + inventoryId + '/update_inventory_sources';
+                Rest.setUrl(this.url);
+                return Rest.get()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this));
             }
         };
     }];
