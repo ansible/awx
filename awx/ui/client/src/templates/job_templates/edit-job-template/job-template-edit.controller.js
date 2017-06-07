@@ -86,13 +86,7 @@ export default
                     $scope.playbook_options = [$scope.playbook];
                 }
 
-                if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
-                    $scope.playbook_options = ['Default'];
-                    $scope.playbook = 'Default';
-                    sync_playbook_select2();
-                    Wait('stop');
-                }
-                else if (!Empty(project)) {
+                if (!Empty(project)) {
                     url = GetBasePath('projects') + project + '/playbooks/';
                     Wait('start');
                     Rest.setUrl(url);
@@ -132,30 +126,7 @@ export default
                 }
             };
 
-            let last_non_scan_project_name = null;
-            let last_non_scan_playbook = "";
-            let last_non_scan_playbook_options = [];
             $scope.jobTypeChange = function() {
-                if ($scope.job_type) {
-                    if ($scope.job_type.value === 'scan') {
-                        if ($scope.project_name !== "Default") {
-                            last_non_scan_project_name = $scope.project_name;
-                            last_non_scan_playbook = $scope.playbook;
-                            last_non_scan_playbook_options = $scope.playbook_options;
-                        }
-                        // If the job_type is 'scan' then we don't want the user to be
-                        // able to prompt for job type or inventory
-                        $scope.ask_job_type_on_launch = false;
-                        $scope.ask_inventory_on_launch = false;
-                        $scope.resetProjectToDefault();
-                    }
-                    else if ($scope.project_name === "Default") {
-                        $scope.project_name = last_non_scan_project_name;
-                        $scope.playbook_options = last_non_scan_playbook_options;
-                        $scope.playbook = last_non_scan_playbook;
-                        $scope.job_template_form.playbook.$setPristine();
-                    }
-                }
                 sync_playbook_select2();
             };
 
@@ -529,12 +500,7 @@ export default
             $scope.formSave = function () {
                 var fld, data = {};
                 $scope.invalid_survey = false;
-
-                // users can't save a survey with a scan job
-                if($scope.job_type.value === "scan" &&
-                    $scope.survey_enabled === true){
-                    $scope.survey_enabled = false;
-                }
+                
                 // Can't have a survey enabled without a survey
                 if($scope.survey_enabled === true &&
                     $scope.survey_exists!==true){
@@ -575,11 +541,7 @@ export default
 
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);
-                    if(data.job_type === 'scan' &&
-                        $scope.default_scan === true){
-                        data.project = "";
-                        data.playbook = "";
-                    }
+
                     // We only want to set the survey_enabled flag to
                     // true for this job template if a survey exists
                     // and it's been enabled.  By default,

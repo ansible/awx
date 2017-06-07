@@ -133,10 +133,6 @@ export default
 
                     scope.can_edit = data.summary_fields.user_capabilities.edit;
 
-                    if (scope.job_type.value === "scan" && (!scope.project || scope.project === "") && (!scope.playbook || scope.playbook === "")) {
-                        scope.resetProjectToDefault();
-                    }
-
                     scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master);
                 })
                 .error(function (data, status) {

@@ -55,15 +55,12 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         " on the selected hosts."), "<em>run</em>") + "</p> <p>" +
                         i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook."), "<em>check</em>") + " " +
                         i18n.sprintf(i18n._("Instead, %s will check playbook " +
-                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p> <p>" +
-                        i18n.sprintf(i18n._("Setting the type to %s will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature."), "<em>scan</em>") + "</p>",
+                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_job_type_on_launch',
-                        ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch'),
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     },
@@ -90,7 +87,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     subCheckbox: {
                         variable: 'ask_inventory_on_launch',
                         ngChange: 'job_template_form.inventory_name.$validate()',
-                        ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
@@ -100,7 +96,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     labelAction: {
                         label: i18n._('RESET'),
                         ngClick: 'resetProjectToDefault()',
-                        'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
                     },
                     type: 'lookup',
                     list: 'ProjectList',
@@ -122,7 +117,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     label: i18n._('Playbook'),
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || disablePlaybookBecausePermissionDenied",
+                    ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || disablePlaybookBecausePermissionDenied",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
@@ -477,13 +472,13 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 view_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) &&  survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     label: i18n._('View Survey'),
                     class: 'Form-primaryButton'
                 },
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     awFeature: 'surveys',
                     awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top',
@@ -493,7 +488,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 }
