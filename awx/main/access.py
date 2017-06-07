@@ -804,7 +804,8 @@ class InventorySourceAccess(BaseAccess):
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
-            return False
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
+
         if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
         # Checks for admin or change permission on inventory.
