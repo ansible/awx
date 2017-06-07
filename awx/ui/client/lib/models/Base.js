@@ -1,9 +1,17 @@
 let $http;
+let $q;
 
 function request (method, ...args) {
-    method = method.toUpperCase();
+    this.method = method.toUpperCase();
 
-    switch (method) {
+    if (typeof args[0] === 'object') {
+        this.res = null;
+        this.model = args[0];
+
+        return $q.resolve();
+    }
+
+    switch (this.method) {
         case 'OPTIONS':
             return this.httpOptions(...args);    
         case 'GET':
@@ -112,12 +120,13 @@ function BaseModel (path) {
     this.path = this.normalizePath(path);
 };
 
-function BaseModelLoader (_$http_) {
+function BaseModelLoader (_$http_, _$q_) {
     $http = _$http_;
+    $q = _$q_;
 
     return BaseModel;
 }
 
-BaseModelLoader.$inject = ['$http'];
+BaseModelLoader.$inject = ['$http', '$q'];
 
 export default BaseModelLoader;

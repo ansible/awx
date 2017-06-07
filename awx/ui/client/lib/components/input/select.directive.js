@@ -36,6 +36,7 @@ function AtInputSelectController (baseInputController, eventService) {
             [select, 'focus', () => input.classList.add('at-Input--focus')],
             [select, 'change', () => scope.$apply(() => {
                 scope.open = false;
+                vm.updateDisplayModel();
                 vm.check();
             })],
             [select, 'blur', () => {

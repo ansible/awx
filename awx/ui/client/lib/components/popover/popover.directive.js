@@ -17,7 +17,7 @@ function AtPopoverController () {
     vm.init = (scope, _container_, _icon_, _popover_) => {
         icon = _icon_;
         popover = _popover_;
-        scope.inline = scope.state._inline || true;
+        scope.inline = true;
 
         icon.addEventListener('click', vm.createDisplayListener());
     };

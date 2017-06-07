@@ -12,10 +12,11 @@ function AtFormController (eventService) {
     let form;
 
     vm.components = [];
+    vm.modal = {};
     vm.state = {
         isValid: false,
         disabled: false,
-        value: {}
+        value: {},
     };
 
     vm.init = (_scope_, _form_) => {
@@ -76,7 +77,7 @@ function AtFormController (eventService) {
             }, {});
 
         scope.state.save(data)
-            .then(scope.state.created)
+            .then(scope.state.onSaveSuccess)
             .catch(err => vm.onSaveError(err))
             .finally(() => vm.state.disabled = false);
     };
@@ -89,7 +90,15 @@ function AtFormController (eventService) {
         }
 
         if (!handled) {
-            // TODO: launch modal for unexpected error type
+            let message;
+
+            if (typeof err.data === 'object') {
+                message = JSON.stringify(err.data);  
+            } else {
+                message = err.data;
+            }
+
+            vm.modal.show('Unable to Submit', `Unexpected Error: ${message}`);
         }
     };
 

@@ -1,12 +1,14 @@
-function AddCredentialsController (models, $state) {
+function EditCredentialsController (models, $state) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
+    let credentialOptions = models.credentialOptions;
 
-    vm.form = credential.createFormSchema('post', {
-        omit: ['user', 'team', 'inputs']
+    vm.form = credentialOptions.createFormSchema('put', {
+        omit: ['user', 'team', 'inputs'],
+        models
     });
 
     vm.form.credential_type._data = credentialType.get('results');
@@ -34,9 +36,9 @@ function AddCredentialsController (models, $state) {
     };
 }
 
-AddCredentialsController.$inject = [
+EditCredentialsController.$inject = [
     'resolvedModels',
     '$state'
 ];
 
-export default AddCredentialsController;
+export default EditCredentialsController;

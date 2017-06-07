@@ -1,7 +1,9 @@
 let BaseModel;
 
-function createFormSchema (type, config) {
-    let schema = Object.assign({}, this.get('actions.POST'));
+function createFormSchema (method, config) {
+    method = method.toUpperCase();
+
+    let schema = Object.assign({}, this.get(`actions.${method}`));
 
     if (config && config.omit) {
         config.omit.forEach(key => {
