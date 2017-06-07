@@ -825,12 +825,12 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = True
 # ---------------------
 # ----- SCM -----
 # ---------------------
-#CUSTOM_ENABLED_VAR =
-#CUSTOM_ENABLED_VALUE =
+#SCM_ENABLED_VAR =
+#SCM_ENABLED_VALUE =
 SCM_GROUP_FILTER = r'^.+$'
 SCM_HOST_FILTER = r'^.+$'
 SCM_EXCLUDE_EMPTY_GROUPS = True
-#CUSTOM_INSTANCE_ID_VAR =
+#SCM_INSTANCE_ID_VAR =
 
 # ---------------------
 # -- Activity Stream --
