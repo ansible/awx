@@ -34,7 +34,7 @@ export default ['i18n', function(i18n) {
             },
             smart_status: {
               label: i18n._('Activity'),
-              columnClass: 'List-tableCell col-lg-2 col-md-2 hidden-sm hidden-xs',
+              columnClass: 'List-tableCell col-lg-2 col-md-3 hidden-sm hidden-xs',
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
@@ -44,7 +44,7 @@ export default ['i18n', function(i18n) {
                 type: 'labels',
                 nosort: true,
                 showDelete: true,
-                columnClass: 'List-tableCell col-lg-2 col-md-4 hidden-sm hidden-xs'
+                columnClass: 'List-tableCell col-lg-2 col-md-3 hidden-sm hidden-xs'
             }
         },
 
