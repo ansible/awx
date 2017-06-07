@@ -1852,7 +1852,7 @@ class RunInventoryUpdate(BaseTask):
                 _eager_fields=dict(
                     job_type='run',
                     status='running',
-                    instance_group = job.instance_group,
+                    instance_group = inventory_update.instance_group,
                     celery_task_id=request_id))
             # associate the inventory update before calling run() so that a
             # cancel() call on the inventory update can cancel the project update
