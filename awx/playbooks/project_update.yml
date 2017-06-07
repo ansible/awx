@@ -10,6 +10,7 @@
 # scm_username: username (only for svn)
 # scm_password: password (only for svn)
 # scm_accept_hostkey: true/false (only for git)
+# scm_revision: current revision in tower
 
 - hosts: all
   connection: local
@@ -105,44 +106,52 @@
         scm_version: "{{ scm_result['after'] }}"
       when: "'after' in scm_result"
 
-    - name: update project using insights
-      uri:
-        url: "{{insights_url}}/r/insights/v1/maintenance?ansible=true"
-        user: "{{scm_username}}"
-        password: "{{scm_password}}"
-        force_basic_auth: yes
+    - block:
+      - name: update project using insights
+        uri:
+          url: "{{insights_url}}/r/insights/v1/maintenance?ansible=true"
+          user: "{{scm_username}}"
+          password: "{{scm_password}}"
+          force_basic_auth: yes
+        register: insights_output
+
+      - name: Set the insights cache version
+        set_fact:
+          scm_version: "{{ insights_output.etag|default(scm_revision)|regex_replace('\"(.*)\"$', '\\1') }}"
+
       when: scm_type == 'insights'
-      register: insights_output
 
-    - name: Ensure the project directory is present
-      file:
-        dest: "{{project_path|quote}}"
-        state: directory
-      when: scm_type == 'insights'
+    - block:
+      - name: Ensure the project directory is present
+        file:
+          dest: "{{project_path|quote}}"
+          state: directory
 
-    - name: Fetch Insights Playbook With Name
-      get_url:
-        url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
-        dest: "{{project_path|quote}}/{{item.name}}-{{item.maintenance_id}}.yml"
-        url_username: "{{scm_username}}"
-        url_password: "{{scm_password}}"
-        force_basic_auth: yes
-        force: yes
-      when: scm_type == 'insights' and item.name != None and item.name != ""
-      with_items: "{{ insights_output.json|default([]) }}"
-      failed_when: false
+      - name: Fetch Insights Playbook With Name
+        get_url:
+          url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
+          dest: "{{project_path|quote}}/{{item.name}}-{{item.maintenance_id}}.yml"
+          url_username: "{{scm_username}}"
+          url_password: "{{scm_password}}"
+          force_basic_auth: yes
+          force: yes
+        when: item.name != None and item.name != ""
+        with_items: "{{ insights_output.json|default([]) }}"
+        failed_when: false
 
-    - name: Fetch Insights Playbook
-      get_url:
-        url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
-        dest: "{{project_path|quote}}/insights-plan-{{item.maintenance_id}}.yml"
-        url_username: "{{scm_username}}"
-        url_password: "{{scm_password}}"
-        force_basic_auth: yes
-        force: yes
-      when: scm_type == 'insights' and (item.name == None or item.name == "")
-      with_items: "{{ insights_output.json|default([]) }}"
-      failed_when: false
+      - name: Fetch Insights Playbook
+        get_url:
+          url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
+          dest: "{{project_path|quote}}/insights-plan-{{item.maintenance_id}}.yml"
+          url_username: "{{scm_username}}"
+          url_password: "{{scm_password}}"
+          force_basic_auth: yes
+          force: yes
+        when: (item.name == None or item.name == "")
+        with_items: "{{ insights_output.json|default([]) }}"
+        failed_when: false
+
+      when: scm_type == 'insights' and scm_version != scm_revision
 
     - name: detect requirements.yml
       stat: path={{project_path|quote}}/roles/requirements.yml
