@@ -36,6 +36,10 @@ export default ['i18n', function(i18n) {
             },
             AUTH_BASIC_ENABLED: {
                 type: 'toggleSwitch',
+            },
+            REMOTE_HOST_HEADERS: {
+                type: 'textarea',
+                reset: 'REMOTE_HOST_HEADERS'
             }
         },
 
