@@ -44,6 +44,20 @@ export default {
             dataHostId: "{{ host.id }}",
             dataType: "host",
             class: 'InventoryManage-breakWord'
+        },
+        groups: {
+            label: "Related Groups",
+            type: 'related_groups',
+            nosort: true,
+            showDelete: true,
+            columnClass: 'RelatedGroupsLabelsCell List-tableCell col-lg-2 col-md-3 hidden-sm hidden-xs'
+            // ngBind: 'host.summary_fields.groups',
+            // ngClass: "{ 'host-disabled-label': !host.enabled }",
+            // columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
+            // dataHostId: "{{ host.id }}",
+            // dataType: "host",
+            // class: 'InventoryManage-breakWord'
+
         }
     },
 

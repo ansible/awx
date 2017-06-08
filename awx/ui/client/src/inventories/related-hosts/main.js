@@ -9,12 +9,14 @@
  import relatedHostList from './list/main';
  import relatedHostsListDefinition from './related-host.list';
  import relatedHostsFormDefinition from './related-host.form';
+ import relatedGroupsLabels from './related-groups-labels/main';
 
 export default
 angular.module('relatedHost', [
         relatedHostAdd.name,
         relatedHostEdit.name,
-        relatedHostList.name
+        relatedHostList.name,
+        relatedGroupsLabels.name
     ])
     .factory('RelatedHostsFormDefinition', relatedHostsFormDefinition)
     .value('RelatedHostsListDefinition', relatedHostsListDefinition);
