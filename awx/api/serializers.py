@@ -1615,7 +1615,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(InventorySourceSerializer, self).build_relational_field(field_name, relation_info)
         # SCM Project and inventory are read-only unless creating a new inventory.
-        if self.instance and field_name in ['source_project', 'inventory']:
+        if self.instance and field_name == 'inventory':
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
