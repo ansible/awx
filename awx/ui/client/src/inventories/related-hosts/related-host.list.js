@@ -38,7 +38,7 @@ export default {
         name: {
             key: true,
             label: 'Hosts',
-            ngClick: "editHost(host.id)",
+            ngClick: "editHost(host)",
             ngClass: "{ 'host-disabled-label': !host.enabled }",
             columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
             dataHostId: "{{ host.id }}",
@@ -66,7 +66,7 @@ export default {
         },
         edit: {
             //label: 'Edit',
-            ngClick: "editHost(host.id)",
+            ngClick: "editHost(host)",
             icon: 'icon-edit',
             awToolTip: 'Edit host',
             dataPlacement: 'top',
@@ -74,7 +74,7 @@ export default {
         },
         view: {
             //label: 'Edit',
-            ngClick: "editHost(host.id)",
+            ngClick: "editHost(host)",
             awToolTip: 'View host',
             dataPlacement: 'top',
             ngShow: '!host.summary_fields.user_capabilities.edit'
