@@ -697,6 +697,61 @@ def test_scm_create_ok(post, organization, admin, version, params):
     assert decrypt_field(cred, 'ssh_key_unlock') == 'some_key_unlock'
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize('version, params', [
+    ['v1', {
+        'kind': 'ssh',
+        'name': 'Best credential ever',
+        'password': 'secret',
+        'vault_password': '',
+    }],
+    ['v2', {
+        'credential_type': 1,
+        'name': 'Best credential ever',
+        'inputs': {
+            'password': 'secret',
+        }
+    }]
+])
+def test_ssh_create_ok(post, organization, admin, version, params):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+    params['organization'] = organization.id
+    response = post(
+        reverse('api:credential_list', kwargs={'version': version}),
+        params,
+        admin
+    )
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert cred.credential_type == ssh
+    assert decrypt_field(cred, 'password') == 'secret'
+
+
+@pytest.mark.django_db
+def test_v1_ssh_vault_ambiguity(post, organization, admin):
+    vault = CredentialType.defaults['vault']()
+    vault.save()
+    params = {
+        'organization': organization.id,
+        'kind': 'ssh',
+        'name': 'Best credential ever',
+        'username': 'joe',
+        'password': 'secret',
+        'ssh_key_data': 'some_key_data',
+        'ssh_key_unlock': 'some_key_unlock',
+        'vault_password': 'vault_password',
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v1'}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+
+
 #
 # Vault Credentials
 #
