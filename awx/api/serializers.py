@@ -1247,12 +1247,14 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
-        d.update({'recent_jobs': [{
+        group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.order_by('name')[:5]]
+        d.setdefault('groups', group_list)
+        d.setdefault('recent_jobs', [{
             'id': j.job.id,
             'name': j.job.job_template.name if j.job.job_template is not None else "",
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]]})
+        } for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created')[:5]])
         return d
 
     def _get_host_port_from_name(self, name):
