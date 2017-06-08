@@ -1598,7 +1598,7 @@ class RunInventoryUpdate(BaseTask):
             if inventory_update.instance_filters:
                 vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
             if inventory_update.group_by:
-                vmware_opts.setdefault('groupby_patterns', inventory_update.groupby_patterns)
+                vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
