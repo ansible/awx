@@ -80,7 +80,8 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
     };
 
     lastUser = function(){
-        if(!Empty($rootScope.lastUser) && $rootScope.lastUser === $rootScope.current_user.id){
+        let lastUser = $cookies.get('lastUser');
+        if(!Empty(lastUser) && parseInt(lastUser) === $rootScope.current_user.id){
             return true;
         }
         else {

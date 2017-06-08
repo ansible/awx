@@ -364,6 +364,8 @@ var tower = angular.module('Tower', [
 
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
+                    $rootScope.lastPath = $location.path();
+                    $cookies.put('lastPath', $location.path());
                     $location.path('/login');
                 } else {
                     var lastUser = $cookies.getObject('current_user'),
