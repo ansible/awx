@@ -40,6 +40,7 @@
  		var init = function(){
  			$scope.host = host.data;
  			$rootScope.breadcrumb.host_name = host.data.name;
+            $scope.name = host.data.name;
  			$scope.description = host.data.description;
 			$scope.variables = getVars(host.data.variables);
         	ParseTypeChange({
