@@ -33,6 +33,16 @@ export default ['NotificationsList', 'i18n',
                     label: i18n._('Description'),
                     type: 'text',
                     ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                instance_groups: {
+                    label: i18n._('Instance Groups'),
+                    type: 'select',
+                    awPopOver: "<p>" + i18n._("Select the Instance Groups for this Organization to run on.") + "</p>",
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    dataTitle: i18n._('Instance Groups'),
+                    multiSelect: true,
+                    ngOptions: 'group.name for group in instanceGroupOptions track by group.id',
                 }
             },
 

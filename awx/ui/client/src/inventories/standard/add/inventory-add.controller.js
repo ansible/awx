@@ -13,7 +13,7 @@
 function InventoriesAdd($scope, $location,
     GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    $state, canAdd) {
+    $state, canAdd, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
 
     $scope.canAdd = canAdd;
 
@@ -42,6 +42,13 @@ function InventoriesAdd($scope, $location,
         });
     }
 
+    $scope.instanceGroupOptions = InstanceGroupsData;
+    CreateSelect2({
+        element: '#inventory_instance_groups',
+        multiple: true,
+        addNew: false
+    });
+
     // Save
     $scope.formSave = function() {
         Wait('start');
@@ -59,12 +66,24 @@ function InventoriesAdd($scope, $location,
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
-                .success(function(data) {
-                    var inventory_id = data.id;
-                    Wait('stop');
-                    $state.go('inventories.edit', {inventory_id: inventory_id}, {reload: true});
+                .then(({data}) => {
+                    const inventory_id = data.id,
+                        instance_group_url = data.related.instance_groups;
+
+                    InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                        .then(() => {
+                            Wait('stop');
+                            $state.go('inventories.edit', {inventory_id: inventory_id}, {reload: true});
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to post instance groups. POST returned ' +
+                                    'status: ' + status
+                            });
+                        });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new inventory. Post returned status: ' + status
@@ -85,5 +104,5 @@ function InventoriesAdd($scope, $location,
 export default ['$scope', '$location',
     'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
-    'Wait', 'ToJSON', '$state', 'canAdd', InventoriesAdd
+    'Wait', 'ToJSON', '$state','canAdd', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', InventoriesAdd
 ];

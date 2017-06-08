@@ -13,13 +13,14 @@
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData) {
+    ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
 
     // Inject dynamic view
-    var defaultUrl = GetBasePath('inventory'),
+    let defaultUrl = GetBasePath('inventory'),
         form = InventoryForm,
         fld, data,
-        inventoryData = resourceData.data;
+        inventoryData = resourceData.data,
+        instance_group_url = inventoryData.related.instance_groups;
 
     init();
 
@@ -33,6 +34,36 @@ function InventoriesEdit($scope, $location,
         $scope.organization_name = inventoryData.summary_fields.organization.name;
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.parseType = 'yaml';
+
+        $scope.instanceGroupOptions = InstanceGroupsData;
+        CreateSelect2({
+            element: '#inventory_instance_groups',
+            multiple: true,
+            addNew: false
+        });
+
+        Rest.setUrl(instance_group_url);
+        Rest.get()
+            .then(({data}) => {
+                if (data.results.length > 0) {
+                    var opts = data.results
+                        .map(i => ({id: i.id + "",
+                                name: i.name}));
+                    CreateSelect2({
+                        element:'#inventory_instance_groups',
+                        multiple: true,
+                        addNew: false,
+                        opts: opts
+                    });
+                }
+            })
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to get instance groups. GET returned ' +
+                        'status: ' + status
+                });
+            });
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState) {
             if(toState.name === 'inventories.edit') {
@@ -75,11 +106,20 @@ function InventoriesEdit($scope, $location,
 
         Rest.setUrl(defaultUrl + $stateParams.inventory_id + '/');
         Rest.put(data)
-            .success(function() {
-                Wait('stop');
-                $state.go($state.current, {}, { reload: true });
+            .then(() => {
+                InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                    .then(() => {
+                        Wait('stop');
+                        $state.go($state.current, {}, { reload: true });
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to update instance groups. POST returned status: ' + status
+                        });
+                    });
             })
-            .error(function(data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, form, {
                     hdr: 'Error!',
                     msg: 'Failed to update inventory. PUT returned status: ' + status
@@ -101,5 +141,5 @@ export default ['$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
-    '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', InventoriesEdit,
+    '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', InventoriesEdit,
 ];

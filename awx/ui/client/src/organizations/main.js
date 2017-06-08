@@ -27,7 +27,23 @@ angular.module('Organizations', [
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateExtender = $stateExtenderProvider.$get(),
-                stateDefinitions = stateDefinitionsProvider.$get();
+                stateDefinitions = stateDefinitionsProvider.$get(),
+                organizationResolve = {
+                            InstanceGroupsData: ['Rest', 'GetBasePath', 'ProcessErrors', (Rest, GetBasePath, ProcessErrors) => {
+                                const url = GetBasePath('instance_groups');
+                                Rest.setUrl(url);
+                                return Rest.get()
+                                    .then(({data}) => {
+                                            return data.results.map((i) => ({name: i.name, id: i.id}));
+                                        })
+                                        .catch(({data, status}) => {
+                                        ProcessErrors(null, data, status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get instance groups info. GET returned status: ' + status
+                                        });
+                                    });
+                            }]
+                };
 
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
@@ -55,6 +71,10 @@ angular.module('Organizations', [
                         activityStream: true,
                         activityStreamTarget: 'organization'
                     },
+                    resolve: {
+                        add: organizationResolve,
+                        edit: organizationResolve
+                    }
                     // concat manually-defined state definitions with generated defintions
                 }).then((generated) => {
                     let linkoutDefinitions = _.map(OrganizationsLinkoutStates, (state) => stateExtender.buildDefinition(state));

@@ -6,10 +6,9 @@
 
 export default ['$scope', '$rootScope', '$location', '$stateParams',
     'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait','$state',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService','InstanceGroupsData',
     function($scope, $rootScope, $location, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait,
-    $state) {
+    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService, InstanceGroupsData) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -24,7 +23,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
 
         var form = OrganizationForm(),
             base = $location.path().replace(/^\//, '').split('/')[0];
-
         init();
 
         function init(){
@@ -34,6 +32,13 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
         }
+
+        $scope.instanceGroupOptions = InstanceGroupsData;
+        CreateSelect2({
+            element: '#organization_instance_groups',
+            multiple: true,
+            addNew: false
+        });
 
         // Save
         $scope.formSave = function() {
@@ -45,16 +50,22 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
                     name: $scope.name,
                     description: $scope.description
                 })
-                .success(function(data) {
-                    Wait('stop');
-                    $rootScope.$broadcast("EditIndicatorChange", "organizations", data.id);
-                    $state.go('organizations.edit', {organization_id: data.id}, {reload: true});
-                })
-                .error(function(data, status) {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to add new organization. Post returned status: ' + status
-                    });
+                .then(({data}) => {
+                    const organization_id = data.id,
+                        instance_group_url = data.related.instance_groups;
+
+                    InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                        .then(() => {
+                            Wait('stop');
+                            $rootScope.$broadcast("EditIndicatorChange", "organizations", organization_id);
+                            $state.go('organizations.edit', {organization_id: organization_id}, {reload: true});
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to add new organization. Post returned status: ' + status
+                            });
+                        });
                 });
         };
 

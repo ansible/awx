@@ -17,14 +17,14 @@ export default
         'ParseTypeChange', 'Wait',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification','$q',
+        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, ClearScope, GetBasePath, md5Setup,
             ParseTypeChange, Wait,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, $q
+            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData
         ) {
 
             ClearScope();
@@ -35,23 +35,55 @@ export default
                 }
             });
 
-            var defaultUrl = GetBasePath('job_templates'),
+            let defaultUrl = GetBasePath('job_templates'),
                 generator = GenerateForm,
                 form = JobTemplateForm(),
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
                 id = $stateParams.job_template_id,
                 checkSCMStatus, getPlaybooks, callback,
-                choicesCount = 0;
+                choicesCount = 0,
+                instance_group_url = defaultUrl + id + '/instance_groups';
 
             init();
-            function init(){
+            function init() {
+
                 CallbackHelpInit({ scope: $scope });
                 $scope.playbook_options = null;
                 $scope.playbook = null;
                 $scope.mode = 'edit';
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
+
+                $scope.instanceGroupOptions = InstanceGroupsData;
+                CreateSelect2({
+                    element: '#job_template_instance_groups',
+                    multiple: true,
+                    addNew: false
+                });
+
+                Rest.setUrl(instance_group_url);
+                    Rest.get()
+                        .then(({data}) => {
+                            if (data.results.length > 0) {
+                                let opts = data.results
+                                    .map(i => ({id: i.id + "",
+                                    name: i.name}));
+                                CreateSelect2({
+                                    element: '#job_template_instance_groups',
+                                    multiple: true,
+                                    addNew: false,
+                                    opts: opts
+                                });
+                            }
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get instance groups. GET returned ' +
+                                    'status: ' + status
+                            });
+                    });
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -413,6 +445,16 @@ export default
                         'alert-danger', saveCompleted, null, null,
                         null, true);
                 }
+
+                InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to update instance groups. POST returned status: ' + status
+                        });
+                    });
+
+
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
                 var associatedLabelsDefer = $q.defer();
