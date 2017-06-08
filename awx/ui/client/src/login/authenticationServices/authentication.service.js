@@ -103,7 +103,7 @@ export default
                     Store('sessionTime', x);
 
                     if ($cookies.getObject('current_user')) {
-                        $cookies.put( 'lastUser', $cookies.getObject('current_user').id);
+                        $rootScope.lastUser = $cookies.getObject('current_user').id;
                     }
                     ConfigService.delete();
                     SocketService.disconnect();

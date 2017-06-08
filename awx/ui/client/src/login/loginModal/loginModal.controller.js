@@ -62,7 +62,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
         Authorization, Alert, Wait, Timer, Empty,
         scope, pendoService, ConfigService, CheckLicense, FeaturesService,
         SocketService) {
-    var lastPath, lastUser, sessionExpired, loginAgain;
+    var lastPath, lastUser, sessionExpired, loginAgain, preAuthUrl;
 
     loginAgain = function() {
         setTimeout(function() {
@@ -80,14 +80,15 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
     };
 
     lastUser = function(){
-        let lastUser = $cookies.get('lastUser');
-        if(!Empty(lastUser) && parseInt(lastUser) === $rootScope.current_user.id){
+        if(!Empty($rootScope.lastUser) && $rootScope.lastUser === $rootScope.current_user.id){
             return true;
         }
         else {
             return false;
         }
     };
+
+    preAuthUrl = $cookies.get('preAuthUrl');
 
     $log.debug('User session expired: ' + sessionExpired);
     $log.debug('Last URL: ' + lastPath());
@@ -113,11 +114,17 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                 pendoService.issuePendoIdentity();
                 FeaturesService.get();
                 Wait("stop");
-                if (lastPath() && lastUser()) {
-                    // Go back to most recent navigation path
-                    $location.path(lastPath());
-                } else {
-                    $location.url('/home');
+                if(!Empty(preAuthUrl)){
+                    $location.path(preAuthUrl);
+                    $cookies.remove('preAuthUrl');
+                }
+                else {
+                    if (lastPath() && lastUser()) {
+                        // Go back to most recent navigation path
+                        $location.path(lastPath());
+                    } else {
+                        $location.url('/home');
+                    }
                 }
             })
             .catch(function () {
