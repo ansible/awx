@@ -256,7 +256,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         function initSourceSelect() {
             $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
-            var source = $scope.source.value;
+            var source = $scope.source && $scope.source.value ? $scope.source.value : null;
 
             CreateSelect2({
                 element: '#inventory_source_source',

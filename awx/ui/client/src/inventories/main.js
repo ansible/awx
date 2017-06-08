@@ -49,6 +49,7 @@ import hostGroupsRoute from './host-groups/host-groups.route';
 import hostGroupsAssociateRoute from './host-groups/host-groups-associate/host-groups-associate.route';
 import inventorySourcesCredentialRoute from './sources/lookup/sources-lookup-credential.route';
 import inventorySourcesInventoryScriptRoute from './sources/lookup/sources-lookup-inventory-script.route';
+import inventorySourcesProjectRoute from './sources/lookup/sources-lookup-project.route';
 import SmartInventory from './smart-inventory/main';
 import StandardInventory from './standard/main';
 
@@ -202,6 +203,14 @@ angular.module('inventory', [
                 editSourceCredential.name = 'inventories.edit.inventory_sources.edit.credential';
                 editSourceCredential.url = '/credential';
 
+                let addSourceProject = _.cloneDeep(inventorySourcesProjectRoute);
+                addSourceProject.name = 'inventories.edit.inventory_sources.add.project';
+                addSourceProject.url = '/project';
+
+                let editSourceProject = _.cloneDeep(inventorySourcesProjectRoute);
+                editSourceProject.name = 'inventories.edit.inventory_sources.edit.project';
+                editSourceProject.url = '/project';
+
                 let editSourceInventoryScript = _.cloneDeep(inventorySourcesInventoryScriptRoute);
                 editSourceInventoryScript.name = 'inventories.edit.inventory_sources.edit.inventory_script';
                 editSourceInventoryScript.url = '/inventory_script';
@@ -271,7 +280,9 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(addSourceCredential),
                             stateExtender.buildDefinition(addSourceInventoryScript),
                             stateExtender.buildDefinition(editSourceCredential),
-                            stateExtender.buildDefinition(editSourceInventoryScript)
+                            stateExtender.buildDefinition(editSourceInventoryScript),
+                            stateExtender.buildDefinition(addSourceProject),
+                            stateExtender.buildDefinition(editSourceProject)
                         ])
                     };
                 });
