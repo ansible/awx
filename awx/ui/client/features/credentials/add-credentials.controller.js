@@ -5,6 +5,8 @@ function AddCredentialsController (models, $state) {
     let credential = models.credential;
     let credentialType = models.credentialType;
 
+    vm.panelTitle = 'New Credential';
+
     vm.form = credential.createFormSchema('post', {
         omit: ['user', 'team', 'inputs']
     });
@@ -24,13 +26,13 @@ function AddCredentialsController (models, $state) {
     };
 
     vm.form.save = data => {
-        data.user = me.get('results[0].id');
+        data.user = me.getSelf().id;
                 
         return credential.request('post', data);
     };
 
     vm.form.onSaveSuccess = res => {
-        $state.go('credentials.edit', { credential: res.data });
+        $state.go('credentials.edit', { id: res.data.id }, { reload: true });
     };
 }
 

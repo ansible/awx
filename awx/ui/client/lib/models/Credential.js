@@ -1,9 +1,9 @@
+const ENCRYPTED_VALUE = '$encrypted$';
+
 let BaseModel;
 
 function createFormSchema (method, config) {
-    method = method.toUpperCase();
-
-    let schema = Object.assign({}, this.get(`actions.${method}`));
+    let schema = Object.assign({}, this.get('options', `actions.${method.toUpperCase()}`));
 
     if (config && config.omit) {
         config.omit.forEach(key => {
@@ -13,17 +13,33 @@ function createFormSchema (method, config) {
 
     for (let key in schema) {
         schema[key].id = key;
+
+        if (method === 'put') {
+            schema[key]._value = this.get(key);
+        }
     }
 
     return schema;
 }
 
-function CredentialModel (method, id) {
+function assignInputGroupValues (inputs) {
+    return inputs.map(input => {
+        let value = this.get(`inputs.${input.id}`);
+
+        input._value = value;
+        input._encrypted = value === ENCRYPTED_VALUE;
+
+        return input;
+    });
+}
+
+function CredentialModel (method, resource) {
     BaseModel.call(this, 'credentials');
     
     this.createFormSchema = createFormSchema.bind(this);
+    this.assignInputGroupValues = assignInputGroupValues.bind(this);
 
-    return this.request(method, id)
+    return this.request(method, resource)
         .then(() => this);
 }
 

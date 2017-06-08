@@ -27,6 +27,10 @@ function AtInputSelectController (baseInputController, eventService) {
 
         vm.setListeners();
         vm.check();
+
+        if (scope.state._value) {
+            vm.updateDisplayModel();  
+        }
     };
 
     vm.setListeners = () => {

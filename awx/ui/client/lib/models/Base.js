@@ -1,40 +1,33 @@
 let $http;
 let $q;
 
-function request (method, ...args) {
-    this.method = method.toUpperCase();
+function request (method, resource) {
+    if (Array.isArray(method) && Array.isArray(resource)) {
+        let promises = method.map((value, i) => this.http[value](resource[i]));
 
-    if (typeof args[0] === 'object') {
-        this.res = null;
-        this.model = args[0];
-
-        return $q.resolve();
+        return $q.all(promises);
     }
-
-    switch (this.method) {
-        case 'OPTIONS':
-            return this.httpOptions(...args);    
-        case 'GET':
-            return this.httpGet(...args);    
-        case 'POST':
-            return this.httpPost(...args);    
-    }
+    
+    return this.http[method](resource);
 }
 
-function httpGet (id) {
+function httpGet (resource) {
     let req = {
         method: 'GET',
         url: this.path
     };
 
-    if (id) {
-        req.url = `${this.path}/${id}`;
+    if (typeof resource === 'object') {
+        this.model[this.method] = resource;
+
+        return $q.resolve();
+    } else if (resource) {
+        req.url = `${this.path}/${resource}`;
     }
 
     return $http(req)
         .then(res => {
-            this.res = res;
-            this.model = res.data;
+            this.model.GET = res.data;
 
             return res;
         });
@@ -47,33 +40,56 @@ function httpPost (data) {
         data
     };
 
-    return $http(req)
-        .then(res => {
-            this.res = res;
-            this.model = res.data;
-
-            return res;
-        });
+    return $http(req).then(res => res);
 }
 
-function httpOptions () {
+function httpPut (changes) {
+    let model = Object.assign(this.get(), changes);
+
+    let req = {
+        method: 'PUT',
+        url: `${this.path}${model.id}/`,
+        data: model
+    };
+
+    return $http(req).then(res => res);
+}
+
+function httpOptions (resource) {
     let req = {
         method: 'OPTIONS',
         url: this.path
     };
 
+    if (resource) {
+        req.url = `${this.path}/${resource}`;
+    }
+
     return $http(req)
         .then(res => {
-            this.res = res;
-            this.model = res.data;
+            this.model.OPTIONS = res.data;
 
             return res;
         });
 }
 
-function get (_keys_) {
-    let keys = _keys_.split('.');
-    let value = this.model;
+function get (method, keys) {
+    let model;
+
+    if (keys) {
+        model = this.model[method.toUpperCase()];
+    } else {
+        model = this.model.GET;
+        keys = method;
+    }
+
+    if (!keys) {
+        return model;
+    }
+
+    keys = keys.split('.');
+
+    let value = model;
 
     try {
         keys.forEach(key => {
@@ -109,14 +125,17 @@ function normalizePath (resource) {
 }
 
 function BaseModel (path) {
+    this.model = {};
     this.get = get;
-    this.httpGet = httpGet;
-    this.httpOptions = httpOptions;
-    this.httpPost = httpPost;
     this.normalizePath = normalizePath;
     this.request = request;
+    this.http = {
+        get: httpGet.bind(this),
+        options: httpOptions.bind(this),
+        post: httpPost.bind(this),
+        put: httpPut.bind(this)
+    };
 
-    this.model = {};
     this.path = this.normalizePath(path);
 };
 

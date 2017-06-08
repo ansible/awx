@@ -26,64 +26,78 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         textarea = element.find('textarea')[0];
         container = element[0];
 
-        scope.pre = {};
-        scope.state._edit = true;
-
         if (scope.state.format === 'ssh_private_key') {
             scope.ssh = true;
-            scope.state._hint = scope.state._hint || DEFAULT_HINT;
             input = element.find('input')[0];
-            vm.setFileListeners(textarea, input);
         }
 
-        if (scope.state._edit) {
+        if (scope.state._value) {
             scope.edit = true;
-            scope.isShown = true;
+            scope.replace = false;
             scope.buttonText = 'REPLACE';
+        } else {
+            scope.state._hint = scope.state._hint || DEFAULT_HINT;
+            vm.listeners = vm.setFileListeners(textarea, input);
+        }
+
+
+        vm.updateModel();
+    };
+
+    vm.updateModel = (value) => {
+        if (!scope.edit || scope.replace) {
+            scope.state._value = scope.displayModel;
         }
 
         vm.check();
     };
 
     vm.setFileListeners = (textarea, input) => { 
-        eventService.addListener(textarea, 'dragenter', event => {
-            event.stopPropagation();
-            event.preventDefault();
-            scope.$apply(() => scope.drag = true);
-        });
+        return eventService.addListeners([
+            [textarea, 'dragenter', event => {
+                event.stopPropagation();
+                event.preventDefault();
+                scope.$apply(() => scope.drag = true);
+            }],
 
-        eventService.addListener(input, 'dragleave', event => {
-            event.stopPropagation();
-            event.preventDefault();
-            scope.$apply(() => scope.drag = false);
-        });
+            [input, 'dragleave', event => {
+                event.stopPropagation();
+                event.preventDefault();
+                scope.$apply(() => scope.drag = false);
+            }],
 
-        eventService.addListener(input, 'change', event => {
-            let reader = new FileReader();
+            [input, 'change', event => {
+                let reader = new FileReader();
 
-            reader.onload = () => vm.readFile(reader, event);
-            reader.readAsText(input.files[0]);
-        });
+                reader.onload = () => vm.readFile(reader, event);
+                reader.readAsText(input.files[0]);
+            }]
+        ]);
     };
 
     vm.readFile = (reader, event) => {
         scope.$apply(() => {
-            scope.state._value = reader.result;
+            scope.displayModel = reader.result;
+            vm.updateModel();
             scope.drag = false
+            input.value = '';
         });
     };
 
     vm.toggle = () => {
-        if (scope.isShown) {
-            scope.buttonText = 'REVERT';
-            scope.pre.value = scope.state._value;
-            scope.state._value = undefined;
-        } else {
-            scope.state._value = scope.pre.value;
+        scope.displayModel = undefined;
+
+        if (scope.replace) {
             scope.buttonText = 'REPLACE';
+            scope.state._hint = '';
+            eventService.remove(vm.listeners);
+        } else {
+            scope.buttonText = 'REVERT';
+            scope.state._hint = scope.state._hint || DEFAULT_HINT;
+            vm.listeners = vm.setFileListeners(textarea, input);
         }
 
-        scope.isShown = !scope.isShown;
+        scope.replace = !scope.replace;
     };
 }
 

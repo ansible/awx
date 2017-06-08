@@ -41,21 +41,21 @@ function config ($stateExtenderProvider, pathServiceProvider) {
         }
     });
 
-    function CredentialsResolve ($q, params, Me, Credential, CredentialType) {
+    function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType) {
+        let id = $stateParams.id;
+
         let promises = {
-            me: new Me('get')
+            me: new Me('get'),
+            credentialType: new CredentialType('get')
         };
 
-        if (params.credential) {
-            promises.credential = new Credential('get', params.credential);
-            promises.credentialOptions = new Credential('options');
-            promises.credentialType = new CredentialType('get', params.credential.credential_type);
+        if (id) {
+            promises.credential = new Credential(['get', 'options'], [id, id]);
         } else {
             promises.credential = new Credential('options');
-            promises.credentialType = new CredentialType('get');
         }
 
-        return $q.all(promises).then(models => models);
+        return $q.all(promises);
     }
 
     CredentialsResolve.$inject = [
@@ -86,7 +86,7 @@ function config ($stateExtenderProvider, pathServiceProvider) {
 
     stateExtender.addState({
         name: 'credentials.edit',
-        route: '/edit/:credential',
+        route: '/edit/:id',
         ncyBreadcrumb: {
             label: N_('EDIT')
         },
