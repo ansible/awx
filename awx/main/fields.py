@@ -470,7 +470,7 @@ class CredentialInputField(JSONSchemaField):
                 v != '$encrypted$',
                 model_instance.pk
             ]):
-                decrypted_values[k] = utils.common.decrypt_field(model_instance, k)
+                decrypted_values[k] = utils.decrypt_field(model_instance, k)
             else:
                 decrypted_values[k] = v
 

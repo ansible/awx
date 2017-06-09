@@ -1,6 +1,6 @@
 from awx.main import utils
 from awx.main.models import CredentialType
-from awx.main.utils.common import encrypt_field, decrypt_field
+from awx.main.utils import encrypt_field, decrypt_field
 from django.db.models import Q
 
 

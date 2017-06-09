@@ -52,7 +52,7 @@ SETTING_CACHE_TIMEOUT = 60
 # Flag indicating whether to store field default values in the cache.
 SETTING_CACHE_DEFAULTS = True
 
-__all__ = ['SettingsWrapper']
+__all__ = ['SettingsWrapper', 'get_settings_to_cache', 'SETTING_CACHE_NOTSET']
 
 
 @contextlib.contextmanager
@@ -147,6 +147,27 @@ class EncryptedCacheProxy(object):
         setattr(self.cache, name, value)
 
 
+def get_writeable_settings(registry):
+    return registry.get_registered_settings(read_only=False)
+
+
+def get_settings_to_cache(registry):
+    return dict([(key, SETTING_CACHE_NOTSET) for key in get_writeable_settings(registry)])
+
+
+def get_cache_value(value):
+    '''Returns the proper special cache setting for a value
+    based on instance type.
+    '''
+    if value is None:
+        value = SETTING_CACHE_NONE
+    elif isinstance(value, (list, tuple)) and len(value) == 0:
+        value = SETTING_CACHE_EMPTY_LIST
+    elif isinstance(value, (dict,)) and len(value) == 0:
+        value = SETTING_CACHE_EMPTY_DICT
+    return value
+
+
 class SettingsWrapper(UserSettingsHolder):
 
     @classmethod
@@ -188,18 +209,6 @@ class SettingsWrapper(UserSettingsHolder):
     def _get_supported_settings(self):
         return self.registry.get_registered_settings()
 
-    def _get_writeable_settings(self):
-        return self.registry.get_registered_settings(read_only=False)
-
-    def _get_cache_value(self, value):
-        if value is None:
-            value = SETTING_CACHE_NONE
-        elif isinstance(value, (list, tuple)) and len(value) == 0:
-            value = SETTING_CACHE_EMPTY_LIST
-        elif isinstance(value, (dict,)) and len(value) == 0:
-            value = SETTING_CACHE_EMPTY_DICT
-        return value
-
     def _preload_cache(self):
         # Ensure we're only modifying local preload timeout from one thread.
         with self._awx_conf_preload_lock:
@@ -212,7 +221,7 @@ class SettingsWrapper(UserSettingsHolder):
             # make those read-only to avoid overriding in the database.
             if not self._awx_conf_init_readonly and 'migrate_to_database_settings' not in sys.argv:
                 defaults_snapshot = self._get_default('DEFAULTS_SNAPSHOT')
-                for key in self._get_writeable_settings():
+                for key in get_writeable_settings(self.registry):
                     init_default = defaults_snapshot.get(key, None)
                     try:
                         file_default = self._get_default(key)
@@ -230,7 +239,7 @@ class SettingsWrapper(UserSettingsHolder):
         # Initialize all database-configurable settings with a marker value so
         # to indicate from the cache that the setting is not configured without
         # a database lookup.
-        settings_to_cache = dict([(key, SETTING_CACHE_NOTSET) for key in self._get_writeable_settings()])
+        settings_to_cache = get_settings_to_cache(self.registry)
         # Load all settings defined in the database.
         for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
             if settings_to_cache[setting.key] != SETTING_CACHE_NOTSET:
@@ -239,7 +248,7 @@ class SettingsWrapper(UserSettingsHolder):
                 value = decrypt_field(setting, 'value')
             else:
                 value = setting.value
-            settings_to_cache[setting.key] = self._get_cache_value(value)
+            settings_to_cache[setting.key] = get_cache_value(value)
         # Load field default value for any settings not found in the database.
         if SETTING_CACHE_DEFAULTS:
             for key, value in settings_to_cache.items():
@@ -247,7 +256,7 @@ class SettingsWrapper(UserSettingsHolder):
                     continue
                 field = self.registry.get_setting_field(key)
                 try:
-                    settings_to_cache[key] = self._get_cache_value(field.get_default())
+                    settings_to_cache[key] = get_cache_value(field.get_default())
                 except SkipField:
                     pass
         # Generate a cache key for each setting and store them all at once.
@@ -296,9 +305,9 @@ class SettingsWrapper(UserSettingsHolder):
                 value = SETTING_CACHE_NOTSET
             if cache_value != value:
                 logger.debug('cache set(%r, %r, %r)', cache_key,
-                             self._get_cache_value(value),
+                             get_cache_value(value),
                              SETTING_CACHE_TIMEOUT)
-                self.cache.set(cache_key, self._get_cache_value(value), timeout=SETTING_CACHE_TIMEOUT)
+                self.cache.set(cache_key, get_cache_value(value), timeout=SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:
                 value = field.get_default()
