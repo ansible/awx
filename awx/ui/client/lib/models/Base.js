@@ -22,7 +22,7 @@ function httpGet (resource) {
 
         return $q.resolve();
     } else if (resource) {
-        req.url = `${this.path}/${resource}`;
+        req.url = `${this.path}${resource}/`;
     }
 
     return $http(req)
@@ -62,7 +62,7 @@ function httpOptions (resource) {
     };
 
     if (resource) {
-        req.url = `${this.path}/${resource}`;
+        req.url = `${this.path}${resource}/`;
     }
 
     return $http(req)

@@ -15,6 +15,17 @@
     }
 }
 
+.at-Checkbox {
+    margin: 0;
+    padding: 0;
+
+    & > input[type=checkbox] {
+        height: @at-input-height;
+        margin: 0;
+        padding: 0;
+    }
+}
+
 .at-InputGroup-button {
     height: 100%;
 }
@@ -86,6 +97,7 @@
 
 .at-InputLabel {
     display: inline-block;
+    width: 100%;
 }
 
 .at-InputLabel-name {
@@ -101,6 +113,30 @@
     font-size: @at-font-size;
     font-weight: @at-font-weight;
     line-height: @at-line-height-short;
+}
+
+.at-InputLabel-checkbox {
+    margin: 0;
+    padding: 0;
+}
+
+.at-InputLabel-checkboxLabel {
+    margin-bottom: 0;
+
+    & > input[type=checkbox] {
+        margin: 0 @at-space 0 0;
+        position: relative;
+        top: @at-space;
+    }
+
+    & > p {
+        font-size: @at-font-size;
+        color: @at-gray-dark-4x;
+        font-weight: @at-font-weight;
+        display: inline;
+        margin: 0;
+        padding: 0;
+    }
 }
 
 .at-InputMessage--rejected {

@@ -1,5 +1,6 @@
 const REQUIRED_INPUT_MISSING_MESSAGE = 'Please enter a value.';
 const DEFAULT_INVALID_INPUT_MESSAGE = 'Invalid input for this type.';
+const PROMPT_ON_LAUNCH = 'ASK';
 
 function BaseInputController () {
     return function extend (type, scope, element, form) {
@@ -10,6 +11,17 @@ function BaseInputController () {
         scope.state._required = scope.state.required || false;
         scope.state._isValid = scope.state.isValid || false;
         scope.state._disabled = scope.state.disabled || false;
+
+        if (scope.state.ask_at_runtime) {
+            scope.state._displayPromptOnLaunch = true;
+
+            if (scope.state._value === 'ASK') {
+                scope.state._promptOnLaunch = true;
+                scope.state._disabled = true;
+            } else {
+                scope.state._promptOnLaunch = false;
+            }
+        }
 
         form.register(type, scope);
 
@@ -47,6 +59,21 @@ function BaseInputController () {
 
                 form.check();
             }
+        };
+
+        vm.togglePromptOnLaunch = () => {
+            if (scope.state._promptOnLaunch) {
+                scope.state._priorValue = scope.state._value;
+                scope.state._value = PROMPT_ON_LAUNCH;
+                scope.state._displayValue = '';
+                scope.state._disabled = true;
+            } else {
+                scope.state._value = scope.state._priorValue;
+                scope.state._displayValue = scope.state._value;
+                scope.state._disabled = false;
+            }
+            
+            vm.check();
         };
     };
 }

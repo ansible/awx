@@ -94,6 +94,8 @@ function AtInputGroupController ($scope, $compile) {
             }
         } else if (input.type === 'number') {
             config._component = 'at-input-number';
+        } else if (input.type === 'boolean') {
+            config._component = 'at-input-checkbox';
         } else if (input.choices) {
             config._component = 'at-input-select';
             config._format = 'array';

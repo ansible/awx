@@ -19,7 +19,7 @@ function AtInputSecretController (baseInputController) {
 
         scope = _scope_;
 
-        if (!scope.state._value) {
+        if (!scope.state._value || scope.state._promptOnLaunch) {
             scope.type = 'password';
             scope.buttonText = 'SHOW';
 
@@ -36,21 +36,23 @@ function AtInputSecretController (baseInputController) {
         vm.check();
     };
 
-    vm.updateModel = value => {
+    vm.updateValue = value => {
         if (!scope.edit || scope.replace) {
-            scope.state._value = scope.displayModel;
+            scope.state._value = scope.state._displayValue;
         }
 
         vm.check();
     };
 
     vm.toggleEditState = () => {
-        scope.displayModel = '';
+        scope.state._dislpayValue = '';
 
         if (scope.replace) {
             scope.buttonText = 'REPLACE';
+            scope.state._disabled = true;
         } else {
             scope.buttonText = 'REVERT';
+            scope.state._disabled = false
         }
 
         scope.replace = !scope.replace;

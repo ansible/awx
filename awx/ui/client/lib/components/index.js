@@ -1,6 +1,7 @@
 import actionGroup from './action/action-group.directive';
 import form from './form/form.directive';
 import formAction from './form/action.directive';
+import inputCheckbox from './input/checkbox.directive';
 import inputGroup from './input/group.directive';
 import inputLabel from './input/label.directive';
 import inputMessage from './input/message.directive';
@@ -25,6 +26,7 @@ angular
     .directive('atActionGroup', actionGroup)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
+    .directive('atInputCheckbox', inputCheckbox)
     .directive('atInputGroup', inputGroup)
     .directive('atInputLabel', inputLabel)
     .directive('atInputMessage', inputMessage)
