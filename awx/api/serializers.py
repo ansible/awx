@@ -3060,7 +3060,7 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'ask_extra_credentials_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',
-                  'job_template_data', 'defaults')
+                  'job_template_data', 'defaults', 'verbosity')
         read_only_fields = (
             'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
@@ -3072,7 +3072,8 @@ class JobLaunchSerializer(BaseSerializer):
             'job_tags': {'write_only': True,},
             'skip_tags': {'write_only': True,},
             'job_type': {'write_only': True,},
-            'inventory': {'write_only': True,}
+            'inventory': {'write_only': True,},
+            'verbosity': {'write_only': True,}
         }
 
     # TODO: remove in 3.3
@@ -3184,6 +3185,7 @@ class JobLaunchSerializer(BaseSerializer):
         JT_skip_tags = obj.skip_tags
         JT_inventory = obj.inventory
         JT_credential = obj.credential
+        JT_verbosity = obj.verbosity
         extra_credentials = attrs.pop('extra_credentials', None)
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = JT_extra_vars
@@ -3193,6 +3195,7 @@ class JobLaunchSerializer(BaseSerializer):
         obj.job_tags = JT_job_tags
         obj.inventory = JT_inventory
         obj.credential = JT_credential
+        obj.verbosity = JT_verbosity
         if extra_credentials is not None:
             attrs['extra_credentials'] = extra_credentials
         return attrs
