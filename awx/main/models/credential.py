@@ -702,6 +702,10 @@ def net(cls):
                 'type': 'string',
                 'secret': True,
             }, {
+                'id': 'authorize',
+                'label': 'Authorize',
+                'type': 'boolean',
+            }, {
                 'id': 'authorize_password',
                 'label': 'Authorize Password',
                 'type': 'string',
