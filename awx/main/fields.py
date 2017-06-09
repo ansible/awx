@@ -501,7 +501,10 @@ class CredentialInputField(JSONSchemaField):
 
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
-        if model_instance.credential_type.kind == 'ssh':
+        if (
+                model_instance.credential_type.managed_by_tower is True and
+                'ssh_key_unlock' in model_instance.credential_type.defined_fields
+        ):
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
             if not model_instance.has_encrypted_ssh_key_data and value.get('ssh_key_unlock'):
