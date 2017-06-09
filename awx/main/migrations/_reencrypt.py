@@ -7,6 +7,7 @@ __all__ = ['replace_aesecb_fernet']
 def replace_aesecb_fernet(apps, schema_editor):
     _notification_templates(apps)
     _credentials(apps)
+    _unified_jobs(apps)
 
 
 def _notification_templates(apps):
@@ -33,3 +34,15 @@ def _credentials(apps):
                 except ValueError:
                     continue
         credential.save()
+
+
+def _unified_jobs(apps):
+    UnifiedJob = apps.get_model('main', 'UnifiedJob')
+    for uj in UnifiedJob.objects.all():
+        if uj.start_args is not None:
+            try:
+                start_args = decrypt_field(uj, 'start_args')
+                uj.start_args = start_args
+                uj.save()
+            except ValueError:
+                continue
