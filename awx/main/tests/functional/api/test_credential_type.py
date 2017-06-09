@@ -167,15 +167,49 @@ def test_create_with_valid_inputs(get, post, admin):
 
 
 @pytest.mark.django_db
-def test_create_with_invalid_inputs_xfail(post, admin):
+@pytest.mark.parametrize('inputs', [
+    True,
+    100,
+    [1, 2, 3, 4],
+    'malformed',
+    {'feelds': {}},
+    {'fields': [123, 234, 345]},
+    {'fields': [{'id':'one', 'label':'One'}, 234]},
+    {'feelds': {}, 'fields': [{'id':'one', 'label':'One'}, 234]}
+])
+def test_create_with_invalid_inputs_xfail(post, admin, inputs):
     response = post(reverse('api:credential_type_list'), {
         'kind': 'cloud',
         'name': 'MyCloud',
-        'inputs': {'feeelds': {},},
+        'inputs': inputs,
         'injectors': {}
     }, admin)
     assert response.status_code == 400
-    assert "'feeelds' was unexpected" in json.dumps(response.data)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('injectors', [
+    True,
+    100,
+    [1, 2, 3, 4],
+    'malformed',
+    {'mal': 'formed'},
+    {'env': {'ENV_VAR': 123}, 'mal': 'formed'},
+    {'env': True},
+    {'env': [1, 2, 3]},
+    {'file': True},
+    {'file': [1, 2, 3]},
+    {'extra_vars': True},
+    {'extra_vars': [1, 2, 3]},
+])
+def test_create_with_invalid_injectors_xfail(post, admin, injectors):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'MyCloud',
+        'inputs': {},
+        'injectors': injectors,
+    }, admin)
+    assert response.status_code == 400
 
 
 @pytest.mark.django_db
@@ -233,17 +267,6 @@ def test_create_with_valid_injectors(get, post, admin):
     assert injectors['env'] == {
         'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'
     }
-
-
-@pytest.mark.django_db
-def test_create_with_invalid_injectors_xfail(post, admin):
-    response = post(reverse('api:credential_type_list'), {
-        'kind': 'cloud',
-        'name': 'MyCloud',
-        'inputs': {},
-        'injectors': {'nonsense': 123}
-    }, admin)
-    assert response.status_code == 400
 
 
 @pytest.mark.django_db
