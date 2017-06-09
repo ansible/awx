@@ -882,3 +882,9 @@ def get_search_fields(model):
                           'name', 'description'):
             fields.append(field.name)
     return fields
+
+
+def has_model_field_prefetched(model_obj, field_name):
+    # NOTE: Update this function if django internal implementation changes.
+    return getattr(getattr(model_obj, field_name, None),
+                   'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
