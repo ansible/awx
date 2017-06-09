@@ -86,8 +86,8 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     $scope.editHost = function(host){
         $state.go('inventories.edit.hosts.edit', {inventory_id: host.inventory_id, host_id: host.id});
     };
-    $scope.goToInsights = function(id){
-        $state.go('inventories.edit.hosts.edit.insights', {host_id:id});
+    $scope.goToInsights = function(host){
+        $state.go('inventories.edit.hosts.edit.insights', {inventory_id: host.inventory_id, host_id:host.id});
     };
     $scope.deleteHost = function(id, name){
         var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
