@@ -88,7 +88,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
         }
     };
 
-    preAuthUrl = $cookies.get('preAuthUrl');
+    preAuthUrl = $rootScope.preAuthUrl;
 
     $log.debug('User session expired: ' + sessionExpired);
     $log.debug('Last URL: ' + lastPath());
@@ -116,7 +116,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                 Wait("stop");
                 if(!Empty(preAuthUrl)){
                     $location.path(preAuthUrl);
-                    $cookies.remove('preAuthUrl');
+                    delete $rootScope.preAuthUrl;
                 }
                 else {
                     if (lastPath() && lastUser()) {

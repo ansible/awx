@@ -365,7 +365,7 @@ var tower = angular.module('Tower', [
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
                     if (!/^\/(login|logout)/.test($location.path())) {
-                        $cookies.put('preAuthUrl', $location.path());
+                        $rootScope.preAuthUrl = $location.path();
                     }
                     $location.path('/login');
                 } else {
