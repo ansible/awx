@@ -542,7 +542,7 @@ export default
             $scope.formSave = function () {
                 var fld, data = {};
                 $scope.invalid_survey = false;
-                
+
                 // Can't have a survey enabled without a survey
                 if($scope.survey_enabled === true &&
                     $scope.survey_exists!==true){
@@ -556,7 +556,7 @@ export default
                 try {
                     for (fld in form.fields) {
                         if (form.fields[fld].type === 'select' &&
-                            fld !== 'playbook') {
+                            fld !== 'playbook' && $scope[fld]) {
                             data[fld] = $scope[fld].value;
                         }
                         else if(form.fields[fld].type === 'checkbox_group') {
