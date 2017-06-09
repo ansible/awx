@@ -62,7 +62,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
         Authorization, Alert, Wait, Timer, Empty,
         scope, pendoService, ConfigService, CheckLicense, FeaturesService,
         SocketService) {
-    var lastPath, lastUser, sessionExpired, loginAgain;
+    var lastPath, lastUser, sessionExpired, loginAgain, preAuthUrl;
 
     loginAgain = function() {
         setTimeout(function() {
@@ -88,6 +88,8 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
         }
     };
 
+    preAuthUrl = $rootScope.preAuthUrl;
+
     $log.debug('User session expired: ' + sessionExpired);
     $log.debug('Last URL: ' + lastPath());
 
@@ -112,11 +114,17 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                 pendoService.issuePendoIdentity();
                 FeaturesService.get();
                 Wait("stop");
-                if (lastPath() && lastUser()) {
-                    // Go back to most recent navigation path
-                    $location.path(lastPath());
-                } else {
-                    $location.url('/home');
+                if(!Empty(preAuthUrl)){
+                    $location.path(preAuthUrl);
+                    delete $rootScope.preAuthUrl;
+                }
+                else {
+                    if (lastPath() && lastUser()) {
+                        // Go back to most recent navigation path
+                        $location.path(lastPath());
+                    } else {
+                        $location.url('/home');
+                    }
                 }
             })
             .catch(function () {
