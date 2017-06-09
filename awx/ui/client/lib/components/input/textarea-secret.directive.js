@@ -37,9 +37,11 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             scope.buttonText = 'REPLACE';
         } else {
             scope.state._hint = scope.state._hint || DEFAULT_HINT;
-            vm.listeners = vm.setFileListeners(textarea, input);
-        }
 
+            if (scope.state.format === 'ssh_private_key') {
+                vm.listeners = vm.setFileListeners(textarea, input);
+            }
+        }
 
         vm.updateModel();
     };

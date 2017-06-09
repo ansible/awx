@@ -35,6 +35,7 @@ function EditCredentialsController (models, $state) {
 
     vm.form.save = data => {
         data.user = me.getSelf().id;
+        credential.clearTypeInputs();
                 
         return credential.request('put', data);
     };

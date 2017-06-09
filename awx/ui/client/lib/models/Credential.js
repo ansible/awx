@@ -33,11 +33,16 @@ function assignInputGroupValues (inputs) {
     });
 }
 
+function clearTypeInputs () {
+    delete this.model.GET.inputs;
+}
+
 function CredentialModel (method, resource) {
     BaseModel.call(this, 'credentials');
-    
+
     this.createFormSchema = createFormSchema.bind(this);
     this.assignInputGroupValues = assignInputGroupValues.bind(this);
+    this.clearTypeInputs = clearTypeInputs.bind(this);
 
     return this.request(method, resource)
         .then(() => this);
