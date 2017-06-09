@@ -15,9 +15,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         inventorySourceData, SourcesService, inventoryData, inventorySourcesOptions, Empty,
         Wait, Rest, Alert, ProcessErrors) {
 
-        init();
-
         function init() {
+            $scope.projectBasePath = GetBasePath('projects');
             $scope.canAdd = inventorySourcesOptions.actions.POST;
             // instantiate expected $scope values from inventorySourceData
             _.assign($scope,
@@ -35,6 +34,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
 
+            if(inventorySourceData.source === 'scm') {
+                $scope.project = inventorySourceData.source_project;
+                $scope.project_name = inventorySourceData.summary_fields.source_project.name;
+                updateSCMProject();
+            }
+
             // display custom inventory_script name
             if (inventorySourceData.source === 'custom') {
                 $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
@@ -45,16 +50,69 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 $scope.canAdd = val;
             });
 
+            $scope.$on('sourceTypeOptionsReady', function() {
+                initSourceSelect();
+            });
+
             $scope.envParseType = 'yaml';
 
             initSources();
+
+            GetChoices({
+                scope: $scope,
+                field: 'verbosity',
+                variable: 'verbosity_options',
+                options: inventorySourcesOptions
+            });
+
+            var i;
+            for (i = 0; i < $scope.verbosity_options.length; i++) {
+                if ($scope.verbosity_options[i].value === $scope.verbosity) {
+                    $scope.verbosity = $scope.verbosity_options[i];
+                }
+            }
+
+            initVerbositySelect();
+
+            $scope.$watch('verbosity', initVerbositySelect);
+
+            // Register a watcher on project_name
+            if ($scope.getInventoryFilesUnregister) {
+                $scope.getInventoryFilesUnregister();
+            }
+            $scope.getInventoryFilesUnregister = $scope.$watch('project', function (newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    updateSCMProject();
+                }
+            });
         }
 
-        var getInventoryFiles = function (project) {
+        function initVerbositySelect(){
+            CreateSelect2({
+                element: '#inventory_source_verbosity',
+                multiple: false
+            });
+        }
+
+        function sync_inventory_file_select2() {
+            CreateSelect2({
+                element:'#inventory-file-select',
+                addNew: true,
+                multiple: false,
+                scope: $scope,
+                options: 'inventory_files',
+                model: 'inventory_file'
+            });
+
+            // TODO: figure out why the inventory file model is being set to
+            // dirty
+        }
+
+        function updateSCMProject() {
             var url;
 
-            if (!Empty(project)) {
-                url = GetBasePath('projects') + project + '/inventories/';
+            if (!Empty($scope.project)) {
+                url = GetBasePath('projects') + $scope.project + '/inventories/';
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
@@ -78,10 +136,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                         Wait('stop');
                     });
             }
-        };
 
-        // Detect and alert user to potential SCM status issues
-        var checkSCMStatus = function () {
             if (!Empty($scope.project)) {
                 Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                 Rest.get()
@@ -108,31 +163,115 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                             msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                     });
             }
-        };
-
-        // Register a watcher on project_name
-        if ($scope.getInventoryFilesUnregister) {
-            $scope.getInventoryFilesUnregister();
         }
-        $scope.getInventoryFilesUnregister = $scope.$watch('project', function (newValue, oldValue) {
-            if (newValue !== oldValue) {
-                getInventoryFiles(newValue);
-                checkSCMStatus();
-            }
-        });
 
-        function sync_inventory_file_select2() {
+        function initSourceSelect() {
+            $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
+            var source = $scope.source && $scope.source.value ? $scope.source.value : null;
+
             CreateSelect2({
-                element:'#inventory-file-select',
-                addNew: true,
-                multiple: false,
-                scope: $scope,
-                options: 'inventory_files',
-                model: 'inventory_file'
+                element: '#inventory_source_source',
+                multiple: false
             });
 
-            // TODO: figure out why the inventory file model is being set to
-            // dirty
+            if (source === 'ec2' || source === 'custom' ||
+                source === 'vmware' || source === 'openstack' ||
+                source === 'scm') {
+
+                var varName;
+                if (source === 'scm') {
+                    varName = 'custom_variables';
+                } else {
+                    varName = source + '_variables';
+                }
+
+                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
+
+                ParseVariableString(inventorySourceData.source_vars);
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: varName,
+                    variable: varName,
+                    parse_variable: 'envParseType',
+                });
+            }
+        }
+
+        function initRegionData() {
+            var source = $scope.source === 'azure_rm' ? 'azure' : $scope.source;
+            var regions = inventorySourceData.source_regions.split(',');
+            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
+            $scope.source_region_choices = $scope[source + '_regions'];
+
+            // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
+            if (source === 'azure') {
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value.toLowerCase() === region));
+            }
+            // all other regions are 1-1
+            else {
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
+            }
+            $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
+            if (source === 'ec2') {
+                var group_by = inventorySourceData.group_by.split(',');
+                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
+            }
+            initRegionSelect();
+        }
+
+        function initSources() {
+            GetSourceTypeOptions({
+                scope: $scope,
+                variable: 'source_type_options'
+            });
+            GetChoices({
+                scope: $scope,
+                field: 'source_regions',
+                variable: 'rax_regions',
+                choice_name: 'rax_region_choices',
+                options: inventorySourcesOptions
+            });
+            GetChoices({
+                scope: $scope,
+                field: 'source_regions',
+                variable: 'ec2_regions',
+                choice_name: 'ec2_region_choices',
+                options: inventorySourcesOptions
+            });
+            GetChoices({
+                scope: $scope,
+                field: 'source_regions',
+                variable: 'gce_regions',
+                choice_name: 'gce_region_choices',
+                options: inventorySourcesOptions
+            });
+            GetChoices({
+                scope: $scope,
+                field: 'source_regions',
+                variable: 'azure_regions',
+                choice_name: 'azure_region_choices',
+                options: inventorySourcesOptions
+            });
+            GetChoices({
+                scope: $scope,
+                field: 'group_by',
+                variable: 'ec2_group_by',
+                choice_name: 'ec2_group_by_choices',
+                options: inventorySourcesOptions
+            });
+
+            initRegionData();
+        }
+
+        function initRegionSelect() {
+            CreateSelect2({
+                element: '#inventory_source_source_regions',
+                multiple: true
+            });
+            CreateSelect2({
+                element: '#inventory_source_group_by',
+                multiple: true
+            });
         }
 
         $scope.lookupCredential = function(){
@@ -152,19 +291,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                     page_size: '5',
                     page: '1'
                 }
-            });
-        };
-
-        $scope.projectBasePath = GetBasePath('projects');
-
-        var initRegionSelect = function() {
-            CreateSelect2({
-                element: '#inventory_source_source_regions',
-                multiple: true
-            });
-            CreateSelect2({
-                element: '#inventory_source_group_by',
-                multiple: true
             });
         };
 
@@ -197,6 +323,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 overwrite_vars: $scope.overwrite_vars,
                 update_on_launch: $scope.update_on_launch,
                 update_cache_timeout: $scope.update_cache_timeout || 0,
+                verbosity: $scope.verbosity.value,
                 // comma-delimited strings
                 group_by: _.map($scope.group_by, 'value').join(','),
                 source_regions: _.map($scope.source_regions, 'value').join(',')
@@ -207,7 +334,13 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 params.source = $scope.source.value;
                 if ($scope.source.value === 'scm') {
                   params.update_on_project_update = $scope.update_on_project_update;
-                  params.source_path = $scope.inventory_file;
+                  params.source_project = $scope.project;
+
+                  if ($scope.inventory_file === '/ (project root)') {
+                      params.source_path = "";
+                  } else {
+                      params.source_path = $scope.inventory_file;
+                  }
                 }
             } else {
                 params.source = null;
@@ -254,152 +387,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             initRegionSelect();
         };
 
-        function initSourceSelect() {
-            $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
-            var source = $scope.source && $scope.source.value ? $scope.source.value : null;
-
-            CreateSelect2({
-                element: '#inventory_source_source',
-                multiple: false
-            });
-
-            if (source === 'ec2' || source === 'custom' ||
-                source === 'vmware' || source === 'openstack' ||
-                source === 'scm') {
-
-                var varName;
-                if (source === 'scm') {
-                    varName = 'custom_variables';
-                } else {
-                    varName = source + '_variables';
-                }
-
-                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
-
-                ParseVariableString(inventorySourceData.source_vars);
-                ParseTypeChange({
-                    scope: $scope,
-                    field_id: varName,
-                    variable: varName,
-                    parse_variable: 'envParseType',
-                });
-            }
-        }
-
-        function initRegionData() {
-            var source = $scope.source.value === 'azure_rm' ? 'azure' : $scope.source.value;
-            var regions = inventorySourceData.source_regions.split(',');
-            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
-            $scope.source_region_choices = $scope[source + '_regions'];
-
-            // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
-            if (source === 'azure') {
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value.toLowerCase() === region));
-            }
-            // all other regions are 1-1
-            else {
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
-            }
-            $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
-            if (source === 'ec2') {
-                var group_by = inventorySourceData.group_by.split(',');
-                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
-            }
-            initRegionSelect();
-        }
-
-        function initSources() {
-            GetSourceTypeOptions({
-                scope: $scope,
-                variable: 'source_type_options',
-                //callback: 'sourceTypeOptionsReady' this callback is hard-coded into GetSourceTypeOptions(), included for ref
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'rax_regions',
-                choice_name: 'rax_region_choices',
-                callback: 'choicesReadyGroup',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'ec2_regions',
-                choice_name: 'ec2_region_choices',
-                callback: 'choicesReadyGroup',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'gce_regions',
-                choice_name: 'gce_region_choices',
-                callback: 'choicesReadyGroup',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'azure_regions',
-                choice_name: 'azure_region_choices',
-                callback: 'choicesReadyGroup',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'group_by',
-                variable: 'ec2_group_by',
-                choice_name: 'ec2_group_by_choices',
-                callback: 'choicesReadyGroup',
-                options: inventorySourcesOptions
-            });
-        }
-
-        function initVerbositySelect(){
-            CreateSelect2({
-                element: '#inventory_source_verbosity',
-                multiple: false
-            });
-        }
-
-        function sync_verbosity_select2() {
-            CreateSelect2({
-                element:'#inventory_source_verbosity',
-                multiple: false
-            });
-        }
-
-        $scope.$on('choicesReadyVerbosity', function() {
-            var i;
-            for (i = 0; i < $scope.verbosity_options.length; i++) {
-                if ($scope.verbosity_options[i].value === $scope.verbosity) {
-                    $scope.verbosity = $scope.verbosity_options[i];
-                }
-            }
-
-            initVerbositySelect();
-        });
-
-        $scope.$watch('verbosity', sync_verbosity_select2);
-
-        GetChoices({
-            scope: $scope,
-            field: 'verbosity',
-            variable: 'verbosity_options',
-            callback: 'choicesReadyVerbosity',
-            options: inventorySourcesOptions
-        });
-
-        // region / source options callback
-        $scope.$on('choicesReadyGroup', function() {
-            if (angular.isObject($scope.source)) {
-                initRegionData();
-            }
-        });
-
-        $scope.$on('sourceTypeOptionsReady', function() {
-            initSourceSelect();
-        });
+        init();
     }
 ];
