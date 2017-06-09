@@ -171,13 +171,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             initRegionSelect();
         };
         // region / source options callback
-        $scope.$on('choicesReadyGroup', function() {
-            initRegionSelect();
-        });
-
-        $scope.$on('choicesReadyVerbosity', function() {
-            initVerbositySelect();
-        });
 
         $scope.$on('sourceTypeOptionsReady', function() {
             initSourceSelect();
@@ -216,7 +209,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 field: 'source_regions',
                 variable: 'rax_regions',
                 choice_name: 'rax_region_choices',
-                callback: 'choicesReadyGroup',
                 options: inventorySourcesOptions
             });
 
@@ -225,7 +217,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 field: 'source_regions',
                 variable: 'ec2_regions',
                 choice_name: 'ec2_region_choices',
-                callback: 'choicesReadyGroup',
                 options: inventorySourcesOptions
             });
 
@@ -234,7 +225,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 field: 'source_regions',
                 variable: 'gce_regions',
                 choice_name: 'gce_region_choices',
-                callback: 'choicesReadyGroup',
                 options: inventorySourcesOptions
             });
 
@@ -243,7 +233,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 field: 'source_regions',
                 variable: 'azure_regions',
                 choice_name: 'azure_region_choices',
-                callback: 'choicesReadyGroup',
                 options: inventorySourcesOptions
             });
 
@@ -253,22 +242,23 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 field: 'group_by',
                 variable: 'ec2_group_by',
                 choice_name: 'ec2_group_by_choices',
-                callback: 'choicesReadyGroup',
                 options: inventorySourcesOptions
             });
+
+            initRegionSelect();
 
             GetChoices({
                 scope: $scope,
                 field: 'verbosity',
                 variable: 'verbosity_options',
-                callback: 'choicesReadyVerbosity',
                 options: inventorySourcesOptions
             });
+
+            initVerbositySelect();
 
             GetSourceTypeOptions({
                 scope: $scope,
                 variable: 'source_type_options'
-                //callback: 'sourceTypeOptionsReady' this callback is hard-coded into GetSourceTypeOptions(), included for ref
             });
         }
 
