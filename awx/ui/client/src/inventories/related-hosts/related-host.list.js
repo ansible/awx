@@ -51,7 +51,7 @@ export default {
 
         columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
         insights: {
-            ngClick: "goToInsights(host.id)",
+            ngClick: "goToInsights(host)",
             icon: 'fa-info',
             awToolTip: 'View Insights Data',
             dataPlacement: 'top',

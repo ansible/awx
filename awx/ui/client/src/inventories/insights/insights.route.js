@@ -29,5 +29,26 @@ export default {
                     });
             }
         ],
+        InventoryData: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'resourceData',
+            (Rest, $stateParams, GetBasePath, ProcessErrors, resourceData) => {
+                if(resourceData.data.type === "host"){
+                    var path = `${GetBasePath('inventory')}${resourceData.data.inventory}`;
+                    Rest.setUrl(path);
+                    return Rest.get()
+                        .then(function(data) {
+                            return (data.data);
+                        }).catch(function(response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get insights info. GET returned status: ' +
+                                    response.status
+                            });
+                        });
+                }
+                else if(resourceData.data.type === 'inventory'){
+                    return resourceData.data;
+                }
+            }
+        ]
     }
 };
