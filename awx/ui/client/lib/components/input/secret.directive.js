@@ -29,14 +29,6 @@ function AtInputSecretController (baseInputController) {
             vm.toggle = vm.toggleRevertReplace;
         }
 
-        vm.updateValue();
-    };
-
-    vm.updateValue = () => {
-        if (!scope.state._promptOnLaunch && (!scope.state._displayRevertReplace || !scope.state._isBeingReplaced)) {
-            scope.state._value = scope.state._displayValue;
-        }
-
         vm.check();
     };
 

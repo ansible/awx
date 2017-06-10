@@ -41,25 +41,19 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             }
         }
 
-        vm.updateValue();
+        vm.check();
     };
 
     vm.toggle = () => {
-        if (scope.state._revert) {
+        vm.toggleRevertReplace();
+
+        if (scope.state._isBeingReplaced) {
             scope.state._displayHint = true;
             vm.listeners = vm.setFileListeners(textarea, input);
         } else {
             scope.state._displayHint = false;
             eventService.remove(vm.listeners);
         }
-
-        vm.toggleRevertReplace();
-    };
-
-    vm.updateValue = () => {
-        scope.state._value = scope.state._displayValue;
-
-        vm.check();
     };
 
     vm.setFileListeners = (textarea, input) => { 
@@ -87,8 +81,8 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
     vm.readFile = (reader, event) => {
         scope.$apply(() => {
-            scope.state._displayValue = reader.result;
-            vm.updateValue();
+            scope.state._value = reader.result;
+            vm.check();
             scope.drag = false
             input.value = '';
         });

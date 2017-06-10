@@ -12,6 +12,7 @@ function BaseInputController () {
         scope.state._required = scope.state.required || false;
         scope.state._isValid = scope.state.isValid || false;
         scope.state._disabled = scope.state.disabled || false;
+        scope.state._activeModel = '_value';
 
         if (scope.state.ask_at_runtime) {
             scope.state._displayPromptOnLaunch = true;
@@ -24,7 +25,7 @@ function BaseInputController () {
             if (scope.state._value === PROMPT_ON_LAUNCH_VALUE) {
                 scope.state._promptOnLaunch = true;
                 scope.state._disabled = true;
-                scope.state._displayValue = '';
+                scope.state._activeModel = '_displayValue';
             }
 
             if (scope.state._value === ENCRYPTED_VALUE) {
@@ -32,7 +33,7 @@ function BaseInputController () {
                 scope.state._enableToggle = true;
                 scope.state._disabled = true;
                 scope.state._isBeingReplaced = false;
-                scope.state._displayValue = '';
+                scope.state._activeModel = '_displayValue';
             }
         }
 
@@ -72,43 +73,41 @@ function BaseInputController () {
 
                 form.check();
             }
-
-            console.log('check', scope.state);
         };
 
         vm.toggleRevertReplace = () => {
-            if (scope.state._isBeingReplaced) {
+            scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
+
+            if (!scope.state._isBeingReplaced) {
                 scope.state._buttonText = 'REPLACE';
                 scope.state._disabled = true;
                 scope.state._enableToggle = true;
                 scope.state._value = scope.state._preEditValue;
-                scope.state._displayValue = '';
+                scope.state._activeModel = '_displayValue';
             } else {
                 scope.state._buttonText = 'REVERT';
                 scope.state._disabled = false;
                 scope.state._enableToggle = false;
-                scope.state._displayValue = '';
+                scope.state._activeModel = '_value';
                 scope.state._value = '';
             }
-
-            scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
         };
 
         vm.togglePromptOnLaunch = () => {
             if (scope.state._promptOnLaunch) {
                 scope.state._value = PROMPT_ON_LAUNCH_VALUE;
-                scope.state._displayValue = '';
+                scope.state._activeModel = '_displayValue';
                 scope.state._disabled = true;
                 scope.state._enableToggle = false;
             } else {
-                scope.state._value = scope.state._preEditValue;
-                scope.state._displayValue = '';
-
-                if (!scope.state._isBeingReplaced) {
+                if (scope.state._isBeingReplaced === false) {
                     scope.state._disabled = true;
                     scope.state._enableToggle = true;
+                    scope.state._value = scope.state._preEditValue;
                 } else {
+                    scope.state._activeModel = '_value';
                     scope.state._disabled = false;
+                    scope.state._value = ''; 
                 }
             }
             
