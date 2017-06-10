@@ -1,6 +1,7 @@
 const REQUIRED_INPUT_MISSING_MESSAGE = 'Please enter a value.';
 const DEFAULT_INVALID_INPUT_MESSAGE = 'Invalid input for this type.';
-const PROMPT_ON_LAUNCH = 'ASK';
+const PROMPT_ON_LAUNCH_VALUE = 'ASK';
+const ENCRYPTED_VALUE = '$encrypted$';
 
 function BaseInputController () {
     return function extend (type, scope, element, form) {
@@ -14,12 +15,24 @@ function BaseInputController () {
 
         if (scope.state.ask_at_runtime) {
             scope.state._displayPromptOnLaunch = true;
+        }
 
-            if (scope.state._value === 'ASK') {
+        if (scope.state._value) {
+            scope.state._edit = true;
+            scope.state._preEditValue = scope.state._value;
+
+            if (scope.state._value === PROMPT_ON_LAUNCH_VALUE) {
                 scope.state._promptOnLaunch = true;
                 scope.state._disabled = true;
-            } else {
-                scope.state._promptOnLaunch = false;
+                scope.state._displayValue = '';
+            }
+
+            if (scope.state._value === ENCRYPTED_VALUE) {
+                scope.state._displayRevertReplace = true;
+                scope.state._enableToggle = true;
+                scope.state._disabled = true;
+                scope.state._isBeingReplaced = false;
+                scope.state._displayValue = '';
             }
         }
 
@@ -59,18 +72,44 @@ function BaseInputController () {
 
                 form.check();
             }
+
+            console.log('check', scope.state);
+        };
+
+        vm.toggleRevertReplace = () => {
+            if (scope.state._isBeingReplaced) {
+                scope.state._buttonText = 'REPLACE';
+                scope.state._disabled = true;
+                scope.state._enableToggle = true;
+                scope.state._value = scope.state._preEditValue;
+                scope.state._displayValue = '';
+            } else {
+                scope.state._buttonText = 'REVERT';
+                scope.state._disabled = false;
+                scope.state._enableToggle = false;
+                scope.state._displayValue = '';
+                scope.state._value = '';
+            }
+
+            scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
         };
 
         vm.togglePromptOnLaunch = () => {
             if (scope.state._promptOnLaunch) {
-                scope.state._priorValue = scope.state._value;
-                scope.state._value = PROMPT_ON_LAUNCH;
+                scope.state._value = PROMPT_ON_LAUNCH_VALUE;
                 scope.state._displayValue = '';
                 scope.state._disabled = true;
+                scope.state._enableToggle = false;
             } else {
-                scope.state._value = scope.state._priorValue;
-                scope.state._displayValue = scope.state._value;
-                scope.state._disabled = false;
+                scope.state._value = scope.state._preEditValue;
+                scope.state._displayValue = '';
+
+                if (!scope.state._isBeingReplaced) {
+                    scope.state._disabled = true;
+                    scope.state._enableToggle = true;
+                } else {
+                    scope.state._disabled = false;
+                }
             }
             
             vm.check();

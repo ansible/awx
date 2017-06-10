@@ -20,51 +20,33 @@ function AtInputSecretController (baseInputController) {
         scope = _scope_;
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
+            scope.state._buttonText = 'SHOW';
             scope.type = 'password';
-            scope.buttonText = 'SHOW';
 
-            vm.toggle = vm.toggleAddState;
+            vm.toggle = vm.toggleShowHide;
         } else {
-            scope.type = 'password';
-            scope.edit = true;
-            scope.replace = false;
-            scope.buttonText = 'REPLACE';
-
-            vm.toggle = vm.toggleEditState;
+            scope.state._buttonText = 'REPLACE';
+            vm.toggle = vm.toggleRevertReplace;
         }
 
-        vm.check();
+        vm.updateValue();
     };
 
-    vm.updateValue = value => {
-        if (!scope.edit || scope.replace) {
+    vm.updateValue = () => {
+        if (!scope.state._promptOnLaunch && (!scope.state._displayRevertReplace || !scope.state._isBeingReplaced)) {
             scope.state._value = scope.state._displayValue;
         }
 
         vm.check();
     };
 
-    vm.toggleEditState = () => {
-        scope.state._dislpayValue = '';
-
-        if (scope.replace) {
-            scope.buttonText = 'REPLACE';
-            scope.state._disabled = true;
-        } else {
-            scope.buttonText = 'REVERT';
-            scope.state._disabled = false
-        }
-
-        scope.replace = !scope.replace;
-    };
-
-    vm.toggleAddState = () => {
+    vm.toggleShowHide = () => {
         if (scope.type === 'password') {
             scope.type = 'text';
-            scope.buttonText = 'HIDE';
+            scope.state._buttonText = 'HIDE';
         } else {
             scope.type = 'password';
-            scope.buttonText = 'SHOW';
+            scope.state._buttonText = 'SHOW';
         }
     };
 }

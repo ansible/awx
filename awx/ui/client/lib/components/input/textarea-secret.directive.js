@@ -28,28 +28,36 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
         if (scope.state.format === 'ssh_private_key') {
             scope.ssh = true;
+            scope.state._hint = scope.state._hint || DEFAULT_HINT;
             input = element.find('input')[0];
         }
 
         if (scope.state._value) {
-            scope.edit = true;
-            scope.replace = false;
-            scope.buttonText = 'REPLACE';
+            scope.state._buttonText = 'REPLACE';
         } else {
-            scope.state._hint = scope.state._hint || DEFAULT_HINT;
-
             if (scope.state.format === 'ssh_private_key') {
                 vm.listeners = vm.setFileListeners(textarea, input);
+                scope.state._displayHint = true;
             }
         }
 
-        vm.updateModel();
+        vm.updateValue();
     };
 
-    vm.updateModel = (value) => {
-        if (!scope.edit || scope.replace) {
-            scope.state._value = scope.displayModel;
+    vm.toggle = () => {
+        if (scope.state._revert) {
+            scope.state._displayHint = true;
+            vm.listeners = vm.setFileListeners(textarea, input);
+        } else {
+            scope.state._displayHint = false;
+            eventService.remove(vm.listeners);
         }
+
+        vm.toggleRevertReplace();
+    };
+
+    vm.updateValue = () => {
+        scope.state._value = scope.state._displayValue;
 
         vm.check();
     };
@@ -79,27 +87,11 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
     vm.readFile = (reader, event) => {
         scope.$apply(() => {
-            scope.displayModel = reader.result;
-            vm.updateModel();
+            scope.state._displayValue = reader.result;
+            vm.updateValue();
             scope.drag = false
             input.value = '';
         });
-    };
-
-    vm.toggle = () => {
-        scope.displayModel = undefined;
-
-        if (scope.replace) {
-            scope.buttonText = 'REPLACE';
-            scope.state._hint = '';
-            eventService.remove(vm.listeners);
-        } else {
-            scope.buttonText = 'REVERT';
-            scope.state._hint = scope.state._hint || DEFAULT_HINT;
-            vm.listeners = vm.setFileListeners(textarea, input);
-        }
-
-        scope.replace = !scope.replace;
     };
 }
 

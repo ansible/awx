@@ -44,6 +44,7 @@ function httpPost (data) {
 }
 
 function httpPut (changes) {
+    console.log(this.get(), changes);
     let model = Object.assign(this.get(), changes);
 
     let req = {
