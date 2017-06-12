@@ -286,7 +286,7 @@ return {
             ngOptions: 'v.label for v in verbosity_options track by v.value',
             ngShow: "source && (source.value !== '' && source.value !== null)",
             "default": 0,
-            required: true,
+            disableChooseOption: true,
             column: 1,
             awPopOver: "<p>" + i18n._("Control the level of output ansible will produce for inventory source update jobs.") + "</p>",
             dataTitle: i18n._('Verbosity'),
@@ -346,7 +346,8 @@ return {
                 label: 'Update on Project Update',
                 type: 'checkbox',
                 ngShow: "source.value === 'scm'",
-                awPopOver: '<p>TODO</p>',
+                awPopOver: '<p>Each time the selected project is updated, refresh the inventory from the selected source before ' +
+                    'executing job tasks.</p>',
                 dataTitle: 'Update on Project Update',
                 dataContainer: 'body',
                 dataPlacement: 'right',
