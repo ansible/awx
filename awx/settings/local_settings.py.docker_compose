@@ -130,6 +130,15 @@ SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+# If Tower is behind a reverse proxy/load balancer, use this setting to
+# whitelist the proxy IP addresses from which Tower should trust custom
+# REMOTE_HOST_HEADERS header values
+# REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
+# PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']
+# If this setting is an empty list (the default), the headers specified by
+# REMOTE_HOST_HEADERS will be trusted unconditionally')
+PROXY_IP_WHITELIST = []
+
 # Define additional environment variables to be passed to subprocess started by
 # the celery task.
 #AWX_TASK_ENV['FOO'] = 'BAR'

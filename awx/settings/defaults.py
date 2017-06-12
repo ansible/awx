@@ -152,6 +152,15 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+# If Tower is behind a reverse proxy/load balancer, use this setting to
+# whitelist the proxy IP addresses from which Tower should trust custom
+# REMOTE_HOST_HEADERS header values
+# REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
+# PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']
+# If this setting is an empty list (the default), the headers specified by
+# REMOTE_HOST_HEADERS will be trusted unconditionally')
+PROXY_IP_WHITELIST = []
+
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 

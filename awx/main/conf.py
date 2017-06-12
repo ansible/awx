@@ -82,6 +82,21 @@ register(
     category_slug='system',
 )
 
+register(
+    'PROXY_IP_WHITELIST',
+    field_class=fields.StringListField,
+    label=_('Proxy IP Whitelist'),
+    help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
+                "to whitelist the proxy IP addresses from which Tower should trust "
+                "custom REMOTE_HOST_HEADERS header values\n"
+                "REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']\n"
+                "PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']\n"
+                "If this setting is an empty list (the default), the headers specified by "
+                "REMOTE_HOST_HEADERS will be trusted unconditionally')"),
+    category=_('System'),
+    category_slug='system',
+)
+
 
 def _load_default_license_from_file():
     try:
