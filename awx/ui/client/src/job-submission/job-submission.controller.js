@@ -172,7 +172,7 @@ export default
 
                     // General catch-all for "other prompts" - used in this link function and to hide the Other Prompts tab when
                     // it should be hidden
-                    $scope.has_other_prompts = (data.ask_job_type_on_launch || data.ask_limit_on_launch || data.ask_tags_on_launch || data.ask_skip_tags_on_launch || data.ask_variables_on_launch) ? true : false;
+                    $scope.has_other_prompts = (data.ask_verbosity_on_launch || data.ask_job_type_on_launch || data.ask_limit_on_launch || data.ask_tags_on_launch || data.ask_skip_tags_on_launch || data.ask_variables_on_launch) ? true : false;
                     $scope.password_needed = data.passwords_needed_to_start && data.passwords_needed_to_start.length > 0;
                     $scope.has_default_inventory = data.defaults && data.defaults.inventory && data.defaults.inventory.id;
                     $scope.has_default_credential = data.defaults && data.defaults.credential && data.defaults.credential.id;
@@ -180,8 +180,38 @@ export default
 
                     $scope.other_prompt_data = {};
 
-                    if($scope.ask_job_type_on_launch) {
-                        $scope.other_prompt_data.job_type = (data.defaults && data.defaults.job_type) ? data.defaults.job_type : "";
+                    let getChoices = (options, lookup) => {
+                        return _.get(options, lookup, []).map(c => ({label: c[1], value: c[0]}));
+                    };
+
+                    let getChoiceFromValue = (choices, value) => {
+                        return _.find(choices, item => item.value === value);
+                    };
+
+                    if ($scope.has_other_prompts) {
+                        Rest.options()
+                        .success(options => {
+                            if ($scope.ask_job_type_on_launch) {
+                                let choices = getChoices(options, 'actions.POST.job_type.choices');
+                                let initialValue = _.get(data, 'defaults.job_type');
+                                let initialChoice = getChoiceFromValue(choices, initialValue);
+                                $scope.other_prompt_data.job_type_options = choices;
+                                $scope.other_prompt_data.job_type = initialChoice;
+                            }
+                            if ($scope.ask_verbosity_on_launch) {
+                                let choices = getChoices(options, 'actions.POST.verbosity.choices');
+                                let initialValue = _.get(data, 'defaults.verbosity');
+                                let initialChoice = getChoiceFromValue(choices, initialValue);
+                                $scope.other_prompt_data.verbosity_options = choices;
+                                $scope.other_prompt_data.verbosity = initialChoice;
+                            }
+                        })
+                        .error((err, status) => {
+                            ProcessErrors($scope, err, status, null, {
+                                hdr: 'Error!',
+                                msg: `Failed to get ${launch_url}. OPTIONS status: ${status}`
+                            });
+                        });
                     }
 
                     if($scope.ask_limit_on_launch) {

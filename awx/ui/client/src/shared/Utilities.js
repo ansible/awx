@@ -790,7 +790,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                       .error(function(data, status) {
                           ProcessErrors(scope, data, status, null, {
                               hdr: 'Error!',
-                              msg: 'Failed to get ' + url + '. GET status: ' + status
+                              msg: 'Failed to get ' + url + '. OPTIONS status: ' + status
                           });
                       });
                 } else {

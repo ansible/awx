@@ -66,6 +66,10 @@ export default
                         job_launch_data.job_type = scope.other_prompt_data.job_type;
                     }
 
+                    if(scope.ask_verbosity_on_launch && scope.other_prompt_data && scope.other_prompt_data.verbosity) {
+                        job_launch_data.verbosity = scope.other_prompt_data.verbosity;
+                    }
+
                     if(scope.survey_enabled===true){
                         for (var i=0; i < scope.survey_questions.length; i++){
                             var fld = scope.survey_questions[i].variable;

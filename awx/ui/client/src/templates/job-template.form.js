@@ -241,7 +241,11 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     dataTitle: i18n._('Verbosity'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    subCheckbox: {
+                        variable: 'ask_verbosity_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                 },
                 instance_groups: {
                     label: i18n._('Instance Groups'),

@@ -144,15 +144,39 @@
                             <textarea rows="6" ng-model="other_prompt_data.extra_vars" name="variables" class="form-control Form-textArea Form-textAreaLabel" id="job_launch_variables" aw-watch=""></textarea>
                         </div>
                     </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_verbosity_on_launch">
+                        <label for="verbosity">
+                            <span class="Form-inputLabel prepend-asterisk"> Verbosity</span>
+                        </label>
+                        <div>
+                            <select
+                                id="job_launch_verbosity"
+                                ng-options="v.label for v in other_prompt_data.verbosity_options track by v.value"
+                                ng-model="other_prompt_data.verbosity"
+                                class="form-control Form-dropDown"
+                                name="verbosity"
+                                tabindex="-1"
+                                aria-hidden="true"
+                                required>
+                                <option value="" class="" selected="selected">Choose a verbosity</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_job_type_on_launch">
                         <label for="job_type">
                             <span class="Form-inputLabel prepend-asterisk" translate> Job Type</span>
                         </label>
                         <div>
-                            <select ng-model="other_prompt_data.job_type" name="job_type" class="form-control Form-dropDown" id="job_launch_job_type" tabindex="-1" aria-hidden="true" required>
-                                <option value="" class="" selected="selected" translate>Choose a job type</option>
-                                <option label="Run" value="run" selected="selected" translate>Run</option>
-                                <option label="Check" value="check" translate>Check</option>
+                            <select
+                                id="job_launch_job_type"
+                                ng-options="v.label for v in other_prompt_data.job_type_options track by v.value"
+                                ng-model="other_prompt_data.job_type"
+                                class="form-control Form-dropDown"
+                                name="job_type"
+                                tabindex="-1"
+                                aria-hidden="true"
+                                required>
+                                <option value="" class="" selected="selected">Choose a job type</option>
                             </select>
                         </div>
                     </div>

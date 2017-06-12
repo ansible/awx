@@ -103,6 +103,9 @@ export default
                     scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? true : false;
                     master.ask_variables_on_launch = scope.ask_variables_on_launch;
 
+                    scope.ask_verbosity_on_launch = (data.ask_verbosity_on_launch) ? true : false;
+                    master.ask_verbosity_on_launch = scope.ask_verbosity_on_launch;
+
                     scope.ask_limit_on_launch = (data.ask_limit_on_launch) ? true : false;
                     master.ask_limit_on_launch = scope.ask_limit_on_launch;
 

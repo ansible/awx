@@ -50,6 +50,11 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                         multiple: false
                     });
 
+                    CreateSelect2({
+                        element: '#job_launch_verbosity',
+                        multiple: false
+                    });
+
                     if(scope.step === 'otherprompts' && scope.ask_variables_on_launch) {
                         ParseTypeChange({
                             scope: scope,
