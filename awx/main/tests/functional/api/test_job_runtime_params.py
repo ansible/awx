@@ -298,7 +298,7 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     ([999], 'object does not exist'),
 ])
 def test_job_launch_JT_with_invalid_extra_credentials(machine_credential, deploy_jobtemplate, pks, error_msg):
-    deploy_jobtemplate.ask_extra_credentials_on_launch = True
+    deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.save()
 
     kv = dict(extra_credentials=pks, credential=machine_credential.id)
@@ -337,7 +337,7 @@ def test_job_launch_JT_enforces_unique_extra_credential_kinds(machine_credential
 
 @pytest.mark.django_db
 def test_job_launch_JT_with_extra_credentials(machine_credential, credential, net_credential, deploy_jobtemplate):
-    deploy_jobtemplate.ask_extra_credentials_on_launch = True
+    deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.save()
 
     kv = dict(extra_credentials=[credential.pk, net_credential.pk], credential=machine_credential.id)

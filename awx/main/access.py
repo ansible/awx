@@ -1251,8 +1251,7 @@ class JobTemplateAccess(BaseAccess):
             'name', 'description', 'forks', 'limit', 'verbosity', 'extra_vars',
             'job_tags', 'force_handlers', 'skip_tags', 'ask_variables_on_launch',
             'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_skip_tags_on_launch',
-            'ask_inventory_on_launch', 'ask_credential_on_launch',
-            'ask_extra_credentials_on_launch', 'survey_enabled',
+            'ask_inventory_on_launch', 'ask_credential_on_launch', 'survey_enabled',
 
             # These fields are ignored, but it is convenient for QA to allow clients to post them
             'last_job_run', 'created', 'modified',

@@ -70,11 +70,6 @@ class Migration(migrations.Migration):
             name='extra_credentials',
             field=models.ManyToManyField(related_name='_jobtemplate_extra_credentials_+', to='main.Credential'),
         ),
-        migrations.AddField(
-            model_name='jobtemplate',
-            name='ask_extra_credentials_on_launch',
-            field=models.BooleanField(default=False),
-        ),
         migrations.AlterUniqueTogether(
             name='credential',
             unique_together=set([('organization', 'name', 'credential_type')]),

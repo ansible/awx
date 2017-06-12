@@ -479,7 +479,7 @@ def test_launch_with_extra_credentials(get, post, organization_factory,
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.ask_extra_credentials_on_launch = True
+    jt.ask_credential_on_launch = True
     jt.save()
 
     resp = post(
@@ -500,13 +500,14 @@ def test_launch_with_extra_credentials(get, post, organization_factory,
 
 
 @pytest.mark.django_db
-def test_launch_with_extra_credentials_no_allowed(get, post, organization_factory,
-                                                  job_template_factory, machine_credential,
-                                                  credential, net_credential):
+def test_launch_with_extra_credentials_not_allowed(get, post, organization_factory,
+                                                   job_template_factory, machine_credential,
+                                                   credential, net_credential):
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.ask_extra_credentials_on_launch = False
+    jt.credential = machine_credential
+    jt.ask_credential_on_launch = False
     jt.save()
 
     resp = post(
@@ -515,8 +516,9 @@ def test_launch_with_extra_credentials_no_allowed(get, post, organization_factor
             credential=machine_credential.pk,
             extra_credentials=[credential.pk, net_credential.pk]
         ),
-        objs.superusers.admin, expect=201
+        objs.superusers.admin
     )
+    assert 'credential' in resp.data['ignored_fields'].keys()
     assert 'extra_credentials' in resp.data['ignored_fields'].keys()
     job_pk = resp.data.get('id')
 
@@ -531,7 +533,7 @@ def test_launch_with_extra_credentials_from_jt(get, post, organization_factory,
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.ask_extra_credentials_on_launch = True
+    jt.ask_credential_on_launch = True
     jt.extra_credentials.add(credential)
     jt.extra_credentials.add(net_credential)
     jt.save()
@@ -559,7 +561,7 @@ def test_launch_with_empty_extra_credentials(get, post, organization_factory,
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.ask_extra_credentials_on_launch = True
+    jt.ask_credential_on_launch = True
     jt.extra_credentials.add(credential)
     jt.extra_credentials.add(net_credential)
     jt.save()
@@ -590,7 +592,7 @@ def test_v1_launch_with_extra_credentials(get, post, organization_factory,
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.ask_extra_credentials_on_launch = True
+    jt.ask_credential_on_launch = True
     jt.save()
 
     resp = post(

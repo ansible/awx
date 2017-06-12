@@ -2378,15 +2378,8 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'ask_extra_credentials_on_launch', 'survey_enabled', 'become_enabled',
+                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled',
                   'allow_simultaneous')
-
-    # TODO: remove in 3.3
-    def get_fields(self):
-        ret = super(JobTemplateSerializer, self).get_fields()
-        if self.version == 1:
-            ret.pop('ask_extra_credentials_on_launch')
-        return ret
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -3063,13 +3056,12 @@ class JobLaunchSerializer(BaseSerializer):
                   'credential', 'extra_credentials', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'ask_extra_credentials_on_launch', 'survey_enabled', 'variables_needed_to_start',
-                  'credential_needed_to_start', 'inventory_needed_to_start',
-                  'job_template_data', 'defaults', 'verbosity')
+                  'survey_enabled', 'variables_needed_to_start', 'credential_needed_to_start',
+                  'inventory_needed_to_start', 'job_template_data', 'defaults', 'verbosity')
         read_only_fields = (
             'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
-            'ask_inventory_on_launch', 'ask_credential_on_launch', 'ask_extra_credentials_on_launch')
+            'ask_inventory_on_launch', 'ask_credential_on_launch',)
         extra_kwargs = {
             'credential': {'write_only': True,},
             'extra_credentials': {'write_only': True, 'default': [], 'allow_empty': True},
@@ -3086,7 +3078,6 @@ class JobLaunchSerializer(BaseSerializer):
         ret = super(JobLaunchSerializer, self).get_fields()
         if self.version == 1:
             ret.pop('extra_credentials')
-            ret.pop('ask_extra_credentials_on_launch')
         return ret
 
     def get_credential_needed_to_start(self, obj):
