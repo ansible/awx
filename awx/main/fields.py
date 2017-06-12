@@ -409,6 +409,8 @@ def format_ssh_private_key(value):
     # These end in a unicode-encoded final character that gets double
     # escaped due to being in a Python 2 bytestring, and that causes
     # Python's key parsing to barf. Detect this issue and correct it.
+    if value == '$encrypted$':
+        return value
     if r'\u003d' in value:
         value = value.replace(r'\u003d', '=')
     try:
@@ -505,6 +507,19 @@ class CredentialInputField(JSONSchemaField):
                 model_instance.credential_type.managed_by_tower is True and
                 'ssh_key_unlock' in model_instance.credential_type.defined_fields
         ):
+
+            # in order to properly test the necessity of `ssh_key_unlock`, we
+            # need to know the real value of `ssh_key_data`; for a payload like:
+            # {
+            #   'ssh_key_data': '$encrypted$',
+            #   'ssh_key_unlock': 'do-you-need-me?',
+            # }
+            # ...we have to fetch the actual key value from the database
+            if model_instance.pk and model_instance.ssh_key_data == '$encrypted$':
+                model_instance.ssh_key_data = model_instance.__class__.objects.get(
+                    pk=model_instance.pk
+                ).ssh_key_data
+
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
             if not model_instance.has_encrypted_ssh_key_data and value.get('ssh_key_unlock'):

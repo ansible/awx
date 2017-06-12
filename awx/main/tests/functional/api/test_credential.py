@@ -1293,6 +1293,131 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
     assert 'password' not in cred.inputs
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize('version, params', [
+    ['v1', {
+        'name': 'Best credential ever',
+        'kind': 'ssh',
+        'username': 'joe',
+        'ssh_key_data': '$encrypted$',
+    }],
+    ['v2', {
+        'name': 'Best credential ever',
+        'credential_type': 1,
+        'inputs': {
+            'username': 'joe',
+            'ssh_key_data': '$encrypted$',
+        }
+    }]
+])
+def test_ssh_unlock_needed(put, organization, admin, credentialtype_ssh, version, params):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'joe',
+            'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
+            'ssh_key_unlock': 'unlock'
+        }
+    )
+    cred.save()
+
+    params['organization'] = organization.id
+    response = put(
+        reverse('api:credential_detail', kwargs={'version': version, 'pk': cred.pk}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs']['ssh_key_unlock'] == ['must be set when SSH key is encrypted.']
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('version, params', [
+    ['v1', {
+        'name': 'Best credential ever',
+        'kind': 'ssh',
+        'username': 'joe',
+        'ssh_key_data': '$encrypted$',
+        'ssh_key_unlock': 'superfluous-key-unlock',
+    }],
+    ['v2', {
+        'name': 'Best credential ever',
+        'credential_type': 1,
+        'inputs': {
+            'username': 'joe',
+            'ssh_key_data': '$encrypted$',
+            'ssh_key_unlock': 'superfluous-key-unlock',
+        }
+    }]
+])
+def test_ssh_unlock_not_needed(put, organization, admin, credentialtype_ssh, version, params):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'joe',
+            'ssh_key_data': EXAMPLE_PRIVATE_KEY,
+        }
+    )
+    cred.save()
+
+    params['organization'] = organization.id
+    response = put(
+        reverse('api:credential_detail', kwargs={'version': version, 'pk': cred.pk}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs']['ssh_key_unlock'] == ['should not be set when SSH key is not encrypted.']
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('version, params', [
+    ['v1', {
+        'name': 'Best credential ever',
+        'kind': 'ssh',
+        'username': 'joe',
+        'ssh_key_data': '$encrypted$',
+        'ssh_key_unlock': 'new-unlock',
+    }],
+    ['v2', {
+        'name': 'Best credential ever',
+        'credential_type': 1,
+        'inputs': {
+            'username': 'joe',
+            'ssh_key_data': '$encrypted$',
+            'ssh_key_unlock': 'new-unlock',
+        }
+    }]
+])
+def test_ssh_unlock_with_prior_value(put, organization, admin, credentialtype_ssh, version, params):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'joe',
+            'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY,
+            'ssh_key_unlock': 'old-unlock'
+        }
+    )
+    cred.save()
+
+    params['organization'] = organization.id
+    response = put(
+        reverse('api:credential_detail', kwargs={'version': version, 'pk': cred.pk}),
+        params,
+        admin
+    )
+    assert response.status_code == 200
+
+    cred = Credential.objects.all()[:1].get()
+    assert decrypt_field(cred, 'ssh_key_unlock') == 'new-unlock'
+
+
 #
 # test secret encryption/decryption
 #
