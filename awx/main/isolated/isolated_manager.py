@@ -305,6 +305,40 @@ class IsolatedManager(object):
             logger.warning('Cleanup from isolated job encountered error, output:\n{}'.format(buff.getvalue()))
 
     @staticmethod
+    def health_check(instance, cutoff_pk=0):
+        '''
+        :param instance:            Django object representing the isolated instance
+        :param cutoff_pk:           Job id of the oldest job still in the running state
+        Method logic not yet written.
+        returns the instance's capacity or None if it is not reachable
+        '''
+        start_delimiter = 'wNqCXG6uul'
+        end_delimiter = 'n6kmoFyyAP'
+        extra_vars = dict(
+            cutoff_pk=cutoff_pk,
+            start_delimiter=start_delimiter,
+            end_delimiter=end_delimiter
+        )
+        args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
+                '%s,' % instance.hostname, 'heartbeat_isolated.yml', '-e',
+                json.dumps(extra_vars)]
+        module_path = os.path.join(os.path.dirname(awx.__file__), 'lib', 'management_modules')
+        playbook_path = os.path.join(os.path.dirname(awx.__file__), 'playbooks')
+        env = {'ANSIBLE_LIBRARY': module_path}
+        buff = cStringIO.StringIO()
+        status, rc = run.run_pexpect(
+            args, playbook_path, env, buff,
+            idle_timeout=60, job_timeout=60,
+            pexpect_timeout=5
+        )
+        output = buff.getvalue()
+        if status != 'successful':
+            return 0  # recognized by task manager as 'unreachable'
+        result = re.search('{}(.*){}'.format(start_delimiter, end_delimiter), output)
+        cap = result.group(1)
+        return cap
+
+    @staticmethod
     def wrap_stdout_handle(instance, private_data_dir, stdout_handle):
         dispatcher = CallbackQueueDispatcher()
 

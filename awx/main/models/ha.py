@@ -26,6 +26,11 @@ class Instance(models.Model):
     hostname = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    last_isolated_check = models.DateTimeField(
+        null=True,
+        editable=False,
+        auto_now_add=True
+    )
     version = models.CharField(max_length=24, blank=True)
     capacity = models.PositiveIntegerField(
         default=100,

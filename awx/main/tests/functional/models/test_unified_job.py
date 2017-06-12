@@ -4,7 +4,7 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project
+from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, UnifiedJob
 
 
 @pytest.mark.django_db
@@ -65,3 +65,16 @@ class TestCreateUnifiedJob:
         assert second_job.inventory == job_with_links.inventory
         assert second_job.limit == 'my_server'
         assert net_credential in second_job.extra_credentials.all()
+
+
+@pytest.mark.django_db
+def test_lowest_running_id():
+    assert UnifiedJob.lowest_running_id() == 1
+    Job.objects.create(status='finished')
+    old_job = Job.objects.create(status='finished')
+    assert UnifiedJob.lowest_running_id() == old_job.id + 1
+    old_running_job = Job.objects.create(status='running')
+    Job.objects.create(status='running')
+    assert UnifiedJob.lowest_running_id() == old_running_job.id
+    Job.objects.create(status='finished')
+    assert UnifiedJob.lowest_running_id() == old_running_job.id

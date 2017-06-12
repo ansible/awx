@@ -17,14 +17,32 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--hostname', dest='hostname', type='string',
                     help='Hostname used during provisioning'),
+        make_option('--hostnames', dest='hostnames', type='string',
+                    help='Alternatively hostnames can be provided with '
+                         'this option as a comma-Delimited list'),
     )
 
-    def handle(self, **options):
-        uuid = settings.SYSTEM_UUID
-        instance = Instance.objects.filter(hostname=options.get('hostname'))
+    def _register_hostname(self, hostname):
+        if not hostname:
+            return
+        instance = Instance.objects.filter(hostname=hostname)
         if instance.exists():
             print("Instance already registered {}".format(instance[0]))
             return
-        instance = Instance(uuid=uuid, hostname=options.get('hostname'))
+        instance = Instance(uuid=self.uuid, hostname=hostname)
         instance.save()
-        print('Successfully registered instance {}'.format(instance))
+        print('Successfully registered instance {}'.format(hostname))
+        self.changed = True
+
+    def handle(self, **options):
+        self.uuid = settings.SYSTEM_UUID
+        self.changed = False
+        self._register_hostname(options.get('hostname'))
+        hostname_list = []
+        if options.get('hostnames'):
+            hostname_list = options.get('hostnames').split(",")
+        instance_list = [x.strip() for x in hostname_list if x]
+        for inst_name in instance_list:
+            self._register_hostname(inst_name)
+        if self.changed:
+            print('(changed: True)')

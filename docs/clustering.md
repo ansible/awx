@@ -112,6 +112,58 @@ rabbitmq_use_long_name=false
 rabbitmq_enable_manager=false
 ```
 
+### Security Isolated Rampart Groups
+
+In Tower versions 3.2+ customers may optionally define isolated groups
+inside security-restricted networking zones to run jobs from.
+Instances in these groups will _not_ have a full install of Tower, but will have a minimal
+set of utilities used to run jobs on them. These must be specified
+in the inventory file prefixed with `isolated_group_`. An example inventory
+file is shown below.
+
+```
+[tower]
+towerA
+towerB
+towerC
+
+[instance_group_security]
+towerB
+towerC
+
+[isolated_group_govcloud]
+isolatedA
+isolatedB
+
+[isolated_group_govcloud:vars]
+controller=security
+```
+
+In this example, when a job runs inside of the `govcloud` isolated group, a
+managing task runs simultaneously on either one of the two instances in
+the `security` ordinary instance group.
+
+Networking security rules must allow
+connections to all nodes in an isolated group from all nodes in its controller
+group. The system is designed such that
+isolated instances never make requests to any of their controllers.
+The controlling instance for a particular job will send management commands to
+a daemon that runs the job, and will slurp job artifacts.
+
+Isolated groups are architected such that they may exist inside of a VPC
+with security rules that _only_ permit the instances in its `controller`
+group to access them.
+
+Recommendations for system configuration with isolated groups:
+ - Do not put any isolated instances inside the `tower` group or other
+   ordinary instance groups.
+ - Define the `controller` variable as either a group var or as a hostvar
+   on all the instances in the isolated group. Please _do not_ allow
+   isolated instances in the same group have a different value for this
+   variable - the behavior in this case can not be predicted.
+ - Do not put an isolated instance in more than 1 isolated group.
+
+
 ### Provisioning and Deprovisioning Instances and Groups
 
 * Provisioning
