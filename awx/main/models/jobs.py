@@ -260,10 +260,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_extra_credentials_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
     )
@@ -365,7 +361,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
             credential=self.ask_credential_on_launch,
-            extra_credentials=self.ask_extra_credentials_on_launch
+            extra_credentials=self.ask_credential_on_launch,
         )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
