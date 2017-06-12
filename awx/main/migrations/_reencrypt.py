@@ -15,11 +15,10 @@ def _notification_templates(apps):
     for nt in NotificationTemplate.objects.all():
         for field in filter(lambda x: nt.notification_class.init_parameters[x]['type'] == "password",
                             nt.notification_class.init_parameters):
-            try:
-                value = decrypt_field(nt, 'notification_configuration', subfield=field)
-                nt.notification_configuration[field] = value
-            except ValueError:
+            if nt.notification_configuration[field].startswith('$encrypted$AESCBC4'):
                 continue
+            value = decrypt_field(nt, 'notification_configuration', subfield=field)
+            nt.notification_configuration[field] = value
         nt.save()
 
 
@@ -28,11 +27,11 @@ def _credentials(apps):
     for credential in Credential.objects.all():
         for field_name, value in credential.inputs.items():
             if field_name in credential.credential_type.secret_fields:
-                try:
-                    value = decrypt_field(credential, field_name)
-                    credential.inputs[field_name] = value
-                except ValueError:
+                value = getattr(credential, field_name)
+                if value.startswith('$encrypted$AESCBC$'):
                     continue
+                value = decrypt_field(credential, field_name)
+                credential.inputs[field_name] = value
         credential.save()
 
 
@@ -40,9 +39,8 @@ def _unified_jobs(apps):
     UnifiedJob = apps.get_model('main', 'UnifiedJob')
     for uj in UnifiedJob.objects.all():
         if uj.start_args is not None:
-            try:
-                start_args = decrypt_field(uj, 'start_args')
-                uj.start_args = start_args
-                uj.save()
-            except ValueError:
+            if uj.start_args.startswith('$encrypted$AESCBC$'):
                 continue
+            start_args = decrypt_field(uj, 'start_args')
+            uj.start_args = start_args
+            uj.save()
