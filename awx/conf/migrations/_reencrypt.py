@@ -5,25 +5,22 @@ import six
 from django.utils.encoding import smart_str
 from Crypto.Cipher import AES
 
-from awx.conf.settings import get_settings_to_cache
 from awx.conf import settings_registry
 
 
 __all__ = ['replace_aesecb_fernet', 'get_encryption_key', 'encrypt_field',
-           'decrypt_value', 'decrypt_value', 'decrypt_field_value']
+           'decrypt_value', 'decrypt_value']
 
 
 def replace_aesecb_fernet(apps, schema_editor):
     Setting = apps.get_model('conf', 'Setting')
-    settings_to_cache = get_settings_to_cache(settings_registry)
 
-    for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
+    for setting in Setting.objects.filter().order_by('pk'):
         if settings_registry.is_setting_encrypted(setting.key):
-            try:
-                setting.value = decrypt_field(setting, 'value')
-                setting.save()
-            except ValueError:
+            if setting.value.startswith('$encrypted$AESCBC$'):
                 continue
+            setting.value = decrypt_field(setting, 'value')
+            setting.save()
 
 
 def get_encryption_key(field_name, pk=None):
@@ -74,11 +71,6 @@ def decrypt_field(instance, field_name, subfield=None):
         return value
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
-    return decrypt_value(key, value)
-
-
-def decrypt_field_value(pk, field_name, value):
-    key = get_encryption_key(field_name, pk)
     return decrypt_value(key, value)
 
 
