@@ -115,6 +115,28 @@ angular.module('inventory', [
                     data: {
                         activityStream: true,
                         activityStreamTarget: 'inventory'
+                    },
+                    resolve: {
+                        edit: {
+                            InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}/instance_groups/`;
+                                    Rest.setUrl(path);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            if (data.results.length > 0) {
+                                                 return data.results;
+                                            }
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get instance groups. GET returned ' +
+                                                    'status: ' + status
+                                            });
+                                    });
+                                }]
+                        }
                     }
                 });
 

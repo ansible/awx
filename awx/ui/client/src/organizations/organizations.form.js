@@ -36,13 +36,12 @@ export default ['NotificationsList', 'i18n',
                 },
                 instance_groups: {
                     label: i18n._('Instance Groups'),
-                    type: 'select',
+                    type: 'custom',
                     awPopOver: "<p>" + i18n._("Select the Instance Groups for this Organization to run on.") + "</p>",
+                    dataTitle: i18n._('Instance Groups'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    dataTitle: i18n._('Instance Groups'),
-                    multiSelect: true,
-                    ngOptions: 'group.name for group in instanceGroupOptions track by group.id',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
                 }
             },
 

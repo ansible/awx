@@ -3,6 +3,7 @@ export default ['i18n', function(i18n) {
         name:  'instance_groups' ,
         basePath: 'instance_groups',
         iterator: 'instance_group',
+        editTitle: i18n._('INSTANCE GROUPS'),
         listTitle: i18n._('INSTANCE GROUPS'),
         index: false,
         hover: false,
@@ -18,7 +19,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Capacity'),
                 nosort: true,
             },
-            running_jobs: {
+            jobs_running: {
                 label: i18n._('Running Jobs'),
                 nosort: true,
             },

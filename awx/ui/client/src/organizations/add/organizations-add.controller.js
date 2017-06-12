@@ -6,9 +6,9 @@
 
 export default ['$scope', '$rootScope', '$location', '$stateParams',
     'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService','InstanceGroupsData',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService',
     function($scope, $rootScope, $location, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService, InstanceGroupsData) {
+    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -32,13 +32,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
         }
-
-        $scope.instanceGroupOptions = InstanceGroupsData;
-        CreateSelect2({
-            element: '#organization_instance_groups',
-            multiple: true,
-            addNew: false
-        });
 
         // Save
         $scope.formSave = function() {

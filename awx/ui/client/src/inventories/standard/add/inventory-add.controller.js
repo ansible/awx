@@ -13,7 +13,7 @@
 function InventoriesAdd($scope, $location,
     GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    $state, canAdd, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
+    $state, canAdd, CreateSelect2, InstanceGroupsService) {
 
     $scope.canAdd = canAdd;
 
@@ -41,13 +41,6 @@ function InventoriesAdd($scope, $location,
             field_id: 'inventory_inventory_variables'
         });
     }
-
-    $scope.instanceGroupOptions = InstanceGroupsData;
-    CreateSelect2({
-        element: '#inventory_instance_groups',
-        multiple: true,
-        addNew: false
-    });
 
     // Save
     $scope.formSave = function() {
@@ -104,5 +97,5 @@ function InventoriesAdd($scope, $location,
 export default ['$scope', '$location',
     'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
-    'Wait', 'ToJSON', '$state','canAdd', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', InventoriesAdd
+    'Wait', 'ToJSON', '$state','canAdd', 'CreateSelect2', 'InstanceGroupsService', InventoriesAdd
 ];

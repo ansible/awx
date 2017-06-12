@@ -46,24 +46,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
                 workflowMaker, inventoryLookup, credentialLookup,
                 stateDefinitions = stateDefinitionsProvider.$get(),
-                stateExtender = $stateExtenderProvider.$get(),
-                instanceGroupsResolve = {
-                    InstanceGroupsData: ['Rest', 'GetBasePath', 'ProcessErrors', (Rest, GetBasePath, ProcessErrors) => {
-                        const url = GetBasePath('instance_groups');
-                        Rest.setUrl(url);
-                        return Rest.get()
-                            .then(({data}) => {
-                                    return data.results.map((i) => ({name: i.name, id: i.id}));
-                                })
-                                .catch(({data, status}) => {
-                                ProcessErrors(null, data, status, null, {
-                                    hdr: 'Error!',
-                                    msg: 'Failed to get instance groups info. GET returned status: ' + status
-                                });
-                            });
-                    }]
-                };
-
+                stateExtender = $stateExtenderProvider.$get();
 
             function generateStateTree() {
 
@@ -102,8 +85,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                                 });
                                             });
                                     }
-                            }],
-                            InstanceGroupsData: instanceGroupsResolve.InstanceGroupsData
+                            }]
                         }
                     }
                 });
@@ -125,7 +107,26 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         activityStreamId: 'job_template_id'
                     },
                     resolve: {
-                        edit: instanceGroupsResolve
+                        edit: {
+                            InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    let path = `${GetBasePath('job_templates')}${$stateParams.job_template_id}/instance_groups/`;
+                                    Rest.setUrl(path);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            if (data.results.length > 0) {
+                                                 return data.results;
+                                            }
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get instance groups. GET returned ' +
+                                                    'status: ' + status
+                                            });
+                                    });
+                                }]
+                        }
                     }
                 });
 

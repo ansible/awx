@@ -9,14 +9,13 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
-         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'InstanceGroupsData',
+         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
-             InstanceGroupsData
+             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService
          ) {
 
              Rest.setUrl(GetBasePath('job_templates'));
@@ -47,13 +46,6 @@
                 $scope.playbook_options = [];
                 $scope.mode = "add";
                 $scope.parseType = 'yaml';
-
-                $scope.instanceGroupOptions = InstanceGroupsData;
-                CreateSelect2({
-                    element: '#job_template_instance_groups',
-                    multiple: true,
-                    addNew: false
-                });
 
                 md5Setup({
                     scope: $scope,
@@ -243,6 +235,7 @@
             function saveCompleted(id) {
                 $state.go('templates.editJobTemplate', {job_template_id: id}, {reload: true});
             }
+
 
             if ($scope.removeTemplateSaveSuccess) {
                 $scope.removeTemplateSaveSuccess();

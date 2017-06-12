@@ -30,37 +30,7 @@ export default ['$scope', '$location', '$stateParams',
             });
 
             $scope.$emit("HideOrgListHeader");
-            $scope.organization_id = id;
-
-            $scope.instanceGroupOptions = InstanceGroupsData;
-            CreateSelect2({
-                element: '#organization_instance_groups',
-                multiple: true,
-                addNew: false
-            });
-
-            Rest.setUrl(instance_group_url);
-            Rest.get()
-                .then(({data}) => {
-                    if (data.results.length > 0) {
-                        let opts = data.results
-                            .map(i => ({id: i.id + "",
-                                name: i.name}));
-                        CreateSelect2({
-                            element: '#organization_instance_groups',
-                            multiple: true,
-                            addNew: false,
-                            opts: opts
-                        });
-                    }
-                })
-                .catch(({data, status}) => {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get instance groups. GET returned ' +
-                            'status: ' + status
-                    });
-                });
+            $scope.instance_groups = InstanceGroupsData;
         }
 
 
