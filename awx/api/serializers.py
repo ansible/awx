@@ -44,7 +44,8 @@ from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
-    camelcase_to_underscore, getattrd, parse_yaml_or_json)
+    camelcase_to_underscore, getattrd, parse_yaml_or_json,
+    has_model_field_prefetched)
 from awx.main.utils.filters import SmartFilter
 
 from awx.main.validators import vars_validate_or_raise
@@ -1247,8 +1248,12 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
-        group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.order_by('name')[:5]]
-        d.setdefault('groups', group_list)
+        if has_model_field_prefetched(obj, 'groups'):
+            group_list = sorted([{'id': g.id, 'name': g.name} for g in obj.groups.all()], key=lambda x: x['name'])[:5]
+        else:
+            group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.all().order_by('name')[:5]]
+        group_cnt = obj.groups.count()
+        d.setdefault('groups', {'count': group_cnt, 'results': group_list})
         d.setdefault('recent_jobs', [{
             'id': j.job.id,
             'name': j.job.job_template.name if j.job.job_template is not None else "",
@@ -2179,7 +2184,7 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
-        if hasattr(obj, '_prefetched_objects_cache') and obj.labels.prefetch_cache_name in obj._prefetched_objects_cache:
+        if has_model_field_prefetched(obj, 'labels'):
             label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
             label_ct = len(obj.labels.all())
         else:

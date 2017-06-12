@@ -19,6 +19,6 @@ from awx.main.utils.common import ( # noqa
     build_proot_temp_dir,
     wrap_args_with_proot,
     get_system_task_capacity,
-    decrypt_field_value
+    decrypt_field_value,
+    has_model_field_prefetched
 )
-
