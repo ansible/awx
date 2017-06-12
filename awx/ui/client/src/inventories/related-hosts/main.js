@@ -19,4 +19,4 @@ angular.module('relatedHost', [
         relatedGroupsLabels.name
     ])
     .factory('RelatedHostsFormDefinition', relatedHostsFormDefinition)
-    .value('RelatedHostsListDefinition', relatedHostsListDefinition);
+    .factory('RelatedHostsListDefinition', relatedHostsListDefinition);
