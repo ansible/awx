@@ -15,7 +15,7 @@ def _notification_templates(apps):
     for nt in NotificationTemplate.objects.all():
         for field in filter(lambda x: nt.notification_class.init_parameters[x]['type'] == "password",
                             nt.notification_class.init_parameters):
-            if nt.notification_configuration[field].startswith('$encrypted$AESCBC4'):
+            if nt.notification_configuration[field].startswith('$encrypted$AESCBC$'):
                 continue
             value = decrypt_field(nt, 'notification_configuration', subfield=field)
             nt.notification_configuration[field] = value

@@ -35,6 +35,11 @@ def test_notification_template_migration():
     assert nt.notification_configuration['token'].startswith('$encrypted$AESCBC$')
     assert decrypt_field(nt, 'notification_configuration', subfield='token') == 'test'
 
+    # This is here for a side-effect.
+    # Exception if the encryption type of AESCBC is not properly skipped, ensures
+    # our `startswith` calls don't have typos
+    _notification_templates(apps)
+
 
 @pytest.mark.django_db
 def test_credential_migration():
@@ -52,6 +57,11 @@ def test_credential_migration():
     assert cred.password.startswith('$encrypted$AESCBC$')
     assert decrypt_field(cred, 'password') == 'test'
 
+    # This is here for a side-effect.
+    # Exception if the encryption type of AESCBC is not properly skipped, ensures
+    # our `startswith` calls don't have typos
+    _credentials(apps)
+
 
 @pytest.mark.django_db
 def test_unified_job_migration():
@@ -65,3 +75,8 @@ def test_unified_job_migration():
 
     assert uj.start_args.startswith('$encrypted$AESCBC$')
     assert json.loads(decrypt_field(uj, 'start_args')) == {'test':'value'}
+
+    # This is here for a side-effect.
+    # Exception if the encryption type of AESCBC is not properly skipped, ensures
+    # our `startswith` calls don't have typos
+    _unified_jobs(apps)

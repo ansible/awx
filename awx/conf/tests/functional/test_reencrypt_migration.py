@@ -23,3 +23,8 @@ def test_settings():
 
     assert setting.value.startswith('$encrypted$AESCBC$')
     assert new_decrypt_field(setting, 'value') == 'test'
+
+    # This is here for a side-effect.
+    # Exception if the encryption type of AESCBC is not properly skipped, ensures
+    # our `startswith` calls don't have typos
+    replace_aesecb_fernet(apps, None)
