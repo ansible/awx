@@ -86,7 +86,11 @@ function AtFormController (eventService) {
         let handled;
 
         if (err.status === 400) {
-            handled = vm.handleValidationErrors(err.data);
+            handled = vm.handleValidationError(err.data);
+        }
+
+        if (err.status === 500) {
+            handled = vm.handleUnexpectedError(err);
         }
 
         if (!handled) {
@@ -102,7 +106,16 @@ function AtFormController (eventService) {
         }
     };
 
-    vm.handleValidationErrors = errors => {
+    vm.handleUnexpectedError = err => {
+        let title = 'Unable to Submit';
+        let message = 'Unexpected server error. View the console for more information';
+
+        vm.modal.show(title, message);
+
+        return true;
+    };
+
+    vm.handleValidationError = errors => {
         let errorMessageSet = vm.setValidationMessages(errors);
 
         if (errorMessageSet) {
