@@ -240,30 +240,11 @@ export default
                         $scope.selected_credentials.machine = angular.copy($scope.defaults.credential);
                     }
 
-                    if($scope.ask_extra_credentials_on_launch) {
-                        // Go out and get the credential types
-                        Rest.setUrl(GetBasePath('credential_types'));
-                        Rest.get()
-                        .success(function (credentialTypeData) {
-                            let credential_types = {};
-                            $scope.credentialKindOptions = [];
-                            credentialTypeData.results.forEach((credentialType => {
-                                credential_types[credentialType.id] = credentialType;
-                                if(($scope.ask_credential_on_launch || (!$scope.ask_credential_on_launch && credentialType.id !== 1)) && credentialType.kind.match(/^(cloud|network|ssh)$/)) {
-                                    $scope.credentialKindOptions.push({
-                                        name: credentialType.name,
-                                        value: credentialType.id
-                                    });
-                                }
-                            }));
-                            $scope.credential_types = credential_types;
-                            if($scope.has_default_extra_credentials) {
-                                $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
-                            }
-                        });
+                    if($scope.has_default_extra_credentials) {
+                        $scope.selected_credentials.extra = angular.copy($scope.defaults.extra_credentials);
                     }
 
-                    if( ($scope.submitJobType === 'workflow_job_template' && !$scope.survey_enabled) || ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.ask_extra_credentials_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                    if( ($scope.submitJobType === 'workflow_job_template' && !$scope.survey_enabled) || ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
                         // The job can be launched if
                         // a) It's a relaunch and no passwords are needed
                         // or
@@ -274,11 +255,30 @@ export default
                     else {
 
                         var initiateModal = function() {
+
+                            // Go out and get the credential types
+                            Rest.setUrl(GetBasePath('credential_types'));
+                            Rest.get()
+                            .success(function (credentialTypeData) {
+                                let credential_types = {};
+                                $scope.credentialTypeOptions = [];
+                                credentialTypeData.results.forEach((credentialType => {
+                                    credential_types[credentialType.id] = credentialType;
+                                    if(credentialType.kind.match(/^(machine|cloud|network|ssh)$/)) {
+                                        $scope.credentialTypeOptions.push({
+                                            name: credentialType.name,
+                                            value: credentialType.id
+                                        });
+                                    }
+                                }));
+                                $scope.credential_types = credential_types;
+                            });
+
                             // Figure out which step the user needs to start on
                             if($scope.ask_inventory_on_launch) {
                                 $scope.setStep("inventory", true);
                             }
-                            else if($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed) {
+                            else if($scope.ask_credential_on_launch || $scope.password_needed) {
                                 $scope.setStep("credential", true);
                             }
                             else if($scope.has_other_prompts) {
@@ -399,7 +399,7 @@ export default
 
             $scope.getActionButtonText = function() {
                 if($scope.step === "inventory") {
-                    return ($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed || $scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
+                    return ($scope.ask_credential_on_launch || $scope.password_needed || $scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
                 }
                 else if($scope.step === "credential") {
                     return ($scope.has_other_prompts || $scope.survey_enabled) ? "NEXT" : "LAUNCH";
@@ -457,7 +457,7 @@ export default
             $scope.takeAction = function() {
                 if($scope.step === "inventory") {
                     // Check to see if there's another step after this one
-                    if($scope.ask_credential_on_launch || $scope.ask_extra_credentials_on_launch || $scope.password_needed) {
+                    if($scope.ask_credential_on_launch || $scope.password_needed) {
                         $scope.setStep("credential");
                     }
                     else if($scope.has_other_prompts) {

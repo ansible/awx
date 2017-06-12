@@ -111,11 +111,10 @@ export default
                     }
 
                     // include the credential used if the user was prompted to choose a cred
-                    if(scope.ask_credential_on_launch && !Empty(scope.selected_credentials.machine)){
-                        job_launch_data.credential_id = scope.selected_credentials.machine.id;
-                    }
-
-                    if(scope.ask_extra_credentials_on_launch){
+                    if(scope.ask_credential_on_launch){
+                        if(!Empty(scope.selected_credentials.machine)) {
+                            job_launch_data.credential_id = scope.selected_credentials.machine.id;
+                        }
                         job_launch_data.extra_credentials = [];
                         scope.selected_credentials.extra.forEach((extraCredential) => {
                             job_launch_data.extra_credentials.push(extraCredential.id);

@@ -15,7 +15,7 @@
         <div class="JobSubmission-stepsContainer">
             <div class="JobSubmission-steps">
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='inventory'}" ng-if="ask_inventory_on_launch" ng-click="setStep('inventory')" translate>Inventory</div>
-                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='credential', 'JobSubmission-step--disabled': !credentialTabEnabled}" ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch || password_needed" ng-click="!credentialTabEnabled || setStep('credential')" translate>Credential</div>
+                <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='credential', 'JobSubmission-step--disabled': !credentialTabEnabled}" ng-if="ask_credential_on_launch || password_needed" ng-click="!credentialTabEnabled || setStep('credential')" translate>Credential</div>
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='otherprompts', 'JobSubmission-step--disabled': !otherPromptsTabEnabled}" ng-if="has_other_prompts" ng-click="!otherPromptsTabEnabled || setStep('otherprompts')" translate>Other Prompts</div>
                 <div class="JobSubmission-step" ng-class="{'JobSubmission-step--active': step==='survey', 'JobSubmission-step--disabled': !surveyTabEnabled}" ng-if="survey_enabled" ng-click="!surveyTabEnabled || setStep('survey')" translate>Survey</div>
             </div>
@@ -36,7 +36,7 @@
                     <job-sub-inv-list ng-if="includeInventoryList" selected-inventory="$parent.selected_inventory"></job-sub-inv-list>
                 </div>
             </div>
-            <div ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
+            <div ng-if="ask_credential_on_launch || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
                         <div class="JobSubmission-selectedItemInfo">
@@ -52,17 +52,17 @@
                                     <span>{{extraCredential.name}}{{$last ? '' : ',&nbsp;'}}</span>
                                 </span>
                                 <span class="JobSubmission-selectedItemNone" ng-show="!selected_credentials.machine && selected_credentials.extra.length === 0" translate>None selected</span>
-                                <span ng-if="ask_credential_on_launch || ask_extra_credentials_on_launch">
+                                <span ng-if="ask_credential_on_launch">
                                     <a class="JobSubmission-revertLink" href="" ng-show="showRevertCredentials()" ng-click="revertToDefaultCredentials()" translate>REVERT</a>
                                 </span>
                             </div>
 
                         </div>
                     </div>
-                    <div class="JobSubmission-credentialSubSection" ng-show="ask_extra_credentials_on_launch">
+                    <div class="JobSubmission-credentialSubSection" ng-show="ask_credential_on_launch">
                         <span class="JobSubmission-label" translate>CREDENTIAL TYPE:</span>
                         <select ng-model="credentialKind">
-                            <option ng-repeat="option in credentialKindOptions" value="{{option.value}}">{{option.name}}</option>
+                            <option ng-repeat="option in credentialTypeOptions" value="{{option.value}}">{{option.name}}</option>
                         </select>
                     </div>
                     <job-sub-cred-list ng-if="includeCredentialList" selected-credentials="selected_credentials" credential-types="::credential_types" credential-kind="credentialKind"></job-sub-cred-list>

@@ -28,7 +28,7 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                     if(scope.ask_inventory_on_launch) {
                         scope.includeInventoryList = true;
                     }
-                    if(scope.ask_credential_on_launch || scope.ask_extra_credentials_on_launch) {
+                    if(scope.ask_credential_on_launch) {
                         scope.credentialKind = (scope.ask_credential_on_launch) ? "1" : "5";
 
                         scope.includeCredentialList = true;
