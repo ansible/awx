@@ -34,3 +34,5 @@
 * Fixed an issue installing Tower on multiple nodes where cluster
   internal node references are used
   [[#6231](https://github.com/ansible/ansible-tower/pull/6231)]
+* Tower now uses [Fernet](https://github.com/fernet/spec/blob/master/Spec.md) *(AESCBC w/ SHA256 HMAC)*
+  for all encrypted fields. [[#826](https://github.com/ansible/ansible-tower/pull/6541)]
