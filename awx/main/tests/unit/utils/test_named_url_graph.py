@@ -293,24 +293,24 @@ def test_contenttype_being_ignored(common_model_name_not_unique_class_mock, sett
 
 
 @pytest.mark.parametrize('input_, output', [
-    ('alice--bob-foo--cat--dog', {
+    ('alice++bob+foo++cat++dog', {
         'name': 'alice',
         'fk_a__name': 'bob',
         'fk_a__str_with_choices_a': 'foo',
         'fk_b__name': 'dog',
         'fk_a__fk_a__name': 'cat',
     }),
-    ('alice----dog', {
+    ('alice++++dog', {
         'name': 'alice',
         'fk_b__name': 'dog',
     }),
-    ('alice--bob-foo--cat--', {
+    ('alice++bob+foo++cat++', {
         'name': 'alice',
         'fk_a__name': 'bob',
         'fk_a__str_with_choices_a': 'foo',
         'fk_a__fk_a__name': 'cat',
     }),
-    ('alice--bob-foo----dog', {
+    ('alice++bob+foo++++dog', {
         'name': 'alice',
         'fk_a__name': 'bob',
         'fk_a__str_with_choices_a': 'foo',
@@ -394,8 +394,8 @@ def test_reserved_uri_char_decoding(common_model_class_mock, settings_mock):
     with mock.patch('awx.main.utils.named_url_graph.settings', settings_mock):
         generate_graph([model])
     kwargs = {}
-    settings_mock.NAMED_URL_GRAPH[model].populate_named_url_query_kwargs(kwargs, r"%3B%2F%3F%3A%40%3D%26[-]")
-    assert kwargs == {'name': ';/?:@=&-'}
+    settings_mock.NAMED_URL_GRAPH[model].populate_named_url_query_kwargs(kwargs, r"%3B%2F%3F%3A%40%3D%26[+]")
+    assert kwargs == {'name': ';/?:@=&+'}
 
 
 def test_unicode_decoding(common_model_class_mock, settings_mock):
@@ -453,20 +453,20 @@ def test_generate_named_url(common_model_name_not_unique_class_mock,
     obj_2_1 = model_2_1(name='bob', str_with_choices_a='foo', fk_a=obj_3)
     obj_1 = model_1(name='alice', fk_a=obj_2_1, fk_b=obj_2_2)
     obj_1.fk_b = None
-    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice--bob-foo--cat--'
+    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice++bob+foo++cat++'
     obj_1.fk_b = obj_2_2
-    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice--bob-foo--cat--dog'
+    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice++bob+foo++cat++dog'
     obj_2_1.fk_a = None
-    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice--bob-foo----dog'
+    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice++bob+foo++++dog'
     obj_1.fk_a = None
-    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice----dog'
+    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice++++dog'
     obj_1.fk_b = None
-    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice----'
+    assert settings_mock.NAMED_URL_GRAPH[model_1].generate_named_url(obj_1) == 'alice++++'
 
 
 def test_reserved_uri_char_encoding(common_model_class_mock, settings_mock):
     model = common_model_class_mock('model')
     with mock.patch('awx.main.utils.named_url_graph.settings', settings_mock):
         generate_graph([model])
-    obj = model(name=u';/?:@=&-我为我蛤续1s')
-    assert settings_mock.NAMED_URL_GRAPH[model].generate_named_url(obj) == u"%3B%2F%3F%3A%40%3D%26[-]我为我蛤续1s"
+    obj = model(name=u';/?:@=&+我为我蛤续1s')
+    assert settings_mock.NAMED_URL_GRAPH[model].generate_named_url(obj) == u"%3B%2F%3F%3A%40%3D%26[+]我为我蛤续1s"
