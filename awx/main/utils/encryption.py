@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from django.utils.encoding import smart_str
 
 
-__all__ = ['get_encryption_key', 'encrypt_field', 'decrypt_field', 'decrypt_value', 'decrypt_field_value']
+__all__ = ['get_encryption_key', 'encrypt_field', 'decrypt_field', 'decrypt_value']
 
 
 def get_encryption_key(field_name, pk=None):
@@ -15,7 +15,7 @@ def get_encryption_key(field_name, pk=None):
     Generate key for encrypted password based on field name,
     ``settings.SECRET_KEY``, and instance pk (if available).
 
-    :param pk: (optional) the primary key of the ``awx.conf.model.Setting``;
+    :param pk: (optional) the primary key of the model object;
                can be omitted in situations where you're encrypting a setting
                that is not database-persistent (like a read-only setting)
     '''
@@ -83,9 +83,4 @@ def decrypt_field(instance, field_name, subfield=None):
         return value
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
-    return decrypt_value(key, value)
-
-
-def decrypt_field_value(pk, field_name, value):
-    key = get_encryption_key(field_name, pk)
     return decrypt_value(key, value)
