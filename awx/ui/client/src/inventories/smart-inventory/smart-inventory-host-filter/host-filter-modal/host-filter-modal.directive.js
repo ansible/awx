@@ -45,6 +45,9 @@ export default ['templateUrl', function(templateUrl) {
                         delete hostList.fields.toggleHost;
                         delete hostList.fields.active_failures;
                         delete hostList.fields.inventory;
+                        delete hostList.fields.name.ngClick;
+                        hostList.fields.name.class += " HostFilterModal-tableRow";
+                        hostList.fields.name.noLink = true;
                         hostList.well = false;
                         let html = GenerateList.build({
                             list: hostList,
