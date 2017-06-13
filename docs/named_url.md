@@ -2,7 +2,7 @@ Starting from API V2, the named URL feature lets user access Tower resources via
 
 ## Usage
 
-There is one named-URL-related Tower configuration setting available under `/api/v2/settings/system/`: `NAMED_URL_FORMATS`, which is a *read only* key-value pair list of all available named URL identifier formats. A typical `NAMED_URL_FORMATS` looks like this:
+There are two named-URL-related Tower configuration setting available under `/api/v2/settings/named-url/`: `NAMED_URL_FORMATS` and `NAMED_URL_GRAPH_NODES`. `NAMED_URL_FORMATS` is a *read only* key-value pair list of all available named URL identifier formats. A typical `NAMED_URL_FORMATS` looks like this:
 ```
 "NAMED_URL_FORMATS": {
     "job_templates": "<name>",
@@ -35,6 +35,7 @@ An important aspect of generating unique identifier for named URL is dealing wit
 
 Although `NAMED_URL_FORMATS` is immutable on user side, it will be automatically modified and expanded over time, reflecting underlying resource modification and expansion. Please consult `NAMED_URL_FORMATS` on the same Tower cluster where you want to use named url feature against.
 
+`NAMED_URL_GRAPH_NODES` is another *read-only* list of key-value pairs that exposes the internal graph data structure Tower used to manage named URLs. This is not supposed to be human-readable but should be used for programmatically generating named URLs. An example script of generating named URL given the primary key of arbitrary resource objects that can have named URL, using info provided by `NAMED_URL_GRAPH_NODES`, can be found as `/tools/scripts/pk_to_named_url.py`.
 
 ## Identifier Format Protocol
 
@@ -71,3 +72,4 @@ In general, acceptance should follow what's in 'Usage' section. The contents in 
 * A user following the rules specified in `NAMED_URL_FORMATS` should be able to generate named URL exactly the same as the `named_url` field.
 * A user should be able to access specified resource objects via accurately generated named URL. This includes not only the object itself but also its related URLs, like if `/api/v2/res_name/obj_slug/` is valid, `/api/v2/res_name/obj_slug/related_res_name/` should also be valid.
 * A user should not be able to access specified resource objects if the given named URL is inaccurate. For example, reserved characters not correctly escaped, or components whose corresponding foreign key field pointing nowhere is not replaced by empty string.
+* A user should be able to dynamically generate named URLs by utilizing `NAMED_URL_GRAPH_NODES`.
