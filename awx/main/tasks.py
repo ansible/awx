@@ -1446,6 +1446,9 @@ class RunProjectUpdate(BaseTask):
             raise
 
     def pre_run_hook(self, instance, **kwargs):
+        # re-create root project folder if a natural disaster has destroyed it
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.mkdir(settings.PROJECTS_ROOT)
         if instance.launch_type == 'sync':
             self.acquire_lock(instance)
 
