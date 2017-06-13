@@ -1,13 +1,16 @@
 import base64
 import hashlib
+import logging
 
 import six
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 from django.utils.encoding import smart_str
 
 
 __all__ = ['get_encryption_key', 'encrypt_field', 'decrypt_field', 'decrypt_value']
+
+logger = logging.getLogger('awx.main.utils.encryption')
 
 
 def get_encryption_key(field_name, pk=None):
@@ -83,4 +86,16 @@ def decrypt_field(instance, field_name, subfield=None):
         return value
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
-    return decrypt_value(key, value)
+    try:
+        return decrypt_value(key, value)
+    except InvalidToken:
+        logger.exception(
+            "Failed to decrypt `%s(pk=%s).%s`; if you've recently restored from "
+            "a database backup or are running in a clustered environment, "
+            "check that your `SECRET_KEY` value is correct",
+            instance.__class__.__name__,
+            getattr(instance, 'pk', None),
+            field_name,
+            exc_info=True
+        )
+        raise
