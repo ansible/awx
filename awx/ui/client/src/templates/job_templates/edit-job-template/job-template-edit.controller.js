@@ -179,12 +179,6 @@ export default
                 });
             };
 
-            $scope.resetProjectToDefault = function() {
-                $scope.project_name = 'Default';
-                $scope.project = null;
-                getPlaybooks();
-            };
-
             // Detect and alert user to potential SCM status issues
             checkSCMStatus = function () {
                 if (!Empty($scope.project)) {

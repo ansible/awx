@@ -178,12 +178,6 @@
                 sync_playbook_select2();
             };
 
-            $scope.resetProjectToDefault = function() {
-                $scope.project_name = 'Default';
-                $scope.project = null;
-                selectPlaybook('force_load');
-            };
-
             // Detect and alert user to potential SCM status issues
             checkSCMStatus = function (oldValue, newValue) {
                 if (oldValue !== newValue && !Empty($scope.project)) {
@@ -237,7 +231,7 @@
             });
 
             if ($scope.removeSurveySaved) {
-                $scope.rmoveSurveySaved();
+                $scope.removeSurveySaved();
             }
             $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
                 Wait('stop');

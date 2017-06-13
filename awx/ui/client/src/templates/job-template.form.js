@@ -93,10 +93,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 project: {
                     label: i18n._('Project'),
-                    labelAction: {
-                        label: i18n._('RESET'),
-                        ngClick: 'resetProjectToDefault()',
-                    },
                     type: 'lookup',
                     list: 'ProjectList',
                     basePath: 'projects',
