@@ -2,17 +2,22 @@
     <div class="form-group at-u-flat">
         <at-input-label></at-input-label>
 
-        <input type="number" 
-               class="form-control at-Input" 
+        <div class="input-group">
+            <span class="input-group-btn">
+                <button class="btn at-ButtonHollow--white at-Input-button"
+                        ng-disabled="state._disabled || form.disabled">
+                    <i class="fa fa-search"></i>
+                </button>
+            </span>
+            <input type="text"
+               class="form-control at-Input"
                ng-class="{ 'at-Input--rejected': state.rejected }"
                ng-model="state._value"
-               ng-attr-min="state._min"
-               ng-attr-max="state._max"
-               ng-attr-step="state._step"
                ng-attr-tabindex="{{ tab || undefined }}"
                ng-attr-placeholder="{{::state._placeholder || undefined }}"
                ng-change="vm.check()"
                ng-disabled="state._disabled || form.disabled" />
+        </div>
 
         <at-input-message></at-input-message>
     </div>

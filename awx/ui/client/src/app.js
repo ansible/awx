@@ -41,6 +41,7 @@ import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
+import credentials from './credentials/main';
 import credentialTypes from './credential-types/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
@@ -105,6 +106,7 @@ var tower = angular.module('Tower', [
     systemTracking.name,
     inventories.name,
     inventoryScripts.name,
+    credentials.name,
     credentialTypes.name,
     organizations.name,
     managementJobs.name,

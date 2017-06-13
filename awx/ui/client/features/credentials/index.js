@@ -1,5 +1,5 @@
-import CredentialList from './credentials.list.js';
-import ListController from './list/credentials-list.controller';
+import CredentialList from '../../src/credentials/credentials.list';
+import ListController from '../../src/credentials/list/credentials-list.controller';
 import AddController from './add-credentials.controller.js';
 import EditController from './edit-credentials.controller.js';
 import { N_ } from '../../src/i18n';
@@ -111,7 +111,5 @@ config.$inject = [
 angular
     .module('at.features.credentials', [])
     .config(config)
-    .factory('CredentialList', CredentialList)
-    .controller('ListController', ListController)
     .controller('AddController', AddController)
     .controller('EditController', EditController);

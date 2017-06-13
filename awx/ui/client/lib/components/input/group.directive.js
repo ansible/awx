@@ -59,7 +59,7 @@ function AtInputGroupController ($scope, $compile) {
             input = Object.assign(input, vm.getComponentType(input));
 
             group.push(Object.assign({
-                _element: vm.createElement(input, i),
+                _element: vm.createComponent(input, i),
                 _key: 'inputs',
                 _group: true,
                 _groupIndex: i
@@ -108,18 +108,6 @@ function AtInputGroupController ($scope, $compile) {
         return config;
     };
 
-    vm.createElement = (input, index) => {
-        let tabindex = Number(scope.tab) + index;
-        let col = input._expand ? 12 : scope.col;
-
-        let element =
-            `<${input._component} col="${col}" tab="${tabindex}"
-                state="${state._reference}._group[${index}]">
-            </${input._component}>`;
-
-        return angular.element(element);
-    };
-
     vm.insert = group => {
         let container = document.createElement('div');
         let col = 1;
@@ -128,13 +116,13 @@ function AtInputGroupController ($scope, $compile) {
 
         group.forEach((input, i) => {
             if (input._expand && !isDivided) {
-                container.appendChild(vm.createInputDivider());
+                container.appendChild(vm.createDivider()[0]);
             }
 
             container.appendChild(input._element[0]);
 
             if ((input._expand || col % colPerRow === 0) && i !== group.length -1) {
-                container.appendChild(vm.createInputDivider());
+                container.appendChild(vm.createDivider()[0]);
                 isDivided = true;
                 col = 0;
             } else {
@@ -147,8 +135,19 @@ function AtInputGroupController ($scope, $compile) {
         element.appendChild(container);
     };
 
-    vm.createInputDivider = () => {
-        return angular.element(`<div class="at-InputGroup-divider"></div>`)[0];
+    vm.createComponent = (input, index) => {
+        let tabindex = Number(scope.tab) + index;
+        let col = input._expand ? 12 : scope.col;
+
+        return angular.element(
+            `<${input._component} col="${col}" tab="${tabindex}"
+                state="${state._reference}._group[${index}]">
+            </${input._component}>`
+        );
+    };
+
+    vm.createDivider = () => {
+        return angular.element('<at-divider></at-divider>');
     };
 
     vm.compile = group => {

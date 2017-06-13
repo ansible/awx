@@ -1,9 +1,11 @@
 import actionGroup from './action/action-group.directive';
+import divider from './utility/divider.directive';
 import form from './form/form.directive';
 import formAction from './form/action.directive';
 import inputCheckbox from './input/checkbox.directive';
 import inputGroup from './input/group.directive';
 import inputLabel from './input/label.directive';
+import inputLookup from './input/lookup.directive';
 import inputMessage from './input/message.directive';
 import inputNumber from './input/number.directive';
 import inputSelect from './input/select.directive';
@@ -24,11 +26,13 @@ import BaseInputController from './input/base.controller';
 angular
     .module('at.lib.components', [])
     .directive('atActionGroup', actionGroup)
+    .directive('atDivider', divider)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
     .directive('atInputGroup', inputGroup)
     .directive('atInputLabel', inputLabel)
+    .directive('atInputLookup', inputLookup)
     .directive('atInputMessage', inputMessage)
     .directive('atInputNumber', inputNumber)
     .directive('atInputSecret', inputSecret)

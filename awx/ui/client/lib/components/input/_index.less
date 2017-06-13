@@ -15,7 +15,7 @@
     }
 }
 
-.at-Checkbox {
+.at-InputCheckbox {
     margin: 0;
     padding: 0;
 
@@ -26,8 +26,8 @@
     }
 }
 
-.at-InputGroup-button {
-    height: 100%;
+.at-InputContainer {
+    margin-top: @at-space-6x;;
 }
 
 .at-Input-button {
@@ -69,7 +69,6 @@
 
 .at-InputGroup {
     padding: 0;
-    margin: 0;
     margin: @at-space-6x 0 0 0;
 }
 
@@ -81,11 +80,13 @@
     left: -@at-inset-width;
 }
 
+.at-InputGroup-button {
+    height: 100%;
+}
+
 .at-InputGroup-title {
     .at-mixin-Heading(@at-font-size-2x);
-    margin-top: 0;
-    margin-left: @at-space-5x;
-    margin-bottom: @at-space-4x;
+    margin: 0 0 0 @at-space-5x;
 }
 
 .at-InputGroup-divider {
@@ -190,6 +191,6 @@
     }
 }
 
-.at-Textarea {
+.at-InputTextarea {
     .at-mixin-FontFixedWidth();
 }

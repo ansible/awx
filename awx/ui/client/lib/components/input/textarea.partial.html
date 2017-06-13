@@ -1,8 +1,8 @@
-<div class="col-sm-{{::col}}">
+<div class="col-sm-{{::col}} at-InputContainer">
     <div class="form-group at-u-flat">
         <at-input-label></at-input-label>
 
-        <textarea class="form-control at-Input at-Textarea"
+        <textarea class="form-control at-Input at-InputTextarea"
                   ng-model="state._value"
                   ng-class="{ 'at-Input--rejected': state._rejected }"
                   ng-attr-maxlength="{{ state.max_length || undefined }}"
