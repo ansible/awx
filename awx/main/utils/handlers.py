@@ -26,6 +26,7 @@ from awx.main.utils.formatters import LogstashFormatter
 __all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'TCPHandler', 'UDPHandler',
            'configure_external_logger']
 
+
 logger = logging.getLogger('awx.main.utils.handlers')
 
 # AWX external logging handler, generally designed to be used
@@ -346,7 +347,15 @@ def configure_external_logger(settings_module, is_startup=True):
     if is_enabled:
         handler_class = HANDLER_MAPPING[settings_module.LOG_AGGREGATOR_PROTOCOL]
         instance = handler_class.from_django_settings(settings_module)
-        instance.setFormatter(LogstashFormatter(settings_module=settings_module))
+
+        # Obtain the Formatter class from settings to maintain customizations
+        configurator = logging.config.DictConfigurator(settings_module.LOGGING)
+        formatter_config = settings_module.LOGGING['formatters']['json'].copy()
+        formatter_config['settings_module'] = settings_module
+        formatter = configurator.configure_custom(formatter_config)
+
+        instance.setFormatter(formatter)
+
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
         awx_logger_instance = None

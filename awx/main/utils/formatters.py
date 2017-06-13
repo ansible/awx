@@ -37,13 +37,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
         '''
         if kind == 'activity_stream':
             return raw_data
-        rename_fields = set((
-            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
-            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
-            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
-            'processName', 'relativeCreated', 'thread', 'threadName', 'extra',
-            'auth_token', 'tags', 'host', 'host_id', 'level', 'port', 'uuid'))
-        if kind == 'system_tracking':
+        elif kind == 'system_tracking':
             data = copy(raw_data['ansible_facts'])
         elif kind == 'job_events':
             data = copy(raw_data['event_model_data'])
@@ -51,7 +45,6 @@ class LogstashFormatter(LogstashFormatterVersion1):
             data = copy(raw_data)
         if isinstance(data, basestring):
             data = json.loads(data)
-        skip_fields = ('res', 'password', 'event_data', 'stdout')
         data_for_log = {}
 
         def index_by_name(alist):
@@ -86,18 +79,31 @@ class LogstashFormatter(LogstashFormatterVersion1):
                 return val
 
         if kind == 'job_events':
-            data.update(data.get('event_data', {}))
-            for fd in data:
-                if fd in skip_fields:
+            job_event = raw_data['python_objects']['job_event']
+            for field_object in job_event._meta.fields:
+
+                if not field_object.__class__ or not field_object.__class__.__name__:
+                    field_class_name = ''
+                else:
+                    field_class_name = field_object.__class__.__name__
+                if field_class_name in ['ManyToOneRel', 'ManyToManyField']:
                     continue
+
+                fd = field_object.name
                 key = fd
-                if fd in rename_fields:
-                    key = 'event_%s' % fd
-                val = data[fd]
-                if key.endswith('created'):
-                    time_float = time.mktime(data[fd].timetuple())
-                    val = self.format_timestamp(time_float)
-                data_for_log[key] = val
+                if field_class_name == 'ForeignKey':
+                    fd = '{}_id'.format(field_object.name)
+
+                try:
+                    data_for_log[key] = getattr(job_event, fd)
+                    if fd in ['created', 'modified'] and data_for_log[key] is not None:
+                        time_float = time.mktime(data_for_log[key].timetuple())
+                        data_for_log[key] = self.format_timestamp(time_float)
+                except Exception as e:
+                    data_for_log[key] = 'Exception `{}` producing field'.format(e)
+
+            data_for_log['event_display'] = job_event.get_event_display2()
+
         elif kind == 'system_tracking':
             data.pop('ansible_python_version', None)
             if 'ansible_python' in data:

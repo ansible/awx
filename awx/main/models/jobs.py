@@ -1289,9 +1289,9 @@ class JobEvent(CreatedModifiedModel):
         if event_data:
             artifact_dict = event_data.pop('artifact_data', None)
 
-        analytics_logger.info('Job event data saved.', extra=dict(event_model_data=kwargs))
-
         job_event = JobEvent.objects.create(**kwargs)
+
+        analytics_logger.info('Job event data saved.', extra=dict(python_objects=dict(job_event=job_event)))
 
         # Save artifact data to parent job (if provided).
         if artifact_dict:

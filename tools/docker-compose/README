@@ -1,2 +1,32 @@
 docker build --no-cache=true --rm=true -t ansible/tower_devel:latest .
 docker run --name tower_test -it --memory="4g" --cpuset="0,1" -v /Users/meyers/ansible/:/tower_devel -p 8013:8013 -p 8080:8080 -p 27017:27017 -p 2222:22 ansible/tower_devel
+
+## How to use the logstash container
+
+POST the following content to `/api/v1/settings/logging/` (this uses
+authentication set up inside of the logstash configuration file).
+
+```
+{
+    "LOG_AGGREGATOR_HOST": "logstash",
+    "LOG_AGGREGATOR_PORT": 8085,
+    "LOG_AGGREGATOR_TYPE": "logstash",
+    "LOG_AGGREGATOR_USERNAME": "awx_logger",
+    "LOG_AGGREGATOR_PASSWORD": "workflows",
+    "LOG_AGGREGATOR_LOGGERS": [
+        "awx",
+        "activity_stream",
+        "job_events",
+        "system_tracking"
+    ],
+    "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
+    "LOG_AGGREGATOR_TOWER_UUID": "991ac7e9-6d68-48c8-bbde-7ca1096653c6",
+    "LOG_AGGREGATOR_ENABLED": true
+}
+```
+
+An example of how to view the most recent logs from the container:
+
+```
+docker exec -i -t $(docker ps -aqf "name=tools_logstash_1") tail -n 50 /logstash.log
+```
