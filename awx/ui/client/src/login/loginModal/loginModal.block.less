@@ -1,4 +1,5 @@
 @import "../../shared/branding/colors.default.less";
+@import "./client/assets/variables.less";
 
 /** @define LoginModal */
 .LoginModal-backDrop {
@@ -56,6 +57,15 @@
     padding-right: 20px;
 }
 
+.LoginModal-logoImage {
+    max-width: 112px;
+    margin: 20px 20px 10px 20px;
+}
+
+.LoginModal-logoImage--notCustom {
+    max-width: @login-max-width;
+    margin: @login-magin;
+}
 
 .LoginModal-alert {
     margin-bottom: 20px;

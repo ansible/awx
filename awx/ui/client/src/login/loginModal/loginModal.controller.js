@@ -98,8 +98,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
             scope.customLogo = $rootScope.custom_logo;
             scope.customLogoPresent = true;
         } else {
-            // scope.customLogo = "tower-logo-login.svg";
-            scope.customLogo = "awx-logo-small.png";
+            scope.customLogo = "default-logo-large.png";
             scope.customLogoPresent = false;
         }
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
