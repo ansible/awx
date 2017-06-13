@@ -41,7 +41,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             }
 
             // display custom inventory_script name
-            if (inventorySourceData.source === 'custom') {
+            if (inventorySourceData.source === 'custom' && inventorySourceData.summary_fields.source_script) {
                 $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
             }
             $scope = angular.extend($scope, inventorySourceData);
