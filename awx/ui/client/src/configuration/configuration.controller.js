@@ -83,6 +83,9 @@ export default [
                                 }
 
                             } else {
+                                if (key === "LICENSE") {
+                                    $scope.license_type = data[key].license_type;
+                                }
                                 //handle nested objects
                                 if(ConfigurationUtils.isEmpty(data[key])) {
                                     $scope[key] = '{}';

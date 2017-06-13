@@ -35,7 +35,8 @@ export default ['i18n', function(i18n) {
             TACACSPLUS_AUTH_PROTOCOL: {
                 type: 'select',
                 reset: 'TACACSPLUS_AUTH_PROTOCOL',
-                ngOptions: 'protocol.label for protocol in TACACSPLUS_AUTH_PROTOCOL_options track by protocol.value'
+                ngOptions: 'protocol.label for protocol in TACACSPLUS_AUTH_PROTOCOL_options track by protocol.value',
+
             }
         },
 
@@ -50,7 +51,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: true
+                ngDisabled: "license_type !== 'enterprise' || form.$invalid || form.$pending"
             }
         }
     };
