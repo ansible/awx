@@ -491,13 +491,23 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 </td>
                 `;
             } else if (field.type === 'labels') {
-                var showDelete = field.showDelete === undefined ? true : field.showDelete;
+                let showDelete = field.showDelete === undefined ? true : field.showDelete;
                 classList = (field.columnClass) ?
                     Attr(field, 'columnClass') : "";
                     html += `
 <td ${classList}>
     <labels-list class=\"LabelList\" show-delete="${showDelete}">
     </labels-list>
+</td>
+                    `;
+            } else if (field.type === 'related_groups') {
+                let showDelete = field.showDelete === undefined ? true : field.showDelete;
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                    html += `
+<td ${classList}>
+    <related-groups-labels-list class=\"LabelList\" show-delete="${showDelete}">
+    </related-groups-labels-list>
 </td>
                     `;
             } else if (field.type === 'owners') {
