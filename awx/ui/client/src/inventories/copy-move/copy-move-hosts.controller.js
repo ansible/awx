@@ -50,4 +50,18 @@
                     break;
             }
         };
+
+        $scope.toggleTargetRootGroup = function(){
+            $scope.selected = !$scope.selected;
+            // cannot perform copy operations to root group level
+            $scope.submitMode = 'move';
+            // toggle off anything currently selected in the list, for clarity
+            _.forEach($scope.groups, (item) => {
+                item.checked = null;
+            });
+            // disable list selections
+            $('#copyMove-list :input').each((idx, el) => {
+                $(el).prop('disabled', (idx, value) => !value);
+            });
+        };
     }];
