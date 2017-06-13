@@ -877,6 +877,9 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
+        if job.store_facts_enabled:
+            env['MEMCACHED_PREPEND_KEY'] = job.memcached_fact_key
+            env['MEMCACHED_LOCATION'] = settings.CACHES['default']['LOCATION']
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
@@ -1140,8 +1143,14 @@ class RunJob(BaseTask):
                                                          ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
+        if job.store_facts_enabled:
+            job.start_job_fact_cache()
+
+
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
+        if job.store_facts_enabled:
+            job.finish_job_fact_cache()
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:

@@ -12,6 +12,8 @@ from urlparse import urljoin
 # Django
 from django.conf import settings
 from django.db import models
+#from django.core.cache import cache
+import memcache
 from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_text
@@ -37,6 +39,8 @@ from awx.main.models.base import PERM_INVENTORY_SCAN
 from awx.main.fields import JSONField
 
 from awx.main.consumers import emit_channel_notification
+
+TIMEOUT = 60
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -703,6 +707,74 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             self.project_update.cancel(job_explanation=job_explanation)
         return res
 
+    @property
+    def store_facts_enabled(self):
+        if not self.job_template or self.job_template is False:
+            return False
+        return True
+
+    @property
+    def memcached_fact_key(self):
+        return '{}'.format(self.inventory.id)
+
+    def memcached_fact_host_key(self, host_name):
+        return '{}-{}'.format(self.inventory.id, host_name)
+
+    def memcached_fact_modified_key(self, host_name):
+        return '{}-{}-modified'.format(self.inventory.id, host_name)
+
+    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
+        return self.inventory.hosts.only(*only)
+
+    def _get_memcache_connection(self):
+        return memcache.Client([settings.CACHES['default']['LOCATION']], debug=0)
+
+    def start_job_fact_cache(self):
+        if not self.inventory:
+            return
+
+        cache = self._get_memcache_connection()
+
+        host_names = []
+
+        for host in self._get_inventory_hosts():
+            host_key = self.memcached_fact_host_key(host.name)
+            modified_key = self.memcached_fact_modified_key(host.name)
+            # Only add host/facts if host doesn't already exist in the cache
+            if cache.get(modified_key) is None:
+                cache.set(host_key, host.ansible_facts)
+                cache.set(modified_key, False)
+
+            host_names.append(host.name)
+
+        cache.set(self.memcached_fact_key, host_names)
+
+    def finish_job_fact_cache(self):
+        if not self.inventory:
+            # TODO: Uh oh, we need to clean up the cache
+            return
+
+        cache = self._get_memcache_connection()
+
+        hosts = self._get_inventory_hosts()
+        for host in hosts:
+            host_key = self.memcached_fact_host_key(host.name)
+            modified_key = self.memcached_fact_modified_key(host.name)
+
+            modified = cache.get(modified_key)
+            if modified is None:
+                continue
+
+            # Save facts that have changed
+            if modified:
+                ansible_facts = cache.get(host_key)
+                if ansible_facts is None:
+                    cache.delete(host_key)
+                    # TODO: Log cache inconsistency
+                    continue
+                host.ansible_facts = ansible_facts
+                host.save()
+
 
 class JobHostSummary(CreatedModifiedModel):
     '''
@@ -1357,3 +1429,4 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
+
