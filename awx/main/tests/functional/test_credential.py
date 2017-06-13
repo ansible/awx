@@ -4,7 +4,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from awx.main.utils.common import decrypt_field
+from awx.main.utils import decrypt_field
 from awx.main.models import Credential, CredentialType
 
 from rest_framework import serializers

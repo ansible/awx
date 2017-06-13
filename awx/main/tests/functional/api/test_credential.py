@@ -2,7 +2,7 @@ import mock # noqa
 import pytest
 
 from awx.main.models.credential import Credential, CredentialType
-from awx.main.utils.common import decrypt_field
+from awx.main.utils import decrypt_field
 from awx.api.versioning import reverse
 
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'

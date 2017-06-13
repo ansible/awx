@@ -7,7 +7,7 @@ from django.apps import apps
 
 from awx.main.models import Credential, CredentialType
 from awx.main.migrations._credentialtypes import migrate_to_v2_credentials
-from awx.main.utils.common import decrypt_field
+from awx.main.utils import decrypt_field
 from awx.main.migrations._credentialtypes import _disassociate_non_insights_projects
 
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
@@ -319,7 +319,7 @@ def test_insights_migration():
             'username': 'bob',
             'password': 'some-password',
         })
-    
+
     assert cred.credential_type.name == 'Insights Basic Auth'
     assert cred.inputs['username'] == 'bob'
     assert cred.inputs['password'].startswith('$encrypted$')

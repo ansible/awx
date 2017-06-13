@@ -26,7 +26,7 @@ from awx.main.models import (
 
 from awx.main import tasks
 from awx.main.task_engine import TaskEnhancer
-from awx.main.utils.common import encrypt_field
+from awx.main.utils import encrypt_field
 
 
 @contextmanager
