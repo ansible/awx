@@ -595,6 +595,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         raise NotImplementedError # Implement in subclasses.
 
     @classmethod
+    def supports_isolation(cls):
+        return False
+
+    @classmethod
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
@@ -952,7 +956,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def start_celery_task(self, opts, error_callback, success_callback, queue):
         task_class = self._get_task_class()
-        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback, queue=queue)
+        from awx.main.models.ha import InstanceGroup
+        ig = InstanceGroup.objects.get(name=queue)
+        args = [self.pk]
+        if ig.controller_id:
+            if self.supports_isolation():  # case of jobs and ad hoc commands
+                # TODO: dock capacity from controller instance, use capacity to select isolated node
+                import random
+                isolated_instance = random.choice(ig.instances.all())
+                args.append(isolated_instance.hostname)
+            else:  # proj & inv updates, system jobs run on controller
+                queue = ig.controller.name
+        task_class().apply_async(args, opts, link_error=error_callback, link=success_callback, queue=queue)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''

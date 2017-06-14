@@ -1,0 +1,17 @@
+version: '3'
+services:
+  # Primary Tower Development Container link
+  tower:
+    environment:
+      DOCKER_TOOLS_DIR: tools/docker-isolated
+    links:
+      - isolated
+  # Isolated Rampart Container
+  isolated:
+    image: gcr.io/ansible-tower-engineering/tower_isolated:${TAG}
+    hostname: isolated
+    volumes:
+      - "../awx/main/isolated:/tower_isolated"
+      - "../awx/lib:/tower_lib"
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    privileged: true

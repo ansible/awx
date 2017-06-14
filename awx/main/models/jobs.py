@@ -494,6 +494,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         from awx.main.tasks import RunJob
         return RunJob
 
+    @classmethod
+    def supports_isolation(cls):
+        return True
+
     def _global_timeout_setting(self):
         return 'DEFAULT_JOB_TIMEOUT'
 

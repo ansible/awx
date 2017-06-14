@@ -1,0 +1,28 @@
+---
+
+# The following variables will be set by the runner of this playbook:
+# src: /tmp/some/path/private_data_dir/
+# job_id: <pk>
+
+- hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: copy artifacts from the isolated host
+      synchronize:
+        src: "{{src}}/artifacts/"
+        dest: "{{src}}/artifacts/"
+        mode: pull
+        recursive: yes
+
+    - name: check to see if the job is inactive
+      command: "systemctl is-active playbook@{{job_id}}.service"
+      register: is_active
+      failed_when: "is_active.rc == 0"
+
+    - shell: journalctl -u playbook@{{job_id}}.service --no-pager
+      register: systemctl_logs
+      ignore_errors: True
+
+    - local_action: copy content={{ systemctl_logs.stdout }} dest={{src}}/artifacts/systemctl_logs mode=0600

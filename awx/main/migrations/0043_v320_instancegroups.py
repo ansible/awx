@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(unique=True, max_length=250)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
+                ('controller', models.ForeignKey(related_name='controlled_groups', default=None, editable=False, to='main.InstanceGroup', help_text='Instance Group to remotely control this group.', null=True)),
                 ('instances', models.ManyToManyField(help_text='Instances that are members of this InstanceGroup', related_name='rampart_groups', editable=False, to='main.Instance')),
             ],
         ),

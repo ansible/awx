@@ -3480,12 +3480,14 @@ class InstanceGroupSerializer(BaseSerializer):
     class Meta:
         model = InstanceGroup
         fields = ("id", "type", "url", "related", "name", "created", "modified", "capacity", "consumed_capacity",
-                  "percent_capacity_remaining", "jobs_running", "instances")
+                  "percent_capacity_remaining", "jobs_running", "instances", "controller")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
+        if obj.controller_id:
+            res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
 
     def get_consumed_capacity(self, obj):

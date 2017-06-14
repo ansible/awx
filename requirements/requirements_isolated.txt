@@ -1,0 +1,2 @@
+psutil==5.2.2
+pexpect==4.2.1

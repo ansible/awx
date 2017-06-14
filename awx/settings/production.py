@@ -50,6 +50,8 @@ ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
 TOWER_USE_VENV = True
 TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
+AWX_ISOLATED_USERNAME = 'awx'
+
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'

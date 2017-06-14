@@ -604,6 +604,12 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 # Time at which an HA node is considered active
 AWX_ACTIVE_NODE_TIME = 7200
 
+# The number of seconds to sleep between status checks for jobs running on isolated nodes
+AWX_ISOLATED_CHECK_INTERVAL = 5
+
+# The timeout (in seconds) for launching jobs on isolated nodes
+AWX_ISOLATED_LAUNCH_TIMEOUT = 600
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"

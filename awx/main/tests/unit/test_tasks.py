@@ -3,13 +3,15 @@ from datetime import datetime
 from functools import partial
 import ConfigParser
 import json
+import os
+import shutil
 import tempfile
 
-import os
 import fcntl
-import pytest
 import mock
+import pytest
 import yaml
+
 
 from awx.main.models import (
     Credential,
@@ -198,11 +200,21 @@ class TestJobExecution:
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
     def setup_method(self, method):
+        self.project_path = tempfile.mkdtemp(prefix='ansible_tower_project_')
+        with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
+            f.write('---')
+
+        # The primary goal of these tests is to mock our `run_pexpect` call
+        # and make assertions about the arguments and environment passed to it.
+        self.run_pexpect = mock.Mock()
+        self.run_pexpect.return_value = ['successful', 0]
+
         self.patches = [
-            mock.patch.object(Project, 'get_project_path', lambda *a, **kw: '/tmp/'),
+            mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
-            mock.patch.object(Job, 'inventory', mock.Mock(pk=1, spec_set=['pk']))
+            mock.patch.object(Job, 'inventory', mock.Mock(pk=1, spec_set=['pk'])),
+            mock.patch('awx.main.isolated.run.run_pexpect', self.run_pexpect)
         ]
         for p in self.patches:
             p.start()
@@ -220,16 +232,13 @@ class TestJobExecution:
         self.task = self.TASK_CLS()
         self.task.update_model = mock.Mock(side_effect=status_side_effect)
 
-        # The primary goal of these tests is to mock our `run_pexpect` call
-        # and make assertions about the arguments and environment passed to it.
-        self.task.run_pexpect = mock.Mock(return_value=['successful', 0])
-
         # ignore pre-run and post-run hooks, they complicate testing in a variety of ways
         self.task.pre_run_hook = self.task.post_run_hook = self.task.final_run_hook = mock.Mock()
 
     def teardown_method(self, method):
         for p in self.patches:
             p.stop()
+        shutil.rmtree(self.project_path, True)
 
     def get_instance(self):
         job = Job(
@@ -238,7 +247,9 @@ class TestJobExecution:
             status='new',
             job_type='run',
             cancel_flag=False,
-            project=Project()
+            project=Project(),
+            playbook='helloworld.yml',
+            verbosity=3
         )
 
         # mock the job.extra_credentials M2M relation so we can avoid DB access
@@ -273,10 +284,105 @@ class TestGenericRun(TestJobExecution):
     def test_uses_bubblewrap(self):
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
         assert args[0] == 'bwrap'
+
+
+class TestIsolatedExecution(TestJobExecution):
+
+    REMOTE_HOST = 'some-isolated-host'
+
+    def test_with_ssh_credentials(self):
+        mock_get = mock.Mock()
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {
+                'username': 'bob',
+                'password': 'secret',
+                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
+            }
+        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.credential = credential
+
+        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
+        inventory = json.dumps({"all": {"hosts": ["localhost"]}})
+
+        def _mock_job_artifacts(*args, **kw):
+            artifacts = os.path.join(private_data, 'artifacts')
+            if not os.path.exists(artifacts):
+                os.makedirs(artifacts)
+            if 'run_isolated.yml' in args[0]:
+                for filename, data in (
+                    ['status', 'successful'],
+                    ['rc', '0'],
+                    ['stdout', 'IT WORKED!'],
+                ):
+                    with open(os.path.join(artifacts, filename), 'w') as f:
+                        f.write(data)
+            return ('successful', 0)
+        self.run_pexpect.side_effect = _mock_job_artifacts
+
+        with mock.patch('time.sleep'):
+            with mock.patch('requests.get') as mock_get:
+                mock_get.return_value = mock.Mock(content=inventory)
+                self.task.run(self.pk, self.REMOTE_HOST)
+                assert mock_get.call_count == 1
+                assert mock.call(
+                    'http://127.0.0.1:8013/api/v1/inventories/1/script/?hostvars=1',
+                    auth=mock.ANY
+                ) in mock_get.call_args_list
+
+        playbook_run = self.run_pexpect.call_args_list[0][0]
+        assert ' '.join(playbook_run[0]).startswith(' '.join([
+            'ansible-playbook', '-u', 'root', '-i', self.REMOTE_HOST + ',',
+            'run_isolated.yml', '-e',
+        ]))
+        extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
+        extra_vars = json.loads(extra_vars)
+        assert extra_vars['dest'] == '/tmp'
+        assert extra_vars['src'] == private_data
+        assert extra_vars['proot_temp_dir'].startswith('/tmp/ansible_tower_proot_')
+        assert extra_vars['job_id'] == '1'
+
+    def test_systemctl_failure(self):
+        # If systemctl fails, read the contents of `artifacts/systemctl_logs`
+        mock_get = mock.Mock()
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {'username': 'bob',}
+        )
+        self.instance.credential = credential
+
+        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        self.task.build_private_data_dir = mock.Mock(return_value=private_data)
+        inventory = json.dumps({"all": {"hosts": ["localhost"]}})
+
+        def _mock_job_artifacts(*args, **kw):
+            artifacts = os.path.join(private_data, 'artifacts')
+            if not os.path.exists(artifacts):
+                os.makedirs(artifacts)
+            if 'run_isolated.yml' in args[0]:
+                for filename, data in (
+                    ['systemctl_logs', 'ERROR IN EXPECT.PY'],
+                ):
+                    with open(os.path.join(artifacts, filename), 'w') as f:
+                        f.write(data)
+            return ('successful', 0)
+        self.run_pexpect.side_effect = _mock_job_artifacts
+
+        with mock.patch('time.sleep'):
+            with mock.patch('requests.get') as mock_get:
+                mock_get.return_value = mock.Mock(content=inventory)
+                with pytest.raises(Exception):
+                    self.task.run(self.pk, self.REMOTE_HOST)
 
 
 class TestJobCredentials(TestJobExecution):
@@ -301,11 +407,11 @@ class TestJobCredentials(TestJobExecution):
         self.instance.credential = credential
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
-        assert passwords[password_name] == 'secret'
+        assert 'secret' in call_kwargs.get('expect_passwords').values()
         assert '-u bob' in ' '.join(args)
         if expected_flag:
             assert expected_flag in ' '.join(args)
@@ -324,7 +430,7 @@ class TestJobCredentials(TestJobExecution):
         self.instance.credential = credential
 
         def run_pexpect_side_effect(private_data, *args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
             assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
             assert ' '.join(args).startswith(
@@ -338,9 +444,7 @@ class TestJobCredentials(TestJobExecution):
 
         private_data = tempfile.mkdtemp(prefix='ansible_tower_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        self.task.run_pexpect = mock.Mock(
-            side_effect=partial(run_pexpect_side_effect, private_data)
-        )
+        self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk, private_data_dir=private_data)
 
     def test_aws_cloud_credential(self):
@@ -354,9 +458,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['AWS_ACCESS_KEY'] == 'bob'
         assert env['AWS_SECRET_KEY'] == 'secret'
@@ -374,9 +478,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['AWS_ACCESS_KEY'] == 'bob'
         assert env['AWS_SECRET_KEY'] == 'secret'
@@ -397,14 +501,14 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert env['GCE_EMAIL'] == 'bob'
             assert env['GCE_PROJECT'] == 'some-project'
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_azure_credentials(self):
@@ -421,13 +525,13 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert env['AZURE_SUBSCRIPTION_ID'] == 'bob'
             ssh_key_data = env['AZURE_CERT_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_azure_rm_with_tenant(self):
@@ -447,9 +551,9 @@ class TestJobCredentials(TestJobExecution):
 
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['AZURE_CLIENT_ID'] == 'some-client'
         assert env['AZURE_SECRET'] == 'some-secret'
@@ -472,9 +576,9 @@ class TestJobCredentials(TestJobExecution):
 
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
@@ -491,9 +595,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['VMWARE_USER'] == 'bob'
         assert env['VMWARE_PASSWORD'] == 'secret'
@@ -515,7 +619,7 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'rb').read()
             assert shade_config == '\n'.join([
                 'clouds:',
@@ -529,7 +633,7 @@ class TestJobCredentials(TestJobExecution):
             ])
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_net_credentials(self):
@@ -550,7 +654,7 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert env['ANSIBLE_NET_USERNAME'] == 'bob'
             assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
             assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
@@ -558,7 +662,7 @@ class TestJobCredentials(TestJobExecution):
             assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_custom_environment_injectors_with_jinja_syntax_error(self):
@@ -614,9 +718,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
 
@@ -646,9 +750,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['JOB_ID'] == str(self.instance.pk)
 
@@ -680,9 +784,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
         assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
@@ -713,9 +817,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert '-e {"api_token": "ABC123"}' in ' '.join(args)
 
@@ -750,9 +854,9 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(credential)
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
         assert '-e {"password": "SUPER-SECRET-123"}' in ' '.join(args)
         assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
@@ -787,11 +891,11 @@ class TestJobCredentials(TestJobExecution):
         self.task.run(self.pk)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_multi_cloud(self):
@@ -821,7 +925,7 @@ class TestJobCredentials(TestJobExecution):
         self.instance.extra_credentials.add(azure_credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
 
             assert env['GCE_EMAIL'] == 'bob'
             assert env['GCE_PROJECT'] == 'some-project'
@@ -834,7 +938,7 @@ class TestJobCredentials(TestJobExecution):
 
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
 
@@ -874,12 +978,12 @@ class TestProjectUpdateCredentials(TestJobExecution):
         )
         self.task.run(self.pk)
 
-        assert self.task.run_pexpect.call_count == 1
-        call_args, _ = self.task.run_pexpect.call_args_list[0]
-        job, args, cwd, env, passwords, stdout = call_args
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
 
-        assert passwords.get('scm_username') == 'bob'
-        assert passwords.get('scm_password') == 'secret'
+        assert 'bob' in call_kwargs.get('expect_passwords').values()
+        assert 'secret' in call_kwargs.get('expect_passwords').values()
 
     def test_ssh_key_auth(self, scm_type):
         ssh = CredentialType.defaults['ssh']()
@@ -897,7 +1001,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(private_data, *args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             ssh_key_data_fifo = '/'.join([private_data, 'credential_1'])
             assert open(ssh_key_data_fifo, 'r').read() == self.EXAMPLE_PRIVATE_KEY
             assert ' '.join(args).startswith(
@@ -907,14 +1011,12 @@ class TestProjectUpdateCredentials(TestJobExecution):
                     ssh_key_data_fifo
                 )
             )
-            assert passwords.get('scm_username') == 'bob'
+            assert 'bob' in kwargs.get('expect_passwords').values()
             return ['successful', 0]
 
         private_data = tempfile.mkdtemp(prefix='ansible_tower_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        self.task.run_pexpect = mock.Mock(
-            side_effect=partial(run_pexpect_side_effect, private_data)
-        )
+        self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk)
 
 
@@ -944,7 +1046,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
 
             assert env['AWS_ACCESS_KEY_ID'] == 'bob'
             assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
@@ -955,7 +1057,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert 'ec2' in config.sections()
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_vmware_source(self):
@@ -971,7 +1073,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
 
             config = ConfigParser.ConfigParser()
             config.read(env['VMWARE_INI_PATH'])
@@ -980,7 +1082,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('vmware', 'server') == 'https://example.org'
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_azure_source(self):
@@ -999,13 +1101,13 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert env['AZURE_SUBSCRIPTION_ID'] == 'bob'
             ssh_key_data = env['AZURE_CERT_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_gce_source(self):
@@ -1025,14 +1127,14 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             assert env['GCE_EMAIL'] == 'bob'
             assert env['GCE_PROJECT'] == 'some-project'
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_openstack_source(self):
@@ -1053,7 +1155,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'rb').read()
             assert '\n'.join([
                 'clouds:',
@@ -1067,7 +1169,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             ]) in shade_config
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_satellite6_source(self):
@@ -1087,7 +1189,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             config = ConfigParser.ConfigParser()
             config.read(env['FOREMAN_INI_PATH'])
             assert config.get('foreman', 'url') == 'https://example.org'
@@ -1095,7 +1197,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'password') == 'secret'
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
     def test_cloudforms_source(self):
@@ -1115,7 +1217,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         )
 
         def run_pexpect_side_effect(*args, **kwargs):
-            job, args, cwd, env, passwords, stdout = args
+            args, cwd, env, stdout = args
             config = ConfigParser.ConfigParser()
             config.read(env['CLOUDFORMS_INI_PATH'])
             assert config.get('cloudforms', 'url') == 'https://example.org'
@@ -1124,7 +1226,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('cloudforms', 'ssl_verify') == 'false'
             return ['successful', 0]
 
-        self.task.run_pexpect = mock.Mock(side_effect=run_pexpect_side_effect)
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
 

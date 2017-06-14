@@ -215,7 +215,11 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
-            task.instance_group = rampart_group
+            if not task.supports_isolation() and rampart_group.controller_id:
+                # non-Ansible jobs on isolated instances run on controller
+                task.instance_group = rampart_group.controller
+            else:
+                task.instance_group = rampart_group
             task.save()
 
             self.consume_capacity(task, rampart_group.name)

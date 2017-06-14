@@ -10,6 +10,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
+      DOCKER_TOOLS_DIR: tools/docker-compose
     ports:
       - "8080:8080"
       - "5555:5555"

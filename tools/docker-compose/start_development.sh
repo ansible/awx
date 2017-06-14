@@ -31,7 +31,7 @@ yes | cp -rf /tower_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 # Tower bootstrapping
 make version_file
 make migrate
-make init
+make init DOCKER_TOOLS_DIR=${DOCKER_TOOLS_DIR}
 
 mkdir -p /tower_devel/awx/public/static
 mkdir -p /tower_devel/awx/ui/static
@@ -41,5 +41,5 @@ mkdir -p /tower_devel/awx/ui/static
 if [ -f "/tower_devel/tools/docker-compose/use_dev_supervisor.txt" ]; then
     make supervisor
 else
-    make honcho
+    honcho start -f "${DOCKER_TOOLS_DIR}/Procfile"
 fi

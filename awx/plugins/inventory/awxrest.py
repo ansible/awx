@@ -65,7 +65,7 @@ class InventoryScript(object):
     def __init__(self, **options):
         self.options = options
 
-    def get_data(self):
+    def get_data(self, output):
         parts = urlparse.urlsplit(self.base_url)
         if parts.username and parts.password:
             auth = (parts.username, parts.password)
@@ -89,10 +89,10 @@ class InventoryScript(object):
         url = urlparse.urljoin(url, url_path)
         response = requests.get(url, auth=auth)
         response.raise_for_status()
-        sys.stdout.write(json.dumps(json.loads(response.content),
+        output.write(json.dumps(json.loads(response.content),
                                     indent=self.indent) + '\n')
 
-    def run(self):
+    def run(self, output=sys.stdout):
         try:
             self.base_url = self.options.get('base_url', '') or \
                 os.getenv('REST_API_URL', '')
@@ -123,11 +123,11 @@ class InventoryScript(object):
             if self.list_ and self.hostname:
                 raise RuntimeError('Only --list or --host may be specified')
             elif self.list_ or self.hostname:
-                self.get_data()
+                self.get_data(output)
             else:
                 raise RuntimeError('Either --list or --host must be specified')
         except Exception, e:
-            sys.stdout.write('%s\n' % json.dumps(dict(failed=True)))
+            output.write('%s\n' % json.dumps(dict(failed=True)))
             if self.options.get('traceback', False):
                 sys.stderr.write(traceback.format_exc())
             else:
@@ -137,7 +137,7 @@ class InventoryScript(object):
                     sys.stderr.write('%s\n' % e.response.content)
                 else:
                     sys.stderr.write('%s\n' % e.response)
-            sys.exit(1)
+            raise
 
 def main():
     parser = optparse.OptionParser()
@@ -173,7 +173,11 @@ def main():
     parser.add_option('--indent', dest='indent', type='int', default=None,
                       help='Indentation level for pretty printing output')
     options, args = parser.parse_args()
-    InventoryScript(**vars(options)).run()
+    try:
+        InventoryScript(**vars(options)).run()
+    except Exception:
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

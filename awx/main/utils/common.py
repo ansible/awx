@@ -609,17 +609,19 @@ def build_proot_temp_dir():
 def wrap_args_with_proot(args, cwd, **kwargs):
     '''
     Wrap existing command line with proot to restrict access to:
+     - /tmp (except for own tmp files)
+    For non-isolated nodes:
      - /etc/tower (to prevent obtaining db info or secret key)
      - /var/lib/awx (except for current project)
      - /var/log/tower
      - /var/log/supervisor
-     - /tmp (except for own tmp files)
     '''
     from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/']
-    hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
-                  tempfile.gettempdir(), settings.PROJECTS_ROOT,
-                  settings.JOBOUTPUT_ROOT]
+    hide_paths = [tempfile.gettempdir()]
+    if not kwargs.get('isolated'):
+        hide_paths.extend(['/etc/tower', '/var/lib/awx', '/var/log',
+                           settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT])
     hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
@@ -633,13 +635,15 @@ def wrap_args_with_proot(args, cwd, **kwargs):
             os.close(handle)
             os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR)
         new_args.extend(['--bind', '%s' %(new_path,), '%s' % (path,)])
-    if 'private_data_dir' in kwargs:
+    if kwargs.get('isolated'):
+        show_paths = [kwargs['private_data_dir']]
+    elif 'private_data_dir' in kwargs:
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
     if settings.ANSIBLE_USE_VENV:
         show_paths.append(settings.ANSIBLE_VENV_PATH)
-    if settings.TOWER_USE_VENV:
+    if settings.TOWER_USE_VENV and not kwargs.get('isolated'):
         show_paths.append(settings.TOWER_VENV_PATH)
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
@@ -647,7 +651,15 @@ def wrap_args_with_proot(args, cwd, **kwargs):
             continue
         path = os.path.realpath(path)
         new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
-    new_args.extend(['--chdir', cwd])
+    if kwargs.get('isolated'):
+        if 'ansible-playbook' in args:
+            # playbook runs should cwd to the SCM checkout dir
+            new_args.extend(['--chdir', os.path.join(kwargs['private_data_dir'], 'project')])
+        else:
+            # ad-hoc runs should cwd to the root of the private data dir
+            new_args.extend(['--chdir', kwargs['private_data_dir']])
+    else:
+        new_args.extend(['--chdir', cwd])
     new_args.extend(args)
     return new_args
 

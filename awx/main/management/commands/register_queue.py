@@ -15,16 +15,27 @@ class Command(BaseCommand):
                     help='Queue to create/update'),
         make_option('--hostnames', dest='hostnames', type='string',
                     help='Comma-Delimited Hosts to add to the Queue'),
+        make_option('--controller', dest='controller', type='string', default='',
+                    help='The controlling group (makes this an isolated group)'),
     )
 
     def handle(self, **options):
         ig = InstanceGroup.objects.filter(name=options.get('queuename'))
+        control_ig = None
+        if options.get('controller'):
+            control_ig = InstanceGroup.objects.filter(name=options.get('controller')).first()
         if ig.exists():
             print("Instance Group already registered {}".format(ig[0]))
             ig = ig[0]
+            if control_ig and ig.controller_id != control_ig.pk:
+                ig.controller = control_ig
+                ig.save()
+                print("Set controller group {} on {}.".format(control_ig, ig))
         else:
             print("Creating instance group {}".format(options.get('queuename')))
             ig = InstanceGroup(name=options.get('queuename'))
+            if control_ig:
+                ig.controller = control_ig
             ig.save()
         hostname_list = []
         if options.get('hostnames'):

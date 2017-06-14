@@ -60,6 +60,14 @@ class InstanceGroup(models.Model):
         editable=False,
         help_text=_('Instances that are members of this InstanceGroup'),
     )
+    controller = models.ForeignKey(
+        'InstanceGroup',
+        related_name='controlled_groups',
+        help_text=_('Instance Group to remotely control this group.'),
+        editable=False,
+        default=None,
+        null=True
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:instance_group_detail', kwargs={'pk': self.pk}, request=request)

@@ -1,0 +1,45 @@
+---
+
+# The following variables will be set by the runner of this playbook:
+# src: /tmp/some/path/private_data_dir
+# dest: /tmp/some/path/
+# proot_temp_dir: /tmp/some/path
+# job_id: <pk>
+
+- hosts: all
+  gather_facts: false
+  vars_prompt:
+    - prompt: "Secret"
+      name: "secret"
+
+  tasks:
+
+    - name: create a proot/bwrap temp dir (if necessary)
+      synchronize:
+        src: "{{proot_temp_dir}}"
+        dest: "/tmp"
+      when: proot_temp_dir is defined
+
+    - name: synchronize job environment with isolated host
+      synchronize:
+        copy_links: true
+        src: "{{src}}"
+        dest: "{{dest}}"
+
+    - name: create a directory for running jobs
+      file: path=/tmp/ansible_tower/jobs state=directory mode=0700
+
+    - name: create symlink keyed by job ID
+      file: src="{{src}}" dest="/tmp/ansible_tower/jobs/{{job_id}}" state=link
+
+    - name: create a named pipe for secret environment data
+      command: "mkfifo /tmp/ansible_tower/jobs/{{job_id}}/env"
+
+    - name: spawn the playbook
+      command: "systemctl start playbook@{{job_id}}.service"
+
+    - name: write the secret environment data
+      mkfifo:
+        content: "{{secret}}"
+        path: "/tmp/ansible_tower/jobs/{{job_id}}/env"
+      no_log: True

@@ -1,0 +1,7 @@
+[Unit]
+Description=Run of Ansible Tower job %I
+
+[Service]
+ExecStart=/venv/tower_isolated/bin/python /tower_isolated/run.py %I
+Restart=no
+Environment=TOWER_LIB_DIRECTORY=/tower_lib

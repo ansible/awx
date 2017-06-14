@@ -46,6 +46,8 @@ CALLBACK_QUEUE = "callback_tasks"
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
 
+AWX_ISOLATED_USERNAME = 'root'
+
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"

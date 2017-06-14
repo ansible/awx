@@ -143,6 +143,10 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         from awx.main.tasks import RunAdHocCommand
         return RunAdHocCommand
 
+    @classmethod
+    def supports_isolation(cls):
+        return True
+
     def get_absolute_url(self, request=None):
         return reverse('api:ad_hoc_command_detail', kwargs={'pk': self.pk}, request=request)
 

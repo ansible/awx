@@ -25,6 +25,7 @@ import json
 import logging
 import multiprocessing
 import os
+import stat
 import threading
 import uuid
 import memcache
@@ -92,6 +93,28 @@ class CallbackQueueEventDispatcher(object):
                     break
 
 
+class IsolatedFileWrite:
+    '''
+    Stand-in class that will write partial event data to a file as a
+    replacement for memcache when a job is running on an isolated host.
+    '''
+
+    def __init__(self):
+        self.private_data_dir = os.getenv('AWX_ISOLATED_DATA_DIR')
+
+    def set(self, key, value):
+        # Strip off the leading memcache key identifying characters :1:ev-
+        event_uuid = key[len(':1:ev-'):]
+        # Write data in a staging area and then atomic move to pickup directory
+        filename = '{}-partial.json'.format(event_uuid)
+        dropoff_location = os.path.join(self.private_data_dir, 'artifacts', 'job_events', filename)
+        write_location = '.'.join([dropoff_location, 'tmp'])
+        partial_data = json.dumps(value)
+        with os.fdopen(os.open(write_location, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR | stat.S_IWUSR), 'w') as f:
+            f.write(partial_data)
+        os.rename(write_location, dropoff_location)
+
+
 class EventContext(object):
     '''
     Store global and local (per thread/process) data associated with callback
@@ -102,7 +125,10 @@ class EventContext(object):
         self.display_lock = multiprocessing.RLock()
         self.dispatcher = CallbackQueueEventDispatcher()
         cache_actual = os.getenv('CACHE', '127.0.0.1:11211')
-        self.cache = memcache.Client([cache_actual], debug=0)
+        if os.getenv('AWX_ISOLATED_DATA_DIR', False):
+            self.cache = IsolatedFileWrite()
+        else:
+            self.cache = memcache.Client([cache_actual], debug=0)
 
     def add_local(self, **kwargs):
         if not hasattr(self, '_local'):
@@ -193,6 +219,7 @@ class EventContext(object):
     def dump(self, fileobj, data, max_width=78, flush=False):
         b64data = base64.b64encode(json.dumps(data))
         with self.display_lock:
+            # pattern corresponding to OutputEventFilter expectation
             fileobj.write(u'\x1b[K')
             for offset in xrange(0, len(b64data), max_width):
                 chunk = b64data[offset:offset + max_width]

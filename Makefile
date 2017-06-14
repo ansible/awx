@@ -301,6 +301,15 @@ requirements_ansible_dev:
 		$(VENV_BASE)/ansible/bin/pip install pytest mock; \
 	fi
 
+requirements_isolated:
+	if [ ! -d "$(VENV_BASE)/tower_isolated" ]; then \
+		virtualenv --system-site-packages $(VENV_BASE)/tower_isolated && \
+		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
+		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+	fi;
+	$(VENV_BASE)/tower_isolated/bin/pip install -r requirements/requirements_isolated.txt
+
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -341,6 +350,10 @@ init:
 	fi; \
 	tower-manage register_instance --hostname=$(COMPOSE_HOST); \
 	tower-manage register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
+	if [ "$(DOCKER_TOOLS_DIR)" == "tools/docker-isolated" ]; then \
+		tower-manage register_instance --hostname=isolated; \
+		tower-manage register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
+	fi;
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -399,7 +412,7 @@ honcho:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	honcho start
+	honcho start -f tools/docker-compose/Procfile
 
 flower:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -443,7 +456,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,tower,$(COMPOSE_HOST) -n celery@$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,tower,$(COMPOSE_HOST),$(EXTRA_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -932,6 +945,18 @@ install:
 docker-auth:
 	docker login -e 1234@5678.com -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
 
+# Docker isolated rampart
+docker-isolated:
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
+	docker start tools_tower_1
+	docker start tools_isolated_1
+	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" != "" ]; then \
+		echo "SSH keys already copied to isolated instance"; \
+	else \
+		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && echo $$(docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
+	fi
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
+
 # Docker Compose Development environment
 docker-compose: docker-auth
 	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
@@ -942,10 +967,17 @@ docker-compose-cluster: docker-auth
 docker-compose-test: docker-auth
 	cd tools && DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
 
-docker-compose-build:
+docker-compose-build: tower-devel-build tower-isolated-build
+
+tower-devel-build:
 	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
 	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
 	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
+
+tower-isolated-build:
+	docker build -t ansible/tower_isolated -f tools/docker-isolated/Dockerfile .
+	docker tag ansible/tower_isolated gcr.io/ansible-tower-engineering/tower_isolated:$(COMPOSE_TAG)
+	#docker push gcr.io/ansible-tower-engineering/tower_isolated:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
