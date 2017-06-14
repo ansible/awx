@@ -1,4 +1,4 @@
-PYTHON = python
+PYTHON ?= python
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
@@ -73,7 +73,7 @@ else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
 endif
-SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
+SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
@@ -674,6 +674,9 @@ release_clean:
 dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
+dist/ansible-tower.tar.gz: ui-release
+	OFFICIAL="yes" $(PYTHON) setup.py sdist
+
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 	@echo "Artifacts:"
@@ -972,3 +975,7 @@ clean-elk:
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+
+docker-production-build: dist/ansible-tower.tar.gz
+	docker build -t ansible/tower_web -f packaging/docker/Dockerfile .
+	docker build -t ansible/tower_task -f packaging/docker/Dockerfile.celery .
