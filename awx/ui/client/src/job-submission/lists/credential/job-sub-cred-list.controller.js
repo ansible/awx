@@ -106,27 +106,15 @@ export default
 
             $scope.toggle_row = function(selectedRow) {
                 if(parseInt($scope.credentialKind) === 1) {
-                    if($scope.selectedCredentials.machine && $scope.selectedCredentials.machine.id === selectedRow.id) {
-                        $scope.selectedCredentials.machine = null;
-                    }
-                    else {
-                        $scope.selectedCredentials.machine = _.cloneDeep(selectedRow);
-                    }
+                    $scope.selectedCredentials.machine = _.cloneDeep(selectedRow);
                 }
                 else {
-                    let rowDeselected = false;
                     for (let i = $scope.selectedCredentials.extra.length - 1; i >= 0; i--) {
-                        if($scope.selectedCredentials.extra[i].id === selectedRow.id) {
-                            $scope.selectedCredentials.extra.splice(i, 1);
-                            rowDeselected = true;
-                        }
-                        else if(selectedRow.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
+                        if(selectedRow.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
                             $scope.selectedCredentials.extra.splice(i, 1);
                         }
                     }
-                    if(!rowDeselected) {
-                        $scope.selectedCredentials.extra.push(_.cloneDeep(selectedRow));
-                    }
+                    $scope.selectedCredentials.extra.push(_.cloneDeep(selectedRow));
                 }
             };
 

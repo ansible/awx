@@ -24,13 +24,25 @@
             <div ng-if="ask_inventory_on_launch" ng-show="step === 'inventory'" class="JobSubmission-form">
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
-                        <div class="JobSubmission-selectedItemInfo">
-                            <span class="JobSubmission-label" translate>SELECTED INVENTORY:</span>
-                            <span ng-show="selected_inventory" ng-bind="selected_inventory.name"></span>
-                            <span class="JobSubmission-selectedItemNone" ng-show="!selected_inventory" translate>None selected</span>
-                        </div>
-                        <div class="JobSubmission-selectedItemRevert" ng-if="ask_inventory_on_launch && has_default_inventory">
-                            <a class="Form-labelAction JobSubmission-revertLink" href="" ng-hide="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()" translate>REVERT</a>
+                        <div class="JobSubmission-selectedItemInfo" ng-hide="!selected_inventory">
+                            <div class="JobSubmission-selectedItemLabel">
+                                <span translate>SELECTED:</span>
+                            </div>
+                            <div class="JobSubmission-previewTags--outer">
+                                <div class="JobSubmission-previewTags--inner">
+                                    <div class="JobSubmission-previewTagContainer">
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteSelectedInventory()">
+                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
+                                        </div>
+                                        <div class="JobSubmission-previewTag JobSubmission-previewTag--deletable">
+                                            <span>{{selected_inventory.name}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="JobSubmission-previewTagRevert">
+                                <a class="JobSubmission-revertLink" href="" ng-hide="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()" translate>REVERT</a>
+                            </div>
                         </div>
                     </div>
                     <job-sub-inv-list ng-if="includeInventoryList" selected-inventory="$parent.selected_inventory"></job-sub-inv-list>
@@ -39,24 +51,33 @@
             <div ng-if="ask_credential_on_launch || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
-                        <div class="JobSubmission-selectedItemInfo">
+                        <div class="JobSubmission-selectedItemInfo" ng-hide="!selected_credentials.machine && selected_credentials.extra.length === 0">
                             <div class="JobSubmission-selectedItemLabel">
-                                <span class="JobSubmission-label" translate>SELECTED CREDENTIAL</span>
+                                <span translate>SELECTED:</span>
                             </div>
-                            <div>
-                                <span ng-show="selected_credentials.machine" class="JobSubmission-selectedItemInfoSubTitle"><span translate>Machine:</span>&nbsp;</span>
-                                <span ng-show="selected_credentials.machine">{{selected_credentials.machine.name}}</span>
-                                <span ng-show="selected_credentials.machine && selected_credentials.extra.length > 0">,&nbsp;</span>
-                                <span ng-repeat="extraCredential in selected_credentials.extra">
-                                    <span class="JobSubmission-previewItemSubTitle">{{credential_types[extraCredential.credential_type].name}}:&nbsp;</span>
-                                    <span>{{extraCredential.name}}{{$last ? '' : ',&nbsp;'}}</span>
-                                </span>
-                                <span class="JobSubmission-selectedItemNone" ng-show="!selected_credentials.machine && selected_credentials.extra.length === 0" translate>None selected</span>
-                                <span ng-if="ask_credential_on_launch">
-                                    <a class="JobSubmission-revertLink" href="" ng-show="showRevertCredentials()" ng-click="revertToDefaultCredentials()" translate>REVERT</a>
-                                </span>
+                            <div class="JobSubmission-previewTags--outer">
+                                <div class="JobSubmission-previewTags--inner">
+                                    <div class="JobSubmission-previewTagContainer" ng-show="selected_credentials.machine">
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteMachineCred()" ng-show="ask_credential_on_launch">
+                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
+                                        </div>
+                                        <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
+                                            <span><span class="JobSubmission-previewTagLabel">MACHINE</span>:&nbsp;{{selected_credentials.machine.name}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="JobSubmission-previewTagContainer" ng-repeat="extraCredential in selected_credentials.extra">
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteExtraCred($index)" ng-show="ask_credential_on_launch">
+                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
+                                        </div>
+                                        <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
+                                            <span><span class="JobSubmission-previewTagLabel">{{credential_types[extraCredential.credential_type].name | uppercase}}</span>:&nbsp;{{extraCredential.name}}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-
+                            <div class="JobSubmission-previewTagRevert" ng-if="ask_credential_on_launch">
+                                <a class="JobSubmission-revertLink" href="" ng-show="showRevertCredentials()" ng-click="revertToDefaultCredentials()" translate>REVERT</a>
+                            </div>
                         </div>
                     </div>
                     <div class="JobSubmission-credentialSubSection" ng-show="ask_credential_on_launch">
