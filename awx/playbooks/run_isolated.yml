@@ -36,7 +36,7 @@
       command: "mkfifo /tmp/ansible_tower/jobs/{{job_id}}/env"
 
     - name: spawn the playbook
-      command: "systemctl start playbook@{{job_id}}.service"
+      command: "tower-expect start {{job_id}}"
 
     - name: write the secret environment data
       mkfifo:

@@ -17,7 +17,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 WORKDIR /
 EXPOSE 22
-ADD tools/docker-isolated/playbook@.service /lib/systemd/system/playbook@.service
+ADD tools/docker-isolated/tower-expect /usr/local/bin/tower-expect
 
 RUN rm -f /etc/ssh/ssh_host_ecdsa_key /etc/ssh/ssh_host_rsa_key
 RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_ecdsa_key

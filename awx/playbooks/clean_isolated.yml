@@ -10,7 +10,7 @@
   tasks:
 
     - name: cancel the job
-      command: "systemctl stop playbook@{{job_id}}.service"
+      command: "tower-expect stop {{job_id}}"
       ignore_errors: yes
 
     - name: remove build artifacts

@@ -8,6 +8,7 @@ import datetime
 import glob
 import sys
 from setuptools import setup
+from distutils.command.sdist import sdist
 
 from awx import __version__
 
@@ -37,6 +38,30 @@ else:
     siteconfig = "/etc/nginx/sites-enabled"
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"
+
+#####################################################################
+# Isolated packaging
+#####################################################################
+
+
+class sdist_isolated(sdist):
+    includes = [
+        'include awx/__init__.py',
+        'include awx/main/isolated/run.py',
+        'recursive-include awx/lib *.py',
+    ]
+
+    def get_file_list(self):
+        self.filelist.process_template_line('include setup.py')
+        for line in self.includes:
+            self.filelist.process_template_line(line)
+        self.write_manifest()
+
+    def make_release_tree(self, base_dir, files):
+        sdist.make_release_tree(self, base_dir, files)
+        with open(os.path.join(base_dir, 'MANIFEST.in'), 'w') as f:
+            f.write('\n'.join(self.includes))
+
 
 #####################################################################
 # Helper Functions
@@ -112,7 +137,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'awx-manage = awx:manage',
-            'tower-manage = awx:manage',
+            'tower-manage = awx:manage'
         ],
     },
     data_files = proc_data_files([
@@ -129,6 +154,7 @@ setup(
                          "tools/scripts/tower-python",
                          "tools/scripts/ansible-tower-setup"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
+    cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
         'egg_info': {
             'tag_build': build_timestamp,
@@ -136,6 +162,7 @@ setup(
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',
+            'isolated_build': 'clean --all egg_info -b "" sdist_isolated',
         },
         'build_scripts': {
             'executable': '/usr/bin/tower-python',
