@@ -50,10 +50,17 @@ class GraphNode(object):
                 stack.pop()
             else:
                 to_append = stack[-1].adj_list[stack[-1].counter][NEXT_NODE]
-                current_fk_name = stack[-1].adj_list[stack[-1].counter][FK_NAME] + '.'
+                current_fk_name = "%s." % (stack[-1].adj_list[stack[-1].counter][FK_NAME],)
                 stack[-1].counter += 1
                 stack.append(to_append)
         return NAMED_URL_RES_DILIMITER.join(named_url_components)
+
+    @property
+    def named_url_repr(self):
+        ret = {}
+        ret['fields'] = self.fields
+        ret['adj_list'] = [[x[FK_NAME], x[NEXT_NODE].model_url_name] for x in self.adj_list]
+        return ret
 
     def _encode_uri(self, text):
         '''
@@ -144,11 +151,13 @@ class GraphNode(object):
     def add_bindings(self):
         if self.model_url_name not in settings.NAMED_URL_FORMATS:
             settings.NAMED_URL_FORMATS[self.model_url_name] = self.named_url_format
+            settings.NAMED_URL_GRAPH_NODES[self.model_url_name] = self.named_url_repr
             settings.NAMED_URL_MAPPINGS[self.model_url_name] = self.model
 
     def remove_bindings(self):
         if self.model_url_name in settings.NAMED_URL_FORMATS:
             settings.NAMED_URL_FORMATS.pop(self.model_url_name)
+            settings.NAMED_URL_GRAPH_NODES.pop(self.model_url_name)
             settings.NAMED_URL_MAPPINGS.pop(self.model_url_name)
 
 
@@ -270,6 +279,7 @@ def _generate_single_graph(configuration, dead_ends):
 
 def generate_graph(models):
     settings.NAMED_URL_FORMATS = {}
+    settings.NAMED_URL_GRAPH_NODES = {}
     settings.NAMED_URL_MAPPINGS = {}
     candidate_nodes = {}
     dead_ends = set()

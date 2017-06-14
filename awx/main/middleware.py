@@ -119,10 +119,20 @@ class URLModificationMiddleware(object):
             field_class=fields.DictField,
             read_only=True,
             label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the format of all available named'
-                        ' URLs. Use this list as a guide when composing named URLs for resources'),
-            category=_('System'),
-            category_slug='system',
+            help_text=_('Read-only list of key-value pairs that shows the standard format of all '
+                        'available named URLs.'),
+            category=_('Named URL'),
+            category_slug='named-url',
+        )
+        register(
+            'NAMED_URL_GRAPH_NODES',
+            field_class=fields.DictField,
+            read_only=True,
+            label=_('List of all named url graph nodes.'),
+            help_text=_('Read-only list of key-value pairs that exposes named URL graph topology.'
+                        ' Use this list to programmatically generate named URLs for resources'),
+            category=_('Named URL'),
+            category_slug='named-url',
         )
 
     def _named_url_to_pk(self, node, named_url):
