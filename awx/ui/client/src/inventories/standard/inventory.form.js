@@ -73,7 +73,7 @@ function(i18n, InventoryCompletedJobsList) {
                 type: 'lookup',
                 list: 'CredentialList',
                 basePath: 'credentials',
-                sourceModel: 'credential',
+                sourceModel: 'insights_credential',
                 sourceField: 'name',
                 search: {
                     credential_type: 13 //insights
