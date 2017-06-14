@@ -3,7 +3,7 @@ import yaml
 
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
-from awx.main.models.inventory import Inventory
+from awx.main.models.inventory import Inventory, Host
 from awx.main.models.jobs import Job, JobTemplate
 
 from awx.api.versioning import reverse
@@ -431,3 +431,31 @@ def test_callback_ignore_unprompted_extra_var(mocker, survey_spec_factory, job_t
                                                                          'limit': 'single-host'},)
 
     mock_job.signal_start.assert_called_once()
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_callback_find_matching_hosts(mocker, get, job_template_prompts, admin_user):
+    job_template = job_template_prompts(False)
+    job_template.host_config_key = "foo"
+    job_template.save()
+    host_with_alias = Host(name='localhost', inventory=job_template.inventory)
+    host_with_alias.save()
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
+        r = get(reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
+                user=admin_user, expect=200)
+        assert tuple(r.data['matching_hosts']) == ('localhost',)
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_callback_extra_var_takes_priority_over_host_name(mocker, get, job_template_prompts, admin_user):
+    job_template = job_template_prompts(False)
+    job_template.host_config_key = "foo"
+    job_template.save()
+    host_with_alias = Host(name='localhost', variables={'ansible_host': 'foobar'}, inventory=job_template.inventory)
+    host_with_alias.save()
+    with mocker.patch('awx.main.access.BaseAccess.check_license'):
+        r = get(reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
+                user=admin_user, expect=200)
+        assert not r.data['matching_hosts']

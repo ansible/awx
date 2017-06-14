@@ -527,6 +527,18 @@ class Host(CommonModelNameNotUnique):
             self.ansible_facts[module] = facts
         self.save()
 
+    def get_effective_host_name(self):
+        '''
+        Return the name of the host that will be used in actual ansible
+        command run.
+        '''
+        host_name = self.name
+        if 'ansible_ssh_host' in self.variables_dict:
+            host_name = self.variables_dict['ansible_ssh_host']
+        if 'ansible_host' in self.variables_dict:
+            host_name = self.variables_dict['ansible_host']
+        return host_name
+
 
 class Group(CommonModelNameNotUnique):
     '''
