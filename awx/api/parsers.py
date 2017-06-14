@@ -62,9 +62,4 @@ class JSONParser(parsers.JSONParser):
                 raise ParseError(_('JSON parse error - not a JSON object'))
             return obj
         except ValueError as exc:
-            try:
-                # PyYAML can also parse JSON-style input string, and support more flexible
-                # input grammar like trailing commas.
-                return yaml.load(data, OrderedDictLoader)
-            except Exception:
-                raise ParseError(_('JSON parse error - %s') % six.text_type(exc))
+            raise ParseError(_('JSON parse error - %s\nPossible cause: trailing comma.' % six.text_type(exc)))
