@@ -1,6 +1,6 @@
 /** @define About */
 @import "./client/src/shared/branding/colors.default.less";
-
+@import "./client/assets/variables.less";
 
 .About-ansibleVersion,
 .About-cowsayCode {
@@ -30,17 +30,18 @@
 		padding-top: 0px;
 		padding-bottom: 0px;
 }
+
 .About-brandImg {
-    float: left;
-    width: 112px;
-		padding-top: 13px;
+	float: @about-modal-float;
+	width: @about-modal-width;
+	padding-top: @about-modal-padding-top;
 }
 
 .About-close {
-		position: absolute;
-		top: 15px;
-		right: 15px;
-	  z-index: 10;
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	z-index: 10;
 }
 
 .About-modalFooter {
