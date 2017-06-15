@@ -32,9 +32,7 @@ def _credentials(apps):
         utils.get_current_apps = lambda: apps
         for credential in apps.get_model('main', 'Credential').objects.all():
             for field_name, value in credential.inputs.items():
-                if value.startswith('$encrypted$AESCBC$'):
-                    continue
-                elif value.startswith('$encrypted$AES$'):
+                if value.startswith('$encrypted$AES$'):
                     value = decrypt_field(credential, field_name)
                     credential.inputs[field_name] = value
             credential.save()
