@@ -9,7 +9,6 @@ from psycopg2.extensions import AsIs
 from django.db import migrations, models
 
 # AWX
-from awx.main.migrations import _reencrypt as reencrypt
 import awx.main.fields
 from awx.main.models import Host
 
@@ -277,7 +276,6 @@ class Migration(migrations.Migration):
             name='kind',
             field=models.CharField(default=b'', help_text='Kind of inventory being represented.', max_length=32, blank=True, choices=[(b'', 'Hosts have a direct link to this inventory.'), (b'smart', 'Hosts for inventory generated using the host_filter property.')]),
         ),
-        migrations.RunPython(reencrypt.replace_aesecb_fernet),
 
         # Timeout help text update
         migrations.AlterField(
