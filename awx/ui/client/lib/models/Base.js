@@ -40,7 +40,11 @@ function httpPost (data) {
         data
     };
 
-    return $http(req).then(res => res);
+    return $http(req).then(res => {
+      this.model.GET = res.data;
+
+      return res;
+    });
 }
 
 function httpPut (changes) {

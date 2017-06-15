@@ -19,6 +19,11 @@ function AtTabController ($state) {
 
         group.register(scope);
     };
+
+    vm.go = () => {
+        console.log('test');
+        $state.go('credentials.edit.permissions', { credential_id: 2 });
+    };
 }
 
 AtTabController.$inject = ['$state'];

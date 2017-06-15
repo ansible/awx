@@ -8,7 +8,8 @@
                 <h4 class="modal-title at-Modal-title">{{ title }}</h4>
             </div>
             <div class="modal-body at-Modal-body">
-                <p>{{ message }}</p>
+                <p ng-show="message">{{ message }}</p>
+                <ng-transclude></ng-transclude>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn at-ButtonHollow--white" ng-click="vm.hide()">

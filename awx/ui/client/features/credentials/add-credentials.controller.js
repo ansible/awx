@@ -32,7 +32,7 @@ function AddCredentialsController (models, $state) {
     };
 
     vm.form.onSaveSuccess = res => {
-        $state.go('credentials.edit', { id: res.data.id }, { reload: true });
+        $state.go('credentials.edit', { credential_id: res.data.id }, { reload: true });
     };
 }
 

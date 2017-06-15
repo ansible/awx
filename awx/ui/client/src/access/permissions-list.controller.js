@@ -6,7 +6,6 @@
 
 export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessErrors', 'Prompt', '$state',
     function($scope, list, Dataset, Wait, Rest, ProcessErrors, Prompt, $state) {
-
         init();
 
         function init() {

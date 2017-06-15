@@ -18,12 +18,16 @@ function AtTabGroupController ($state) {
     };
 
     vm.register = tab => {
-        if (vm.tabs.length === 0) {
-            tab.active = true;
-        } else {
-            tab.disabled = true;
-        }
 
+        tab.active = true;
+/*
+ *        if (vm.tabs.length === 0) {
+ *            tab.active = true;
+ *        } else {
+ *            tab.disabled = true;
+ *        }
+ *
+ */
         vm.tabs.push(tab);
     };
 }
