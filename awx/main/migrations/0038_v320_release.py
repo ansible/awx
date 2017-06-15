@@ -278,4 +278,36 @@ class Migration(migrations.Migration):
             field=models.CharField(default=b'', help_text='Kind of inventory being represented.', max_length=32, blank=True, choices=[(b'', 'Hosts have a direct link to this inventory.'), (b'smart', 'Hosts for inventory generated using the host_filter property.')]),
         ),
         migrations.RunPython(reencrypt.replace_aesecb_fernet),
+
+        # Timeout help text update
+        migrations.AlterField(
+            model_name='inventorysource',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
+        migrations.AlterField(
+            model_name='inventoryupdate',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
+        migrations.AlterField(
+            model_name='job',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
+        migrations.AlterField(
+            model_name='jobtemplate',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
+        migrations.AlterField(
+            model_name='project',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
+        migrations.AlterField(
+            model_name='projectupdate',
+            name='timeout',
+            field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
+        ),
     ]
