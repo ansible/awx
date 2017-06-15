@@ -1,3 +1,4 @@
+from awx.main import utils
 from awx.conf.migrations._reencrypt import decrypt_field
 
 
@@ -23,17 +24,25 @@ def _notification_templates(apps):
 
 
 def _credentials(apps):
-    Credential = apps.get_model('main', 'Credential')
-    for credential in Credential.objects.all():
-        for field_name, value in credential.inputs.items():
-            if field_name in credential.credential_type.inputs.get('fields', []):
-                value = getattr(credential, field_name)
-                if value.startswith('$encrypted$AESCBC$'):
-                    continue
-                elif value.startswith('$encrypted$AES$'):
-                    value = decrypt_field(credential, field_name)
-                    credential.inputs[field_name] = value
-        credential.save()
+    # this monkey-patch is necessary to make the implicit role generation save
+    # signal use the correct Role model (the version active at this point in
+    # migration, not the one at HEAD)
+    orig_current_apps = utils.get_current_apps
+    try:
+        utils.get_current_apps = lambda: apps
+        for credential in apps.get_model('main', 'Credential').objects.all():
+            for field_name, value in credential.inputs.items():
+                if field_name in credential.credential_type.inputs.get('fields', []):
+                    value = getattr(credential, field_name)
+                    if value.startswith('$encrypted$AESCBC$'):
+                        continue
+                    elif value.startswith('$encrypted$AES$'):
+                        value = decrypt_field(credential, field_name)
+                        credential.inputs[field_name] = value
+            credential.save()
+    finally:
+        utils.get_current_apps = orig_current_apps
+
 
 
 def _unified_jobs(apps):
