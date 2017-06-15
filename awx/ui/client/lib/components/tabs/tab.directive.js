@@ -21,8 +21,11 @@ function AtTabController ($state) {
     };
 
     vm.go = () => {
-        console.log('test');
-        $state.go('credentials.edit.permissions', { credential_id: 2 });
+        if (scope.state._disabled || scope.state._active) {
+            return;
+        }
+
+        $state.go(scope.state._go, scope.state._params, { reload: true });
     };
 }
 
@@ -38,7 +41,9 @@ function atTab (pathService, _$animate_) {
         controller: AtTabController,
         controllerAs: 'vm',
         link: atTabLink,
-        scope: true
+        scope: {
+            state: '='
+        }
     };
 }
 

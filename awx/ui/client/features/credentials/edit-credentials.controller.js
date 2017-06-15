@@ -1,9 +1,22 @@
-function EditCredentialsController (models, $state) {
+function EditCredentialsController (models, $state, $scope) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
+
+    vm.tab = {
+        details: {  
+            _active: true
+        },
+        permissions:{
+            _go: 'credentials.edit.permissions',
+            _params: { credential_id: credential.get('id') }
+        }
+    };
+
+    // Only exists for permissions compatibility
+    $scope.credential_obj = credential.get();
 
     vm.panelTitle = credential.get('name');
 
@@ -47,7 +60,8 @@ function EditCredentialsController (models, $state) {
 
 EditCredentialsController.$inject = [
     'resolvedModels',
-    '$state'
+    '$state',
+    '$scope'
 ];
 
 export default EditCredentialsController;

@@ -7,6 +7,15 @@ function AddCredentialsController (models, $state) {
 
     vm.panelTitle = 'New Credential';
 
+    vm.tab = {
+        details: {  
+            _active: true
+        },
+        permissions:{
+            _disabled: true
+        }
+    };
+
     vm.form = credential.createFormSchema('post', {
         omit: ['user', 'team', 'inputs']
     });

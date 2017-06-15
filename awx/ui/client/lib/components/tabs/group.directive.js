@@ -44,7 +44,9 @@ function atTabGroup (pathService, _$animate_) {
         controller: AtTabGroupController,
         controllerAs: 'vm',
         link: atTabGroupLink,
-        scope: true
+        scope: {
+            state: '='
+        }
     };
 }
 
