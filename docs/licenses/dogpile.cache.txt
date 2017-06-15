@@ -1,4 +1,4 @@
-Copyright (c) 2011-2015 Mike Bayer
+Copyright (c) 2011-2016 Mike Bayer
 
 All rights reserved.
 
