@@ -26,12 +26,13 @@ def _credentials(apps):
     Credential = apps.get_model('main', 'Credential')
     for credential in Credential.objects.all():
         for field_name, value in credential.inputs.items():
-            if field_name in credential.credential_type.secret_fields:
+            if field_name in credential.credential_type.inputs.get('fields', []):
                 value = getattr(credential, field_name)
                 if value.startswith('$encrypted$AESCBC$'):
                     continue
-                value = decrypt_field(credential, field_name)
-                credential.inputs[field_name] = value
+                elif value.startswith('$encrypted$AES$'):
+                    value = decrypt_field(credential, field_name)
+                    credential.inputs[field_name] = value
         credential.save()
 
 
