@@ -14,7 +14,7 @@
     max-width: 200px;
 }
 
-.LabelList-tag {
+.LabelList-tag, .JobSubmission-previewTag {
     border-radius: 5px;
     padding: 2px 10px;
     margin: 4px 0px;
@@ -40,7 +40,7 @@
     color: @default-link-hov;
 }
 
-.LabelList-tag--deletable {
+.LabelList-tag--deletable, .JobSubmission-previewTag--deletable {
     color: @default-bg;
     background-color: @default-link;
     margin-right: 0px;
@@ -51,7 +51,7 @@
     margin-right: 5px;
 }
 
-.LabelList-deleteContainer {
+.LabelList-deleteContainer, .JobSubmission-previewTagContainerDelete {
     background-color: @default-link;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -77,11 +77,11 @@
     max-width: ~"calc(100% - 23px)";
 }
 
-.LabelList-deleteContainer:hover, {
+.LabelList-deleteContainer:hover, .JobSubmission-previewTagContainerDelete:hover {
     border-color: @default-err;
     background-color: @default-err;
 }
 
-.LabelList-deleteContainer:hover > .LabelList-tagDelete {
+.LabelList-deleteContainer:hover > .LabelList-tagDelete, .JobSubmission-previewTagContainerDelete:hover > .JobSubmission-previewTagContainerTagDelete {
     color: @default-bg;
 }

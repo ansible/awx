@@ -358,6 +358,9 @@ export default
                 if($scope.has_default_inventory) {
                     $scope.selected_inventory = angular.copy($scope.defaults.inventory);
                 }
+                else {
+                    $scope.selected_inventory = null;
+                }
             };
 
             $scope.revertToDefaultCredentials = function() {
@@ -555,6 +558,18 @@ export default
             $scope.$on('inventorySelected', function(evt, selectedRow){
                 $scope.selected_inventory = _.cloneDeep(selectedRow);
             });
+
+            $scope.deleteMachineCred = function() {
+                $scope.selected_credentials.machine = null;
+            };
+
+            $scope.deleteExtraCred = function(index) {
+                $scope.selected_credentials.extra.splice(index, 1);
+            };
+
+            $scope.deleteSelectedInventory = function() {
+                $scope.selected_inventory = null;
+            };
 
         }
     ];

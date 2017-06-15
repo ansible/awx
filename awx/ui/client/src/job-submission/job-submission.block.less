@@ -177,7 +177,6 @@
 }
 
 .JobSubmission-revertLink {
-    padding-left:10px;
     font-size: 14px;
 }
 
@@ -190,6 +189,10 @@
 .JobSubmission-selectedItemInfo {
     display: flex;
     flex: 0 0 100%;
+    background-color: @default-no-items-bord;
+    border: 1px solid @default-border;
+    padding: 10px;
+    border-radius: 5px;
 }
 .JobSubmission-selectedItemRevert {
     display: flex;
@@ -200,9 +203,12 @@
     justify-content: flex-end;
     margin-bottom: 15px;
 }
-.JobSubmission-label {
+.JobSubmission-selectedItemLabel, .JobSubmission-label {
     color: @default-interface-txt;
     margin-right: 10px;
+}
+.JobSubmission-label {
+    line-height: 24px;
 }
 .JobSubmission-selectedItemNone {
     color: @default-icon;
@@ -223,5 +229,25 @@
     margin-top: auto;
 }
 .JobSubmission-selectedItemLabel {
-    flex: 0 0 165px;
+    flex: 0 0 80px;
+    line-height: 29px;
+}
+.JobSubmission-previewTags--outer {
+    flex: 1 0 auto;
+    max-width: ~"calc(100% - 140px)";
+}
+.JobSubmission-previewTags--inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+.JobSubmission-previewTagLabel {
+    color: @default-list-header-bg;
+}
+.JobSubmission-previewTagRevert {
+    flex: 0 0 60px;
+    line-height: 29px;
+}
+.JobSubmission-previewTagContainer {
+    display: flex;
 }
