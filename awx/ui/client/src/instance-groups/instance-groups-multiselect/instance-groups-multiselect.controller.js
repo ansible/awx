@@ -9,7 +9,6 @@ export default ['$scope',
 
         $scope.deleteTag = function(tag){
             _.remove($scope.instanceGroups, {id: tag.id});
-            console.log($scope.instanceGroups);
         }
     }
 ];

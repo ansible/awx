@@ -12,6 +12,7 @@ export default ['templateUrl', function(templateUrl) {
                 $('#instance-groups-modal').off('hidden.bs.modal');
                 $(element).remove();
             });
+
             scope.showModal = function() {
                 $('#instance-groups-modal').modal('show');
             };
