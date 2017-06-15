@@ -58,6 +58,23 @@ def parent_relationship_factory(mocker):
 # TODO: Test create and associate failure (i.e. id doesn't exist, record already exists, permission denied)
 # TODO: Mock and check return (Response)
 class TestSubListCreateAttachDetachAPIView:
+    def test_attach_validate_ok(self, mocker):
+        mock_request = mocker.MagicMock(data=dict(id=1))
+        serializer = SubListCreateAttachDetachAPIView()
+
+        (sub_id, res) = serializer.attach_validate(mock_request)
+
+        assert sub_id == 1
+        assert res is None
+
+    def test_attach_validate_invalid_type(self, mocker):
+        mock_request = mocker.MagicMock(data=dict(id='foobar'))
+        serializer = SubListCreateAttachDetachAPIView()
+
+        (sub_id, res) = serializer.attach_validate(mock_request)
+
+        assert type(res) is Response
+
     def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory, mock_response_new):
         (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         create_return_value = mocker.MagicMock(status_code=status.HTTP_201_CREATED)
@@ -91,7 +108,15 @@ class TestSubListCreateAttachDetachAPIView:
 
         assert sub_id == 1
         assert res is None
-    
+
+    def test_unattach_validate_invalid_type(self, mocker):
+        mock_request = mocker.MagicMock(data=dict(id='foobar'))
+        serializer = SubListCreateAttachDetachAPIView()
+
+        (sub_id, res) = serializer.unattach_validate(mock_request)
+
+        assert type(res) is Response
+
     def test_unattach_validate_missing_id(self, mocker):
         mock_request = mocker.MagicMock(data=dict())
         serializer = SubListCreateAttachDetachAPIView()
@@ -100,7 +125,7 @@ class TestSubListCreateAttachDetachAPIView:
 
         assert sub_id is None
         assert type(res) is Response
- 
+
     def test_unattach_by_id_ok(self, mocker, parent_relationship_factory, get_object_or_400):
         (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         mock_request = mocker.MagicMock()
