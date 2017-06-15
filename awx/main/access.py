@@ -784,8 +784,8 @@ class GroupAccess(BaseAccess):
 
 class InventorySourceAccess(BaseAccess):
     '''
-    I can see inventory sources whenever I can see their group or inventory.
-    I can change inventory sources whenever I can change their group.
+    I can see inventory sources whenever I can see their inventory.
+    I can change inventory sources whenever I can change their inventory.
     '''
 
     model = InventorySource
@@ -815,8 +815,15 @@ class InventorySourceAccess(BaseAccess):
                 inventory=data.get('inventory'),
                 update_on_project_update=True, source='scm').exists())
 
+    @check_superuser
+    def can_delete(self, obj):
+        if obj and obj.inventory:
+            return self.user.can_access(Inventory, 'admin', obj.inventory, None)
+        return False
+
+    @check_superuser
     def can_change(self, obj, data):
-        # Checks for admin or change permission on group.
+        # Checks for admin change permission on inventory.
         if obj and obj.inventory:
             return (
                 self.user.can_access(Inventory, 'change', obj.inventory, None) and
