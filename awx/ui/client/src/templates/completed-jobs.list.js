@@ -11,7 +11,11 @@ export default ['i18n', function(i18n) {
         awToolTip: i18n._('Please save and run a job to view'),
         dataPlacement: 'top',
         name: 'completed_jobs',
-        basePath: 'api/v2/job_templates/{{$stateParams.job_template_id}}/jobs/?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
+        basePath: 'api/v2/job_templates/{{$stateParams.job_template_id}}/jobs',
+        search: {
+            or__status__in: "successful,failed,error,canceled",
+            order_by: "-id"
+        },
         iterator: 'completed_job',
         editTitle: i18n._('COMPLETED JOBS'),
         index: false,
@@ -29,6 +33,7 @@ export default ['i18n', function(i18n) {
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
                 ngClick:"viewjobResults(completed_job)",
+                nosort: true
             },
             id: {
                 label: 'ID',

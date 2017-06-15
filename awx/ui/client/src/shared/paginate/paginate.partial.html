@@ -44,5 +44,29 @@
             <span>{{dataRange}}</span>
             <span>of {{dataCount()}}</span>
         </span>
+        <div class="Paginate-filteringDropdowns" ng-hide="hideViewPerPage">
+            <div class="Paginate-filterLabel" translate>VIEW PER PAGE</div>
+            <div class="DashboardGraphs-periodDropdown">
+                <a role="button"
+                data-toggle="dropdown"
+                data-target="#"
+                href="/page.html"
+                class="DashboardGraphs-filterDropdownText">
+                    <translate>{{pageSize}}</translate> <i class="fa fa-angle-down DashboardGraphs-filterIcon"></i>
+                </a>
+                <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
+                    DashboardGraphs-filterDropdownItems--period Paginate-dropdown" role="menu" aria-labelledby="period-dropdown">
+                    <li>
+                        <a ng-click="filter(20)" translate>20</a>
+                    </li>
+                    <li>
+                        <a ng-click="filter(50)" translate>50</a>
+                    </li>
+                    <li>
+                        <a ng-click="filter(100)" translate>100</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>

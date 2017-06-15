@@ -9,7 +9,8 @@ export default ['templateUrl',
                 iterator: '@',
                 basePath: '@',
                 querySet: '=',
-                maxVisiblePages: '@'
+                maxVisiblePages: '@',
+                hideViewPerPage: '='
             },
             controller: 'PaginateController',
             templateUrl: templateUrl('shared/paginate/paginate')
