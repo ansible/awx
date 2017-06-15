@@ -461,12 +461,23 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         })
         return d
 
+    def attach_validate(self, request):
+        sub_id = request.data.get('id', None)
+        res = None
+        if sub_id and not isinstance(sub_id, int):
+            data = dict(msg=_('"id" field must be an integer.'))
+            res = Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return (sub_id, res)
+
     def attach(self, request, *args, **kwargs):
         created = False
         parent = self.get_parent_object()
         relationship = getattrd(parent, self.relationship)
-        sub_id = request.data.get('id', None)
         data = request.data
+
+        sub_id, res = self.attach_validate(request)
+        if res:
+            return res
 
         # Create the sub object if an ID is not provided.
         if not sub_id:
@@ -514,6 +525,9 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         res = None
         if not sub_id:
             data = dict(msg=_('"id" is required to disassociate'))
+            res = Response(data, status=status.HTTP_400_BAD_REQUEST)
+        elif not isinstance(sub_id, int):
+            data = dict(msg=_('"id" field must be an integer.'))
             res = Response(data, status=status.HTTP_400_BAD_REQUEST)
         return (sub_id, res)
 
