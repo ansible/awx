@@ -4,7 +4,12 @@ export default ['$scope',
         $scope.instanceGroupsTags = [];
 
         $scope.$watch('instanceGroups', function() {
-            $scope.instanceGroupsTags = _.map($scope.instanceGroups, (item) => item.name);
+            $scope.instanceGroupsTags = $scope.instanceGroups;
         }, true);
+
+        $scope.deleteTag = function(tag){
+            _.remove($scope.instanceGroups, {id: tag.id});
+            console.log($scope.instanceGroups);
+        }
     }
 ];
