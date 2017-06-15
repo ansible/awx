@@ -9,7 +9,7 @@ from awx.conf import settings_registry
 
 
 __all__ = ['replace_aesecb_fernet', 'get_encryption_key', 'encrypt_field',
-           'decrypt_value', 'decrypt_value']
+           'decrypt_value', 'decrypt_value', 'should_decrypt_field']
 
 
 def replace_aesecb_fernet(apps, schema_editor):
@@ -17,9 +17,8 @@ def replace_aesecb_fernet(apps, schema_editor):
 
     for setting in Setting.objects.filter().order_by('pk'):
         if settings_registry.is_setting_encrypted(setting.key):
-            if setting.value.startswith('$encrypted$AESCBC$'):
-                continue
-            setting.value = decrypt_field(setting, 'value')
+            if should_decrypt_field(setting.value):
+                setting.value = decrypt_field(setting, 'value')
             setting.save()
 
 
@@ -100,3 +99,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=Fals
         # know to decode the data when it's decrypted later
         tokens.insert(1, 'UTF8')
     return '$'.join(tokens)
+
+
+def should_decrypt_field(value):
+    return value.startswith('$encrypted$') and '$AESCBC$' not in value
