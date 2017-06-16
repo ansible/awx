@@ -61,7 +61,11 @@ module.exports = function(config) {
                     }, {
                         test: /\.js$/,
                         loader: 'babel-loader',
-                        include: [path.resolve() + '/client/src/'],
+                        include: [
+                            path.resolve() + '/client/src/',
+                            path.resolve() + '/client/lib/',
+                            path.resolve() + '/client/features/'
+                        ],
                         exclude: '/(node_modules)/',
                         query: {
                             presets: ['es2015'],
