@@ -46,6 +46,7 @@
                 $scope.playbook_options = [];
                 $scope.mode = "add";
                 $scope.parseType = 'yaml';
+                $scope.credentialNotPresent = false;
 
                 md5Setup({
                     scope: $scope,
@@ -261,6 +262,29 @@
                         null, true);
                 }
 
+                $scope.selectedCredentials.extra.map(cred => cred.id)
+                    .forEach(function(cred_id) {
+
+                        Rest.setUrl(data.related.extra_credentials);
+                        Rest.post({'id': cred_id})
+                            .success(function () {
+                            })
+                            .error(function (data,
+                                status) {
+                                    ProcessErrors(
+                                        $scope,
+                                        data,
+                                        status,
+                                        form,
+                                        {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to add extra credential. Post returned ' +
+                                            'status: ' +
+                                            status
+                                        });
+                            });
+                    });
+
 
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
@@ -399,6 +423,14 @@
                     data.ask_inventory_on_launch = $scope.ask_inventory_on_launch ? $scope.ask_inventory_on_launch : false;
                     data.ask_variables_on_launch = $scope.ask_variables_on_launch ? $scope.ask_variables_on_launch : false;
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
+                    if ($scope.selectedCredentials && $scope.selectedCredentials
+                        .machine && $scope.selectedCredentials
+                            .machine) {
+                                data.credential = $scope.selectedCredentials
+                                    .machine.id;
+                    } else {
+                        data.credential = null;
+                    }
 
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);

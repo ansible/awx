@@ -1423,9 +1423,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "</div>\n";
                     }
 
-                    //custom fields
                     if (field.type === 'custom') {
-                        html += label();
+                        let labelOptions = {};
+
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngModel: field.subCheckbox.variable,
+                                ngDisabled: field.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";

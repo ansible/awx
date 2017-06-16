@@ -55,6 +55,7 @@ export default
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
                 $scope.instance_groups = InstanceGroupsData;
+                $scope.credentialNotPresent = false;
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -200,8 +201,6 @@ export default
             // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
             $scope.$watch('verbosity', sync_verbosity_select2);
 
-
-            // Turn off 'Wait' after both cloud credential and playbook list come back
             if ($scope.removeJobTemplateLoadFinished) {
                 $scope.removeJobTemplateLoadFinished();
             }
@@ -218,19 +217,11 @@ export default
 
             });
 
-            if ($scope.cloudCredentialReadyRemove) {
-                $scope.cloudCredentialReadyRemove();
-            }
-            $scope.cloudCredentialReadyRemove = $scope.$on('cloudCredentialReady', function () {
-                $scope.$emit('jobTemplateLoadFinished');
-            });
-
-
             // Retrieve each related set and populate the playbook list
             if ($scope.jobTemplateLoadedRemove) {
                 $scope.jobTemplateLoadedRemove();
             }
-            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject) {
+            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, masterObject) {
                 var dft;
 
                 master = masterObject;
@@ -247,13 +238,7 @@ export default
 
                 ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
 
-                if($scope.job_template_obj.summary_fields.cloud_credential && related_cloud_credential) {
-                    $scope.$emit('cloudCredentialReady', $scope.job_template_obj.summary_fields.cloud_credential.name);
-                } else {
-                    // No existing cloud credential
-                    $scope.$emit('cloudCredentialReady', null);
-                }
-
+                $scope.$emit('jobTemplateLoadFinished');
             });
 
             Wait('start');
@@ -411,6 +396,73 @@ export default
                         null, true);
                 }
 
+                let extraCredUrl = data.related.extra_credentials;
+
+                Rest.setUrl(extraCredUrl);
+                Rest.get()
+                    .then(({data}) => {
+                        let existingCreds = data.results
+                            .map(cred => cred.id);
+
+                        let newCreds = $scope.selectedCredentials.extra
+                            .map(cred => cred.id);
+
+                        let toAdd, toRemove;
+
+                        [toAdd, toRemove] = _.partition(_.xor(existingCreds, newCreds), cred => (newCreds.indexOf(cred) > -1));
+
+                        let destroyResolve = [];
+
+                        toRemove.forEach((cred_id) => {
+                            Rest.setUrl(extraCredUrl);
+                            destroyResolve.push(
+                                Rest.post({'id': cred_id, 'disassociate': true})
+                                    .catch(({data, status}) => {
+                                            ProcessErrors(
+                                                $scope,
+                                                data,
+                                                status,
+                                                form,
+                                                {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to remove extra credential. Post returned ' +
+                                                    'status: ' +
+                                                    status
+                                                });
+                                    }));
+                        });
+
+                        $q.all(destroyResolve)
+                            .then(() => {
+                                toAdd.forEach((cred_id) => {
+                                    Rest.setUrl(extraCredUrl);
+                                    Rest.post({'id': cred_id})
+                                        .catch(({data, status}) => {
+                                                ProcessErrors(
+                                                    $scope,
+                                                    data,
+                                                    status,
+                                                    form,
+                                                    {
+                                                        hdr: 'Error!',
+                                                        msg: 'Failed to add extra credential. Post returned ' +
+                                                        'status: ' +
+                                                        status
+                                                    });
+                                        });
+                                });
+                            });
+
+
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to get existing extra credentials. GET returned ' +
+                                'status: ' + status
+                        });
+                    });
+
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
                     .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, form, {
@@ -546,6 +598,14 @@ export default
                     data.ask_inventory_on_launch = $scope.ask_inventory_on_launch ? $scope.ask_inventory_on_launch : false;
                     data.ask_variables_on_launch = $scope.ask_variables_on_launch ? $scope.ask_variables_on_launch : false;
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
+                    if ($scope.selectedCredentials && $scope.selectedCredentials
+                        .machine && $scope.selectedCredentials
+                            .machine) {
+                                data.credential = $scope.selectedCredentials
+                                    .machine.id;
+                    } else {
+                        data.credential = null;
+                    }
 
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);
@@ -585,8 +645,8 @@ export default
                         });
                 } catch (err) {
                     Wait('stop');
-                    Alert("Error", "Error parsing extra variables. " +
-                        "Parser returned: " + err);
+                    Alert("Error", "Error saving job template. " +
+                        "Error: " + err);
                 }
             };
 
