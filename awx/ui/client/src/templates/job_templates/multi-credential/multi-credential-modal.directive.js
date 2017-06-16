@@ -45,7 +45,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                     credentialTypeData.results.forEach((credentialType => {
                         credential_types[credentialType.id] = credentialType;
                         if(credentialType.kind
-                            .match(/^(machine|cloud|network|ssh)$/)) {
+                            .match(/^(machine|cloud|net|ssh)$/)) {
                                 scope.credentialTypeOptions.push({
                                     name: credentialType.name,
                                     value: credentialType.id
