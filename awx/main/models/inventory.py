@@ -448,6 +448,12 @@ class Host(CommonModelNameNotUnique):
         default={},
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
     )
+    ansible_facts_modified = models.DateTimeField(
+        default=None,
+        editable=False,
+        null=True,
+        help_text=_('The date and time ansible_facts was last modified.'),
+    )
     insights_system_id = models.TextField(
         blank=True,
         default=None,

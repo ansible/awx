@@ -7,6 +7,7 @@ import hashlib
 import hmac
 import logging
 import time
+import json
 from urlparse import urljoin
 
 # Django
@@ -708,12 +709,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         return res
 
     @property
-    def store_facts_enabled(self):
-        if not self.job_template or self.job_template is False:
-            return False
-        return True
-
-    @property
     def memcached_fact_key(self):
         return '{}'.format(self.inventory.id)
 
@@ -742,7 +737,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             modified_key = self.memcached_fact_modified_key(host.name)
             # Only add host/facts if host doesn't already exist in the cache
             if cache.get(modified_key) is None:
-                cache.set(host_key, host.ansible_facts)
+                cache.set(host_key, json.dumps(host.ansible_facts))
                 cache.set(modified_key, False)
 
             host_names.append(host.name)

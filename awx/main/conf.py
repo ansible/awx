@@ -229,6 +229,19 @@ register(
 )
 
 register(
+    'ANSIBLE_FACT_CACHE_TIMEOUT',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Per-Host Ansible Fact Cache Timeout'),
+    help_text=_('Maximum time, in seconds, that Tower stored Ansible facts are considered valid since '
+                'the last time they were modified. Only valid, non-stale, facts will be accessible by '
+                'a playbook. Note, this does not influence the deletion of ansible_facts from the database.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,

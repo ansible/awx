@@ -773,6 +773,7 @@ class BaseTask(Task):
         self.final_run_hook(instance, status, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
+            print("Status is not successful!")
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
@@ -877,9 +878,12 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.store_facts_enabled:
-            env['MEMCACHED_PREPEND_KEY'] = job.memcached_fact_key
-            env['MEMCACHED_LOCATION'] = settings.CACHES['default']['LOCATION']
+        if job.store_facts:
+            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
+            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
+            env['ANSIBLE_CACHE_PLUGIN'] = "tower"
+            env['ANSIBLE_FACT_CACHE_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
@@ -954,13 +958,6 @@ class RunJob(BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
-        # Set environment variables related to gathering facts from the cache
-        if (job.job_type == PERM_INVENTORY_SCAN or job.store_facts is True) and not kwargs.get('isolated'):
-            env['FACT_QUEUE'] = settings.FACT_QUEUE
-            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
-            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
-            env['ANSIBLE_CACHE_PLUGIN'] = "tower"
-            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = "tcp://127.0.0.1:%s" % str(settings.FACT_CACHE_PORT)
         return env
 
     def build_args(self, job, **kwargs):
@@ -1143,13 +1140,13 @@ class RunJob(BaseTask):
                                                          ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
-        if job.store_facts_enabled:
+        if job.store_facts:
             job.start_job_fact_cache()
 
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
-        if job.store_facts_enabled:
+        if job.store_facts:
             job.finish_job_fact_cache()
         try:
             inventory = job.inventory

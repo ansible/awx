@@ -33,6 +33,8 @@ import os
 import memcache
 import json
 
+from ansible import constants as C
+
 try:
     from ansible.cache.base import BaseCacheModule
 except:
@@ -42,8 +44,8 @@ except:
 class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):
-        # Basic in-memory caching for typical runs
-        self.mc = memcache.Client([os.environ['MEMCACHED_LOCATION']], debug=0)
+        self.mc = memcache.Client([C.CACHE_PLUGIN_CONNECTION], debug=0)
+        self.timeout = int(C.CACHE_PLUGIN_TIMEOUT)
         self.inventory_id = os.environ['INVENTORY_ID']
 
     @property
@@ -59,9 +61,14 @@ class CacheModule(BaseCacheModule):
     def get(self, key):
         host_key = self.translate_host_key(key)
         value_json = self.mc.get(host_key)
-        if not value_json:
+        if value_json is None:
             raise KeyError
-        return json.loads(value_json)
+        try:
+            return json.loads(value_json)
+        # If cache entry is corrupt or bad, fail gracefully.
+        except (TypeError, ValueError):
+            self.delete(key)
+            raise KeyError
 
     def set(self, key, value):
         host_key = self.translate_host_key(key)
@@ -74,7 +81,8 @@ class CacheModule(BaseCacheModule):
         return self.mc.get(self.host_names_key)
 
     def contains(self, key):
-        val = self.mc.get(key)
+        host_key = self.translate_host_key(key)
+        val = self.mc.get(host_key)
         if val is None:
             return False
         return True
@@ -84,13 +92,19 @@ class CacheModule(BaseCacheModule):
         self.mc.delete(self.translate_modified_key(key))
 
     def flush(self):
-        for k in self.mc.get(self.host_names_key):
+        host_names = self.mc.get(self.host_names_key)
+        if not host_names:
+            return
+
+        for k in host_names:
             self.mc.delete(self.translate_host_key(k))
             self.mc.delete(self.translate_modified_key(k))
 
     def copy(self):
         ret = dict()
-        for k in self.mc.get(self.host_names_key):
-            ret[k] = self.mc.get(self.translate_host_key(k))
-        return ret
+        host_names = self.mc.get(self.host_names_key)
+        if not host_names:
+            return
+
+        return [self.mc.get(self.translate_host_key(k)) for k in host_names]
 
