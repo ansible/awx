@@ -11,6 +11,7 @@ import fcntl
 import mock
 import pytest
 import yaml
+from django.conf import settings
 
 
 from awx.main.models import (
@@ -340,7 +341,7 @@ class TestIsolatedExecution(TestJobExecution):
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
         assert ' '.join(playbook_run[0]).startswith(' '.join([
-            'ansible-playbook', '-u', 'root', '-i', self.REMOTE_HOST + ',',
+            'ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i', self.REMOTE_HOST + ',',
             'run_isolated.yml', '-e',
         ]))
         extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
@@ -348,7 +349,6 @@ class TestIsolatedExecution(TestJobExecution):
         assert extra_vars['dest'] == '/tmp'
         assert extra_vars['src'] == private_data
         assert extra_vars['proot_temp_dir'].startswith('/tmp/ansible_tower_proot_')
-        assert extra_vars['job_id'] == '1'
 
     def test_systemctl_failure(self):
         # If systemctl fails, read the contents of `artifacts/systemctl_logs`

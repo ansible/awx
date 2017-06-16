@@ -2,7 +2,6 @@
 
 # The following variables will be set by the runner of this playbook:
 # src: /tmp/some/path/private_data_dir/
-# job_id: <pk>
 
 - hosts: all
   gather_facts: false
@@ -16,6 +15,6 @@
         mode: pull
         recursive: yes
 
-    - shell: "tower-expect is-alive {{job_id}}"
+    - shell: "tower-expect is-alive {{src}}"
       register: is_alive
       failed_when: "is_alive.rc == 0"

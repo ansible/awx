@@ -1,8 +1,8 @@
 ---
 
 # The following variables will be set by the runner of this playbook:
-# private_dirs: ['/tmp/path/private_data_dir/', '/tmp//path/proot_temp_dir/']
-# job_id: <pk>
+# cleanup_dirs: ['/tmp/path/private_data_dir/', '/tmp//path/proot_temp_dir/']
+# private_data_dir: '/tmp/path/private_data_dir/'
 
 - hosts: all
   gather_facts: false
@@ -10,9 +10,9 @@
   tasks:
 
     - name: cancel the job
-      command: "tower-expect stop {{job_id}}"
+      command: "tower-expect stop {{private_data_dir}}"
       ignore_errors: yes
 
     - name: remove build artifacts
       file: path="{{item}}" state=absent
-      with_items: "{{private_dirs}}"
+      with_items: "{{cleanup_dirs}}"

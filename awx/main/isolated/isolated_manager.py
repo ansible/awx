@@ -116,7 +116,6 @@ class IsolatedManager(object):
         extra_vars = {
             'src': self.private_data_dir,
             'dest': os.path.split(self.private_data_dir)[0],
-            'job_id': str(self.instance.pk)
         }
         if self.proot_temp_dir:
             extra_vars['proot_temp_dir'] = self.proot_temp_dir
@@ -197,7 +196,7 @@ class IsolatedManager(object):
             return True
         return False
 
-    def check(self):
+    def check(self, interval=None):
         """
         Repeatedly poll the isolated node to determine if the job has run.
 
@@ -208,12 +207,11 @@ class IsolatedManager(object):
         For a completed job run, this function returns (status, rc),
         representing the status and return code of the isolated
         `ansible-playbook` run.
-        """
 
-        extra_vars = {
-            'src': self.private_data_dir,
-            'job_id': str(self.instance.pk)
-        }
+        :param interval: an interval (in seconds) to wait between status polls
+        """
+        interval = interval if interval is not None else settings.AWX_ISOLATED_CHECK_INTERVAL
+        extra_vars = {'src': self.private_data_dir}
         args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
                 '%s,' % self.host, 'check_isolated.yml', '-e',
                 json.dumps(extra_vars)]
@@ -222,7 +220,8 @@ class IsolatedManager(object):
 
         status = 'failed'
         rc = None
-        buff = None
+        buff = cStringIO.StringIO()
+        last_check = time.time()
         seek = 0
         job_timeout = remaining = self.job_timeout
         while status == 'failed':
@@ -236,7 +235,11 @@ class IsolatedManager(object):
                     status = 'failed'
                     break
 
-            time.sleep(settings.AWX_ISOLATED_CHECK_INTERVAL)
+            canceled = self.cancelled_callback() if self.cancelled_callback else False
+            if not canceled and time.time() - last_check < interval:
+                # If the job isn't cancelled, but we haven't waited `interval` seconds, wait longer
+                time.sleep(1)
+                continue
 
             buff = cStringIO.StringIO()
             logger.debug('Checking job on isolated host with `check_isolated.yml` playbook.')
@@ -256,6 +259,8 @@ class IsolatedManager(object):
                     for line in f:
                         self.stdout_handle.write(line)
                         seek += len(line)
+
+            last_check = time.time()
 
         if status == 'successful':
             status_path = self.path_to('artifacts', 'status')
@@ -278,12 +283,11 @@ class IsolatedManager(object):
     def cleanup(self):
         # If the job failed for any reason, make a last-ditch effort at cleanup
         extra_vars = {
-            'private_dirs': [
-                '/tmp/ansible_tower/jobs/%s' % self.instance.pk,
+            'private_data_dir': self.private_data_dir,
+            'cleanup_dirs': [
                 self.private_data_dir,
                 self.proot_temp_dir,
             ],
-            'job_id': str(self.instance.pk),
         }
         args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
                 '%s,' % self.host, 'clean_isolated.yml', '-e',

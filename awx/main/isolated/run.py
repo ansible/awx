@@ -258,9 +258,9 @@ def __run__(private_data_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='manage a daemonized, isolated ansible playbook')
     parser.add_argument('command', choices=['start', 'stop', 'is-alive'])
-    parser.add_argument('job_id')
+    parser.add_argument('private_data_dir')
     args = parser.parse_args()
-    private_data_dir = os.readlink('/tmp/ansible_tower/jobs/%s' % args.job_id)
+    private_data_dir = args.private_data_dir
     pidfile = os.path.join(private_data_dir, 'pid')
 
     if args.command == 'start':
