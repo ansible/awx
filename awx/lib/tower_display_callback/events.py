@@ -22,7 +22,6 @@ import base64
 import contextlib
 import datetime
 import json
-import logging
 import multiprocessing
 import os
 import stat
@@ -30,67 +29,7 @@ import threading
 import uuid
 import memcache
 
-# Kombu
-from kombu import Connection, Exchange, Producer
-
 __all__ = ['event_context']
-
-
-class CallbackQueueEventDispatcher(object):
-
-    def __init__(self):
-        self.callback_connection = os.getenv('CALLBACK_CONNECTION', None)
-        self.connection_queue = os.getenv('CALLBACK_QUEUE', '')
-        self.connection = None
-        self.exchange = None
-        self._init_logging()
-
-    def _init_logging(self):
-        try:
-            self.job_callback_debug = int(os.getenv('JOB_CALLBACK_DEBUG', '0'))
-        except ValueError:
-            self.job_callback_debug = 0
-        self.logger = logging.getLogger('awx.plugins.callback.job_event_callback')
-        if self.job_callback_debug >= 2:
-            self.logger.setLevel(logging.DEBUG)
-        elif self.job_callback_debug >= 1:
-            self.logger.setLevel(logging.INFO)
-        else:
-            self.logger.setLevel(logging.WARNING)
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(levelname)-8s %(process)-8d %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
-    def dispatch(self, obj):
-        if not self.callback_connection or not self.connection_queue:
-            return
-        active_pid = os.getpid()
-        for retry_count in xrange(4):
-            try:
-                if not hasattr(self, 'connection_pid'):
-                    self.connection_pid = active_pid
-                if self.connection_pid != active_pid:
-                    self.connection = None
-                if self.connection is None:
-                    self.connection = Connection(self.callback_connection)
-                    self.exchange = Exchange(self.connection_queue, type='direct')
-
-                producer = Producer(self.connection)
-                producer.publish(obj,
-                                 serializer='json',
-                                 compression='bzip2',
-                                 exchange=self.exchange,
-                                 declare=[self.exchange],
-                                 routing_key=self.connection_queue)
-                return
-            except Exception, e:
-                self.logger.info('Publish Job Event Exception: %r, retry=%d', e,
-                                 retry_count, exc_info=True)
-                retry_count += 1
-                if retry_count >= 3:
-                    break
 
 
 class IsolatedFileWrite:
@@ -123,7 +62,6 @@ class EventContext(object):
 
     def __init__(self):
         self.display_lock = multiprocessing.RLock()
-        self.dispatcher = CallbackQueueEventDispatcher()
         cache_actual = os.getenv('CACHE', '127.0.0.1:11211')
         if os.getenv('AWX_ISOLATED_DATA_DIR', False):
             self.cache = IsolatedFileWrite()

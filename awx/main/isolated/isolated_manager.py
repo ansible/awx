@@ -108,7 +108,7 @@ class IsolatedManager(object):
         # strip some environment variables that aren't applicable to isolated
         # execution
         for var in (
-                'RABBITMQ_HOST', 'RABBITMQ_PASS', 'RABBITMQ_USER', 'CACHE',
+                'HOME', 'RABBITMQ_HOST', 'RABBITMQ_PASS', 'RABBITMQ_USER', 'CACHE',
                 'DJANGO_PROJECT_DIR', 'DJANGO_SETTINGS_MODULE', 'RABBITMQ_VHOST'):
             secrets['env'].pop(var, None)
         self.build_isolated_job_data()
@@ -126,7 +126,7 @@ class IsolatedManager(object):
         # - sets up a temporary directory for proot/bwrap (if necessary)
         # - copies encrypted job data from the controlling host to the isolated host (with rsync)
         # - writes the encryption secret to a named pipe on the isolated host
-        # - launches the isolated playbook runner via `systemctl start playbook@<job-id>.service`
+        # - launches the isolated playbook runner via `tower-expect start <job-id>`
         args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
                 '%s,' % self.host, 'run_isolated.yml', '-e',
                 json.dumps(extra_vars)]
@@ -178,18 +178,18 @@ class IsolatedManager(object):
         if 'AD_HOC_COMMAND_ID' not in self.env:
             os.symlink(self.cwd, self.path_to('project'))
 
-        # create a directory for build artifacts to live in
-        os.mkdir(self.path_to('artifacts'), stat.S_IRUSR | stat.S_IWUSR)
+        # create directories for build artifacts to live in
+        os.makedirs(self.path_to('artifacts', 'job_events'), mode=stat.S_IRUSR | stat.S_IWUSR)
 
     def _missing_artifacts(self, path_list, buff):
         missing_artifacts = filter(lambda path: not os.path.exists(path), path_list)
         for path in missing_artifacts:
-            self.stdout_handle.write('ERROR running isolated job, missing `{}`.\n'.format(path))
+            self.stdout_handle.write('ansible did not exit cleanly, missing `{}`.\n'.format(path))
         if missing_artifacts:
-            systemctl_path = self.path_to('artifacts', 'systemctl_logs')
-            if os.path.exists(systemctl_path):
+            daemon_path = self.path_to('artifacts', 'daemon.log')
+            if os.path.exists(daemon_path):
                 # If available, show log files from the run.py call
-                with codecs.open(systemctl_path, 'r', encoding='utf-8') as f:
+                with codecs.open(daemon_path, 'r', encoding='utf-8') as f:
                     self.stdout_handle.write(f.read())
             else:
                 # Provide the management playbook standard out if not available

@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import argparse
 import base64
 import codecs
@@ -119,7 +121,7 @@ def run_pexpect(args, cwd, env, logfile,
             if isinstance(extra_update_fields, dict):
                 extra_update_fields['job_explanation'] = "Job terminated due to timeout"
         if canceled or timed_out:
-            handle_termination(child, proot_cmd, is_cancel=canceled)
+            handle_termination(child.pid, child.args, proot_cmd, is_cancel=canceled)
         if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
             child.close(True)
             canceled = True
@@ -194,51 +196,44 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
                        pexpect_timeout=pexpect_timeout)
 
 
-def handle_termination(job, proot_cmd, is_cancel=True):
+def handle_termination(pid, args, proot_cmd, is_cancel=True):
     '''
     Terminate a subprocess spawned by `pexpect`.
 
-    :param job:       the pexpect subprocess running the job.
+    :param pid:       the process id of the running the job.
+    :param args:      the args for the job, i.e., ['ansible-playbook', 'abc.yml']
     :param proot_cmd  the command used to isolate processes i.e., `bwrap`
     :param is_cancel: flag showing whether this termination is caused by
                       instance's cancel_flag.
     '''
     try:
-        if proot_cmd in ' '.join(job.args):
+        if proot_cmd in ' '.join(args):
             if not psutil:
-                os.kill(job.pid, signal.SIGKILL)
+                os.kill(pid, signal.SIGKILL)
             else:
                 try:
-                    main_proc = psutil.Process(pid=job.pid)
+                    main_proc = psutil.Process(pid=pid)
                     child_procs = main_proc.children(recursive=True)
                     for child_proc in child_procs:
                         os.kill(child_proc.pid, signal.SIGKILL)
                     os.kill(main_proc.pid, signal.SIGKILL)
                 except (TypeError, psutil.Error):
-                    os.kill(job.pid, signal.SIGKILL)
+                    os.kill(pid, signal.SIGKILL)
         else:
-            os.kill(job.pid, signal.SIGTERM)
+            os.kill(pid, signal.SIGTERM)
         time.sleep(3)
     except OSError:
         keyword = 'cancel' if is_cancel else 'timeout'
         logger.warn("Attempted to %s already finished job, ignoring" % keyword)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='run an isolated ansible playbook')
-    parser.add_argument('job_id')
-    args = parser.parse_args()
-    private_data_dir = os.readlink('/tmp/ansible_tower/jobs/%s' % args.job_id)
-
+def __run__(private_data_dir):
     buff = cStringIO.StringIO()
     with open(os.path.join(private_data_dir, 'env'), 'r') as f:
         for line in f:
             buff.write(line)
 
     artifacts_dir = os.path.join(private_data_dir, 'artifacts')
-    job_events_dir = os.path.join(artifacts_dir, 'job_events')
-    if not os.path.exists(job_events_dir):
-        os.makedirs(job_events_dir, mode=stat.S_IRUSR | stat.S_IWUSR)
 
     # Standard out directed to pickup location without event filtering applied
     stdout_filename = os.path.join(artifacts_dir, 'stdout')
@@ -258,3 +253,49 @@ if __name__ == '__main__':
         os.mknod(artifact_path, stat.S_IFREG | stat.S_IRUSR | stat.S_IWUSR)
         with open(artifact_path, 'w') as f:
             f.write(str(data))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='manage a daemonized, isolated ansible playbook')
+    parser.add_argument('command', choices=['start', 'stop', 'is-alive'])
+    parser.add_argument('job_id')
+    args = parser.parse_args()
+    private_data_dir = os.readlink('/tmp/ansible_tower/jobs/%s' % args.job_id)
+    pidfile = os.path.join(private_data_dir, 'pid')
+
+    if args.command == 'start':
+        # create a file to log stderr in case the daemonized process throws
+        # an exception before it gets to `pexpect.spawn`
+        stderr_path = os.path.join(private_data_dir, 'artifacts', 'daemon.log')
+        if not os.path.exists(stderr_path):
+            os.mknod(stderr_path, stat.S_IFREG | stat.S_IRUSR | stat.S_IWUSR)
+        stderr = open(stderr_path, 'w+')
+
+        import daemon
+        from daemon.pidfile import TimeoutPIDLockFile
+        context = daemon.DaemonContext(
+            pidfile=TimeoutPIDLockFile(pidfile),
+            stderr=stderr
+        )
+        with context:
+            __run__(private_data_dir)
+        sys.exit(0)
+
+    try:
+        with open(pidfile, 'r') as f:
+            pid = int(f.readline())
+    except IOError:
+        sys.exit(1)
+
+    if args.command == 'stop':
+        try:
+            with open(os.path.join(private_data_dir, 'args'), 'r') as args:
+                handle_termination(pid, json.load(args), 'bwrap')
+        except IOError:
+            handle_termination(pid, [], 'bwrap')
+    elif args.command == 'is-alive':
+        try:
+            os.kill(pid, signal.SIG_DFL)
+            sys.exit(0)
+        except OSError:
+            sys.exit(1)

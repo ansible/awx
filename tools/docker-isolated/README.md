@@ -66,6 +66,6 @@ This should give a shell to the `tools_isolated_1` container, as the
 The following command would run the playbook for job 57.
 
 ```bash
-systemctl start playbook@57.service
+tower-expect start 57
 ```
 

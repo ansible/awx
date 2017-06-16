@@ -371,7 +371,7 @@ class TestIsolatedExecution(TestJobExecution):
                 os.makedirs(artifacts)
             if 'run_isolated.yml' in args[0]:
                 for filename, data in (
-                    ['systemctl_logs', 'ERROR IN EXPECT.PY'],
+                    ['daemon.log', 'ERROR IN RUN.PY'],
                 ):
                     with open(os.path.join(artifacts, filename), 'w') as f:
                         f.write(data)

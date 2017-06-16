@@ -16,13 +16,6 @@
         mode: pull
         recursive: yes
 
-    - name: check to see if the job is inactive
-      command: "systemctl is-active playbook@{{job_id}}.service"
-      register: is_active
-      failed_when: "is_active.rc == 0"
-
-    - shell: journalctl -u playbook@{{job_id}}.service --no-pager
-      register: systemctl_logs
-      ignore_errors: True
-
-    - local_action: copy content={{ systemctl_logs.stdout }} dest={{src}}/artifacts/systemctl_logs mode=0600
+    - shell: "tower-expect is-alive {{job_id}}"
+      register: is_alive
+      failed_when: "is_alive.rc == 0"
