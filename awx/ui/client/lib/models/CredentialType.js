@@ -26,18 +26,11 @@ function mergeInputProperties (type) {
     });
 }
 
-function getById (id) {
-    let type = this.get('results').filter(type => type.id === id);
-
-    return type ? type[0] : undefined;
-}
-
 function CredentialTypeModel (method, id) {
     BaseModel.call(this, 'credential_types');
 
     this.categorizeByKind = categorizeByKind.bind(this);
     this.mergeInputProperties = mergeInputProperties.bind(this);
-    this.getById = getById.bind(this);
 
     return this.request(method, id)
         .then(() => this);

@@ -1,3 +1,5 @@
+const DEFAULT_EMPTY_PLACEHOLDER = 'NO OPTIONS AVAILABLE';
+
 function atInputSelectLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -24,6 +26,11 @@ function AtInputSelectController (baseInputController, eventService) {
         element = _element_;
         input = element.find('input')[0];
         select = element.find('select')[0];
+
+        if (!scope.state._data || scope.state._data.length === 0) {
+            scope.state._disabled = true;
+            scope.state._placeholder = DEFAULT_EMPTY_PLACEHOLDER;
+        }
 
         vm.setListeners();
         vm.check();
@@ -55,6 +62,8 @@ function AtInputSelectController (baseInputController, eventService) {
     vm.updateDisplayModel = () => {
         if (scope.state._format === 'array') {
             scope.displayModel = scope.state._data[scope.state._value];
+        } else if (scope.state._format === 'objects') {
+            scope.displayModel = scope.state._value[scope.state._display];
         } else if (scope.state._format === 'grouped-object') {
             scope.displayModel = scope.state._value[scope.state._display];
         } else {

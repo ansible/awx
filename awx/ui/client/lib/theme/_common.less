@@ -10,6 +10,10 @@
 .at-Button--green {
     .at-mixin-Button();
     .at-mixin-ButtonColor('at-green', 'at-white');
+
+    &[disabled] {
+        background: @at-gray-dark;
+    }
 }
  
 .at-Button--blue {
@@ -25,6 +29,7 @@
 .at-ButtonHollow--white { 
     .at-mixin-Button();
     .at-mixin-ButtonHollow('at-gray-dark-3x', 'at-gray-dark-2x');
+    border-color: @at-gray-dark;
 }
 
 .at-ButtonIcon {

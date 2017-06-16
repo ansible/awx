@@ -7,7 +7,7 @@
     color: @at-gray-dark-5x;
 
     &, &:active {
-        border-color: @at-gray-dark-3x;
+        border-color: @at-gray-dark-2x;
     }
 
     &:focus {
@@ -19,25 +19,33 @@
     margin: 0;
     padding: 0;
 
-    & > input[type=checkbox] {
-        height: @at-input-height;
-        margin: 0;
-        padding: 0;
+    & > label {
+        & > input[type=checkbox] {
+            height: @at-input-height;
+            margin: 0;
+            padding: 0;
+        }
+
+        & > p {
+            margin: 0;
+            padding: 0 0 0 @at-space-6x;
+            line-height: @at-line-height-tall;
+        }
     }
 }
 
 .at-InputContainer {
-    margin-top: @at-space-6x;;
+    margin-top: @at-space-6x;
 }
 
 .at-Input-button {
     min-width: @at-input-button-width;
     display: block;
-    height: 100%;
+    height: @at-input-height;
 
     &, &:active, &:hover, &:focus {
         color: @at-gray-dark-3x;
-        border-color: @at-gray-dark-3x;
+        border-color: @at-gray-dark-2x;
         background-color: @at-white;
         cursor: pointer;
     }
@@ -76,12 +84,16 @@
     position: absolute;
     width: @at-inset-width;
     height: 100%;
-    background: @at-gray;
+    background: @at-gray-dark;
     left: -@at-inset-width;
 }
 
 .at-InputGroup-button {
     height: 100%;
+
+    & > button {
+        height: 100%;
+    }
 }
 
 .at-InputGroup-title {

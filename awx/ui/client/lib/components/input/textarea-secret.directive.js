@@ -34,6 +34,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
         if (scope.state._value) {
             scope.state._buttonText = 'REPLACE';
+            scope.state._placeholder = 'ENCRYPTED';
         } else {
             if (scope.state.format === 'ssh_private_key') {
                 vm.listeners = vm.setFileListeners(textarea, input);
@@ -48,10 +49,12 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         vm.toggleRevertReplace();
 
         if (scope.state._isBeingReplaced) {
+            scope.state._placeholder = '';
             scope.state._displayHint = true;
             vm.listeners = vm.setFileListeners(textarea, input);
         } else {
             scope.state._displayHint = false;
+            scope.state._placeholder = 'ENCRYPTED';
             eventService.remove(vm.listeners);
         }
     };

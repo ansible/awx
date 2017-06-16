@@ -128,10 +128,17 @@ function normalizePath (resource) {
     return `${version}${resource}/`;
 }
 
+function getById (id) {
+    let item = this.get('results').filter(result => result.id === id);
+
+    return item ? item[0] : undefined;
+}
+
 function BaseModel (path) {
     this.model = {};
     this.get = get;
     this.normalizePath = normalizePath;
+    this.getById = getById;
     this.request = request;
     this.http = {
         get: httpGet.bind(this),

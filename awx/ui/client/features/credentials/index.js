@@ -6,12 +6,13 @@ import AddController from './add-credentials.controller.js';
 import EditController from './edit-credentials.controller.js';
 import { N_ } from '../../src/i18n';
 
-function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType) {
+function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
     let id = $stateParams.credential_id;
 
     let promises = {
         me: new Me('get'),
-        credentialType: new CredentialType('get')
+        credentialType: new CredentialType('get'),
+        organization: new Organization('get')
     };
 
     if (id) {
@@ -28,13 +29,13 @@ CredentialsResolve.$inject = [
     '$stateParams',
     'MeModel',
     'CredentialModel',
-    'CredentialTypeModel'
+    'CredentialTypeModel',
+    'OrganizationModel'
 ];
 
-function CredentialsConfig ($stateProvider, $stateExtenderProvider, stateDefinitionsProvider, pathServiceProvider) {
+function CredentialsConfig ($stateProvider, $stateExtenderProvider, pathServiceProvider) {
     let pathService = pathServiceProvider.$get();
     let stateExtender = $stateExtenderProvider.$get();
-    let stateDefinitions = stateDefinitionsProvider.$get();
 
     stateExtender.addState({
         name: 'credentials',
@@ -272,7 +273,6 @@ function CredentialsConfig ($stateProvider, $stateExtenderProvider, stateDefinit
 CredentialsConfig.$inject = [
   '$stateProvider',
   '$stateExtenderProvider',
-  'stateDefinitionsProvider',
   'PathServiceProvider'
 ];
 

@@ -26,6 +26,7 @@ function AtInputSecretController (baseInputController) {
             vm.toggle = vm.toggleShowHide;
         } else {
             scope.state._buttonText = 'REPLACE';
+            scope.state._placeholder = 'ENCRYPTED';
             vm.toggle = vm.toggleRevertReplace;
         }
 

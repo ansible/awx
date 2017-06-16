@@ -1,11 +1,14 @@
+const DEFAULT_ORGANIZATION_PLACEHOLDER = 'SELECT AN ORGANIZATION';
+
 function AddCredentialsController (models, $state) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
+    let organization = models.organization;
 
-    vm.panelTitle = 'New Credential';
+    vm.panelTitle = 'NEW CREDENTIAL';
 
     vm.tab = {
         details: {  
@@ -19,6 +22,13 @@ function AddCredentialsController (models, $state) {
     vm.form = credential.createFormSchema('post', {
         omit: ['user', 'team', 'inputs']
     });
+
+    vm.form.organization._placeholder = DEFAULT_ORGANIZATION_PLACEHOLDER;
+    vm.form.organization._data = organization.get('results');
+    vm.form.organization._format = 'objects';
+    vm.form.organization._exp = 'org as org.name for org in state._data';
+    vm.form.organization._display = 'name';
+    vm.form.organization._key = 'id';
 
     vm.form.credential_type._data = credentialType.get('results');
     vm.form.credential_type._placeholder = 'SELECT A TYPE';

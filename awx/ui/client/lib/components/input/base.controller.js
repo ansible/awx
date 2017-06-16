@@ -84,12 +84,14 @@ function BaseInputController () {
                 scope.state._enableToggle = true;
                 scope.state._value = scope.state._preEditValue;
                 scope.state._activeModel = '_displayValue';
+                scope.state._placeholder = 'ENCRYPTED';
             } else {
                 scope.state._buttonText = 'REVERT';
                 scope.state._disabled = false;
                 scope.state._enableToggle = false;
                 scope.state._activeModel = '_value';
                 scope.state._value = '';
+                scope.state._placeholder = '';
             }
         };
 
