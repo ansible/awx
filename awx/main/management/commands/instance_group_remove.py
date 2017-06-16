@@ -11,13 +11,13 @@ from django.core.management.base import BaseCommand, CommandError
 class Command(BaseCommand):
 
     help = (
-        "Remove specified instances (specified by hostnames) from the specified queue (instance group).\n"
+        "Remove an instance (specified by --hostname) from the specified queue (instance group).\n"
         "In order remove the queue, use the `unregister_queue` command.")
 
     option_list = BaseCommand.option_list + (
         make_option('--queuename', dest='queuename', type='string',
                     help='Queue to be removed from'),
-        make_option('--hostname', dest='hostnames', type='string',
+        make_option('--hostname', dest='hostname', type='string',
                     help='Host to remove from queue'),
     )
 
