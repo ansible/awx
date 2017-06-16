@@ -81,13 +81,12 @@ function(i18n, InventoryCompletedJobsList) {
             },
             instance_groups: {
                 label: i18n._('Instance Groups'),
-                type: 'select',
+                type: 'custom',
                 awPopOver: "<p>" + i18n._("Select the Instance Groups for this Inventory to run on.") + "</p>",
                 dataTitle: i18n._('Instance Groups'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                multiSelect: true,
-                ngOptions: 'group.name for group in instanceGroupOptions track by group.id',
+                control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
             },
             inventory_variables: {
                 realName: 'variables',

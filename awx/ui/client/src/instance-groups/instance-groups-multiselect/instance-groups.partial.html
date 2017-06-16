@@ -1,0 +1,18 @@
+<div class="input-group Form-mixedInputGroup">
+    <span class="input-group-btn Form-variableHeightButtonGroup">
+        <button type="button" class="Form-lookupButton Form-lookupButton--variableHeight btn btn-default" ng-click="openInstanceGroupsModal()">
+            <i class="fa fa-search"></i>
+        </button>
+    </span>
+    <span id="InstanceGroups" class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup">
+        <div class="LabelList-tagContainer" ng-repeat="tag in instanceGroupsTags">
+            <div class="LabelList-deleteContainer"
+                ng-click="deleteTag(tag)">
+                <i class="fa fa-times LabelList-tagDelete"></i>
+            </div>
+            <div class="LabelList-tag LabelList-tag--deletable">
+                <span class="LabelList-name">{{ tag.name }}</span>
+            </div>
+        </div>
+    </span>
+</div>

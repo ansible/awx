@@ -1,13 +1,17 @@
 import InstanceGroupsList from './list/instance-groups-list.controller';
+import instanceGroupsMultiselect from './instance-groups-multiselect/instance-groups.directive';
+import instanceGroupsModal from './instance-groups-multiselect/instance-groups-modal/instance-groups-modal.directive';
 import list from './instance-groups.list';
 import service from './instance-groups.service';
 import { N_ } from '../i18n';
 
 export default
 angular.module('instanceGroups', [])
-    .factory('InstanceGroupList', list)
     .service('InstanceGroupsService', service)
+    .factory('InstanceGroupList', list)
     .controller('InstanceGroupsList', InstanceGroupsList)
+    .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
+    .directive('instanceGroupsModal', instanceGroupsModal)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
@@ -21,16 +25,11 @@ angular.module('instanceGroups', [])
                     controllers: {
                         list: 'InstanceGroupsList'
                     },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'instanceGroup'
-                    },
                     ncyBreadcrumb: {
                         parent: 'setup',
                         label: N_('INSTANCE GROUPS')
                     }
                 })
             });
-
         }
     ]);
