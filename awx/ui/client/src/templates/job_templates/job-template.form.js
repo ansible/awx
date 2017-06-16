@@ -138,7 +138,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                             credentials-to-post="credentialsToPost">
                         </multi-credential>`,
                     required: true,
-                    awPopOver: "<p>" + i18n._("Select credentials so that tower can access the nodes this job will be ran against.<br /><br />You can only select one credential of each type, and you must either select a machine (SSH) credential or check \"Prompt on launch\".  In that case, a machine credential will need to be selected at run time.<br /><br />You can select credentials and still check the \"Prompt on launch\" box.  In this case, the credentials selected will act as defaults that can be updated at run time.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
                     dataTitle: i18n._('Credentials'),
                     dataPlacement: 'right',
                     dataContainer: "body",
