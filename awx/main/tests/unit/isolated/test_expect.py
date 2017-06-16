@@ -14,6 +14,8 @@ from Crypto import Random
 
 from awx.main.isolated import run, isolated_manager
 
+from django.conf import settings
+
 HERE, FILENAME = os.path.split(__file__)
 
 
@@ -254,7 +256,7 @@ def test_check_isolated_job(private_data_dir, rsa_key):
         run_pexpect.side_effect = _synchronize_job_artifacts
         with mock.patch.object(mgr, '_missing_artifacts') as missing_artifacts:
             missing_artifacts.return_value = False
-            status, rc = mgr.check()
+            status, rc = mgr.check(interval=0)
 
         assert status == 'failed'
         assert rc == 1
@@ -262,8 +264,8 @@ def test_check_isolated_job(private_data_dir, rsa_key):
 
         run_pexpect.assert_called_with(
             [
-                'ansible-playbook', '-u', 'root', '-i', 'isolated-host,',
-                'check_isolated.yml', '-e', '{"src": "%s", "job_id": "123"}' % private_data_dir,
+                'ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i', 'isolated-host,',
+                'check_isolated.yml', '-e', '{"src": "%s"}' % private_data_dir,
                 '-vvvvv'
             ],
             '/tower_devel/awx/playbooks', mgr.env, mock.ANY,
@@ -294,7 +296,7 @@ def test_check_isolated_job_timeout(private_data_dir, rsa_key):
             return ('failed', 1)
 
         run_pexpect.side_effect = _synchronize_job_artifacts
-        status, rc = mgr.check()
+        status, rc = mgr.check(interval=0)
 
         assert status == 'failed'
         assert rc == 1
