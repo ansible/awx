@@ -1,11 +1,18 @@
 module.exports = {
     css: {
         files: 'client/**/*.less',
-        tasks: ['newer:less:dev']
+        tasks: ['less:dev']
     },
     partials: {
-        files: 'client/src/**/*.html',
+        files: [
+            'client/lib/components/**/*.partial.html',
+            'client/src/**/*.partial.html'
+        ],
         tasks: ['newer:copy:partials']
+    },
+    views: {
+        files: 'client/features/**/*.view.html',
+        tasks: ['newer:copy:views']
     },
     assets: {
         files: 'client/assets',

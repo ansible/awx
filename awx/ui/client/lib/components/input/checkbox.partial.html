@@ -1,0 +1,17 @@
+<div class="col-sm-{{::col}} at-InputContainer">
+    <div class="form-group at-u-flat">
+        <at-input-label></at-input-label>
+            <div class="checkbox at-InputCheckbox">
+                <label>
+                    <input type="checkbox"
+                           ng-class="{ 'at-Input--rejected': state.rejected }"
+                           ng-model="state._value"
+                           ng-attr-tabindex="{{ tab || undefined }}"
+                           ng-change="vm.check()"
+                           ng-disabled="state._disabled || form.disabled" />
+                    <p>{{ label }}</p>
+                </label>
+            </div>
+        <at-input-message></at-input-message>
+    </div>
+</div>

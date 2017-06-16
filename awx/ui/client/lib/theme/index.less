@@ -1,0 +1,15 @@
+// App-wide styles 
+@import '_variables';
+@import '_mixins';
+@import '_utility';
+@import '_common';
+
+// Aggregated component and feature specific styles
+@import '../components/_index';
+@import '../../features/_index';
+
+/*
+ * Temporary overrides used only during the transition away from old style
+ * structure to new style structure. Overrides unwanted/uneeded rules.
+ */
+@import '_temporary-overrides';

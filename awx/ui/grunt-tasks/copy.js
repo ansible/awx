@@ -30,6 +30,14 @@ module.exports = {
             dest: 'static/lib/'
         }]
     },
+    views: {
+        files: [{
+            cwd: 'client/features',
+            expand: true,
+            src: ['**/*.view.html'],
+            dest: 'static/views/'
+        }]
+    },
     partials: {
         files: [{
             cwd: 'client/src',
@@ -41,6 +49,11 @@ module.exports = {
             expand: true,
             src: ['*.html'],
             dest: 'static/partials/'
+        }, {
+            cwd: 'client/lib/components',
+            expand: true,
+            src: ['**/*.partial.html'],
+            dest: 'static/partials/components/'
         }]
     },
     languages: {

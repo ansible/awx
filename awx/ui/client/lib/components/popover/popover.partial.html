@@ -1,0 +1,16 @@
+<div ng-show="state.help_text"
+     class="at-Popover"
+     ng-class="{ 'at-Popover--inline': inline }">
+    <span class="at-Popover-icon">
+        <i class="fa fa-question-circle"></i>
+    </span>
+    <div class="at-Popover-container">
+        <div class="at-Popover-arrow">
+            <i class="fa fa-caret-left fa-2x"></i>
+        </div>
+        <div class="at-Popover-content">
+            <h4 class="at-Popover-title">{{::state.label}}</h4>
+            <p class="at-Popover-text">{{::state.help_text}}</p>
+        </div>
+    </div>
+</div>

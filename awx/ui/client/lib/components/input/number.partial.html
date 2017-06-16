@@ -1,0 +1,19 @@
+<div class="col-sm-{{::col}} at-InputContainer">
+    <div class="form-group at-u-flat">
+        <at-input-label></at-input-label>
+
+        <input type="number" 
+               class="form-control at-Input" 
+               ng-class="{ 'at-Input--rejected': state.rejected }"
+               ng-model="state._value"
+               ng-attr-min="state._min"
+               ng-attr-max="state._max"
+               ng-attr-step="state._step"
+               ng-attr-tabindex="{{ tab || undefined }}"
+               ng-attr-placeholder="{{::state._placeholder || undefined }}"
+               ng-change="vm.check()"
+               ng-disabled="state._disabled || form.disabled" />
+
+        <at-input-message></at-input-message>
+    </div>
+</div>

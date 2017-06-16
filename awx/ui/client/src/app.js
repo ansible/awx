@@ -41,6 +41,7 @@ import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
+import credentials from './credentials/main';
 import credentialTypes from './credential-types/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
@@ -60,7 +61,6 @@ import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
-import credentials from './credentials/main';
 import jobs from './jobs/main';
 import teams from './teams/main';
 import users from './users/main';
@@ -71,6 +71,11 @@ import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
+
+import '../lib/components';
+import '../lib/models';
+import '../lib/services';
+import '../features';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -101,6 +106,7 @@ var tower = angular.module('Tower', [
     systemTracking.name,
     inventories.name,
     inventoryScripts.name,
+    credentials.name,
     credentialTypes.name,
     organizations.name,
     managementJobs.name,
@@ -118,7 +124,6 @@ var tower = angular.module('Tower', [
     standardOut.name,
     Templates.name,
     portalMode.name,
-    credentials.name,
     jobs.name,
     teams.name,
     users.name,
@@ -131,6 +136,11 @@ var tower = angular.module('Tower', [
     'PromptDialog',
     'AWDirectives',
     'features',
+
+    'at.lib.components',
+    'at.lib.models',
+    'at.lib.services',
+    'at.features',
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
