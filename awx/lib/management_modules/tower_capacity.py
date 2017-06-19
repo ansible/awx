@@ -25,8 +25,11 @@ def main():
         argument_spec = dict()
     )
     # Duplicated with awx.main.utils.common.get_system_task_capacity
-    proc = subprocess.Popen(['free', '-m'], stdout=subprocess.PIPE)
-    out,err = proc.communicate()
+    try:
+        out = subprocess.check_output(['free', '-m'])
+    except subprocess.CalledProcessError as e:
+        module.fail_json(msg=str(e))
+        return
     total_mem_value = out.split()[7]
     if int(total_mem_value) <= 2048:
         cap = 50
