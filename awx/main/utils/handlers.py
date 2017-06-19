@@ -11,7 +11,6 @@ import socket
 import select
 import six
 from concurrent.futures import ThreadPoolExecutor
-from copy import copy
 from requests.exceptions import RequestException
 
 # loggly

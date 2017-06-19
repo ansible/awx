@@ -153,9 +153,9 @@ class JobOptions(BaseModel):
         default=0,
         help_text=_("The amount of time (in seconds) to run before the task is canceled."),
     )
-    store_facts = models.BooleanField(
+    use_fact_cache = models.BooleanField(
         default=False,
-        help_text=_('During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+        help_text=_("If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible."),
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
@@ -288,7 +288,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'schedule', 'limit', 'verbosity', 'job_tags', 'extra_vars',
                 'launch_type', 'force_handlers', 'skip_tags', 'start_at_task',
                 'become_enabled', 'labels', 'survey_passwords',
-                'allow_simultaneous', 'timeout', 'store_facts',]
+                'allow_simultaneous', 'timeout', 'use_fact_cache',]
 
     def resource_validation_data(self):
         '''

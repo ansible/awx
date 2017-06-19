@@ -88,13 +88,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='job',
-            name='store_facts',
-            field=models.BooleanField(default=False, help_text='During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+            name='use_fact_cache',
+            field=models.BooleanField(default=False, help_text='If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible.'),
         ),
         migrations.AddField(
             model_name='jobtemplate',
-            name='store_facts',
-            field=models.BooleanField(default=False, help_text='During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+            name='use_fact_cache',
+            field=models.BooleanField(default=False, help_text='If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible.'),
         ),
         migrations.RunSQL([("CREATE INDEX host_ansible_facts_default_gin ON %s USING gin"
                             "(ansible_facts jsonb_path_ops);", [AsIs(Host._meta.db_table)])],

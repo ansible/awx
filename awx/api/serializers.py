@@ -2227,7 +2227,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'vault_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task', 'timeout', 'store_facts',)
+                  'skip_tags', 'start_at_task', 'timeout', 'use_fact_cache',)
 
     def get_fields(self):
         fields = super(JobOptionsSerializer, self).get_fields()
