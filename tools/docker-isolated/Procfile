@@ -3,6 +3,5 @@ runworker:      make runworker
 daphne:         make daphne
 celeryd:        make celeryd EXTRA_GROUP_QUEUES=thepentagon
 receiver:       make receiver
-factcacher:     make factcacher
 flower:         make flower
 uwsgi:          make uwsgi

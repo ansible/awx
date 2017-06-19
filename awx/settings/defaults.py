@@ -1053,9 +1053,6 @@ LOGGING = {
         'awx.main.consumers': {
             'handlers': ['null']
         },
-        'awx.main.commands.run_fact_cache_receiver': {
-            'handlers': ['fact_receiver'],
-        },
         'awx.main.access': {
             'handlers': ['null'],
             'propagate': False,

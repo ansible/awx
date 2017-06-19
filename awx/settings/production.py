@@ -66,8 +66,7 @@ SERVICE_NAME_DICT = {
     "callback": "awx-callback-receiver",
     "channels": "awx-channels-worker",
     "uwsgi": "awx-uwsgi",
-    "daphne": "awx-daphne",
-    "fact": "awx-fact-cache-receiver"}
+    "daphne": "awx-daphne"}
 # Used for sending commands in automatic restart
 UWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
 
