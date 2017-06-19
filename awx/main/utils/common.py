@@ -545,8 +545,8 @@ def get_system_task_capacity():
         return settings.SYSTEM_TASK_CAPACITY
     try:
         out = subprocess.check_output(['free', '-m'])
-    except subprocess.CalledProcessError as e:
-        logger.error('Problem obtaining capacity from system, error:\n{}'.format(str(e)))
+    except subprocess.CalledProcessError:
+        logger.exception('Problem obtaining capacity from system.')
         return 0
     total_mem_value = out.split()[7]
     if int(total_mem_value) <= 2048:

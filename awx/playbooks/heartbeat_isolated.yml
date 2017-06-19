@@ -1,8 +1,4 @@
 ---
-
-# The following variables will be set by the runner of this playbook:
-# job_id_cutoff: <pk>
-
 - hosts: all
   gather_facts: false
 
@@ -10,11 +6,6 @@
 
     - name: Get capacity of the instance
       tower_capacity:
-      register: result
-
-    - name: Print capacity in escaped string to scrape
-      debug: msg="{{ start_delimiter|default('') }}{{ result['capacity'] }}{{ end_delimiter|default('') }}"
 
     - name: Remove any stale temporary files
       tower_isolated_cleanup:
-        cutoff_pk: "{{ cutoff_pk | default(0) }}"

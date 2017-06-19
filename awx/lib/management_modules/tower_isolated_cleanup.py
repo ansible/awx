@@ -22,53 +22,48 @@ import os
 import re
 import shutil
 import datetime
+import subprocess
 
 
 def main():
     module = AnsibleModule(
-        argument_spec = dict(
-            cutoff_pk = dict(required=False, default=0, type='int'),
-        )
+        argument_spec = dict()
     )
-    cutoff_pk = module.params.get('cutoff_pk')
     changed = False
-    jobs_removed = set([])
+    paths_removed = set([])
 
-    cutoff_time = datetime.datetime.now() - datetime.timedelta(days=7)
+    # If a folder was last modified before this datetime, it will always be deleted
+    folder_cutoff = datetime.datetime.now() - datetime.timedelta(days=7)
+    # If a folder does not have an associated job running and is older than
+    # this datetime, then it will be deleted because its job has finished
+    job_cutoff = datetime.datetime.now() - datetime.timedelta(hours=1)
 
-    for search_pattern, extract_pattern in [
-        ('/tmp/ansible_tower/jobs/*', r'\/tmp\/ansible_tower\/jobs\/(?P<job_id>\d+)'),
-        ('/tmp/ansible_tower_*', r'\/tmp\/ansible_tower_(?P<job_id>\d+)_*'),
-        ('/tmp/ansible_tower_proot_*', None),
+    for search_pattern in [
+        '/tmp/ansible_tower_[0-9]*_*', '/tmp/ansible_tower_proot_*',
     ]:
         for path in glob.iglob(search_pattern):
             st = os.stat(path)
             modtime = datetime.datetime.fromtimestamp(st.st_mtime)
-            if modtime > cutoff_time:
-                # If job's pk value is lower than threshold, we delete it
+
+            if modtime > job_cutoff:
+                continue
+            elif modtime > folder_cutoff:
                 try:
-                    if extract_pattern is None:
-                        continue
-                    re_match = re.match(extract_pattern, path)
-                    if re_match is None:
-                        continue
-                    job_id = int(re_match.group('job_id'))
-                    if job_id >= cutoff_pk:
-                        module.debug('Skipping job {}, which may still be running.'.format(job_id))
-                        continue
+                    re_match = re.match(r'\/tmp\/ansible_tower_\d+_.+', path)
+                    if re_match is not None:
+                        if subprocess.check_call(['tower-expect', 'is-alive', path]) == 0:
+                            continue
+                        else:
+                            module.debug('Deleting path {} its job has completed.'.format(path))
                 except (ValueError, IndexError):
                     continue
             else:
                 module.debug('Deleting path {} because modification date is too old.'.format(path))
-                job_id = 'unknown'
             changed = True
-            jobs_removed.add(job_id)
-            if os.path.islink(path):
-                os.remove(path)
-            else:
-                shutil.rmtree(path)
+            paths_removed.add(path)
+            shutil.rmtree(path)
 
-    module.exit_json(changed=changed, jobs_removed=[j for j in jobs_removed])
+    module.exit_json(changed=changed, paths_removed=list(paths_removed))
 
 
 if __name__ == '__main__':

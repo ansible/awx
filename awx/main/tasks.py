@@ -201,7 +201,7 @@ def tower_isolated_heartbeat(self):
     local_hostname = settings.CLUSTER_HOST_ID
     logger.debug("Controlling node checking for any isolated management tasks.")
     poll_interval = settings.AWX_ISOLATED_PERIODIC_CHECK
-    # Add in some task buffer time
+    # Get isolated instances not checked since poll interval - some buffer
     nowtime = now()
     accept_before = nowtime - timedelta(seconds=(poll_interval - 10))
     isolated_instance_qs = Instance.objects.filter(
@@ -212,15 +212,12 @@ def tower_isolated_heartbeat(self):
     with transaction.atomic():
         for isolated_instance in isolated_instance_qs:
             isolated_instance.last_isolated_check = nowtime
+            # Prevent modified time from being changed, as in normal heartbeat
             isolated_instance.save(update_fields=['last_isolated_check'])
-    # Find the oldest job in the system and pass that to the cleanup
-    if not isolated_instance_qs:
-        return
-    cutoff_pk = UnifiedJob.lowest_running_id()
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
         logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
-        isolated_manager.IsolatedManager.health_check(isolated_instance_qs, cutoff_pk=cutoff_pk)
+        isolated_manager.IsolatedManager.health_check(isolated_instance_qs)
 
 
 @task(bind=True, queue='tower')

@@ -726,18 +726,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 pass
         super(UnifiedJob, self).delete()
 
-    @classmethod
-    def lowest_running_id(cls):
-        oldest_running_job = cls.objects.filter(status__in=ACTIVE_STATES).order_by('id').only('id').first()
-        if oldest_running_job is not None:
-            return oldest_running_job.id
-        else:
-            newest_finished_job = cls.objects.order_by('id').only('id').last()
-            if newest_finished_job is None:
-                return 1  # System has no finished jobs
-            else:
-                return newest_finished_job.id + 1
-
     def copy_unified_job(self):
         '''
         Returns saved object, including related fields.

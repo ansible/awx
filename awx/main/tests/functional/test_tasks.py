@@ -104,8 +104,7 @@ class TestIsolatedManagementTask:
     @pytest.fixture
     def needs_updating(self, control_group):
         ig = InstanceGroup.objects.create(name='thepentagon', controller=control_group)
-        inst = ig.instances.create(
-            hostname='isolated', capacity=103)
+        inst = ig.instances.create(hostname='isolated', capacity=103)
         inst.last_isolated_check=now() - timedelta(seconds=MockSettings.AWX_ISOLATED_PERIODIC_CHECK)
         inst.save()
         return ig
@@ -113,25 +112,25 @@ class TestIsolatedManagementTask:
     @pytest.fixture
     def just_updated(self, control_group):
         ig = InstanceGroup.objects.create(name='thepentagon', controller=control_group)
-        inst = ig.instances.create(
-            hostname='isolated', capacity=103)
+        inst = ig.instances.create(hostname='isolated', capacity=103)
         inst.last_isolated_check=now()
         inst.save()
         return inst
 
     def test_takes_action(self, control_instance, needs_updating):
+        original_isolated_instance = needs_updating.instances.all().first()
         with mock.patch('awx.main.tasks.settings', MockSettings()):
             with mock.patch.object(isolated_manager.IsolatedManager, 'health_check') as check_mock:
-                check_mock.return_value = 98
                 tower_isolated_heartbeat()
         iso_instance = Instance.objects.get(hostname='isolated')
-        check_mock.assert_called_once_with(iso_instance, cutoff_pk=mock.ANY)
-        assert iso_instance.capacity == 98
+        call_args, _ = check_mock.call_args
+        assert call_args[0][0] == iso_instance
+        assert iso_instance.last_isolated_check > original_isolated_instance.last_isolated_check
+        assert iso_instance.modified == original_isolated_instance.modified
 
     def test_does_not_take_action(self, control_instance, just_updated):
         with mock.patch('awx.main.tasks.settings', MockSettings()):
             with mock.patch.object(isolated_manager.IsolatedManager, 'health_check') as check_mock:
-                check_mock.return_value = 98
                 tower_isolated_heartbeat()
         iso_instance = Instance.objects.get(hostname='isolated')
         check_mock.assert_not_called()
