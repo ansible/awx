@@ -43,11 +43,9 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
 # Ansible base virtualenv paths and enablement
-ANSIBLE_USE_VENV = True
 ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
 
 # Tower base virtualenv paths and enablement
-TOWER_USE_VENV = True
 TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
 AWX_ISOLATED_USERNAME = 'awx'

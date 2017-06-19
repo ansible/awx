@@ -467,24 +467,22 @@ class BaseTask(Task):
         }
 
     def add_ansible_venv(self, env, add_tower_lib=True):
-        if settings.ANSIBLE_USE_VENV:
-            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
-            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-            for python_ver in ["python2.7", "python2.6"]:
-                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
-                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
-                    break
+        env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+        env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+        venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+        env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+        for python_ver in ["python2.7", "python2.6"]:
+            if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                break
         # Add awx/lib to PYTHONPATH.
         if add_tower_lib:
             env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
         return env
 
     def add_tower_venv(self, env):
-        if settings.TOWER_USE_VENV:
-            env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
-            env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
+        env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
+        env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
         return env
 
     def build_env(self, instance, **kwargs):
