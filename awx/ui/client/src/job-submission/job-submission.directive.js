@@ -6,8 +6,8 @@
 
 import jobSubmissionController from './job-submission.controller';
 
-export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions',
-    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions) {
+export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions', 'i18n',
+    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions, i18n) {
     return {
         scope: {
             submitJobId: '=',
@@ -53,6 +53,12 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                     CreateSelect2({
                         element: '#job_launch_verbosity',
                         multiple: false
+                    });
+
+                    CreateSelect2({
+                        element: `#job-launch-credential-kind-select`,
+                        multiple: false,
+                        placeholder: i18n._('Select a credential')
                     });
 
                     if(scope.step === 'otherprompts' && scope.ask_variables_on_launch) {

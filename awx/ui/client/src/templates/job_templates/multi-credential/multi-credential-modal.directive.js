@@ -1,5 +1,5 @@
-export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile',
-    function(templateUrl, Rest, GetBasePath, GenerateList, $compile) {
+export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile', 'CreateSelect2', 'i18n',
+    function(templateUrl, Rest, GetBasePath, GenerateList, $compile, CreateSelect2, i18n) {
     return {
         restrict: 'E',
         scope: {
@@ -15,6 +15,12 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
             $('#multi-credential-modal').on('hidden.bs.modal', function () {
                 $('#multi-credential-modal').off('hidden.bs.modal');
                 $(element).remove();
+            });
+
+            CreateSelect2({
+                element: `#multi-credential-kind-select`,
+                multiple: false,
+                placeholder: i18n._('Select a credential')
             });
 
             scope.showModal = function() {

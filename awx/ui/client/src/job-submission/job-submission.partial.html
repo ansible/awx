@@ -82,7 +82,7 @@
                     </div>
                     <div class="JobSubmission-credentialSubSection" ng-show="ask_credential_on_launch">
                         <span class="JobSubmission-label" translate>CREDENTIAL TYPE:</span>
-                        <select ng-model="credentialKind">
+                        <select id="job-launch-credential-kind-select" ng-model="credentialKind">
                             <option ng-repeat="option in credentialTypeOptions" value="{{option.value}}">{{option.name}}</option>
                         </select>
                     </div>
