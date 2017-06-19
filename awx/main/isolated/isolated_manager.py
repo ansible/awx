@@ -305,26 +305,29 @@ class IsolatedManager(object):
             logger.warning('Cleanup from isolated job encountered error, output:\n{}'.format(buff.getvalue()))
 
     @staticmethod
-    def health_check(instance, cutoff_pk=0):
+    def health_check(instance_qs, cutoff_pk=0):
         '''
-        :param instance:            Django object representing the isolated instance
+        :param instance_qs:         List of Django objects representing the
+                                    isolated instances to manage
         :param cutoff_pk:           Job id of the oldest job still in the running state
         Method logic not yet written.
         returns the instance's capacity or None if it is not reachable
         '''
-        start_delimiter = 'wNqCXG6uul'
-        end_delimiter = 'n6kmoFyyAP'
         extra_vars = dict(
             cutoff_pk=cutoff_pk,
-            start_delimiter=start_delimiter,
-            end_delimiter=end_delimiter
         )
+        hostname_string = ''
+        for instance in instance_qs:
+            hostname_string += '{},'.format(instance.hostname)
         args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
-                '%s,' % instance.hostname, 'heartbeat_isolated.yml', '-e',
+                hostname_string, 'heartbeat_isolated.yml', '-e',
                 json.dumps(extra_vars)]
         module_path = os.path.join(os.path.dirname(awx.__file__), 'lib', 'management_modules')
         playbook_path = os.path.join(os.path.dirname(awx.__file__), 'playbooks')
-        env = {'ANSIBLE_LIBRARY': module_path}
+        env = {
+            'ANSIBLE_LIBRARY': module_path,
+            'ANSIBLE_STDOUT_CALLBACK': 'json'
+        }
         buff = cStringIO.StringIO()
         status, rc = run.run_pexpect(
             args, playbook_path, env, buff,
@@ -332,11 +335,15 @@ class IsolatedManager(object):
             pexpect_timeout=5
         )
         output = buff.getvalue()
-        if status != 'successful':
-            return 0  # recognized by task manager as 'unreachable'
-        result = re.search('{}(.*){}'.format(start_delimiter, end_delimiter), output)
-        cap = result.group(1)
-        return cap
+        output = output[output.find('{'):]  # Remove starting log statements
+        result = json.loads(output)
+        for instance in instance_qs:
+            task_result = result['plays'][0]['tasks'][0]['hosts'][instance.hostname]
+            if 'capacity' in task_result:
+                instance.capacity = int(task_result['capacity'])
+                instance.save(update_fields=['capacity'])
+            elif 'msg' in task_result:
+                logger.warning('Could not update capacity of {}, msg={}'.format(instance.hostname, task_result['msg']))
 
     @staticmethod
     def wrap_stdout_handle(instance, private_data_dir, stdout_handle):

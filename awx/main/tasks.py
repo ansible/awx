@@ -218,10 +218,9 @@ def tower_isolated_heartbeat(self):
         return
     cutoff_pk = UnifiedJob.lowest_running_id()
     # Slow pass looping over isolated IGs and their isolated instances
-    for isolated_instance in isolated_instance_qs:
-        logger.debug("Managing isolated instance {}.".format(isolated_instance.hostname))
-        isolated_instance.capacity = isolated_manager.IsolatedManager.health_check(isolated_instance, cutoff_pk=cutoff_pk)
-        isolated_instance.save(update_fields=['capacity'])
+    if len(isolated_instance_qs) > 0:
+        logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
+        isolated_manager.IsolatedManager.health_check(isolated_instance_qs, cutoff_pk=cutoff_pk)
 
 
 @task(bind=True, queue='tower')
