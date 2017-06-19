@@ -32,6 +32,9 @@
 import os
 import memcache
 import json
+import datetime
+from dateutil import parser
+from dateutil.tz import tzutc
 
 from ansible import constants as C
 
@@ -45,21 +48,34 @@ class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):
         self.mc = memcache.Client([C.CACHE_PLUGIN_CONNECTION], debug=0)
-        self.timeout = int(C.CACHE_PLUGIN_TIMEOUT)
-        self.inventory_id = os.environ['INVENTORY_ID']
+        self._timeout = int(C.CACHE_PLUGIN_TIMEOUT)
+        self._inventory_id = os.environ['INVENTORY_ID']
 
     @property
     def host_names_key(self):
-        return '{}'.format(self.inventory_id)
+        return '{}'.format(self._inventory_id)
 
     def translate_host_key(self, host_name):
-        return '{}-{}'.format(self.inventory_id, host_name)
+        return '{}-{}'.format(self._inventory_id, host_name)
 
     def translate_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self.inventory_id, host_name)
+        return '{}-{}-modified'.format(self._inventory_id, host_name)
 
     def get(self, key):
         host_key = self.translate_host_key(key)
+        modified_key = self.translate_modified_key(key)
+
+        '''
+        Cache entry expired
+        '''
+        modified = self.mc.get(modified_key)
+        if modified is None:
+            raise KeyError
+        modified = parser.parse(modified).replace(tzinfo=tzutc())
+        now_utc = datetime.datetime.now(tzutc())
+        if self._timeout != 0 and (modified + datetime.timedelta(seconds=self._timeout)) < now_utc:
+            raise KeyError
+
         value_json = self.mc.get(host_key)
         if value_json is None:
             raise KeyError
@@ -75,17 +91,17 @@ class CacheModule(BaseCacheModule):
         modified_key = self.translate_modified_key(key)
 
         self.mc.set(host_key, json.dumps(value))
-        self.mc.set(modified_key, True)
+        self.mc.set(modified_key, datetime.datetime.now(tzutc()).isoformat())
 
     def keys(self):
         return self.mc.get(self.host_names_key)
 
     def contains(self, key):
-        host_key = self.translate_host_key(key)
-        val = self.mc.get(host_key)
-        if val is None:
+        try:
+            self.get(key)
+            return True
+        except KeyError:
             return False
-        return True
 
     def delete(self, key):
         self.mc.delete(self.translate_host_key(key))
@@ -106,5 +122,7 @@ class CacheModule(BaseCacheModule):
         if not host_names:
             return
 
-        return [self.mc.get(self.translate_host_key(k)) for k in host_names]
+        for k in host_names:
+            ret[k] = self.mc.get(self.translate_host_key(k))
+        return ret
 

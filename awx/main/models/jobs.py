@@ -17,6 +17,8 @@ from django.db import models
 import memcache
 from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
+from dateutil import parser
+from dateutil.tz import tzutc
 from django.utils.encoding import force_text
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
@@ -40,8 +42,6 @@ from awx.main.models.base import PERM_INVENTORY_SCAN
 from awx.main.fields import JSONField
 
 from awx.main.consumers import emit_channel_notification
-
-TIMEOUT = 60
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -735,10 +735,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         for host in self._get_inventory_hosts():
             host_key = self.memcached_fact_host_key(host.name)
             modified_key = self.memcached_fact_modified_key(host.name)
-            # Only add host/facts if host doesn't already exist in the cache
+
             if cache.get(modified_key) is None:
+                if host.ansible_facts_modified:
+                    host_modified = host.ansible_facts_modified.replace(tzinfo=tzutc()).isoformat()
+                else:
+                    host_modified = datetime.datetime.now(tzutc()).isoformat()
                 cache.set(host_key, json.dumps(host.ansible_facts))
-                cache.set(modified_key, False)
+                cache.set(modified_key, host_modified)
 
             host_names.append(host.name)
 
@@ -746,7 +750,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
     def finish_job_fact_cache(self):
         if not self.inventory:
-            # TODO: Uh oh, we need to clean up the cache
             return
 
         cache = self._get_memcache_connection()
@@ -758,16 +761,18 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
             modified = cache.get(modified_key)
             if modified is None:
+                cache.delete(host_key)
                 continue
 
-            # Save facts that have changed
-            if modified:
+            # Save facts if cache is newer than DB
+            modified = parser.parse(modified, tzinfos=[tzutc()])
+            if not host.ansible_facts_modified or modified > host.ansible_facts_modified:
                 ansible_facts = cache.get(host_key)
                 if ansible_facts is None:
                     cache.delete(host_key)
-                    # TODO: Log cache inconsistency
                     continue
                 host.ansible_facts = ansible_facts
+                host.ansible_facts_modified = modified
                 host.save()
 
 

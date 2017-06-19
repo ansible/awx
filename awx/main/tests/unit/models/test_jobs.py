@@ -6,6 +6,10 @@ from awx.main.models import (
     Host,
 )
 
+import datetime
+import json
+from dateutil.tz import tzutc
+
 
 class CacheMock(object):
     def __init__(self):
@@ -24,18 +28,28 @@ class CacheMock(object):
 
 
 @pytest.fixture
-def hosts():
+def old_time():
+    return (datetime.datetime.now(tzutc()) - datetime.timedelta(minutes=60))
+
+
+@pytest.fixture()
+def new_time():
+    return (datetime.datetime.now(tzutc()))
+
+
+@pytest.fixture
+def hosts(old_time):
     return [
-        Host(name='host1', ansible_facts={"a": 1, "b": 2}),
-        Host(name='host2', ansible_facts={"a": 1, "b": 2}),
-        Host(name='host3', ansible_facts={"a": 1, "b": 2}),
+        Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
+        Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
+        Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
     ]
 
 
 @pytest.fixture
 def hosts2():
     return [
-        Host(name='host2', ansible_facts="foobar"),
+        Host(name='host2', ansible_facts="foobar", ansible_facts_modified=old_time),
     ]
 
 
@@ -75,8 +89,8 @@ def test_start_job_fact_cache(hosts, job, inventory, mocker):
 
     job._get_memcache_connection().set.assert_any_call('{}'.format(5), [h.name for h in hosts])
     for host in hosts:  
-        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), host.ansible_facts)
-        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), False)
+        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), json.dumps(host.ansible_facts))
+        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), host.ansible_facts_modified.isoformat())
 
 
 def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory, mocker):
@@ -84,8 +98,8 @@ def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory,
     job.start_job_fact_cache()
 
     for host in hosts:  
-        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), host.ansible_facts)
-        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), False)
+        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), json.dumps(host.ansible_facts))
+        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), host.ansible_facts_modified.isoformat())
 
     job._get_memcache_connection().set.reset_mock()
 
@@ -93,23 +107,25 @@ def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory,
 
     # Ensure hosts2 ansible_facts didn't overwrite hosts ansible_facts
     ansible_facts_cached = job._get_memcache_connection().get('{}-{}'.format(5, hosts2[0].name))
-    assert ansible_facts_cached == hosts[1].ansible_facts
+    assert ansible_facts_cached == json.dumps(hosts[1].ansible_facts)
 
 
-def test_finish_job_fact_cache(job, hosts, inventory, mocker):
+def test_finish_job_fact_cache(job, hosts, inventory, mocker, new_time):
 
     job.start_job_fact_cache()
+    for h in hosts:
+        h.save = mocker.Mock()
 
-    host = hosts[1]
-    host_key = job.memcached_fact_host_key(host.name)
-    modified_key = job.memcached_fact_modified_key(host.name)
-    host.save = mocker.Mock()
+    host_key = job.memcached_fact_host_key(hosts[1].name)
+    modified_key = job.memcached_fact_modified_key(hosts[1].name)
 
     job._get_memcache_connection().set(host_key, 'blah')
-    job._get_memcache_connection().set(modified_key, True)
+    job._get_memcache_connection().set(modified_key, new_time.isoformat())
     
     job.finish_job_fact_cache()
 
-    assert host.ansible_facts == 'blah'
-    host.save.assert_called_once_with()
+    hosts[0].save.assert_not_called()
+    hosts[2].save.assert_not_called()
+    assert hosts[1].ansible_facts == 'blah'
+    hosts[1].save.assert_called_once_with()
 
