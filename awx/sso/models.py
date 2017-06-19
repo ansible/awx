@@ -13,6 +13,7 @@ class UserEnterpriseAuth(models.Model):
     PROVIDER_CHOICES = (
         ('radius', _('RADIUS')),
         ('tacacs+', _('TACACS+')),
+        ('saml', _('SAML')),
     )
 
     class Meta:
