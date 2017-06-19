@@ -7,8 +7,7 @@
 import templatesService from './templates.service';
 import surveyMaker from './survey-maker/main';
 import templatesList from './list/main';
-import jobTemplatesAdd from './job_templates/add-job-template/main';
-import jobTemplatesEdit from './job_templates/edit-job-template/main';
+import jobTemplates from './job_templates/main';
 import workflowAdd from './workflows/add-workflow/main';
 import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
@@ -18,28 +17,21 @@ import workflowControls from './workflows/workflow-controls/main';
 import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
 import templateCopyService from './copy-template/template-copy.service';
-import CallbackHelpInit from './job_templates/factories/callback-help-init.factory';
-import md5Setup from './job_templates/factories/md-5-setup.factory';
 import WorkflowForm from './workflows.form';
 import CompletedJobsList from './completed-jobs.list';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
-import JobTemplateForm from './job-template.form';
 
 export default
-angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
-        jobTemplatesEdit.name, labels.name, workflowAdd.name, workflowEdit.name,
+angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.name, labels.name, workflowAdd.name, workflowEdit.name,
         workflowChart.name, workflowMaker.name, workflowControls.name
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
     .service('TemplateCopyService', templateCopyService)
-    .factory('CallbackHelpInit', CallbackHelpInit)
-    .factory('md5Setup', md5Setup)
     .factory('WorkflowForm', WorkflowForm)
     .factory('CompletedJobsList', CompletedJobsList)
     .factory('TemplateList', TemplateList)
-    .factory('JobTemplateForm', JobTemplateForm)
     .value('InventorySourcesList', InventorySourcesList)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {

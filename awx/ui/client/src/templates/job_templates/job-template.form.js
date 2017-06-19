@@ -127,68 +127,26 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     includePlaybookNotFoundError: true
                 },
                 credential: {
-                    label: i18n._('Machine Credential'),
-                    type: 'lookup',
-                    list: 'CredentialList',
-                    basePath: 'credentials',
-                    autopopulateLookup: false,
-                    search: {
-                        kind: 'ssh'
-                    },
-                    sourceModel: 'credential',
-                    sourceField: 'name',
-                    awRequiredWhen: {
-                        reqExpression: '!ask_credential_on_launch',
-                        alwaysShowAsterisk: true
-                    },
-                    requiredErrorMsg: i18n._("Please select a Machine Credential or check the Prompt on launch option."),
-                    column: 1,
-                    awPopOver: "<p>" + i18n._("Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
-                     " the username and SSH key or password that Ansible will need to log into the remote hosts.") + "</p>",
-                    dataTitle: i18n._('Credential'),
+                    label: i18n._('Credentials'),
+                    type: 'custom',
+                    control: `
+                        <multi-credential
+                            credentials="credentials"
+                            prompt="ask_credential_on_launch"
+                            selected-credentials="selectedCredentials"
+                            credential-not-present="credentialNotPresent"
+                            credentials-to-post="credentialsToPost">
+                        </multi-credential>`,
+                    required: true,
+                    awPopOver: "<p>" + i18n._("Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
+                    dataTitle: i18n._('Credentials'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_credential_on_launch',
                         text: i18n._('Prompt on launch'),
-                        ngChange: 'job_template_form.credential_name.$validate()',
-                    },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
-                cloud_credential: {
-                    label: i18n._('Cloud Credential'),
-                    type: 'lookup',
-                    list: 'CredentialList',
-                    basePath: 'credentials',
-                    search: {
-                        cloud: 'true'
-                    },
-                    sourceModel: 'cloud_credential',
-                    sourceField: 'name',
-                    column: 1,
-                    awPopOver:"<p>" + i18n._("Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
-                        "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.") + "</p>",
-                    dataTitle: i18n._('Cloud Credential'),
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
-                network_credential: {
-                    label: i18n._('Network Credential'),
-                    type: 'lookup',
-                    list: 'CredentialList',
-                    basePath: 'credentials',
-                    search: {
-                        kind: 'net'
-                    },
-                    sourceModel: 'network_credential',
-                    sourceField: 'name',
-                    column: 1,
-                    awPopOver: "<p>" + i18n._("Network credentials are used by Ansible networking modules to connect to and manage networking devices.") + "</p>",
-                    dataTitle: i18n._('Network Credential'),
-                    dataPlacement: 'right',
-                    dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    }
                 },
                 forks: {
                     label: i18n._('Forks'),
@@ -417,7 +375,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "job_template_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "job_template_form.$invalid || credentialNotPresent",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 }
             },
