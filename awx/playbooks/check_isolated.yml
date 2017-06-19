@@ -8,6 +8,10 @@
 
   tasks:
 
+    - shell: "tower-expect is-alive {{src}}"
+      register: is_alive
+      ignore_errors: true
+
     - name: copy artifacts from the isolated host
       synchronize:
         src: "{{src}}/artifacts/"
@@ -15,6 +19,6 @@
         mode: pull
         recursive: yes
 
-    - shell: "tower-expect is-alive {{src}}"
-      register: is_alive
-      failed_when: "is_alive.rc == 0"
+    - fail:
+        msg: "isolated task is still running"
+      when: "is_alive.rc == 0"
