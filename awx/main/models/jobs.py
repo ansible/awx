@@ -46,6 +46,7 @@ from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.main.models.jobs')
 analytics_logger = logging.getLogger('awx.analytics.job_events')
+system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
@@ -774,6 +775,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
                 host.ansible_facts = ansible_facts
                 host.ansible_facts_modified = modified
                 host.save()
+                system_tracking_logger.info('New fact for inventory {} host {}'.format(host.inventory.name, host.name),
+                                            extra=dict(inventory_id=host.inventory.id, host_name=host.name,
+                                                       ansible_facts=host.ansible_facts,
+                                                       ansible_facts_modified=host.ansible_facts_modified.isoformat()))
 
 
 class JobHostSummary(CreatedModifiedModel):

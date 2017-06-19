@@ -44,7 +44,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             'processName', 'relativeCreated', 'thread', 'threadName', 'extra',
             'auth_token', 'tags', 'host', 'host_id', 'level', 'port', 'uuid'))
         if kind == 'system_tracking':
-            data = copy(raw_data['facts_data'])
+            data = copy(raw_data['ansible_facts'])
         elif kind == 'job_events':
             data = copy(raw_data['event_model_data'])
         else:
@@ -99,17 +99,14 @@ class LogstashFormatter(LogstashFormatterVersion1):
                     val = self.format_timestamp(time_float)
                 data_for_log[key] = val
         elif kind == 'system_tracking':
-            module_name = raw_data['module_name']
-            if module_name in ['services', 'packages', 'files']:
-                data_for_log[module_name] = index_by_name(data)
-            elif module_name == 'ansible':
-                data_for_log['ansible'] = data
-                # Remove sub-keys with data type conflicts in elastic search
-                data_for_log['ansible'].pop('ansible_python_version', None)
-                data_for_log['ansible']['ansible_python'].pop('version_info', None)
-            else:
-                data_for_log['facts'] = data
-            data_for_log['module_name'] = module_name
+            data.pop('ansible_python_version', None)
+            if 'ansible_python' in data:
+                data['ansible_python'].pop('version_info', None)
+
+            data_for_log['ansible_facts'] = data
+            data_for_log['ansible_facts_modified'] = raw_data['ansible_facts_modified']
+            data_for_log['inventory_id'] = raw_data['inventory_id']
+            data_for_log['host_name'] = raw_data['host_name']
         elif kind == 'performance':
             request = raw_data['python_objects']['request']
             response = raw_data['python_objects']['response']

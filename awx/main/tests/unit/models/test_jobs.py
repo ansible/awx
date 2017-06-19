@@ -38,18 +38,18 @@ def new_time():
 
 
 @pytest.fixture
-def hosts(old_time):
+def hosts(old_time, inventory):
     return [
-        Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
-        Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
-        Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time),
+        Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time, inventory=inventory),
+        Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time, inventory=inventory),
+        Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=old_time, inventory=inventory),
     ]
 
 
 @pytest.fixture
-def hosts2():
+def hosts2(inventory):
     return [
-        Host(name='host2', ansible_facts="foobar", ansible_facts_modified=old_time),
+        Host(name='host2', ansible_facts="foobar", ansible_facts_modified=old_time, inventory=inventory),
     ]
 
 
