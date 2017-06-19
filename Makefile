@@ -302,13 +302,13 @@ requirements_ansible_dev:
 	fi
 
 requirements_isolated:
-	if [ ! -d "$(VENV_BASE)/tower_isolated" ]; then \
-		virtualenv --system-site-packages $(VENV_BASE)/tower_isolated && \
-		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-		$(VENV_BASE)/tower_isolated/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+	if [ ! -d "$(VENV_BASE)/tower" ]; then \
+		virtualenv --system-site-packages $(VENV_BASE)/tower && \
+		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
+		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 	fi;
-	$(VENV_BASE)/tower_isolated/bin/pip install -r requirements/requirements_isolated.txt
+	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_isolated.txt
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower

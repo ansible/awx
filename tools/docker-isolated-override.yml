@@ -11,7 +11,7 @@ services:
     image: gcr.io/ansible-tower-engineering/tower_isolated:${TAG}
     hostname: isolated
     volumes:
-      - "../awx/main/isolated:/tower_isolated"
+      - "../awx/main/isolated:/tower_devel"
       - "../awx/lib:/tower_lib"
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     privileged: true
