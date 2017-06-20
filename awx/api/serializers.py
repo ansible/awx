@@ -3465,7 +3465,10 @@ class InstanceSerializer(BaseSerializer):
         return obj.consumed_capacity
 
     def get_percent_capacity_remaining(self, obj):
-        return float("{0:.2f}".format((float(obj.consumed_capacity) / float(obj.capacity)) * 100.0))
+        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+            return 0.0
+        else:
+            return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
     def get_jobs_running(self, obj):
         return UnifiedJob.objects.filter(execution_node=obj.hostname, status__in=('running', 'waiting',)).count()
@@ -3494,7 +3497,10 @@ class InstanceGroupSerializer(BaseSerializer):
         return obj.consumed_capacity
 
     def get_percent_capacity_remaining(self, obj):
-        return float("{0:.2f}".format((float(obj.consumed_capacity) / float(obj.capacity)) * 100.0))
+        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+            return 0.0
+        else:
+            return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
     def get_jobs_running(self, obj):
         return UnifiedJob.objects.filter(instance_group=obj, status__in=('running', 'waiting',)).count()
