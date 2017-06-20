@@ -1,0 +1,31 @@
+<div class="at-InputContainer">
+    <div class="row">
+        <div class="col-xs-10 at-InputSearch-group--left">
+            <div class="form-group at-u-flat">
+                <div class="input-group">
+                    <input type="text" class="form-control at-Input"
+                           ng-attr-placeholder="{{ vm.placeholder }}" autofocus />
+                    <span class="input-group-btn">
+                        <button class="btn at-ButtonHollow--default at-Input-button">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-2 at-InputSearch-group--right">
+            <button class="btn at-ButtonHollow--default at-InputSearch-toggle"
+                    ng-class="{ 'at-InputSearch-toggle--active': vm.isToggleActive }"
+                    ng-click="vm.toggle()">
+                KEY
+            </button>
+        </div>
+    </div>
+    <div class="row" ng-show="vm.isToggleActive">
+        <div class="col-xs-12">
+            <div class="well at-InputSearch-well">
+                <p>Some info here</p>
+            </div>
+        </div>
+    </div>
+</div>

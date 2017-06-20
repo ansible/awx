@@ -1,29 +1,39 @@
 const DEFAULT_ANIMATION_DURATION = 150;
 
-function atModalLink (scope, el, attr, controllers) {
+function atModalLink (scope, el, attrs, controllers) {
     let modalController = controllers[0];
     let container = el[0];
+    let property = `scope.${scope.ns}.modal`;
 
-    modalController.init(scope, container);
+    let done = scope.$watch(property, () => {
+        modalController.init(scope, container);
+        done();
+    });
 }
 
-function AtModalController () {
+function AtModalController (eventService) {
     let vm = this;
 
-    let scope;
     let container;
+    let listeners;
 
-    vm.init = (_scope_, _container_) => {
-        scope = _scope_;
+    vm.init = (scope, _container_) => {
         container = _container_;
 
-        scope.state.show = vm.show;
-        scope.state.hide = vm.hide;
+        vm.modal = scope[scope.ns].modal;
+        vm.modal.show = vm.show;
+        vm.modal.hide = vm.hide;
     };
 
     vm.show = (title, message) => {
-        scope.title = title;
-        scope.message = message;
+        vm.modal.title = title;
+        vm.modal.message = message;
+
+        event.stopPropagation();
+
+        listeners = eventService.addListeners([
+            [window, 'click', vm.clickToHide]
+        ]);
 
         container.style.display = 'block';
         container.style.opacity = 1;
@@ -32,13 +42,33 @@ function AtModalController () {
     vm.hide = () => {
         container.style.opacity = 0;
 
+        eventService.remove(listeners);
+
         setTimeout(() => {
             container.style.display = 'none';
-            scope.message = '';
-            scope.title = '';
+            vm.modal.message = '';
+            vm.modal.title = '';
         }, DEFAULT_ANIMATION_DURATION);
     };
+
+    vm.clickToHide = event => {
+        if (vm.clickIsOutsideContainer(event)) {
+            console.log('outside');
+        } else {
+            console.log('inside');
+        }
+    };
+
+    vm.clickIsOutsideContainer = e => {
+        let pos = container.getBoundingClientRect();
+        let ex = e.clientX;
+        let ey = e.clientY;
+
+        console.log(e, pos);
+    };
 }
+
+AtModalController.$inject = ['EventService'];
 
 function atModal (pathService) {
     return {
@@ -50,9 +80,7 @@ function atModal (pathService) {
         controller: AtModalController,
         controllerAs: 'vm',
         link: atModalLink,
-        scope: {
-            state: '='
-        }
+        scope: true
     };
 }
 

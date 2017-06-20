@@ -70,10 +70,10 @@
 
 .at-mixin-ButtonIcon () {
     line-height: @at-line-height-short;
-    color: @at-color-icon;
 
     & > i {
         cursor: pointer;
+        transition: color @at-transition-icon-button;
     }
 
     & > i:hover {

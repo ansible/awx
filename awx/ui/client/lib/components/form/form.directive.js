@@ -2,6 +2,9 @@ function atFormLink (scope, el, attrs, controllers) {
     let formController = controllers[0];
     let form = el[0];
 
+    scope.ns = 'form';
+    scope[scope.ns] = { modal: {} };
+
     formController.init(scope, form);
 }
 
@@ -9,10 +12,10 @@ function AtFormController (eventService) {
     let vm = this || {};
 
     let scope;
+    let modal;
     let form;
 
     vm.components = [];
-    vm.modal = {};
     vm.state = {
         isValid: false,
         disabled: false,
@@ -22,6 +25,7 @@ function AtFormController (eventService) {
     vm.init = (_scope_, _form_) => {
         scope = _scope_;
         form = _form_;
+        modal = scope[scope.ns].modal;
 
         vm.setListeners();
     };
@@ -102,7 +106,7 @@ function AtFormController (eventService) {
                 message = err.data;
             }
 
-            vm.modal.show('Unable to Submit', `Unexpected Error: ${message}`);
+            modal.show('Unable to Submit', `Unexpected Error: ${message}`);
         }
     };
 
@@ -110,7 +114,7 @@ function AtFormController (eventService) {
         let title = 'Unable to Submit';
         let message = 'Unexpected server error. View the console for more information';
 
-        vm.modal.show(title, message);
+        modal.show(title, message);
 
         return true;
     };
