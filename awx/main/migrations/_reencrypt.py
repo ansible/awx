@@ -1,11 +1,30 @@
+from django.utils.translation import ugettext_lazy as _
+
 from awx.main import utils
 from awx.conf.migrations._reencrypt import (
     decrypt_field,
     should_decrypt_field,
 )
 
+from awx.main.notifications.email_backend import CustomEmailBackend
+from awx.main.notifications.slack_backend import SlackBackend
+from awx.main.notifications.twilio_backend import TwilioBackend
+from awx.main.notifications.pagerduty_backend import PagerDutyBackend
+from awx.main.notifications.hipchat_backend import HipChatBackend
+from awx.main.notifications.webhook_backend import WebhookBackend
+from awx.main.notifications.irc_backend import IrcBackend
+from awx.main.models.credential import Credential
 
 __all__ = ['replace_aesecb_fernet']
+
+
+NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
+                      ('slack', _('Slack'), SlackBackend),
+                      ('twilio', _('Twilio'), TwilioBackend),
+                      ('pagerduty', _('Pagerduty'), PagerDutyBackend),
+                      ('hipchat', _('HipChat'), HipChatBackend),
+                      ('webhook', _('Webhook'), WebhookBackend),
+                      ('irc', _('IRC'), IrcBackend)]
 
 
 def replace_aesecb_fernet(apps, schema_editor):
@@ -17,8 +36,10 @@ def replace_aesecb_fernet(apps, schema_editor):
 def _notification_templates(apps):
     NotificationTemplate = apps.get_model('main', 'NotificationTemplate')
     for nt in NotificationTemplate.objects.all():
-        for field in filter(lambda x: nt.notification_class.init_parameters[x]['type'] == "password",
-                            nt.notification_class.init_parameters):
+        CLASS_FOR_NOTIFICATION_TYPE = dict([(x[0], x[2]) for x in NOTIFICATION_TYPES])
+        notification_class = CLASS_FOR_NOTIFICATION_TYPE[nt.notification_type]
+        for field in filter(lambda x: notification_class.init_parameters[x]['type'] == "password",
+                            notification_class.init_parameters):
             if should_decrypt_field(nt.notification_configuration[field]):
                 value = decrypt_field(nt, 'notification_configuration', subfield=field)
                 nt.notification_configuration[field] = value
@@ -26,21 +47,14 @@ def _notification_templates(apps):
 
 
 def _credentials(apps):
-    # this monkey-patch is necessary to make the implicit role generation save
-    # signal use the correct Role model (the version active at this point in
-    # migration, not the one at HEAD)
-    orig_current_apps = utils.get_current_apps
-    try:
-        utils.get_current_apps = lambda: apps
-        for credential in apps.get_model('main', 'Credential').objects.all():
-            for field_name, value in credential.inputs.items():
-                if should_decrypt_field(value):
-                    value = decrypt_field(credential, field_name)
-                    credential.inputs[field_name] = value
-            credential.save()
-    finally:
-        utils.get_current_apps = orig_current_apps
-
+    # TODO: Try to not use the model directly imported from our
+    # source (should use apps.get_model) to make the migration less britle.
+    for credential in Credential.objects.all():
+        for field_name, value in credential.inputs.items():
+            if should_decrypt_field(value):
+                value = decrypt_field(credential, field_name)
+                credential.inputs[field_name] = value
+        credential.save()
 
 
 def _unified_jobs(apps):
