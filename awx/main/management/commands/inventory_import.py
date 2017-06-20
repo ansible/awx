@@ -163,6 +163,8 @@ class AnsibleInventoryLoader(object):
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
                 self.method, proc.returncode, stdout, stderr))
 
+        for line in stderr.splitlines():
+            logger.error(line)
         try:
             data = json.loads(stdout)
             if not isinstance(data, dict):
