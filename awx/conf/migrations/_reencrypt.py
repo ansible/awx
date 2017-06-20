@@ -102,4 +102,6 @@ def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=Fals
 
 
 def should_decrypt_field(value):
-    return value.startswith('$encrypted$') and '$AESCBC$' not in value
+    if hasattr(value, 'startswith'):
+        return value.startswith('$encrypted$') and '$AESCBC$' not in value
+    return False
