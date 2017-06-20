@@ -28,7 +28,7 @@ export default {
                     list: list,
                     mode: 'edit'
                 });
-                return $templateRequest(templateUrl('inventories-hosts/inventories/related/groups/related/nested-hosts/nested-hosts-disassociate')).then((template) => {
+                return $templateRequest(templateUrl('inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate')).then((template) => {
                     return html.concat(template);
                 });
             },
