@@ -23,11 +23,13 @@ class Command(BaseCommand):
         instance = Instance.objects.filter(hostname=options.get('name'))
         if instance.exists():
             instance.delete()
+            print("Instance Removed")
             result = subprocess.Popen("rabbitmqctl forget_cluster_node rabbitmq@{}".format(options.get('name')), shell=True).wait()
             if result != 0:
                 print("Node deprovisioning may have failed when attempting to remove the RabbitMQ instance from the cluster")
             else:
                 print('Successfully deprovisioned {}'.format(options.get('name')))
+            print('(changed: True)')
         else:
             print('No instance found matching name {}'.format(options.get('name')))
 

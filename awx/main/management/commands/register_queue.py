@@ -5,7 +5,7 @@ import sys
 from awx.main.models import Instance, InstanceGroup
 
 from optparse import make_option
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -20,34 +20,44 @@ class Command(BaseCommand):
     )
 
     def handle(self, **options):
+        if not options.get('queuename'):
+            raise CommandError("Specify `--queuename` to use this command.")
+        changed = False
         ig = InstanceGroup.objects.filter(name=options.get('queuename'))
         control_ig = None
         if options.get('controller'):
             control_ig = InstanceGroup.objects.filter(name=options.get('controller')).first()
         if ig.exists():
-            print("Instance Group already registered {}".format(ig[0]))
+            print("Instance Group already registered {}".format(ig[0].name))
             ig = ig[0]
             if control_ig and ig.controller_id != control_ig.pk:
                 ig.controller = control_ig
                 ig.save()
-                print("Set controller group {} on {}.".format(control_ig, ig))
+                print("Set controller group {} on {}.".format(control_ig.name, ig.name))
+                changed = True
         else:
             print("Creating instance group {}".format(options.get('queuename')))
             ig = InstanceGroup(name=options.get('queuename'))
             if control_ig:
                 ig.controller = control_ig
             ig.save()
+            changed = True
         hostname_list = []
         if options.get('hostnames'):
             hostname_list = options.get('hostnames').split(",")
-        instance_list = [x.strip() for x in hostname_list]
+        instance_list = [x.strip() for x in hostname_list if x]
         for inst_name in instance_list:
             instance = Instance.objects.filter(hostname=inst_name)
-            if instance.exists() and instance not in ig.instances.all():
+            if instance.exists() and instance[0] not in ig.instances.all():
                 ig.instances.add(instance[0])
-                print("Added instance {} to {}".format(instance[0], ig))
+                print("Added instance {} to {}".format(instance[0].hostname, ig.name))
+                changed = True
             elif not instance.exists():
                 print("Instance does not exist: {}".format(inst_name))
+                if changed:
+                    print('(changed: True)')
                 sys.exit(1)
             else:
-                print("Instance already registered {}".format(instance[0]))
+                print("Instance already registered {}".format(instance[0].hostname))
+        if changed:
+            print('(changed: True)')

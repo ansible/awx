@@ -19,7 +19,6 @@ import traceback
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
-from datetime import timedelta
 import yaml
 import fcntl
 try:
@@ -34,7 +33,7 @@ from celery.signals import celeryd_init, worker_process_init
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
@@ -196,6 +195,29 @@ def cluster_node_heartbeat(self):
                                                                                                              inst.version))
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
 
+
+@task(bind=True)
+def tower_isolated_heartbeat(self):
+    local_hostname = settings.CLUSTER_HOST_ID
+    logger.debug("Controlling node checking for any isolated management tasks.")
+    poll_interval = settings.AWX_ISOLATED_PERIODIC_CHECK
+    # Get isolated instances not checked since poll interval - some buffer
+    nowtime = now()
+    accept_before = nowtime - timedelta(seconds=(poll_interval - 10))
+    isolated_instance_qs = Instance.objects.filter(
+        rampart_groups__controller__instances__hostname=local_hostname,
+        last_isolated_check__lt=accept_before
+    )
+    # Fast pass of isolated instances, claiming the nodes to update
+    with transaction.atomic():
+        for isolated_instance in isolated_instance_qs:
+            isolated_instance.last_isolated_check = nowtime
+            # Prevent modified time from being changed, as in normal heartbeat
+            isolated_instance.save(update_fields=['last_isolated_check'])
+    # Slow pass looping over isolated IGs and their isolated instances
+    if len(isolated_instance_qs) > 0:
+        logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
+        isolated_manager.IsolatedManager.health_check(isolated_instance_qs)
 
 
 @task(bind=True, queue='tower')

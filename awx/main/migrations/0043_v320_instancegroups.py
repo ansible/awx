@@ -48,4 +48,9 @@ class Migration(migrations.Migration):
             name='instance_group',
             field=models.ManyToManyField(to='main.InstanceGroup', blank=True),
         ),
+        migrations.AddField(
+            model_name='instance',
+            name='last_isolated_check',
+            field=models.DateTimeField(auto_now_add=True, null=True),
+        ),
     ]

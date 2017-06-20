@@ -950,10 +950,10 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_tower_1
 	docker start tools_isolated_1
-	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" != "" ]; then \
+	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub`" ]; then \
 		echo "SSH keys already copied to isolated instance"; \
 	else \
-		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && echo $$(docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
+		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && rm -f /root/.ssh/authorized_keys && echo $$(docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
 	fi
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 

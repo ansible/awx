@@ -30,3 +30,4 @@ class Command(BaseCommand):
         ig = ig.first()
         ig.delete()
         print("Instance Group Removed")
+        print('(changed: True)')

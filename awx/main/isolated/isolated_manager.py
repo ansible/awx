@@ -57,9 +57,7 @@ class IsolatedManager(object):
         self.cwd = cwd
         self.env = env.copy()
         # Do not use callbacks for controller's management jobs
-        self.env['ANSIBLE_CALLBACK_PLUGINS'] = ''
-        self.env['CALLBACK_QUEUE'] = ''
-        self.env['CALLBACK_CONNECTION'] = ''
+        self.env.update(self._base_management_env())
         self.stdout_handle = stdout_handle
         self.ssh_key_path = ssh_key_path
         self.expect_passwords = {k.pattern: v for k, v in expect_passwords.items()}
@@ -71,8 +69,18 @@ class IsolatedManager(object):
         self.proot_cmd = proot_cmd
         self.started_at = None
 
-    @property
-    def awx_playbook_path(self):
+    @staticmethod
+    def _base_management_env():
+        return {
+            'ANSIBLE_CALLBACK_PLUGINS': '',
+            'CALLBACK_QUEUE': '',
+            'CALLBACK_CONNECTION': '',
+            'ANSIBLE_RETRY_FILES_ENABLED': 'False',
+            'ANSIBLE_HOST_KEY_CHECKING': 'False'
+        }
+
+    @classmethod
+    def awx_playbook_path(cls):
         return os.path.join(
             os.path.dirname(awx.__file__),
             'playbooks'
@@ -134,7 +142,7 @@ class IsolatedManager(object):
         buff = StringIO.StringIO()
         logger.debug('Starting job on isolated host with `run_isolated.yml` playbook.')
         status, rc = run.run_pexpect(
-            args, self.awx_playbook_path, self.env, buff,
+            args, self.awx_playbook_path(), self.env, buff,
             expect_passwords={
                 re.compile(r'Secret:\s*?$', re.M): base64.b64encode(json.dumps(secrets))
             },
@@ -244,7 +252,7 @@ class IsolatedManager(object):
             buff = cStringIO.StringIO()
             logger.debug('Checking job on isolated host with `check_isolated.yml` playbook.')
             status, rc = run.run_pexpect(
-                args, self.awx_playbook_path, self.env, buff,
+                args, self.awx_playbook_path(), self.env, buff,
                 cancelled_callback=self.cancelled_callback,
                 idle_timeout=remaining,
                 job_timeout=remaining,
@@ -295,7 +303,7 @@ class IsolatedManager(object):
         logger.debug('Cleaning up job on isolated host with `clean_isolated.yml` playbook.')
         buff = cStringIO.StringIO()
         status, rc = run.run_pexpect(
-            args, self.awx_playbook_path, self.env, buff,
+            args, self.awx_playbook_path(), self.env, buff,
             idle_timeout=60, job_timeout=60,
             pexpect_timeout=5
         )
@@ -303,6 +311,56 @@ class IsolatedManager(object):
         if status != 'successful':
             # stdout_handle is closed by this point so writing output to logs is our only option
             logger.warning('Cleanup from isolated job encountered error, output:\n{}'.format(buff.getvalue()))
+
+    @classmethod
+    def health_check(cls, instance_qs):
+        '''
+        :param instance_qs:         List of Django objects representing the
+                                    isolated instances to manage
+        Runs playbook that will
+         - determine if instance is reachable
+         - find the instance capacity
+         - clean up orphaned private files
+        Performs save on each instance to update its capacity.
+        '''
+        hostname_string = ''
+        for instance in instance_qs:
+            hostname_string += '{},'.format(instance.hostname)
+        args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
+                hostname_string, 'heartbeat_isolated.yml']
+        env = cls._base_management_env()
+        env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'lib', 'management_modules')
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'json'
+
+        buff = cStringIO.StringIO()
+        status, rc = run.run_pexpect(
+            args, cls.awx_playbook_path(), env, buff,
+            idle_timeout=60, job_timeout=60,
+            pexpect_timeout=5
+        )
+        output = buff.getvalue()
+        buff.close()
+
+        try:
+            result = json.loads(output)
+            if not isinstance(result, dict):
+                raise TypeError('Expected a dict but received {}.'.format(str(type(result))))
+        except (ValueError, AssertionError, TypeError):
+            logger.exception('Failed to read status from isolated instances, output:\n {}'.format(output))
+            return
+
+        for instance in instance_qs:
+            try:
+                task_result = result['plays'][0]['tasks'][0]['hosts'][instance.hostname]
+            except (KeyError, IndexError):
+                logger.exception('Failed to read status from isolated instance {}.'.format(instance.hostname))
+                continue
+            if 'capacity' in task_result:
+                instance.capacity = int(task_result['capacity'])
+                instance.save(update_fields=['capacity'])
+            else:
+                logger.warning('Could not update capacity of {}, msg={}'.format(
+                    instance.hostname, task_result.get('msg', 'unknown failure')))
 
     @staticmethod
     def wrap_stdout_handle(instance, private_data_dir, stdout_handle):
