@@ -77,7 +77,7 @@ function EditCredentialsController (models, $state, $scope) {
     };
 
     vm.form.onSaveSuccess = res => {
-        $state.go('credentials', { reload: true });
+        $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
     };
 }
 

@@ -38,14 +38,14 @@ function atFormActionController ($state) {
     vm.setCancelDefaults = () => {
         scope.text = 'CANCEL';
         scope.fill = 'Hollow';
-        scope.color = 'white';
+        scope.color = 'default';
         scope.action = () => $state.go('^');
     };
 
     vm.setSaveDefaults = () => {
         scope.text = 'SAVE';
         scope.fill = '';
-        scope.color = 'green';
+        scope.color = 'success';
         scope.action = () => form.submit();
     };
 }
