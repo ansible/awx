@@ -61,11 +61,28 @@ ssh root@isolated
 This should give a shell to the `tools_isolated_1` container, as the
 `tools_tower_1` container sees it.
 
-### Start the playbook service
+### Run a playbook
 
-The following command would run the playbook for job 57.
+In order to run an isolated job, associate the instance group `thepentagon` with
+a job template, inventory, or organization, then run a job that derives from
+that resource. You should be able to confirm success by inspecting the
+`instance_group` of the job.
+
+#### Advanced Manual Testing
+
+If you want to run a job manually inside of the isolated container with this
+tooling, you need a private data directory. Normal isolated job runs will
+clean up their private data directory, but you can temporarily disable this
+by disabling some parts of the cleanup_isolated.yml playbook.
+
+Example location of a private data directory:
+
+`/tmp/ansible_tower_29_OM6Mnx/`
+
+The following command would run the playbook corresponding to that job.
 
 ```bash
-tower-expect start 57
+tower-expect start /tmp/ansible_tower_29_OM6Mnx/
 ```
 
+Other tower-expect commands include `start`, `is-alive`, and `stop`.
