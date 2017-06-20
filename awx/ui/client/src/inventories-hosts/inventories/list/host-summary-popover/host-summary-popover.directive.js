@@ -1,0 +1,94 @@
+export default ['templateUrl', 'Wait', '$filter', '$compile',
+    function(templateUrl, Wait, $filter, $compile) {
+        return {
+            restrict: 'E',
+            replace: false,
+            scope: {
+                inventory: '='
+            },
+            controller: 'HostSummaryPopoverController',
+            templateUrl: templateUrl('inventories-hosts/inventories/list/host-summary-popover/host-summary-popover'),
+            link: function(scope) {
+
+                function ellipsis(a) {
+                    if (a.length > 20) {
+                        return a.substr(0,20) + '...';
+                    }
+                    return a;
+                }
+
+                function attachElem(event, html, title) {
+                    var elem = $(event.target).parent();
+                    try {
+                        elem.tooltip('hide');
+                        elem.popover('destroy');
+                    }
+                    catch(err) {
+                        //ignore
+                    }
+                    $('.popover').each(function() {
+                        // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                        $(this).remove();
+                    });
+                    $('.tooltip').each( function() {
+                        // close any lingering tool tipss
+                        $(this).hide();
+                    });
+                    elem.attr({
+                        "aw-pop-over": html,
+                        "data-popover-title": title,
+                        "data-placement": "right" });
+                    elem.removeAttr('ng-click');
+                    $compile(elem)(scope);
+                    scope.triggerPopover(event);
+                }
+
+                scope.generateTable = function(data, event){
+                    var html, title = "Recent Jobs";
+                    Wait('stop');
+                    if (data.count > 0) {
+                        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+                        html += "<thead>\n";
+                        html += "<tr>";
+                        html += "<th>Status</th>";
+                        html += "<th>Finished</th>";
+                        html += "<th>Name</th>";
+                        html += "</tr>\n";
+                        html += "</thead>\n";
+                        html += "<tbody>\n";
+
+                        data.results.forEach(function(row) {
+                            html += "<tr>\n";
+                            html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                                ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
+                            html += "<td>" + ($filter('longDate')(row.finished)) + "</td>";
+                            html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                                ". Click for details\" aw-tip-placement=\"top\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
+                            html += "</tr>\n";
+                        });
+                        html += "</tbody>\n";
+                        html += "</table>\n";
+                    }
+                    else {
+                        html = "<p>No recent job data available for this inventory.</p>\n";
+                    }
+                    attachElem(event, html, title);
+                };
+
+                scope.showHostSummary = function(event) {
+                    try{
+                        var elem = $(event.target).parent();
+                        // if the popover is visible already, then exit the function here
+                        if(elem.data()['bs.popover'].tip().hasClass('in')){
+                            return;
+                        }
+                    }
+                    catch(err){
+                        scope.gatherRecentJobs(event);
+                    }
+                };
+
+            }
+        };
+    }
+];

@@ -20,14 +20,14 @@ export default function BuildAnchor($log, $filter) {
                      if (activity.operation === 'create' || activity.operation === 'delete'){
                          // the API formats the changes.inventory field as str 'myInventoryName-PrimaryKey'
                          var inventory_id = _.last(activity.changes.inventory.split('-'));
-                         url += 'inventories/' + inventory_id + '/manage?group=' + activity.changes.id;
+                         url += 'inventories/' + inventory_id + '/groups/edit/' + activity.changes.id;
                      }
                      else {
-                         url += 'inventories/' + activity.summary_fields.inventory[0].id + '/manage?group=' + (activity.changes.id || activity.changes.object1_pk);
+                         url += 'inventories/' + activity.summary_fields.inventory[0].id + '/groups/edit/' + (activity.changes.id || activity.changes.object1_pk);
                      }
                      break;
                  case 'host':
-                     url += 'home/hosts/' + obj.id;
+                     url += 'hosts/' + obj.id;
                      break;
                  case 'job':
                      url += 'jobs/' + obj.id;

@@ -1,0 +1,157 @@
+/*************************************************
+ * Copyright (c) 2017 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePath',
+    'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
+    'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData',
+    function($scope, NestedHostsListDefinition, $rootScope, GetBasePath,
+    rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
+    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData) {
+
+    let list = NestedHostsListDefinition;
+
+    init();
+
+    function init(){
+        $scope.canAdd = canAdd;
+        $scope.enableSmartInventoryButton = false;
+        $scope.disassociateFrom = groupData;
+
+        // Search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+        $rootScope.flashMessage = null;
+
+        $scope.$watchCollection(list.name, function() {
+            $scope[list.name] = _.map($scope.nested_hosts, function(value) {
+                value.inventory_name = value.summary_fields.inventory.name;
+                value.inventory_id = value.summary_fields.inventory.id;
+                return value;
+            });
+            setJobStatus();
+        });
+
+        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
+            if(toParams && toParams.host_search) {
+                let hasMoreThanDefaultKeys = false;
+                angular.forEach(toParams.host_search, function(value, key) {
+                    if(key !== 'order_by' && key !== 'page_size') {
+                        hasMoreThanDefaultKeys = true;
+                    }
+                });
+                $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+            }
+            else {
+                $scope.enableSmartInventoryButton = false;
+            }
+        });
+
+        $scope.$on('selectedOrDeselected', function(e, value) {
+            let item = value.value;
+
+            if (value.isSelected) {
+                if(!$scope.hostsSelected) {
+                    $scope.hostsSelected = [];
+                }
+                $scope.hostsSelected.push(item);
+            } else {
+                _.remove($scope.hostsSelected, { id: item.id });
+                if($scope.hostsSelected.length === 0) {
+                    $scope.hostsSelected = null;
+                }
+            }
+
+            $scope.systemTrackingDisabled = ($scope.hostsSelected && $scope.hostsSelected.length > 2) ? true : false;
+        });
+
+    }
+
+    function setJobStatus(){
+        _.forEach($scope.hosts, function(value) {
+            SetStatus({
+                scope: $scope,
+                host: value
+            });
+        });
+    }
+
+    $scope.associateHost = function(){
+        $state.go('inventories.edit.groups.edit.nested_hosts.associate');
+    };
+    $scope.editHost = function(id){
+        $state.go('inventories.edit.hosts.edit', {host_id: id});
+    };
+    $scope.disassociateHost = function(host){
+        $scope.toDisassociate = {};
+        angular.extend($scope.toDisassociate, host);
+        $('#host-disassociate-modal').modal('show');
+    };
+
+    $scope.confirmDisassociate = function(){
+
+        // Bind an even listener for the modal closing.  Trying to $state.go() before the modal closes
+        // will mean that these two things are running async and the modal may not finish closing before
+        // the state finishes transitioning.
+        $('#host-disassociate-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+            // Remove the event handler so that we don't end up with multiple bindings
+            $('#host-disassociate-modal').off('hidden.bs.modal');
+            // Reload the inventory manage page and show that the group has been removed
+            $state.go('.', null, {reload: true});
+        });
+
+        let closeModal = function(){
+            $('#host-disassociate-modal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        };
+
+        GroupsService.disassociateHost($scope.toDisassociate.id, $scope.disassociateFrom.id)
+            .then(() => {
+                closeModal();
+            }).catch((error) => {
+                closeModal();
+                ProcessErrors(null, error.data, error.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to disassociate host from group: POST returned status' +
+                        error.status
+                });
+            });
+    };
+
+    $scope.toggleHost = function(event, host) {
+        try {
+            $(event.target).tooltip('hide');
+        } catch (e) {
+            // ignore
+        }
+
+        host.enabled = !host.enabled;
+
+        HostsService.put(host).then(function(){
+            $state.go($state.current, null, {reload: true});
+        });
+    };
+
+    $scope.systemTracking = function(){
+        var hostIds = _.map($scope.hostsSelected, (host) => host.id);
+        $state.go('systemTracking', {
+            inventoryId: $state.params.inventory_id,
+            hosts: $scope.hostsSelected,
+            hostIds: hostIds
+        });
+    };
+
+    $scope.setAdhocPattern = function(){
+        var pattern = _($scope.hostsSelected)
+            .map(function(item){
+                return item.name;
+            }).value().join(':');
+
+        $state.go('^.^.^.adhoc', {pattern: pattern});
+    };
+}];

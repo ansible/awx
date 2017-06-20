@@ -736,8 +736,8 @@ function($injector, $stateExtender, $log, i18n) {
                             list.iterator = field.sourceModel;
                             return list;
                         }],
-                        OrganizationId: ['ListDefinition', 'InventoryManageService', '$stateParams', '$rootScope',
-                            function(list, InventoryManageService, $stateParams, $rootScope){
+                        OrganizationId: ['ListDefinition', 'InventoriesService', '$stateParams', '$rootScope',
+                            function(list, InventoriesService, $stateParams, $rootScope){
                                 if(list.iterator === 'inventory_script'){
                                     if($rootScope.$$childTail &&
                                         $rootScope.$$childTail.$resolve &&
@@ -745,7 +745,7 @@ function($injector, $stateExtender, $log, i18n) {
                                             return $rootScope.$$childTail.$resolve.inventoryData.summary_fields.organization.id;
                                     }
                                     else {
-                                        return InventoryManageService.getInventory($stateParams.inventory_id).then(res => res.data.summary_fields.organization.id);
+                                        return InventoriesService.getInventory($stateParams.inventory_id).then(res => res.data.summary_fields.organization.id);
                                     }
 
                                 }
