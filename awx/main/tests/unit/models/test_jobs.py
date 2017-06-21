@@ -87,7 +87,7 @@ def test_start_job_fact_cache(hosts, job, inventory, mocker):
 
     job.start_job_fact_cache()
 
-    job._get_memcache_connection().set.assert_any_call('{}'.format(5), [h.name for h in hosts])
+    job._get_memcache_connection().set.assert_any_call('5', [h.name for h in hosts])
     for host in hosts:  
         job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), json.dumps(host.ansible_facts))
         job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), host.ansible_facts_modified.isoformat())

@@ -773,7 +773,6 @@ class BaseTask(Task):
         self.final_run_hook(instance, status, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
-            print("Status is not successful!")
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
@@ -1858,7 +1857,6 @@ class RunInventoryUpdate(BaseTask):
                 raise
 
     def final_run_hook(self, instance, status, **kwargs):
-        print("In final run hook")
         if self.custom_dir_path:
             for p in self.custom_dir_path:
                 try:
