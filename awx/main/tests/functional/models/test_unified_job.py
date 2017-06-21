@@ -1,10 +1,12 @@
 import pytest
+import mock
 
 # Django
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
 from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project
+from awx.main.models.ha import InstanceGroup
 
 
 @pytest.mark.django_db
@@ -65,3 +67,36 @@ class TestCreateUnifiedJob:
         assert second_job.inventory == job_with_links.inventory
         assert second_job.limit == 'my_server'
         assert net_credential in second_job.extra_credentials.all()
+
+
+@pytest.mark.django_db
+class TestIsolatedRuns:
+
+    def test_low_capacity_isolated_instance_selected(self):
+        ig = InstanceGroup.objects.create(name='tower')
+        iso_ig = InstanceGroup.objects.create(name='thepentagon', controller=ig)
+        iso_ig.instances.create(hostname='iso1', capacity=50)
+        i2 = iso_ig.instances.create(hostname='iso2', capacity=200)
+        job = Job.objects.create(
+            instance_group=iso_ig
+        )
+
+        mock_async = mock.MagicMock()
+        success_callback = mock.MagicMock()
+        error_callback = mock.MagicMock()
+
+        class MockTaskClass:
+            apply_async = mock_async
+
+        with mock.patch.object(job, '_get_task_class') as task_class:
+            task_class.return_value = MockTaskClass
+            job.start_celery_task([], error_callback, success_callback, 'thepentagon')
+        mock_async.assert_called_with([job.id, 'iso2'], [], link_error=error_callback, link=success_callback, queue='thepentagon')
+
+        i2.capacity = 20
+        i2.save()
+
+        with mock.patch.object(job, '_get_task_class') as task_class:
+            task_class.return_value = MockTaskClass
+            job.start_celery_task([], error_callback, success_callback, 'thepentagon')
+        mock_async.assert_called_with([job.id, 'iso1'], [], link_error=error_callback, link=success_callback, queue='thepentagon')
