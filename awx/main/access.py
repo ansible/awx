@@ -2037,6 +2037,7 @@ class UnifiedJobAccess(BaseAccess):
             'modified_by',
             'unified_job_node__workflow_job',
             'unified_job_template',
+            'instance_group',
             Prefetch('labels', queryset=Label.objects.all().order_by('name'))
         )
 
