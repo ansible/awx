@@ -7,9 +7,9 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 
-NAMED_URL_RES_DILIMITER = "--"
-NAMED_URL_RES_INNER_DILIMITER = "-"
-NAMED_URL_RES_DILIMITER_ENCODE = "%2D"
+NAMED_URL_RES_DILIMITER = "++"
+NAMED_URL_RES_INNER_DILIMITER = "+"
+NAMED_URL_RES_DILIMITER_ENCODE = "%2B"
 URL_PATH_RESERVED_CHARSET = {}
 for c in ';/?:@=&[]':
     URL_PATH_RESERVED_CHARSET[c] = six.moves.urllib.parse.quote(c, safe='')

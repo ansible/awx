@@ -1,4 +1,4 @@
-Starting from API V2, the named URL feature lets user access Tower resources via resource-specific human-readable identifiers. Before the only way of accessing a resource object without auxiliary query string is via resource primary key number, for example, via URL path `/api/v2/hosts/2/`. Now users can use named URL to do the same thing, for example, via URL path `/api/v2/hosts/host_name--inv_name--org_name/`.
+Starting from API V2, the named URL feature lets user access Tower resources via resource-specific human-readable identifiers. Before the only way of accessing a resource object without auxiliary query string is via resource primary key number, for example, via URL path `/api/v2/hosts/2/`. Now users can use named URL to do the same thing, for example, via URL path `/api/v2/hosts/host_name++inv_name++org_name/`.
 
 ## Usage
 
@@ -6,30 +6,30 @@ There are two named-URL-related Tower configuration setting available under `/ap
 ```
 "NAMED_URL_FORMATS": {
     "job_templates": "<name>",
-    "organizations": "<name>",
-    "users": "<username>",
     "workflow_job_templates": "<name>",
-    "labels": "<name>--<organization.name>",
-    "teams": "<name>--<organization.name>",
-    "system_job_templates": "<name>",
-    "notification_templates": "<name>--<organization.name>",
+    "inventories": "<name>++<organization.name>",
+    "users": "<username>",
+    "custom_inventory_scripts": "<name>++<organization.name>",
+    "labels": "<name>++<organization.name>",
+    "credential_types": "<name>+<kind>",
+    "notification_templates": "<name>++<organization.name>",
     "instances": "<hostname>",
-    "custom_inventory_scripts": "<name>--<organization.name>",
     "instance_groups": "<name>",
-    "hosts": "<name>--<inventory.name>--<organization.name>",
-    "projects": "<name>",
-    "groups": "<name>--<inventory.name>--<organization.name>",
-    "credential_types": "<name>-<kind>",
-    "credentials": "<name>--<credential_type.name>-<credential_type.kind>--<organization.name>",
-    "inventories": "<name>--<organization.name>",
-    "inventory_sources": "<name>"
+    "hosts": "<name>++<inventory.name>++<organization.name>",
+    "system_job_templates": "<name>",
+    "groups": "<name>++<inventory.name>++<organization.name>",
+    "organizations": "<name>",
+    "credentials": "<name>++<credential_type.name>+<credential_type.kind>++<organization.name>",
+    "teams": "<name>++<organization.name>",
+    "inventory_sources": "<name>",
+    "projects": "<name>"
 }
 ```
 For each item in `NAMED_URL_FORMATS`, the key is the API name of the resource to have named URL, the value is a string indicating how to form a human-readable unique identifiers for that resource. A typical procedure of composing named URL for a specific resource object using `NAMED_URL_FORMATS` is given below:
 
-Suppose that a user wants to manually determine the named URL for a label with `id` 5. She should first look up `labels` field of `NAMED_URL_FORMATS` and get the identifier format `<name>--<organization.name>`. The first part of the URL format is `<name>`, that indicates she should get the label resource detail, `/api/v2/labels/5/`, and look for `name` field in returned JSON. Suppose the user has `name` field with value 'Foo', then the first part of our unique identifier is `Foo`; The second part of the format are double dashes `--`. That is the delimiter that separate different parts of a unique identifier so simply append them to unique identifier to get `Foo--`; The third part of the format is `<organization.name>`, This indicates that field is not in the current label object under investigation, but in an organization which the label object points to. Thus, as the format indicates, the user should look up `organization` in `related` field of current returned JSON. That field may or may not exist, if it exists, follow the URL given in that field, say `/api/v2/organizations/3/`, to get the detail of the specific organization, extract its `name` field, say 'Default', and append it to our current unique identifier. Since `<organizations.name>` is the last part of format, we end up generating unique identifier for underlying label and have our named URL ready: `/api/v2/labels/Foo--Default/`. In the case where `organization` does not exist in `related` field of label object detail, we append empty string `''` instead, which essentially does not alter the current identifier. So `Foo--` becomes final unique identifier and thus generate named URL to be `/api/v2/labels/Foo--/`.
+Suppose that a user wants to manually determine the named URL for a label with `id` 5. She should first look up `labels` field of `NAMED_URL_FORMATS` and get the identifier format `<name>++<organization.name>`. The first part of the URL format is `<name>`, that indicates she should get the label resource detail, `/api/v2/labels/5/`, and look for `name` field in returned JSON. Suppose the user has `name` field with value 'Foo', then the first part of our unique identifier is `Foo`; The second part of the format are double pluses `++`. That is the delimiter that separate different parts of a unique identifier so simply append them to unique identifier to get `Foo++`; The third part of the format is `<organization.name>`, This indicates that field is not in the current label object under investigation, but in an organization which the label object points to. Thus, as the format indicates, the user should look up `organization` in `related` field of current returned JSON. That field may or may not exist, if it exists, follow the URL given in that field, say `/api/v2/organizations/3/`, to get the detail of the specific organization, extract its `name` field, say 'Default', and append it to our current unique identifier. Since `<organizations.name>` is the last part of format, we end up generating unique identifier for underlying label and have our named URL ready: `/api/v2/labels/Foo++Default/`. In the case where `organization` does not exist in `related` field of label object detail, we append empty string `''` instead, which essentially does not alter the current identifier. So `Foo++` becomes final unique identifier and thus generate named URL to be `/api/v2/labels/Foo++/`.
 
-An important aspect of generating unique identifier for named URL is dealing with reserved characters. Because the identifier is part of a URL, the following reserved characters by URL standard should be escaped to its percentage encoding: `;/?:@=&[]`. For example, if an organization is named `;/?:@=&[]`, its unique identifier should be `%3B%2F%3F%3A%40%3D%26%5B%5D`. Another special reserved character is `-`, which is not reserved by URL standard but used by named URL to link different parts of an identifier. It is escaped by `[-]`. For example, if an organization is named `[-]`, tis unique identifier is `%5B[-]%5D`, where original `[` and `]` are percent encoded and `-` is converted to `[-]`.
+An important aspect of generating unique identifier for named URL is dealing with reserved characters. Because the identifier is part of a URL, the following reserved characters by URL standard should be escaped to its percentage encoding: `;/?:@=&[]`. For example, if an organization is named `;/?:@=&[]`, its unique identifier should be `%3B%2F%3F%3A%40%3D%26%5B%5D`. Another special reserved character is `+`, which is not reserved by URL standard but used by named URL to link different parts of an identifier. It is escaped by `[+]`. For example, if an organization is named `[+]`, tis unique identifier is `%5B[+]%5D`, where original `[` and `]` are percent encoded and `+` is converted to `[+]`.
 
 `NAMED_URL_FORMATS` exclusively lists every resource that can have named URL, any resource not listed there has no named URL. `NAMED_URL_FORMATS` alone should be instructive enough for users to compose human-readable unique identifier and named URL themselves. For more convenience, every object of a resource that can have named URL will have a related field `named_url` that displays that object's named URL. Users can simply copy-paste that field for their custom usages. Also, users are expected to see indications in help text of API browser if a resource object has named URL.
 
@@ -45,17 +45,17 @@ Resources in Tower are identifiable by their unique keys, which are basically tu
 
 Here is an example for understanding the rules: Suppose Tower has resources `Foo` and `Bar`, both `Foo` and `Bar` contain a `name` field and a `choice` field that can only have value 'yes' or 'no'. Additionally, resource `Foo` contains a many-to-one field (a foreign key) relating to `Bar`, say `fk`. `Foo` has a unique key tuple `(name, choice, fk)` and `Bar` has a unique key tuple `(name, choice)`. Apparently `Bar` can have named URL because it satisfies rule 1. On the other hand, `Foo` can also have named URL, because although `Foo` breaks rule 1, the extra field breaking rule 1 is `fk` field, which is many-to-one-related to `Bar` and `Bar` can have named URL.
 
-For resources satisfying rule 1 above, their human-readable unique identifiers are combinations of foreign key fields, delimited by `-`. In specific, resource `Bar` above will have slug format `<name>-<choice>`. Note the field order matters in slug format: `name` field always comes the first if present, following by all the rest fields arranged in lexicographic order of field name. For example, if `Bar` also has an `a_choice` field satisfying rule 1 and the unique key becomes `(name, choice, a_choice)`, its slug format becomes `<name>-<a_choice>-<choice>`.
+For resources satisfying rule 1 above, their human-readable unique identifiers are combinations of foreign key fields, delimited by `+`. In specific, resource `Bar` above will have slug format `<name>+<choice>`. Note the field order matters in slug format: `name` field always comes the first if present, following by all the rest fields arranged in lexicographic order of field name. For example, if `Bar` also has an `a_choice` field satisfying rule 1 and the unique key becomes `(name, choice, a_choice)`, its slug format becomes `<name>+<a_choice>+<choice>`.
 
-For resources satisfying rule 2 above instead, if we trace back via the extra foreign key fields, we end up getting a tree of resources that all together identify objects of that resource. In order to generate identifier format, each resource in the traceback tree generates its own part of standalone format in the way described in the last paragraph, using all fields but the foreign keys. Finally all parts are combined by `--` in the following order:
+For resources satisfying rule 2 above instead, if we trace back via the extra foreign key fields, we end up getting a tree of resources that all together identify objects of that resource. In order to generate identifier format, each resource in the traceback tree generates its own part of standalone format in the way described in the last paragraph, using all fields but the foreign keys. Finally all parts are combined by `++` in the following order:
 * Put stand-alone format as the first identifier component.
 * Recursively generate unique identifiers for each resource the underlying resource is pointing to using foreign key (a child of a traceback tree node).
 * Treat generated unique identifiers as the rest identifier components. Sort them in lexicographic order of corresponding foreign key.
-* Combine all components together using `--` to generate the final identifier format.
+* Combine all components together using `++` to generate the final identifier format.
 
-Back to the example above, when generating identifier format for resource `Foo`, we firstly generate stand-alone formats, `<name>-<choice>` for `Foo` and `<fk.name>-<fk.choice>` for `Bar`, then combine them together to be `<name>-<choice>--<fk.name>-<fk.choice>`.
+Back to the example above, when generating identifier format for resource `Foo`, we firstly generate stand-alone formats, `<name>+<choice>` for `Foo` and `<fk.name>+<fk.choice>` for `Bar`, then combine them together to be `<name>+<choice>++<fk.name>+<fk.choice>`.
 
-When generating identifiers according to the given identifier format, there are cases where a foreign key may points to nowhere. In this case we substitute the part of the format corresponding to the resource the foreign key should point to with an empty string `''`. For example, if a `Foo` object has `name` to be 'alice', `choice` to be 'yes', but `fk` field `None`, its identifier will look like `alice-yes--`.
+When generating identifiers according to the given identifier format, there are cases where a foreign key may points to nowhere. In this case we substitute the part of the format corresponding to the resource the foreign key should point to with an empty string `''`. For example, if a `Foo` object has `name` to be 'alice', `choice` to be 'yes', but `fk` field `None`, its identifier will look like `alice+yes++`.
 
 
 ## Implementation Overview
