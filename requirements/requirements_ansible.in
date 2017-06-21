@@ -3,12 +3,12 @@ azure==2.0.0rc6
 backports.ssl-match-hostname==3.5.0.1
 kombu==3.0.37
 boto==2.46.1
+boto3==1.4.4
 python-memcached==1.58
 psphere==0.5.2
 psutil==5.2.2
 pyvmomi==6.5
 pywinrm[kerberos]==0.2.2
-requests==2.11.1
 secretstorage==2.3.1
 shade==1.20.0
 setuptools==35.0.2
