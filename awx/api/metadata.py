@@ -175,7 +175,11 @@ class Metadata(metadata.SimpleMetadata):
         # (such as TOWER_URL_BASE)
         self.request = request
 
-        metadata = super(Metadata, self).determine_metadata(request, view)
+        try:
+            setattr(view, '_request', request)
+            metadata = super(Metadata, self).determine_metadata(request, view)
+        finally:
+            delattr(view, '_request')
 
         # Add version number in which view was added to Tower.
         added_in_version = '1.2'

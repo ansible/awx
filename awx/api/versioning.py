@@ -14,6 +14,9 @@ def get_request_version(request):
     version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
     if request and hasattr(request, 'version'):
         version = request.version
+        if version is None:
+            # For requests to /api/
+            return None
     return int(version.lstrip('v'))
 
 

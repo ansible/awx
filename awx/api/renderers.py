@@ -23,9 +23,11 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
         # data form.
         try:
             setattr(renderer_context['view'], '_raw_data_response_status', renderer_context['response'].status_code)
+            setattr(renderer_context['view'], '_request', renderer_context['request'])
             return super(BrowsableAPIRenderer, self).get_context(data, accepted_media_type, renderer_context)
         finally:
             delattr(renderer_context['view'], '_raw_data_response_status')
+            delattr(renderer_context['view'], '_request')
 
     def get_raw_data_form(self, data, view, method, request):
         # Set a flag on the view to indiciate to the view/serializer that we're
