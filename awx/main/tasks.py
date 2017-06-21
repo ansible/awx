@@ -877,7 +877,7 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.use_fact_cache:
+        if job.use_fact_cache and not kwargs.get('isolated'):
             env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
             env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
             env['ANSIBLE_CACHE_PLUGIN'] = "tower"
@@ -1139,13 +1139,13 @@ class RunJob(BaseTask):
                                                          ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
-        if job.use_fact_cache:
+        if job.use_fact_cache and not kwargs.get('isolated'):
             job.start_job_fact_cache()
 
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
-        if job.use_fact_cache:
+        if job.use_fact_cache and not kwargs.get('isolated'):
             job.finish_job_fact_cache()
         try:
             inventory = job.inventory
