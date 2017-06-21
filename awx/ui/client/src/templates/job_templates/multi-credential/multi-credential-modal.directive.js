@@ -140,7 +140,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                             $scope.selectedCredentials.extra.length > 0 &&
                             parseInt($scope.credentialKind) !== 1) {
                             updateExtraCredentialsList();
-                        } else {
+                        } else if (parseInt($scope.credentialKind) !== 1) {
                             uncheckAllCredentials();
                         }
                     }
