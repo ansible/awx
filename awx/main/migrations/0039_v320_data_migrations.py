@@ -8,6 +8,7 @@ from django.db import migrations
 # AWX
 from awx.main.migrations import _inventory_source as invsrc
 from awx.main.migrations import _migration_utils as migration_utils
+from awx.main.migrations import _reencrypt
 
 
 class Migration(migrations.Migration):
@@ -22,4 +23,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(invsrc.remove_rax_inventory_sources),
         migrations.RunPython(invsrc.remove_inventory_source_with_no_inventory_link),
         migrations.RunPython(invsrc.rename_inventory_sources),
+        migrations.RunPython(_reencrypt.replace_aesecb_fernet),
     ]
