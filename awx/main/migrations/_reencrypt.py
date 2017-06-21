@@ -1,6 +1,6 @@
+import logging
 from django.utils.translation import ugettext_lazy as _
 
-from awx.main import utils
 from awx.conf.migrations._reencrypt import (
     decrypt_field,
     should_decrypt_field,
@@ -13,7 +13,8 @@ from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.irc_backend import IrcBackend
-from awx.main.models.credential import Credential
+
+logger = logging.getLogger('awx.main.migrations')
 
 __all__ = ['replace_aesecb_fernet']
 
@@ -25,6 +26,10 @@ NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                       ('hipchat', _('HipChat'), HipChatBackend),
                       ('webhook', _('Webhook'), WebhookBackend),
                       ('irc', _('IRC'), IrcBackend)]
+
+
+PASSWORD_FIELDS = ('password', 'security_token', 'ssh_key_data', 'ssh_key_unlock',
+                   'become_password', 'vault_password', 'secret', 'authorize_password')
 
 
 def replace_aesecb_fernet(apps, schema_editor):
@@ -47,14 +52,14 @@ def _notification_templates(apps):
 
 
 def _credentials(apps):
-    # TODO: Try to not use the model directly imported from our
-    # source (should use apps.get_model) to make the migration less britle.
-    for credential in Credential.objects.all():
-        for field_name, value in credential.inputs.items():
+    for credential in apps.get_model('main', 'Credential').objects.all():
+        for field_name in PASSWORD_FIELDS:
+            value = getattr(credential, field_name)
             if should_decrypt_field(value):
                 value = decrypt_field(credential, field_name)
-                credential.inputs[field_name] = value
+                setattr(credential, field_name, value)
         credential.save()
+
 
 
 def _unified_jobs(apps):
