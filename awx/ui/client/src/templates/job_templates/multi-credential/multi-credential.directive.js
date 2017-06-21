@@ -16,8 +16,8 @@ export default ['templateUrl', '$compile',
             },
             restrict: 'E',
             templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential'),
-            controller: ['$scope',
-                function($scope) {
+            controller: ['$scope', 'MultiCredentialService',
+                function($scope, MultiCredentialService) {
                     if (!$scope.selectedCredentials) {
                         $scope.selectedCredentials = {
                             machine: null,
@@ -43,23 +43,11 @@ export default ['templateUrl', '$compile',
                     });
 
                     $scope.removeCredential = function(credToRemove) {
-                        $scope.credentialsToPost = $scope.credentialsToPost
-                            .filter(function(cred) {
-                                if (cred.id === credToRemove) {
-                                    if (cred.postType === 'machine') {
-                                        $scope.selectedCredentials.machine = null;
-                                    } else {
-                                        $scope.selectedCredentials
-                                            .extra = $scope.selectedCredentials
-                                                .extra
-                                                .filter(selectedCred => {
-                                                    return selectedCred
-                                                        .id !== credToRemove;
-                                                });
-                                    }
-                                }
-                                return cred.id !== credToRemove;
-                            });
+                        [$scope.selectedCredentials,
+                            $scope.credentialsToPost] = MultiCredentialService
+                                .removeCredential(credToRemove, $scope.
+                                    selectedCredentials,
+                                        $scope.credentialsToPost);
                     };
                 }
             ],

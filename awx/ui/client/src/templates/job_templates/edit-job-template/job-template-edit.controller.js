@@ -17,14 +17,14 @@ export default
         'ParseTypeChange', 'Wait',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
+        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, ClearScope, GetBasePath, md5Setup,
             ParseTypeChange, Wait,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData
+            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService
         ) {
 
             ClearScope();
@@ -396,71 +396,10 @@ export default
                         null, true);
                 }
 
-                let extraCredUrl = data.related.extra_credentials;
-
-                Rest.setUrl(extraCredUrl);
-                Rest.get()
-                    .then(({data}) => {
-                        let existingCreds = data.results
-                            .map(cred => cred.id);
-
-                        let newCreds = $scope.selectedCredentials.extra
-                            .map(cred => cred.id);
-
-                        let toAdd, toRemove;
-
-                        [toAdd, toRemove] = _.partition(_.xor(existingCreds, newCreds), cred => (newCreds.indexOf(cred) > -1));
-
-                        let destroyResolve = [];
-
-                        toRemove.forEach((cred_id) => {
-                            Rest.setUrl(extraCredUrl);
-                            destroyResolve.push(
-                                Rest.post({'id': cred_id, 'disassociate': true})
-                                    .catch(({data, status}) => {
-                                            ProcessErrors(
-                                                $scope,
-                                                data,
-                                                status,
-                                                form,
-                                                {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to remove extra credential. Post returned ' +
-                                                    'status: ' +
-                                                    status
-                                                });
-                                    }));
-                        });
-
-                        $q.all(destroyResolve)
-                            .then(() => {
-                                toAdd.forEach((cred_id) => {
-                                    Rest.setUrl(extraCredUrl);
-                                    Rest.post({'id': cred_id})
-                                        .catch(({data, status}) => {
-                                                ProcessErrors(
-                                                    $scope,
-                                                    data,
-                                                    status,
-                                                    form,
-                                                    {
-                                                        hdr: 'Error!',
-                                                        msg: 'Failed to add extra credential. Post returned ' +
-                                                        'status: ' +
-                                                        status
-                                                    });
-                                        });
-                                });
-                            });
-
-
-                    })
-                    .catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get existing extra credentials. GET returned ' +
-                                'status: ' + status
-                        });
+                MultiCredentialService
+                    .findChangedExtraCredentials({
+                        creds: $scope.selectedCredentials.extra,
+                        url: data.related.extra_credentials
                     });
 
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)

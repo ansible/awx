@@ -1,5 +1,5 @@
-export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile', 'CreateSelect2', 'i18n',
-    function(templateUrl, Rest, GetBasePath, GenerateList, $compile, CreateSelect2, i18n) {
+export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile', 'CreateSelect2', 'i18n', 'MultiCredentialService',
+    function(templateUrl, Rest, GetBasePath, GenerateList, $compile, CreateSelect2, i18n, MultiCredentialService) {
     return {
         restrict: 'E',
         scope: {
@@ -11,17 +11,6 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
         link: function(scope, element) {
             scope.credentialKind = "1";
-
-            $('#multi-credential-modal').on('hidden.bs.modal', function () {
-                $('#multi-credential-modal').off('hidden.bs.modal');
-                $(element).remove();
-            });
-
-            CreateSelect2({
-                element: `#multi-credential-kind-select`,
-                multiple: false,
-                placeholder: i18n._('Select a credential')
-            });
 
             scope.showModal = function() {
                 $('#multi-credential-modal').modal('show');
@@ -42,23 +31,21 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                     .append($compile(html)(scope));
             };
 
-            // Go out and get the credential types
-            Rest.setUrl(GetBasePath('credential_types'));
-            Rest.get()
-                .success(function (credentialTypeData) {
-                    let credential_types = {};
-                    scope.credentialTypeOptions = [];
-                    credentialTypeData.results.forEach((credentialType => {
-                        credential_types[credentialType.id] = credentialType;
-                        if(credentialType.kind
-                            .match(/^(machine|cloud|net|ssh)$/)) {
-                                scope.credentialTypeOptions.push({
-                                    name: credentialType.name,
-                                    value: credentialType.id
-                                });
-                        }
-                    }));
+            $('#multi-credential-modal').on('hidden.bs.modal', function () {
+                $('#multi-credential-modal').off('hidden.bs.modal');
+                $(element).remove();
+            });
+
+            CreateSelect2({
+                element: `#multi-credential-kind-select`,
+                multiple: false,
+                placeholder: i18n._('Select a credential')
+            });
+
+            MultiCredentialService.getCredentialTypes()
+                .then(({credential_types, credentialTypeOptions}) => {
                     scope.credential_types = credential_types;
+                    scope.credentialTypeOptions = credentialTypeOptions;
                     scope.$emit('multiCredentialModalLinked');
                 });
         },
@@ -66,42 +53,6 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
         controller: ['$scope', 'CredentialList', 'i18n', 'QuerySet',
             'GetBasePath', function($scope, CredentialList, i18n, qs,
             GetBasePath) {
-
-            let updateCredentialTags = function() {
-                let machineCred = [];
-                let extraCreds = [];
-
-                if ($scope.selectedCredentials &&
-                    $scope.selectedCredentials.machine) {
-                        let mach = $scope.selectedCredentials.machine;
-                        mach.postType = "machine";
-                        machineCred = [$scope.selectedCredentials.machine];
-                }
-
-                if ($scope.selectedCredentials &&
-                    $scope.selectedCredentials.extra) {
-                    extraCreds = $scope.selectedCredentials.extra;
-                }
-
-                extraCreds = extraCreds.map(function(cred) {
-                    cred.postType = "extra";
-
-                    return cred;
-                });
-
-                let credTags = machineCred.concat(extraCreds);
-
-                $scope.credTags = credTags.map(cred => ({
-                  name: cred.name,
-                  id: cred.id,
-                  postType: cred.postType,
-                  kind: $scope.credentialTypeOptions
-                      .filter(type => {
-                          return parseInt(cred.credential_type) === type.value;
-                      })[0].name + ":"
-                }));
-            };
-
             let updateExtraCredentialsList = function() {
                 let extraCredIds = $scope.selectedCredentials.extra
                     .map(cred => cred.id);
@@ -111,7 +62,10 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                             .indexOf(cred.id) > - 1) ? 1 : 0;
                     }
                 });
-                updateCredentialTags();
+
+                $scope.credTags = MultiCredentialService
+                    .updateCredentialTags($scope.selectedCredentials,
+                        $scope.credentialTypeOptions);
             };
 
             let updateMachineCredentialList = function() {
@@ -123,14 +77,20 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                                 .machine.id) ? 1 : 0;
                     }
                 });
-                updateCredentialTags();
+
+                $scope.credTags = MultiCredentialService
+                    .updateCredentialTags($scope.selectedCredentials,
+                        $scope.credentialTypeOptions);
             };
 
             let uncheckAllCredentials = function() {
                 $scope.credentials.forEach(cred => {
                     cred.checked = 0;
                 });
-                updateCredentialTags();
+
+                $scope.credTags = MultiCredentialService
+                    .updateCredentialTags($scope.selectedCredentials,
+                        $scope.credentialTypeOptions);
             };
 
             let init = function() {
@@ -264,22 +224,10 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
             };
 
             $scope.removeCredential = function(credToRemove) {
-                $scope.credTags
-                    .forEach(function(cred) {
-                        if (credToRemove === cred.id) {
-                            if (cred.postType === 'machine') {
-                                $scope.selectedCredentials[cred.postType] = null;
-                            } else {
-                                $scope.selectedCredentials[cred.postType] = $scope
-                                    .selectedCredentials[cred.postType]
-                                        .filter(cred => cred
-                                            .id !== credToRemove);
-                            }
-                        }
-                    });
-
-                $scope.credTags = $scope.credTags
-                    .filter(cred => cred.id !== credToRemove);
+                [$scope.selectedCredentials,
+                    $scope.credTags] = MultiCredentialService
+                        .removeCredential(credToRemove,
+                            $scope.selectedCredentials, $scope.credTags);
 
                 if ($scope.credentials
                     .filter(cred => cred.id === credToRemove).length) {
