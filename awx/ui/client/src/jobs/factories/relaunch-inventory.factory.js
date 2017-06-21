@@ -10,11 +10,7 @@ export default
                 .success(function (data) {
                     InventoryUpdate({
                         scope: scope,
-                        url: data.related.update,
-                        group_name: data.summary_fields.group.name,
-                        group_source: data.source,
-                        tree_id: null,
-                        group_id: data.group
+                        url: data.related.update
                     });
                 })
                 .error(function (data, status) {
