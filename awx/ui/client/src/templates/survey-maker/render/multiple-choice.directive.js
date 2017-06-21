@@ -16,6 +16,7 @@ function link($timeout, CreateSelect2, scope, element, attrs, ngModel) {
         CreateSelect2({
              element: element.find('select'),
              multiple: scope.isMultipleSelect(),
+             minimumResultsForSearch: scope.isMultipleSelect() ? Infinity : 10,
              customDropdownAdapter: scope.preview ? false : true,
              disabledOptions: true
         });
