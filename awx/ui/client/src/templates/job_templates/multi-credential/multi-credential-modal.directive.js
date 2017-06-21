@@ -248,6 +248,21 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 }
             };
 
+            $scope.selectedCredentialsDirty = function() {
+                if ($scope.originalSelectedCredentials) {
+                    return !($scope.originalSelectedCredentials.machine === null &&
+                        $scope.originalSelectedCredentials.extra.length === 0) &&
+                        !_.eq($scope.selectedCredentials,
+                            $scope.originalSelectedCredentials);
+                } else {
+                    return false;
+                }
+            };
+
+            $scope.revertToDefaultCredentials = function() {
+                $scope.selectedCredentials = _.cloneDeep($scope.originalSelectedCredentials);
+            };
+
             $scope.removeCredential = function(credToRemove) {
                 $scope.credTags
                     .forEach(function(cred) {
