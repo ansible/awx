@@ -23,6 +23,8 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
+      CELERY_RDB_HOST: 0.0.0.0
+      DOCKER_TOOLS_DIR: tools/docker-compose
     volumes:
       - "../:/tower_devel"
 
@@ -35,6 +37,8 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
+      CELERY_RDB_HOST: 0.0.0.0
+      DOCKER_TOOLS_DIR: tools/docker-compose
     volumes:
       - "../:/tower_devel"
   tower_3:
@@ -46,6 +50,8 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
+      CELERY_RDB_HOST: 0.0.0.0
+      DOCKER_TOOLS_DIR: tools/docker-compose
     volumes:
       - "../:/tower_devel"
   rabbitmq_1:
@@ -64,7 +70,7 @@ services:
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
-    image: postgres:9.4.1
+    image: postgres:9.6
   memcached:
     image: memcached:alpine
   logstash:
