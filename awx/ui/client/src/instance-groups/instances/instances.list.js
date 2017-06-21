@@ -1,21 +1,20 @@
 export default ['i18n', function(i18n) {
     return {
-        name:  'instance_groups' ,
-        basePath: 'instance_groups',
-        iterator: 'instance_group',
-        editTitle: i18n._('INSTANCE GROUPS'),
-        listTitle: i18n._('INSTANCE GROUPS'),
+        name:  'instances' ,
+        iterator: 'instance',
+        listTitle: false,
         index: false,
         hover: false,
+        tabs: true,
+        well: true,
 
         fields: {
-            name: {
+            hostname: {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8',
-                uiSref: 'instanceGroups.instances.list({instance_group_id: instance_group.id})',
-                ngClass: "{'isActive' : isActive()}"
+                uiSref: 'instanceGroups.instances.list.job({instance_id: instance.id})'
             },
             percent_capacity_remaining: {
                 label: i18n._('Capacity'),

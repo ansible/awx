@@ -34,6 +34,13 @@
 .BreadCrumb-menuLink:hover {
     color: @bc-link-icon-focus;
 }
+.BreadCrumb-menuLink {
+    .BreadCrumb-menuLinkImage.fa-refresh {
+        &:hover {
+            color: @default-link;
+        }
+    }
+}
 .BreadCrumb-menuLinkImage {
     font-size: 18px;
     color: @bc-link-icon;

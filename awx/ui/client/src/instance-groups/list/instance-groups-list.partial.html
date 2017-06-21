@@ -1,0 +1,63 @@
+<div class="List-header">
+    <div class="List-title">
+        <div class="List-titleText" translate>
+            INSTANCE GROUPS
+        </div>
+        <span class="badge List-titleBadge">
+            {{ instanceGroupCount | translate}}
+        </span>
+    </div>
+</div>
+
+<smart-search django-model="instance_groups" base-path="instance_groups" iterator="instance_group" list="list" dataset="instance_group_dataset"
+    collection="instance_groups" search-tags="searchTags">
+</smart-search>
+
+<div class="List-noItems" ng-show="instance_groups.length < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
+
+<div class="list-table-container" ng-show="instance_groups.length > 0">
+    <table id="instance_groups_table" class="List-table" is-extended="false">
+        <thead>
+            <tr class="List-tableHeaderRow">
+                <th id="instance_group-name-header" class="List-tableHeader list-header col-md-5 col-sm-5 col-xs-5" ng-click="columnNoSort !== 'true' &amp;&amp; toggleColumnOrderBy()"
+                    ng-class="{'list-header-noSort' : columnNoSort === 'true'}" base-path="instance_groups" collection="instance_groups"
+                    dataset="instance_group_dataset" column-sort="" column-field="name" column-iterator="instance_group" column-no-sort="undefined"
+                    column-label="Name" column-custom-class="col-md-5 col-sm-5 col-xs-5" query-set="instance_group_queryset">
+                    "{{'Name' | translate}}"
+                    <i ng-hide="columnNoSort === 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
+                </th>
+                <th id="instance_group-percent_capacity_remaining-header" class="List-tableHeader list-header list-header-noSort" translate>
+                    Capacity
+                </th>
+                <th id="instance_group-jobs_running-header" class="List-tableHeader list-header list-header-noSort" translate>
+                    Running Jobs
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ngRepeat: instance_group in instance_groups -->
+            <tr ng-class="{isActive: isActive(instance_group.id)}" id="instance_group.id" class="List-tableRow instance_group_class ng-scope" ng-repeat="instance_group in instance_groups">
+                <td class="List-tableCell name-column col-md-5 col-sm-5 col-xs-5">
+                    <a ui-sref="instanceGroups.instances.list({instance_group_id: instance_group.id})" class="ng-binding" >{{ instance_group.name | translate }}</a>
+                    <span class="badge List-titleBadge">{{ instance_group.instances | translate }}</span>
+                </td>
+                <td class="List-tableCell List-tableCell--capacityRemainingColumn ng-binding">
+                    <capacity-bar capacity="instance_group.percent_capacity_remaining"></capacity-bar><span>{{ instance_group.percent_capacity_remaining | translate }}%</span>
+                </td>
+                <td class="List-tableCell jobs_running-column ng-binding">
+                    <a ui-sref="instanceGroups.instances.jobs({instance_group_id: instance_group.id})">
+                        {{ instance_group.jobs_running | translate }}
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<paginate
+    base-path="instance_groups"
+    iterator="instance_group"
+    dataset="instance_group_dataset"
+    collection="instance_groups"
+    query-set="instance_group_queryset">
+</paginate>

@@ -1,0 +1,33 @@
+<div class="Panel">
+    <div class="row Form-tabRow">
+        <div class="col-xs-12">
+            <div class="List-header">
+                <div class="List-title">
+                    <div class="List-titleText">{{ instanceName | translate }}</div>
+                </div>
+                <div class="List-details">
+                    <div class="Capacity-details">
+                        <p class="Capacity-details--label" translate>Capacity</p>
+                        <capacity-bar capacity="instanceCapacity"></capacity-bar>
+                        <span class="Capacity-details--percentage">{{ instanceCapacity | translate }}%</span>
+                    </div>
+                    <div class="RunningJobs-details">
+                        <p class="RunningJobs-details--label" translate>Running Jobs</p>
+                        <span class="badge List-titleBadge">
+                            {{ instanceJobsRunning | translate }}
+                        </span>
+                    </div>
+                </div>
+                <div class="List-exitHolder">
+                    <button class="List-exit" ng-click="$state.go('instanceGroups.instances.list')">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="Form-tabHolder">
+                <div class="Form-tab Form-tab--notitle is-selected" translate>JOBS</div>
+            </div>
+        </div>
+    </div>
+    <div class="instance-jobs-list" ui-view="list"></div>
+</div>

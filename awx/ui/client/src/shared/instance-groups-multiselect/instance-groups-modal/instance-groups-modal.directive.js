@@ -47,7 +47,7 @@ export default ['templateUrl', function(templateUrl) {
                             instanceGroupList.well = false;
                             instanceGroupList.multiSelect = true;
                             instanceGroupList.multiSelectExtended = true;
-                            delete instanceGroupList.fields.capacity;
+                            delete instanceGroupList.fields.percent_capacity_remaining;
                             delete instanceGroupList.fields.jobs_running;
 
                             let html = `${GenerateList.build({
