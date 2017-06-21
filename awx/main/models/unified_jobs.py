@@ -961,9 +961,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         args = [self.pk]
         if ig.controller_id:
             if self.supports_isolation():  # case of jobs and ad hoc commands
-                # TODO: dock capacity from controller instance, use capacity to select isolated node
-                import random
-                isolated_instance = random.choice(ig.instances.all())
+                isolated_instance = ig.instances.order_by('-capacity').first()
                 args.append(isolated_instance.hostname)
             else:  # proj & inv updates, system jobs run on controller
                 queue = ig.controller.name

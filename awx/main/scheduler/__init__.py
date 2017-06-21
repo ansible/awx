@@ -406,6 +406,7 @@ class TaskManager():
         for rampart_group in self.graph:
             self.graph[rampart_group]['capacity_used'] = 0
         for t in tasks:
+            # TODO: dock capacity for isolated job management tasks running in queue
             for group_actual in InstanceGroup.objects.filter(instances__hostname=t.execution_node).values_list('name'):
                 if group_actual[0] in self.graph:
                     self.graph[group_actual[0]]['capacity_used'] += t.task_impact
