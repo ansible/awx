@@ -139,20 +139,41 @@ isolatedB
 controller=security
 ```
 
-In this example, when a job runs inside of the `govcloud` isolated group, a
-managing task runs simultaneously on either one of the two instances in
-the `security` ordinary instance group.
+In the isolated rampart model, "controller" instances interact with "isolated"
+instances via a series of Ansible playbooks over SSH.  As such, all isolated instances
+must be preconfigured by the installer with passwordless SSH access from any potential
+controller instances.  In the example above, the `isolatedA` and `isolatedB` hosts
+must be reachable from `towerB` and `towerC` hosts via `ssh
+awx@<isolated-hostname>` (meaning, `authorized_keys` must be pre-distributed to
+the `isolatedA` and `isolatedB` hosts).
 
-Networking security rules must allow
-connections to all nodes in an isolated group from all nodes in its controller
-group. The system is designed such that
-isolated instances never make requests to any of their controllers.
-The controlling instance for a particular job will send management commands to
-a daemon that runs the job, and will slurp job artifacts.
+When a job is scheduled to run on an "isolated" instance:
+
+*  The "controller" instance compiles metadata required to run the job and copies
+   it to the "isolated" instance via `rsync`.  This metadata includes:
+
+   - the entire SCM checkout directory for the project
+   - a static inventory file
+   - pexpect passwords
+   - environment variables
+   - the `ansible`/`ansible-playbook` command invocation, i.e., 
+     `bwrap ... ansible-playbook -i /path/to/inventory /path/to/playbook.yml -e ...`
+
+* Once the metadata has been rsynced to the isolated host, the "controller
+  instance" starts a process on the "isolated" instance which consumes the
+  metadata and starts running `ansible`/`ansible-playbook`.  As the playbook
+  runs, job artifacts (such as stdout and job events) are written to disk on
+  the "isolated" instance.
+
+* While the job runs on the "isolated" instance, the "controller" instance
+  periodically copies job artifacts (stdout and job events) from the "isolated"
+  instance using `rsync`.  It consumes these until the job finishes running on the
+  "isolated" instance.
 
 Isolated groups are architected such that they may exist inside of a VPC
 with security rules that _only_ permit the instances in its `controller`
-group to access them.
+group to access them; only ingress SSH traffic from "controller" instances to
+"isolated" instances is required.
 
 Recommendations for system configuration with isolated groups:
  - Do not put any isolated instances inside the `tower` group or other
