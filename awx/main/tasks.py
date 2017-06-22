@@ -1057,18 +1057,13 @@ class RunJob(BaseTask):
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
-        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
-            args.append("scan_facts.yml")
-        else:
-            args.append(job.playbook)
+        args.append(job.playbook)
         return args
 
     def build_safe_args(self, job, **kwargs):
         return self.build_args(job, display=True, **kwargs)
 
     def build_cwd(self, job, **kwargs):
-        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
-            return self.get_path_to('..', 'playbooks')
         cwd = job.project.get_project_path()
         if not cwd:
             root = settings.PROJECTS_ROOT
