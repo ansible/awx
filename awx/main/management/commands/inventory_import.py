@@ -371,6 +371,9 @@ class Command(NoArgsCommand):
                     job_args=json.dumps(sys.argv),
                     job_env=dict(os.environ.items()),
                     job_cwd=os.getcwd(),
+                    _eager_fields=dict(
+                        execution_node=settings.CLUSTER_HOST_ID,
+                        instance_group=InstanceGroup.objects.get(name='tower'))
                 )
 
         # FIXME: Wait or raise error if inventory is being updated by another

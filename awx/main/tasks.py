@@ -1134,14 +1134,17 @@ class RunJob(BaseTask):
         if job.project and job.project.scm_type:
             job_request_id = '' if self.request.id is None else self.request.id
             pu_ig = job.instance_group
+            pu_en = job.execution_node
             if kwargs['isolated']:
                 pu_ig = pu_ig.controller
+                pu_en = settings.CLUSTER_HOST_ID
             local_project_sync = job.project.create_project_update(
                 launch_type="sync",
                 _eager_fields=dict(
                     job_type='run',
                     status='running',
                     instance_group = pu_ig,
+                    execution_node=pu_en,
                     celery_task_id=job_request_id))
             # save the associated job before calling run() so that a
             # cancel() call on the job can cancel the project update
@@ -1392,6 +1395,8 @@ class RunProjectUpdate(BaseTask):
                     launch_type='scm',
                     _eager_fields=dict(
                         status='running',
+                        instance_group=project_update.instance_group,
+                        execution_node=project_update.execution_node,
                         celery_task_id=str(project_request_id),
                         source_project_update=project_update))
             try:
@@ -1856,6 +1861,7 @@ class RunInventoryUpdate(BaseTask):
                 _eager_fields=dict(
                     job_type='run',
                     status='running',
+                    execution_node=inventory_update.execution_node,
                     instance_group = inventory_update.instance_group,
                     celery_task_id=request_id))
             # associate the inventory update before calling run() so that a
