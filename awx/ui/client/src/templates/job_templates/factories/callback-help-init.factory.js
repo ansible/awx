@@ -1,6 +1,6 @@
 export default
     function CallbackHelpInit($q, $location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors,
-             ParseVariableString, Empty, Wait) {
+             ParseVariableString, Empty, Wait, MultiCredentialService) {
         return function(params) {
             var scope = params.scope,
             defaultUrl = GetBasePath('job_templates'),
@@ -134,114 +134,15 @@ export default
 
                     scope.can_edit = data.summary_fields.user_capabilities.edit;
 
-                    scope.selectedCredentials = {
-                        machine: null,
-                        extra: []
-                    };
-
-                    var credDefers = [];
-
-                    if (data.related.credential) {
-                        Rest.setUrl(data.related.credential);
-                        credDefers.push(Rest.get()
-                            .then(({data}) => {
-                                scope.selectedCredentials.machine = data;
-                            })
-                            .catch(({data, status}) => {
-                                ProcessErrors(
-                                    scope,
-                                    data,
-                                    status,
-                                    null,
-                                    {
-                                        hdr: 'Error!',
-                                        msg: 'Failed to get machine credential. ' +
-                                        'Get returned status: ' +
-                                        status
-                                    });
-                            }));
-                    }
-
-                    if (data.related.extra_credentials) {
-                        Rest.setUrl(data.related.extra_credentials);
-                        credDefers.push(Rest.get()
-                            .then(({data}) => {
-                                scope.selectedCredentials.extra = data.results;
-                            })
-                            .catch(({data, status}) => {
-                                ProcessErrors(
-                                    scope,
-                                    data,
-                                    status,
-                                    null,
-                                    {
-                                        hdr: 'Error!',
-                                        msg: 'Failed to get extra credentials. ' +
-                                        'Get returned status: ' +
-                                        status
-                                    });
-                            }));
-                    }
-
-                    Rest.setUrl(GetBasePath('credential_types'));
-                    credDefers.push(Rest.get()
-                        .then(({data}) => {
-                            scope.credentialTypeOptions = [];
-                            data.results.forEach((credentialType => {
-                                if(credentialType.kind.match(/^(machine|cloud|network|ssh)$/)) {
-                                    scope.credentialTypeOptions.push({
-                                        name: credentialType.name,
-                                        value: credentialType.id
-                                    });
-                                }
-                            }));
-                        })
-                        .catch(({data, status}) => {
-                            ProcessErrors(
-                                scope,
-                                data,
-                                status,
-                                null,
-                                {
-                                    hdr: 'Error!',
-                                    msg: 'Failed to get credential types. Get returned ' +
-                                    'status: ' +
-                                    status
-                                });
-                        }));
-
-                    $q.all(credDefers)
-                        .then(() => {
-                            let machineCred = [];
-                            let extraCreds = [];
-
-                            if (scope.selectedCredentials && scope.selectedCredentials.machine) {
-                                let mach = scope.selectedCredentials.machine;
-                                mach.postType = "machine";
-                                machineCred = [scope.selectedCredentials.machine];
-                            }
-
-                            if (scope.selectedCredentials && scope.selectedCredentials.extra) {
-                                extraCreds = scope.selectedCredentials.extra;
-                            }
-
-                            extraCreds = extraCreds.map(function(cred) {
-                                cred.postType = "extra";
-
-                                return cred;
+                    MultiCredentialService.loadCredentials(data)
+                        .then(([selectedCredentials, credTypes, credTypeOptions,
+                            credTags]) => {
+                                scope.selectedCredentials = selectedCredentials;
+                                scope.credential_types = credTypes;
+                                scope.credentialTypeOptions = credTypeOptions;
+                                scope.credentialsToPost = credTags;
+                                scope.$emit('jobTemplateLoaded', master);
                             });
-
-                            let credTags = machineCred.concat(extraCreds);
-
-                            scope.credentialsToPost = credTags.map(cred => ({
-                              name: cred.name,
-                              id: cred.id,
-                              postType: cred.postType,
-                              kind: scope.credentialTypeOptions
-                                  .filter(type => parseInt(cred.credential_type) === type.value)[0].name + ":"
-                            }));
-                            scope.$emit('jobTemplateLoaded', master);
-                        });
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, {
@@ -256,5 +157,5 @@ export default
 CallbackHelpInit.$inject =
     [   '$q', '$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm',
         '$stateParams', 'ProcessErrors', 'ParseVariableString',
-        'Empty', 'Wait'
+        'Empty', 'Wait', 'MultiCredentialService'
     ];

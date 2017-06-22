@@ -9,13 +9,13 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
-         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
+         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'MultiCredentialService',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService
+             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
          ) {
 
              Rest.setUrl(GetBasePath('job_templates'));
@@ -262,29 +262,11 @@
                         null, true);
                 }
 
-                $scope.selectedCredentials.extra.map(cred => cred.id)
-                    .forEach(function(cred_id) {
-
-                        Rest.setUrl(data.related.extra_credentials);
-                        Rest.post({'id': cred_id})
-                            .success(function () {
-                            })
-                            .error(function (data,
-                                status) {
-                                    ProcessErrors(
-                                        $scope,
-                                        data,
-                                        status,
-                                        form,
-                                        {
-                                            hdr: 'Error!',
-                                            msg: 'Failed to add extra credential. Post returned ' +
-                                            'status: ' +
-                                            status
-                                        });
-                            });
+                MultiCredentialService
+                    .saveExtraCredentials({
+                        creds: $scope.selectedCredentials.extra,
+                        url: data.related.extra_credentials
                     });
-
 
                 var orgDefer = $q.defer();
                 var associationDefer = $q.defer();
