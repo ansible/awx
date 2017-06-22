@@ -14,6 +14,7 @@ from celery.contrib.rdb import Rdb
 
 import cmd
 import contextlib
+import logging
 import os
 import pprint
 import re
@@ -26,6 +27,8 @@ from Queue import Queue, Empty
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import Terminal256Formatter
+
+logger = logging.getLogger('awx')
 
 
 @contextlib.contextmanager
@@ -157,6 +160,9 @@ class CustomPdb(Rdb):
             str(port), ('dockerhost', 6899)
         )
         return (sock, port)
+
+    def say(self, m):
+        logger.warning(m)
 
 
 CustomPdb.complete = rlcompleter.Completer(locals()).complete

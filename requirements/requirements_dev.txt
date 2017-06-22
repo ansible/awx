@@ -10,5 +10,6 @@ pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock
+logutils
 flower
 uwsgitop

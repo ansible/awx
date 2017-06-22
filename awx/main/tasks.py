@@ -225,7 +225,7 @@ def tower_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
     last_run = state.schedule_last_run
-    logger.debug("Last run was: %s", last_run)
+    logger.debug("Last scheduler run was: %s", last_run)
     state.schedule_last_run = run_now
     state.save()
 

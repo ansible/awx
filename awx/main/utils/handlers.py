@@ -17,6 +17,7 @@ from requests.exceptions import RequestException
 # loggly
 import traceback
 
+from django.conf import settings
 from requests_futures.sessions import FuturesSession
 
 # AWX
@@ -302,6 +303,33 @@ HANDLER_MAPPING = {
     'tcp': TCPHandler,
     'udp': UDPHandler,
 }
+
+
+ColorHandler = logging.StreamHandler
+
+if settings.COLOR_LOGS is True:
+    try:
+        from logutils.colorize import ColorizingStreamHandler
+
+        class ColorHandler(ColorizingStreamHandler):
+
+            def format(self, record):
+                message = logging.StreamHandler.format(self, record)
+                return '\n'.join([
+                    self.colorize(line, record)
+                    for line in message.splitlines()
+                ])
+
+            level_map = {
+                logging.DEBUG: (None, 'green', True),
+                logging.INFO: (None, None, True),
+                logging.WARNING: (None, 'yellow', True),
+                logging.ERROR: (None, 'red', True),
+                logging.CRITICAL: (None, 'red', True),
+            }
+    except ImportError:
+        # logutils is only used for colored logs in the dev environment
+        pass
 
 
 def _add_or_remove_logger(address, instance):

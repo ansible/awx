@@ -19,6 +19,11 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
+# show colored logs in the dev environment
+# to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
+LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'
+COLOR_LOGS = True
+
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)
@@ -39,6 +44,9 @@ TEMPLATE_LOADERS = (
 # Disable capturing all SQL queries when running celeryd in development.
 if 'celeryd' in sys.argv:
     SQL_DEBUG = False
+
+CELERYD_HIJACK_ROOT_LOGGER = False
+CELERYD_LOG_COLOR = True
 
 CALLBACK_QUEUE = "callback_tasks"
 
