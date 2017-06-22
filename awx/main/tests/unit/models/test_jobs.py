@@ -119,13 +119,15 @@ def test_finish_job_fact_cache(job, hosts, inventory, mocker, new_time):
     host_key = job.memcached_fact_host_key(hosts[1].name)
     modified_key = job.memcached_fact_modified_key(hosts[1].name)
 
-    job._get_memcache_connection().set(host_key, 'blah')
+    ansible_facts_new = {"foo": "bar", "insights": {"system_id": "updated_by_scan"}}
+    job._get_memcache_connection().set(host_key, json.dumps(ansible_facts_new))
     job._get_memcache_connection().set(modified_key, new_time.isoformat())
     
     job.finish_job_fact_cache()
 
     hosts[0].save.assert_not_called()
     hosts[2].save.assert_not_called()
-    assert hosts[1].ansible_facts == 'blah'
+    assert hosts[1].ansible_facts == ansible_facts_new
+    assert hosts[1].insights_system_id == "updated_by_scan"
     hosts[1].save.assert_called_once_with()
 

@@ -769,11 +769,18 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             modified = parser.parse(modified, tzinfos=[tzutc()])
             if not host.ansible_facts_modified or modified > host.ansible_facts_modified:
                 ansible_facts = cache.get(host_key)
+                try:
+                    ansible_facts = json.loads(ansible_facts)
+                except Exception:
+                    ansible_facts = None
+
                 if ansible_facts is None:
                     cache.delete(host_key)
                     continue
                 host.ansible_facts = ansible_facts
                 host.ansible_facts_modified = modified
+                if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
+                    host.insights_system_id = ansible_facts['insights']['system_id']
                 host.save()
                 system_tracking_logger.info('New fact for inventory {} host {}'.format(host.inventory.name, host.name),
                                             extra=dict(inventory_id=host.inventory.id, host_name=host.name,
