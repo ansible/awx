@@ -2117,6 +2117,10 @@ class CredentialSerializerCreate(CredentialSerializer):
                     attrs.pop(field)
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
+
+        if attrs.get('team'):
+            attrs['organization'] = attrs['team'].organization
+
         try:
             return super(CredentialSerializerCreate, self).validate(attrs)
         except ValidationError as e:
@@ -2134,8 +2138,6 @@ class CredentialSerializerCreate(CredentialSerializer):
     def create(self, validated_data):
         user = validated_data.pop('user', None)
         team = validated_data.pop('team', None)
-        if team:
-            validated_data['organization'] = team.organization
 
         # If our payload contains v1 credential fields, translate to the new
         # model
