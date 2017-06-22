@@ -64,10 +64,29 @@ class CallbackModule(CallbackBase):
 
     def __init__(self):
         super(CallbackModule, self).__init__()
-        self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id=143")
+        self.create_ws_connection()
         self.task = None
         self.play = None
         self.hosts = []
+
+    def create_ws_connection(self):
+        self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id=144")
+
+    def ws_send(self, data):
+
+        def send():
+            if self.ws is None:
+                self.create_ws_connection()
+            self.ws.send(data)
+        try:
+            send()
+        except BaseException:
+            try:
+                self.create_ws_connection()
+                send()
+            except BaseException:
+                print (traceback.format_exc())
+        
 
     @catch_exceptions
     @debug
@@ -82,7 +101,7 @@ class CallbackModule(CallbackBase):
     @catch_exceptions
     @debug
     def v2_runner_on_ok(self, result):
-        self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
+        self.ws_send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
                                                     task_id=str(result._task._uuid),
                                                     working=False,
                                                     status="pass")]))
@@ -90,7 +109,7 @@ class CallbackModule(CallbackBase):
     @catch_exceptions
     @debug
     def v2_runner_on_failed(self, result, ignore_errors=False):
-        self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
+        self.ws_send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
                                                     task_id=str(result._task._uuid),
                                                     working=False,
                                                     status="fail")]))
@@ -98,7 +117,7 @@ class CallbackModule(CallbackBase):
     @catch_exceptions
     @debug
     def runner_on_unreachable(self, host, result, ignore_errors=False):
-        self.ws.send(json.dumps(['TaskStatus', dict(device_name=host,
+        self.ws_send(json.dumps(['TaskStatus', dict(device_name=host,
                                                     task_id=str(self.task._uuid),
                                                     working=False,
                                                     status="fail")]))
@@ -106,7 +125,7 @@ class CallbackModule(CallbackBase):
     @catch_exceptions
     @debug
     def v2_runner_item_on_skipped(self, result, ignore_errors=False):
-        self.ws.send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
+        self.ws_send(json.dumps(['TaskStatus', dict(device_name=result._host.get_name(),
                                                     task_id=str(result._task._uuid),
                                                     working=False,
                                                     status="skip")]))
@@ -131,7 +150,7 @@ class CallbackModule(CallbackBase):
         self.hosts = play.get_variable_manager()._inventory.get_hosts()
 
         for host in self.hosts:
-            self.ws.send(json.dumps(['DeviceStatus', dict(name=host.get_name(),
+            self.ws_send(json.dumps(['DeviceStatus', dict(name=host.get_name(),
                                                           working=True,
                                                           status=None)]))
 
@@ -140,7 +159,7 @@ class CallbackModule(CallbackBase):
     def v2_playbook_on_task_start(self, task, is_conditional):
         self.task = task
         for host in self.hosts:
-            self.ws.send(json.dumps(['TaskStatus', dict(device_name=host.get_name(),
+            self.ws_send(json.dumps(['TaskStatus', dict(device_name=host.get_name(),
                                                         task_id=str(task._uuid),
                                                         working=True,
                                                         status=None)]))
@@ -155,6 +174,6 @@ class CallbackModule(CallbackBase):
             status = "pass"
             status = "fail" if s['failures'] > 0 else status
             status = "fail" if s['unreachable'] > 0 else status
-            self.ws.send(json.dumps(['DeviceStatus', dict(name=host.get_name(),
+            self.ws_send(json.dumps(['DeviceStatus', dict(name=host.get_name(),
                                                           working=False,
                                                           status=status)]))
