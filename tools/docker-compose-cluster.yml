@@ -24,7 +24,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      DOCKER_TOOLS_DIR: tools/docker-compose
+      EXTRA_GROUP_QUEUES: alpha
     volumes:
       - "../:/tower_devel"
 
@@ -38,7 +38,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      DOCKER_TOOLS_DIR: tools/docker-compose
+      EXTRA_GROUP_QUEUES: bravo
     volumes:
       - "../:/tower_devel"
   tower_3:
@@ -51,7 +51,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      DOCKER_TOOLS_DIR: tools/docker-compose
+      EXTRA_GROUP_QUEUES: charlie
     volumes:
       - "../:/tower_devel"
   rabbitmq_1:
