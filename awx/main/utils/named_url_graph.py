@@ -16,6 +16,10 @@ for c in ';/?:@=&[]':
 FK_NAME = 0
 NEXT_NODE = 1
 
+NAME_EXCEPTIONS = {
+    "custom_inventory_scripts": "inventory_scripts"
+}
+
 
 class GraphNode(object):
 
@@ -27,10 +31,16 @@ class GraphNode(object):
         self.adj_list = adj_list
         self.counter = 0
 
+    def _handle_unexpected_model_url_names(self, model_url_name):
+        if model_url_name in NAME_EXCEPTIONS:
+            return NAME_EXCEPTIONS[model_url_name]
+        return model_url_name
+
     @property
     def model_url_name(self):
         if not hasattr(self, '_model_url_name'):
             self._model_url_name = self.model._meta.verbose_name_plural.replace(' ', '_')
+            self._model_url_name = self._handle_unexpected_model_url_names(self._model_url_name)
         return self._model_url_name
 
     @property
