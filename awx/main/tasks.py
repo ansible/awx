@@ -52,7 +52,7 @@ from awx.main.isolated import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
-                            parse_yaml_or_json)
+                            parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -354,6 +354,23 @@ def update_host_smart_inventory_memberships():
     except IntegrityError as e:
         logger.error("Update Host Smart Inventory Memberships failed due to an exception: " + str(e))
         return
+
+
+@task(queue='tower')
+def delete_inventory(inventory_id):
+    i = Inventory.objects.filter(id=inventory_id)
+    if not i.exists():
+        logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
+        return
+    i = i[0]
+    with ignore_inventory_computed_fields(), \
+            ignore_inventory_group_removal():
+        i.delete()
+    emit_channel_notification(
+        'inventories-status_changed',
+        {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
+    )
+    logger.debug('Deleted inventory: %s' % inventory_id)
 
 
 class BaseTask(Task):

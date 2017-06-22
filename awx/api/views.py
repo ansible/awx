@@ -59,7 +59,7 @@ import ansiconv
 from social.backends.utils import load_backends
 
 # AWX
-from awx.main.tasks import send_notifications, update_host_smart_inventory_memberships
+from awx.main.tasks import send_notifications, update_host_smart_inventory_memberships, delete_inventory
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
@@ -1838,9 +1838,16 @@ class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
         return super(InventoryDetail, self).update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        with ignore_inventory_computed_fields():
-            with ignore_inventory_group_removal():
-                return super(InventoryDetail, self).destroy(request, *args, **kwargs)
+        obj = self.get_object()
+        if obj.pending_deletion is True:
+            return Response(dict(error=_("Inventory is already being deleted.")), status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.can_access(self.model, 'delete', obj):
+            raise PermissionDenied()
+        obj.websocket_emit_status('pending_deletion')
+        delete_inventory.delay(obj.id)
+        obj.pending_deletion = True
+        obj.save(update_fields=['pending_deletion'])
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):

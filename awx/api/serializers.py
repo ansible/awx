@@ -1130,7 +1130,7 @@ class InventorySerializer(BaseSerializerWithVariables):
                   'total_hosts', 'hosts_with_active_failures', 'total_groups',
                   'groups_with_active_failures', 'has_inventory_sources',
                   'total_inventory_sources', 'inventory_sources_with_failures',
-                  'insights_credential',)
+                  'insights_credential', 'pending_deletion',)
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
