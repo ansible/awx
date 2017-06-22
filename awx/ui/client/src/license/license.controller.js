@@ -9,10 +9,10 @@ import {N_} from "../i18n";
 export default
     ['Wait', '$state', '$scope', '$rootScope',
     'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService', 'i18n',
+    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config',
     function( Wait, $state, $scope, $rootScope,
         ProcessErrors, CheckLicense, moment, $window, ConfigService,
-        FeaturesService, pendoService, i18n){
+        FeaturesService, pendoService, i18n, config){
 
         var calcDaysRemaining = function(seconds){
 	 		// calculate the number of days remaining on the license
@@ -38,18 +38,13 @@ export default
             // license/license.partial.html compares fileName
             $scope.fileName = N_("No file selected.");
             $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
-            Wait('start');
-            ConfigService.delete();
-            ConfigService.getConfig().then(function(config){
-                $scope.license = config;
-                $scope.license.version = config.version.split('-')[0];
-                $scope.time = {};
-                $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
-                $scope.time.expiresOn = calcExpiresOn($scope.license.license_info.license_date);
-                $scope.valid = CheckLicense.valid($scope.license.license_info);
-                $scope.compliant = $scope.license.license_info.compliant;
-                Wait('stop');
-            });
+            $scope.license = config;
+            $scope.license.version = config.version.split('-')[0];
+            $scope.time = {};
+            $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
+            $scope.time.expiresOn = calcExpiresOn($scope.license.license_info.license_date);
+            $scope.valid = CheckLicense.valid($scope.license.license_info);
+            $scope.compliant = $scope.license.license_info.compliant;
         };
 
         init();
