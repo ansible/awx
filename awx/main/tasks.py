@@ -727,8 +727,11 @@ class BaseTask(Task):
                 pexpect_timeout=getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
             )
+            execution_node = settings.CLUSTER_HOST_ID
+            if isolated_host is not None:
+                execution_node = isolated_host
             instance = self.update_model(instance.pk, status='running',
-                                         execution_node=settings.CLUSTER_HOST_ID,
+                                         execution_node=execution_node,
                                          output_replacements=output_replacements)
             if isolated_host:
                 manager_instance = isolated_manager.IsolatedManager(
