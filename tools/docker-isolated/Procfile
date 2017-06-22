@@ -1,7 +1,0 @@
-nginx:          make nginx
-runworker:      make runworker
-daphne:         make daphne
-celeryd:        make celeryd EXTRA_GROUP_QUEUES=thepentagon
-receiver:       make receiver
-flower:         make flower
-uwsgi:          make uwsgi
