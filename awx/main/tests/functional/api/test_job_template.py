@@ -473,6 +473,23 @@ def test_scan_jt_surveys(inventory):
 
 
 @pytest.mark.django_db
+def test_launch_with_pending_deletion_inventory(get, post, organization_factory,
+                                                job_template_factory, machine_credential,
+                                                credential, net_credential):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization, credential='c',
+                              inventory='test_inv', project='test_proj').job_template
+    jt.inventory.pending_deletion = True
+    jt.inventory.save()
+
+    resp = post(
+        reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
+        objs.superusers.admin, expect=400
+    )
+    assert resp.data['inventory'] == ['The inventory associated with this Job Template is being deleted.']
+
+
+@pytest.mark.django_db
 def test_launch_with_extra_credentials(get, post, organization_factory,
                                        job_template_factory, machine_credential,
                                        credential, net_credential):
