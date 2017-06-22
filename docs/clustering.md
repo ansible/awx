@@ -115,9 +115,9 @@ rabbitmq_enable_manager=false
 ### Security Isolated Rampart Groups
 
 In Tower versions 3.2+ customers may optionally define isolated groups
-inside security-restricted networking zones to run jobs from.
+inside security-restricted networking zones to run jobs and ad hoc commands from.
 Instances in these groups will _not_ have a full install of Tower, but will have a minimal
-set of utilities used to run jobs on them. These must be specified
+set of utilities used to run jobs. Isolated groups must be specified
 in the inventory file prefixed with `isolated_group_`. An example inventory
 file is shown below.
 
@@ -150,7 +150,8 @@ the `isolatedA` and `isolatedB` hosts).
 When a job is scheduled to run on an "isolated" instance:
 
 *  The "controller" instance compiles metadata required to run the job and copies
-   it to the "isolated" instance via `rsync`.  This metadata includes:
+   it to the "isolated" instance via `rsync` (any related project or inventory
+   updates are run on the controller instance). This metadata includes:
 
    - the entire SCM checkout directory for the project
    - a static inventory file

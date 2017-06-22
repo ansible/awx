@@ -86,6 +86,7 @@ def mock_logging(self):
 @mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
 class TestInvalidOptionsFunctional:
 
+    @mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
     def test_invalid_options_invalid_source(self, inventory):
         # Give invalid file to the command
         cmd = inventory_import.Command()
@@ -113,8 +114,9 @@ class TestInvalidOptionsFunctional:
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
-@mock.patch.object(inventory_import.Command, 'check_license', mock.MagicMock())
-@mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
+@mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
+@mock.patch.object(inventory_import.Command, 'check_license', new=mock.MagicMock())
+@mock.patch.object(inventory_import.Command, 'set_logging_level', new=mock_logging)
 class TestINIImports:
 
     @mock.patch.object(inventory_import.AnsibleInventoryLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
