@@ -1,12 +1,11 @@
 const DEFAULT_ORGANIZATION_PLACEHOLDER = 'SELECT AN ORGANIZATION';
 
-function AddCredentialsController (models, organizationList, $state) {
+function AddCredentialsController (models, $state) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
-    let organization = models.organization;
 
     vm.panelTitle = 'NEW CREDENTIAL';
 
@@ -23,8 +22,8 @@ function AddCredentialsController (models, organizationList, $state) {
         omit: ['user', 'team', 'inputs']
     });
 
-    vm.form.organization._model = organization;
-    vm.form.organization._placeholder = DEFAULT_ORGANIZATION_PLACEHOLDER;
+    vm.form.organization._resource = 'organization';
+    vm.form.organization._route = 'credentials.add.organization';
 
     vm.form.credential_type._data = credentialType.get('results');
     vm.form.credential_type._placeholder = 'SELECT A TYPE';
@@ -53,7 +52,6 @@ function AddCredentialsController (models, organizationList, $state) {
 
 AddCredentialsController.$inject = [
     'resolvedModels',
-    'OrganizationList',
     '$state'
 ];
 

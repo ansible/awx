@@ -2,9 +2,6 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
 
-    scope.ns = 'lookup';
-    scope[scope.ns] = { modal: {} };
-
     if (scope.tab === '1') {
         element.find('input')[0].focus();
     }
@@ -16,27 +13,30 @@ function AtInputLookupController (baseInputController, $state) {
     let vm = this || {};
 
     let scope;
-    let modal;
 
     vm.init = (_scope_, element, form) => {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
 
-        scope.$watch('organization', () => {
-            if (scope.organization) {
-                scope.state._value = scope.organization;
-                scope.state._displayValue = scope.organization_name;
+        scope.$watch(scope.state._resource, () => {
+            if (scope[scope.state._resource]) {
+                scope.state._value = scope[scope.state._resource];
+                scope.state._displayValue = scope[`${scope.state._resource}_name`];
             }
         });
-
-        modal = scope.lookup.modal;
 
         vm.check();
     };
 
     vm.search = () => {
-        $state.go('credentials.add.organization');
+        let params = {};
+
+        if (scope.state._value) {
+            params.selected = scope.state._value;
+        }
+
+        $state.go(scope.state._route, params);
     };
 }
 
