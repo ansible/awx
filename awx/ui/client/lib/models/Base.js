@@ -77,25 +77,24 @@ function httpOptions (resource) {
         });
 }
 
-function get (method, keys) {
-    let model;
+function options (keys) {
+    return this.find('options', keys);
+}
 
-    if (keys) {
-        model = this.model[method.toUpperCase()];
-    } else {
-        model = this.model.GET;
-        keys = method;
-    }
+function get (keys) {
+    return this.find('get', keys);
+}
+
+function find (method, keys) {
+    let value = this.model[method.toUpperCase()];
 
     if (!keys) {
-        return model;
+        return value;
     }
 
-    keys = keys.split('.');
-
-    let value = model;
-
     try {
+        keys = keys.split('.');
+
         keys.forEach(key => {
             let bracketIndex = key.indexOf('[');
             let hasArray = bracketIndex !== -1;
@@ -137,6 +136,8 @@ function getById (id) {
 function BaseModel (path) {
     this.model = {};
     this.get = get;
+    this.options = options;
+    this.find = find;
     this.normalizePath = normalizePath;
     this.getById = getById;
     this.request = request;

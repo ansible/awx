@@ -10,7 +10,6 @@ import inputMessage from './input/message.directive';
 import inputNumber from './input/number.directive';
 import inputSelect from './input/select.directive';
 import inputSecret from './input/secret.directive';
-import inputSearch from './input/search.directive';
 import inputText from './input/text.directive';
 import inputTextarea from './input/textarea.directive';
 import inputTextareaSecret from './input/textarea-secret.directive';
@@ -19,6 +18,8 @@ import panel from './panel/panel.directive';
 import panelHeading from './panel/heading.directive';
 import panelBody from './panel/body.directive';
 import popover from './popover/popover.directive';
+import search from './search/search.directive';
+import searchKey from './search/key.directive';
 import tab from './tabs/tab.directive';
 import tabGroup from './tabs/group.directive';
 import table from './table/table.directive';
@@ -39,7 +40,6 @@ angular
     .directive('atInputNumber', inputNumber)
     .directive('atInputSecret', inputSecret)
     .directive('atInputSelect', inputSelect)
-    .directive('atInputSearch', inputSearch)
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)
@@ -48,6 +48,8 @@ angular
     .directive('atPanelHeading', panelHeading)
     .directive('atPanelBody', panelBody)
     .directive('atPopover', popover)
+    .directive('atSearch', search)
+    .directive('atSearchKey', searchKey)
     .directive('atTab', tab)
     .directive('atTabGroup', tabGroup)
     .directive('atTable', table)

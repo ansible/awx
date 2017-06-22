@@ -1,6 +1,6 @@
 <div class="at-InputContainer">
     <div class="row">
-        <div class="col-xs-10 at-InputSearch-group--left">
+        <div class="col-xs-10 at-Search-group--left">
             <div class="form-group at-u-flat">
                 <div class="input-group">
                     <input type="text" class="form-control at-Input"
@@ -13,19 +13,15 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-2 at-InputSearch-group--right">
-            <button class="btn at-ButtonHollow--default at-InputSearch-toggle"
-                    ng-class="{ 'at-InputSearch-toggle--active': vm.isToggleActive }"
+        <div class="col-xs-2 at-Search-group--right">
+            <button class="btn at-ButtonHollow--default at-Search-toggle"
+                    ng-class="{ 'at-Search-toggle--active': vm.isToggleActive }"
                     ng-click="vm.toggle()">
                 KEY
             </button>
         </div>
     </div>
     <div class="row" ng-show="vm.isToggleActive">
-        <div class="col-xs-12">
-            <div class="well at-InputSearch-well">
-                <p>Some info here</p>
-            </div>
-        </div>
+        <at-search-key></at-search-key>
     </div>
 </div>

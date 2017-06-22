@@ -1,6 +1,6 @@
 const DEFAULT_ORGANIZATION_PLACEHOLDER = 'SELECT AN ORGANIZATION';
 
-function AddCredentialsController (models, $state) {
+function AddCredentialsController (models, organizationList, $state) {
     let vm = this || {};
 
     let me = models.me;
@@ -23,6 +23,7 @@ function AddCredentialsController (models, $state) {
         omit: ['user', 'team', 'inputs']
     });
 
+    vm.form.organization._model = organization;
     vm.form.organization._placeholder = DEFAULT_ORGANIZATION_PLACEHOLDER;
 
     vm.form.credential_type._data = credentialType.get('results');
@@ -52,6 +53,7 @@ function AddCredentialsController (models, $state) {
 
 AddCredentialsController.$inject = [
     'resolvedModels',
+    'OrganizationList',
     '$state'
 ];
 

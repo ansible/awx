@@ -13,7 +13,7 @@
             <input type="text"
                class="form-control at-Input"
                ng-class="{ 'at-Input--rejected': state.rejected }"
-               ng-model="state._value"
+               ng-model="state._displayValue"
                ng-attr-tabindex="{{ tab || undefined }}"
                ng-attr-placeholder="{{::state._placeholder || undefined }}"
                ng-change="vm.check()"
@@ -23,8 +23,5 @@
         <at-input-message></at-input-message>
     </div>
 
-    <at-modal>
-        <at-input-search></at-input-search>
-        <at-table namespace></at-table>
-    </at-modal>
+    <div ui-view="organization"></div>
 </div>
