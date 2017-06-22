@@ -40,6 +40,28 @@ def test_edit_inventory(put, inventory, alice, role_field, expected_status_code)
     put(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), data, alice, expect=expected_status_code)
 
 
+@pytest.mark.django_db
+def test_async_inventory_deletion(delete, get, inventory, alice):
+    inventory.admin_role.members.add(alice)
+    resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 202
+
+    resp = get(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 200
+    assert resp.data.get('pending_deletion') is True
+
+
+@pytest.mark.django_db
+def test_async_inventory_duplicate_deletion_prevention(delete, get, inventory, alice):
+    inventory.admin_role.members.add(alice)
+    resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 202
+
+    resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 400
+    assert resp.data['error'] == 'Inventory is already being deleted.'
+
+
 @pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
 @pytest.mark.django_db
 def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order_by):

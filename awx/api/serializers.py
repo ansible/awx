@@ -3127,6 +3127,9 @@ class JobLaunchSerializer(BaseSerializer):
             if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
                 errors[field] = _("Job Template '%s' is missing or undefined.") % field
 
+        if obj.inventory and obj.inventory.pending_deletion is True:
+            errors['inventory'] = _("The inventory associated with this Job Template is being deleted.")
+
         if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
             credential = obj.credential
         else:
