@@ -30,100 +30,99 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
-import time
+import memcache
+import json
+import datetime
+from dateutil import parser
+from dateutil.tz import tzutc
+
+from ansible import constants as C
 
 try:
     from ansible.cache.base import BaseCacheModule
 except:
     from ansible.plugins.cache.base import BaseCacheModule
 
-from kombu import Connection, Exchange, Producer
-
 
 class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):
-        # Basic in-memory caching for typical runs
-        self._cache = {}
-        self._all_keys = {}
+        self.mc = memcache.Client([C.CACHE_PLUGIN_CONNECTION], debug=0)
+        self._timeout = int(C.CACHE_PLUGIN_TIMEOUT)
+        self._inventory_id = os.environ['INVENTORY_ID']
 
-        self.date_key = time.time()
-        self.callback_connection = os.environ['CALLBACK_CONNECTION']
-        self.callback_queue = os.environ['FACT_QUEUE']
-        self.connection = Connection(self.callback_connection)
-        self.exchange = Exchange(self.callback_queue, type='direct')
-        self.producer = Producer(self.connection)
+    @property
+    def host_names_key(self):
+        return '{}'.format(self._inventory_id)
 
-    def filter_ansible_facts(self, facts):
-        return dict((k, facts[k]) for k in facts.keys() if k.startswith('ansible_'))
+    def translate_host_key(self, host_name):
+        return '{}-{}'.format(self._inventory_id, host_name)
 
-    def identify_new_module(self, key, value):
-        # Return the first key found that doesn't exist in the
-        # previous set of facts
-        if key in self._all_keys:
-            for k in value.iterkeys():
-                if k not in self._all_keys[key] and not k.startswith('ansible_'):
-                    return k
-        # First time we have seen facts from this host
-        # it's either ansible facts or a module facts (including module_setup)
-        elif len(value) == 1:
-            return value.iterkeys().next()
-        return None
+    def translate_modified_key(self, host_name):
+        return '{}-{}-modified'.format(self._inventory_id, host_name)
 
     def get(self, key):
-        return self._cache.get(key)
+        host_key = self.translate_host_key(key)
+        modified_key = self.translate_modified_key(key)
 
-    '''
-    get() returns a reference to the fact object (usually a dict). The object is modified directly,
-    then set is called. Effectively, pre-determining the set logic.
+        '''
+        Cache entry expired
+        '''
+        modified = self.mc.get(modified_key)
+        if modified is None:
+            raise KeyError
+        modified = parser.parse(modified).replace(tzinfo=tzutc())
+        now_utc = datetime.datetime.now(tzutc())
+        if self._timeout != 0 and (modified + datetime.timedelta(seconds=self._timeout)) < now_utc:
+            raise KeyError
 
-    The below logic creates a backup of the cache each set. The values are now preserved across set() calls.
+        value_json = self.mc.get(host_key)
+        if value_json is None:
+            raise KeyError
+        try:
+            return json.loads(value_json)
+        # If cache entry is corrupt or bad, fail gracefully.
+        except (TypeError, ValueError):
+            self.delete(key)
+            raise KeyError
 
-    For a given key. The previous value is looked at for new keys that aren't of the form 'ansible_'.
-    If found, send the value of the found key.
-    If not found, send all the key value pairs of the form 'ansible_' (we presume set() is called because
-    of an ansible fact module invocation)
-
-    More simply stated...
-    In value, if a new key is found at the top most dict then consider this a module request and only 
-    emit the facts for the found top-level key.
-
-    If a new key is not found, assume set() was called as a result of ansible facts scan. Thus, emit 
-    all facts of the form 'ansible_'.
-    '''
     def set(self, key, value):
-        module = self.identify_new_module(key, value)
-        # Assume ansible fact triggered the set if no new module found
-        facts = self.filter_ansible_facts(value) if not module else dict({ module : value[module]})
-        self._cache[key] = value
-        self._all_keys[key] = value.keys()
-        packet = {
-            'host': key,
-            'inventory_id': os.environ['INVENTORY_ID'],
-            'job_id': os.getenv('JOB_ID', ''),
-            'facts': facts,
-            'date_key': self.date_key,
-        }
+        host_key = self.translate_host_key(key)
+        modified_key = self.translate_modified_key(key)
 
-        # Emit fact data to tower for processing
-        self.producer.publish(packet,
-                              serializer='json',
-                              compression='bzip2',
-                              exchange=self.exchange,
-                              declare=[self.exchange],
-                              routing_key=self.callback_queue)
+        self.mc.set(host_key, json.dumps(value))
+        self.mc.set(modified_key, datetime.datetime.now(tzutc()).isoformat())
 
     def keys(self):
-        return self._cache.keys()
+        return self.mc.get(self.host_names_key)
 
     def contains(self, key):
-        return key in self._cache
+        try:
+            self.get(key)
+            return True
+        except KeyError:
+            return False
 
     def delete(self, key):
-        del self._cache[key]
+        self.mc.delete(self.translate_host_key(key))
+        self.mc.delete(self.translate_modified_key(key))
 
     def flush(self):
-        self._cache = {}
+        host_names = self.mc.get(self.host_names_key)
+        if not host_names:
+            return
+
+        for k in host_names:
+            self.mc.delete(self.translate_host_key(k))
+            self.mc.delete(self.translate_modified_key(k))
 
     def copy(self):
-        return self._cache.copy()
+        ret = dict()
+        host_names = self.mc.get(self.host_names_key)
+        if not host_names:
+            return
+
+        for k in host_names:
+            ret[k] = self.mc.get(self.translate_host_key(k))
+        return ret
+

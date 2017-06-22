@@ -137,7 +137,6 @@ SERVICE_NAME_DICT = {
     "runworker": "channels",
     "uwsgi": "uwsgi",
     "daphne": "daphne",
-    "fact": "factcacher",
     "nginx": "nginx"}
 # Used for sending commands in automatic restart
 UWSGI_FIFO_LOCATION = '/awxfifo'

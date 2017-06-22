@@ -390,7 +390,6 @@ server_noattach:
 	tmux new-window 'exec make receiver'
 	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
-	tmux split-window -h 'exec make factcacher'
 	tmux select-window -t tower:0
 
 server: server_noattach
@@ -471,12 +470,6 @@ socketservice:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_socketio_service
-
-factcacher:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_fact_cache_receiver
 
 nginx:
 	nginx -g "daemon off;"

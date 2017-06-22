@@ -11,7 +11,6 @@ import socket
 import select
 import six
 from concurrent.futures import ThreadPoolExecutor
-from copy import copy
 from requests.exceptions import RequestException
 
 # loggly
@@ -113,28 +112,10 @@ class BaseHandler(logging.Handler):
         """
         return payload
 
-    def _send_and_queue_system_tracking(self, payload_data):
-        # Special action for System Tracking, queue up multiple log messages
-        ret = []
-        module_name = payload_data['module_name']
-        if module_name in ['services', 'packages', 'files']:
-            facts_dict = payload_data.pop(module_name)
-            for key in facts_dict:
-                fact_payload = copy(payload_data)
-                fact_payload.update(facts_dict[key])
-                ret.append(self._send(fact_payload))
-        return ret
-
     def _format_and_send_record(self, record):
-        ret = []
-        payload = self.format(record)
         if self.indv_facts:
-            payload_data = json.loads(payload)
-            if record.name.startswith('awx.analytics.system_tracking'):
-                ret.extend(self._send_and_queue_system_tracking(payload_data))
-        if len(ret) == 0:
-            ret.append(self._send(payload))
-        return ret
+            return [self._send(json.loads(self.format(record)))]
+        return [self._send(self.format(record))]
 
     def _skip_log(self, logger_name):
         if self.host == '' or (not self.enabled_flag):

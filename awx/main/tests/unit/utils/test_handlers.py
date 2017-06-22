@@ -4,6 +4,8 @@ import cStringIO
 import json
 import logging
 import socket
+import datetime
+from dateutil.tz import tzutc
 from uuid import uuid4
 
 import mock
@@ -135,7 +137,7 @@ def test_base_logging_handler_emit(dummy_log_record):
     assert body['message'] == 'User joe logged in'
 
 
-def test_base_logging_handler_emit_one_record_per_fact():
+def test_base_logging_handler_emit_system_tracking():
     handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
                           message_type='logstash', indv_facts=True,
                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
@@ -149,27 +151,20 @@ def test_base_logging_handler_emit_one_record_per_fact():
         tuple(), # args,
         None # exc_info
     )
-    record.module_name = 'packages'
-    record.facts_data = [{
-        "name": "ansible",
-        "version": "2.2.1.0"
-    }, {
-        "name": "ansible-tower",
-        "version": "3.1.0"
-    }]
+    record.inventory_id = 11
+    record.host_name = 'my_lucky_host'
+    record.ansible_facts = {
+        "ansible_kernel": "4.4.66-boot2docker",
+        "ansible_machine": "x86_64",
+        "ansible_swapfree_mb": 4663,
+    }
+    record.ansible_facts_modified = datetime.datetime.now(tzutc()).isoformat()
     sent_payloads = handler.emit(record)
 
-    assert len(sent_payloads) == 2
-    sent_payloads.sort(key=lambda payload: payload['version'])
-
+    assert len(sent_payloads) == 1
+    assert sent_payloads[0]['ansible_facts'] == record.ansible_facts
     assert sent_payloads[0]['level'] == 'INFO'
     assert sent_payloads[0]['logger_name'] == 'awx.analytics.system_tracking'
-    assert sent_payloads[0]['name'] == 'ansible'
-    assert sent_payloads[0]['version'] == '2.2.1.0'
-    assert sent_payloads[1]['level'] == 'INFO'
-    assert sent_payloads[1]['logger_name'] == 'awx.analytics.system_tracking'
-    assert sent_payloads[1]['name'] == 'ansible-tower'
-    assert sent_payloads[1]['version'] == '3.1.0'
 
 
 @pytest.mark.parametrize('host, port, normalized, hostname_only', [

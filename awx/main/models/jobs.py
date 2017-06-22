@@ -7,13 +7,18 @@ import hashlib
 import hmac
 import logging
 import time
+import json
 from urlparse import urljoin
 
 # Django
 from django.conf import settings
 from django.db import models
+#from django.core.cache import cache
+import memcache
 from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
+from dateutil import parser
+from dateutil.tz import tzutc
 from django.utils.encoding import force_text
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
@@ -41,6 +46,7 @@ from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.main.models.jobs')
 analytics_logger = logging.getLogger('awx.analytics.job_events')
+system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
@@ -147,9 +153,9 @@ class JobOptions(BaseModel):
         default=0,
         help_text=_("The amount of time (in seconds) to run before the task is canceled."),
     )
-    store_facts = models.BooleanField(
+    use_fact_cache = models.BooleanField(
         default=False,
-        help_text=_('During a Job run, collect, associate, and persist the most recent per-Host Ansible facts in the ansible_facts namespace.'),
+        help_text=_("If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible."),
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
@@ -282,7 +288,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'schedule', 'limit', 'verbosity', 'job_tags', 'extra_vars',
                 'launch_type', 'force_handlers', 'skip_tags', 'start_at_task',
                 'become_enabled', 'labels', 'survey_passwords',
-                'allow_simultaneous', 'timeout', 'store_facts',]
+                'allow_simultaneous', 'timeout', 'use_fact_cache',]
 
     def resource_validation_data(self):
         '''
@@ -702,6 +708,84 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if self.project_update:
             self.project_update.cancel(job_explanation=job_explanation)
         return res
+
+    @property
+    def memcached_fact_key(self):
+        return '{}'.format(self.inventory.id)
+
+    def memcached_fact_host_key(self, host_name):
+        return '{}-{}'.format(self.inventory.id, host_name)
+
+    def memcached_fact_modified_key(self, host_name):
+        return '{}-{}-modified'.format(self.inventory.id, host_name)
+
+    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
+        return self.inventory.hosts.only(*only)
+
+    def _get_memcache_connection(self):
+        return memcache.Client([settings.CACHES['default']['LOCATION']], debug=0)
+
+    def start_job_fact_cache(self):
+        if not self.inventory:
+            return
+
+        cache = self._get_memcache_connection()
+
+        host_names = []
+
+        for host in self._get_inventory_hosts():
+            host_key = self.memcached_fact_host_key(host.name)
+            modified_key = self.memcached_fact_modified_key(host.name)
+
+            if cache.get(modified_key) is None:
+                if host.ansible_facts_modified:
+                    host_modified = host.ansible_facts_modified.replace(tzinfo=tzutc()).isoformat()
+                else:
+                    host_modified = datetime.datetime.now(tzutc()).isoformat()
+                cache.set(host_key, json.dumps(host.ansible_facts))
+                cache.set(modified_key, host_modified)
+
+            host_names.append(host.name)
+
+        cache.set(self.memcached_fact_key, host_names)
+
+    def finish_job_fact_cache(self):
+        if not self.inventory:
+            return
+
+        cache = self._get_memcache_connection()
+
+        hosts = self._get_inventory_hosts()
+        for host in hosts:
+            host_key = self.memcached_fact_host_key(host.name)
+            modified_key = self.memcached_fact_modified_key(host.name)
+
+            modified = cache.get(modified_key)
+            if modified is None:
+                cache.delete(host_key)
+                continue
+
+            # Save facts if cache is newer than DB
+            modified = parser.parse(modified, tzinfos=[tzutc()])
+            if not host.ansible_facts_modified or modified > host.ansible_facts_modified:
+                ansible_facts = cache.get(host_key)
+                try:
+                    ansible_facts = json.loads(ansible_facts)
+                except Exception:
+                    ansible_facts = None
+
+                if ansible_facts is None:
+                    cache.delete(host_key)
+                    continue
+                host.ansible_facts = ansible_facts
+                host.ansible_facts_modified = modified
+                if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
+                    host.insights_system_id = ansible_facts['insights']['system_id']
+                host.save()
+                system_tracking_logger.info('New fact for inventory {} host {}'.format(host.inventory.name, host.name),
+                                            extra=dict(inventory_id=host.inventory.id, host_name=host.name,
+                                                       ansible_facts=host.ansible_facts,
+                                                       ansible_facts_modified=host.ansible_facts_modified.isoformat()))
 
 
 class JobHostSummary(CreatedModifiedModel):
@@ -1357,3 +1441,4 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
+
