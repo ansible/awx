@@ -31,7 +31,7 @@ from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
-from awx.api.versioning import URLPathVersioning
+from awx.api.versioning import URLPathVersioning, get_request_version
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -66,13 +66,13 @@ def get_view_name(cls, suffix=None):
     return views.get_view_name(cls, suffix=None)
 
 
-def get_view_description(cls, html=False):
+def get_view_description(cls, request, html=False):
     '''
     Wrapper around REST framework get_view_description() to support
     get_description() method and view_description property on a view class.
     '''
     if hasattr(cls, 'get_description') and callable(cls.get_description):
-        desc = cls().get_description(html=html)
+        desc = cls().get_description(request, html=html)
         cls = type(cls.__name__, (object,), {'__doc__': desc})
     elif hasattr(cls, 'view_description'):
         if callable(cls.view_description):
@@ -150,6 +150,14 @@ class APIView(views.APIView):
         except NameError:
             pass
 
+    def get_view_description(self, html=False):
+        """
+        Return some descriptive text for the view, as used in OPTIONS responses
+        and in the browsable API.
+        """
+        func = self.settings.VIEW_DESCRIPTION_FUNCTION
+        return func(self.__class__, self._request, html)
+
     def get_description_context(self):
         return {
             'view': self,
@@ -170,13 +178,25 @@ class APIView(views.APIView):
             'deprecated': getattr(self, 'deprecated', False),
         }
 
-    def get_description(self, html=False):
+    def get_description(self, request, html=False):
+        self.request = request
         template_list = []
         for klass in inspect.getmro(type(self)):
             template_basename = camelcase_to_underscore(klass.__name__)
             template_list.append('api/%s.md' % template_basename)
         context = self.get_description_context()
-        return render_to_string(template_list, context)
+
+        # "v2" -> 2
+        default_version = int(settings.REST_FRAMEWORK['DEFAULT_VERSION'].lstrip('v'))
+        request_version = get_request_version(self.request)
+        if request_version is not None and request_version < default_version:
+            context['deprecated'] = True
+
+        description = render_to_string(template_list, context)
+        if context.get('deprecated'):
+            # render deprecation messages at the very top
+            description = '\n'.join([render_to_string('api/_deprecated.md', context), description])
+        return description
 
     def update_raw_data(self, data):
         # Remove the parent key if the view is a sublist, since it will be set
