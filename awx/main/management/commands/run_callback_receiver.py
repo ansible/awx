@@ -114,7 +114,13 @@ class CallbackBrokerWorker(ConsumerMixin):
                 if 'job_id' not in body and 'ad_hoc_command_id' not in body:
                     raise Exception('Payload does not have a job_id or ad_hoc_command_id')
                 if settings.DEBUG:
-                    logger.info('Body: {}'.format(body))
+                    from pygments import highlight
+                    from pygments.lexers import PythonLexer
+                    from pygments.formatters import Terminal256Formatter
+                    from pprint import pformat
+                    logger.info('Body: {}'.format(
+                        highlight(pformat(body, width=160), PythonLexer(), Terminal256Formatter(style='friendly'))
+                    ))
                 try:
                     if 'job_id' in body:
                         JobEvent.create_from_data(**body)

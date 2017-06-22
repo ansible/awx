@@ -917,9 +917,9 @@ LOGGING = {
     },
     'handlers': {
         'console': {
+            '()': 'logging.StreamHandler',
             'level': 'DEBUG',
             'filters': ['require_debug_true_or_test'],
-            'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
         'null': {
@@ -1091,3 +1091,4 @@ LOGGING = {
         },
     }
 }
+COLOR_LOGS = False
