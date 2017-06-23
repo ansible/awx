@@ -3053,40 +3053,29 @@ class JobTemplateCallback(GenericAPIView):
         # Find the host objects to search for a match.
         obj = self.get_object()
         hosts = obj.inventory.hosts.all()
-        # First try for an exact match on the name.
-        try:
-            return set([hosts.get(name__in=remote_hosts)])
-        except (Host.DoesNotExist, Host.MultipleObjectsReturned):
-            pass
-        # Next, try matching based on name or ansible_host variables.
-        matches = set()
+        # Populate host_mappings
+        host_mappings = {}
         for host in hosts:
-            for host_var in ['ansible_ssh_host', 'ansible_host']:
-                ansible_host = host.variables_dict.get(host_var, '')
-                if ansible_host in remote_hosts:
-                    matches.add(host)
-                if host.name != ansible_host and host.name in remote_hosts:
-                    matches.add(host)
+            host_name = host.get_effective_host_name()
+            host_mappings.setdefault(host_name, [])
+            host_mappings[host_name].append(host)
+        # Try finding direct match
+        matches = set()
+        for host_name in remote_hosts:
+            if host_name in host_mappings:
+                matches.update(host_mappings[host_name])
         if len(matches) == 1:
             return matches
-
         # Try to resolve forward addresses for each host to find matches.
-        for host in hosts:
-            hostnames = set([host.name])
-            for host_var in ['ansible_ssh_host', 'ansible_host']:
-                ansible_host = host.variables_dict.get(host_var, '')
-                if ansible_host:
-                    hostnames.add(ansible_host)
-            for hostname in hostnames:
-                try:
-                    result = socket.getaddrinfo(hostname, None)
-                    possible_ips = set(x[4][0] for x in result)
-                    possible_ips.discard(hostname)
-                    if possible_ips and possible_ips & remote_hosts:
-                        matches.add(host)
-                except socket.gaierror:
-                    pass
-        # Return all matches found.
+        for host_name in host_mappings:
+            try:
+                result = socket.getaddrinfo(host_name, None)
+                possible_ips = set(x[4][0] for x in result)
+                possible_ips.discard(host_name)
+                if possible_ips and possible_ips & remote_hosts:
+                    matches.update(host_mappings[host_name])
+            except socket.gaierror:
+                pass
         return matches
 
     def get(self, request, *args, **kwargs):
