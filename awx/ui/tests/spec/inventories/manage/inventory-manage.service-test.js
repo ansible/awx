@@ -1,28 +1,28 @@
 'use strict';
 
-describe('Service: InventoryManageService', () => {
+describe('Service: InventoriesService', () => {
 
     let Rest,
-        InventoryManageService;
+        InventoriesService;
 
     beforeEach(angular.mock.module('Tower'), ($provide)=>{
         $provide.value('Rest', Rest);
     });
     beforeEach(angular.mock.module('inventoryManage'));
-    beforeEach(angular.mock.inject(($httpBackend, _InventoryManageService_) =>{
+    beforeEach(angular.mock.inject(($httpBackend, _InventoriesService_) =>{
         Rest = $httpBackend;
-        InventoryManageService = _InventoryManageService_;
+        InventoriesService = _InventoriesService_;
     }));
 
     xdescribe('RESTy methods should handle errors', () => {
 
         beforeEach(() => {
-            spyOn(InventoryManageService, 'error');
+            spyOn(InventoriesService, 'error');
         });
-        it('InventoryManageService.getInventory should handle errors', () => {
+        it('InventoriesService.getInventory should handle errors', () => {
             Rest.expectGET('/api/v2/inventory:id/').respond(400, {});
             Rest.flush();
-            expect(InventoryManageService.error).toHaveBeenCalled();
+            expect(InventoriesService.error).toHaveBeenCalled();
         });
     });
 
