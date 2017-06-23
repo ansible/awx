@@ -292,6 +292,7 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += options.mode === 'lookup' ? `<tbody ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `"<tbody>\n"`;
                 innerTable += "<tr ng-class=\"[" + list.iterator;
                 innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
+                innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.pending_deletion]` : "";
 
                 if (list.multiSelect) {
                     innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
@@ -300,7 +301,8 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += "]\" ";
                 innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                 innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
-                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
+                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name + "\"";
+                innerTable += (list.disableRow) ? " disable-row=" + list.disableRow + " " : "";
                 innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                 innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                 innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
@@ -379,7 +381,11 @@ export default ['$compile', 'Attr', 'Icon',
                                     type: 'fieldActions',
                                     td: false
                                 });
-                            } else {
+                            }
+                            if (field_action === 'pending_deletion') {
+                                innerTable += `<a ng-if='${list.iterator}.pending_deletion'>Pending Delete</a>`;
+                            }
+                            else {
                                 fAction = list.fieldActions[field_action];
                                 innerTable += "<button id=\"";
                                 innerTable += (fAction.id) ? fAction.id : field_action + "-action";
@@ -402,6 +408,7 @@ export default ['$compile', 'Attr', 'Icon',
                                         innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
                                     }
                                 }
+                                innerTable += (fAction.ngDisabled) ? "ng-disabled=\"" + fAction.ngDisabled + "\"" : "";
                                 innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                                 innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
                                 innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
@@ -430,7 +437,6 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 innerTable += "</tr>\n";
-
                 // End List
                 innerTable += "</tbody>\n";
 

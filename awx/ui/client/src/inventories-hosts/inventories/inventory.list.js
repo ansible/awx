@@ -18,6 +18,7 @@ export default ['i18n', function(i18n) {
         hover: true,
         basePath: 'inventory',
         title: false,
+        disableRow: "{{ inventory.pending_deletion }}",
 
         fields: {
             status: {
@@ -97,7 +98,8 @@ export default ['i18n', function(i18n) {
                 ngClick: 'editInventory(inventory)',
                 awToolTip: i18n._('Edit inventory'),
                 dataPlacement: 'top',
-                ngShow: 'inventory.summary_fields.user_capabilities.edit'
+                ngShow: 'inventory.summary_fields.user_capabilities.edit',
+                ngHide: 'inventory.pending_deletion'
             },
             view: {
                 label: i18n._('View'),
@@ -111,7 +113,12 @@ export default ['i18n', function(i18n) {
                 ngClick: "deleteInventory(inventory.id, inventory.name)",
                 awToolTip: i18n._('Delete inventory'),
                 dataPlacement: 'top',
-                ngShow: 'inventory.summary_fields.user_capabilities.delete'
+                ngShow: 'inventory.summary_fields.user_capabilities.delete',
+                ngHide: 'inventory.pending_deletion'
+
+            },
+            pending_deletion: {
+                label: i18n._('Pending Delete'),
             }
         }
     };}];

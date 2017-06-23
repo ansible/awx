@@ -272,6 +272,21 @@ function(ConfigurationUtils, i18n, $rootScope) {
     };
 })
 
+// the disableRow directive disables table row click events
+.directive('disableRow', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.bind('click', function(event) {
+                if (attrs.disableRow) {
+                    event.preventDefault();
+                }
+                return;
+            });
+        }
+    };
+})
+
 
 .directive('awSurveyQuestion', function() {
     return {

@@ -102,11 +102,19 @@ function InventoriesList($scope,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>' +
+                    '<div class="Prompt-bodyNote"><span class="Prompt-bodyNote--emphasis">Note:</span> The inventory will be in a pending status until the final delete is processed.</div>',
             action: action,
             actionText: 'DELETE'
         });
     };
+
+    $scope.$on(`ws-inventories`, function(e, data){
+        let inventory = $scope.inventories.find((inventory) => inventory.id === data.inventory_id);
+        if (data.status === 'pending_deletion') {
+            inventory.pending_deletion = true;
+        }
+    });
 }
 
 export default ['$scope',
