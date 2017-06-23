@@ -5,7 +5,8 @@ describe('Controller: LicenseController', () => {
     let scope,
         LicenseController,
         ConfigService,
-        ProcessErrors;
+        ProcessErrors,
+        config;
 
     beforeEach(angular.mock.module('Tower'));
     beforeEach(angular.mock.module('license', ($provide) => {
@@ -14,39 +15,32 @@ describe('Controller: LicenseController', () => {
             'delete'
             ]);
 
-        ConfigService.getConfig.and.returnValue({
-            then: function(callback){
-                return callback({
-                    license_info: {
-                        time_remaining: 1234567 // seconds
-                    },
-                    version: '3.1.0-devel'
-                });
-            }
-        });
+        config = {
+            license_info: {
+                time_remaining: 1234567 // seconds
+            },
+            version: '3.1.0-devel'
+        };
 
         ProcessErrors = jasmine.createSpy('ProcessErrors');
 
         $provide.value('ConfigService', ConfigService);
         $provide.value('ProcessErrors', ProcessErrors);
+        $provide.value('config', config);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, _ConfigService_, _ProcessErrors_, _config_) => {
         scope = $rootScope.$new();
         ConfigService = _ConfigService_;
         ProcessErrors = _ProcessErrors_;
+        config = _config_;
         LicenseController = $controller('licenseController', {
             $scope: scope,
             ConfigService: ConfigService,
-            ProcessErrors: ProcessErrors
+            ProcessErrors: ProcessErrors,
+            config: config
         });
     }));
-
-    // Suites
-    it('should GET a config object on initialization', ()=>{
-        expect(ConfigService.delete).toHaveBeenCalled();
-        expect(ConfigService.getConfig).toHaveBeenCalled();
-    });
 
     xit('should show correct expiration date', ()=>{
         let date = new Date(),
