@@ -9,7 +9,7 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputLookupController (baseInputController, $state) {
+function AtInputLookupController (baseInputController, $state, $stateParams) {
     let vm = this || {};
 
     let scope;
@@ -36,13 +36,15 @@ function AtInputLookupController (baseInputController, $state) {
             params.selected = scope.state._value;
         }
 
+        console.log(scope.state);
         $state.go(scope.state._route, params);
     };
 }
 
 AtInputLookupController.$inject = [
     'BaseInputController',
-    '$state'
+    '$state',
+    '$stateParams'
 ];
 
 function atInputLookup (pathService) {

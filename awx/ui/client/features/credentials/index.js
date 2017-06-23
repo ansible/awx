@@ -73,6 +73,9 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
     stateExtender.addState(legacy.getStateConfiguration('edit-permissions'));
     stateExtender.addState(legacy.getStateConfiguration('add-permissions'));
     stateExtender.addState(legacy.getStateConfiguration('add-organization'));
+    stateExtender.addState(legacy.getStateConfiguration('edit-organization'));
+    stateExtender.addState(legacy.getStateConfiguration('add-credential-type'));
+    stateExtender.addState(legacy.getStateConfiguration('edit-credential-type'));
 }
 
 CredentialsConfig.$inject = [

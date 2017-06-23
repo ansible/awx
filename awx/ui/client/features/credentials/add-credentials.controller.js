@@ -25,13 +25,18 @@ function AddCredentialsController (models, $state) {
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'credentials.add.organization';
 
-    vm.form.credential_type._data = credentialType.get('results');
-    vm.form.credential_type._placeholder = 'SELECT A TYPE';
-    vm.form.credential_type._format = 'grouped-object';
-    vm.form.credential_type._display = 'name';
-    vm.form.credential_type._key = 'id';
-    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
+    vm.form.credential_type._resource = 'credentialType';
+    vm.form.credential_type._route = 'credentials.add.credentialType';
 
+/*
+ *    vm.form.credential_type._data = credentialType.get('results');
+ *    vm.form.credential_type._placeholder = 'SELECT A TYPE';
+ *    vm.form.credential_type._format = 'grouped-object';
+ *    vm.form.credential_type._display = 'name';
+ *    vm.form.credential_type._key = 'id';
+ *    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
+ *
+ */
     vm.form.inputs = {
         _get: credentialType.mergeInputProperties,
         _source: vm.form.credential_type,

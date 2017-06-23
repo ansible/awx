@@ -201,45 +201,88 @@ function LegacyCredentialsService (pathService) {
         }
     };
 
+    this.lookupTemplateProvider = (ListDefinition, generateList) => {
+        let html = generateList.build({
+            mode: 'lookup',
+            list: ListDefinition,
+            input_type: 'radio'
+        });
+
+        return `<lookup-modal>${html}</lookup-modal>`;
+    };
+
     this.organization = {
+        url: '/organization?selected',
+        searchPrefix: 'organization',
         params: {
             organization_search: {
                 value: {
                     page_size: 5,
                     order_by: 'name'
                 },
-                dynamic:true,
-                squash:''
+                dynamic: true,
+                squash: ''
             }
         },
         data: {
             basePath: 'organizations',
-            formChildState:true
+            formChildState: true
         },
         ncyBreadcrumb: {
             skip: true
         },
-        views: {
-            'organization@credentials.add': {
-                templateProvider: (ListDefinition, generateList) => {
-                    let html = generateList.build({
-                        mode: 'lookup',
-                        list: ListDefinition,
-                        input_type: 'radio'
-                    });
-
-                    return `<lookup-modal>${html}</lookup-modal>`;
-                }
-            }
-        },
+        views: {},
         resolve: {
-            ListDefinition: ['OrganizationList', function(list) {
+            ListDefinition: ['OrganizationList', list => {
                 return list;
             }],
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => {
                     return qs.search(
                         GetBasePath('organizations'), 
+                        $stateParams[`${list.iterator}_search`]
+                    );
+                }
+            ]
+        },
+        onExit: function($state) {
+            if ($state.transition) {
+                $('#form-modal').modal('hide');
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+            }
+        }
+    };
+
+    this.credentialType = {
+        url: '/credential_type?selected',
+        searchPrefix: 'credential_type',
+        params: {
+            credential_type_search: {
+                value: {
+                    page_size: 5,
+                    order_by: 'name'
+                },
+                dynamic: true,
+                squash: ''
+            }
+        },
+        data: {
+            basePath: 'credential_types',
+            formChildState: true
+        },
+        ncyBreadcrumb: {
+            skip: true
+        },
+        views: {},
+        resolve: {
+            ListDefinition: ['CredentialTypesList', list => {
+                return list;
+            }],
+            Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                (list, qs, $stateParams, GetBasePath) => {
+                    return qs.search(
+                        GetBasePath('credential_types'), 
                         $stateParams[`${list.iterator}_search`]
                     );
                 }
@@ -264,8 +307,33 @@ function LegacyCredentialsService (pathService) {
                 return this.addPermissions;
             case 'add-organization':
                 this.organization.name = 'credentials.add.organization';
-                this.organization.url = '/organization';
+                this.organization.views['organization@credentials.add'] = {
+                    templateProvider: this.lookupTemplateProvider
+                };
+
                 return this.organization;
+            case 'edit-organization':
+                this.organization.name = 'credentials.edit.organization';
+                this.organization.views['organization@credentials.edit'] = {
+                    templateProvider: this.lookupTemplateProvider
+                };
+
+                return this.organization;
+            case 'add-credential-type':
+                this.credentialType.name = 'credentials.add.credentialType';
+                this.credentialType.views['credentialType@credentials.add'] = {
+                    templateProvider: this.lookupTemplateProvider
+                };
+
+                return this.credentialType;
+            case 'edit-credential-type':
+                this.credentialType.name = 'credentials.edit.credentialType';
+                this.credentialType.views['credentialType@credentials.edit'] = {
+                    templateProvider: this.lookupTemplateProvider
+                };
+
+                return this.credentialType;
+
             default:
                 throw new Error(`Legacy state configuration for ${name} does not exist`);
         };
