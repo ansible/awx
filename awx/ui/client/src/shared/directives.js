@@ -533,7 +533,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 }
                 else {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
-                    let switchType = attrs.awlookuptype ? attrs.awlookuptype : modelName;console.log(switchType);
+                    let switchType = attrs.awlookuptype ? attrs.awlookuptype : modelName;
 
                     switch(switchType) {
                         case 'credential':
