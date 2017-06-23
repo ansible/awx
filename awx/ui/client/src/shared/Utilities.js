@@ -624,7 +624,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     scope = params.scope,
                     selectOptions = params.options,
                     model = params.model,
-                    original_options;
+                    original_options,
+                    minimumResultsForSearch = params.minimumResultsForSearch ? params.minimumResultsForSearch : Infinity;
 
                     if (scope && selectOptions) {
                         original_options = _.cloneDeep(scope[selectOptions]);
@@ -651,7 +652,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         multiple: multiple,
                         containerCssClass: 'Form-dropDown',
                         width: '100%',
-                        minimumResultsForSearch: Infinity,
+                        minimumResultsForSearch: minimumResultsForSearch,
                         escapeMarkup: function(m) {
                             return $filter('sanitize')(m);
                         }
