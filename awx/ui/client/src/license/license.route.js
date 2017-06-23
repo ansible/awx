@@ -24,6 +24,15 @@ export default {
 					return CheckLicense.notify();
 				}
 
-		}]
+		}],
+		config: ['ConfigService', 'CheckLicense', '$rootScope',
+			function(ConfigService, CheckLicense, $rootScope) {
+				ConfigService.delete();
+	            return ConfigService.getConfig()
+					.then(function(config){
+						$rootScope.licenseMissing = (CheckLicense.valid(config.license_info) === false) ? true : false;
+						return config;
+					});
+			}]
 	},
 };
