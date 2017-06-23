@@ -1381,7 +1381,7 @@ class GroupSerializer(BaseSerializerWithVariables):
                 res['inventory_source'] = self.reverse('api:inventory_source_detail',
                                                        kwargs={'pk': obj.deprecated_inventory_source.pk})
             except Group.deprecated_inventory_source.RelatedObjectDoesNotExist:
-                res['inventory_source'] = None
+                pass
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         return res
@@ -1592,7 +1592,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             res['last_update'] = self.reverse('api:inventory_update_detail',
                                               kwargs={'pk': obj.last_update.pk})
         if self.version == 1:  # TODO: remove in 3.3
-            res['group'] = None
             if obj.deprecated_group:
                 res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.deprecated_group.pk})
         return res
