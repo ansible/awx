@@ -110,7 +110,7 @@ export default ['i18n', function(i18n) {
                 awToolTip: "Create a new Smart Inventory from search results.",
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: 'SMART INVENTORY',
-                ngShow: 'canAdd',
+                ngShow: 'canAdd && (hosts.length > 0 || !(searchTags | isEmpty))',
                 dataPlacement: "top",
                 ngDisabled: '!enableSmartInventoryButton'
             }
