@@ -210,18 +210,18 @@ def test_delete_inventory_host(delete, host, alice, role_field, expected_status_
     delete(reverse('api:host_detail', kwargs={'pk': host.id}), alice, expect=expected_status_code)
 
 
-@pytest.mark.parametrize("role_field,expected_status_code", [
-    (None, 403),
-    ('admin_role', 202),
-    ('update_role', 202),
-    ('adhoc_role', 403),
-    ('use_role', 403)
+# See companion test in tests/functional/test_rbac_inventory.py::test_inventory_source_update
+@pytest.mark.parametrize("start_access,expected_status_code", [
+    (True, 202),
+    (False, 403)
 ])
 @pytest.mark.django_db
-def test_inventory_source_update(post, inventory_source, alice, role_field, expected_status_code):
-    if role_field:
-        getattr(inventory_source.inventory, role_field).members.add(alice)
-    post(reverse('api:inventory_source_update_view', kwargs={'pk': inventory_source.id}), {}, alice, expect=expected_status_code)
+def test_inventory_update_access_called(post, inventory_source, alice, mock_access, start_access, expected_status_code):
+    with mock_access(InventorySource) as mock_instance:
+        mock_instance.can_start = mock.MagicMock(return_value=start_access)
+        post(reverse('api:inventory_source_update_view', kwargs={'pk': inventory_source.id}),
+             {}, alice, expect=expected_status_code)
+        mock_instance.can_start.assert_called_once_with(inventory_source)
 
 
 @pytest.mark.django_db
