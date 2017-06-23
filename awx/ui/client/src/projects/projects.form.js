@@ -131,7 +131,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 basePath: 'credentials',
                 list: 'CredentialList',
                 search: {
-                    "credential_type": null
+                    credential_type: null
                 },
                 ngClick: 'lookupCredential()',
                 awRequiredWhen: {
