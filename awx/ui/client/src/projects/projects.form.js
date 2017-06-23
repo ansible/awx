@@ -135,14 +135,13 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 //     kind: 'scm'
                 // },
                 ngClick: 'lookupCredential()',
-                autopopulateLookup: false,
                 awRequiredWhen: {
                     reqExpression: "credRequired",
                     init: false
                 },
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',
-                awLookupType: 'scm_credential',
+                awLookupType: '{{lookupType}}',
                 sourceField: 'name',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'

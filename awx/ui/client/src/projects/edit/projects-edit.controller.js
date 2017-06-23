@@ -251,6 +251,10 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
 
                 // Dynamically update popover values
                 if ($scope.scm_type.value) {
+                    if(($scope.lookupType === 'insights_credential' && $scope.scm_type.value !== 'insights') || ($scope.lookupType === 'scm_credential' && $scope.scm_type.value === 'insights')) {
+                        $scope.credential = null;
+                        $scope.credential_name = '';
+                    }
                     switch ($scope.scm_type.value) {
                         case 'git':
                             $scope.credentialLabel = "SCM Credential";
@@ -259,12 +263,16 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                                 '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                                 'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
                                 'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
                             break;
                         case 'svn':
                             $scope.credentialLabel = "SCM Credential";
                             $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                                 '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                                 '<li>svn+ssh://servername.example.com/path</li></ul>';
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
                             break;
                         case 'hg':
                             $scope.credentialLabel = "SCM Credential";
@@ -274,16 +282,21 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                                 '<p>' + i18n.sprintf(i18n._('%sNote:%s Mercurial does not support password authentication for SSH. ' +
                                 'Do not put the username and key in the URL. ' +
                                 'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
                             break;
                         case 'insights':
                             $scope.pathRequired = false;
                             $scope.scmRequired = false;
                             $scope.credRequired = true;
                             $scope.credentialLabel = "Credential";
-                        break;
+                            $scope.lookupType = 'insights_credential';
+                            break;
                         default:
                             $scope.credentialLabel = "SCM Credential";
                             $scope.urlPopover = '<p> ' + i18n._('URL popover text');
+                            $scope.credRequired = false;
+                            $scope.lookupType = 'scm_credential';
                     }
                 }
             }

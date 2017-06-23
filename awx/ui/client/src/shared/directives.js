@@ -491,7 +491,6 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 autopopulateLookup,
                 modelKey = attrs.ngModel,
                 modelName = attrs.source,
-                lookupType = attrs.awlookuptype,
                 watcher = attrs.awRequiredWhen || undefined,
                 watchBasePath,
                 awLookupWhen = attrs.awLookupWhen;
@@ -534,16 +533,20 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 }
                 else {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
-                    let switchType = lookupType ? lookupType : modelName;
+                    let switchType = attrs.awlookuptype ? attrs.awlookuptype : modelName;console.log(switchType);
+
                     switch(switchType) {
                         case 'credential':
-                            query = '?kind=ssh&role_level=use_role';
+                            query = '?credential_type__kind=ssh&role_level=use_role';
                             break;
                         case 'scm_credential':
-                            query = '?kind=scm&role_level=use_role';
+                            query = '?credential_type__kind=scm&role_level=use_role';
                             break;
                         case 'network_credential':
-                            query = '?kind=net&role_level=use_role';
+                            query = '?credential_type__kind=net&role_level=use_role';
+                            break;
+                        case 'insights_credential':
+                            query = '?credential_type__kind=insights&role_level=use_role';
                             break;
                         case 'organization':
                             query = '?role_level=admin_role';
@@ -628,7 +631,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                     query = elm.attr('data-query');
                     query = query.replace(/\:value/, encodeURIComponent(viewValue));
 
-                    let base = lookupType ? lookupType : ctrl.$name.split('_name')[0];
+                    let base = attrs.awlookuptype ? attrs.awlookuptype : ctrl.$name.split('_name')[0];
                     if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
                         basePath = scope[attrs.watchbasepath];
                         query += '&role_level=use_role';
