@@ -37,7 +37,7 @@ endif
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
-NAME = ansible-tower
+NAME ?= ansible-tower
 VERSION = $(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 BUILD = 0.git$(DATE)
@@ -73,6 +73,7 @@ else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
 endif
+SDIST_COMMAND ?= sdist
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
@@ -681,7 +682,7 @@ release_clean:
 	-(rm -rf ($RELEASE))
 
 dist/$(SDIST_TAR_FILE): ui-release
-	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
+	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
@@ -729,7 +730,7 @@ rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_
 
 	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/tower.fc rpm-build/
-	cp packaging/rpm/$(NAME).sysconfig rpm-build/
+	cp packaging/rpm/ansible-tower.sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
 	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
