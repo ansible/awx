@@ -368,12 +368,16 @@ class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
 
 
 class ParentMixin(object):
+    parent_object = None
 
     def get_parent_object(self):
+        if self.parent_object is not None:
+            return self.parent_object
         parent_filter = {
             self.lookup_field: self.kwargs.get(self.lookup_field, None),
         }
-        return get_object_or_404(self.parent_model, **parent_filter)
+        self.parent_object = get_object_or_404(self.parent_model, **parent_filter)
+        return self.parent_object
 
     def check_parent_access(self, parent=None):
         parent = parent or self.get_parent_object()

@@ -1968,6 +1968,7 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
     parent_model = Inventory
     relationship = 'hosts'
     parent_key = 'inventory'
+    capabilities_prefetch = ['inventory.admin']
 
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
@@ -2226,6 +2227,7 @@ class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
+    capabilities_prefetch = ['inventory.admin']
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2252,6 +2254,7 @@ class GroupAllHostsList(SubListAPIView):
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
+    capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2608,6 +2611,7 @@ class InventorySourceHostsList(SubListAPIView):
     parent_model = InventorySource
     relationship = 'hosts'
     new_in_148 = True
+    capabilities_prefetch = ['inventory.admin']
 
 
 class InventorySourceGroupsList(SubListAPIView):
@@ -3936,6 +3940,7 @@ class JobEventHostsList(SubListAPIView):
     parent_model = JobEvent
     relationship = 'hosts'
     view_name = _('Job Event Hosts List')
+    capabilities_prefetch = ['inventory.admin']
 
 
 class BaseJobEventsList(SubListAPIView):
