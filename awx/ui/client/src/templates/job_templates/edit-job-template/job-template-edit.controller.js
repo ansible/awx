@@ -13,7 +13,7 @@
 export default
     [   '$filter', '$scope', '$rootScope',
         '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
-        'Rest', 'Alert',  'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup',
+        'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'md5Setup',
         'ParseTypeChange', 'Wait',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
@@ -21,13 +21,11 @@ export default
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-            ProcessErrors, ClearScope, GetBasePath, md5Setup,
+            ProcessErrors, GetBasePath, md5Setup,
             ParseTypeChange, Wait,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService
         ) {
-
-            ClearScope();
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
                 if (val === false) {

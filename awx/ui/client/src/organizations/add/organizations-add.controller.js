@@ -6,9 +6,9 @@
 
 export default ['$scope', '$rootScope', '$location', '$stateParams',
     'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService',
+    'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2', '$state','InstanceGroupsService',
     function($scope, $rootScope, $location, $stateParams, OrganizationForm,
-    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService) {
+    GenerateForm, Rest, Alert, ProcessErrors, GetBasePath, Wait, CreateSelect2, $state, InstanceGroupsService) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -18,8 +18,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
                     Alert('Permission Error', 'You do not have permission to add an organization.', 'alert-info');
                 }
             });
-
-        ClearScope();
 
         var form = OrganizationForm(),
             base = $location.path().replace(/^\//, '').split('/')[0];

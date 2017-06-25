@@ -4,13 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
+export default ['$scope', 'Rest', 'CredentialList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, Rest, CredentialList, Prompt, ClearScope,
+    function($scope, Rest, CredentialList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
     i18n) {
-
-        ClearScope();
 
         var list = CredentialList,
             defaultUrl = GetBasePath('credentials');

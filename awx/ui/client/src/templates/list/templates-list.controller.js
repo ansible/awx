@@ -5,17 +5,16 @@
  *************************************************/
 
 export default ['$scope', '$rootScope',
-    'Alert','TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors',
+    'Alert','TemplateList', 'Prompt', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
     'TemplateCopyService',
     function(
         $scope, $rootScope, Alert,
-        TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
+        TemplateList, Prompt, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
         qs, TemplateCopyService
     ) {
-        ClearScope();
 
         var list = TemplateList;
 
@@ -77,7 +76,7 @@ export default ['$scope', '$rootScope',
                 $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
             });
         });
-        
+
         $scope.editJobTemplate = function(template) {
             if(template) {
                     if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {

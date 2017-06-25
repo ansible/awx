@@ -6,10 +6,10 @@
 
 export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
-    'ClearScope', 'Wait', '$state', 'CreateSelect2', 'TemplatesService',
+    'Wait', '$state', 'CreateSelect2', 'TemplatesService',
     'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
-    ClearScope, Wait, $state, CreateSelect2, TemplatesService, ToJSON,
+    Wait, $state, CreateSelect2, TemplatesService, ToJSON,
     ParseTypeChange, $q, Rest, GetBasePath) {
 
          Rest.setUrl(GetBasePath('workflow_job_templates'));
@@ -21,7 +21,6 @@ export default [
                  }
              });
 
-         ClearScope();
          // Inject dynamic view
          let form = WorkflowForm(),
              generator = GenerateForm;

@@ -22,43 +22,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name shared.function:Utilities#ClearScope
- * @methodOf shared.function:Utilities
- * @description
- *  Place to remove things that might be lingering from a prior tab or view.
- *  This used to destroy the scope, but that causes issues in angular 1.2.x
- */
-.factory('ClearScope', ['$rootScope', function($rootScope) {
-    return function() {
-
-        $rootScope.flashMessage = null;
-
-        //$('#form-modal .modal-body').empty();
-        $('#form-modal2 .modal-body').empty();
-
-        $('.tooltip').each(function() {
-            $(this).remove();
-        });
-
-        $('.popover').each(function() {
-            $(this).remove();
-        });
-
-        $('.ui-dialog-content').each(function() {
-            $(this).dialog('close');
-        });
-
-        try {
-            $('#help-modal').dialog('close');
-        } catch (e) {
-            // ignore
-        }
-    };
-}])
-
-
-/**
- * @ngdoc method
  * @name shared.function:Utilities#Empty
  * @methodOf shared.function:Utilities
  * @description Empty()

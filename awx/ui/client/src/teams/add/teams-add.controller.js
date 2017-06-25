@@ -5,12 +5,9 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', 'TeamForm', 'GenerateForm', 'Rest',
-    'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait',  '$state',
+    'Alert', 'ProcessErrors', 'GetBasePath', 'Wait',  '$state',
     function($scope, $rootScope, TeamForm, GenerateForm, Rest, Alert,
-    ProcessErrors, ClearScope, GetBasePath, Wait, $state) {
-
-        ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-        //$scope.
+    ProcessErrors, GetBasePath, Wait, $state) {
 
         Rest.setUrl(GetBasePath('teams'));
         Rest.options()

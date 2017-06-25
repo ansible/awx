@@ -203,12 +203,12 @@ var tower = angular.module('Tower', [
     ])
     .run(['$stateExtender', '$q', '$compile', '$cookies', '$rootScope', '$log', '$stateParams',
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
-        'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
+        'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
         'FeaturesService', '$filter', 'SocketService',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
-            ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
+            LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
             $filter, SocketService) {
 
@@ -303,6 +303,28 @@ var tower = angular.module('Tower', [
                     }
                     if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
+                    }
+
+                    $rootScope.flashMessage = null;
+
+                    $('#form-modal2 .modal-body').empty();
+
+                    $('.tooltip').each(function() {
+                        $(this).remove();
+                    });
+
+                    $('.popover').each(function() {
+                        $(this).remove();
+                    });
+
+                    $('.ui-dialog-content').each(function() {
+                        $(this).dialog('close');
+                    });
+
+                    try {
+                        $('#help-modal').dialog('close');
+                    } catch (e) {
+                        // ignore
                     }
 
                     // On each navigation request, check that the user is logged in

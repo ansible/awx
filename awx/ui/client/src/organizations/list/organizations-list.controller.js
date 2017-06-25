@@ -6,13 +6,11 @@
 
 
 export default ['$stateParams', '$scope', '$rootScope',
-    'Rest', 'OrganizationList', 'Prompt', 'ClearScope',
+    'Rest', 'OrganizationList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset', 'i18n',
     function($stateParams, $scope, $rootScope,
-        Rest, OrganizationList, Prompt, ClearScope,
+        Rest, OrganizationList, Prompt,
         ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset, i18n) {
-
-        ClearScope();
 
         var defaultUrl = GetBasePath('organizations'),
             list = OrganizationList;

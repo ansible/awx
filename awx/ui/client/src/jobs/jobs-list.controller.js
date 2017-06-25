@@ -11,13 +11,11 @@
  */
 
  export default ['$state', '$rootScope', '$scope', '$stateParams',
-     'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob',
+     'Find', 'DeleteJob', 'RelaunchJob',
      'GetBasePath', 'Dataset', 'QuerySet', 'ListDefinition', '$interpolate',
      function($state, $rootScope, $scope, $stateParams,
-         ClearScope, Find, DeleteJob, RelaunchJob,
+         Find, DeleteJob, RelaunchJob,
          GetBasePath, Dataset, qs, ListDefinition, $interpolate) {
-
-    ClearScope();
 
     var list = ListDefinition;
 
