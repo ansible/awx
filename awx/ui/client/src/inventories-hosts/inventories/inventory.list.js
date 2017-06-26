@@ -28,7 +28,7 @@ export default ['i18n', function(i18n) {
                 ngClick: "null",
                 iconOnly: true,
                 excludeModal: true,
-                template: `<source-summary-popover inventory="inventory" ng-if="inventory.kind === ''"></source-summary-popover><host-summary-popover inventory="inventory" ng-class="{'HostSummaryPopover-noSourceSummary': inventory.kind !== ''}"></host-summary-popover>`,
+                template: `<source-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-if="inventory.kind === ''"></source-summary-popover><host-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-class="{'HostSummaryPopover-noSourceSummary': inventory.kind !== ''}"></host-summary-popover>`,
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
