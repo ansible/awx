@@ -9,11 +9,11 @@ export default [
     'ProcessErrors', 'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange',
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
-    'OrgAdminLookup',
+    'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
     ProcessErrors, ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
     ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-    TemplatesService, Rest, ToggleNotification, OrgAdminLookup) {
+    TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData) {
         ClearScope();
 
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -47,125 +47,74 @@ export default [
                 templateType: 'workflow_job_template'
             });
 
-            Rest.setUrl(GetBasePath('labels'));
-            Wait("start");
-            Rest.get()
-                .success(function (data) {
-                    $scope.labelOptions = data.results
-                        .map((i) => ({label: i.name, value: i.id}));
+            $scope.labelOptions = availableLabels
+                .map((i) => ({label: i.name, value: i.id}));
 
-                    var seeMoreResolve = $q.defer();
+            var opts = selectedLabels
+                .map(i => ({id: i.id + "",
+                    test: i.name}));
 
-                    var getNext = function(data, arr, resolve) {
-                        Rest.setUrl(data.next);
-                        Rest.get()
-                            .success(function (data) {
-                                if (data.next) {
-                                    getNext(data, arr.concat(data.results), resolve);
-                                } else {
-                                    resolve.resolve(arr.concat(data.results));
+            CreateSelect2({
+                element:'#workflow_job_template_labels',
+                multiple: true,
+                addNew: true,
+                opts: opts
+            });
+
+            $scope.workflow_job_template_obj = workflowJobTemplateData;
+            $scope.name = workflowJobTemplateData.name;
+            $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
+            let fld, i;
+            for (fld in form.fields) {
+                if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {
+                    if (form.fields[fld].type === 'select') {
+                        if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
+                            for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                                if (workflowJobTemplateData[fld] === $scope[fld + '_options'][i].value) {
+                                    $scope[fld] = $scope[fld + '_options'][i];
                                 }
-                            });
-                    };
-
-                    Rest.setUrl(GetBasePath('workflow_job_templates') + id +
-                         "/labels");
-                    Rest.get()
-                        .success(function(data) {
-                            if (data.next) {
-                                getNext(data, data.results, seeMoreResolve);
-                            } else {
-                                seeMoreResolve.resolve(data.results);
-                            }
-
-                            seeMoreResolve.promise.then(function (labels) {
-                                $scope.$emit("choicesReady");
-                                var opts = labels
-                                    .map(i => ({id: i.id + "",
-                                        test: i.name}));
-                                CreateSelect2({
-                                    element:'#workflow_job_template_labels',
-                                    multiple: true,
-                                    addNew: true,
-                                    opts: opts
-                                });
-                                Wait("stop");
-                            });
-                        }).error(function(){
-                            // job template id is null in this case
-                            $scope.$emit("choicesReady");
-                        });
-
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get labels. GET returned ' +
-                            'status: ' + status
-                    });
-                });
-
-            // Go out and GET the workflow job temlate data needed to populate the form
-            TemplatesService.getWorkflowJobTemplate(id)
-            .then(function(data){
-                let workflowJobTemplateData = data.data;
-                $scope.workflow_job_template_obj = workflowJobTemplateData;
-                $scope.name = workflowJobTemplateData.name;
-                $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
-                let fld, i;
-                for (fld in form.fields) {
-                    if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {
-                        if (form.fields[fld].type === 'select') {
-                            if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
-                                for (i = 0; i < $scope[fld + '_options'].length; i++) {
-                                    if (workflowJobTemplateData[fld] === $scope[fld + '_options'][i].value) {
-                                        $scope[fld] = $scope[fld + '_options'][i];
-                                    }
-                                }
-                            } else {
-                                $scope[fld] = workflowJobTemplateData[fld];
                             }
                         } else {
                             $scope[fld] = workflowJobTemplateData[fld];
-                            if(!Empty(workflowJobTemplateData.summary_fields.survey)) {
-                                $scope.survey_exists = true;
-                            }
+                        }
+                    } else {
+                        $scope[fld] = workflowJobTemplateData[fld];
+                        if(!Empty(workflowJobTemplateData.summary_fields.survey)) {
+                            $scope.survey_exists = true;
                         }
                     }
-                    if (fld === 'variables') {
-                        // Parse extra_vars, converting to YAML.
-                        $scope.variables = ParseVariableString(workflowJobTemplateData.extra_vars);
-
-                        ParseTypeChange({ scope: $scope, field_id: 'workflow_job_template_variables' });
-                    }
-                    if (form.fields[fld].type === 'lookup' && workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
-                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                    }
                 }
+                if (fld === 'variables') {
+                    // Parse extra_vars, converting to YAML.
+                    $scope.variables = ParseVariableString(workflowJobTemplateData.extra_vars);
 
-                if(workflowJobTemplateData.organization) {
-                    OrgAdminLookup.checkForAdminAccess({organization: workflowJobTemplateData.organization})
-                    .then(function(canEditOrg){
-                        $scope.canEditOrg = canEditOrg;
-                    });
+                    ParseTypeChange({ scope: $scope, field_id: 'workflow_job_template_variables' });
                 }
-                else {
-                    $scope.canEditOrg = true;
+                if (form.fields[fld].type === 'lookup' && workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
+                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                    workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                 }
+            }
 
-                Wait('stop');
-                $scope.url = workflowJobTemplateData.url;
-                $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
-
-                $scope.includeWorkflowMaker = true;
-
-            }, function(error){
-                ProcessErrors($scope, error.data, error.status, form, {
-                    hdr: 'Error!',
-                    msg: 'Failed to get workflow job template. GET returned ' +
-                'status: ' + error.status
+            if(workflowJobTemplateData.organization) {
+                OrgAdminLookup.checkForAdminAccess({organization: workflowJobTemplateData.organization})
+                .then(function(canEditOrg){
+                    $scope.canEditOrg = canEditOrg;
                 });
+            }
+            else {
+                $scope.canEditOrg = true;
+            }
+
+            $scope.url = workflowJobTemplateData.url;
+            $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
+
+            $scope.includeWorkflowMaker = true;
+
+            $scope.$on('SurveySaved', function() {
+                Wait('stop');
+                $scope.survey_exists = true;
+                $scope.invalid_survey = false;
             });
         }
 
@@ -337,15 +286,6 @@ export default [
                 callback: 'NotificationRefresh'
             });
         };
-
-        if ($scope.removeSurveySaved) {
-            $scope.removeSurveySaved();
-        }
-        $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
-            Wait('stop');
-            $scope.survey_exists = true;
-            $scope.invalid_survey = false;
-        });
 
         init();
     }

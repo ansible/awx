@@ -8,24 +8,15 @@
      [   '$filter', '$scope',
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
-        'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
+        'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state', 'availableLabels',
          'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'MultiCredentialService',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
+             $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
          ) {
-
-             Rest.setUrl(GetBasePath('job_templates'));
-             Rest.options()
-                 .success(function(data) {
-                     if (!data.actions.POST) {
-                         $state.go("^");
-                         Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a job template.'), 'alert-info');
-                     }
-                 });
 
             ClearScope();
             // Inject dynamic view
@@ -61,7 +52,6 @@
                 // Make sure the form controller knows there was a change
                 $scope[form.name + '_form'].$setDirty();
             };
-
 
             var selectCount = 0;
 
@@ -119,20 +109,9 @@
                 callback: 'choicesReadyVerbosity'
             });
 
-            Rest.setUrl(GetBasePath('labels'));
-            Rest.get()
-                .success(function (data) {
-                    $scope.labelOptions = data.results
-                        .map((i) => ({label: i.name, value: i.id}));
-                    $scope.$emit("choicesReadyVerbosity");
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get labels. GET returned ' +
-                            'status: ' + status
-                    });
-                });
+            $scope.labelOptions = availableLabels
+                .map((i) => ({label: i.name, value: i.id}));
+            $scope.$emit("choicesReadyVerbosity");
 
             function sync_playbook_select2() {
                 CreateSelect2({
@@ -237,131 +216,6 @@
                 $state.go('templates.editJobTemplate', {job_template_id: id}, {reload: true});
             }
 
-
-            if ($scope.removeTemplateSaveSuccess) {
-                $scope.removeTemplateSaveSuccess();
-            }
-            $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
-                Wait('stop');
-                if (data.related &&
-                    data.related.callback) {
-                    Alert('Callback URL',
-`Host callbacks are enabled for this template. The callback URL is:
-<p style=\"padding: 10px 0;\">
-    <strong>
-        ${$scope.callback_server_path}
-        ${data.related.callback}
-    </strong>
-</p>
-<p>The host configuration key is:
-    <strong>
-        ${$filter('sanitize')(data.host_config_key)}
-    </strong>
-</p>`,
-                        'alert-danger', saveCompleted, null, null,
-                        null, true);
-                }
-
-                MultiCredentialService
-                    .saveExtraCredentials({
-                        creds: $scope.selectedCredentials.extra,
-                        url: data.related.extra_credentials
-                    });
-
-                var orgDefer = $q.defer();
-                var associationDefer = $q.defer();
-                Rest.setUrl(data.related.labels);
-
-                var currentLabels = Rest.get()
-                    .then(function(data) {
-                        return data.data.results
-                            .map(val => val.id);
-                    });
-
-                currentLabels.then(function (current) {
-                    var labelsToAdd = ($scope.labels || [])
-                        .map(val => val.value);
-                    var labelsToDisassociate = current
-                        .filter(val => labelsToAdd
-                            .indexOf(val) === -1)
-                        .map(val => ({id: val, disassociate: true}));
-                    var labelsToAssociate = labelsToAdd
-                        .filter(val => current
-                            .indexOf(val) === -1)
-                        .map(val => ({id: val, associate: true}));
-                    var pass = labelsToDisassociate
-                        .concat(labelsToAssociate);
-                    associationDefer.resolve(pass);
-                });
-
-                Rest.setUrl(GetBasePath("organizations"));
-                Rest.get()
-                    .success(function(data) {
-                        orgDefer.resolve(data.results[0].id);
-                    });
-
-                orgDefer.promise.then(function(orgId) {
-                    var toPost = [];
-                    $scope.newLabels = $scope.newLabels
-                        .map(function(i, val) {
-                            val.organization = orgId;
-                            return val;
-                        });
-
-                    $scope.newLabels.each(function(i, val) {
-                        toPost.push(val);
-                    });
-
-                    associationDefer.promise.then(function(arr) {
-                        toPost = toPost
-                            .concat(arr);
-
-                        Rest.setUrl(data.related.labels);
-
-                        var defers = [];
-                        for (var i = 0; i < toPost.length; i++) {
-                            defers.push(Rest.post(toPost[i]));
-                        }
-                        $q.all(defers)
-                            .then(function() {
-                                $scope.addedItem = data.id;
-
-                                if($scope.survey_questions &&
-                                    $scope.survey_questions.length > 0){
-                                    //once the job template information
-                                    // is saved we submit the survey
-                                    // info to the correct endpoint
-                                    var url = data.url+ 'survey_spec/';
-                                    Rest.setUrl(url);
-                                    Rest.post({ name: $scope.survey_name,
-                                        description: $scope.survey_description,
-                                        spec: $scope.survey_questions })
-                                        .success(function () {
-                                            Wait('stop');
-                                        })
-                                        .error(function (data,
-                                            status) {
-                                                ProcessErrors(
-                                                    $scope,
-                                                    data,
-                                                    status,
-                                                    form,
-                                                    {
-                                                        hdr: 'Error!',
-                                                        msg: 'Failed to add new ' +
-                                                        'survey. Post returned ' +
-                                                        'status: ' +
-                                                        status
-                                                    });
-                                        });
-                                }
-
-                                saveCompleted(data.id);
-                            });
-                    });
-                });
-            });
-
             // Save
             $scope.formSave = function () {
                 var fld, data = {};
@@ -444,7 +298,124 @@
                     Rest.setUrl(defaultUrl);
                     Rest.post(data)
                         .then(({data}) => {
-                            $scope.$emit('templateSaveSuccess', data);
+
+                            Wait('stop');
+                            if (data.related && data.related.callback) {
+                                Alert('Callback URL',
+                                    `Host callbacks are enabled for this template. The callback URL is:
+                                    <p style=\"padding: 10px 0;\">
+                                    <strong>
+                                    ${$scope.callback_server_path}
+                                    ${data.related.callback}
+                                    </strong>
+                                    </p>
+                                    <p>The host configuration key is:
+                                    <strong>
+                                    ${$filter('sanitize')(data.host_config_key)}
+                                    </strong>
+                                    </p>`,
+                                    'alert-danger', saveCompleted, null, null,
+                                    null, true);
+                            }
+
+                            MultiCredentialService
+                                .saveExtraCredentials({
+                                    creds: $scope.selectedCredentials.extra,
+                                    url: data.related.extra_credentials
+                                });
+
+                            var orgDefer = $q.defer();
+                            var associationDefer = $q.defer();
+                            Rest.setUrl(data.related.labels);
+
+                            var currentLabels = Rest.get()
+                                .then(function(data) {
+                                    return data.data.results
+                                        .map(val => val.id);
+                                });
+
+                            currentLabels.then(function (current) {
+                                var labelsToAdd = ($scope.labels || [])
+                                    .map(val => val.value);
+                                var labelsToDisassociate = current
+                                    .filter(val => labelsToAdd
+                                        .indexOf(val) === -1)
+                                    .map(val => ({id: val, disassociate: true}));
+                                var labelsToAssociate = labelsToAdd
+                                    .filter(val => current
+                                        .indexOf(val) === -1)
+                                    .map(val => ({id: val, associate: true}));
+                                var pass = labelsToDisassociate
+                                    .concat(labelsToAssociate);
+                                associationDefer.resolve(pass);
+                            });
+
+                            Rest.setUrl(GetBasePath("organizations"));
+                            Rest.get()
+                                .success(function(data) {
+                                    orgDefer.resolve(data.results[0].id);
+                                });
+
+                            orgDefer.promise.then(function(orgId) {
+                                var toPost = [];
+                                $scope.newLabels = $scope.newLabels
+                                    .map(function(i, val) {
+                                        val.organization = orgId;
+                                        return val;
+                                    });
+
+                                $scope.newLabels.each(function(i, val) {
+                                    toPost.push(val);
+                                });
+
+                                associationDefer.promise.then(function(arr) {
+                                    toPost = toPost
+                                        .concat(arr);
+
+                                    Rest.setUrl(data.related.labels);
+
+                                    var defers = [];
+                                    for (var i = 0; i < toPost.length; i++) {
+                                        defers.push(Rest.post(toPost[i]));
+                                    }
+                                    $q.all(defers)
+                                        .then(function() {
+                                            $scope.addedItem = data.id;
+
+                                            if($scope.survey_questions &&
+                                                $scope.survey_questions.length > 0){
+                                                //once the job template information
+                                                // is saved we submit the survey
+                                                // info to the correct endpoint
+                                                var url = data.url+ 'survey_spec/';
+                                                Rest.setUrl(url);
+                                                Rest.post({ name: $scope.survey_name,
+                                                    description: $scope.survey_description,
+                                                    spec: $scope.survey_questions })
+                                                    .success(function () {
+                                                        Wait('stop');
+                                                    })
+                                                    .error(function (data,
+                                                        status) {
+                                                            ProcessErrors(
+                                                                $scope,
+                                                                data,
+                                                                status,
+                                                                form,
+                                                                {
+                                                                    hdr: 'Error!',
+                                                                    msg: 'Failed to add new ' +
+                                                                    'survey. Post returned ' +
+                                                                    'status: ' +
+                                                                    status
+                                                                });
+                                                    });
+                                            }
+
+                                            saveCompleted(data.id);
+                                        });
+                                });
+                            });
 
                             const instance_group_url = data.related.instance_groups;
                             InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)

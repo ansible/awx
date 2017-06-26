@@ -77,7 +77,62 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                                 });
                                             });
                                     }
-                            }]
+                            }],
+                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
+                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                                    var getNext = function(data, arr) {
+                                        Rest.setUrl(data.next);
+                                        return Rest.get()
+                                            .then(function (res) {
+                                                if (res.data.next) {
+                                                    return getNext(res.data, arr.concat(res.data.results));
+                                                } else {
+                                                    return arr.concat(res.data.results);
+                                                }
+                                            });
+                                    };
+
+                                    return TemplatesService.getLabelOptions()
+                                        .then(function(res) {
+                                            if (res.next) {
+                                                return getNext(res, res.results)
+                                                    .then(function(labels) {
+                                                        return labels;
+                                                    }).catch(function(response){
+                                                        ProcessErrors(null, response.data, response.status, null, {
+                                                            hdr: 'Error!',
+                                                            msg: 'Failed to get labels. GET returned status: ' +
+                                                                response.status
+                                                        });
+                                                    });
+                                            }
+                                            else {
+                                                return res.results;
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }],
+                            checkPermissions: ['Rest', 'GetBasePath', 'TemplatesService', 'Alert', 'ProcessErrors', '$state',
+                                function(Rest, GetBasePath, TemplatesService, Alert, ProcessErrors, $state) {
+                                    return TemplatesService.getJobTemplateOptions()
+                                        .then(function(data) {
+                                            if (!data.actions.POST) {
+                                                $state.go("^");
+                                                Alert('Permission Error', 'You do not have permission to add a job template.', 'alert-info');
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get job template options. OPTIONS returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                                    }]
                         }
                     }
                 });
@@ -117,6 +172,83 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                                     'status: ' + status
                                             });
                                     });
+                                }],
+                                availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
+                                    function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                                        var getNext = function(data, arr) {
+                                            Rest.setUrl(data.next);
+                                            return Rest.get()
+                                                .then(function (res) {
+                                                    if (res.data.next) {
+                                                        return getNext(res.data, arr.concat(res.data.results));
+                                                    } else {
+                                                        return arr.concat(res.data.results);
+                                                    }
+                                                });
+                                        };
+
+                                        return TemplatesService.getLabelOptions()
+                                            .then(function(res) {
+                                                if (res.next) {
+                                                    return getNext(res, res.results)
+                                                        .then(function(labels) {
+                                                            return labels;
+                                                        }).catch(function(response){
+                                                            ProcessErrors(null, response.data, response.status, null, {
+                                                                hdr: 'Error!',
+                                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                                    response.status
+                                                            });
+                                                        });
+                                                }
+                                                else {
+                                                    return res.results;
+                                                }
+                                            }).catch(function(response){
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get labels. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
+                                }],
+                                selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
+                                    function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
+                                        var getNext = function(data, arr) {
+                                            Rest.setUrl(data.next);
+                                            return Rest.get()
+                                                .then(function (res) {
+                                                    if (res.data.next) {
+                                                        return getNext(res.data, arr.concat(res.data.results));
+                                                    } else {
+                                                        return arr.concat(res.data.results);
+                                                    }
+                                                });
+                                        };
+                                        return TemplatesService.getJobTemplateLabels($stateParams.job_template_id)
+                                            .then(function(res) {
+                                                if (res.next) {
+                                                    return getNext(res, res.results)
+                                                        .then(function(labels) {
+                                                            return labels;
+                                                        }).catch(function(response){
+                                                            ProcessErrors(null, response.data, response.status, null, {
+                                                                hdr: 'Error!',
+                                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                                    response.status
+                                                            });
+                                                        });
+                                                }
+                                                else {
+                                                    return res.results;
+                                                }
+                                            }).catch(function(response){
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get labels. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
                                 }]
                         }
                     }
@@ -129,6 +261,65 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                     form: 'WorkflowForm',
                     controllers: {
                         add: 'WorkflowAdd'
+                    },
+                    resolve: {
+                        add: {
+                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
+                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                                    var getNext = function(data, arr) {
+                                        Rest.setUrl(data.next);
+                                        return Rest.get()
+                                            .then(function (res) {
+                                                if (res.data.next) {
+                                                    return getNext(res.data, arr.concat(res.data.results));
+                                                } else {
+                                                    return arr.concat(res.data.results);
+                                                }
+                                            });
+                                    };
+
+                                    return TemplatesService.getLabelOptions()
+                                        .then(function(res) {
+                                            if (res.next) {
+                                                return getNext(res, res.results)
+                                                    .then(function(labels) {
+                                                        return labels;
+                                                    }).catch(function(response){
+                                                        ProcessErrors(null, response.data, response.status, null, {
+                                                            hdr: 'Error!',
+                                                            msg: 'Failed to get labels. GET returned status: ' +
+                                                                response.status
+                                                        });
+                                                    });
+                                            }
+                                            else {
+                                                return res.results;
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }],
+                            checkPermissions: ['Rest', 'GetBasePath', 'TemplatesService', 'Alert', 'ProcessErrors', '$state',
+                                function(Rest, GetBasePath, TemplatesService, Alert, ProcessErrors, $state) {
+                                    return TemplatesService.getWorkflowJobTemplateOptions()
+                                        .then(function(data) {
+                                            if (!data.actions.POST) {
+                                                $state.go("^");
+                                                Alert('Permission Error', 'You do not have permission to add a workflow job template.', 'alert-info');
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get workflow job template options. OPTIONS returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                                    }]
+                        }
                     }
                 });
 
@@ -144,6 +335,100 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                         activityStream: true,
                         activityStreamTarget: 'workflow_job_template',
                         activityStreamId: 'workflow_job_template_id'
+                    },
+                    resolve: {
+                        edit: {
+                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
+                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                                    var getNext = function(data, arr) {
+                                        Rest.setUrl(data.next);
+                                        return Rest.get()
+                                            .then(function (res) {
+                                                if (res.data.next) {
+                                                    return getNext(res.data, arr.concat(res.data.results));
+                                                } else {
+                                                    return arr.concat(res.data.results);
+                                                }
+                                            });
+                                    };
+
+                                    return TemplatesService.getLabelOptions()
+                                        .then(function(res) {
+                                            if (res.next) {
+                                                return getNext(res, res.results)
+                                                    .then(function(labels) {
+                                                        return labels;
+                                                    }).catch(function(response){
+                                                        ProcessErrors(null, response.data, response.status, null, {
+                                                            hdr: 'Error!',
+                                                            msg: 'Failed to get labels. GET returned status: ' +
+                                                                response.status
+                                                        });
+                                                    });
+                                            }
+                                            else {
+                                                return res.results;
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }],
+                            selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
+                                function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
+                                    var getNext = function(data, arr) {
+                                        Rest.setUrl(data.next);
+                                        return Rest.get()
+                                            .then(function (res) {
+                                                if (res.data.next) {
+                                                    return getNext(res.data, arr.concat(res.data.results));
+                                                } else {
+                                                    return arr.concat(res.data.results);
+                                                }
+                                            });
+                                    };
+                                    return TemplatesService.getWorkflowJobTemplateLabels($stateParams.workflow_job_template_id)
+                                        .then(function(res) {
+                                            if (res.next) {
+                                                return getNext(res, res.results)
+                                                    .then(function(labels) {
+                                                        return labels;
+                                                    }).catch(function(response){
+                                                        ProcessErrors(null, response.data, response.status, null, {
+                                                            hdr: 'Error!',
+                                                            msg: 'Failed to get labels. GET returned status: ' +
+                                                                response.status
+                                                        });
+                                                    });
+                                            }
+                                            else {
+                                                return res.results;
+                                            }
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }],
+                            workflowJobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors',
+                                function($stateParams, TemplatesService, ProcessErrors) {
+                                    return TemplatesService.getWorkflowJobTemplate($stateParams.workflow_job_template_id)
+                                        .then(function(res) {
+                                            return res.data;
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get workflow job template. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }]
+                        }
                     }
                 });
 

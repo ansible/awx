@@ -14,17 +14,17 @@ export default
     [   '$filter', '$scope', '$rootScope',
         '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
         'Rest', 'Alert',  'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup',
-        'ParseTypeChange', 'Wait',
+        'ParseTypeChange', 'Wait', 'selectedLabels',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService',
+        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService', 'availableLabels',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, ClearScope, GetBasePath, md5Setup,
-            ParseTypeChange, Wait,
+            ParseTypeChange, Wait, selectedLabels,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService
+            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService, availableLabels
         ) {
 
             ClearScope();
@@ -41,7 +41,7 @@ export default
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
                 id = $stateParams.job_template_id,
-                checkSCMStatus, getPlaybooks, callback,
+                callback,
                 choicesCount = 0,
                 instance_group_url = defaultUrl + id + '/instance_groups';
 
@@ -63,6 +63,88 @@ export default
                     id: id,
                     templateType: 'job_template'
                 });
+
+                $scope.$watch('project', function (newValue, oldValue) {
+                    if (newValue !== oldValue) {
+                        var url;
+                        if ($scope.playbook) {
+                            $scope.playbook_options = [$scope.playbook];
+                        }
+
+                        if (!Empty($scope.project)) {
+                            let promises = [];
+                            url = GetBasePath('projects') + $scope.project + '/playbooks/';
+                            Wait('start');
+                            Rest.setUrl(url);
+                            promises.push(Rest.get()
+                                .success(function (data) {
+                                    $scope.disablePlaybookBecausePermissionDenied = false;
+                                    $scope.playbook_options = [];
+                                    var playbookNotFound = true;
+                                    for (var i = 0; i < data.length; i++) {
+                                        $scope.playbook_options.push(data[i]);
+                                        if (data[i] === $scope.playbook) {
+                                            $scope.job_template_form.playbook.$setValidity('required', true);
+                                            playbookNotFound = false;
+                                        }
+                                    }
+                                    $scope.playbookNotFound = playbookNotFound;
+                                    sync_playbook_select2();
+                                    if ($scope.playbook) {
+                                        jobTemplateLoadFinished();
+                                    }
+                                })
+                                .error(function (ret,status_code) {
+                                    if (status_code === 403) {
+                                        /* user doesn't have access to see the project, no big deal. */
+                                        $scope.disablePlaybookBecausePermissionDenied = true;
+                                    } else {
+                                        Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
+                                            ' project or make the playbooks available on the file system.', 'alert-info');
+                                    }
+                                    Wait('stop');
+                                }));
+
+
+                            Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
+                            promises.push(Rest.get()
+                                .success(function (data) {
+                                    var msg;
+                                    switch (data.status) {
+                                    case 'failed':
+                                        msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                        break;
+                                    case 'never updated':
+                                        msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                        break;
+                                    case 'missing':
+                                        msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
+                                            ' the directory exists and file permissions are set correctly.</div>';
+                                        break;
+                                    }
+                                    if (msg) {
+                                        Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
+                                    }
+                                })
+                                .error(function (data, status) {
+                                    if (status === 403) {
+                                        /* User doesn't have read access to the project, no problem. */
+                                    } else {
+                                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
+                                            '. GET returned status: ' + status });
+                                    }
+                                }));
+
+                            $q.all(promises)
+                                .then(function(){
+                                    Wait('stop');
+                                });
+                        }
+                    }
+                });
+
+                // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
+                $scope.$watch('verbosity', sync_verbosity_select2);
             }
 
             callback = function() {
@@ -84,51 +166,17 @@ export default
                 });
             }
 
-            getPlaybooks = function (project) {
-                var url;
-                if ($scope.playbook) {
-                    $scope.playbook_options = [$scope.playbook];
-                }
+            function jobTemplateLoadFinished(){
+                CreateSelect2({
+                    element:'#job_template_job_type',
+                    multiple: false
+                });
 
-                if (!Empty(project)) {
-                    url = GetBasePath('projects') + project + '/playbooks/';
-                    Wait('start');
-                    Rest.setUrl(url);
-                    Rest.get()
-                        .success(function (data) {
-                            $scope.disablePlaybookBecausePermissionDenied = false;
-                            $scope.playbook_options = [];
-                            var playbookNotFound = true;
-                            for (var i = 0; i < data.length; i++) {
-                                $scope.playbook_options.push(data[i]);
-                                if (data[i] === $scope.playbook) {
-                                    $scope.job_template_form.playbook.$setValidity('required', true);
-                                    playbookNotFound = false;
-                                }
-                            }
-                            $scope.playbookNotFound = playbookNotFound;
-                            sync_playbook_select2();
-                            if ($scope.playbook) {
-                                $scope.$emit('jobTemplateLoadFinished');
-                            } else {
-                                Wait('stop');
-                            }
-                        })
-                        .error(function (ret,status_code) {
-                            if (status_code === 403) {
-                                /* user doesn't have access to see the project, no big deal. */
-                                $scope.disablePlaybookBecausePermissionDenied = true;
-                            } else {
-                                Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
-                                    ' project or make the playbooks available on the file system.', 'alert-info');
-                            }
-                            Wait('stop');
-                        });
-                }
-                else {
-                    Wait('stop');
-                }
-            };
+                CreateSelect2({
+                    element:'#playbook-select',
+                    multiple: false
+                });
+            }
 
             $scope.jobTypeChange = function() {
                 sync_playbook_select2();
@@ -151,72 +199,6 @@ export default
                 });
             };
 
-            // Detect and alert user to potential SCM status issues
-            checkSCMStatus = function () {
-                if (!Empty($scope.project)) {
-                    Wait('start');
-                    Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
-                    Rest.get()
-                        .success(function (data) {
-                            var msg;
-                            switch (data.status) {
-                            case 'failed':
-                                msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
-                                break;
-                            case 'never updated':
-                                msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
-                                break;
-                            case 'missing':
-                                msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
-                                    ' the directory exists and file permissions are set correctly.</div>';
-                                break;
-                            }
-                            Wait('stop');
-                            if (msg) {
-                                Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
-                            }
-                        })
-                        .error(function (data, status) {
-                            if (status === 403) {
-                                /* User doesn't have read access to the project, no problem. */
-                            } else {
-                                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
-                                    '. GET returned status: ' + status });
-                            }
-                        });
-                }
-            };
-
-            // Register a watcher on project_name. Refresh the playbook list on change.
-            if ($scope.watchProjectUnregister) {
-                $scope.watchProjectUnregister();
-            }
-            $scope.watchProjectUnregister = $scope.$watch('project', function (newValue, oldValue) {
-                if (newValue !== oldValue) {
-                    getPlaybooks($scope.project);
-                    checkSCMStatus();
-                }
-            });
-
-            // watch for changes to 'verbosity', ensure we keep our select2 in sync when it changes.
-            $scope.$watch('verbosity', sync_verbosity_select2);
-
-            if ($scope.removeJobTemplateLoadFinished) {
-                $scope.removeJobTemplateLoadFinished();
-            }
-            $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
-                CreateSelect2({
-                    element:'#job_template_job_type',
-                    multiple: false
-                });
-
-                CreateSelect2({
-                    element:'#playbook-select',
-                    multiple: false
-                });
-
-            });
-
             // Retrieve each related set and populate the playbook list
             if ($scope.jobTemplateLoadedRemove) {
                 $scope.jobTemplateLoadedRemove();
@@ -225,8 +207,6 @@ export default
                 var dft;
 
                 master = masterObject;
-
-                getPlaybooks($scope.project);
 
                 dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
                 md5Setup({
@@ -238,7 +218,7 @@ export default
 
                 ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
 
-                $scope.$emit('jobTemplateLoadFinished');
+                jobTemplateLoadFinished();
             });
 
             Wait('start');
@@ -304,68 +284,21 @@ export default
                 callback: 'choicesReady'
             });
 
-            Rest.setUrl(GetBasePath('labels'));
-            Wait("start");
-            Rest.get()
-                .success(function (data) {
-                    $scope.labelOptions = data.results
-                        .map((i) => ({label: i.name, value: i.id}));
+            $scope.labelOptions = availableLabels
+                .map((i) => ({label: i.name, value: i.id}));
 
-                    var seeMoreResolve = $q.defer();
+            var opts = selectedLabels
+                .map(i => ({id: i.id + "",
+                    test: i.name}));
 
-                    var getNext = function(data, arr, resolve) {
-                        Rest.setUrl(data.next);
-                        Rest.get()
-                            .success(function (data) {
-                                if (data.next) {
-                                    getNext(data, arr.concat(data.results), resolve);
-                                } else {
-                                    resolve.resolve(arr.concat(data.results));
-                                }
-                            });
-                    };
-                    if($state.params.job_template_id !== "null"){
-                        Rest.setUrl(defaultUrl + $state.params.job_template_id +
-                             "/labels");
-                        Rest.get()
-                            .success(function(data) {
-                                if (data.next) {
-                                    getNext(data, data.results, seeMoreResolve);
-                                } else {
-                                    seeMoreResolve.resolve(data.results);
-                                }
+            CreateSelect2({
+                element:'#job_template_labels',
+                multiple: true,
+                addNew: true,
+                opts: opts
+            });
 
-                                seeMoreResolve.promise.then(function (labels) {
-                                    $scope.$emit("choicesReady");
-                                    var opts = labels
-                                        .map(i => ({id: i.id + "",
-                                            test: i.name}));
-                                    CreateSelect2({
-                                        element:'#job_template_labels',
-                                        multiple: true,
-                                        addNew: true,
-                                        opts: opts
-                                    });
-                                    Wait("stop");
-                                });
-                            }).error(function(){
-                                // job template id is null in this case
-                                $scope.$emit("choicesReady");
-                            });
-                    }
-                    else {
-                        // job template doesn't exist
-                        $scope.$emit("choicesReady");
-                    }
-
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get labels. GET returned ' +
-                            'status: ' + status
-                    });
-                });
+            $scope.$emit("choicesReady");
 
             function saveCompleted() {
                 $state.go($state.current, {}, {reload: true});

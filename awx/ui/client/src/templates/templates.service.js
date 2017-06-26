@@ -35,22 +35,50 @@ export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
             return Rest.post(data);
         },
         getLabelOptions: function(){
-            var url = GetBasePath('labels');
+            var url = GetBasePath('labels') + '?page_size=200';
 
             var deferred = $q.defer();
 
             Rest.setUrl(url);
             Rest.get()
             .success(function(data) {
-                // Turn the labels into something consumable
-                var labels = data.results.map((i) => ({label: i.name, value: i.id}));
-                deferred.resolve(labels);
+                deferred.resolve(data);
             }).error(function(msg, code) {
                 deferred.reject(msg, code);
             });
 
           return deferred.promise;
 
+      },
+      getJobTemplateLabels: function(id) {
+          var url = GetBasePath('job_templates') + id + "/labels?page_size=200";
+
+          var deferred = $q.defer();
+
+          Rest.setUrl(url);
+          Rest.get()
+          .success(function(data) {
+              deferred.resolve(data);
+          }).error(function(msg, code) {
+              deferred.reject(msg, code);
+          });
+
+        return deferred.promise;
+      },
+      getWorkflowJobTemplateLabels: function(id) {
+          var url = GetBasePath('workflow_job_templates') + id + "/labels?page_size=200";
+
+          var deferred = $q.defer();
+
+          Rest.setUrl(url);
+          Rest.get()
+          .success(function(data) {
+              deferred.resolve(data);
+          }).error(function(msg, code) {
+              deferred.reject(msg, code);
+          });
+
+        return deferred.promise;
       },
       getJobTemplate: function(id) {
           var url = GetBasePath('job_templates');
@@ -205,6 +233,36 @@ export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
 
           Rest.setUrl(url);
           return Rest.post();
+      },
+      getWorkflowJobTemplateOptions: function() {
+          var deferred = $q.defer();
+
+          let url = GetBasePath('workflow_job_templates');
+
+          Rest.setUrl(url);
+          Rest.options()
+              .success(function(data) {
+                  deferred.resolve(data);
+              }).error(function(msg, code) {
+                  deferred.reject(msg, code);
+              });
+
+          return deferred.promise;
+      },
+      getJobTemplateOptions: function() {
+          var deferred = $q.defer();
+
+          let url = GetBasePath('job_templates');
+
+          Rest.setUrl(url);
+          Rest.options()
+              .success(function(data) {
+                  deferred.resolve(data);
+              }).error(function(msg, code) {
+                  deferred.reject(msg, code);
+              });
+
+          return deferred.promise;
       }
     };
 }];

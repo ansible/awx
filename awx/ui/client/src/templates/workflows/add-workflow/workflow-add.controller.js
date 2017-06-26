@@ -7,19 +7,10 @@
 export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
     'ClearScope', 'Wait', '$state', 'CreateSelect2', 'TemplatesService',
-    'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath',
+    'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
     ClearScope, Wait, $state, CreateSelect2, TemplatesService, ToJSON,
-    ParseTypeChange, $q, Rest, GetBasePath) {
-
-         Rest.setUrl(GetBasePath('workflow_job_templates'));
-         Rest.options()
-             .success(function(data) {
-                 if (!data.actions.POST) {
-                     $state.go("^");
-                     Alert('Permission Error', 'You do not have permission to add a workflow job template.', 'alert-info');
-                 }
-             });
+    ParseTypeChange, $q, Rest, GetBasePath, availableLabels) {
 
          ClearScope();
          // Inject dynamic view
@@ -43,24 +34,14 @@ export default [
                  }
              });
 
-             // Go out and grab the possible labels
-             TemplatesService.getLabelOptions()
-                .then(function(data){
-                    $scope.labelOptions = data;
-                    // select2-ify the labels input
-                    CreateSelect2({
-                        element:'#workflow_job_template_labels',
-                        multiple: true,
-                        addNew: true
-                    });
-                }, function(error){
-                    ProcessErrors($scope, error.data, error.status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get labels. GET returned ' +
-                            'status: ' + error.status
-                    });
-                });
+             $scope.labelOptions = availableLabels
+                 .map((i) => ({label: i.name, value: i.id}));
 
+             CreateSelect2({
+                 element:'#workflow_job_template_labels',
+                 multiple: true,
+                 addNew: true
+             });
          }
 
          $scope.formSave = function () {
