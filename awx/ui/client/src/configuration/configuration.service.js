@@ -69,21 +69,6 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                     });
 
                 return deferred.promise;
-            },
-
-            resetAll: function() {
-                var deferred = $q.defer();
-
-                Rest.setUrl(url);
-                Rest.destroy()
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(error) {
-                        deferred.reject(error);
-                    });
-
-                return deferred.promise;
             }
         };
     }
