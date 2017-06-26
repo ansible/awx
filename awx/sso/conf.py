@@ -7,8 +7,11 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
+# Django REST Framework
+from rest_framework import serializers
+
 # Tower
-from awx.conf import register
+from awx.conf import register, register_validate
 from awx.sso import fields
 from awx.main.validators import validate_private_key, validate_certificate
 from awx.sso.validators import *  # noqa
@@ -1083,3 +1086,23 @@ register(
     placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
     feature_required='enterprise_auth',
 )
+
+
+def tacacs_validate(serializer, attrs):
+    if not serializer.instance:
+        return attrs
+    errors = []
+    host = serializer.instance.TACACSPLUS_HOST
+    if 'TACACSPLUS_HOST' in attrs:
+        host = attrs['TACACSPLUS_HOST']
+    secret = serializer.instance.TACACSPLUS_SECRET
+    if 'TACACSPLUS_SECRET' in attrs:
+        secret = attrs['TACACSPLUS_SECRET']
+    if bool(host) ^ bool(secret):
+        errors.append('TACACSPLUS_HOST and TACACSPLUS_SECRET can only be both empty or both populated.')
+    if errors:
+        raise serializers.ValidationError(_('\n'.join(errors)))
+    return attrs
+
+
+register_validate('tacacsplus', tacacs_validate)
