@@ -309,3 +309,12 @@ def test_default_value_from_settings_with_custom_representation(reg):
 
     field = reg.get_setting_field('AWX_SOME_SETTING')
     assert field.default == 'default'
+
+
+def test_validate_registry(reg):
+    validate_func = lambda x: None
+    reg.register_validate('FOO_BAR', validate_func)
+    assert reg.get_registered_validate_func('FOO_BAR') == validate_func
+    assert reg.get_registered_validate_func('NOT_EXIST') is None
+    reg.unregister_validate('FOO_BAR')
+    assert reg.get_registered_validate_func('FOO_BAR') is None

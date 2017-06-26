@@ -6,8 +6,11 @@ import os
 # Django
 from django.utils.translation import ugettext_lazy as _
 
+# Django REST Framework
+from rest_framework import serializers
+
 # Tower
-from awx.conf import fields, register
+from awx.conf import fields, register, register_validate
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -360,3 +363,22 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+
+
+def logging_validate(serializer, attrs):
+    if not serializer.instance:
+        return attrs
+    errors = []
+    if attrs.get('LOG_AGGREGATOR_ENABLED', False):
+        if not serializer.instance.LOG_AGGREGATOR_HOST and not attrs.get('LOG_AGGREGATOR_HOST', None) or\
+                serializer.instance.LOG_AGGREGATOR_HOST and not attrs.get('LOG_AGGREGATOR_HOST', True):
+            errors.append('Cannot enable log aggregator without providing host.')
+        if not serializer.instance.LOG_AGGREGATOR_TYPE and not attrs.get('LOG_AGGREGATOR_TYPE', None) or\
+                serializer.instance.LOG_AGGREGATOR_TYPE and not attrs.get('LOG_AGGREGATOR_TYPE', True):
+            errors.append('Cannot enable log aggregator without providing type.')
+    if errors:
+        raise serializers.ValidationError(_('\n'.join(errors)))
+    return attrs
+
+
+register_validate('logging', logging_validate)
