@@ -218,7 +218,8 @@ function LegacyCredentialsService (pathService) {
             organization_search: {
                 value: {
                     page_size: 5,
-                    order_by: 'name'
+                    order_by: 'name',
+                    role_level: 'admin_role'
                 },
                 dynamic: true,
                 squash: ''
