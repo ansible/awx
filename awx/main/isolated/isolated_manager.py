@@ -357,7 +357,7 @@ class IsolatedManager(object):
                 continue
             if 'capacity' in task_result:
                 instance.capacity = int(task_result['capacity'])
-                instance.save(update_fields=['capacity'])
+                instance.save(update_fields=['capacity', 'modified'])
             else:
                 logger.warning('Could not update capacity of {}, msg={}'.format(
                     instance.hostname, task_result.get('msg', 'unknown failure')))
