@@ -49,7 +49,6 @@ function AtInputGroupController ($scope, $compile) {
 
         vm.insert(group);
         state._group = group;
-        vm.compile(group);
     };
 
     vm.createComponentConfigs = inputs => {
@@ -138,20 +137,22 @@ function AtInputGroupController ($scope, $compile) {
     vm.createComponent = (input, index) => {
         let tabindex = Number(scope.tab) + index;
         let col = input._expand ? 12 : scope.col;
-
-        return angular.element(
+        let component = angular.element(
             `<${input._component} col="${col}" tab="${tabindex}"
                 state="${state._reference}._group[${index}]">
             </${input._component}>`
         );
+
+        $compile(component)(scope.$parent)
+
+        return component;
     };
 
     vm.createDivider = () => {
-        return angular.element('<at-divider></at-divider>');
-    };
+        let divider = angular.element('<at-divider></at-divider>');
+        $compile(divider[0])(scope.$parent);
 
-    vm.compile = group => {
-        group.forEach(component => $compile(component._element[0])(scope.$parent));
+        return divider;
     };
 
     vm.clear = () => {

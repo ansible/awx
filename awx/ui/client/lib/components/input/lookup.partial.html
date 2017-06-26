@@ -4,7 +4,7 @@
 
         <div class="input-group">
             <span class="input-group-btn">
-                <button class="btn at-ButtonHollow--white at-Input-button"
+                <button class="btn at-ButtonHollow--default at-Input-button"
                         ng-disabled="state._disabled || form.disabled"
                         ng-click="vm.search()">
                     <i class="fa fa-search"></i>
@@ -13,7 +13,7 @@
             <input type="text"
                class="form-control at-Input"
                ng-class="{ 'at-Input--rejected': state.rejected }"
-               ng-model="state._value"
+               ng-model="state._displayValue"
                ng-attr-tabindex="{{ tab || undefined }}"
                ng-attr-placeholder="{{::state._placeholder || undefined }}"
                ng-change="vm.check()"
@@ -23,8 +23,5 @@
         <at-input-message></at-input-message>
     </div>
 
-    <at-modal state="vm.lookup">
-        <at-search></at-search>
-        <at-table></at-table>
-    </at-modal>
+    <div ui-view="{{ state._resource }}"></div>
 </div>

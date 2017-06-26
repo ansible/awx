@@ -1,44 +1,73 @@
 const DEFAULT_ANIMATION_DURATION = 150;
 
-function atModalLink (scope, el, attr, controllers) {
+function atModalLink (scope, el, attrs, controllers) {
     let modalController = controllers[0];
-    let container = el[0];
+    let property = `scope.${scope.ns}.modal`;
 
-    modalController.init(scope, container);
+    let done = scope.$watch(property, () => {
+        modalController.init(scope, el);
+        done();
+    });
 }
 
-function AtModalController () {
+function AtModalController (eventService) {
     let vm = this;
 
-    let scope;
-    let container;
+    let overlay;
+    let modal;
+    let listeners;
 
-    vm.init = (_scope_, _container_) => {
-        scope = _scope_;
-        container = _container_;
+    vm.init = (scope, el) => {
+        overlay = el[0];
+        modal = el.find('.at-Modal-window')[0];
 
-        scope.state.show = vm.show;
-        scope.state.hide = vm.hide;
+        vm.modal = scope[scope.ns].modal;
+        vm.modal.show = vm.show;
+        vm.modal.hide = vm.hide;
     };
 
     vm.show = (title, message) => {
-        scope.title = title;
-        scope.message = message;
+        vm.modal.title = title;
+        vm.modal.message = message;
 
-        container.style.display = 'block';
-        container.style.opacity = 1;
+        event.stopPropagation();
+
+        listeners = eventService.addListeners([
+            [window, 'click', vm.clickToHide]
+        ]);
+
+        overlay.style.display = 'block';
+        overlay.style.opacity = 1;
     };
 
     vm.hide = () => {
-        container.style.opacity = 0;
+        overlay.style.opacity = 0;
 
-        setTimeout(() => {
-            container.style.display = 'none';
-            scope.message = '';
-            scope.title = '';
-        }, DEFAULT_ANIMATION_DURATION);
+        eventService.remove(listeners);
+
+        setTimeout(() => overlay.style.display = 'none', DEFAULT_ANIMATION_DURATION);
+    };
+
+    vm.clickToHide = event => {
+        if (vm.clickIsOutsideModal(event)) {
+            vm.hide();
+        }
+    };
+
+    vm.clickIsOutsideModal = e => {
+        let m = modal.getBoundingClientRect();
+        let cx = e.clientX;
+        let cy = e.clientY;
+        
+        if (cx < m.left || cx > m.right || cy > m.bottom || cy < m.top) {
+            return true;
+        }
+
+        return false;
     };
 }
+
+AtModalController.$inject = ['EventService'];
 
 function atModal (pathService) {
     return {
@@ -50,9 +79,7 @@ function atModal (pathService) {
         controller: AtModalController,
         controllerAs: 'vm',
         link: atModalLink,
-        scope: {
-            state: '='
-        }
+        scope: true
     };
 }
 

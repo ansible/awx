@@ -7,8 +7,6 @@ import inputGroup from './input/group.directive';
 import inputLabel from './input/label.directive';
 import inputLookup from './input/lookup.directive';
 import inputMessage from './input/message.directive';
-import inputNumber from './input/number.directive';
-import inputSelect from './input/select.directive';
 import inputSecret from './input/secret.directive';
 import inputText from './input/text.directive';
 import inputTextarea from './input/textarea.directive';
@@ -34,9 +32,7 @@ angular
     .directive('atInputLabel', inputLabel)
     .directive('atInputLookup', inputLookup)
     .directive('atInputMessage', inputMessage)
-    .directive('atInputNumber', inputNumber)
     .directive('atInputSecret', inputSecret)
-    .directive('atInputSelect', inputSelect)
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)

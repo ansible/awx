@@ -38,14 +38,14 @@ function atFormActionController ($state) {
     vm.setCancelDefaults = () => {
         scope.text = 'CANCEL';
         scope.fill = 'Hollow';
-        scope.color = 'white';
-        scope.action = () => $state.go('^');
+        scope.color = 'default';
+        scope.action = () => $state.go(scope.to || '^');
     };
 
     vm.setSaveDefaults = () => {
         scope.text = 'SAVE';
         scope.fill = '';
-        scope.color = 'green';
+        scope.color = 'success';
         scope.action = () => form.submit();
     };
 }
@@ -64,7 +64,8 @@ function atFormAction (pathService) {
         link,
         scope: {
             state: '=',
-            type: '@'
+            type: '@',
+            to: '@'
         }
     };
 }

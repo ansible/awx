@@ -11,9 +11,9 @@
 }
 
 .at-mixin-Heading (@size) {
-    color: @at-gray-dark-4x;
+    color: @at-color-body-text;
     font-size: @size;
-    font-weight: @at-font-weight-2x;
+    font-weight: @at-font-weight-heading;
     line-height: @at-line-height-short;
     text-transform: uppercase;
     margin: 0;
@@ -21,12 +21,13 @@
 }
 
 .at-mixin-Button () {
-    height: @at-input-height;
-    padding: @at-space-2x @at-space-4x;
-    font-size: @at-font-size;
+    height: @at-height-input;
+    padding: @at-padding-button-vertical @at-padding-button-horizontal;
+    font-size: @at-font-size-body;
+    line-height: 1;
 }
 
-.at-mixin-ButtonColor (@background, @color, @hover: '@{background}--hover') {
+.at-mixin-ButtonColor (@background, @color, @hover: '@{background}-hover') {
     background-color: @@background;
 
     &, &:hover, &:focus {
@@ -42,21 +43,23 @@
     }
 }
 
-.at-mixin-ButtonHollow (@color, @accent) {
-    background-color: @at-white;
-    color: @@color;
-    border-color: @@color;
+.at-mixin-ButtonHollow (@bg, @border, @text) {
+    @hover: '@{bg}-hover';
+
+    background-color: @@bg;
+    color: @@text;
+    border-color: @@border;
 
     &:hover, &:active {
-        color: @@color;
-        background-color: @at-white--hover;
+        color: @@text;
+        background-color: @@hover;
         box-shadow: none;
     }
 
     &:focus {
-        color: @at-white;
-        background-color: @@accent;
-        border-color: @@accent;
+        color: @@text;
+        background-color: @@hover;
+        border-color: @@border;
         cursor: default;
     }
 
@@ -67,14 +70,14 @@
 
 .at-mixin-ButtonIcon () {
     line-height: @at-line-height-short;
-    color: @at-gray-dark-2x;
 
     & > i {
         cursor: pointer;
+        transition: color @at-transition-icon-button;
     }
 
     & > i:hover {
-        color: @at-gray-dark-3x;
+        color: @at-color-icon-hover
     }
 }
 

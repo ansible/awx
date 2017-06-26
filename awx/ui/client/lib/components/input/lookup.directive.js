@@ -9,43 +9,46 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputLookupController (baseInputController) {
+function AtInputLookupController (baseInputController, $state, $stateParams) {
     let vm = this || {};
 
-    vm.lookup = {};
+    let scope;
 
-    vm.init = (scope, element, form) => {
-        baseInputController.call(vm, 'input', scope, element, form);
+    vm.init = (_scope_, element, form) => {
+        baseInputController.call(vm, 'input', _scope_, element, form);
 
-        vm.lookup.modal = {
-            title: 'Select Organization',
-            buttons: [
-                {
-                    type: 'cancel'
-                },
-                {
-                    type: 'select'
-                }
-            ]
-        };
+        scope = _scope_;
 
-        vm.lookup.search = {
-            placeholder: 'test'
-        };
-
-        vm.lookup.table = {
-
-        };
+        scope.$watch(scope.state._resource, vm.watchResource);
 
         vm.check();
     };
 
+    vm.watchResource = () => {
+        if (scope[scope.state._resource]) {
+            scope.state._value = scope[scope.state._resource];
+            scope.state._displayValue = scope[`${scope.state._resource}_name`];
+
+            vm.check();
+        }
+    };
+
     vm.search = () => {
-        vm.modal.show('test');
+        let params = {};
+
+        if (scope.state._value) {
+            params.selected = scope.state._value;
+        }
+
+        $state.go(scope.state._route, params);
     };
 }
 
-AtInputLookupController.$inject = ['BaseInputController'];
+AtInputLookupController.$inject = [
+    'BaseInputController',
+    '$state',
+    '$stateParams'
+];
 
 function atInputLookup (pathService) {
     return {
