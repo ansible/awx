@@ -3,7 +3,16 @@ import mock
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource
+from awx.main.models import InventorySource, Project, ProjectUpdate
+
+
+@pytest.fixture
+def scm_inventory(inventory, project):
+    with mock.patch.object(project, 'update'):
+        inventory.inventory_sources.create(
+            name='foobar', update_on_project_update=True, source='scm',
+            source_project=project, scm_last_revision=project.scm_revision)
+    return inventory
 
 
 @pytest.mark.django_db
@@ -225,6 +234,31 @@ def test_inventory_update_access_called(post, inventory_source, alice, mock_acce
 
 
 @pytest.mark.django_db
+class TestUpdateOnProjUpdate:
+
+    def test_no_access_update_denied(self, admin_user, scm_inventory, mock_access, post):
+        inv_src = scm_inventory.inventory_sources.first()
+        with mock_access(Project) as mock_access:
+            mock_access.can_start = mock.MagicMock(return_value=False)
+            r = post(reverse('api:inventory_source_update_view', kwargs={'pk': inv_src.id}),
+                     {}, admin_user, expect=403)
+        assert 'You do not have permission to update project' in r.data['detail']
+
+    def test_no_access_update_allowed(self, admin_user, scm_inventory, mock_access, post):
+        inv_src = scm_inventory.inventory_sources.first()
+        inv_src.source_project.scm_type = 'git'
+        inv_src.source_project.save()
+        with mock.patch('awx.api.views.InventorySourceUpdateView.get_object') as get_object:
+            get_object.return_value = inv_src
+            with mock.patch.object(inv_src.source_project, 'update') as mock_update:
+                mock_update.return_value = ProjectUpdate(pk=48, id=48)
+                r = post(reverse('api:inventory_source_update_view', kwargs={'pk': inv_src.id}),
+                         {}, admin_user, expect=202)
+        assert 'dependent project' in r.data['detail']
+        assert not r.data['inventory_update']
+
+
+@pytest.mark.django_db
 def test_inventory_source_vars_prohibition(post, inventory, admin_user):
     with mock.patch('awx.api.serializers.settings') as mock_settings:
         mock_settings.INV_ENV_VARIABLE_BLACKLIST = ('FOOBAR',)
@@ -233,15 +267,6 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
                  admin_user, expect=400)
     assert 'prohibited environment variable' in r.data['source_vars'][0]
     assert 'FOOBAR' in r.data['source_vars'][0]
-
-
-@pytest.fixture
-def scm_inventory(inventory, project):
-    with mock.patch.object(project, 'update'):
-        inventory.inventory_sources.create(
-            name='foobar', update_on_project_update=True, source='scm',
-            source_project=project, scm_last_revision=project.scm_revision)
-    return inventory
 
 
 @pytest.mark.django_db
