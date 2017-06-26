@@ -321,14 +321,14 @@ function LegacyCredentialsService (pathService) {
                 return this.organization;
             case 'add-credential-type':
                 this.credentialType.name = 'credentials.add.credentialType';
-                this.credentialType.views['credentialType@credentials.add'] = {
+                this.credentialType.views['credential_type@credentials.add'] = {
                     templateProvider: this.lookupTemplateProvider
                 };
 
                 return this.credentialType;
             case 'edit-credential-type':
                 this.credentialType.name = 'credentials.edit.credentialType';
-                this.credentialType.views['credentialType@credentials.edit'] = {
+                this.credentialType.views['credential_type@credentials.edit'] = {
                     templateProvider: this.lookupTemplateProvider
                 };
 

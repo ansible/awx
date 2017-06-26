@@ -19,14 +19,18 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
 
         scope = _scope_;
 
-        scope.$watch(scope.state._resource, () => {
-            if (scope[scope.state._resource]) {
-                scope.state._value = scope[scope.state._resource];
-                scope.state._displayValue = scope[`${scope.state._resource}_name`];
-            }
-        });
+        scope.$watch(scope.state._resource, vm.watchResource);
 
         vm.check();
+    };
+
+    vm.watchResource = () => {
+        if (scope[scope.state._resource]) {
+            scope.state._value = scope[scope.state._resource];
+            scope.state._displayValue = scope[`${scope.state._resource}_name`];
+
+            vm.check();
+        }
     };
 
     vm.search = () => {
@@ -36,7 +40,6 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
             params.selected = scope.state._value;
         }
 
-        console.log(scope.state);
         $state.go(scope.state._route, params);
     };
 }

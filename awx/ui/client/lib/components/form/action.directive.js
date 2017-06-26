@@ -39,7 +39,7 @@ function atFormActionController ($state) {
         scope.text = 'CANCEL';
         scope.fill = 'Hollow';
         scope.color = 'default';
-        scope.action = () => $state.go('^');
+        scope.action = () => $state.go(scope.to || '^');
     };
 
     vm.setSaveDefaults = () => {
@@ -64,7 +64,8 @@ function atFormAction (pathService) {
         link,
         scope: {
             state: '=',
-            type: '@'
+            type: '@',
+            to: '@'
         }
     };
 }

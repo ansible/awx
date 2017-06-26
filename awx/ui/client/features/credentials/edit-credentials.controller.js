@@ -6,6 +6,7 @@ function EditCredentialsController (models, $state, $scope) {
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
+    let selectedCredentialType = credentialType.getById(credential.get('credential_type'));
 
     vm.tab = {
         details: {  
@@ -43,15 +44,14 @@ function EditCredentialsController (models, $state, $scope) {
     vm.form.organization._value = credential.get('summary_fields.organization.id');
     vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
 
-    vm.form.credential_type._data = credentialType.get('results');
-    vm.form.credential_type._format = 'grouped-object';
-    vm.form.credential_type._display = 'name';
-    vm.form.credential_type._key = 'id';
-    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
-    vm.form.credential_type._value = credentialType.getById(credential.get('credential_type'));
-
+    vm.form.credential_type._resource = 'credential_type';
+    vm.form.credential_type._route = 'credentials.edit.credentialType';
+    vm.form.credential_type._value = selectedCredentialType.id;
+    vm.form.credential_type._displayValue = selectedCredentialType.name;
+ 
     vm.form.inputs = {
-        _get (type) {
+        _get (id) {
+            let type = credentialType.getById(id);
             let inputs = credentialType.mergeInputProperties(type);
             
             if (type.id === credential.get('credential_type')) {
