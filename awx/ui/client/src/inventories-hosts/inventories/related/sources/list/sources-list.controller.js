@@ -123,10 +123,16 @@
                 Wait('start');
                 SourcesService.delete(inventory_source.id).then(() => {
                     $('#prompt-modal').modal('hide');
+                    let reloadListStateParams = null;
+
+                    if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
+                        reloadListStateParams = _.cloneDeep($state.params);
+                        reloadListStateParams.inventory_source_search.page = (parseInt(reloadListStateParams.inventory_source_search.page)-1).toString();
+                    }
                     if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
-                        $state.go("inventories.edit.inventory_sources", {inventory_id: $scope.inventory_id}, {reload: true});
+                        $state.go('^', reloadListStateParams, {reload: true});
                     } else {
-                        $state.go($state.current.name, null, {reload: true});
+                        $state.go('.', reloadListStateParams, {reload: true});
                     }
                     Wait('stop');
                 });

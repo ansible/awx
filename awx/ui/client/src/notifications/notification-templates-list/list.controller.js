@@ -165,10 +165,18 @@
                  Rest.setUrl(url);
                  Rest.destroy()
                      .success(function() {
+
+                         let reloadListStateParams = null;
+
+                         if($scope.notification_templates.length === 1 && $state.params.notification_template_search && !_.isEmpty($state.params.notification_template_search.page) && $state.params.notification_template_search.page !== '1') {
+                             reloadListStateParams = _.cloneDeep($state.params);
+                             reloadListStateParams.notification_template_search.page = (parseInt(reloadListStateParams.notification_template_search.page)-1).toString();
+                         }
+
                          if (parseInt($state.params.notification_template_id) === id) {
-                            $state.go("^", null, { reload: true });
+                            $state.go("^", reloadListStateParams, { reload: true });
                          } else {
-                            $state.go('.', null, {reload: true});
+                            $state.go('.', reloadListStateParams, {reload: true});
                          }
                          Wait('stop');
                      })

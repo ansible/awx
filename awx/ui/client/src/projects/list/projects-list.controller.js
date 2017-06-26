@@ -179,10 +179,18 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success(function() {
+
+                        let reloadListStateParams = null;
+
+                        if($scope.projects.length === 1 && $state.params.project_search && !_.isEmpty($state.params.project_search.page) && $state.params.project_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.project_search.page = (parseInt(reloadListStateParams.project_search.page)-1).toString();
+                        }
+
                         if (parseInt($state.params.project_id) === id) {
-                            $state.go("^", null, { reload: true });
+                            $state.go("^", reloadListStateParams, { reload: true });
                         } else {
-                            $state.go('.', null, {reload: true});
+                            $state.go('.', reloadListStateParams, {reload: true});
                         }
                     })
                     .error(function (data, status) {

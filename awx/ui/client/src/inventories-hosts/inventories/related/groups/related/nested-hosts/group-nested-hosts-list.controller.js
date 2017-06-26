@@ -100,8 +100,16 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
         $('#host-disassociate-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
             // Remove the event handler so that we don't end up with multiple bindings
             $('#host-disassociate-modal').off('hidden.bs.modal');
+
+            let reloadListStateParams = null;
+
+            if($scope.nested_hosts.length === 1 && $state.params.nested_host_search && !_.isEmpty($state.params.nested_host_search.page) && $state.params.nested_host_search.page !== '1') {
+                reloadListStateParams = _.cloneDeep($state.params);
+                reloadListStateParams.nested_host_search.page = (parseInt(reloadListStateParams.nested_host_search.page)-1).toString();
+            }
+
             // Reload the inventory manage page and show that the group has been removed
-            $state.go('.', null, {reload: true});
+            $state.go('.', reloadListStateParams, {reload: true});
         });
 
         let closeModal = function(){
