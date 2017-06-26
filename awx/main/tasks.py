@@ -358,14 +358,15 @@ def update_host_smart_inventory_memberships():
 
 @task(queue='tower')
 def delete_inventory(inventory_id):
-    i = Inventory.objects.filter(id=inventory_id)
-    if not i.exists():
-        logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
-        return
-    i = i[0]
     with ignore_inventory_computed_fields(), \
             ignore_inventory_group_removal():
-        i.delete()
+        with transaction.atomic():
+            try:
+                i = Inventory.objects.get(id=inventory_id)
+            except Inventory.DoesNotExist:
+                logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
+                return
+            i.delete()
     emit_channel_notification(
         'inventories-status_changed',
         {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
