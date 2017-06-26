@@ -56,6 +56,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
+from awx.conf import settings_registry
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
@@ -93,19 +94,19 @@ def task_set_logger_pre_run(*args, **kwargs):
     configure_external_logger(settings, is_startup=False)
 
 
-def _clear_cache_keys(set_of_keys):
-    logger.debug('cache delete_many(%r)', set_of_keys)
-    cache.delete_many(set_of_keys)
-
-
-@task(queue='tower_broadcast_all')
-def process_cache_changes(cache_keys):
+@task(queue='tower_broadcast_all', bind=True)
+def handle_setting_changes(self, setting_keys):
+    orig_len = len(setting_keys)
+    for i in range(orig_len):
+        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
+            setting_keys.append(dependent_key)
     logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
-        process_cache_changes.request))
-    set_of_keys = set([key for key in cache_keys])
-    _clear_cache_keys(set_of_keys)
-    for setting_key in set_of_keys:
-        if setting_key.startswith('LOG_AGGREGATOR_'):
+        self.request))
+    cache_keys = set(setting_keys)
+    logger.debug('cache delete_many(%r)', cache_keys)
+    cache.delete_many(cache_keys)
+    for key in cache_keys:
+        if key.startswith('LOG_AGGREGATOR_'):
             restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
             break
 

@@ -22,6 +22,7 @@ from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse
 from awx.main.utils import *  # noqa
 from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
+from awx.main.tasks import handle_setting_changes
 from awx.conf.license import get_licensed_features
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
@@ -102,6 +103,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         settings_qs = self.get_queryset()
         user = self.request.user if self.category_slug == 'user' else None
+        settings_change_list = []
         for key, value in serializer.validated_data.items():
             if key == 'LICENSE':
                 continue
@@ -111,9 +113,13 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
                 setting = Setting.objects.create(key=key, user=user, value=value)
+                settings_change_list.append(key)
             elif setting.value != value or type(setting.value) != type(value):
                 setting.value = value
                 setting.save(update_fields=['value'])
+                settings_change_list.append(key)
+        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+            handle_setting_changes.delay(settings_change_list)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -121,8 +127,12 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
+        settings_change_list = []
         for setting in self.get_queryset().exclude(key='LICENSE'):
             setting.delete()
+            settings_change_list.append(setting.key)
+        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+            handle_setting_changes.delay(settings_change_list)
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
         # used to make the request as a default.

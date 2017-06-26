@@ -1,6 +1,5 @@
 # Python
 import logging
-import sys
 
 # Django
 from django.conf import settings
@@ -14,7 +13,6 @@ import awx.main.signals
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingSerializer
-from awx.main.tasks import process_cache_changes
 
 logger = logging.getLogger('awx.conf.signals')
 
@@ -30,11 +28,9 @@ def handle_setting_change(key, for_delete=False):
     for dependent_key in settings_registry.get_dependent_settings(key):
         # Note: Doesn't handle multiple levels of dependencies!
         setting_keys.append(dependent_key)
+    # NOTE: This block is probably duplicated.
     cache_keys = set([Setting.get_cache_key(k) for k in setting_keys])
-    logger.debug('sending signals to delete cache keys(%r)', cache_keys)
     cache.delete_many(cache_keys)
-    if 'migrate_to_database_settings' not in sys.argv:
-        process_cache_changes.delay(list(cache_keys))
 
     # Send setting_changed signal with new value for each setting.
     for setting_key in setting_keys:
