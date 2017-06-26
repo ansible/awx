@@ -9,7 +9,12 @@ export default {
     },
     data: {
         activityStream: true,
-        activityStreamTarget: 'inventory'
+        activityStreamTarget: 'inventory',
+        socket: {
+            "groups": {
+                "inventories": ["status_changed"]
+            }
+        }
     },
     views: {
         '@': {

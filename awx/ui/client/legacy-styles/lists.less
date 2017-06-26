@@ -80,6 +80,28 @@ table, tbody {
     padding-left: 10px;
 }
 
+.List-tableRow--disabled {
+    .List-tableCell, .List-tableCell * {
+        color: @b7grey;
+        cursor: not-allowed;
+    }
+}
+
+.List-tableRow--disabled {
+    .List-actionButton:hover {
+        color: @list-action-icon;
+        background-color: @list-actn-bg !important;
+    }
+}
+
+.List-tableRow--disabled {
+    .List-actionButtonCell * {
+        color: @default-err;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+}
+
 .List-tableCell {
     padding: 7px 15px;
     border-top:0px!important;
