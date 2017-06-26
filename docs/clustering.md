@@ -112,6 +112,10 @@ rabbitmq_use_long_name=false
 rabbitmq_enable_manager=false
 ```
 
+Recommendations and constraints:
+ - Do not create a group named `instance_group_tower`
+ - Do not name any instance the same as a group name
+
 ### Security Isolated Rampart Groups
 
 In Tower versions 3.2+ customers may optionally define isolated groups
@@ -177,6 +181,7 @@ group to access them; only ingress SSH traffic from "controller" instances to
 "isolated" instances is required.
 
 Recommendations for system configuration with isolated groups:
+ - Do not create a group named `isolated_group_tower`
  - Do not put any isolated instances inside the `tower` group or other
    ordinary instance groups.
  - Define the `controller` variable as either a group var or as a hostvar
