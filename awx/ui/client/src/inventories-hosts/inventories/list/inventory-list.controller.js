@@ -86,12 +86,7 @@ function InventoriesList($scope,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    if (parseInt($state.params.inventory_id) === id) {
-                        $state.go("^", null, {reload: true});
-                    } else {
-                       $state.go('.', null, {reload: true});
-                       Wait('stop');
-                    }
+                    Wait('stop');
                 })
                 .error(function (data, status) {
                     ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
@@ -113,6 +108,20 @@ function InventoriesList($scope,
         let inventory = $scope.inventories.find((inventory) => inventory.id === data.inventory_id);
         if (data.status === 'pending_deletion') {
             inventory.pending_deletion = true;
+        }
+        if (data.status === 'deleted') {
+            let reloadListStateParams = null;
+
+            if($scope.inventories.length === 1 && $state.params.inventory_search && !_.isEmpty($state.params.inventory_search.page) && $state.params.inventory_search.page !== '1') {
+                reloadListStateParams = _.cloneDeep($state.params);
+                reloadListStateParams.inventory_search.page = (parseInt(reloadListStateParams.inventory_search.page)-1).toString();
+            }
+
+            if (parseInt($state.params.inventory_id) === data.inventory_id) {
+                $state.go("^", reloadListStateParams, {reload: true});
+            } else {
+                $state.go('.', reloadListStateParams, {reload: true});
+            }
         }
     });
 }

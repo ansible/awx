@@ -100,14 +100,21 @@
                 $state.go('.', null, {reload: true});
             });
 
+            let reloadListStateParams = null;
+
+            if($scope.groups.length === 1 && $state.params.group_search && !_.isEmpty($state.params.group_search.page) && $state.params.group_search.page !== '1') {
+                reloadListStateParams = _.cloneDeep($state.params);
+                reloadListStateParams.group_search.page = (parseInt(reloadListStateParams.group_search.page)-1).toString();
+            }
+
             switch($scope.deleteOption){
                 case 'promote':
                     GroupsService.promote($scope.toDelete.id, $stateParams.inventory_id)
                         .then(() => {
                             if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                                $state.go("^", null, {reload: true});
+                                $state.go("^", reloadListStateParams, {reload: true});
                             } else {
-                                $state.go($state.current, null, {reload: true});
+                                $state.go($state.current, reloadListStateParams, {reload: true});
                             }
                             $('#group-delete-modal').modal('hide');
                             $('body').removeClass('modal-open');
@@ -117,9 +124,9 @@
                 default:
                     GroupsService.delete($scope.toDelete.id).then(() => {
                         if (parseInt($state.params.group_id) === $scope.toDelete.id) {
-                            $state.go("^", null, {reload: true});
+                            $state.go("^", reloadListStateParams, {reload: true});
                         } else {
-                            $state.go($state.current, null, {reload: true});
+                            $state.go($state.current, reloadListStateParams, {reload: true});
                         }
                         $('#group-delete-modal').modal('hide');
                         $('body').removeClass('modal-open');

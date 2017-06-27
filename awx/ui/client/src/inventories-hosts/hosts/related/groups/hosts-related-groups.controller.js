@@ -70,7 +70,15 @@
 
             $('#host-disassociate-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
                 $('#host-disassociate-modal').off('hidden.bs.modal');
-                $state.go('.', null, {reload: true});
+
+                let reloadListStateParams = null;
+
+                if($scope.groups.length === 1 && $state.params.group_search && !_.isEmpty($state.params.group_search.page) && $state.params.group_search.page !== '1') {
+                    reloadListStateParams = _.cloneDeep($state.params);
+                    reloadListStateParams.group_search.page = (parseInt(reloadListStateParams.group_search.page)-1).toString();
+                }
+
+                $state.go('.', reloadListStateParams, {reload: true});
             });
 
             GroupsService.disassociateHost(host.id, $scope.disassociateGroup.id).then(() => {

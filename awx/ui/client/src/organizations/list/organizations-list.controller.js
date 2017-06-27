@@ -145,10 +145,18 @@ export default ['$stateParams', '$scope', '$rootScope',
                 Rest.destroy()
                     .success(function() {
                         Wait('stop');
+
+                        let reloadListStateParams = null;
+
+                        if($scope.organizations.length === 1 && $state.params.organization_search && !_.isEmpty($state.params.organization_search.page) && $state.params.organization_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.organization_search.page = (parseInt(reloadListStateParams.organization_search.page)-1).toString();
+                        }
+
                         if (isDeletedOrganizationBeingEdited(id, parseInt($stateParams.organization_id)) === true) {
-                            $state.go('^', null, { reload: true });
+                            $state.go('^', reloadListStateParams, { reload: true });
                         } else {
-                            $state.reload('organizations');
+                            $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
                     .error(function(data, status) {

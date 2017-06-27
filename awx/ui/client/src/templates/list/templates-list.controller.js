@@ -105,11 +105,19 @@ export default ['$scope', '$rootScope',
 
                             function handleSuccessfulDelete(isWorkflow) {
                                 let stateParamId = isWorkflow ? $state.params.workflow_job_template_id : $state.params.job_template_id;
+
+                                let reloadListStateParams = null;
+
+                                if($scope.templates.length === 1 && $state.params.template_search && !_.isEmpty($state.params.template_search.page) && $state.params.template_search.page !== '1') {
+                                    reloadListStateParams = _.cloneDeep($state.params);
+                                    reloadListStateParams.template_search.page = (parseInt(reloadListStateParams.template_search.page)-1).toString();
+                                }
+
                                 if (parseInt(stateParamId) === template.id) {
                                     // Move the user back to the templates list
-                                    $state.go("templates", null, {reload: true});
+                                    $state.go("templates", reloadListStateParams, {reload: true});
                                 } else {
-                                    $state.go(".", null, {reload: true});
+                                    $state.go(".", reloadListStateParams, {reload: true});
                                 }
                                 Wait('stop');
                             }

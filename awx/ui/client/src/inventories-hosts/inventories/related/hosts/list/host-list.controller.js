@@ -96,10 +96,18 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
             Wait('start');
             HostsService.delete(id).then(() => {
                 $('#prompt-modal').modal('hide');
+
+                let reloadListStateParams = null;
+
+                if($scope.hosts.length === 1 && $state.params.host_search && !_.isEmpty($state.params.host_search.page) && $state.params.host_search.page !== '1') {
+                    reloadListStateParams = _.cloneDeep($state.params);
+                    reloadListStateParams.host_search.page = (parseInt(reloadListStateParams.host_search.page)-1).toString();
+                }
+
                 if (parseInt($state.params.host_id) === id) {
-                    $state.go("hosts", null, {reload: true});
+                    $state.go('^', reloadListStateParams, {reload: true});
                 } else {
-                    $state.go($state.current.name, null, {reload: true});
+                    $state.go('.', reloadListStateParams, {reload: true});
                 }
                 Wait('stop');
             });

@@ -68,31 +68,6 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     $scope.goToInsights = function(id){
         $state.go('hosts.edit.insights', {host_id:id});
     };
-    $scope.deleteHost = function(id, name){
-        var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
-        var action = function(){
-            delete $rootScope.promptActionBtnClass;
-            Wait('start');
-            HostsService.delete(id).then(() => {
-                $('#prompt-modal').modal('hide');
-                if (parseInt($state.params.host_id) === id) {
-                    $state.go("hosts", null, {reload: true});
-                } else {
-                    $state.go($state.current.name, null, {reload: true});
-                }
-                Wait('stop');
-            });
-        };
-        // Prompt depends on having $rootScope.promptActionBtnClass available...
-        Prompt({
-            hdr: 'Delete Host',
-            body: body,
-            action: action,
-            actionText: 'DELETE',
-        });
-        $rootScope.promptActionBtnClass = 'Modal-errorButton';
-    };
-
     $scope.toggleHost = function(event, host) {
         try {
             $(event.target).tooltip('hide');
