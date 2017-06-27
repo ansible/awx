@@ -55,6 +55,10 @@
                  type: 'text',
                  reset: 'DEFAULT_PROJECT_UPDATE_TIMEOUT',
              },
+             ANSIBLE_FACT_CACHE_TIMEOUT: {
+                 type: 'text',
+                 reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
+             },
          },
 
          buttons: {
