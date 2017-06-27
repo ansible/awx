@@ -9,14 +9,14 @@ describe('Controller: WorkflowAdd', () => {
         GenerateForm,
         TemplatesService,
         q,
-        getLabelsDeferred,
         createWorkflowJobTemplateDeferred,
         httpBackend,
         ProcessErrors,
         CreateSelect2,
         Wait,
         ParseTypeChange,
-        ToJSON;
+        ToJSON,
+        availableLabels;
 
     beforeEach(angular.mock.module('Tower'));
     beforeEach(angular.mock.module('RestServices'));
@@ -44,6 +44,11 @@ describe('Controller: WorkflowAdd', () => {
             }
         };
 
+        availableLabels = [{
+            name: "foo",
+            id: "1"
+        }];
+      
         Alert = jasmine.createSpy('Alert');
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         CreateSelect2 = jasmine.createSpy('CreateSelect2');
@@ -59,9 +64,10 @@ describe('Controller: WorkflowAdd', () => {
         $provide.value('Wait', Wait);
         $provide.value('ParseTypeChange', ParseTypeChange);
         $provide.value('ToJSON', ToJSON);
+        $provide.value('availableLabels', availableLabels);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, $httpBackend, _state_, _ConfigService_, _GetChoices_, _Alert_, _GenerateForm_, _ProcessErrors_, _CreateSelect2_, _Wait_, _ParseTypeChange_, _ToJSON_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, $httpBackend, _state_, _ConfigService_, _GetChoices_, _Alert_, _GenerateForm_, _ProcessErrors_, _CreateSelect2_, _Wait_, _ParseTypeChange_, _ToJSON_, _availableLabels_) => {
         scope = $rootScope.$new();
         state = _state_;
         q = $q;
@@ -71,10 +77,10 @@ describe('Controller: WorkflowAdd', () => {
         ProcessErrors = _ProcessErrors_;
         CreateSelect2 = _CreateSelect2_;
         Wait = _Wait_;
-        getLabelsDeferred = q.defer();
         createWorkflowJobTemplateDeferred = q.defer();
         ParseTypeChange = _ParseTypeChange_;
         ToJSON = _ToJSON_;
+        availableLabels = _availableLabels_;
 
         $httpBackend
             .whenGET(/^\/api\/?$/)
@@ -84,7 +90,6 @@ describe('Controller: WorkflowAdd', () => {
             .whenGET(/\/static\/*/)
             .respond(200, {});
 
-        TemplatesService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);
         TemplatesService.createWorkflowJobTemplate = jasmine.createSpy('createWorkflowJobTemplate').and.returnValue(createWorkflowJobTemplateDeferred.promise);
 
         WorkflowAdd = $controller('WorkflowAdd', {
@@ -97,38 +102,24 @@ describe('Controller: WorkflowAdd', () => {
             CreateSelect2: CreateSelect2,
             Wait: Wait,
             ParseTypeChange: ParseTypeChange,
+            availableLabels: availableLabels,
             ToJSON
         });
     }));
 
     it('should get/set the label options and select2-ify the input', ()=>{
-        // Resolve TemplatesService.getLabelsForJobTemplate
-        getLabelsDeferred.resolve({
-            foo: "bar"
-        });
         // We expect the digest cycle to fire off this call to /static/config.js so we go ahead and handle it
         httpBackend.expectGET('/static/config.js').respond(200);
         scope.$digest();
-        expect(scope.labelOptions).toEqual({
-            foo: "bar"
-        });
+        expect(scope.labelOptions).toEqual([{
+            label: "foo",
+            value: "1"
+        }]);
         expect(CreateSelect2).toHaveBeenCalledWith({
             element:'#workflow_job_template_labels',
             multiple: true,
             addNew: true
         });
-    });
-
-    it('should call ProcessErrors when getLabelsForJobTemplate returns a rejected promise', ()=>{
-        // Reject TemplatesService.getLabelsForJobTemplate
-        getLabelsDeferred.reject({
-            data: "mockedData",
-            status: 400
-        });
-        // We expect the digest cycle to fire off this call to /static/config.js so we go ahead and handle it
-        httpBackend.expectGET('/static/config.js').respond(200);
-        scope.$digest();
-        expect(ProcessErrors).toHaveBeenCalled();
     });
 
     describe('scope.formSave()', () => {
