@@ -1,11 +1,13 @@
 
 
-                    <rect x=0
+                    <rect ng-attr-class="{{layer.is_pressed ? 'NetworkUI__layer--button-pressed' : layer.mouse_over ? 'NetworkUI__layer--button-hover' : 'NetworkUI__layer'}}"
+                          x=0
                           y=0
-                          ng-attr-width={{layer.size}}
-                          ng-attr-height={{layer.size}}
-                          rx=3></rect>
-                    <text ng-attr-x="{{layer.size/2}}"
-                          ng-attr-y="{{layer.size/2}}"
+                          ng-attr-width={{layer.width}}
+                          ng-attr-height={{layer.height}}
+                          rx=5></rect>
+                    <text ng-attr-class="{{layer.is_pressed ? 'NetworkUI__layer-text--button-pressed' : layer.mouse_over ? 'NetworkUI__layer-text--button-hover' : 'NetworkUI__layer-text'}}"
+                          ng-attr-x="{{layer.width/2}}"
+                          ng-attr-y="{{layer.height/2}}"
                           dy=".3em"
                           text-anchor="middle">{{layer.name}}</text>
