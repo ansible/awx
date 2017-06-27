@@ -9,6 +9,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         function init() {
 
             let updatePaginationVariables = function() {
+                $scope.pageSize = calcPageSize();
                 $scope.current = calcCurrent();
                 $scope.last = calcLast();
                 $scope.pageRange = calcPageRange($scope.current, $scope.last);
@@ -21,6 +22,22 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 updatePaginationVariables();
             });
         }
+
+        $scope.filter = function(id){
+            $scope.pageSize = Number(id);
+            $('#period-dropdown')
+                .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+id+
+            "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
+            
+            if($scope.querySet){
+                let origQuerySet = _.cloneDeep($scope.querySet);
+                queryset = _.merge(origQuerySet, { page_size: $scope.pageSize });
+            }
+            else {
+                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page_size: $scope.pageSize, page: 1 });
+            }
+            $scope.toPage();
+        };
 
         $scope.dataCount = function() {
             return $filter('number')($scope.dataset.count);
@@ -65,7 +82,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         };
 
         function calcLast() {
-            return Math.ceil($scope.dataset.count / pageSize);
+            return Math.ceil($scope.dataset.count / $scope.pageSize);
         }
 
         function calcCurrent() {
@@ -107,15 +124,20 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         }
 
         function calcDataRange() {
-            if ($scope.current === 1 && $scope.dataset.count < parseInt(pageSize)) {
+            if ($scope.current === 1 && $scope.dataset.count < parseInt($scope.pageSize)) {
                 return `1 - ${$scope.dataset.count}`;
             } else if ($scope.current === 1) {
-                return `1 - ${pageSize}`;
+                return `1 - ${$scope.pageSize}`;
             } else {
-                let floor = (($scope.current - 1) * parseInt(pageSize)) + 1;
-                let ceil = floor + parseInt(pageSize) < $scope.dataset.count ? floor + parseInt(pageSize) : $scope.dataset.count;
+                let floor = (($scope.current - 1) * parseInt($scope.pageSize)) + 1;
+                let ceil = floor + parseInt($scope.pageSize) < $scope.dataset.count ? floor + parseInt($scope.pageSize) : $scope.dataset.count;
                 return `${floor} - ${ceil}`;
             }
+        }
+
+        function calcPageSize(){
+            let pageSize = $scope.querySet ? $scope.querySet.page_size || 20 : $stateParams[`${$scope.iterator}_search`].page_size || 20;
+            return Number(pageSize) ;
         }
 
         init();

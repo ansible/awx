@@ -7,7 +7,8 @@ export default {
             value: {
                 or__job__inventory:"",
                 or__adhoccommand__inventory:"",
-                or__inventoryupdate__inventory_source__inventory:""
+                or__inventoryupdate__inventory_source__inventory:"",
+                order_by: "-id"
             },
             squash:""
         }

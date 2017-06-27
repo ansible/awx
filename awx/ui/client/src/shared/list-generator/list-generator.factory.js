@@ -453,12 +453,14 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (options.paginate === undefined || options.paginate === true) {
+                    let hide_view_per_page = (options.mode === "lookup") ? true : false;
                     html += `<paginate
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"
                     dataset="${list.iterator}_dataset"
                     iterator="${list.iterator}"
-                    query-set="${list.iterator}_queryset"`;
+                    query-set="${list.iterator}_queryset"
+                    hide-view-per-page="${hide_view_per_page}"`;
                     html += list.maxVisiblePages ? `max-visible-pages="${list.maxVisiblePages}"` : '';
                     html += `></paginate></div>`;
                 }
