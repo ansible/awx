@@ -1,3 +1,18 @@
+
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/static/assets/OpenSans-Regular.ttf);
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    font-style: bold;
+    font-weight: 600;
+    src: url(/static/assets/OpenSans-Bold.ttf);
+}
+
 @selected-red: #c9232c;
 @selected-mango: #ff5850;
 @selected-blue: #5bbddf;
@@ -7,11 +22,12 @@
 @widget-body: #D7D7D7;
 @link: #D7D7D7;
 @debug-copynot: rgb(77,200,242);
-@button-body: #f6f6f6;
+@button-body: #ffffff;
 @button-text: #707070;
-@button-outline: #b4b6b4;
-@button-body-hover: #dfdfdf;
-@button-body-pressed: #d5d5d5;
+@button-outline: #b7b7b7;
+@button-body-hover: #f2f2f2;
+@button-body-pressed: #848992;
+@button-text-pressed: #ffffff;
 @green: #5CB85C;
 @red:  #D9534F;
 
@@ -22,10 +38,12 @@
 
 .NetworkUI__text {
     fill: @button-text;
+    font-family: 'Open Sans';
 }
 
 .NetworkUI__debug-text {
     fill: @debug-copynot;
+    font-family: 'Open Sans';
 }
 
 
@@ -115,6 +133,17 @@
     stroke: none;
 }
 
+.NetworkUI__router-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__router-text--selected {
+    font-family: 'Open Sans';
+}
+
+
 .NetworkUI__switch {
     fill: @widget-body;
     stroke: @dark-widget-detail;
@@ -144,6 +173,16 @@
 .NetworkUI__switch polygon {
     fill: @light-widget-detail;
     stroke: none;
+}
+
+.NetworkUI__switch-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__switch-text--selected {
+    font-family: 'Open Sans';
 }
 
 .NetworkUI__rack {
@@ -194,6 +233,8 @@
 
 .NetworkUI__button-text {
     fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
 .NetworkUI__button--button-pressed {
@@ -203,7 +244,9 @@
 }
 
 .NetworkUI__button-text--button-pressed {
-    fill: @button-text;
+    fill: @button-text-pressed;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
 .NetworkUI__button--button-hover {
@@ -214,6 +257,8 @@
 
 .NetworkUI__button-text--button-hover {
     fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
 }
 
 .NetworkUI__host {
@@ -256,6 +301,17 @@
     stroke: none;
 }
 
+
+.NetworkUI__host-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__host-text--selected {
+    font-family: 'Open Sans';
+}
+
 .NetworkUI__status {
     fill: @widget-body;
     stroke: @dark-widget-detail;
@@ -296,11 +352,19 @@
 .NetworkUI__interface-text {
     fill: @button-text;
     font-size: 8px;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__interface-text--selected {
+    font-size: 8px;
+    font-family: 'Open Sans';
 }
 
 .NetworkUI__link-text {
     fill: @button-text;
     font-size: 8px;
+    font-family: 'Open Sans';
 }
 
 .NetworkUI__touch {
