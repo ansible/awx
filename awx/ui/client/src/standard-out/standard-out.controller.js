@@ -11,10 +11,8 @@
 */
 
 export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
-    ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
+    GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
     ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n) {
-
-    ClearScope();
 
     var job_id = $stateParams.id,
         jobType = $state.current.data.jobType;
@@ -279,6 +277,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 }
 
 JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
-    '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
+    '$stateParams', 'GetBasePath', 'Rest', 'ProcessErrors',
     'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
     'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n'];

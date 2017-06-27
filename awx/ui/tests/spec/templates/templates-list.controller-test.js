@@ -6,7 +6,6 @@ describe('Controller: TemplatesList', () => {
         rootScope,
         state,
         TemplatesListController,
-        ClearScope,
         GetChoices,
         Alert,
         Prompt,
@@ -53,7 +52,6 @@ describe('Controller: TemplatesList', () => {
             }
         };
 
-        ClearScope = jasmine.createSpy('ClearScope');
         GetChoices = jasmine.createSpy('GetChoices');
         Alert = jasmine.createSpy('Alert');
         Prompt = jasmine.createSpy('Prompt').and.callFake(function(args) {
@@ -61,7 +59,6 @@ describe('Controller: TemplatesList', () => {
         });
         InitiatePlaybookRun = jasmine.createSpy('InitiatePlaybookRun');
 
-        $provide.value('ClearScope', ClearScope);
         $provide.value('GetChoices', GetChoices);
         $provide.value('Alert', Alert);
         $provide.value('Prompt', Prompt);
@@ -69,12 +66,11 @@ describe('Controller: TemplatesList', () => {
         $provide.value('InitiatePlaybookRun', InitiatePlaybookRun);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, _state_, _ConfigService_, _ClearScope_, _GetChoices_, _Alert_, _Prompt_, _InitiatePlaybookRun_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, _state_, _ConfigService_, _GetChoices_, _Alert_, _Prompt_, _InitiatePlaybookRun_) => {
         scope = $rootScope.$new();
         rootScope = $rootScope;
         q = $q;
         state = _state_;
-        ClearScope = _ClearScope_;
         GetChoices = _GetChoices_;
         Alert = _Alert_;
         Prompt = _Prompt_;
@@ -92,7 +88,6 @@ describe('Controller: TemplatesList', () => {
             $scope: scope,
             $rootScope: rootScope,
             $state: state,
-            ClearScope: ClearScope,
             GetChoices: GetChoices,
             Alert: Alert,
             Prompt: Prompt,

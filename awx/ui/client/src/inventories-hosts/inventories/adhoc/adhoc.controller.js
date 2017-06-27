@@ -11,10 +11,8 @@
 */
 function adhocController($q, $scope, $stateParams,
     $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
-    GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
+    GenerateForm, Rest, ProcessErrors, GetBasePath, GetChoices,
     KindChange, Wait, ParseTypeChange) {
-
-    ClearScope();
 
     // this is done so that we can access private functions for testing, but
     // we don't want to populate the "public" scope with these internal
@@ -302,6 +300,6 @@ function adhocController($q, $scope, $stateParams,
 
 export default ['$q', '$scope', '$stateParams',
     '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
-     'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
+     'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'GetBasePath',
     'GetChoices', 'KindChange', 'Wait', 'ParseTypeChange',
     adhocController];

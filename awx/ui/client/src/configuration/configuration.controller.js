@@ -5,7 +5,7 @@
  *************************************************/
 
 export default [
-    '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert', 'ClearScope',
+    '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
     'Wait', 'configDataResolve', 'ToJSON',
     //Form definitions
@@ -24,7 +24,7 @@ export default [
     'ConfigurationJobsForm',
     'ConfigurationUiForm',
     function(
-        $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
+        $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert,
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
         Wait, configDataResolve, ToJSON,
         //Form definitions

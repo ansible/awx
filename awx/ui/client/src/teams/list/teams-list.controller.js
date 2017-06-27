@@ -4,13 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Rest', 'TeamList', 'Prompt', 'ClearScope',
+export default ['$scope', 'Rest', 'TeamList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
     'rbacUiControlService', 'Dataset',
-    function($scope, Rest, TeamList, Prompt, ClearScope, ProcessErrors,
+    function($scope, Rest, TeamList, Prompt, ProcessErrors,
     GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
-
-        ClearScope();
 
         var list = TeamList,
             defaultUrl = GetBasePath('teams');

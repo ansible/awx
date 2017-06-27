@@ -5,16 +5,14 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
-    'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt', 'ClearScope',
+    'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt',
     'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
     'i18n', 'CredentialTypes',
     function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
-    ProcessErrors, GenerateForm, Prompt, ClearScope, GetBasePath,
+    ProcessErrors, GenerateForm, Prompt, GetBasePath,
     GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
     $state, CreateSelect2, ToggleNotification, i18n, CredentialTypes) {
-
-        ClearScope('htmlTemplate');
 
         var form = ProjectsForm(),
             defaultUrl = GetBasePath('projects') + $stateParams.project_id + '/',

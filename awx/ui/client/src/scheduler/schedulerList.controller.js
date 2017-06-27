@@ -13,15 +13,13 @@
 
 export default [
     '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
-    'ClearScope', 'rbacUiControlService',
+    'rbacUiControlService',
     'ToggleSchedule', 'DeleteSchedule', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
     function($scope, $location, $stateParams,
-        ScheduleList, Rest, ClearScope,
+        ScheduleList, Rest,
         rbacUiControlService,
         ToggleSchedule, DeleteSchedule,
         $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
-
-        ClearScope();
 
         var base, scheduleEndpoint,
             list = ScheduleList;

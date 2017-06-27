@@ -13,12 +13,11 @@ const user_type_options = [
 ];
 
 export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
-    'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
+    'Alert', 'ProcessErrors', 'ReturnToCaller', 'GetBasePath',
     'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
     function($scope, $rootScope, UserForm, GenerateForm, Rest, Alert,
-    ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, Wait, CreateSelect2,
+    ProcessErrors, ReturnToCaller, GetBasePath, Wait, CreateSelect2,
     $state, $location, i18n) {
-        ClearScope();
 
         var defaultUrl = GetBasePath('organizations'),
             form = UserForm;

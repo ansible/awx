@@ -7,13 +7,13 @@
  export default
      [   '$filter', '$scope',
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
-        'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
+        'ProcessErrors', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
          'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'MultiCredentialService',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-             ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
+             ProcessErrors, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
          ) {
@@ -27,7 +27,6 @@
                      }
                  });
 
-            ClearScope();
             // Inject dynamic view
             let defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),

@@ -12,12 +12,10 @@
 
 function SmartInventoryAdd($scope, $location,
     GenerateForm, smartInventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
-    ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state, canAdd) {
 
     $scope.canAdd = canAdd;
-
-    ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -90,6 +88,6 @@ function SmartInventoryAdd($scope, $location,
 
 export default ['$scope', '$location',
     'GenerateForm', 'smartInventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
+    'ProcessErrors', 'GetBasePath', 'ParseTypeChange',
     'Wait', 'ToJSON', '$state', 'canAdd', SmartInventoryAdd
 ];

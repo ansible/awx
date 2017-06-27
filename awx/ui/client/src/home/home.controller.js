@@ -5,11 +5,9 @@
  *************************************************/
 
 export default ['$scope', '$rootScope','Wait',
-    'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors', 'graphData',
+    'Rest', 'GetBasePath', 'ProcessErrors', 'graphData',
     function($scope, $rootScope, Wait,
-    ClearScope, Rest, GetBasePath, ProcessErrors, graphData) {
-
-        ClearScope('home');
+    Rest, GetBasePath, ProcessErrors, graphData) {
 
         var dataCount = 0;
 

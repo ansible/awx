@@ -6,7 +6,7 @@
 
 function SmartInventoryEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
-    ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, resourceData, $rootScope) {
 
     // Inject dynamic view
@@ -14,12 +14,9 @@ function SmartInventoryEdit($scope, $location,
         form = InventoryForm,
         inventory_id = $stateParams.smartinventory_id,
         inventoryData = resourceData.data;
-
-    ClearScope();
     init();
 
     function init() {
-        ClearScope();
         form.formLabelSize = null;
         form.formFieldSize = null;
         $scope.inventory_id = inventory_id;
@@ -97,7 +94,7 @@ function SmartInventoryEdit($scope, $location,
 
 export default [ '$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
+    'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', 'resourceData', '$rootScope', SmartInventoryEdit
 ];
