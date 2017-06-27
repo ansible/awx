@@ -76,7 +76,7 @@ function(i18n, InventoryCompletedJobsList) {
                 sourceModel: 'insights_credential',
                 sourceField: 'name',
                 search: {
-                    credential_type: 13 //insights
+                    credential_type: '13' //insights
                 }
             },
             instance_groups: {
