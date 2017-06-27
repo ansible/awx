@@ -40,27 +40,6 @@ and they are structured as follows:
 The `controller` for the group "thepentagon" and all hosts therein is
 determined by a ForeignKey within the instance group.
 
-## Development Testing Notes
-
-### Test the SSH connection between containers
-
-While the environment is running, you can test the connection like so:
-
-```bash
-docker exec -i -t tools_tower_1 /bin/bash
-```
-
-Inside the context of that container:
-
-```bash
-ssh root@isolated
-```
-
-(note: awx user has been deprecated)
-
-This should give a shell to the `tools_isolated_1` container, as the
-`tools_tower_1` container sees it.
-
 ### Run a playbook
 
 In order to run an isolated job, associate the instance group `thepentagon` with

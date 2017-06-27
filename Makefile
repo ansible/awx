@@ -353,6 +353,7 @@ init:
 	if [ "$(EXTRA_GROUP_QUEUES)" == "thepentagon" ]; then \
 		tower-manage register_instance --hostname=isolated; \
 		tower-manage register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
+		tower-manage generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
 	elif [ "$(EXTRA_GROUP_QUEUES)" != "" ]; then \
 		tower-manage register_queue --queuename=$(EXTRA_GROUP_QUEUES) --hostnames=$(COMPOSE_HOST); \
 	fi;

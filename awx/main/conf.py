@@ -174,6 +174,29 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_PRIVATE_KEY',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('The RSA private key for SSH traffic to isolated instances'),
+    help_text=_('The RSA private key for SSH traffic to isolated instances'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_PUBLIC_KEY',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('The RSA public key for SSH traffic to isolated instances'),
+    help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,
