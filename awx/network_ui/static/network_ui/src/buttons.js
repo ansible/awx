@@ -33,7 +33,7 @@ exports.ButtonPressed = ButtonPressed;
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     var i = 0;
-    var buttons = controller.scope.buttons;
+    var buttons = controller.scope.all_buttons;
     var button = null;
     for (i = 0; i < buttons.length; i++) {
         button = buttons[i];
@@ -58,7 +58,7 @@ _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
     if (!controller.scope.hide_buttons) {
 
         var i = 0;
-        var buttons = controller.scope.buttons;
+        var buttons = controller.scope.all_buttons;
         var button = null;
         for (i = 0; i < buttons.length; i++) {
             button = buttons[i];
@@ -85,7 +85,7 @@ _Start.prototype.start.transitions = ['Ready'];
 _ButtonPressed.prototype.onMouseUp = function (controller, msg_type, $event) {
 
     var i = 0;
-    var buttons = controller.scope.buttons;
+    var buttons = controller.scope.all_buttons;
     var button = null;
     for (i = 0; i < buttons.length; i++) {
         button = buttons[i];

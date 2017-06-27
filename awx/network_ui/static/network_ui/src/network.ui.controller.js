@@ -72,6 +72,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
   $scope.debug = {'hidden': true};
   $scope.hide_buttons = false;
+  $scope.hide_links = false;
   $scope.hide_interfaces = false;
   $scope.graph = {'width': window.innerWidth,
                   'right_column': window.innerWidth - 300,
@@ -94,12 +95,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     //{"name": "router", "size":50, 'x':10, 'y':100},
     //{"name": "switch", "size":50, 'x':10, 'y':160},
     //{"name": "rack", "size":50, 'x':10, 'y':220},
-  ];
-
-  $scope.layers = [
-    //{"name": "Layer 3", "size":60, 'x':window.innerWidth - 70, 'y':10},
-    //{"name": "Layer 2", "size":60, 'x':window.innerWidth - 70, 'y':80},
-    //{"name": "Layer 1", "size":60, 'x':window.innerWidth - 70, 'y':150},
   ];
 
   $scope.links = [
@@ -459,6 +454,14 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         xhr.send();
     };
 
+    $scope.onTogglePhysical = function () {
+        $scope.hide_links = false;
+    };
+
+    $scope.onUnTogglePhysical = function () {
+        $scope.hide_links = true;
+    };
+
     // Buttons
 
     $scope.buttons = [
@@ -470,6 +473,24 @@ var NetworkUIController = function($scope, $document, $location, $window) {
       new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
       new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
     ];
+
+    $scope.layers = [
+      new models.ToggleButton("APPLICATION", $scope.graph.width - 140, 10, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("PRESENTATION", $scope.graph.width - 140, 50, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("SESSION", $scope.graph.width - 140, 90, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("TRANSPORT", $scope.graph.width - 140, 130, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("NETWORK", $scope.graph.width - 140, 170, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("DATA-LINK", $scope.graph.width - 140, 210, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("PHYSICAL",
+                              $scope.graph.width - 140, 250, 120, 30,
+                              $scope.onTogglePhysical,
+                              $scope.onUnTogglePhysical,
+                              true)
+    ];
+
+    $scope.all_buttons = [];
+    $scope.all_buttons.extend($scope.buttons);
+    $scope.all_buttons.extend($scope.layers);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
@@ -1113,6 +1134,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 	  	$scope.graph.right_column = $window.innerWidth - 300;
 	  	$scope.graph.height = $window.innerHeight;
 
+        $scope.update_size();
+
 		// manuall $digest required as resize event
 		// is outside of angular
 	 	$scope.$digest();
@@ -1130,6 +1153,13 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         console.log("Network UI stopping");
         $document.unbind('keydown', $scope.onKeyDown);
     });
+
+    $scope.update_size = function () {
+        var i = 0;
+        for (i = 0; i < $scope.layers.length; i++) {
+            $scope.layers[i].x = $scope.graph.width - 140;
+        }
+    };
 };
 
 exports.NetworkUIController = NetworkUIController;

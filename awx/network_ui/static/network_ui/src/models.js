@@ -1,6 +1,7 @@
 var fsm = require('./fsm.js');
 var button = require('./button.js');
 var util = require('./util.js');
+var inherits = require('inherits');
 
 function Device(id, name, x, y, type) {
     this.id = id;
@@ -266,6 +267,36 @@ Button.prototype.is_selected = function (x, y) {
             y < this.y + this.height);
 
 };
+
+
+function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callback, default_toggled) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.callback = this.toggle;
+    this.is_pressed = default_toggled;
+    this.toggled = default_toggled;
+    this.toggle_callback = toggle_callback;
+    this.untoggle_callback = untoggle_callback;
+    this.mouse_over = false;
+    this.fsm = new fsm.FSMController(this, button.Start, null);
+}
+inherits(ToggleButton, Button);
+exports.ToggleButton = ToggleButton;
+
+ToggleButton.prototype.toggle = function () {
+    this.toggled = !this.toggled;
+    this.is_pressed = this.toggled;
+
+    if (this.toggled) {
+        this.toggle_callback();
+    } else {
+        this.untoggle_callback();
+    }
+};
+
 
 function Task(id, name) {
     this.id = id;

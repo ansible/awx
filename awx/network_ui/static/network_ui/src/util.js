@@ -1,3 +1,12 @@
+Array.prototype.extend = function (other_array) {
+    /* you should include a test to check whether other_array really is an array */
+    var i = 0;
+    for (i = 0; i < other_array.length; i++) {
+        this.push(other_array[i]);
+    }
+};
+
+
 var math = require('mathjs');
 
 function noop () {
