@@ -83,7 +83,7 @@
                       translate({{-link.from_interface.dot_d - 25}}, 0)
                       rotate({{-link.slope()}})
                       ">
-<text ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}"
+<text ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       font-size="8"
@@ -99,10 +99,9 @@
                       translate({{-link.length() + link.to_interface.dot_d + 25}}, 0)
                       rotate({{-link.slope()}})
                       ">
-<text ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}"
+<text ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
-      font-size="8"
       x="0"
       y="0"> {{link.to_interface.name}}</text>
 <text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="0">{{link.to_interface.name}}{{link.to_interface.edit_label?'_':''}}</text>

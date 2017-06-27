@@ -462,13 +462,13 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     // Buttons
 
     $scope.buttons = [
-      new models.Button("Deploy", 10, 10, 60, 50, $scope.onDeployButton),
-      new models.Button("Destroy", 80, 10, 60, 50, $scope.onDestroyButton),
-      new models.Button("Record", 150, 10, 60, 50, $scope.onRecordButton),
-      new models.Button("Export", 220, 10, 60, 50, $scope.onExportButton),
-      new models.Button("Discover", 290, 10, 80, 50, $scope.onDiscoverButton),
-      new models.Button("Layout", 380, 10, 60, 50, $scope.onLayoutButton),
-      new models.Button("Configure", 450, 10, 80, 50, $scope.onConfigureButton)
+      new models.Button("DEPLOY", 10, 10, 70, 30, $scope.onDeployButton),
+      new models.Button("DESTROY", 90, 10, 80, 30, $scope.onDestroyButton),
+      new models.Button("RECORD", 180, 10, 80, 30, $scope.onRecordButton),
+      new models.Button("EXPORT", 270, 10, 70, 30, $scope.onExportButton),
+      new models.Button("DISCOVER", 350, 10, 80, 30, $scope.onDiscoverButton),
+      new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
+      new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
     ];
 
     $scope.onTaskStatus = function(data) {

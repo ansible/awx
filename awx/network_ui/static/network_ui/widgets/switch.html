@@ -55,10 +55,10 @@
                     <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate(28, -6) scale(2.0)"/>
                     </g>
                     <g ng-show="current_scale > 0.5">
-                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
+                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__switch-text--selected' : 'NetworkUI--hidden'}}"
                           filter="url(#selected)"
                           text-anchor="middle"
 						  x="0"
 						  y="0"> {{device.name}} </text>
-                    <text text-anchor="middle" x="0" y="0">{{device.name}}{{device.edit_label?'_':''}}</text>
+                    <text class="NetworkUI__switch-text" text-anchor="middle" x="0" y="0">{{device.name}}{{device.edit_label?'_':''}}</text>
                     </g>
