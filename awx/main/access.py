@@ -899,6 +899,9 @@ class CredentialTypeAccess(BaseAccess):
             return False
         return super(CredentialTypeAccess, self).get_method_capability(method, obj, parent_obj)
 
+    def get_queryset(self):
+        return self.model.objects.all()
+
 
 class CredentialAccess(BaseAccess):
     '''

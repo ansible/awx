@@ -14,16 +14,20 @@ def test_list_as_unauthorized_xfail(get):
 
 @pytest.mark.django_db
 def test_list_as_normal_user(get, alice):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
     response = get(reverse('api:credential_type_list'), alice)
     assert response.status_code == 200
-    assert response.data['count'] == 0
+    assert response.data['count'] == 1
 
 
 @pytest.mark.django_db
 def test_list_as_admin(get, admin):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
     response = get(reverse('api:credential_type_list'), admin)
     assert response.status_code == 200
-    assert response.data['count'] == 0
+    assert response.data['count'] == 1
 
 
 @pytest.mark.django_db
