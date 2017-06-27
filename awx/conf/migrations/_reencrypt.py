@@ -13,12 +13,14 @@ __all__ = ['replace_aesecb_fernet', 'get_encryption_key', 'encrypt_field',
 
 
 def replace_aesecb_fernet(apps, schema_editor):
+    from awx.main.utils.encryption import encrypt_field
     Setting = apps.get_model('conf', 'Setting')
 
     for setting in Setting.objects.filter().order_by('pk'):
         if settings_registry.is_setting_encrypted(setting.key):
             if should_decrypt_field(setting.value):
                 setting.value = decrypt_field(setting, 'value')
+                setting.value = encrypt_field(setting, 'value')
             setting.save()
 
 
