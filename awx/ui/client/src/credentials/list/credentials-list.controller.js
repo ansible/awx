@@ -4,13 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
+export default ['$scope', 'Rest', 'CredentialList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, Rest, CredentialList, Prompt, ClearScope,
+    function($scope, Rest, CredentialList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
     i18n) {
-
-        ClearScope();
 
         var list = CredentialList,
             defaultUrl = GetBasePath('credentials');
@@ -76,10 +74,18 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success(function() {
+
+                        let reloadListStateParams = null;
+
+                        if($scope.credentials.length === 1 && $state.params.credential_search && !_.isEmpty($state.params.credential_search.page) && $state.params.credential_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.credential_search.page = (parseInt(reloadListStateParams.credential_search.page)-1).toString();
+                        }
+
                         if (parseInt($state.params.credential_id) === id) {
-                            $state.go("^", null, { reload: true });
+                            $state.go("^", reloadListStateParams, { reload: true });
                         } else {
-                            $state.go('.', null, {reload: true});
+                            $state.go('.', reloadListStateParams, {reload: true});
                         }
                         Wait('stop');
                     })

@@ -8,9 +8,8 @@ import authenticationController from './loginModal.controller';
 /* jshint unused: vars */
 export default
     [     'templateUrl',
-        'ClearScope',
         'Wait',
-        function(templateUrl, ClearScope, Wait) {
+        function(templateUrl, Wait) {
             return {
                 restrict: 'E',
                 scope: true,
@@ -19,7 +18,6 @@ export default
                 link: function(scope, element, attrs) {
                     var setLoginFocus = function () {
                         // Need to clear out any open dialog windows that might be open when this modal opens.
-                        ClearScope();
                         $('#login-username').focus();
                     };
 

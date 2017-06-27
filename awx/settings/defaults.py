@@ -609,7 +609,8 @@ AWX_ISOLATED_CHECK_INTERVAL = 30
 
 # The timeout (in seconds) for launching jobs on isolated nodes
 AWX_ISOLATED_LAUNCH_TIMEOUT = 600
-# The time between the background isolated heartbeat status check
+
+# The time (in seconds) between the periodic isolated heartbeat status check
 AWX_ISOLATED_PERIODIC_CHECK = 600
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'

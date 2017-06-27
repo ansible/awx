@@ -5,10 +5,9 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', '$state',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state',
     function($scope, $rootScope, $stateParams, TeamForm, Rest, ProcessErrors,
-    ClearScope, GetBasePath, Wait, $state) {
-        ClearScope();
+    GetBasePath, Wait, $state) {
 
         var form = TeamForm,
             id = $stateParams.team_id,

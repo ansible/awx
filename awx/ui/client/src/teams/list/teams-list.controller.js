@@ -4,13 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Rest', 'TeamList', 'Prompt', 'ClearScope',
+export default ['$scope', 'Rest', 'TeamList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
     'rbacUiControlService', 'Dataset',
-    function($scope, Rest, TeamList, Prompt, ClearScope, ProcessErrors,
+    function($scope, Rest, TeamList, Prompt, ProcessErrors,
     GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
-
-        ClearScope();
 
         var list = TeamList,
             defaultUrl = GetBasePath('teams');
@@ -53,10 +51,18 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt', 'ClearScope',
                     .success(function() {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
+
+                        let reloadListStateParams = null;
+
+                        if($scope.teams.length === 1 && $state.params.team_search && !_.isEmpty($state.params.team_search.page) && $state.params.team_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.team_search.page = (parseInt(reloadListStateParams.team_search.page)-1).toString();
+                        }
+
                         if (parseInt($state.params.team_id) === id) {
-                            $state.go('^', null, { reload: true });
+                            $state.go('^', reloadListStateParams, { reload: true });
                         } else {
-                            $state.go('.', null, { reload: true });
+                            $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
                     .error(function(data, status) {

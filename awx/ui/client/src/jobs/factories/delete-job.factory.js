@@ -70,7 +70,14 @@ export default
                                 scope.$emit(callback, action_label);
                             }
                             else {
-                                $state.reload();
+                                let reloadListStateParams = null;
+
+                                if(scope.jobs.length === 1 && $state.params.job_search && !_.isEmpty($state.params.job_search.page) && $state.params.job_search.page !== '1') {
+                                    reloadListStateParams = _.cloneDeep($state.params);
+                                    reloadListStateParams.job_search.page = (parseInt(reloadListStateParams.job_search.page)-1).toString();
+                                }
+                                
+                                $state.go('.', reloadListStateParams, {reload: true});
                                 Wait('stop');
                             }
                         })

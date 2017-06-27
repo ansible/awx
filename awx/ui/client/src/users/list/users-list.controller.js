@@ -13,17 +13,15 @@ const user_type_options = [
 ];
 
 export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
-    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
     'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, $rootScope, Rest, UserList, Prompt, ClearScope,
+    function($scope, $rootScope, Rest, UserList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService,
     Dataset, i18n) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
         }
-
-        ClearScope();
 
         var list = UserList,
             defaultUrl = GetBasePath('users');
@@ -65,6 +63,14 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success(function() {
+
+                        let reloadListStateParams = null;
+
+                        if($scope.users.length === 1 && $state.params.user_search && !_.isEmpty($state.params.user_search.page) && $state.params.user_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.user_search.page = (parseInt(reloadListStateParams.user_search.page)-1).toString();
+                        }
+
                         if (parseInt($state.params.user_id) === id) {
                             $state.go('^', null, { reload: true });
                         } else {

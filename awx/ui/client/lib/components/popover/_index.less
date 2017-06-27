@@ -1,5 +1,5 @@
 .at-Popover {
-    padding: 0 0 0 @at-space-3x;
+    padding: 0 0 0 5px;
 }
 
 .at-Popover--inline {
@@ -8,7 +8,8 @@
 
 .at-Popover-icon {
     .at-mixin-ButtonIcon();  
-    font-size: @at-font-size-4x;
+    color: @at-color-icon-popover;
+    font-size: @at-font-size-icon;
     padding: 0;
     margin: 0;
 }
@@ -17,35 +18,35 @@
     visibility: hidden;
     opacity: 0;
     color: @at-white;
-    background-color: @at-gray-dark-4x;
-    max-width: @at-popover-width;
-    padding: @at-space-4x;
+    background-color: @at-color-body-background-dark;
+    max-width: @at-popover-maxwidth;
+    padding: @at-padding-popover;
     height: auto;
     position: fixed;
     z-index: 2000;
-    margin: 0 0 0 @at-space-6x;
+    margin: 0 0 0 18px;
     border-radius: @at-border-radius;
     box-shadow: 0 5px 10px rgba(0,0,0, 0.2);
     transition: opacity .15s linear;
-    font-weight: @at-font-weight
+    font-weight: @at-font-weight-body;
 }
 
 .at-Popover-arrow {
-    color: @at-gray-dark-4x;
+    color: @at-color-body-background-dark;
     position: fixed;
     z-index: 1999;
     padding: 0;
-    margin: @at-space-4x 0 0 @at-space;
+    margin: 8px 0 0 3px;
 }
 
 .at-Popover-title {
-    .at-mixin-Heading(@at-font-size);
-    color: @at-white;
-    margin-bottom: @at-space-4x;
+    .at-mixin-Heading(@at-font-size-body);
+    color: @at-color-body-text-dark;
+    margin-bottom: @at-margin-popover;
 }
 
 .at-Popover-text {
     margin: 0;
     padding: 0;
-    font-size: @at-font-size;
+    font-size: @at-font-size-body;
 }

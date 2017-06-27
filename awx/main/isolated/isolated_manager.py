@@ -5,7 +5,9 @@ import StringIO
 import json
 import os
 import re
+import shutil
 import stat
+import tempfile
 import time
 import logging
 
@@ -141,7 +143,7 @@ class IsolatedManager(object):
             args.append('-%s' % ('v' * min(5, self.instance.verbosity)))
         buff = StringIO.StringIO()
         logger.debug('Starting job on isolated host with `run_isolated.yml` playbook.')
-        status, rc = run.run_pexpect(
+        status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.env, buff,
             expect_passwords={
                 re.compile(r'Secret:\s*?$', re.M): base64.b64encode(json.dumps(secrets))
@@ -153,6 +155,22 @@ class IsolatedManager(object):
         if status != 'successful':
             self.stdout_handle.write(buff.getvalue())
         return status, rc
+
+    @classmethod
+    def run_pexpect(cls, pexpect_args, *args, **kw):
+        isolated_ssh_path = None
+        try:
+            if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None):
+                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_tower_isolated')
+                os.chmod(isolated_ssh_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                isolated_key = os.path.join(isolated_ssh_path, '.isolated')
+                ssh_sock = os.path.join(isolated_ssh_path, '.isolated_ssh_auth.sock')
+                run.open_fifo_write(isolated_key, settings.AWX_ISOLATED_PRIVATE_KEY)
+                pexpect_args = run.wrap_args_with_ssh_agent(pexpect_args, isolated_key, ssh_sock)
+            return run.run_pexpect(pexpect_args, *args, **kw)
+        finally:
+            if isolated_ssh_path:
+                shutil.rmtree(isolated_ssh_path)
 
     def build_isolated_job_data(self):
         '''
@@ -251,7 +269,7 @@ class IsolatedManager(object):
 
             buff = cStringIO.StringIO()
             logger.debug('Checking job on isolated host with `check_isolated.yml` playbook.')
-            status, rc = run.run_pexpect(
+            status, rc = IsolatedManager.run_pexpect(
                 args, self.awx_playbook_path(), self.env, buff,
                 cancelled_callback=self.cancelled_callback,
                 idle_timeout=remaining,
@@ -302,7 +320,7 @@ class IsolatedManager(object):
                 json.dumps(extra_vars)]
         logger.debug('Cleaning up job on isolated host with `clean_isolated.yml` playbook.')
         buff = cStringIO.StringIO()
-        status, rc = run.run_pexpect(
+        status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.env, buff,
             idle_timeout=60, job_timeout=60,
             pexpect_timeout=5
@@ -333,7 +351,7 @@ class IsolatedManager(object):
         env['ANSIBLE_STDOUT_CALLBACK'] = 'json'
 
         buff = cStringIO.StringIO()
-        status, rc = run.run_pexpect(
+        status, rc = IsolatedManager.run_pexpect(
             args, cls.awx_playbook_path(), env, buff,
             idle_timeout=60, job_timeout=60,
             pexpect_timeout=5
@@ -357,7 +375,7 @@ class IsolatedManager(object):
                 continue
             if 'capacity' in task_result:
                 instance.capacity = int(task_result['capacity'])
-                instance.save(update_fields=['capacity'])
+                instance.save(update_fields=['capacity', 'modified'])
             else:
                 logger.warning('Could not update capacity of {}, msg={}'.format(
                     instance.hostname, task_result.get('msg', 'unknown failure')))

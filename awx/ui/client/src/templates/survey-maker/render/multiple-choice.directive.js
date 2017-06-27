@@ -17,8 +17,8 @@ function link($timeout, CreateSelect2, scope, element, attrs, ngModel) {
              element: element.find('select'),
              multiple: scope.isMultipleSelect(),
              minimumResultsForSearch: scope.isMultipleSelect() ? Infinity : 10,
-             customDropdownAdapter: scope.preview ? false : true,
-             disabledOptions: true
+             customDropdownAdapter: true,
+             disabledOptions: scope.preview ? true : false
         });
     });
 

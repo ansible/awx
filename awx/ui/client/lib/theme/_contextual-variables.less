@@ -1,0 +1,139 @@
+/**
+ * All variables used in the UI. Use these variables directly during the development of components
+ * and features. Be sure the context of the variable name applies to the work that's being done.
+ * For example, it wouldn't make sense to use `@at-input-height` to describe the height of a 
+ * button. Either add an alias if it makes sense to use the same base variable, or add a new 
+ * base variable to reference.
+ *
+ * Keep in mind the goal is to be able to modify an item by referencing its context instead of 
+ * an arbitrary variable name. For example, tt should be a simple change when an ask comes in to 
+ * "increase the height of inputs"
+ *
+ * 1. Colors
+ * 2. Typography
+ * 3. Layout
+ * 4. Buttons
+ * 5. Misc 
+ * 
+ */
+
+// 1. Colors --------------------------------------------------------------------------------------
+
+@at-color-default: @at-white;
+@at-color-default-hover: @at-white-hover;
+
+@at-color-unreachable: @at-red-bright;
+@at-color-unreachable-hover: @at-red-bright-hover;
+
+@at-color-error: @at-red;
+@at-color-error-hover: @at-red-hover;
+
+@at-color-warning: @at-orange;
+@at-color-warning-hover: @at-orange-hover;
+
+@at-color-info: @at-blue;
+@at-color-info-hover: @at-blue-hover;
+
+@at-color-success: @at-green;
+@at-color-success-hover: @at-green-hover;
+
+@at-color-disabled: @at-gray-dark;
+
+@at-color-body-background-dark: @at-gray-dark-5x;
+@at-color-body-text-dark: @at-white;
+@at-color-body-background: @at-gray-light-3x;
+@at-color-body-text: @at-gray-dark-5x;
+
+@at-color-button-border-default: @at-gray-dark-2x;
+@at-color-button-text-default: @at-gray-dark-5x;
+
+@at-color-tab-default-active: @at-gray-dark-2x;
+@at-color-tab-border-default-active: @at-gray-dark-2x;
+@at-color-tab-text-default-active: @at-white;
+
+@at-color-tab-default-disabled: @at-white;
+@at-color-tab-border-default-disabled: @at-gray-dark-2x;
+@at-color-tab-text-default-disabled: @at-gray-dark-5x;
+
+@at-color-form-label: @at-gray-dark-5x;
+
+@at-color-input-border: @at-gray-dark-2x;
+@at-color-input-error: @at-color-error;
+@at-color-input-focus: @at-color-info;
+@at-color-input-hint: @at-gray-dark-4x;
+@at-color-input-icon: @at-gray-dark-2x;
+@at-color-input-placeholder: @at-gray-dark-4x;
+@at-color-input-text: @at-gray-dark-6x;
+@at-color-input-background: @at-gray-light-3x;
+@at-color-input-disabled: @at-gray-light-2x;
+
+@at-color-icon-dismiss: @at-gray-dark;
+@at-color-icon-popover: @at-gray-dark-3x;
+@at-color-icon-hover: @at-gray-dark-5x;
+
+@at-color-panel-heading: @at-gray-dark-5x;
+@at-color-panel-border: @at-gray-dark;
+
+@at-color-search-key-active: @at-blue;
+
+@at-color-table-header-background: @at-gray-light;
+@at-color-line-separator: @at-gray;
+
+// 2. Typography ----------------------------------------------------------------------------------
+
+@at-font-size-body: @at-font-size-3x;
+@at-font-size-button: @at-font-size;
+@at-font-size-breadcrumb: @at-font-size-3x;
+@at-font-size-form-label: @at-font-size-2x;
+@at-font-size-help-text: @at-font-size;
+@at-font-size-icon: @at-font-size-4x;
+@at-font-size-input: @at-font-size-3x;
+@at-font-size-panel-heading: @at-font-size-3x;
+@at-font-size-panel-inset-heading: @at-font-size-2x;
+@at-font-size-modal-heading: @at-font-size-3x;
+@at-font-size-modal-dismiss: @at-font-size-3x;
+@at-font-size-navigation: @at-font-size-3x;
+@at-font-size-table-heading: @at-font-size-3x;
+@at-font-size-menu-icon: @at-font-size-5x;
+
+@at-font-weight-body: @at-font-weight;
+@at-font-weight-heading: @at-font-weight-2x;
+
+// 3. Layout --------------------------------------------------------------------------------------
+
+@at-padding-button-horizontal: @at-space-2x;
+@at-padding-button-vertical: @at-space;
+@at-padding-inset: @at-space-3x;
+@at-padding-panel: @at-space-4x;
+@at-padding-popover: @at-space-2x;
+@at-padding-well: @at-space-2x;
+
+@at-margin-input-message: @at-space;
+@at-margin-item-column: @at-space-3x;
+@at-margin-panel: @at-space-4x;
+@at-margin-panel-inset: @at-space-3x;
+@at-margin-popover: @at-space-2x;
+@at-margin-tag: @at-space-2x;
+@at-margin-form-label: @at-space;
+@at-margin-form-label-hint: @at-space-2x;
+
+@at-margin-top-search-key: @at-space-2x;
+
+@at-height-divider: @at-margin-panel;
+@at-height-input: 30px;
+@at-height-button: 30px;
+@at-height-tab: 30px;
+
+// 4. Transitions ---------------------------------------------------------------------------------
+
+@at-transition-icon-button: 0.2s;
+
+// 5. Misc ----------------------------------------------------------------------------------------
+
+@at-border-radius: 5px;
+@at-popover-maxwidth: 320px;
+@at-line-height-short: 0.9;
+@at-line-height-tall: 2;
+@at-line-height: 24px;
+@at-input-button-width: 72px;
+

@@ -6,16 +6,15 @@
 
 export default [
     '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange',
+    'ProcessErrors', 'GetBasePath', '$q', 'ParseTypeChange',
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
     'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
-    ProcessErrors, ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
+    ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
     ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
     TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData) {
-        ClearScope();
-
+        
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
                 $scope.canAddWorkflowJobTemplate = false;

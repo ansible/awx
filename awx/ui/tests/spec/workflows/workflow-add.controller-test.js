@@ -5,7 +5,6 @@ describe('Controller: WorkflowAdd', () => {
     let scope,
         state,
         WorkflowAdd,
-        ClearScope,
         Alert,
         GenerateForm,
         TemplatesService,
@@ -49,8 +48,7 @@ describe('Controller: WorkflowAdd', () => {
             name: "foo",
             id: "1"
         }];
-
-        ClearScope = jasmine.createSpy('ClearScope');
+      
         Alert = jasmine.createSpy('Alert');
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         CreateSelect2 = jasmine.createSpy('CreateSelect2');
@@ -58,7 +56,6 @@ describe('Controller: WorkflowAdd', () => {
         ParseTypeChange = jasmine.createSpy('ParseTypeChange');
         ToJSON = jasmine.createSpy('ToJSON');
 
-        $provide.value('ClearScope', ClearScope);
         $provide.value('Alert', Alert);
         $provide.value('GenerateForm', GenerateForm);
         $provide.value('state', state);
@@ -70,11 +67,10 @@ describe('Controller: WorkflowAdd', () => {
         $provide.value('availableLabels', availableLabels);
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, $httpBackend, _state_, _ConfigService_, _ClearScope_, _GetChoices_, _Alert_, _GenerateForm_, _ProcessErrors_, _CreateSelect2_, _Wait_, _ParseTypeChange_, _ToJSON_, _availableLabels_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, $q, $httpBackend, _state_, _ConfigService_, _GetChoices_, _Alert_, _GenerateForm_, _ProcessErrors_, _CreateSelect2_, _Wait_, _ParseTypeChange_, _ToJSON_, _availableLabels_) => {
         scope = $rootScope.$new();
         state = _state_;
         q = $q;
-        ClearScope = _ClearScope_;
         Alert = _Alert_;
         GenerateForm = _GenerateForm_;
         httpBackend = $httpBackend;
@@ -99,7 +95,6 @@ describe('Controller: WorkflowAdd', () => {
         WorkflowAdd = $controller('WorkflowAdd', {
             $scope: scope,
             $state: state,
-            ClearScope: ClearScope,
             Alert: Alert,
             GenerateForm: GenerateForm,
             TemplatesService: TemplatesService,
@@ -111,10 +106,6 @@ describe('Controller: WorkflowAdd', () => {
             ToJSON
         });
     }));
-
-    it('should call ClearScope', ()=>{
-        expect(ClearScope).toHaveBeenCalled();
-    });
 
     it('should get/set the label options and select2-ify the input', ()=>{
         // We expect the digest cycle to fire off this call to /static/config.js so we go ahead and handle it

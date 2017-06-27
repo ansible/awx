@@ -6,13 +6,12 @@
 
 export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
-    'ClearScope', 'Wait', '$state', 'CreateSelect2', 'TemplatesService',
+    'Wait', '$state', 'CreateSelect2', 'TemplatesService',
     'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
-    ClearScope, Wait, $state, CreateSelect2, TemplatesService, ToJSON,
+    Wait, $state, CreateSelect2, TemplatesService, ToJSON,
     ParseTypeChange, $q, Rest, GetBasePath, availableLabels) {
 
-         ClearScope();
          // Inject dynamic view
          let form = WorkflowForm(),
              generator = GenerateForm;

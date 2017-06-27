@@ -6,7 +6,6 @@ function AddCredentialsController (models, $state) {
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
-    let organization = models.organization;
 
     vm.panelTitle = 'NEW CREDENTIAL';
 
@@ -23,22 +22,18 @@ function AddCredentialsController (models, $state) {
         omit: ['user', 'team', 'inputs']
     });
 
-    vm.form.organization._placeholder = DEFAULT_ORGANIZATION_PLACEHOLDER;
-    vm.form.organization._data = organization.get('results');
-    vm.form.organization._format = 'objects';
-    vm.form.organization._exp = 'org as org.name for org in state._data';
-    vm.form.organization._display = 'name';
-    vm.form.organization._key = 'id';
+    vm.form.organization._resource = 'organization';
+    vm.form.organization._route = 'credentials.add.organization';
 
-    vm.form.credential_type._data = credentialType.get('results');
-    vm.form.credential_type._placeholder = 'SELECT A TYPE';
-    vm.form.credential_type._format = 'grouped-object';
-    vm.form.credential_type._display = 'name';
-    vm.form.credential_type._key = 'id';
-    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
+    vm.form.credential_type._resource = 'credential_type';
+    vm.form.credential_type._route = 'credentials.add.credentialType';
 
     vm.form.inputs = {
-        _get: credentialType.mergeInputProperties,
+        _get: id => {
+            let type = credentialType.getById(id);
+
+            return credentialType.mergeInputProperties(type);
+        },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',
         _key: 'inputs'

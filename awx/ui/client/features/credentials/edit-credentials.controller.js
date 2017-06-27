@@ -6,7 +6,7 @@ function EditCredentialsController (models, $state, $scope) {
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
-    let organization = models.organization;
+    let selectedCredentialType = credentialType.getById(credential.get('credential_type'));
 
     vm.tab = {
         details: {  
@@ -21,9 +21,9 @@ function EditCredentialsController (models, $state, $scope) {
     };
 
     $scope.$watch('$state.current.name', (value) => {
-        if (value === 'credentials.edit') {
+        if (/credentials.edit($|\.organization$)/.test(value)) {
             vm.tab.details._active = true;
-            vm.tab.details._permissions = false;
+            vm.tab.permissions._active = false;
         } else {
             vm.tab.permissions._active = true;
             vm.tab.details._active = false;
@@ -39,23 +39,19 @@ function EditCredentialsController (models, $state, $scope) {
         omit: ['user', 'team', 'inputs']
     });
 
-    vm.form.organization._placeholder = DEFAULT_ORGANIZATION_PLACEHOLDER;
-    vm.form.organization._data = organization.get('results');
-    vm.form.organization._format = 'objects';
-    vm.form.organization._exp = 'org as org.name for org in state._data';
-    vm.form.organization._display = 'name';
-    vm.form.organization._key = 'id';
-    vm.form.organization._value = organization.getById(credential.get('organization'));
+    vm.form.organization._resource = 'organization';
+    vm.form.organization._route = 'credentials.edit.organization';
+    vm.form.organization._value = credential.get('summary_fields.organization.id');
+    vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
 
-    vm.form.credential_type._data = credentialType.get('results');
-    vm.form.credential_type._format = 'grouped-object';
-    vm.form.credential_type._display = 'name';
-    vm.form.credential_type._key = 'id';
-    vm.form.credential_type._exp = 'type as type.name group by type.kind for type in state._data';
-    vm.form.credential_type._value = credentialType.getById(credential.get('credential_type'));
-
+    vm.form.credential_type._resource = 'credential_type';
+    vm.form.credential_type._route = 'credentials.edit.credentialType';
+    vm.form.credential_type._value = selectedCredentialType.id;
+    vm.form.credential_type._displayValue = selectedCredentialType.name;
+ 
     vm.form.inputs = {
-        _get (type) {
+        _get (id) {
+            let type = credentialType.getById(id);
             let inputs = credentialType.mergeInputProperties(type);
             
             if (type.id === credential.get('credential_type')) {
@@ -77,7 +73,7 @@ function EditCredentialsController (models, $state, $scope) {
     };
 
     vm.form.onSaveSuccess = res => {
-        $state.go('credentials', { reload: true });
+        $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
     };
 }
 

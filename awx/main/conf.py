@@ -156,6 +156,47 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_CHECK_INTERVAL',
+    field_class=fields.IntegerField,
+    label=_('Isolated status check interval'),
+    help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_LAUNCH_TIMEOUT',
+    field_class=fields.IntegerField,
+    label=_('Isolated launch timeout'),
+    help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_PRIVATE_KEY',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('The RSA private key for SSH traffic to isolated instances'),
+    help_text=_('The RSA private key for SSH traffic to isolated instances'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_PUBLIC_KEY',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('The RSA public key for SSH traffic to isolated instances'),
+    help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,

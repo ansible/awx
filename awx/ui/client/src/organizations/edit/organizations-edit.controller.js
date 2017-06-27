@@ -5,13 +5,11 @@
  *************************************************/
 
 export default ['$scope', '$location', '$stateParams',
-    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', 'ClearScope',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData',
     function($scope, $location, $stateParams,
-        OrganizationForm, Rest, ProcessErrors, Prompt, ClearScope,
+        OrganizationForm, Rest, ProcessErrors, Prompt,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
-
-        ClearScope();
 
         let form = OrganizationForm(),
             defaultUrl = GetBasePath('organizations'),

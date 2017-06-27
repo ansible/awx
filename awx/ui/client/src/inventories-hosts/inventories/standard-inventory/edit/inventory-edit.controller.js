@@ -12,7 +12,7 @@
 
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
-    ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
+    GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
 
     // Inject dynamic view
@@ -111,7 +111,7 @@ function InventoriesEdit($scope, $location,
 
 export default ['$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
+    'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', InventoriesEdit,
 ];

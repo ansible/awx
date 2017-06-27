@@ -76,7 +76,7 @@ function(i18n, InventoryCompletedJobsList) {
                 sourceModel: 'insights_credential',
                 sourceField: 'name',
                 search: {
-                    credential_type: 13 //insights
+                    credential_type: '13' //insights
                 }
             },
             instance_groups: {
@@ -201,7 +201,7 @@ function(i18n, InventoryCompletedJobsList) {
         relatedButtons: {
             remediate_inventory: {
                 ngClick: 'remediateInventory(id, name, insights_credential)',
-                ngShow: 'insights_credential!==null',
+                ngShow: 'insights_credential!==null && mode !== "add"',
                 label: i18n._('Remediate Inventory'),
                 class: 'Form-primaryButton'
             }

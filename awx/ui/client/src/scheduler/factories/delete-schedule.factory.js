@@ -25,11 +25,19 @@ export default
                     .success(function () {
                         $('#prompt-modal').modal('hide');
                         scope.$emit(callback, id);
-                        if (new RegExp('/' + id + '$').test($location.$$url)) {
-                            $location.url($location.url().replace(/[/][0-9]+$/, "")); // go to list view
+
+                        let reloadListStateParams = null;
+
+                        if(scope.schedules.length === 1 && $state.params.schedule_search && !_.isEmpty($state.params.schedule_search.page) && $state.params.schedule_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.schedule_search.page = (parseInt(reloadListStateParams.schedule_search.page)-1).toString();
+                        }
+
+                        if (parseInt($state.params.schedule_id) === id) {
+                            $state.go('^', reloadListStateParams, {reload: true});
                         }
                         else{
-                            $state.go('.', null, {reload: true});
+                            $state.go('.', reloadListStateParams, {reload: true});
                         }
                     })
                     .error(function (data, status) {

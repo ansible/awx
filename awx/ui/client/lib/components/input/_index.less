@@ -1,17 +1,21 @@
 .at-Input {
-    .at-mixin-Placeholder(@at-gray-dark-3x);
+    .at-mixin-Placeholder(@at-color-input-placeholder);
 
-    height: @at-input-height;
-    background: @at-white;
+    height: @at-height-input;
+    background: @at-color-input-background;
     border-radius: @at-border-radius;
-    color: @at-gray-dark-5x;
+    color: @at-color-input-text;
 
     &, &:active {
-        border-color: @at-gray-dark-2x;
+        border-color: @at-color-input-border;
     }
 
     &:focus {
-        border-color: @at-blue;
+        border-color: @at-color-input-focus;
+    }
+
+    &[disabled] {
+        background: @at-color-input-disabled;
     }
 }
 
@@ -21,43 +25,43 @@
 
     & > label {
         & > input[type=checkbox] {
-            height: @at-input-height;
+            height: @at-height-input;
             margin: 0;
             padding: 0;
         }
 
         & > p {
             margin: 0;
-            padding: 0 0 0 @at-space-6x;
+            padding: 0 0 0 @at-padding-panel;
             line-height: @at-line-height-tall;
         }
     }
 }
 
 .at-InputContainer {
-    margin-top: @at-space-6x;
+    margin-top: @at-margin-panel;
 }
 
 .at-Input-button {
-    min-width: @at-input-button-width;
     display: block;
-    height: @at-input-height;
+    height: @at-height-button;
+    line-height: 1;
 
     &, &:active, &:hover, &:focus {
-        color: @at-gray-dark-3x;
-        border-color: @at-gray-dark-2x;
-        background-color: @at-white;
+        color: @at-color-button-text-default;
+        border-color: @at-color-input-border;
+        background-color: @at-color-default;
         cursor: pointer;
     }
 }
 
 .at-Input--focus {
-    border-color: @at-blue;
+    border-color: @at-color-input-focus;
 }
 
 .at-Input--rejected {
     &, &:focus {
-        border-color: @at-red;
+        border-color: @at-color-input-error;
     }
 }
 
@@ -66,7 +70,6 @@
     height: 100%;
     width: 100%;
     left: 0;
-    right: @at-input-button-width;
     z-index: -2;
     opacity: 0;
 }
@@ -77,15 +80,15 @@
 
 .at-InputGroup {
     padding: 0;
-    margin: @at-space-6x 0 0 0;
+    margin: @at-margin-panel 0 0 0;
 }
 
 .at-InputGroup-border {
     position: absolute;
-    width: @at-inset-width;
+    width: 5px;
     height: 100%;
-    background: @at-gray-dark;
-    left: -@at-inset-width;
+    background: @at-color-panel-border;
+    left: -5px;
 }
 
 .at-InputGroup-button {
@@ -93,19 +96,22 @@
 
     & > button {
         height: 100%;
+        border-right: none;
+        color: @at-color-button-text-default;
+        min-width: @at-input-button-width;
     }
 }
 
 .at-InputGroup-title {
-    .at-mixin-Heading(@at-font-size-2x);
-    margin: 0 0 0 @at-space-5x;
+    .at-mixin-Heading(@at-font-size-panel-inset-heading);
+    margin: 0 0 0 @at-margin-panel-inset;
 }
 
 .at-InputGroup-divider {
     clear: both;
     margin: 0;
     padding: 0;
-    height: @at-space-6x;
+    height: @at-height-divider;
 }
 
 .at-InputLabel {
@@ -114,17 +120,17 @@
 }
 
 .at-InputLabel-name {
-    color: @at-gray-dark-4x;
-    font-size: @at-font-size-2x;
-    font-weight: @at-font-weight;
+    color: @at-color-form-label;
+    font-size: @at-font-size-form-label;
+    font-weight: @at-font-weight-body;
     text-transform: uppercase;
 }
 
 .at-InputLabel-hint {
-    margin-left: @at-space-4x;
-    color: @at-gray-dark-3x;
-    font-size: @at-font-size;
-    font-weight: @at-font-weight;
+    margin-left: @at-margin-form-label-hint;
+    color: @at-color-input-hint;
+    font-size: @at-font-size-help-text;
+    font-weight: @at-font-weight-body;
     line-height: @at-line-height-short;
 }
 
@@ -137,15 +143,15 @@
     margin-bottom: 0;
 
     & > input[type=checkbox] {
-        margin: 0 @at-space 0 0;
+        margin: 0 3px 0 0;
         position: relative;
-        top: @at-space;
+        top: 3px
     }
 
     & > p {
-        font-size: @at-font-size;
-        color: @at-gray-dark-4x;
-        font-weight: @at-font-weight;
+        font-size: @at-font-size-help-text;
+        color: @at-color-form-label;
+        font-weight: @at-font-weight-body;
         display: inline;
         margin: 0;
         padding: 0;
@@ -153,16 +159,16 @@
 }
 
 .at-InputMessage--rejected {
-    font-size: @at-font-size; 
-    color: @at-red;
-    margin: @at-space-3x 0 0 0;
+    font-size: @at-font-size-help-text; 
+    color: @at-color-error;
+    margin: @at-margin-input-message 0 0 0;
     padding: 0;
 }
 
 .at-InputLabel-required {
-    color: @at-red;
-    font-weight: @at-font-weight-2x;
-    font-size: @at-font-size-2x;
+    color: @at-color-error;
+    font-weight: @at-font-weight-heading;
+    font-size: @at-font-size-form-label;
     margin: 0;
 }
 
@@ -171,13 +177,13 @@
     width: 100%;
 
     & > i {
-        font-size: @at-font-size;
+        font-size: @at-font-size-button;
         position: absolute;  
         z-index: 3;
         pointer-events: none;
-        top: @at-space-4x;
-        right: @at-space-4x;
-        color: @at-gray-dark-2x;
+        top: @at-height-input / 3;
+        right: @at-height-input / 3;
+        color: @at-color-input-icon;
     }
 }
 
@@ -188,7 +194,7 @@
 }
 
 .at-InputSelect-select {
-    height: @at-input-height;
+    height: @at-height-input;
     cursor: pointer;
     position: absolute;
     z-index: 1;

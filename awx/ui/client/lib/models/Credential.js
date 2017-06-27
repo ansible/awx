@@ -3,7 +3,7 @@ const ENCRYPTED_VALUE = '$encrypted$';
 let BaseModel;
 
 function createFormSchema (method, config) {
-    let schema = Object.assign({}, this.get('options', `actions.${method.toUpperCase()}`));
+    let schema = Object.assign({}, this.options(`actions.${method.toUpperCase()}`));
 
     if (config && config.omit) {
         config.omit.forEach(key => {

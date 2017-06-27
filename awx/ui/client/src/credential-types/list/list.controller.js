@@ -61,10 +61,18 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success(function() {
+
+                        let reloadListStateParams = null;
+
+                        if($scope.credential_types.length === 1 && $state.params.credential_type_search && !_.isEmpty($state.params.credential_type_search.page) && $state.params.credential_type_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.credential_type_search.page = (parseInt(reloadListStateParams.credential_type_search.page)-1).toString();
+                        }
+
                         if (parseInt($state.params.credential_type_id) === id) {
-                            $state.go('^', null, { reload: true });
+                            $state.go('^', reloadListStateParams, { reload: true });
                         } else {
-                            $state.go('.', null, { reload: true });
+                            $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
                     .error(function(data, status) {

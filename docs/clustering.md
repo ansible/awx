@@ -140,12 +140,11 @@ controller=security
 ```
 
 In the isolated rampart model, "controller" instances interact with "isolated"
-instances via a series of Ansible playbooks over SSH.  As such, all isolated instances
-must be preconfigured by the installer with passwordless SSH access from any potential
-controller instances.  In the example above, the `isolatedA` and `isolatedB` hosts
-must be reachable from `towerB` and `towerC` hosts via `ssh
-awx@<isolated-hostname>` (meaning, `authorized_keys` must be pre-distributed to
-the `isolatedA` and `isolatedB` hosts).
+instances via a series of Ansible playbooks over SSH.  At installation time,
+a randomized RSA key is generated and distributed as an authorized key to all
+"isolated" instances.  The private half of the key is encrypted and stored
+within Tower, and is used to authenticate from "controller" instances to
+"isolated" instances when jobs are run.
 
 When a job is scheduled to run on an "isolated" instance:
 
@@ -184,6 +183,20 @@ Recommendations for system configuration with isolated groups:
    isolated instances in the same group have a different value for this
    variable - the behavior in this case can not be predicted.
  - Do not put an isolated instance in more than 1 isolated group.
+
+Isolated Node Authentication
+----------------------------
+By default - at installation time - a randomized RSA key is generated and
+distributed as an authorized key to all "isolated" instances.  The private half
+of the key is encrypted and stored within Tower, and is used to authenticate
+from "controller" instances to "isolated" instances when jobs are run.
+
+For users who wish to manage SSH authentication from controlling nodes to
+isolated nodes via some system _outside_ of Tower (such as externally-managed
+passwordless SSH keys), this behavior can be disabled by unsetting two Tower
+API settings values:
+
+`HTTP PATCH /api/v2/settings/jobs/ {'AWX_ISOLATED_PRIVATE_KEY': '', 'AWX_ISOLATED_PUBLIC_KEY': ''}`
 
 
 ### Provisioning and Deprovisioning Instances and Groups
