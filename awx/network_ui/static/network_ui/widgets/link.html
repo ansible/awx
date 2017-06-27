@@ -110,7 +110,7 @@
 <circle ng-attr-cx="{{link.from_interface.dot_x}}"
         ng-attr-cy="{{link.from_interface.dot_y}}"
         r=14
-        ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
+        ng-attr-class="{{link.from_interface.selected ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
 <circle ng-attr-cx="{{link.from_interface.dot_x}}"
         ng-attr-cy="{{link.from_interface.dot_y}}"
         r=10
@@ -118,7 +118,7 @@
 <circle ng-attr-cx="{{link.to_interface.dot_x}}"
         ng-attr-cy="{{link.to_interface.dot_y}}"
         r=14
-        ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
+        ng-attr-class="{{link.to_interface.selected ? 'NetworkUI__interface--selected' : 'NetworkUI--hidden'}}" ></circle>
 <circle ng-attr-cx="{{link.to_interface.dot_x}}"
         ng-attr-cy="{{link.to_interface.dot_y}}"
         r=10
