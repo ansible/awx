@@ -450,12 +450,39 @@ export default [
         };
 
         var resetAll = function() {
+            var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
+            var payload = {};
+            clearApiErrors();
+            _.each(keys, function(key) {
+                payload[key] = $scope.configDataResolve[key].default;
+            });
+
             Wait('start');
-            ConfigurationService.resetAll()
+            ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     populateFromApi();
                     $scope[formTracker.currentFormName()].$setPristine();
-                    $scope.$broadcast('CUSTOM_LOGO_reverted');
+
+                    let keys = _.keys(formDefs[formTracker.getCurrent()].fields);
+                    _.each(keys, function(key) {
+                        $scope[key] = $scope.configDataResolve[key].default;
+                        if($scope[key + '_field'].type === "select"){
+                            // We need to re-instantiate the Select2 element
+                            // after resetting the value. Example:
+                            $scope.$broadcast(key+'_populated', null, false);
+                        }
+                        else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
+                            $scope.$broadcast(key+'_reverted');
+                        }
+                        else if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
+                            $scope[key] = ConfigurationUtils.arrayToList($scope[key], key);
+                        }
+                        else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
+                            $scope[key] = '{}';
+                            $scope.$broadcast('codeMirror_populated', key);
+                        }
+                    });
+
                 })
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
