@@ -5,6 +5,7 @@ from awx.conf.migrations._reencrypt import (
     decrypt_field,
     should_decrypt_field,
 )
+from awx.main.utils.encryption import encrypt_field
 
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
@@ -46,8 +47,8 @@ def _notification_templates(apps):
         for field in filter(lambda x: notification_class.init_parameters[x]['type'] == "password",
                             notification_class.init_parameters):
             if should_decrypt_field(nt.notification_configuration[field]):
-                value = decrypt_field(nt, 'notification_configuration', subfield=field)
-                nt.notification_configuration[field] = value
+                nt.notification_configuration[field] = decrypt_field(nt, 'notification_configuration', subfield=field)
+                nt.notification_configuration[field] = encrypt_field(nt, 'notification_configuration', subfield=field)
         nt.save()
 
 
@@ -58,6 +59,7 @@ def _credentials(apps):
             if should_decrypt_field(value):
                 value = decrypt_field(credential, field_name)
                 setattr(credential, field_name, value)
+                setattr(credential, field_name, encrypt_field(credential, field_name))
         credential.save()
 
 
@@ -67,6 +69,6 @@ def _unified_jobs(apps):
     for uj in UnifiedJob.objects.all():
         if uj.start_args is not None:
             if should_decrypt_field(uj.start_args):
-                start_args = decrypt_field(uj, 'start_args')
-                uj.start_args = start_args
+                uj.start_args = decrypt_field(uj, 'start_args')
+                uj.start_args = encrypt_field(uj, 'start_args')
                 uj.save()
