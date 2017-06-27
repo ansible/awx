@@ -23,6 +23,7 @@ import apiLoader from './api-loader';
 import variables from './variables/main';
 import parse from './parse/main';
 import loadconfig from './load-config/main';
+import nextpage from './next-page/main';
 import Modal from './Modal';
 import moment from './moment/main';
 import config from './config/main';
@@ -50,6 +51,7 @@ angular.module('shared', [listGenerator.name,
         variables.name,
         parse.name,
         loadconfig.name,
+        nextpage.name,
         Modal.name,
         moment.name,
         config.name,

@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
+export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBasePath, $q, NextPage){
     return {
         deleteJobTemplate: function(id){
             var url = GetBasePath('job_templates');
@@ -34,51 +34,69 @@ export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
             Rest.setUrl(url);
             return Rest.post(data);
         },
-        getLabelOptions: function(){
-            var url = GetBasePath('labels') + '?page_size=200';
-
-            var deferred = $q.defer();
-
-            Rest.setUrl(url);
-            Rest.get()
-            .success(function(data) {
-                deferred.resolve(data);
-            }).error(function(msg, code) {
-                deferred.reject(msg, code);
-            });
-
-          return deferred.promise;
-
+        getAllLabelOptions: function() {
+            Rest.setUrl(GetBasePath('labels') + '?page_size=200');
+            return Rest.get()
+                .then(function(res) {
+                    if (res.data.next) {
+                        return NextPage({
+                            url: res.data.next,
+                            arrayOfValues: res.data.results
+                        }).then(function(labels) {
+                            return labels;
+                        }).catch(function(response){
+                            return $q.reject( response );
+                        });
+                    }
+                    else {
+                        return $q.resolve( res.data.results );
+                    }
+                }).catch(function(response){
+                    return $q.reject( response );
+                });
       },
-      getJobTemplateLabels: function(id) {
-          var url = GetBasePath('job_templates') + id + "/labels?page_size=200";
-
-          var deferred = $q.defer();
-
-          Rest.setUrl(url);
-          Rest.get()
-          .success(function(data) {
-              deferred.resolve(data);
-          }).error(function(msg, code) {
-              deferred.reject(msg, code);
-          });
-
-        return deferred.promise;
+      getAllJobTemplateLabels: function(id) {
+          Rest.setUrl(GetBasePath('job_templates') + id + "/labels?page_size=20");
+          return Rest.get()
+              .then(function(res) {
+                  if (res.data.next) {
+                      return NextPage({
+                          url: res.data.next,
+                          arrayOfValues: res.data.results
+                      }).then(function(labels) {
+                          return labels;
+                      }).catch(function(response){
+                          return $q.reject( response );
+                      });
+                  }
+                  else {
+                      return $q.resolve( res.data.results );
+                  }
+              }).catch(function(response){
+                  return $q.reject( response );
+              });
       },
-      getWorkflowJobTemplateLabels: function(id) {
-          var url = GetBasePath('workflow_job_templates') + id + "/labels?page_size=200";
 
-          var deferred = $q.defer();
-
-          Rest.setUrl(url);
-          Rest.get()
-          .success(function(data) {
-              deferred.resolve(data);
-          }).error(function(msg, code) {
-              deferred.reject(msg, code);
-          });
-
-        return deferred.promise;
+      getAllWorkflowJobTemplateLabels: function(id) {
+          Rest.setUrl(GetBasePath('workflow_job_templates') + id + "/labels?page_size=200");
+          return Rest.get()
+              .then(function(res) {
+                  if (res.data.next) {
+                      return NextPage({
+                          url: res.data.next,
+                          arrayOfValues: res.data.results
+                      }).then(function(labels) {
+                          return labels;
+                      }).catch(function(response){
+                          return $q.reject( response );
+                      });
+                  }
+                  else {
+                      return $q.resolve( res.data.results );
+                  }
+              }).catch(function(response){
+                  return $q.reject( response );
+              });
       },
       getJobTemplate: function(id) {
           var url = GetBasePath('job_templates');
