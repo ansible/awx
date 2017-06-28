@@ -9,12 +9,12 @@ export default [
     'ProcessErrors', 'GetBasePath', '$q', 'ParseTypeChange',
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
-    'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData',
+    'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData', 'i18n',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
     ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
     ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-    TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData) {
-        
+    TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n) {
+
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
                 $scope.canAddWorkflowJobTemplate = false;
@@ -59,6 +59,9 @@ export default [
                 addNew: true,
                 opts: opts
             });
+
+            $scope.workflowEditorTooltip = i18n._("Click here to open the workflow graph editor.");
+            $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
 
             $scope.workflow_job_template_obj = workflowJobTemplateData;
             $scope.name = workflowJobTemplateData.name;

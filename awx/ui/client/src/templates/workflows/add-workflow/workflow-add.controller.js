@@ -7,10 +7,10 @@
 export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
     'Wait', '$state', 'CreateSelect2', 'TemplatesService',
-    'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels',
+    'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels', 'i18n',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
     Wait, $state, CreateSelect2, TemplatesService, ToJSON,
-    ParseTypeChange, $q, Rest, GetBasePath, availableLabels) {
+    ParseTypeChange, $q, Rest, GetBasePath, availableLabels, i18n) {
 
          // Inject dynamic view
          let form = WorkflowForm(),
@@ -41,6 +41,9 @@ export default [
                  multiple: true,
                  addNew: true
              });
+
+             $scope.workflowEditorTooltip = i18n._("Please save before defining the workflow graph.");
+             $scope.surveyTooltip = i18n._('Please save before adding a survey to this workflow.');
          }
 
          $scope.formSave = function () {

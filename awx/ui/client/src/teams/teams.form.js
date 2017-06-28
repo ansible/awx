@@ -66,7 +66,7 @@ export default ['i18n', function(i18n) {
                 users: {
                     name: 'users',
                     dataPlacement: 'top',
-                    awToolTip: i18n._('Please save before adding users'),
+                    awToolTip: i18n._('Please save before adding users.'),
                     basePath: 'api/v2/teams/{{$stateParams.team_id}}/access_list/',
                     search: {
                         order_by: 'username'
@@ -110,7 +110,7 @@ export default ['i18n', function(i18n) {
                         // @todo ask about name field / serializer on this endpoint
                         order_by: 'id'
                     },
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                    awToolTip: i18n._('Please save before assigning permissions.'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',

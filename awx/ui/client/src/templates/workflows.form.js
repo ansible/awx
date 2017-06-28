@@ -106,7 +106,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
             related: {
                 permissions: {
                     name: 'permissions',
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                    awToolTip: i18n._('Please save before assigning permissions.'),
                     dataPlacement: 'top',
                     basePath: 'api/v2/workflow_job_templates/{{$stateParams.workflow_job_template_id}}/access_list/',
                     search: {
@@ -167,7 +167,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     ngClick: 'addSurvey()',
                     ngShow: '!survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
                     awFeature: 'surveys',
-                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
+                    awToolTip: '{{surveyTooltip}}',
                     dataPlacement: 'top',
                     label: i18n._('Add Survey'),
                     class: 'Form-primaryButton'
@@ -177,12 +177,14 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     awFeature: 'surveys',
                     ngShow: 'survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
                     label: i18n._('Edit Survey'),
-                    class: 'Form-primaryButton'
+                    class: 'Form-primaryButton',
+                    awToolTip: '{{surveyTooltip}}',
+                    dataPlacement: 'top'
                 },
                 workflow_editor: {
                     ngClick: 'openWorkflowMaker()',
                     ngShow: '$state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\')',
-                    awToolTip: i18n._('Please save before defining the workflow graph'),
+                    awToolTip: '{{workflowEditorTooltip}}',
                     dataPlacement: 'top',
                     label: i18n._('Workflow Editor'),
                     class: 'Form-primaryButton'
