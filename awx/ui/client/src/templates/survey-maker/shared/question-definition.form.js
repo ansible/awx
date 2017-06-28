@@ -232,9 +232,10 @@ export default
             type: 'custom',
             control:  '<div>'+
                 '<label for="default_int"><span class="Form-inputLabel">Default Answer</span></label>'+
-                '<input type="number" ng-model="default_int" name="default_int" aw-min="int_min" aw-max="int_max"  class="form-control Form-textInput" integer />'+
+                '<input type="number" ng-model="default_int" name="default_int" aw-range range-min="int_min" range-max="int_max" class="form-control Form-textInput" integer />'+
                 '<div class="error" ng-show="survey_question_form.default_int.$error.number || survey_question_form.default_int.$error.integer">Please enter a valid integer.</div>'+
-                '<div class="error" ng-show="survey_question_form.default_int.$error.awMin || survey_question_form.default_int.$error.awMax"> Please enter a value in the range of {{int_min}} to {{int_max}}.</div>'+
+                '<div class="error" ng-show="survey_question_form.default_int.$error.awRangeMin"> Please enter a minimum default of {{int_min}}.</div>'+
+                '<div class="error" ng-show="survey_question_form.default_int.$error.awRangeMax"> Please enter a maximum default of {{int_max}}.</div>'+
                 '</div>',
             column: 2,
             ngShow: 'type.type === "integer" ',
@@ -245,9 +246,10 @@ export default
             type: 'custom',
             control: '<div>'+
                 '<label for="default_float"><span class="Form-inputLabel">Default Answer</span></label>'+
-                '<input type="number" ng-model="default_float" name="default_float" aw-min="float_min" aw-max="float_max"  class="form-control Form-textInput"  />'+
+                '<input type="number" ng-model="default_float" name="default_float" aw-range range-min="float_min" range-max="float_max" class="form-control Form-textInput"  />'+
                 '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">Please enter a valid float.</div>'+
-                '<div class="error" ng-show="survey_question_form.default_float.$error.awMin || survey_question_form.default_float.$error.awMax"> Please enter a value in the range of {{float_min}} to {{float_max}}!</div>'+
+                '<div class="error" ng-show="survey_question_form.default_float.$error.awRangeMin"> Please enter a minimum default of {{float_min}}.</div>'+
+                '<div class="error" ng-show="survey_question_form.default_float.$error.awRangeMax"> Please enter a maximum default of {{float_max}}.</div>'+
                 '</div>',
             column: 2,
             ngShow: 'type.type=== "float" ',
