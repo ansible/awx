@@ -149,7 +149,7 @@ def test_build_isolated_job_data(private_data_dir, rsa_key):
 
     path = os.path.join(private_data_dir, 'artifacts')
     assert os.path.isdir(path)
-    assert stat.S_IMODE(os.stat(path).st_mode) == stat.S_IRUSR + stat.S_IWUSR  # user rw
+    assert stat.S_IMODE(os.stat(path).st_mode) == stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR  # user rwx
 
     path = os.path.join(private_data_dir, 'args')
     with open(path, 'r') as f:
