@@ -1,7 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 import datetime
-import sys
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -19,7 +18,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', False):
             print settings.AWX_ISOLATED_PUBLIC_KEY
-            sys.exit(1)
+            return
 
         key = rsa.generate_private_key(
             public_exponent=65537,
