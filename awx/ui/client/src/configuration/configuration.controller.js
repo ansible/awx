@@ -352,11 +352,11 @@ export default [
 
         // Some dropdowns are listed as "list" type in the API even though they're a dropdown:
         var multiselectDropdowns = ['AD_HOC_COMMANDS'];
-        var formSave = function() {
-            var saveDeferred = $q.defer();
+
+        var getFormPayload = function() {
             var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
             var payload = {};
-            clearApiErrors();
+
             _.each(keys, function(key) {
                 if($scope.configDataResolve[key].type === 'choice' || multiselectDropdowns.indexOf(key) !== -1) {
                     //Parse dropdowns and dropdowns labeled as lists
@@ -396,8 +396,14 @@ export default [
                 }
             });
 
+            return payload;
+        };
+
+        var formSave = function() {
+            var saveDeferred = $q.defer();
+            clearApiErrors();
             Wait('start');
-            ConfigurationService.patchConfiguration(payload)
+            ConfigurationService.patchConfiguration(getFormPayload())
                 .then(function(data) {
                     loginUpdate();
                     saveDeferred.resolve(data);
@@ -560,6 +566,7 @@ export default [
             formCancel: formCancel,
             formTracker: formTracker,
             formSave: formSave,
+            getFormPayload: getFormPayload,
             populateFromApi: populateFromApi,
             resetAllConfirm: resetAllConfirm,
             show_auditor_bar: show_auditor_bar,
