@@ -166,7 +166,7 @@ class IsolatedManager(object):
                 isolated_key = os.path.join(isolated_ssh_path, '.isolated')
                 ssh_sock = os.path.join(isolated_ssh_path, '.isolated_ssh_auth.sock')
                 run.open_fifo_write(isolated_key, settings.AWX_ISOLATED_PRIVATE_KEY)
-                pexpect_args = run.wrap_args_with_ssh_agent(pexpect_args, isolated_key, ssh_sock)
+                pexpect_args = run.wrap_args_with_ssh_agent(pexpect_args, isolated_key, ssh_sock, silence_ssh_add=True)
             return run.run_pexpect(pexpect_args, *args, **kw)
         finally:
             if isolated_ssh_path:
