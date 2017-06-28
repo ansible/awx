@@ -355,7 +355,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift(function(viewValue) {
-                if (FLOAT_REGEXP.test(viewValue)) {
+                if (viewValue === '' || FLOAT_REGEXP.test(viewValue)) {
                     ctrl.$setValidity('float', true);
                     return parseFloat(viewValue.replace(',', '.'));
                 } else {
