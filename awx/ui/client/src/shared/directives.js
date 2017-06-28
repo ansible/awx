@@ -349,6 +349,41 @@ function(ConfigurationUtils, i18n, $rootScope) {
     };
 }])
 
+.directive('awRange', ['Empty', function(Empty) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elem, attr, ctrl) {
+
+            let checkRange = function(viewValue){
+                ctrl.$setValidity('awRangeMin', true);
+                ctrl.$setValidity('awRangeMax', true);
+                var max = (attr.rangeMax) ? scope.$eval(attr.rangeMax) : Infinity;
+                var min = (attr.rangeMin) ? scope.$eval(attr.rangeMin) : -Infinity;
+                if (!Empty(max) && !Empty(viewValue) && Number(viewValue) > max) {
+                    ctrl.$setValidity('awRangeMax', false);
+                }
+                else if(!Empty(min) && !Empty(viewValue) && Number(viewValue) < min) {
+                    ctrl.$setValidity('awRangeMin', false);
+                }
+                return viewValue;
+            };
+
+            scope.$watch(attr.rangeMin, function () {
+                checkRange(scope.$eval(attr.ngModel));
+            });
+
+            scope.$watch(attr.rangeMax, function () {
+                checkRange(scope.$eval(attr.ngModel));
+            });
+
+            ctrl.$parsers.unshift(function(viewValue) {
+                return checkRange(viewValue);
+            });
+        }
+    };
+}])
+
 .directive('smartFloat', function() {
     var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
     return {
