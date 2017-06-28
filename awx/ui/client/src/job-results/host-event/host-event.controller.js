@@ -24,6 +24,10 @@
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
+            $('.modal-dialog').on('resize', function(){
+                let height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
+                editor.setSize("100%", height);
+            });
         };
         /*ignore jslint end*/
         $scope.isActiveState = function(name){
@@ -96,6 +100,11 @@
                 }
             }
             $('#HostEvent').modal('show');
+            $('.modal-content').resizable({
+                minHeight: 450,
+                minWidth: 600
+            });
+            $('.modal-dialog').draggable();
 
             $('#HostEvent').on('hidden.bs.modal', function () {
                 $scope.closeHostEvent();
