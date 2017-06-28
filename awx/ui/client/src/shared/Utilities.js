@@ -154,11 +154,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 $log.debug('Debug: ' + defaultMsg.msg);
             }
             if (status === 403) {
-                msg = 'The API responded with a 403 Access Denied error. ';
                 if (data && data.detail) {
-                    msg += 'Detail: ' + data.detail;
+                    msg = data.detail;
                 } else {
-                    msg += 'Please contact your system administrator.';
+                    msg = 'The API responded with a 403 Access Denied error. Please contact your system administrator.';
                 }
                 Alert(defaultMsg.hdr, msg);
             } else if (status === 409) {
