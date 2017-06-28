@@ -22,7 +22,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
         settings_module = kwargs.pop('settings_module', None)
         ret = super(LogstashFormatter, self).__init__(**kwargs)
         if settings_module:
-            self.host_id = settings_module.CLUSTER_HOST_ID
+            self.host_id = getattr(settings_module, 'CLUSTER_HOST_ID', None)
             if hasattr(settings_module, 'LOG_AGGREGATOR_TOWER_UUID'):
                 self.tower_uuid = settings_module.LOG_AGGREGATOR_TOWER_UUID
             self.message_type = getattr(settings_module, 'LOG_AGGREGATOR_TYPE', 'other')
