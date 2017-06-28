@@ -46,8 +46,11 @@ else:
 
 class sdist_isolated(sdist):
     includes = [
+        'include Makefile',
         'include awx/__init__.py',
         'include awx/main/isolated/run.py',
+        'include tools/scripts/tower-expect',
+        'include requirements/requirements_isolated.txt',
         'recursive-include awx/lib *.py',
     ]
 
@@ -109,7 +112,7 @@ def proc_data_files(data_files):
 
 
 setup(
-    name='ansible-tower',
+    name=os.getenv('NAME', 'ansible-tower'),
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
     author='Ansible, Inc.',
     author_email='info@ansible.com',
