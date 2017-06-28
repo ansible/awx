@@ -165,7 +165,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 },
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: '!survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
+                    ngShow: '!survey_exists && ($state.includes(\'templates.addWorkflowJobTemplate\') || $state.includes(\'templates.editWorkflowJobTemplate\'))',
                     awFeature: 'surveys',
                     awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top',
@@ -175,13 +175,13 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
+                    ngShow: 'survey_exists && ($state.includes(\'templates.addWorkflowJobTemplate\') || $state.includes(\'templates.editWorkflowJobTemplate\'))',
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 },
                 workflow_editor: {
                     ngClick: 'openWorkflowMaker()',
-                    ngShow: '$state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\')',
+                    ngShow: '$state.includes(\'templates.addWorkflowJobTemplate\') || $state.includes(\'templates.editWorkflowJobTemplate\')',
                     awToolTip: i18n._('Please save before defining the workflow graph'),
                     dataPlacement: 'top',
                     label: i18n._('Workflow Editor'),
