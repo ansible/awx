@@ -152,7 +152,12 @@ class SettingLoggingTest(GenericAPIView):
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            BaseHTTPSHandler.perform_test(serializer.validated_data)
+            class MockSettings:
+                pass
+            mock_settings = MockSettings()
+            for k, v in serializer.validated_data.items():
+                setattr(mock_settings, k, v)
+            BaseHTTPSHandler.perform_test(mock_settings)
         except LoggingConnectivityException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_200_OK)

@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-from collections import OrderedDict
 import pytest
 import os
 
@@ -209,26 +208,18 @@ def test_logging_aggregrator_connection_test_bad_request(get, post, admin, key):
 def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
     with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
         url = reverse('api:setting_logging_test')
-        post(url, {
+        user_data = {
             'LOG_AGGREGATOR_TYPE': 'logstash',
             'LOG_AGGREGATOR_HOST': 'localhost',
             'LOG_AGGREGATOR_PORT': 8080,
             'LOG_AGGREGATOR_USERNAME': 'logger',
             'LOG_AGGREGATOR_PASSWORD': 'mcstash'
-        }, user=admin, expect=200)
-        perform_test.assert_called_with(OrderedDict([
-            ('LOG_AGGREGATOR_HOST', u'localhost'),
-            ('LOG_AGGREGATOR_PORT', 8080),
-            ('LOG_AGGREGATOR_TYPE', 'logstash'),
-            ('LOG_AGGREGATOR_USERNAME', 'logger'),
-            ('LOG_AGGREGATOR_PASSWORD', 'mcstash'),
-            ('LOG_AGGREGATOR_LOGGERS', ['awx', 'activity_stream', 'job_events', 'system_tracking']),
-            ('LOG_AGGREGATOR_INDIVIDUAL_FACTS', False),
-            ('LOG_AGGREGATOR_ENABLED', False),
-            ('LOG_AGGREGATOR_TOWER_UUID', ''),
-            ('LOG_AGGREGATOR_PROTOCOL', 'https'),
-            ('LOG_AGGREGATOR_TCP_TIMEOUT', 5),
-        ]))
+        }
+        post(url, user_data, user=admin, expect=200)
+        create_settings = perform_test.call_args[0][0]
+        for k, v in user_data.items():
+            assert hasattr(create_settings, k)
+            assert getattr(create_settings, k) == v
 
 
 @pytest.mark.django_db
