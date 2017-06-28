@@ -80,17 +80,15 @@ class AnsibleInventoryLoader(object):
             self.is_vendored_source = True
 
     def build_env(self):
-        # Use ansible venv if it's available and setup to use
         env = dict(os.environ.items())
-        if settings.ANSIBLE_USE_VENV:
-            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
-            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-            for python_ver in ["python2.7", "python2.6"]:
-                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
-                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
-                    break
+        env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+        env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+        venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+        env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+        for python_ver in ["python2.7", "python2.6"]:
+            if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                break
         return env
 
     def get_base_args(self):
