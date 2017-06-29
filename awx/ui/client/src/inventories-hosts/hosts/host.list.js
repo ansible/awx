@@ -79,17 +79,15 @@ export default ['i18n', function(i18n) {
 
             columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
             edit: {
-                //label: 'Edit',
                 ngClick: "editHost(host.id)",
                 icon: 'icon-edit',
-                awToolTip: 'Edit host',
+                awToolTip: i18n._('Edit host'),
                 dataPlacement: 'top',
                 ngShow: 'host.summary_fields.user_capabilities.edit'
             },
             view: {
-                //label: 'Edit',
                 ngClick: "editHost(host.id)",
-                awToolTip: 'View host',
+                awToolTip: i18n._('View host'),
                 dataPlacement: 'top',
                 ngShow: '!host.summary_fields.user_capabilities.edit'
             }
@@ -98,18 +96,18 @@ export default ['i18n', function(i18n) {
         actions: {
             refresh: {
                 mode: 'all',
-                awToolTip: "Refresh the page",
+                awToolTip: i18n._("Refresh the page"),
                 ngClick: "refreshGroups()",
                 ngShow: "socketStatus == 'error'",
                 actionClass: 'btn List-buttonDefault',
-                buttonContent: 'REFRESH'
+                buttonContent: i18n._('REFRESH')
             },
             smart_inventory: {
                 mode: 'all',
                 ngClick: "smartInventory()",
-                awToolTip: "Create a new Smart Inventory from search results.",
+                awToolTip: i18n._("Create a new Smart Inventory from search results."),
                 actionClass: 'btn List-buttonDefault',
-                buttonContent: 'SMART INVENTORY',
+                buttonContent: i18n._('SMART INVENTORY'),
                 ngShow: 'canAdd && (hosts.length > 0 || !(searchTags | isEmpty))',
                 dataPlacement: "top",
                 ngDisabled: '!enableSmartInventoryButton'

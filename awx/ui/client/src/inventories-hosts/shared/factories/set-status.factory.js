@@ -1,5 +1,5 @@
 export default
-    function SetStatus($filter, SetEnabledMsg, Empty) {
+    function SetStatus($filter, SetEnabledMsg, Empty, i18n) {
         return function(params) {
             var scope = params.scope,
             host = params.host,
@@ -13,8 +13,8 @@ export default
             }
 
             function noRecentJobs() {
-                title = 'No job data';
-                html = "<p>No recent job data available for this host.</p>\n";
+                title = i18n._('No job data');
+                html = "<p>" + i18n._("No recent job data available for this host.") + "</p>\n";
             }
 
             function setMsg(host) {
@@ -22,11 +22,11 @@ export default
 
                 if (host.has_active_failures === true || (host.has_active_failures === false && host.last_job !== null)) {
                     if (host.has_active_failures === true) {
-                        host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
+                        host.badgeToolTip = i18n._('Most recent job failed. Click to view jobs.');
                         host.active_failures = 'error';
                     }
                     else {
-                        host.badgeToolTip = "Most recent job successful. Click to view jobs.";
+                        host.badgeToolTip = i18n._("Most recent job successful. Click to view jobs.");
                         host.active_failures = 'successful';
                     }
                     if (host.summary_fields.recent_jobs.length > 0) {
@@ -40,9 +40,9 @@ export default
                         html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                         html += "<thead>\n";
                         html += "<tr>\n";
-                        html += "<th>Status</th>\n";
-                        html += "<th>Finished</th>\n";
-                        html += "<th>Name</th>\n";
+                        html += "<th>" + i18n._("Status") + "</th>\n";
+                        html += "<th>" + i18n._("Finished") + "</th>\n";
+                        html += "<th>" + i18n._("Name") + "</th>\n";
                         html += "</tr>\n";
                         html += "</thead>\n";
                         html += "<tbody>\n";
@@ -72,7 +72,7 @@ export default
                     }
                 }
                 else if (host.has_active_failures === false && host.last_job === null) {
-                    host.badgeToolTip = "No job data available.";
+                    host.badgeToolTip = i18n._("No job data available.");
                     host.active_failures = 'none';
                     noRecentJobs();
                 }
@@ -98,5 +98,6 @@ export default
 SetStatus.$inject =
     [   '$filter',
         'SetEnabledMsg',
-        'Empty'
+        'Empty',
+        'i18n'
     ];

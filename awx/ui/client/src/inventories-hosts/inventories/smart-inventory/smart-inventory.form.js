@@ -29,7 +29,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
             editTitle: '{{ name }}',
             name: 'smartinventory',
             basePath: 'inventory',
-            breadcrumbName: 'SMART INVENTORY',
+            breadcrumbName: i18n._('SMART INVENTORY'),
             stateTree: 'inventories',
             activeEditState: 'inventories.editSmartInventory',
             detailsClick: "$state.go('inventories.editSmartInventory')",

@@ -35,7 +35,7 @@ export default ['i18n', function(i18n) {
                 nosort: true
             },
             id: {
-                label: 'ID',
+                label: i18n._('ID'),
                 ngClick:"viewjobResults(completed_job)",
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ completed_job.status_tip }}",

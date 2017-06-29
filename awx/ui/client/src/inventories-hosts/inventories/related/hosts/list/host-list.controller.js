@@ -7,10 +7,10 @@
 // import HostsService from './../hosts/host.service';
 export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd',
+    'HostsService', 'SetStatus', 'canAdd', 'i18n',
     function($scope, ListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd) {
+    HostsService, SetStatus, canAdd, i18n) {
 
     let list = ListDefinition;
 
@@ -90,7 +90,7 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
         $state.go('inventories.edit.hosts.edit.insights', {inventory_id: host.inventory_id, host_id:host.id});
     };
     $scope.deleteHost = function(id, name){
-        var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the host below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
+        var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the host below from the inventory?') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(name) + '</div>';
         var action = function(){
             delete $rootScope.promptActionBtnClass;
             Wait('start');

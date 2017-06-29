@@ -13,7 +13,7 @@
 function InventoriesList($scope,
     $filter, Rest, InventoryList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state,
-    Dataset, canAdd) {
+    Dataset, canAdd, i18n) {
 
     let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
@@ -40,33 +40,33 @@ function InventoriesList($scope,
         if (inventory.has_inventory_sources) {
             if (inventory.inventory_sources_with_failures > 0) {
                 inventory.syncStatus = 'error';
-                inventory.syncTip = inventory.inventory_sources_with_failures + ' sources with sync failures. Click for details';
+                inventory.syncTip = inventory.inventory_sources_with_failures + i18n._(' sources with sync failures. Click for details');
             }
             else {
                 inventory.syncStatus = 'successful';
-                inventory.syncTip = 'No inventory sync failures. Click for details.';
+                inventory.syncTip = i18n._('No inventory sync failures. Click for details.');
             }
         }
         else {
             inventory.syncStatus = 'na';
-            inventory.syncTip = 'Not configured for inventory sync.';
+            inventory.syncTip = i18n._('Not configured for inventory sync.');
             inventory.launch_class = "btn-disabled";
         }
 
         if (inventory.has_active_failures) {
             inventory.hostsStatus = 'error';
-            inventory.hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
+            inventory.hostsTip = inventory.hosts_with_active_failures + i18n._(' hosts with failures. Click for details.');
         }
         else if (inventory.total_hosts) {
             inventory.hostsStatus = 'successful';
-            inventory.hostsTip = 'No hosts with failures. Click for details.';
+            inventory.hostsTip = i18n._('No hosts with failures. Click for details.');
         }
         else {
             inventory.hostsStatus = 'none';
-            inventory.hostsTip = 'Inventory contains 0 hosts.';
+            inventory.hostsTip = i18n._('Inventory contains 0 hosts.');
         }
 
-        inventory.kind_label = inventory.kind === '' ? 'Inventory' : (inventory.kind === 'smart' ? 'Smart Inventory': 'Inventory');
+        inventory.kind_label = inventory.kind === '' ? 'Inventory' : (inventory.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
     }
 
     $scope.editInventory = function (inventory) {
@@ -97,10 +97,10 @@ function InventoriesList($scope,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>' +
-                    '<div class="Prompt-bodyNote"><span class="Prompt-bodyNote--emphasis">Note:</span> The inventory will be in a pending status until the final delete is processed.</div>',
+            body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the inventory below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>' +
+                    '<div class="Prompt-bodyNote"><span class="Prompt-bodyNote--emphasis">Note:</span> ' + i18n._('The inventory will be in a pending status until the final delete is processed.') + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
     };
 
@@ -129,5 +129,5 @@ function InventoriesList($scope,
 export default ['$scope',
     '$filter', 'Rest', 'InventoryList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'Dataset', 'canAdd', InventoriesList
+    '$state', 'Dataset', 'canAdd', 'i18n', InventoriesList
 ];

@@ -55,7 +55,7 @@ export default {
         },
         name: {
             key: true,
-            label: 'Hosts',
+            label: N_('Hosts'),
             ngClick: "editHost(nested_host.id)",
             ngClass: "{ 'host-disabled-label': !nested_host.enabled }",
             columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
@@ -69,17 +69,15 @@ export default {
 
         columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
         edit: {
-            //label: 'Edit',
             ngClick: "editHost(nested_host.id)",
             icon: 'icon-edit',
-            awToolTip: 'Edit host',
+            awToolTip: N_('Edit host'),
             dataPlacement: 'top',
             ngShow: 'nested_host.summary_fields.user_capabilities.edit'
         },
         view: {
-            //label: 'Edit',
             ngClick: "editHost(nested_host.id)",
-            awToolTip: 'View host',
+            awToolTip: N_('View host'),
             dataPlacement: 'top',
             ngShow: '!nested_host.summary_fields.user_capabilities.edit'
         },
@@ -87,7 +85,7 @@ export default {
             //label: 'Delete',
             ngClick: "disassociateHost(nested_host)",
             icon: 'icon-trash',
-            awToolTip: 'Disassociate host',
+            awToolTip: N_('Disassociate host'),
             dataPlacement: 'top',
             ngShow: 'nested_host.summary_fields.user_capabilities.delete'
         }
@@ -98,19 +96,19 @@ export default {
             mode: 'all',
             ngDisabled: '!hostsSelected',
             ngClick: 'setAdhocPattern()',
-            awToolTip: "Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups.",
+            awToolTip: N_("Select an inventory source by clicking the check box beside it. The inventory source can be a single group or host, a selection of multiple hosts, or a selection of multiple groups."),
             dataPlacement: 'top',
             actionClass: 'btn List-buttonDefault',
-            buttonContent: 'RUN COMMANDS',
+            buttonContent: N_('RUN COMMANDS'),
             showTipWhenDisabled: true,
             tooltipInnerClass: "Tooltip-wide",
             // TODO: we don't always want to show this
             ngShow: true
         },
         system_tracking: {
-            buttonContent: 'System Tracking',
+            buttonContent: N_('System Tracking'),
             ngClick: 'systemTracking()',
-            awToolTip: "Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts.",
+            awToolTip: N_("Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts."),
             dataTipWatch: "systemTrackingTooltip",
             dataPlacement: 'top',
             awFeature: 'system_tracking',
@@ -122,28 +120,28 @@ export default {
         },
         refresh: {
             mode: 'all',
-            awToolTip: "Refresh the page",
+            awToolTip: N_("Refresh the page"),
             ngClick: "refreshGroups()",
             ngShow: "socketStatus == 'error'",
             actionClass: 'btn List-buttonDefault',
-            buttonContent: 'REFRESH'
+            buttonContent: N_('REFRESH')
         },
         add: {
             mode: 'all',
             type: 'buttonDropdown',
-            awToolTip: "Add a host",
+            awToolTip: N_("Add a host"),
             actionClass: 'btn List-buttonSubmit',
-            buttonContent: '&#43; ADD',
+            buttonContent: '&#43; ' + N_('ADD'),
             ngShow: 'canAdd',
             dataPlacement: "top",
             options: [
                 {
-                    optionContent: 'Existing Host',
+                    optionContent: N_('Existing Host'),
                     optionSref: '.associate',
                     ngShow: 'canAdd'
                 },
                 {
-                    optionContent: 'New Host',
+                    optionContent: N_('New Host'),
                     optionSref: '.add',
                     ngShow: 'canAdd'
                 }

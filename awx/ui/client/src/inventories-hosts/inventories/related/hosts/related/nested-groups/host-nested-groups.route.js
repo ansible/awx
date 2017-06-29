@@ -1,4 +1,5 @@
 import {templateUrl} from '../../../../../../shared/template-url/template-url.factory';
+import { N_ } from '../../../../../../i18n';
 
 export default {
     name: 'inventories.edit.hosts.edit.nested_groups',
@@ -15,7 +16,7 @@ export default {
     },
     ncyBreadcrumb: {
         parent: "inventories.edit.hosts.edit",
-        label: "ASSOCIATED GROUPS"
+        label: N_("ASSOCIATED GROUPS")
     },
     views: {
         // 'related@inventories.edit.groups.edit': {

@@ -12,23 +12,22 @@
 
 export default ['i18n', function(i18n) {
     return {
-        addTitle: 'EXECUTE COMMAND',
+        addTitle: i18n._('EXECUTE COMMAND'),
         name: 'adhoc',
         well: true,
         forceListeners: true,
 
         fields: {
             module_name: {
-                label: 'Module',
+                label: i18n._('Module'),
                 excludeModal: true,
                 type: 'select',
                 ngOptions: 'module.label for module in adhoc_module_options' +
                     ' track by module.value',
                 ngChange: 'moduleChange()',
                 required: true,
-                awPopOver:'<p>These are the modules that Tower supports ' +
-                    'running commands against.',
-                dataTitle: 'Module',
+                awPopOver: i18n._('These are the modules that Tower supports running commands against.'),
+                dataTitle: i18n._('Module'),
                 dataPlacement: 'right',
                 dataContainer: 'body'
             },
@@ -37,13 +36,13 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 awPopOverWatch: 'argsPopOver',
                 awPopOver: '{{ argsPopOver }}',
-                dataTitle: 'Arguments',
+                dataTitle: i18n._('Arguments'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 autocomplete: false
             },
             limit: {
-                label: 'Limit',
+                label: i18n._('Limit'),
                 type: 'text',
 
                 awPopOver: '<p>The pattern used to target hosts in the ' +
@@ -53,12 +52,12 @@ export default ['i18n', function(i18n) {
                     '<a id=\"adhoc_form_hostpatterns_doc_link\"' +
                     'href=\"http://docs.ansible.com/intro_patterns.html\" ' +
                     'target=\"_blank\">here</a>.</p>',
-                dataTitle: 'Limit',
+                dataTitle: i18n._('Limit'),
                 dataPlacement: 'right',
                 dataContainer: 'body'
             },
             credential: {
-                label: 'Machine Credential',
+                label: i18n._('Machine Credential'),
                 type: 'lookup',
                 list: 'CredentialList',
                 basePath: 'credentials',
@@ -70,7 +69,7 @@ export default ['i18n', function(i18n) {
                     'Choose the credential containing ' +
                     'the username and SSH key or password that Ansbile ' +
                     'will need to log into the remote hosts.</p>',
-                dataTitle: 'Credential',
+                dataTitle: i18n._('Credential'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 awRequiredWhen: {
@@ -79,17 +78,17 @@ export default ['i18n', function(i18n) {
                 }
             },
             become_enabled: {
-                label: 'Enable Privilege Escalation',
+                label: i18n._('Enable Privilege Escalation'),
                 type: 'checkbox',
 
                 column: 2,
                 awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible</code> command. </p>",
                 dataPlacement: 'right',
-                dataTitle: 'Become Privilege Escalation',
+                dataTitle: i18n._('Become Privilege Escalation'),
                 dataContainer: "body"
             },
             verbosity: {
-                label: 'Verbosity',
+                label: i18n._('Verbosity'),
                 excludeModal: true,
                 type: 'select',
                 ngOptions: 'verbosity.label for verbosity in ' +
@@ -98,13 +97,13 @@ export default ['i18n', function(i18n) {
                 required: true,
                 awPopOver:'<p>These are the verbosity levels for standard ' +
                     'out of the command run that are supported.',
-                dataTitle: 'Verbosity',
+                dataTitle: i18n._('Verbosity'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 "default": 1
             },
             forks: {
-                label: 'Forks',
+                label: i18n._('Forks'),
                 id: 'forks-number',
                 type: 'number',
                 integer: true,
@@ -117,7 +116,7 @@ export default ['i18n', function(i18n) {
                 awPopOver: '<p>The number of parallel or simultaneous processes to use while executing the command. 0 signifies ' +
                     'the default value from the <a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
                     ' target=\"_blank\">ansible configuration file</a>.</p>',
-                dataTitle: 'Forks',
+                dataTitle: i18n._('Forks'),
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
@@ -143,11 +142,11 @@ export default ['i18n', function(i18n) {
             reset: {
                 ngClick: 'formReset()',
                 ngDisabled: true,
-                label: 'Reset',
+                label: i18n._('Reset'),
                 'class': 'btn btn-sm Form-cancelButton'
             },
             launch: {
-                label: 'Save',
+                label: i18n._('Save'),
                 ngClick: 'launchJob()',
                 ngDisabled: true,
                 'class': 'btn btn-sm List-buttonSubmit launchButton'
