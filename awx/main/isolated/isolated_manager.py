@@ -78,7 +78,8 @@ class IsolatedManager(object):
             'CALLBACK_QUEUE': '',
             'CALLBACK_CONNECTION': '',
             'ANSIBLE_RETRY_FILES_ENABLED': 'False',
-            'ANSIBLE_HOST_KEY_CHECKING': 'False'
+            'ANSIBLE_HOST_KEY_CHECKING': 'False',
+            'ANSIBLE_LIBRARY': os.path.join(os.path.dirname(awx.__file__), 'plugins', 'isolated')
         }
 
     @classmethod
@@ -204,7 +205,7 @@ class IsolatedManager(object):
             os.symlink(self.cwd, self.path_to('project'))
 
         # create directories for build artifacts to live in
-        os.makedirs(self.path_to('artifacts', 'job_events'), mode=stat.S_IRUSR | stat.S_IWUSR)
+        os.makedirs(self.path_to('artifacts', 'job_events'), mode=stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR)
 
     def _missing_artifacts(self, path_list, buff):
         missing_artifacts = filter(lambda path: not os.path.exists(path), path_list)
@@ -347,7 +348,6 @@ class IsolatedManager(object):
         args = ['ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i',
                 hostname_string, 'heartbeat_isolated.yml']
         env = cls._base_management_env()
-        env['ANSIBLE_LIBRARY'] = os.path.join(os.path.dirname(awx.__file__), 'lib', 'management_modules')
         env['ANSIBLE_STDOUT_CALLBACK'] = 'json'
 
         buff = cStringIO.StringIO()
