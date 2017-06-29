@@ -6,7 +6,7 @@ export default ['templateUrl', '$compile',
                 instanceGroups: '='
             },
             restrict: 'E',
-            templateUrl: templateUrl('instance-groups/instance-groups-multiselect/instance-groups'),
+            templateUrl: templateUrl('shared/instance-groups-multiselect/instance-groups'),
             controller: instanceGroupsMultiselectController,
             link: function(scope) {
                 scope.openInstanceGroupsModal = function() {

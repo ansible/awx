@@ -8,7 +8,7 @@
             data-trigger="hover"
             data-container="body"
             ng-hide= "loadingLicense || licenseMissing"
-            ng-if="(socketStatus === 'error' && showRefreshButton) || $state.includes('instanceGroups')"
+            ng-if="(socketStatus === 'error' && showRefreshButton) || alwaysShowRefreshButton"
             ng-click="refresh()">
             <i class="BreadCrumb-menuLinkImage fa fa-refresh"
                 alt="Refresh the page">

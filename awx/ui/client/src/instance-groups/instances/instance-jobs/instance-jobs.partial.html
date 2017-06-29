@@ -3,18 +3,18 @@
         <div class="col-xs-12">
             <div class="List-header">
                 <div class="List-title">
-                    <div class="List-titleText">{{ instanceName | translate }}</div>
+                    <div class="List-titleText">{{ instanceName }}</div>
                 </div>
                 <div class="List-details">
                     <div class="Capacity-details">
                         <p class="Capacity-details--label" translate>Capacity</p>
                         <capacity-bar capacity="instanceCapacity"></capacity-bar>
-                        <span class="Capacity-details--percentage">{{ instanceCapacity | translate }}%</span>
+                        <span class="Capacity-details--percentage">{{ instanceCapacity }}%</span>
                     </div>
                     <div class="RunningJobs-details">
                         <p class="RunningJobs-details--label" translate>Running Jobs</p>
                         <span class="badge List-titleBadge">
-                            {{ instanceJobsRunning | translate }}
+                            {{ instanceJobsRunning }}
                         </span>
                     </div>
                 </div>

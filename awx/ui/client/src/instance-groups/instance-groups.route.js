@@ -9,6 +9,17 @@ export default {
         parent: 'setup',
         label: N_('INSTANCE GROUPS')
     },
+    params: {
+        instance_group_search: {
+            value: {
+                page_size: '10',
+                order_by: 'name'
+            }
+        }
+    },
+    data: {
+        alwaysShowRefreshButton: true,
+    },
     views: {
         '@': {
             templateUrl: templateUrl('./instance-groups/instance-groups'),

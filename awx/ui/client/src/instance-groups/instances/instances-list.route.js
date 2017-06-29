@@ -12,7 +12,7 @@ export default {
     params: {
         instance_search: {
             value: {
-                page_size: '5',
+                page_size: '10',
                 order_by: 'hostname'
             }
         }

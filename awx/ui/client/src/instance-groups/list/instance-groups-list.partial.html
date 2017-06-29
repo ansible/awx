@@ -4,7 +4,7 @@
             INSTANCE GROUPS
         </div>
         <span class="badge List-titleBadge">
-            {{ instanceGroupCount | translate}}
+            {{ instanceGroupCount }}
         </span>
     </div>
 </div>
@@ -38,15 +38,15 @@
             <!-- ngRepeat: instance_group in instance_groups -->
             <tr ng-class="{isActive: isActive(instance_group.id)}" id="instance_group.id" class="List-tableRow instance_group_class ng-scope" ng-repeat="instance_group in instance_groups">
                 <td class="List-tableCell name-column col-md-5 col-sm-5 col-xs-5">
-                    <a ui-sref="instanceGroups.instances.list({instance_group_id: instance_group.id})" class="ng-binding" >{{ instance_group.name | translate }}</a>
-                    <span class="badge List-titleBadge">{{ instance_group.instances | translate }}</span>
+                    <a ui-sref="instanceGroups.instances.list({instance_group_id: instance_group.id})" class="ng-binding" >{{ instance_group.name }}</a>
+                    <span class="badge List-titleBadge">{{ instance_group.instances }}</span>
                 </td>
                 <td class="List-tableCell List-tableCell--capacityRemainingColumn ng-binding">
-                    <capacity-bar capacity="instance_group.percent_capacity_remaining"></capacity-bar><span>{{ instance_group.percent_capacity_remaining | translate }}%</span>
+                    <capacity-bar capacity="instance_group.percent_capacity_remaining"></capacity-bar><span>{{ instance_group.percent_capacity_remaining }}%</span>
                 </td>
                 <td class="List-tableCell jobs_running-column ng-binding">
                     <a ui-sref="instanceGroups.instances.jobs({instance_group_id: instance_group.id})">
-                        {{ instance_group.jobs_running | translate }}
+                        {{ instance_group.jobs_running }}
                     </a>
                 </td>
             </tr>

@@ -8,6 +8,15 @@ export default {
         parent: 'instanceGroups.instances.list',
         label: N_('{{ breadcrumb.instance_name }}')
     },
+    params: {
+        instance_job_search: {
+            value: {
+                page_size: '10',
+                order_by: '-finished',
+                not__launch_type: 'sync'
+            }
+        }
+    },
     views: {
         'list@instanceGroups.instances.list.job': {
             templateProvider: function(InstanceJobsList, generateList) {

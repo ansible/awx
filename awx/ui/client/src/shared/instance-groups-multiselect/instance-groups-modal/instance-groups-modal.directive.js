@@ -4,7 +4,7 @@ export default ['templateUrl', function(templateUrl) {
         scope: {
             instanceGroups: '='
         },
-        templateUrl: templateUrl('instance-groups/instance-groups-multiselect/instance-groups-modal/instance-groups-modal'),
+        templateUrl: templateUrl('shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal'),
 
         link: function(scope, element) {
 

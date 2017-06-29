@@ -9,10 +9,11 @@ export default {
         label: N_('JOBS')
     },
     params: {
-        instance_group_job_search: {
+        job_search: {
             value: {
-                page_size: '5',
-                order_by: 'name'
+                page_size: '10',
+                order_by: '-finished',
+                not__launch_type: 'sync'
             }
         },
         instance_group_id: null
