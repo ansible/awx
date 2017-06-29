@@ -8,13 +8,15 @@ function atFormLink (scope, el, attrs, controllers) {
     formController.init(scope, form);
 }
 
-function AtFormController (eventService) {
+function AtFormController (eventService, strings) {
     let vm = this || {};
 
     let scope;
     let modal;
     let form;
 
+    strings = strings.components.forms;
+   
     vm.components = [];
     vm.state = {
         isValid: false,
@@ -99,6 +101,8 @@ function AtFormController (eventService) {
 
         if (!handled) {
             let message;
+            let title = strings.SUBMISSION_ERROR_TITLE;
+            let preface = strings.SUBMISSION_ERROR_PREFACE;
 
             if (typeof err.data === 'object') {
                 message = JSON.stringify(err.data);  
@@ -106,13 +110,13 @@ function AtFormController (eventService) {
                 message = err.data;
             }
 
-            modal.show('Unable to Submit', `Unexpected Error: ${message}`);
+            modal.show(title, `${preface}: ${message}`)
         }
     };
 
     vm.handleUnexpectedError = err => {
-        let title = 'Unable to Submit';
-        let message = 'Unexpected server error. View the console for more information';
+        let title = strings.SUBMISSION_ERROR_TITLE;
+        let message = strings.SUBMISSION_ERROR_MESSAGE;
 
         modal.show(title, message);
 
@@ -190,7 +194,7 @@ function AtFormController (eventService) {
     };
 }
 
-AtFormController.$inject = ['EventService'];
+AtFormController.$inject = ['EventService', 'ComponentsStrings'];
 
 function atForm (pathService) {
     return {

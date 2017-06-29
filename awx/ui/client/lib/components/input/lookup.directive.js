@@ -20,12 +20,13 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
         scope = _scope_;
 
         scope.$watch(scope.state._resource, vm.watchResource);
+        scope.state._validate = vm.checkOnInput;
 
         vm.check();
     };
 
     vm.watchResource = () => {
-        if (scope[scope.state._resource]) {
+        if (scope[scope.state._resource] !== scope.state._value) {
             scope.state._value = scope[scope.state._resource];
             scope.state._displayValue = scope[`${scope.state._resource}_name`];
 
@@ -33,14 +34,42 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
         }
     };
 
-    vm.search = () => {
+    vm.lookup = () => {
         let params = {};
 
-        if (scope.state._value) {
+        if (scope.state._value && scope.state._isValid) {
             params.selected = scope.state._value;
         }
 
         $state.go(scope.state._route, params);
+    };
+
+    vm.reset = () => {
+        scope.state._value = undefined;
+        scope[scope.state._resource] = undefined;
+    };
+
+    vm.checkOnInput = () => {
+        if (!scope.state._touched) {
+            return { isValid: true };
+        }
+
+        let result = scope.state._model.match('get', 'name', scope.state._displayValue);
+
+        if (result) {
+            scope[scope.state._resource] = result.id;
+            scope.state._value = result.id;
+            scope.state._displayValue = result.name;
+
+            return { isValid: true };
+        }
+
+        vm.reset();
+
+        return {
+            isValid: false,
+            message: vm.strings.components.lookup.NOT_FOUND
+        };
     };
 }
 

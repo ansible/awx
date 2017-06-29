@@ -20,6 +20,7 @@ import tab from './tabs/tab.directive';
 import tabGroup from './tabs/group.directive';
 
 import BaseInputController from './input/base.controller';
+import ComponentsStrings from './components.strings';
 
 angular
     .module('at.lib.components', [])
@@ -43,6 +44,7 @@ angular
     .directive('atPopover', popover)
     .directive('atTab', tab)
     .directive('atTabGroup', tabGroup)
-    .service('BaseInputController', BaseInputController);
+    .service('BaseInputController', BaseInputController)
+    .service('ComponentsStrings', ComponentsStrings);
 
 

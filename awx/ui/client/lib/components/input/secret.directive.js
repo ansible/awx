@@ -20,13 +20,13 @@ function AtInputSecretController (baseInputController) {
         scope = _scope_;
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
-            scope.state._buttonText = 'SHOW';
+            scope.state._buttonText = vm.strings.components.SHOW;
             scope.type = 'password';
 
             vm.toggle = vm.toggleShowHide;
         } else {
-            scope.state._buttonText = 'REPLACE';
-            scope.state._placeholder = 'ENCRYPTED';
+            scope.state._buttonText = vm.strings.components.REPLACE;
+            scope.state._placeholder = vm.strings.components.ENCRYPTED;
             vm.toggle = vm.toggleRevertReplace;
         }
 
@@ -36,10 +36,10 @@ function AtInputSecretController (baseInputController) {
     vm.toggleShowHide = () => {
         if (scope.type === 'password') {
             scope.type = 'text';
-            scope.state._buttonText = 'HIDE';
+            scope.state._buttonText = vm.strings.components.HIDE;
         } else {
             scope.type = 'password';
-            scope.state._buttonText = 'SHOW';
+            scope.state._buttonText = vm.strings.components.SHOW;
         }
     };
 }

@@ -1,21 +1,19 @@
-const DEFAULT_ORGANIZATION_PLACEHOLDER = 'SELECT AN ORGANIZATION';
-
-function AddCredentialsController (models, $state) {
+function AddCredentialsController (models, $state, strings) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
+    let organization = models.organization;
 
-    vm.panelTitle = 'NEW CREDENTIAL';
+    vm.mode = 'add';
+    vm.strings = strings.credentials;
+
+    vm.panelTitle = vm.strings[vm.mode].PANEL_TITLE;
 
     vm.tab = {
-        details: {  
-            _active: true
-        },
-        permissions:{
-            _disabled: true
-        }
+        details: { _active: true },
+        permissions:{ _disabled: true }
     };
 
     vm.form = credential.createFormSchema('post', {
@@ -24,9 +22,13 @@ function AddCredentialsController (models, $state) {
 
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'credentials.add.organization';
-
+    vm.form.organization._model = organization;
+    vm.form.organization._placeholder = vm.strings.inputs.ORGANIZATION_PLACEHOLDER;
+    
     vm.form.credential_type._resource = 'credential_type';
     vm.form.credential_type._route = 'credentials.add.credentialType';
+    vm.form.credential_type._model = credentialType;
+    vm.form.credential_type._placeholder = vm.strings.inputs.CREDENTIAL_TYPE_PLACEHOLDER;
 
     vm.form.inputs = {
         _get: id => {
@@ -52,7 +54,8 @@ function AddCredentialsController (models, $state) {
 
 AddCredentialsController.$inject = [
     'resolvedModels',
-    '$state'
+    '$state',
+    'CredentialsStrings'
 ];
 
 export default AddCredentialsController;
