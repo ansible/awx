@@ -14,7 +14,7 @@ export default
     [   '$filter', '$scope', '$rootScope',
         '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
         'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'md5Setup',
-        'ParseTypeChange', 'Wait', 'selectedLabels',
+        'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService', 'availableLabels',
@@ -22,7 +22,7 @@ export default
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, GetBasePath, md5Setup,
-            ParseTypeChange, Wait, selectedLabels,
+            ParseTypeChange, Wait, selectedLabels, i18n,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService, availableLabels
         ) {
@@ -54,6 +54,7 @@ export default
                 $scope.showJobType = false;
                 $scope.instance_groups = InstanceGroupsData;
                 $scope.credentialNotPresent = false;
+                $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
 
                 SurveyControllerInit({
                     scope: $scope,

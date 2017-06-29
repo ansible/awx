@@ -386,7 +386,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 permissions: {
                     name: 'permissions',
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                    awToolTip: i18n._('Please save before assigning permissions.'),
                     dataPlacement: 'top',
                     basePath: 'api/v2/job_templates/{{$stateParams.job_template_id}}/access_list/',
                     search: {
@@ -447,7 +447,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     ngClick: 'addSurvey()',
                     ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     awFeature: 'surveys',
-                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
+                    awToolTip: '{{surveyTooltip}}',
                     dataPlacement: 'top',
                     label: i18n._('Add Survey'),
                     class: 'Form-primaryButton'
@@ -457,7 +457,9 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     awFeature: 'surveys',
                     ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                     label: i18n._('Edit Survey'),
-                    class: 'Form-primaryButton'
+                    class: 'Form-primaryButton',
+                    awToolTip: '{{surveyTooltip}}',
+                    dataPlacement: 'top'
                 }
             }
         };

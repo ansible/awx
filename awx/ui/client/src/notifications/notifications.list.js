@@ -12,7 +12,7 @@ export default ['i18n', function(i18n){
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
         dataPlacement: 'top',
-        awToolTip: i18n._('Please save before adding notifications'),
+        awToolTip: i18n._('Please save before adding notifications.'),
         name:  'notifications' ,
         title: i18n._('Notifications'),
         iterator: 'notification',

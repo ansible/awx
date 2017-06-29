@@ -107,14 +107,14 @@ function(i18n) {
             related: {
                 ansible_facts: {
                     name: 'ansible_facts',
-                    awToolTip: i18n._('Please save before viewing facts'),
+                    awToolTip: i18n._('Please save before viewing facts.'),
                     dataPlacement: 'top',
                     title: i18n._('Facts'),
                     skipGenerator: true
                 },
                 nested_groups: {
                     name: 'nested_groups',
-                    awToolTip: i18n._('Please save before defining groups'),
+                    awToolTip: i18n._('Please save before defining groups.'),
                     dataPlacement: 'top',
                     ngClick: "$state.go('inventories.edit.hosts.edit.nested_groups')",
                     title: i18n._('Groups'),
@@ -122,7 +122,7 @@ function(i18n) {
                 },
                 insights: {
                     name: 'insights',
-                    awToolTip: i18n._('Please save before viewing Insights'),
+                    awToolTip: i18n._('Please save before viewing Insights.'),
                     dataPlacement: 'top',
                     title: i18n._('Insights'),
                     skipGenerator: true,
