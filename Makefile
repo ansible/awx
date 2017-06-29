@@ -937,7 +937,7 @@ install:
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
 docker-auth:
-	docker login -e 1234@5678.com -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
+	docker login -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
 
 # Docker isolated rampart
 docker-isolated:
