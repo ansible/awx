@@ -50,7 +50,7 @@
                             data-placement="top"
                             ng-click="deleteJob()"
                             ng-hide="job_status == 'running' ||
-                                job_status == 'pending' "
+                                job_status == 'pending' || !job.summary_fields.user_capabilities.delete"
                             aw-tool-tip="Delete"
                             data-original-title=""
                             title="">

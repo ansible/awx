@@ -76,6 +76,11 @@ class Migration(migrations.Migration):
             name='pending_deletion',
             field=models.BooleanField(default=False, help_text='Flag indicating the inventory is being deleted.', editable=False),
         ),
+        migrations.AlterField(
+            model_name='inventory',
+            name='organization',
+            field=models.ForeignKey(related_name='inventories', on_delete=models.deletion.SET_NULL, to='main.Organization', help_text='Organization containing this inventory.', null=True),
+        ),
 
         # Facts
         migrations.AlterField(

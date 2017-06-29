@@ -127,7 +127,7 @@ function(i18n, InventoryCompletedJobsList) {
         related: {
             permissions: {
                 name: 'permissions',
-                awToolTip: i18n._('Please save before assigning permissions'),
+                awToolTip: i18n._('Please save before assigning permissions.'),
                 dataPlacement: 'top',
                 basePath: 'api/v2/inventories/{{$stateParams.inventory_id}}/access_list/',
                 type: 'collection',
@@ -172,7 +172,7 @@ function(i18n, InventoryCompletedJobsList) {
             },
             groups: {
                 name: 'groups',
-                awToolTip: i18n._('Please save before creating groups'),
+                awToolTip: i18n._('Please save before creating groups.'),
                 dataPlacement: 'top',
                 include: "GroupList",
                 title: i18n._('Groups'),
@@ -181,7 +181,7 @@ function(i18n, InventoryCompletedJobsList) {
             },
             hosts: {
                 name: 'hosts',
-                awToolTip: i18n._('Please save before creating hosts'),
+                awToolTip: i18n._('Please save before creating hosts.'),
                 dataPlacement: 'top',
                 include: "RelatedHostsListDefinition",
                 title: i18n._('Hosts'),
@@ -190,7 +190,7 @@ function(i18n, InventoryCompletedJobsList) {
             },
             inventory_sources: {
                 name: 'inventory_sources',
-                awToolTip: i18n._('Please save before defining inventory sources'),
+                awToolTip: i18n._('Please save before defining inventory sources.'),
                 dataPlacement: 'top',
                 title: i18n._('Sources'),
                 iterator: 'inventory_source',

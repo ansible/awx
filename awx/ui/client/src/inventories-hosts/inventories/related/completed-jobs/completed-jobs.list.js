@@ -8,7 +8,7 @@
 export default ['i18n', function(i18n) {
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
-        awToolTip: i18n._('Please save and run a job to view'),
+        awToolTip: i18n._('Please save and run a job to view.'),
         dataPlacement: 'top',
         name: 'completed_jobs',
         basePath: 'unified_jobs',

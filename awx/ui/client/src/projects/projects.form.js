@@ -221,7 +221,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
         related: {
             permissions: {
                 name: 'permissions',
-                awToolTip: i18n._('Please save before assigning permissions'),
+                awToolTip: i18n._('Please save before assigning permissions.'),
                 djangoModel: 'access_list',
                 dataPlacement: 'top',
                 basePath: 'api/v2/projects/{{$stateParams.project_id}}/access_list/',

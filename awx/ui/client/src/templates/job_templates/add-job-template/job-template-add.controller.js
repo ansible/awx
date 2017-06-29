@@ -17,7 +17,7 @@
              Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
          ) {
-               
+
             // Inject dynamic view
             let defaultUrl = GetBasePath('job_templates'),
                 form = JobTemplateForm(),
@@ -45,6 +45,8 @@
                     default_val: false
                 });
                 CallbackHelpInit({ scope: $scope });
+
+                $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
             }
 
             callback = function() {

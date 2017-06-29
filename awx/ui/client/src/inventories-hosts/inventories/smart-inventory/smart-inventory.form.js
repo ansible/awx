@@ -110,7 +110,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
             related: {
                 permissions: {
                     name: 'permissions',
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                    awToolTip: i18n._('Please save before assigning permissions.'),
                     dataPlacement: 'top',
                     basePath: 'api/v2/inventories/{{$stateParams.smartinventory_id}}/access_list/',
                     type: 'collection',

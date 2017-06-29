@@ -65,7 +65,7 @@ export default ['NotificationsList', 'i18n',
                 users: {
                     name: 'users',
                     dataPlacement: 'top',
-                    awToolTip: i18n._('Please save before adding users'),
+                    awToolTip: i18n._('Please save before adding users.'),
                     basePath: 'api/v2/organizations/{{$stateParams.organization_id}}/access_list/',
                     search: {
                         order_by: 'username'
