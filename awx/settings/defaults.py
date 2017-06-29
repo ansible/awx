@@ -285,7 +285,8 @@ REST_FRAMEWORK = {
     'VIEW_NAME_FUNCTION': 'awx.api.generics.get_view_name',
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
     'NON_FIELD_ERRORS_KEY': '__all__',
-    'DEFAULT_VERSION': 'v2'
+    'DEFAULT_VERSION': 'v2',
+    #'URL_FORMAT_OVERRIDE': None,
 }
 
 AUTHENTICATION_BACKENDS = (
