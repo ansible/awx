@@ -510,3 +510,13 @@ def get_current_user_from_drf_request(sender, **kwargs):
     request = get_current_request()
     drf_request = getattr(request, 'drf_request', None)
     return (getattr(drf_request, 'user', False), 0)
+
+
+@receiver(pre_delete, sender=Organization)
+def delete_inventory_for_org(sender, instance, **kwargs):
+    inventories = Inventory.objects.filter(organization__pk=instance.pk)
+    for inventory in inventories:
+        try:
+            inventory.schedule_deletion()
+        except RuntimeError, e:
+            logger.debug(e)

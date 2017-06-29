@@ -373,6 +373,16 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
             raise ValidationError(_("Credential kind must be 'insights'."))
         return self.insights_credential
 
+    @transaction.atomic
+    def schedule_deletion(self):
+        from awx.main.tasks import delete_inventory
+        if self.pending_deletion is True:
+            raise RuntimeError("Inventory is already pending deletion.")
+        self.websocket_emit_status('pending_deletion')
+        delete_inventory.delay(self.pk)
+        self.pending_deletion = True
+        self.save(update_fields=['pending_deletion'])
+
 
 class SmartInventoryMembership(BaseModel):
     '''
