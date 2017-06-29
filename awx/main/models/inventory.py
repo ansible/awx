@@ -63,7 +63,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         'Organization',
         related_name='inventories',
         help_text=_('Organization containing this inventory.'),
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
     )
     variables = models.TextField(
         blank=True,
