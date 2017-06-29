@@ -187,15 +187,16 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         '''
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
-            if hasattr(self, field_name):
-                item = getattr(self, field_name)
-                if field_name in ['inventory', 'credential']:
-                    if not user.can_access(item.__class__, 'use', item):
-                        continue
-                if field_name in ['unified_job_template']:
-                    if not user.can_access(item.__class__, 'start', item, validate_license=False):
-                        continue
-                create_kwargs[field_name] = item
+            item = getattr(self, field_name, None)
+            if item is None:
+                continue
+            if field_name in ['inventory', 'credential']:
+                if not user.can_access(item.__class__, 'use', item):
+                    continue
+            if field_name in ['unified_job_template']:
+                if not user.can_access(item.__class__, 'start', item, validate_license=False):
+                    continue
+            create_kwargs[field_name] = item
         create_kwargs['workflow_job_template'] = workflow_job_template
         return self.__class__.objects.create(**create_kwargs)
 
