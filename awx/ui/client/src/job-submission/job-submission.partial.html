@@ -214,7 +214,16 @@
                             <span class="Form-inputLabel" translate>Job Tags</span>
                         </label>
                         <div>
-                            <textarea rows="5" ng-model="other_prompt_data.job_tags" name="tags" class="form-control Form-textArea Form-textInput"></textarea>
+                            <select
+                                id="job_launch_job_tags"
+                                ng-options="v.label for v in other_prompt_data.job_tags_options track by v.value"
+                                ng-model="other_prompt_data.job_tags"
+                                class="form-control Form-dropDown"
+                                name="verbosity"
+                                tabindex="-1"
+                                aria-hidden="true"
+                                multiple>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_skip_tags_on_launch">
@@ -222,7 +231,17 @@
                             <span class="Form-inputLabel" translate>Skip Tags</span>
                         </label>
                         <div>
-                            <textarea rows="5" ng-model="other_prompt_data.skip_tags" name="skip_tags" class="form-control Form-textArea Form-textInput"></textarea>
+                            <!-- <textarea rows="5" ng-model="other_prompt_data.skip_tags" name="skip_tags" class="form-control Form-textArea Form-textInput"></textarea> -->
+                            <select
+                                id="job_launch_skip_tags"
+                                ng-options="v.label for v in other_prompt_data.skip_tags_options track by v.value"
+                                ng-model="other_prompt_data.skip_tags"
+                                class="form-control Form-dropDown"
+                                name="verbosity"
+                                tabindex="-1"
+                                aria-hidden="true"
+                                multiple>
+                            </select>
                         </div>
                     </div>
                 </form>

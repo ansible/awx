@@ -61,6 +61,18 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                         placeholder: i18n._('Select a credential')
                     });
 
+                    CreateSelect2({
+                        element: '#job_launch_job_tags',
+                        multiple: true,
+                        addNew: true
+                    });
+
+                    CreateSelect2({
+                        element: '#job_launch_skip_tags',
+                        multiple: true,
+                        addNew: true
+                    });
+
                     if(scope.step === 'otherprompts' && scope.ask_variables_on_launch) {
                         ParseTypeChange({
                             scope: scope,
