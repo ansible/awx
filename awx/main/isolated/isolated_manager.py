@@ -374,8 +374,9 @@ class IsolatedManager(object):
                 logger.exception('Failed to read status from isolated instance {}.'.format(instance.hostname))
                 continue
             if 'capacity' in task_result:
+                instance.version = task_result['version']
                 instance.capacity = int(task_result['capacity'])
-                instance.save(update_fields=['capacity', 'modified'])
+                instance.save(update_fields=['capacity', 'version', 'modified'])
             else:
                 logger.warning('Could not update capacity of {}, msg={}'.format(
                     instance.hostname, task_result.get('msg', 'unknown failure')))
