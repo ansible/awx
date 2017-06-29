@@ -8,7 +8,6 @@ NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-DOCKER_HOST_IP=`python -c "import socket; print(socket.gethostbyname(socket.gethostname()))"`
 
 GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
 # NOTE: This defaults the container image version to the branch that's active
@@ -953,13 +952,13 @@ docker-isolated:
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
 
 docker-compose-cluster: docker-auth
-	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
-	cd tools && DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
 
 docker-compose-build: tower-devel-build tower-isolated-build
 
@@ -983,10 +982,10 @@ docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: docker-auth
-	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-cluster-elk: docker-auth
-	DOCKER_HOST_IP=$(DOCKER_HOST_IP) TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 clean-elk:
 	docker stop tools_kibana_1

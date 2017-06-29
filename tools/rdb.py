@@ -155,9 +155,14 @@ class CustomPdb(Rdb):
         return Rdb.displayhook(self, obj)
 
     def get_avail_port(self, *args, **kwargs):
+        try:
+            socket.gethostbyname('docker.for.mac.localhost')
+            host = 'docker.for.mac.localhost'
+        except:
+            host = os.popen('ip route').read().split(' ')[2]
         sock, port = Rdb.get_avail_port(self, *args, **kwargs)
         socket.socket(socket.AF_INET, socket.SOCK_DGRAM).sendto(
-            str(port), ('dockerhost', 6899)
+            str(port), (host, 6899)
         )
         return (sock, port)
 
