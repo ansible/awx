@@ -713,7 +713,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         result = super(UnifiedJob, self).save(*args, **kwargs)
 
         # If status changed, update the parent instance.
-        if self.status != status_before:
+        if self.status != status_before and self.status != 'pending':
             self._update_parent_instance()
 
         # Done.
