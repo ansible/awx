@@ -16,9 +16,9 @@ On the other hand, the rest of authentication methods use the same types of logi
 Tower will try authenticating against each enabled authentication method *in the specified order*, meaning if the same username and password is valid in multiple enabled auth methods (For example, both LDAP and TACACS+), Tower will only use the first positive match (In the above example, log a user in via LDAP and skip TACACS+).
 
 ## Notes:
-* RADIUS users and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
+* SAML users, RADIUS users and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
   * Enterprise users can only be created via the first successful login attempt from remote authentication backend.
   * Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in Tower.
   * Tower passwords of Enterprise users should always be empty and cannot be set by any user if there are enterprise backends enabled.
-  * If enterprise backends (RADIUS and TACACS+ for now) are disabled, an Enterprise user can be converted to a normal Tower user by setting password field. But this operation is irreversible (The converted Tower user can no longer be treated as Enterprise user)
+  * If enterprise backends are disabled, an Enterprise user can be converted to a normal Tower user by setting password field. But this operation is irreversible (The converted Tower user can no longer be treated as Enterprise user)

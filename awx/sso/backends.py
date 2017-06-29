@@ -126,23 +126,25 @@ class LDAPBackend(BaseLDAPBackend):
         return set()
 
 
+def _decorate_enterprise_user(user, provider):
+    user.set_unusable_password()
+    user.save()
+    enterprise_auth = UserEnterpriseAuth(user=user, provider=provider)
+    enterprise_auth.save()
+    return enterprise_auth
+
+
 def _get_or_set_enterprise_user(username, password, provider):
     created = False
     try:
         user = User.objects.all().prefetch_related('enterprise_auth').get(username=username)
     except User.DoesNotExist:
         user = User(username=username)
-        user.set_unusable_password()
-        user.save()
-        enterprise_auth = UserEnterpriseAuth(user=user, provider=provider)
-        enterprise_auth.save()
+        enterprise_auth = _decorate_enterprise_user(user, provider)
         logger.debug("Created enterprise user %s via %s backend." %
                      (username, enterprise_auth.get_provider_display()))
         created = True
-    # NOTE: remove has_usable_password logic in a future release.
-    if created or\
-            not user.has_usable_password() or\
-            (provider,) in user.enterprise_auth.all().values_list('provider') and not user.has_usable_password():
+    if created or user.is_in_enterprise_category(provider):
         return user
     logger.warn("Enterprise user %s already defined in Tower." % username)
 
@@ -258,7 +260,17 @@ class SAMLAuth(BaseSAMLAuth):
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to authenticate, license does not support SAML authentication")
             return None
-        return super(SAMLAuth, self).authenticate(*args, **kwargs)
+        created = False
+        try:
+            user = User.objects.get(username=kwargs.get('username', ''))
+            if user and not user.is_in_enterprise_category('saml'):
+                return None
+        except User.DoesNotExist:
+            created = True
+        user = super(SAMLAuth, self).authenticate(*args, **kwargs)
+        if user and created:
+            _decorate_enterprise_user(user, 'saml')
+        return user
 
     def get_user(self, user_id):
         if not all([django_settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID, django_settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
