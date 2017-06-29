@@ -59,7 +59,7 @@ def test_async_inventory_duplicate_deletion_prevention(delete, get, inventory, a
 
     resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 400
-    assert resp.data['error'] == 'Inventory is already being deleted.'
+    assert resp.data['error'] == 'Inventory is already pending deletion.'
 
 
 @pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
@@ -314,12 +314,12 @@ class TestControlledBySCM:
 @pytest.mark.django_db
 class TestInsightsCredential:
     def test_insights_credential(self, patch, insights_inventory, admin_user, insights_credential):
-        patch(insights_inventory.get_absolute_url(), 
+        patch(insights_inventory.get_absolute_url(),
               {'insights_credential': insights_credential.id}, admin_user,
               expect=200)
 
     def test_non_insights_credential(self, patch, insights_inventory, admin_user, scm_credential):
-        patch(insights_inventory.get_absolute_url(), 
+        patch(insights_inventory.get_absolute_url(),
               {'insights_credential': scm_credential.id}, admin_user,
               expect=400)
 
