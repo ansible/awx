@@ -32,6 +32,7 @@ function InventoriesEdit($scope, $location,
 
         $scope.insights_credential_name = (inventoryData.summary_fields.insights_credential && inventoryData.summary_fields.insights_credential.name) ? inventoryData.summary_fields.insights_credential.name : null;
         $scope.insights_credential = (inventoryData.summary_fields.insights_credential && inventoryData.summary_fields.insights_credential.id) ? inventoryData.summary_fields.insights_credential.id : null;
+        $scope.is_insights = (inventoryData.summary_fields.insights_credential && inventoryData.summary_fields.insights_credential.id) ? true : false;
         $scope.organization_name = inventoryData.summary_fields.organization.name;
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.parseType = 'yaml';

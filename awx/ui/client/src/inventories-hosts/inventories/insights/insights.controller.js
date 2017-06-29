@@ -9,8 +9,8 @@ export default [ 'InsightsData', '$scope', 'moment', '$state', 'InventoryData',
 function (data, $scope, moment, $state, InventoryData, InsightsService) {
 
     function init() {
-        $scope.reports = data.reports;
-        $scope.reports_dataset = data;
+        $scope.reports = (data && data.reports) ? data.reports : [];
+        $scope.reports_dataset = (data) ? data : {};
         $scope.currentFilter = "total";
         $scope.solvable_count = filter('solvable').length;
         $scope.not_solvable_count = filter('not_solvable').length;
@@ -20,8 +20,11 @@ function (data, $scope, moment, $state, InventoryData, InsightsService) {
         $scope.low_count =filter('low').length;
         let a = moment(), b = moment($scope.reports_dataset.last_check_in);
         $scope.last_check_in = a.diff(b, 'hours');
-        $scope.inventory = InventoryData;
-        $scope.insights_credential = InventoryData.summary_fields.insights_credential.id;
+        $scope.inventory = (InventoryData) ? InventoryData : {};
+        $scope.insights_credential = (InventoryData && InventoryData.summary_fields &&
+            InventoryData.summary_fields.insights_credential && InventoryData.summary_fields.insights_credential.id) ?
+                InventoryData.summary_fields.insights_credential.id : null;
+
     }
 
     function filter(str){

@@ -64,14 +64,15 @@
 }
 
 .InsightsNav-anchor.is-currentFilter{
+    background-color: @f2grey;
     padding-top: 5px;
-    border-bottom: 5px solid @menu-link-btm-hov;
+    border-bottom: 5px solid @b7grey;
 }
 
 .InsightsNav-anchor:hover{
-    background-color: @menu-link-bg-hov;
+    background-color: @f2grey;
     padding-top: 5px;
-    border-bottom: 5px solid @menu-link-btm-hov;
+    border-bottom: 5px solid @b7grey;
 }
 
 .InsightsNav-totalIssues{
@@ -97,6 +98,22 @@
 
 .InsightsNav-solvableBadge{
     background-color: @b7grey;
+}
+
+.InsightsNav-refresh{
+    color: @default-icon;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.InsightsNav-refresh:hover{
+    color: @default-link;
+}
+
+.InsightsBody-missingIssues{
+    color: @default-icon;
+    margin: 10px 0px 10px 0px;
 }
 
 .InsightsRow{
