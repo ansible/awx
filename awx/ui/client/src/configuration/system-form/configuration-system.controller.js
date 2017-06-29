@@ -15,6 +15,9 @@ export default [
     'CreateSelect2',
     'GenerateForm',
     'i18n',
+    'Rest',
+    'ProcessErrors',
+    'ngToast',
     function(
         $rootScope, $scope, $state, $stateParams, $timeout,
         AngularCodeMirror,
@@ -25,7 +28,10 @@ export default [
         ConfigurationUtils,
         CreateSelect2,
         GenerateForm,
-        i18n
+        i18n,
+        Rest,
+        ProcessErrors,
+        ngToast
     ) {
         var systemVm = this;
 
@@ -185,6 +191,36 @@ export default [
         $timeout(function(){
             $scope.$parent.configuration_logging_template_form.$setPristine();
         }, 1000);
+
+        $scope.$parent.vm.testLogging = function() {
+            Rest.setUrl("/api/v2/settings/logging/test/");
+            Rest.post($scope.$parent.vm.getFormPayload())
+                .then(() => {
+                    ngToast.success({
+                        content: `<i class="fa fa-check-circle
+                            Toast-successIcon"></i>` +
+                                i18n._('Log aggregator test successful.')
+                    });
+                })
+                .catch(({data, status}) => {
+                    if (status === 500) {
+                        ngToast.danger({
+                            content: `<i class="fa fa-exclamation-triangle
+                                Toast-successIcon"></i>` +
+                                    i18n._('Log aggregator test failed.<br />Detail: ') +
+                                        data.error
+                        });
+                    } else {
+                        ProcessErrors($scope, data, status, null,
+                            {
+                                hdr: i18n._('Error!'),
+                                msg: i18n._('There was an error testing the ' +
+                                    'log aggregator. Returned status: ') +
+                                    status
+                            });
+                    }
+                });
+        };
 
         angular.extend(systemVm, {
             activeForm: activeForm,

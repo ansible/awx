@@ -51,6 +51,12 @@
                  label: i18n._('Revert all to default'),
                  class: 'Form-resetAll'
              },
+             testLogging: {
+                 ngClick: 'vm.testLogging()',
+                 label: i18n._('Test'),
+                 class: 'btn-primary',
+                 ngDisabled: 'configuration_logging_template_form.$invalid'
+             },
              cancel: {
                  ngClick: 'vm.formCancel()',
              },
