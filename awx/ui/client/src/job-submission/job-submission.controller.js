@@ -219,11 +219,15 @@ export default
                     }
 
                     if($scope.ask_tags_on_launch) {
-                        $scope.other_prompt_data.job_tags = (data.defaults && data.defaults.job_tags) ? data.defaults.job_tags : "";
+                        $scope.other_prompt_data.job_tags_options = (data.defaults && data.defaults.job_tags) ? data.defaults.job_tags.split(',')
+                            .map((i) => ({name: i, label: i, value: i})) : [];
+                        $scope.other_prompt_data.job_tags = $scope.other_prompt_data.job_tags_options;
                     }
 
                     if($scope.ask_skip_tags_on_launch) {
-                        $scope.other_prompt_data.skip_tags = (data.defaults && data.defaults.skip_tags) ? data.defaults.skip_tags : "";
+                        $scope.other_prompt_data.skip_tags_options = (data.defaults && data.defaults.skip_tags) ? data.defaults.skip_tags.split(',')
+                            .map((i) => ({name: i, label: i, value: i})) : [];
+                        $scope.other_prompt_data.skip_tags = $scope.other_prompt_data.skip_tags_options;
                     }
 
                     if($scope.ask_variables_on_launch) {

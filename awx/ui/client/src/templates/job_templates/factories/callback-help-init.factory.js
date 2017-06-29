@@ -113,6 +113,16 @@ export default
                     scope.ask_skip_tags_on_launch = (data.ask_skip_tags_on_launch) ? true : false;
                     master.ask_skip_tags_on_launch = scope.ask_skip_tags_on_launch;
 
+                    scope.job_tag_options = (data.job_tags) ? data.job_tags.split(',')
+                        .map((i) => ({name: i, label: i, value: i})) : [];
+                    scope.job_tags = scope.job_tag_options;
+                    master.job_tags = scope.job_tags;
+
+                    scope.skip_tag_options = (data.skip_tags) ? data.skip_tags.split(',')
+                        .map((i) => ({name: i, label: i, value: i})) : [];
+                    scope.skip_tags = scope.skip_tag_options;
+                    master.skip_tags = scope.skip_tags;
+
                     scope.ask_job_type_on_launch = (data.ask_job_type_on_launch) ? true : false;
                     master.ask_job_type_on_launch = scope.ask_job_type_on_launch;
 

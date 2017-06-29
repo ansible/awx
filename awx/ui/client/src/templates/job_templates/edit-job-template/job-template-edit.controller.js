@@ -55,6 +55,8 @@ export default
                 $scope.instance_groups = InstanceGroupsData;
                 $scope.credentialNotPresent = false;
                 $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
+                $scope.job_tag_options = [];
+                $scope.skip_tag_options = [];
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -174,6 +176,18 @@ export default
                 CreateSelect2({
                     element:'#playbook-select',
                     multiple: false
+                });
+
+                CreateSelect2({
+                    element:'#job_template_job_tags',
+                    multiple: true,
+                    addNew: true
+                });
+
+                CreateSelect2({
+                    element:'#job_template_skip_tags',
+                    multiple: true,
+                    addNew: true
                 });
             }
 
@@ -469,6 +483,8 @@ export default
                     data.ask_inventory_on_launch = $scope.ask_inventory_on_launch ? $scope.ask_inventory_on_launch : false;
                     data.ask_variables_on_launch = $scope.ask_variables_on_launch ? $scope.ask_variables_on_launch : false;
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
+                    data.job_tags = (Array.isArray($scope.job_tags)) ? $scope.job_tags.join() : "";
+                    data.skip_tags = (Array.isArray($scope.skip_tags)) ? $scope.skip_tags.join() : "";
                     if ($scope.selectedCredentials && $scope.selectedCredentials
                         .machine && $scope.selectedCredentials
                             .machine) {
@@ -504,6 +520,20 @@ export default
                         .filter("[data-select2-tag=true]")
                         .filter("[data-label-is-present=true]")
                         .map((i, val) => ({name: $(val).text()}));
+
+                    $scope.job_tags = _.map($scope.job_tags, function(i){return i.value;});
+                    $("#job_template_job_tags").siblings(".select2").first().find(".select2-selection__choice").each(function(optionIndex, option){
+                        $scope.job_tags.push(option.title);
+                    });
+
+                    $scope.skip_tags = _.map($scope.skip_tags, function(i){return i.value;});
+                    $("#job_template_skip_tags").siblings(".select2").first().find(".select2-selection__choice").each(function(optionIndex, option){
+                        $scope.skip_tags.push(option.title);
+                    });
+
+                    data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
+                    data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
+
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.put(data)

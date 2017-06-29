@@ -50,12 +50,20 @@ export default
 
                     }
 
-                    if(scope.ask_tags_on_launch && scope.other_prompt_data && typeof scope.other_prompt_data.job_tags === 'string'){
-                        job_launch_data.job_tags = scope.other_prompt_data.job_tags;
+                    if(scope.ask_tags_on_launch && scope.other_prompt_data && Array.isArray(scope.other_prompt_data.job_tags)){
+                        scope.job_tags = _.map(scope.job_tags, function(i){return i.value;});
+                        $("#job_launch_job_tags").siblings(".select2").first().find(".select2-selection__choice").each(function(optionIndex, option){
+                            scope.job_tags.push(option.title);
+                        });
+                        job_launch_data.job_tags = (Array.isArray(scope.job_tags)) ? _.uniq(scope.job_tags).join() : "";
                     }
 
-                    if(scope.ask_skip_tags_on_launch && scope.other_prompt_data && typeof scope.other_prompt_data.skip_tags === 'string'){
-                        job_launch_data.skip_tags = scope.other_prompt_data.skip_tags;
+                    if(scope.ask_skip_tags_on_launch && scope.other_prompt_data && Array.isArray(scope.other_prompt_data.skip_tags)){
+                        scope.skip_tags = _.map(scope.skip_tags, function(i){return i.value;});
+                        $("#job_launch_skip_tags").siblings(".select2").first().find(".select2-selection__choice").each(function(optionIndex, option){
+                            scope.skip_tags.push(option.title);
+                        });
+                        job_launch_data.skip_tags = (Array.isArray(scope.skip_tags)) ?  _.uniq(scope.skip_tags).join() : "";
                     }
 
                     if(scope.ask_limit_on_launch && scope.other_prompt_data && scope.other_prompt_data.limit){

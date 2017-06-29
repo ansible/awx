@@ -212,9 +212,10 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 job_tags: {
                     label: i18n._('Job Tags'),
-                    type: 'textarea',
-                    rows: 5,
+                    type: 'select',
+                    multiSelect: true,
                     'elementClass': 'Form-textInput',
+                    ngOptions: 'tag.label for tag in job_tag_options track by tag.value',
                     column: 2,
                     awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
                         "<p>" + i18n._("Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.") + "</p>" +
@@ -230,9 +231,10 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 skip_tags: {
                     label: i18n._('Skip Tags'),
-                    type: 'textarea',
-                    rows: 5,
+                    type: 'select',
+                    multiSelect: true,
                     'elementClass': 'Form-textInput',
+                    ngOptions: 'tag.label for tag in skip_tag_options track by tag.value',
                     column: 2,
                     awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
                         "<p>" + i18n._("Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.") + "</p>" +
