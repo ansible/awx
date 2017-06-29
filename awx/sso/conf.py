@@ -890,16 +890,18 @@ register(
 def get_saml_metadata_url():
     return urlparse.urljoin(settings.TOWER_URL_BASE, reverse('sso:saml_metadata'))
 
+def get_saml_entity_id():
+    return settings.TOWER_URL_BASE
 
 register(
     'SOCIAL_AUTH_SAML_CALLBACK_URL',
     field_class=fields.CharField,
     read_only=True,
     default=SocialAuthCallbackURL('saml'),
-    label=_('SAML Service Provider Callback URL'),
+    label=_('SAML Assertion Consumer Service (ACS) URL'),
     help_text=_('Register Tower as a service provider (SP) with each identity '
                 'provider (IdP) you have configured. Provide your SP Entity ID '
-                'and this callback URL for your application.'),
+                'and this ACS URL for your application.'),
     category=_('SAML'),
     category_slug='saml',
     depends_on=['TOWER_URL_BASE'],
@@ -923,13 +925,15 @@ register(
     'SOCIAL_AUTH_SAML_SP_ENTITY_ID',
     field_class=fields.CharField,
     allow_blank=True,
-    default='',
+    default=get_saml_entity_id,
     label=_('SAML Service Provider Entity ID'),
     help_text=_('The application-defined unique identifier used as the '
-                'audience of the SAML service provider (SP) configuration.'),
+                'audience of the SAML service provider (SP) configuration. '
+                'This is usually the URL for Tower.'),
     category=_('SAML'),
     category_slug='saml',
     feature_required='enterprise_auth',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
