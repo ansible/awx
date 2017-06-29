@@ -2,6 +2,8 @@
 # Python
 import time
 import pytest
+import mock
+from contextlib import contextmanager
 
 from awx.main.tests.factories import (
     create_organization,
@@ -12,6 +14,22 @@ from awx.main.tests.factories import (
     create_survey_spec,
     create_workflow_job_template,
 )
+
+
+@pytest.fixture
+def mock_access():
+    @contextmanager
+    def access_given_class(TowerClass):
+        try:
+            mock_instance = mock.MagicMock(__name__='foobar')
+            MockAccess = mock.MagicMock(return_value=mock_instance)
+            the_patch = mock.patch.dict('awx.main.access.access_registry',
+                                        {TowerClass: [MockAccess]}, clear=False)
+            the_patch.__enter__()
+            yield mock_instance
+        finally:
+            the_patch.__exit__()
+    return access_given_class
 
 
 @pytest.fixture

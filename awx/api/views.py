@@ -2637,23 +2637,31 @@ class InventorySourceUpdateView(RetrieveAPIView):
     is_job_start = True
     new_in_14 = True
 
-    def _build_update_response(self, update, request):
-        if not update:
+    def _update_dependent_project(self, obj, request):
+        if not self.request.user or not self.request.user.can_access(Project, 'start', obj.source_project):
+            raise PermissionDenied(detail=_(
+                'You do not have permission to update project `{}`.'.format(obj.source_project.name)))
+        project_update = obj.source_project.update()
+        if not project_update:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            headers = {'Location': update.get_absolute_url(request=request)}
-            return Response(dict(inventory_update=update.id),
-                            status=status.HTTP_202_ACCEPTED, headers=headers)
+            headers = {'Location': project_update.get_absolute_url(request=request)}
+            return Response(dict(
+                detail=_('Request to update dependent project has been accepted.'), inventory_update=None),
+                status=status.HTTP_202_ACCEPTED, headers=headers)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_update:
             if obj.source == 'scm' and obj.update_on_project_update:
-                if not self.request.user or not self.request.user.can_access(Project, 'start', obj.source_project):
-                    raise PermissionDenied(detail=_(
-                        'You do not have permission to update project `{}`.'.format(obj.source_project.name)))
-                return self._build_update_response(obj.source_project.update(), request)
-            return self._build_update_response(obj.update(), request)
+                return self._update_dependent_project(obj, request)
+            update = obj.update()
+            if not update:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                headers = {'Location': update.get_absolute_url(request=request)}
+                return Response(dict(inventory_update=update.id),
+                                status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 

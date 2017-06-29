@@ -95,7 +95,7 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             continue
         result = access_method(*args, **kwargs)
         logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
-                     access_method.__name__, args, result)
+                     getattr(access_method, '__name__', 'unknown'), args, result)
         if result:
             return result
     return False
