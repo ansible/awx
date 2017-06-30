@@ -611,6 +611,9 @@ AWX_ISOLATED_CHECK_INTERVAL = 30
 # The timeout (in seconds) for launching jobs on isolated nodes
 AWX_ISOLATED_LAUNCH_TIMEOUT = 600
 
+# Ansible connection timeout (in seconds) for communicating with isolated instances
+AWX_ISOLATED_CONNECTION_TIMEOUT = 10
+
 # The time (in seconds) between the periodic isolated heartbeat status check
 AWX_ISOLATED_PERIODIC_CHECK = 600
 
@@ -1008,6 +1011,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
+        'management_playbooks': {
+            'level': 'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
         'fact_receiver': {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
@@ -1066,9 +1078,12 @@ LOGGING = {
         },
         'awx.main': {
             'handlers': ['null']
-        },
-        'awx.main.commands.run_callback_receiver': {
+        }, 'awx.main.commands.run_callback_receiver': {
             'handlers': ['callback_receiver'],
+        },
+        'awx.isolated.manager.playbooks': {
+            'handlers': ['management_playbooks'],
+            'propagate': False
         },
         'awx.main.commands.inventory_import': {
             'handlers': ['inventory_import'],

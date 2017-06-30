@@ -24,6 +24,9 @@ from defaults import *  # NOQA
 LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'
 COLOR_LOGS = True
 
+# Pipe management playbook output to console
+LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True
+
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)

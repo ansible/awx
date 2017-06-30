@@ -341,8 +341,9 @@ class TestIsolatedExecution(TestJobExecution):
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
         assert ' '.join(playbook_run[0]).startswith(' '.join([
-            'ansible-playbook', '-u', settings.AWX_ISOLATED_USERNAME, '-i', self.REMOTE_HOST + ',',
-            'run_isolated.yml', '-e',
+            'ansible-playbook', 'run_isolated.yml', '-u', settings.AWX_ISOLATED_USERNAME,
+            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.REMOTE_HOST + ',',
+            '-e',
         ]))
         extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
         extra_vars = json.loads(extra_vars)
