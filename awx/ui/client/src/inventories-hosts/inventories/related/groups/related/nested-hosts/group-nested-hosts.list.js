@@ -89,7 +89,7 @@ export default {
             icon: 'icon-trash',
             awToolTip: 'Disassociate host',
             dataPlacement: 'top',
-            ngShow: 'nested_host.summary_fields.user_capabilities.delete'
+            ngShow: 'nested_host.summary_fields.user_capabilities.delete && nested_host.can_disassociate'
         }
     },
 

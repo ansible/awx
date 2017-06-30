@@ -29,8 +29,11 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
 
         $scope.$watchCollection(list.name, function() {
             $scope[list.name] = _.map($scope.nested_hosts, function(value) {
-                value.inventory_name = value.summary_fields.inventory.name;
-                value.inventory_id = value.summary_fields.inventory.id;
+                angular.forEach(value.summary_fields.groups.results, function(directParentGroup) {
+                    if(directParentGroup.id === parseInt($state.params.group_id)) {
+                        value.can_disassociate = true;
+                    }
+                });
                 return value;
             });
             setJobStatus();
@@ -72,7 +75,7 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
     }
 
     function setJobStatus(){
-        _.forEach($scope.hosts, function(value) {
+        _.forEach($scope.nested_hosts, function(value) {
             SetStatus({
                 scope: $scope,
                 host: value
