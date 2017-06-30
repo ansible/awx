@@ -32,7 +32,8 @@ def validate_ldap_dn_with_user(value):
 
 
 def validate_ldap_bind_dn(value):
-    if not re.match(r'^[A-Za-z][A-Za-z0-9._-]*?\\[A-Za-z0-9 ._-]+?$', value.strip()):
+    if not re.match(r'^[A-Za-z][A-Za-z0-9._-]*?\\[A-Za-z0-9 ._-]+?$', value.strip()) and \
+            not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', value.strip()):
         validate_ldap_dn(value)
 
 

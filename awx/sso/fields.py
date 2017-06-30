@@ -269,7 +269,18 @@ class LDAPSearchUnionField(fields.ListField):
         if len(data) == 3 and isinstance(data[0], basestring):
             return self.ldap_search_field_class().run_validation(data)
         else:
-            return LDAPSearchUnion(*[self.ldap_search_field_class().run_validation(x) for x in data])
+            search_args = []
+            for i in range(len(data)):
+                if not isinstance(data[i], list):
+                    raise ValidationError('In order to ultilize LDAP Union, input element No. %d'
+                                          ' should be a search query array.' % (i + 1))
+                try:
+                    search_args.append(self.ldap_search_field_class().run_validation(data[i]))
+                except Exception as e:
+                    if hasattr(e, 'detail') and isinstance(e.detail, list):
+                        e.detail.insert(0, "Error parsing LDAP Union element No. %d:" % (i + 1))
+                    raise e
+            return LDAPSearchUnion(*search_args)
 
 
 class LDAPUserAttrMapField(fields.DictField):
