@@ -1,4 +1,4 @@
-PYTHON = python
+PYTHON ?= python
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
@@ -72,8 +72,10 @@ else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
 endif
+
 SDIST_COMMAND ?= sdist
-SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
+SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
+
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
@@ -683,6 +685,9 @@ release_clean:
 dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
 
+dist/ansible-tower.tar.gz: ui-release
+	OFFICIAL="yes" $(PYTHON) setup.py sdist
+
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 	@echo "Artifacts:"
@@ -997,3 +1002,35 @@ clean-elk:
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+
+# Openshift placeholders, these are good for bootstrapping a totally fresh Openshift Node but not for re-running
+# So you may want to pick and choose the functionality in these targets based on what you are doing
+openshift-production-build: dist/ansible-tower.tar.gz
+	docker build -t ansible/tower_web -f installer/openshift/Dockerfile .
+	docker build -t ansible/tower_task -f installer/openshift/Dockerfile.celery .
+
+openshift-production-tag: openshift-production-build
+	docker tag ansible/tower_web:latest 172.30.1.1:5000/tower/tower_web:latest
+	docker tag ansible/tower_task:latest 172.30.1.1:5000/tower/tower_task:latest
+
+openshift-image-push: openshift-production-tag
+	oc login -u developer && \
+	docker login -u developer -p $(shell oc whoami -t) 172.30.1.1:5000 && \
+	docker push 172.30.1.1:5000/tower/tower_web:latest && \
+	docker push 172.30.1.1:5000/tower/tower_task:latest
+
+openshift-preconfig:
+	oc login -u developer || true && \
+	oc new-project tower || true && \
+	oc adm policy add-role-to-user admin developer -n tower
+
+openshift-deploy: openshift-preconfig openshift-image-push
+	oc login -u developer && \
+	oc new-app --template=postgresql-persistent -e MEMORY_LIMIT=512Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql -e POSTGRESQL_USER=tower -e POSTGRESQL_PASSWORD=password123 -e POSTGRESQL_DATABASE=tower -e VOLUME_CAPACITY=1Gi -e POSTGRESQL_VERSION=9.5 -n tower && \
+	echo "Waiting for PG to come online" && \
+	sleep 15 && \
+	oc apply -f installer/openshift/config/configmap.yml && \
+	oc apply -f installer/openshift/config/deployment.yml
+
+openshift-delete:
+	oc delete -f installer/openshift/config/deployment.yml
