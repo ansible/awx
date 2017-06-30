@@ -1,0 +1,43 @@
+<div class="instances-list">
+    <smart-search django-model="instances" base-path="instances" iterator="instance" dataset="instance_dataset"
+        list="list" collection="instances" search-tags="searchTags">
+    </smart-search>
+
+    <div class="List-noItems ng-hide" ng-show="instances.length === 0 &amp;&amp; (searchTags | isEmpty)" translate>PLEASE ADD ITEMS TO THIS LIST</div>
+    <div class="list-table-container" ng-show="instances.length > 0">
+        <table id="instances_table" class="List-table" is-extended="false">
+            <thead>
+                <tr class="List-tableHeaderRow">
+                    <th id="instance-hostname-header" class="List-tableHeader list-header col-md-5 col-sm-5 col-xs-5" ng-click="columnNoSort !== 'true' &amp;&amp; toggleColumnOrderBy()"
+                        ng-class="{'list-header-noSort' : columnNoSort === 'true'}" base-path="instances" collection="instances"
+                        dataset="instance_dataset" column-sort="" column-field="hostname" column-iterator="instance" column-no-sort="undefined"
+                        column-label="Name" column-custom-class="col-md-5 col-sm-5 col-xs-5" query-set="instance_queryset">
+                        "{{'Name' | translate}}"
+                        <i ng-hide="columnNoSort === 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
+                    </th>
+                    <th id="instance-percent_capacity_remaining-header" class="List-tableHeader list-header  list-header-noSort" translate>
+                        Capacity
+                    </th>
+                    <th id="instance-jobs_running-header" class="List-tableHeader list-header  list-header-noSort" translate>
+                        Running Jobs
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ngRepeat: instance in instances -->
+                <tr ng-class="{isActive: isActive(instance.id)}" id="instance.id" class="List-tableRow instance_class ng-scope" ng-repeat="instance in instances">
+                    <td class="List-tableCell hostname-column col-md-5 col-sm-5 col-xs-5">
+                        <a ui-sref="instanceGroups.instances.list.job.list({instance_id: instance.id})" class="ng-binding">{{ instance.hostname }}</a></td>
+                    <td class="List-tableCell List-tableCell--capacityRemainingColumn ng-binding">
+                        <capacity-bar capacity="instance.percent_capacity_remaining"></capacity-bar><span>{{ instance.percent_capacity_remaining }}%</span>
+                    </td>
+                    <td class="List-tableCell jobs_running-column ng-binding">
+                        <a ui-sref="instanceGroups.instances.jobs({instance_group_id: $stateParams.instance_group_id})">
+                            {{ instance.jobs_running }}
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

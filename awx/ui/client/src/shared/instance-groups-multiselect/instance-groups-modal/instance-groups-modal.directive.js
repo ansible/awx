@@ -4,7 +4,7 @@ export default ['templateUrl', function(templateUrl) {
         scope: {
             instanceGroups: '='
         },
-        templateUrl: templateUrl('instance-groups/instance-groups-multiselect/instance-groups-modal/instance-groups-modal'),
+        templateUrl: templateUrl('shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal'),
 
         link: function(scope, element) {
 
@@ -47,7 +47,7 @@ export default ['templateUrl', function(templateUrl) {
                             instanceGroupList.well = false;
                             instanceGroupList.multiSelect = true;
                             instanceGroupList.multiSelectExtended = true;
-                            delete instanceGroupList.fields.capacity;
+                            delete instanceGroupList.fields.percent_capacity_remaining;
                             delete instanceGroupList.fields.jobs_running;
 
                             let html = `${GenerateList.build({

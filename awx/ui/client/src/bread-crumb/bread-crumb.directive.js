@@ -12,6 +12,7 @@ export default
 
                     scope.showActivityStreamButton = false;
                     scope.showRefreshButton = false;
+                    scope.alwaysShowRefreshButton = false;
                     scope.loadingLicense = true;
 
                     scope.$on("$stateChangeSuccess", function updateActivityStreamButton(event, toState, toParams, fromState, fromParams) {
@@ -48,6 +49,7 @@ export default
                         }
 
                         scope.showRefreshButton = (streamConfig && streamConfig.refreshButton) ? true : false;
+                        scope.alwaysShowRefreshButton = (streamConfig && streamConfig.alwaysShowRefreshButton) ? true: false;
                     });
 
                     // scope.$on('featuresLoaded', function(){
