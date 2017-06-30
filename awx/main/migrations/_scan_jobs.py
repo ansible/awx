@@ -7,9 +7,14 @@ logger = logging.getLogger('awx.main.migrations')
 
 def _create_fact_scan_project(Project, org):
     name = "Tower Fact Scan - {}".format(org.name if org else "No Organization")
-    return Project.objects.create(name=name, 
-                                  scm_url='https://github.com/ansible/tower-fact-modules',
-                                  organization=org)
+    proj = Project(name=name, 
+                   scm_url='https://github.com/ansible/tower-fact-modules',
+                   scm_type='git',
+                   scm_update_on_launch=True,
+                   scm_update_cache_timeout=86400,
+                   organization=org)
+    proj.save(skip_update=True)
+    return proj
 
 
 def _create_fact_scan_projects(Project, orgs):
@@ -51,7 +56,6 @@ def _migrate_scan_job_templates(apps):
             jt.project = org_proj_map[jt.inventory.organization.id]
         # Job Templates without an Organization; through related Inventory
         else:
-            # TODO: Create a project without an org and connect
             if not project_no_org:
                 project_no_org = _create_fact_scan_project(Project, None)
             jt.project = project_no_org
