@@ -28,7 +28,7 @@
              list.iterator = 'associate_host';
              list.name = 'associate_hosts';
              list.multiSelect = true;
-             list.fields.name.ngClick = 'linkoutHost(associate_host.id)';
+             list.fields.name.ngClick = 'linkoutHost(associate_host)';
              list.trackBy = 'associate_host.id';
              delete list.fields.toggleHost;
              delete list.fields.active_failures;
@@ -97,10 +97,8 @@
 
          };
 
-         $scope.linkoutHost = function(userId) {
-             // Open the edit user form in a new tab so as not to navigate the user
-             // away from the modal
-             $window.open('/#/users/' + userId,'_blank');
+         $scope.linkoutHost = function(host) {
+             $window.open('/#/inventories/inventory/' + host.inventory + '/hosts/edit/' + host.id,'_blank');
          };
      });
  }];

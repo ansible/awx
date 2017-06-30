@@ -33,7 +33,7 @@
              list.iterator = 'associate_group';
              list.name = 'associate_groups';
              list.multiSelect = true;
-             list.fields.name.ngClick = 'linkoutGroup(associate_group.id)';
+             list.fields.name.ngClick = 'linkoutGroup(associate_group)';
              list.trackBy = 'associate_group.id';
              list.multiSelectPreview = {
                  selectedRows: 'selectedItems',
@@ -106,10 +106,8 @@
 
          };
 
-         $scope.linkoutGroup = function(userId) {
-             // Open the edit user form in a new tab so as not to navigate the user
-             // away from the modal
-             $window.open('/#/users/' + userId,'_blank');
+         $scope.linkoutGroup = function(group) {
+             $window.open('/#/inventories/inventory/' + group.inventory + '/groups/edit/' + group.id,'_blank');
          };
      });
  }];
