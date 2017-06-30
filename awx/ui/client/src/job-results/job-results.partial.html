@@ -363,8 +363,12 @@
                         <label class="JobResults-resultRowLabel">
                             Instance Group
                         </label>
-                        <div class="JobResults-resultRowText">
+                        <div class="JobResults-resultRowText JobResults-resultRowText--instanceGroup">
                             {{ job.summary_fields.instance_group.name }}
+                            <span class="JobResults-isolatedBadge"
+                            ng-if="job.summary_fields.instance_group.controller_id">
+                            Isolated
+                            </span>
                         </div>
                     </div>
 
