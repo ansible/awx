@@ -9,7 +9,6 @@ from sets import Set
 # Django
 from django.conf import settings
 from django.db import transaction, connection
-from django.db.utils import DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now
 
@@ -23,6 +22,8 @@ from awx.main.tasks import _send_notification_templates
 
 # Celery
 from celery.task.control import inspect
+
+from django_pglocks import advisory_lock
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -459,13 +460,12 @@ class TaskManager():
         logger.debug("Starting Schedule")
         with transaction.atomic():
             # Lock
-            try:
-                Instance.objects.select_for_update(nowait=True).all()[0]
-            except DatabaseError:
-                return
+            with advisory_lock('task_manager_lock', wait=False) as acquired:
+                if acquired is False:
+                    return
 
-            finished_wfjs = self._schedule()
+                finished_wfjs = self._schedule()
 
-        # Operations whose queries rely on modifications made during the atomic scheduling session
-        for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-            _send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')
+                # Operations whose queries rely on modifications made during the atomic scheduling session
+                for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
+                    _send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')

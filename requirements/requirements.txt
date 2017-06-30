@@ -59,6 +59,7 @@ django-crum==0.7.1
 django-extensions==1.7.8
 django-jsonfield==1.0.1
 django-polymorphic==1.2
+django-pglocks==1.0.2
 django-radius==1.1.0
 django-solo==1.1.2
 django-split-settings==0.2.5
