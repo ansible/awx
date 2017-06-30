@@ -27,13 +27,13 @@ spec:
               name: tower-application-config
           env:
             - name: DATABASE_USER
-              value: postgres
+              value: tower
             - name: DATABASE_NAME
               value: tower
             - name: DATABASE_HOST
               value: postgresql
             - name: DATABASE_PASSWORD
-              value: password
+              value: password123
         - name: tower-rabbit
           image: rabbitmq:3
           env:

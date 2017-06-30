@@ -38,10 +38,10 @@ COPY dist/ansible-tower-3.2.0.tar.gz /tmp/ansible-tower-3.2.0.tar.gz
 RUN pip install /tmp/ansible-tower-3.2.0.tar.gz
 # TODO: Replace this with the actual version
 RUN echo "3.2.0" > /var/lib/awx/.tower_version
-ADD packaging/docker/nginx.conf /etc/nginx/nginx.conf
-ADD packaging/docker/supervisor.conf /supervisor.conf
-ADD packaging/docker/launch_tower.sh /usr/bin/launch_tower.sh
-ADD packaging/docker/settings.py /etc/tower/settings.py
+ADD installer/openshift/nginx.conf /etc/nginx/nginx.conf
+ADD installer/openshift/supervisor.conf /supervisor.conf
+ADD installer/openshift/launch_tower.sh /usr/bin/launch_tower.sh
+ADD installer/openshift/settings.py /etc/tower/settings.py
 RUN yum -y remove gcc postgresql-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && yum -y clean all
 RUN rm -rf /root/.cache
 RUN chmod g+w /etc/passwd

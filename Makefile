@@ -977,6 +977,28 @@ clean-elk:
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
-docker-production-build: dist/ansible-tower.tar.gz
-	docker build -t ansible/tower_web -f packaging/docker/Dockerfile .
-	docker build -t ansible/tower_task -f packaging/docker/Dockerfile.celery .
+# Openshift placeholders
+openshift-production-build: dist/ansible-tower.tar.gz
+	docker build -t ansible/tower_web -f installer/openshift/Dockerfile .
+	docker build -t ansible/tower_task -f installer/openshift/Dockerfile.celery .
+
+openshift-production-tag: openshift-production-build
+	docker tag ansible/tower_web:latest 172.30.1.1:5000/tower/tower_web:latest
+	docker tag ansible/tower_task:latest 172.30.1.1:5000/tower/tower_task:latest
+
+openshift-image-push: openshift-production-tag
+	oc login -u developer && \
+	docker login -u developer -p ${oc whoami -t} 172.30.1.1:5000 && \
+	docker push 172.30.1.1:5000/tower/tower_web:latest && \
+	docker push 172.30.1.1:5000/tower/tower_task:latest
+
+openshift-deploy: openshift-image-push
+	oc login -u developer && \
+	oc new-project tower && \
+	oc adm policy add-role-to-user admin developer -n tower && \
+	oc new-app --template=postgresql-persistent -e MEMORY_LIMIT=512Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql -e POSTGRESQL_USER=tower -e POSTGRESQL_PASSWORD=password123 -e POSTGRESQL_DATABASE=tower -e VOLUME_CAPACITY=1Gi -e POSTGRESQL_VERSION=9.5 -n tower && \
+	oc apply -f installer/openshift/config/configmap.yml && \
+	oc apply -f installer/openshift/config/deployment.yml
+
+openshift-delete:
+	oc delete -f installer/openshift/config/deployment.yml
