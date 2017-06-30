@@ -1,0 +1,76 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: tower
+  namespace: tower
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: tower-web-deploy
+        service: django
+    spec:
+      containers:
+        - name: tower-web
+          image: 172.30.1.1:5000/tower/tower_web:latest
+          ports:
+            - containerPort: 8052
+          volumeMounts:
+            - mountPath: /etc/tower
+              name: tower-application-config
+        - name: tower-celery
+          image: 172.30.1.1:5000/tower/tower_task:latest
+          volumeMounts:
+            - mountPath: /etc/tower
+              name: tower-application-config
+          env:
+            - name: DATABASE_USER
+              value: postgres
+            - name: DATABASE_NAME
+              value: tower
+            - name: DATABASE_HOST
+              value: postgresql
+            - name: DATABASE_PASSWORD
+              value: password
+        - name: tower-rabbit
+          image: rabbitmq:3
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: secret
+            - name: RABBITMQ_NODENAME
+              value: rabbitmq
+            - name: RABBITMQ_DEFAULT_USER
+              value: tower
+            - name: RABBITMQ_DEFAULT_PASS
+              value: abcdefg
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: tower
+        - name: tower-memcached
+          image: memcached
+      volumes:
+        - name: tower-application-config
+          configMap:
+            name: tower-config
+            items:
+              - key: tower_settings
+                path: settings.py
+              - key: secret_key
+                path: SECRET_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tower-web-svc
+  namespace: tower
+  labels:
+    name: tower-web-svc
+spec:
+  type: "NodePort"
+  ports:
+    - name: http
+      port: 8052
+      nodePort: 30083
+  selector:
+    name: tower-web-deploy
