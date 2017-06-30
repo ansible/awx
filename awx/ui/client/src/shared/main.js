@@ -32,6 +32,7 @@ import directives from './directives';
 import features from './features/main';
 import orgAdminLookup from './org-admin-lookup/main';
 import limitPanels from './limit-panels/main';
+import multiSelectPreview from './multi-select-preview/main';
 import 'angular-duration-format';
 
 export default
@@ -61,6 +62,7 @@ angular.module('shared', [listGenerator.name,
         features.name,
         orgAdminLookup.name,
         limitPanels.name,
+        multiSelectPreview.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])

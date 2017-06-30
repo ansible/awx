@@ -1,0 +1,19 @@
+<div class="MultiSelectPreview" ng-show="selectedRows.length > 0">
+    <div class="MultiSelectPreview-selectedItems">
+        <div class="MultiSelectPreview-selectedItemsLabel">
+            <span>SELECTED:</span>
+        </div>
+        <div class="MultiSelectPreview-previewTags--outer">
+            <div class="MultiSelectPreview-previewTags--inner">
+                <div class="MultiSelectPreview-previewTagContainer" ng-repeat="selectedRow in selectedRows">
+                    <div class="MultiSelectPreview-previewTagContainerDelete" ng-click="unselectSelectedRow($index)">
+                        <i class="fa fa-times MultiSelectPreview-previewTagContainerTagDelete"></i>
+                    </div>
+                    <div class="MultiSelectPreview-previewTag MultiSelectPreview-previewTag--deletable">
+                        <span>{{selectedRow.name}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

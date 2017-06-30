@@ -163,6 +163,10 @@ export default ['$compile', 'Attr', 'Icon',
                     html += "</div>\n";
                 }
 
+                if (list.multiSelectPreview) {
+                    html += "<multi-select-preview selected-rows='" + list.multiSelectPreview.selectedRows + "' available-rows='" + list.multiSelectPreview.availableRows + "'></multi-select-preview>";
+                }
+
                 if (options.instructions) {
                     html += "<div class=\"instructions alert alert-info\">" + options.instructions + "</div>\n";
                 } else if (list.instructions) {
