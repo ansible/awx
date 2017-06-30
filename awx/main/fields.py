@@ -542,6 +542,10 @@ class CredentialTypeInputField(JSONSchemaField):
             'type': 'object',
             'additionalProperties': False,
             'properties': {
+                'required': {
+                    'type': 'array',
+                    'items': {'type': 'string'}
+                },
                 'fields':  {
                     'type': 'array',
                     'items': {
