@@ -35,6 +35,10 @@
              list.multiSelect = true;
              list.fields.name.ngClick = 'linkoutGroup(associate_group.id)';
              list.trackBy = 'associate_group.id';
+             list.multiSelectPreview = {
+                 selectedRows: 'selectedItems',
+                 availableRows: 'associate_groups'
+             };
              delete list.actions;
              delete list.fieldActions;
              delete list.fields.failed_hosts;
@@ -58,9 +62,11 @@
                      $scope.$watchCollection('associate_groups', function () {
                          if($scope.selectedItems) {
                              $scope.associate_groups.forEach(function(row, i) {
-                                 if (_.includes($scope.selectedItems, row.id)) {
-                                     $scope.associate_groups[i].isSelected = true;
-                                 }
+                                 $scope.selectedItems.forEach(function(selectedItem) {
+                                     if(selectedItem.id === row.id) {
+                                         $scope.associate_groups[i].isSelected = true;
+                                     }
+                                 });
                              });
                          }
                      });
@@ -72,14 +78,14 @@
                  let item = value.value;
 
                  if (value.isSelected) {
-                     $scope.selectedItems.push(item.id);
+                     $scope.selectedItems.push(item);
                  }
                  else {
                      // _.remove() Returns the new array of removed elements.
                      // This will pull all the values out of the array that don't
                      // match the deselected item effectively removing it
                      $scope.selectedItems = _.remove($scope.selectedItems, function(selectedItem) {
-                         return selectedItem !== item.id;
+                         return selectedItem.id !== item.id;
                      });
                  }
              });

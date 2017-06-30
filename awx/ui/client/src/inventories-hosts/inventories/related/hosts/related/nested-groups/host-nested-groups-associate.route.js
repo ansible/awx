@@ -13,7 +13,7 @@ export default {
             controller: function($scope, $q, GroupsService, $state){
                 $scope.associateGroups = function(selectedItems){
                     var deferred = $q.defer();
-                    return $q.all( _.map(selectedItems, (id) => GroupsService.associateHost({id: parseInt($state.params.host_id)}, id)) )
+                    return $q.all( _.map(selectedItems, (selectedItem) => GroupsService.associateHost({id: parseInt($state.params.host_id)}, selectedItem.id)) )
                          .then( () =>{
                              deferred.resolve();
                          }, (error) => {

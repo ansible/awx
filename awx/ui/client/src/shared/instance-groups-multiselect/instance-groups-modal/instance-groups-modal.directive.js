@@ -46,7 +46,10 @@ export default ['templateUrl', function(templateUrl) {
                             instanceGroupList.listTitle = false;
                             instanceGroupList.well = false;
                             instanceGroupList.multiSelect = true;
-                            instanceGroupList.multiSelectExtended = true;
+                            instanceGroupList.multiSelectPreview = {
+                                selectedRows: 'igTags',
+                                availableRows: 'instance_groups'
+                            };
                             delete instanceGroupList.fields.percent_capacity_remaining;
                             delete instanceGroupList.fields.jobs_running;
 
