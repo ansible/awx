@@ -724,6 +724,37 @@ class TestJobCredentials(TestJobExecution):
 
         assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
 
+    def test_custom_environment_injectors_with_boolean_env_var(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'turbo_button',
+                    'label': 'Turbo Button',
+                    'type': 'boolean'
+                }]
+            },
+            injectors={
+                'env': {
+                    'TURBO_BUTTON': '{{turbo_button}}'
+                }
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+            inputs={'turbo_button': True}
+        )
+        self.instance.extra_credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert env['TURBO_BUTTON'] == str(True)
+
     def test_custom_environment_injectors_with_reserved_env_var(self):
         some_cloud = CredentialType(
             kind='cloud',
@@ -822,6 +853,68 @@ class TestJobCredentials(TestJobExecution):
         args, cwd, env, stdout = call_args
 
         assert '-e {"api_token": "ABC123"}' in ' '.join(args)
+
+    def test_custom_environment_injectors_with_boolean_extra_vars(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'turbo_button',
+                    'label': 'Turbo Button',
+                    'type': 'boolean'
+                }]
+            },
+            injectors={
+                'extra_vars': {
+                    'turbo_button': '{{turbo_button}}'
+                }
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+            inputs={'turbo_button': True}
+        )
+        self.instance.extra_credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '-e {"turbo_button": true}' in ' '.join(args)
+
+    def test_custom_environment_injectors_with_complicated_boolean_template(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'turbo_button',
+                    'label': 'Turbo Button',
+                    'type': 'boolean'
+                }]
+            },
+            injectors={
+                'extra_vars': {
+                    'turbo_button': '{% if turbo_button %}FAST!{% else %}SLOW!{% endif %}'
+                }
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+            inputs={'turbo_button': True}
+        )
+        self.instance.extra_credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '-e {"turbo_button": "FAST!"}' in ' '.join(args)
 
     def test_custom_environment_injectors_with_secret_extra_vars(self):
         """
