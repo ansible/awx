@@ -1923,6 +1923,17 @@ class CredentialTypeSerializer(BaseSerializer):
         )
         return res
 
+    def to_representation(self, data):
+        value = super(CredentialTypeSerializer, self).to_representation(data)
+
+        # translate labels and help_text for credential fields "managed by Tower"
+        if value.get('managed_by_tower'):
+            for field in value.get('inputs', {}).get('fields', []):
+                field['label'] = _(field['label'])
+                if 'help_text' in field:
+                    field['help_text'] = _(field['help_text'])
+        return value
+
 
 # TODO: remove when API v1 is removed
 @six.add_metaclass(BaseSerializerMetaclass)
