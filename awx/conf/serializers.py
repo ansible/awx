@@ -70,6 +70,10 @@ class SettingSingletonSerializer(serializers.Serializer):
             category_slug = self.context['view'].kwargs.get('category_slug', 'all')
         except (KeyError, AttributeError):
             category_slug = ''
+        if self.context['view'].kwargs.get('category_slug', '') == 'all':
+            for validate_func in settings_registry._validate_registry.values():
+                attrs = validate_func(self, attrs)
+            return attrs
         custom_validate = settings_registry.get_registered_validate_func(category_slug)
         return custom_validate(self, attrs) if custom_validate else attrs
 
