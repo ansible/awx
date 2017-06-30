@@ -171,6 +171,10 @@ export default [
                 $scope.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.LOG_AGGREGATOR_TYPE });
             }
 
+            if($scope.$parent.LOG_AGGREGATOR_PROTOCOL !== null) {
+                $scope.$parent.LOG_AGGREGATOR_PROTOCOL = _.find($scope.$parent.LOG_AGGREGATOR_PROTOCOL_options, { value: $scope.$parent.LOG_AGGREGATOR_PROTOCOL });
+            }
+
             if(flag !== undefined){
                 dropdownRendered = flag;
             }
@@ -183,6 +187,7 @@ export default [
                     placeholder: i18n._('Select types'),
                 });
                 $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_TYPE.$setPristine();
+                $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_PROTOCOL.$setPristine();
             }
         }
 

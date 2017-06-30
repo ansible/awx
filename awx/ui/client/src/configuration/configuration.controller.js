@@ -392,7 +392,11 @@ export default [
                 }
                 else {
                     // Everything else
-                    payload[key] = $scope[key];
+                    if (key !== 'LOG_AGGREGATOR_TCP_TIMEOUT' ||
+                        ($scope.LOG_AGGREGATOR_PROTOCOL === 'https' ||
+                            $scope.LOG_AGGREGATOR_PROTOCOL === 'tcp')) {
+                                payload[key] = $scope[key];
+                    }
                 }
             });
 
