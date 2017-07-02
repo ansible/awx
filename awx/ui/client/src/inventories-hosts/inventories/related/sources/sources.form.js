@@ -60,7 +60,6 @@ return {
         source: {
             label: i18n._('Source'),
             type: 'select',
-            required: true,
             ngOptions: 'source.label for source in source_type_options track by source.value',
             ngChange: 'sourceChange(source)',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
