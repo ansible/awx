@@ -5,6 +5,7 @@ export default {
                 page_size:"5",
                 order_by:"name",
                 role_level:"use_role",
+                kind: null
             },
             dynamic:true,
             squash:""
