@@ -457,7 +457,7 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (options.paginate === undefined || options.paginate === true) {
-                    let hide_view_per_page = (options.mode === "lookup") ? true : false;
+                    let hide_view_per_page = (options.mode === "lookup" || options.hideViewPerPage) ? true : false;
                     html += `<paginate
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"
