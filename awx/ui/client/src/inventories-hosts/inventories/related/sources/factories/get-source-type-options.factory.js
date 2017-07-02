@@ -11,7 +11,7 @@ export default
                 .success(function (data) {
                     var i, choices = data.actions.GET.source.choices;
                     for (i = 0; i < choices.length; i++) {
-                        if (choices[i][0] !== 'file' && choices[i][0] !== "") {
+                        if (choices[i][0] !== 'file') {
                             scope[variable].push({
                                 label: choices[i][1],
                                 value: choices[i][0]
