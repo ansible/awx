@@ -161,6 +161,12 @@ class SettingLoggingTest(GenericAPIView):
         obj = type('Settings', (object,), defaults)()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if request.data.get('LOG_AGGREGATOR_PASSWORD', '').startswith('$encrypted$'):
+            serializer.validated_data['LOG_AGGREGATOR_PASSWORD'] = getattr(
+                settings, 'LOG_AGGREGATOR_PASSWORD', ''
+            )
+
         try:
             class MockSettings:
                 pass
