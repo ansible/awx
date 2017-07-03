@@ -212,7 +212,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 if ($scope.originalSelectedCredentials) {
                     return !($scope.originalSelectedCredentials.machine === null &&
                         $scope.originalSelectedCredentials.extra.length === 0) &&
-                        !_.eq($scope.selectedCredentials,
+                        !_.isEqual($scope.selectedCredentials,
                             $scope.originalSelectedCredentials);
                 } else {
                     return false;
