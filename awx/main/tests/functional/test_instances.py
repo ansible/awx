@@ -1,11 +1,33 @@
 import pytest
 
 from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate
+from awx.main.models import Instance
+from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
 def test_default_tower_instance_group(default_instance_group, job_factory):
     assert default_instance_group in job_factory().preferred_instance_groups
+
+
+@pytest.mark.django_db
+def test_instance_dup(org_admin, organization, project, instance_factory, instance_group_factory, get, system_auditor):
+    i1 = instance_factory("i1")
+    i2 = instance_factory("i2")
+    i3 = instance_factory("i3")
+    ig_all = instance_group_factory("all", instances=[i1, i2, i3])
+    ig_dup = instance_group_factory("duplicates", instances=[i1])
+    project.organization.instance_groups.add(ig_all, ig_dup)
+    actual_num_instances = Instance.objects.active_count()
+    list_response = get(reverse('api:instance_list'), user=system_auditor)
+    api_num_instances_auditor = list_response.data.items()[0][1]
+
+    list_response2 = get(reverse('api:instance_list'), user=org_admin)
+    api_num_instances_oa = list_response2.data.items()[0][1]
+
+    assert actual_num_instances == api_num_instances_auditor
+    #Note: The org_admin will not see the default 'tower' node because it is not in it's group, as expected
+    assert api_num_instances_oa == (actual_num_instances - 1)
 
 
 @pytest.mark.django_db
