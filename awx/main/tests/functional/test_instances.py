@@ -26,7 +26,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     api_num_instances_oa = list_response2.data.items()[0][1]
 
     assert actual_num_instances == api_num_instances_auditor
-    #Note: The org_admin will not see the default 'tower' node because it is not in it's group, as expected
+    # Note: The org_admin will not see the default 'tower' node because it is not in it's group, as expected
     assert api_num_instances_oa == (actual_num_instances - 1)
 
 
