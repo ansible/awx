@@ -86,7 +86,7 @@ export default ['i18n', function(i18n) {
                 icon: 'fa-info',
                 awToolTip: 'View Insights Data',
                 dataPlacement: 'top',
-                ngShow: 'host.insights_system_id'
+                ngShow: 'host.insights_system_id && host.summary_fields.inventory.hasOwnProperty("insights_credential_id")'
             },
             edit: {
                 //label: 'Edit',

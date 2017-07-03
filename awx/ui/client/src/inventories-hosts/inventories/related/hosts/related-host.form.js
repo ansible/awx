@@ -126,7 +126,7 @@ function(i18n) {
                     dataPlacement: 'top',
                     title: i18n._('Insights'),
                     skipGenerator: true,
-                    ngIf: 'host.insights_system_id!==null'
+                    ngIf: "host.insights_system_id!==null && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')"
                 }
             }
         };
