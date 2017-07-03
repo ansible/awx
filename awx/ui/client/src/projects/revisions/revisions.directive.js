@@ -6,7 +6,6 @@ export default
         function(templateUrl, Rest, $q, $filter) {
             return {
                 restrict: 'E',
-                scope: false,
                 templateUrl: templateUrl('projects/revisions/revisions'),
                 link: function(scope)  {
                     let full_revision = scope.project.scm_revision;
@@ -14,6 +13,8 @@ export default
                     scope.count = scope.project.scm_revision.length;
 
                     scope.copyRevisionHash = function() {
+                        scope.$emit('copied');
+
                         let textArea = document.createElement("textarea");
 
                         // Place in top-left corner of screen regardless of scroll position.
@@ -40,7 +41,7 @@ export default
                         textArea.value = full_revision;
                         document.body.appendChild(textArea);
                         textArea.select();
-                        
+
                         document.execCommand('copy');
 
                         document.body.removeChild(textArea);
