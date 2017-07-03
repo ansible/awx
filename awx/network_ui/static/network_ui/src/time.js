@@ -61,6 +61,7 @@ _Past.prototype.onMessage = function(controller, msg_type, message) {
         controller.handle_message(type, data);
     }
 };
+_Past.prototype.onMessage.transitions = ['Present'];
 
 _Past.prototype.onMultipleMessage = function(controller, msg_type, message) {
         var i = 0;
@@ -98,6 +99,7 @@ _Past.prototype.onRedo = function(controller, msg_type, message) {
             }
         }
 };
+_Past.prototype.onRedo.transitions = ['Present'];
 
 _Past.prototype.onCoverageRequest = function(controller) {
         controller.scope.send_coverage();
@@ -195,7 +197,7 @@ _Past.prototype.onMouseWheel = function (controller, msg_type, message) {
     }
 
 };
-_Past.prototype.onMouseWheel.transitions = ['Past'];
+_Past.prototype.onMouseWheel.transitions = ['Present'];
 
 _Past.prototype.onKeyDown = function(controller, msg_type, $event) {
 
@@ -217,7 +219,7 @@ _Past.prototype.onKeyDown = function(controller, msg_type, $event) {
         controller.next_controller.handle_message(msg_type, $event);
     }
 };
-_Past.prototype.onKeyDown.transitions = ['Past'];
+_Past.prototype.onKeyDown.transitions = ['Present'];
 
 
 _Past.prototype.undo = function(controller) {
@@ -369,6 +371,7 @@ _Present.prototype.onUndo = function(controller, msg_type, message) {
             controller.changeState(Past);
         }
 };
+_Present.prototype.onUndo.transitions = ['Past'];
 _Present.prototype.onSnapshot = function(controller, msg_type, message) {
         if (message.sender !== controller.scope.client_id) {
             controller.scope.onSnapshot(message);
