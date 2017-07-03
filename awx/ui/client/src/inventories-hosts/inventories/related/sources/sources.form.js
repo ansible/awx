@@ -71,7 +71,7 @@ return {
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
-            ngShow: "source && source.value !== ''",
+            ngShow: "source && source.value !== '' && source.value !== 'custom'",
             sourceModel: 'credential',
             sourceField: 'name',
             ngClick: 'lookupCredential()',
@@ -134,43 +134,24 @@ return {
         instance_filters: {
             label: i18n._('Instance Filters'),
             type: 'text',
-            ngShow: "source && source.value == 'ec2'",
+            ngShow: "source && (source.value == 'ec2' || source.value == 'vmware')",
             dataTitle: 'Instance Filters',
             dataPlacement: 'right',
-            awPopOver: "<p>Provide a comma-separated list of filter expressions. " +
-                "Hosts are imported when <em>ANY</em> of the filters match.</p>" +
-                "Limit to hosts having a tag:<br />\n" +
-                "<blockquote>tag-key=TowerManaged</blockquote>\n" +
-                "Limit to hosts using either key pair:<br />\n" +
-                "<blockquote>key-name=staging, key-name=production</blockquote>\n" +
-                "Limit to hosts where the Name tag begins with <em>test</em>:<br />\n" +
-                "<blockquote>tag:Name=test*</blockquote>\n" +
-                "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
-                "for a complete list of supported filters.</p>",
+            awPopOverWatch: 'instanceFilterPopOver',
+            awPopOver: '{{ instanceFilterPopOver }}',
             dataContainer: 'body',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         group_by: {
             label: i18n._('Only Group By'),
             type: 'select',
-            ngShow: "source && source.value == 'ec2'",
+            ngShow: "source && (source.value == 'ec2' || source.value == 'vmware')",
             ngOptions: 'source.label for source in group_by_choices track by source.value',
             multiSelect: true,
             dataTitle: 'Only Group By',
             dataPlacement: 'right',
-            awPopOver: "<p>Select which groups to create automatically. " +
-                "Tower will create group names similar to the following examples based on the options selected:</p><ul>" +
-                "<li>Availability Zone: <strong>zones &raquo; us-east-1b</strong></li>" +
-                "<li>Image ID: <strong>images &raquo; ami-b007ab1e</strong></li>" +
-                "<li>Instance ID: <strong>instances &raquo; i-ca11ab1e</strong></li>" +
-                "<li>Instance Type: <strong>types &raquo; type_m1_medium</strong></li>" +
-                "<li>Key Name: <strong>keys &raquo; key_testing</strong></li>" +
-                "<li>Region: <strong>regions &raquo; us-east-1</strong></li>" +
-                "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
-                "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
-                "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
-                "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
-                "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
+            awPopOverWatch: 'groupByPopOver',
+            awPopOver: '{{ groupByPopOver }}',
             dataContainer: 'body',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
