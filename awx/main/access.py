@@ -373,7 +373,10 @@ class InstanceAccess(BaseAccess):
     model = Instance
 
     def get_queryset(self):
-        return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup))
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return Instance.objects.all().distinct()
+        else:
+            return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
 
     def can_add(self, data):
         return False
