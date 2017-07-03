@@ -341,13 +341,20 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         };
 
         $scope.sourceChange = function(source) {
-            $scope.source = source;
+            if (source) {
+              source = source.value;
+            } else {
+              source = "";
+            }
 
-            source = source.value;
+            $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
 
-            if (source === 'ec2' || source === 'custom' ||
-                source === 'vmware' || source === 'openstack' ||
-                source === 'scm') {
+            if (source === 'custom'){
+                $scope.credentialBasePath = GetBasePath('inventory_script');
+            }
+
+            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm') {
+                $scope.envParseType = 'yaml';
 
                 var varName;
                 if (source === 'scm') {
@@ -361,18 +368,26 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                     scope: $scope,
                     field_id: varName,
                     variable: varName,
-                    parse_variable: 'envParseType',
+                    parse_variable: 'envParseType'
                 });
             }
+
+            if (source === 'scm') {
+              $scope.overwrite_vars = true;
+              $scope.inventory_source_form.inventory_file.$setPristine();
+            } else {
+              $scope.overwrite_vars = false;
+            }
+
             // reset fields
+            $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
-            $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
-            $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' && source.value !== 'scm' && source.value !== 'ec2' ? true : false;
+            $scope.source_region_choices = source === 'azure_rm' ? $scope.azure_regions : $scope[source + '_regions'];
+            $scope.cloudCredentialRequired = source !== '' && source !== 'scm' && source !== 'custom' && source !== 'ec2' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
             $scope.credential_name = null;
-
             initRegionSelect();
         };
 

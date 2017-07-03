@@ -144,6 +144,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     varName = source + '_variables';
                 }
 
+                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
                 ParseTypeChange({
                     scope: $scope,
                     field_id: varName,
