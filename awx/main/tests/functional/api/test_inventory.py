@@ -1,6 +1,8 @@
 import pytest
 import mock
 
+from django.core.exceptions import ValidationError
+
 from awx.api.versioning import reverse
 
 from awx.main.models import InventorySource, Project, ProjectUpdate
@@ -32,6 +34,19 @@ def test_inventory_source_notification_on_cloud_only(get, post, inventory_source
     url = reverse('api:inventory_source_notification_templates_success_list', kwargs={'pk': not_is.id})
     response = post(url, dict(id=notification_template.id), u)
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_inventory_source_unique_together_with_inv(inventory_factory):
+    inv1 = inventory_factory('foo')
+    inv2 = inventory_factory('bar')
+    is1 = InventorySource(name='foo', source='file', inventory=inv1)
+    is1.save()
+    is2 = InventorySource(name='foo', source='file', inventory=inv1)
+    with pytest.raises(ValidationError):
+        is2.validate_unique()
+    is2 = InventorySource(name='foo', source='file', inventory=inv2)
+    is2.validate_unique()
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -347,4 +362,3 @@ class TestInsightsCredential:
         patch(insights_inventory.get_absolute_url(),
               {'insights_credential': scm_credential.id}, admin_user,
               expect=400)
-

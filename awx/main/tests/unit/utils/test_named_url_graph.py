@@ -24,8 +24,10 @@ def common_model_class_mock():
 
 @pytest.fixture
 def common_model_name_not_unique_class_mock():
-    def class_generator(ut, fk_a_obj, fk_b_obj, plural):
+    def class_generator(ut, fk_a_obj, fk_b_obj, plural, soft_ut=[]):
         class ModelClass(CommonModelNameNotUnique):
+
+            SOFT_UNIQUE_TOGETHER = soft_ut
 
             class Meta:
                 unique_together = ut
@@ -90,6 +92,33 @@ def test_invalid_generation(common_model_name_not_unique_class_mock,
     with mock.patch('awx.main.utils.named_url_graph.settings', settings_mock):
         generate_graph(models)
     assert not settings_mock.NAMED_URL_FORMATS
+
+
+def test_soft_unique_together_being_included(common_model_name_not_unique_class_mock,
+                                             common_model_class_mock, settings_mock):
+    models = []
+    model_1 = common_model_class_mock('model_1')
+    models.append(model_1)
+    model_2 = common_model_name_not_unique_class_mock(
+        (),
+        model_1,
+        model_1,
+        'model_2',
+        soft_ut=[('name', 'fk_a')]
+    )
+    models.append(model_2)
+
+    random.shuffle(models)
+    with mock.patch('awx.main.utils.named_url_graph.settings', settings_mock):
+        generate_graph(models)
+    assert settings_mock.NAMED_URL_GRAPH[model_1].model == model_1
+    assert settings_mock.NAMED_URL_GRAPH[model_1].fields == ('name',)
+    assert settings_mock.NAMED_URL_GRAPH[model_1].adj_list == []
+
+    assert settings_mock.NAMED_URL_GRAPH[model_2].model == model_2
+    assert settings_mock.NAMED_URL_GRAPH[model_2].fields == ('name',)
+    assert zip(*settings_mock.NAMED_URL_GRAPH[model_2].adj_list)[0] == ('fk_a',)
+    assert [x.model for x in zip(*settings_mock.NAMED_URL_GRAPH[model_2].adj_list)[1]] == [model_1]
 
 
 def test_chain_generation(common_model_class_mock, common_model_name_not_unique_class_mock, settings_mock):

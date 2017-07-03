@@ -224,6 +224,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
     '''
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
 
     class Meta:
         app_label = 'main'
@@ -1433,4 +1434,3 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
-

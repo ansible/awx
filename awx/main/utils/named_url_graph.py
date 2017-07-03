@@ -187,6 +187,8 @@ def _get_all_unique_togethers(model):
             ret.append(uts)
         else:
             ret.extend(uts)
+        soft_uts = getattr(model_to_backtrack, 'SOFT_UNIQUE_TOGETHER', [])
+        ret.extend(soft_uts)
         for parent_class in model_to_backtrack.__bases__:
             if issubclass(parent_class, models.Model) and\
                     hasattr(parent_class, '_meta') and\

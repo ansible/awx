@@ -20,6 +20,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Release UJT unique_together constraint
+        migrations.AlterUniqueTogether(
+            name='unifiedjobtemplate',
+            unique_together=set([]),
+        ),
+
         # Inventory Refresh
         migrations.RenameField(
             'InventorySource',
