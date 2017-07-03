@@ -18,8 +18,9 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         init();
 
         function init() {
+            $scope.mode = 'add';
             // apply form definition's default field values
-            GenerateForm.applyDefaults(form, $scope);
+            GenerateForm.applyDefaults(form, $scope, true);
             $scope.canAdd = inventorySourcesOptions.actions.POST;
             $scope.envParseType = 'yaml';
             initSources();
@@ -118,7 +119,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             });
         };
 
-        $scope.projectBasePath = GetBasePath('projects');
         $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
 
         $scope.sourceChange = function(source) {
@@ -144,10 +144,11 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             }
 
             if (source === 'scm') {
-              $scope.overwrite_vars = true;
-              $scope.inventory_source_form.inventory_file.$setPristine();
+                $scope.projectBasePath = GetBasePath('projects');
+                $scope.overwrite_vars = true;
+                $scope.inventory_source_form.inventory_file.$setPristine();
             } else {
-              $scope.overwrite_vars = false;
+                $scope.overwrite_vars = false;
             }
 
             // reset fields

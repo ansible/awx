@@ -564,10 +564,6 @@ function(ConfigurationUtils, i18n, $rootScope) {
                         _doAutoPopulate();
                     }
                 });
-
-                if (attrs.watchbasepath === 'projectBasePath') {
-                    _doAutoPopulate();
-                }
             }
 
             function _doAutoPopulate() {
