@@ -612,7 +612,7 @@ def build_proot_temp_dir():
 def wrap_args_with_proot(args, cwd, **kwargs):
     '''
     Wrap existing command line with proot to restrict access to:
-     - /tmp (except for own tmp files)
+     - AWX_PROOT_BASE_PATH (generally, /tmp) (except for own /tmp files)
     For non-isolated nodes:
      - /etc/tower (to prevent obtaining db info or secret key)
      - /var/lib/awx (except for current project)
@@ -621,7 +621,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     '''
     from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/']
-    hide_paths = [tempfile.gettempdir()]
+    hide_paths = [settings.AWX_PROOT_BASE_PATH]
     if not kwargs.get('isolated'):
         hide_paths.extend(['/etc/tower', '/var/lib/awx', '/var/log',
                            settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT])
