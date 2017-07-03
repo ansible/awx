@@ -299,7 +299,8 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_related(self, obj):
         res = OrderedDict()
         view = self.context.get('view', None)
-        if view and hasattr(view, 'retrieve') and type(obj) in settings.NAMED_URL_GRAPH:
+        if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and \
+                type(obj) in settings.NAMED_URL_GRAPH:
             original_url = self.get_url(obj)
             if not original_url.startswith('/api/v1'):
                 res['named_url'] = self._generate_named_url(
