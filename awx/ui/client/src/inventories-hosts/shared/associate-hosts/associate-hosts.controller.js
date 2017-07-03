@@ -70,14 +70,14 @@
                  let item = value.value;
 
                  if (value.isSelected) {
-                     $scope.selectedItems.push(item.id);
+                     $scope.selectedItems.push(item);
                  }
                  else {
                      // _.remove() Returns the new array of removed elements.
                      // This will pull all the values out of the array that don't
                      // match the deselected item effectively removing it
                      $scope.selectedItems = _.remove($scope.selectedItems, function(selectedItem) {
-                         return selectedItem !== item.id;
+                         return selectedItem.id !== item.id;
                      });
                  }
              });
