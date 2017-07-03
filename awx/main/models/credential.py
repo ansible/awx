@@ -233,10 +233,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     inputs = CredentialInputField(
         blank=True,
         default={},
-        help_text=_('Data structure used to specify input values (e.g., '
-                    '{"username": "jane-doe", "password": "secret"}).  Valid '
-                    'fields and their requirements vary depending on the '
-                    'fields defined on the chosen CredentialType.')
+        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -419,11 +418,17 @@ class CredentialType(CommonModelNameNotUnique):
     )
     inputs = CredentialTypeInputField(
         blank=True,
-        default={}
+        default={},
+        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
-        default={}
+        default={},
+        help_text=_('Enter injectors using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
 
     def get_absolute_url(self, request=None):
