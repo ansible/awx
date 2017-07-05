@@ -22,7 +22,7 @@ export default
         sourcesEdit.name
     ])
     .factory('SourcesFormDefinition', sourcesFormDefinition)
-    .factory('SourcesListDefinition', sourcesListDefinition)
+    .value('SourcesListDefinition', sourcesListDefinition)
     .factory('GetSyncStatusMsg', GetSyncStatusMsg)
     .factory('ViewUpdateStatus', ViewUpdateStatus)
     .factory('CancelSourceUpdate', CancelSourceUpdate)
