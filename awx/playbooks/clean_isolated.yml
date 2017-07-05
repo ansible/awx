@@ -4,7 +4,8 @@
 # cleanup_dirs: ['/tmp/path/private_data_dir/', '/tmp//path/proot_temp_dir/']
 # private_data_dir: '/tmp/path/private_data_dir/'
 
-- hosts: all
+- name: Clean up from isolated job run.
+  hosts: all
   gather_facts: false
 
   tasks:

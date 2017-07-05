@@ -189,7 +189,7 @@ def cluster_node_heartbeat(self):
     for other_inst in recent_inst:
         if other_inst.version == "":
             continue
-        if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version):
+        if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version) and not settings.DEBUG:
             logger.error("Host {} reports Tower version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
                                                                                                              other_inst.version,
                                                                                                              inst.hostname,
