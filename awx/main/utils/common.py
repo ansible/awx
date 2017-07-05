@@ -256,7 +256,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type != "insights":
-        netloc = u':'.join([urllib.quote(x) for x in (netloc_username, netloc_password) if x])
+        netloc = u':'.join([urllib.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
