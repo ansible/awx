@@ -320,7 +320,7 @@ def test_insights_migration():
             'password': 'some-password',
         })
 
-    assert cred.credential_type.name == 'Insights Basic Auth'
+    assert cred.credential_type.name == 'Insights'
     assert cred.inputs['username'] == 'bob'
     assert cred.inputs['password'].startswith('$encrypted$')
 

@@ -946,16 +946,16 @@ def azure_rm(cls):
 def insights(cls):
     return cls(
         kind='insights',
-        name='Insights Basic Auth',
+        name='Insights',
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Basic Auth Username',
+                'label': 'Username',
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Basic Auth Password',
+                'label': 'Password',
                 'type': 'string',
                 'secret': True
             }],
