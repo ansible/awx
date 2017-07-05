@@ -129,8 +129,10 @@ register(
 register(
     'AWX_PROOT_BASE_PATH',
     field_class=fields.CharField,
-    label=_('Job isolation execution path'),
-    help_text=_('Create temporary working directories for isolated jobs in this location.'),
+    label=_('Job execution path'),
+    help_text=_('The directory in which Tower will create new temporary '
+                'directories for job execution and isolation '
+                '(such as credential files and custom inventory scripts).'),
     category=_('Jobs'),
     category_slug='jobs',
 )

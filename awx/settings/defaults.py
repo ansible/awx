@@ -594,7 +594,9 @@ AWX_PROOT_SHOW_PATHS = []
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
-# The directory in which bubblewrap will create new temporary directories for its root
+# The directory in which Tower will create new temporary directories for job
+# execution and isolation (such as credential files and custom
+# inventory scripts).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_BASE_PATH = "/tmp"
 
