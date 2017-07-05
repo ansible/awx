@@ -18,7 +18,7 @@
     - name: create a proot/bwrap temp dir (if necessary)
       synchronize:
         src: "{{proot_temp_dir}}"
-        dest: "/tmp"
+        dest: "{{dest}}"
       when: proot_temp_dir is defined
 
     - name: synchronize job environment with isolated host

@@ -154,7 +154,7 @@ class IsolatedManager(object):
 
         extra_vars = {
             'src': self.private_data_dir,
-            'dest': os.path.split(self.private_data_dir)[0],
+            'dest': settings.AWX_PROOT_BASE_PATH,
         }
         if self.proot_temp_dir:
             extra_vars['proot_temp_dir'] = self.proot_temp_dir
@@ -190,7 +190,7 @@ class IsolatedManager(object):
         isolated_ssh_path = None
         try:
             if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None):
-                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_tower_isolated')
+                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_tower_isolated', dir=settings.AWX_PROOT_BASE_PATH)
                 os.chmod(isolated_ssh_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
                 isolated_key = os.path.join(isolated_ssh_path, '.isolated')
                 ssh_sock = os.path.join(isolated_ssh_path, '.isolated_ssh_auth.sock')
