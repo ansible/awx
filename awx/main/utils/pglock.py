@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from django_pglocks import advisory_lock as django_pglocks_advisory_lock
 from django.db import connection
 
+
 @contextmanager
 def advisory_lock(*args, **kwargs):
     if connection.vendor == 'postgresql':
