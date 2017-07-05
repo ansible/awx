@@ -15,7 +15,6 @@ from celery import task
 from awx.main.scheduler import TaskManager 
 from django.core.cache import cache
 
-
 logger = logging.getLogger('awx.main.scheduler')
 
 # TODO: move logic to UnifiedJob model and use bind=True feature of celery.
@@ -58,4 +57,5 @@ def run_fail_inconsistent_running_jobs():
 
             all_running_sorted_tasks = scheduler.get_running_tasks()
             scheduler.process_celery_tasks(celery_task_start_time, active_tasks, all_running_sorted_tasks)
+
 
