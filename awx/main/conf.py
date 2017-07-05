@@ -416,6 +416,18 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_VERIFY_CERT',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable/disable HTTPS certificate verification'),
+    help_text=_('Flag to control enable/disable of certificate verification'
+                ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
+                ' log handler will verify certificate sent by external log aggregator'
+                ' before establishing connection.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 def logging_validate(serializer, attrs):
