@@ -848,7 +848,7 @@ class Command(NoArgsCommand):
         license_info = TaskEnhancer().validate_enhancements()
         if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
-            raise CommandError('No Tower license found!')
+            raise CommandError('No license found!')
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)

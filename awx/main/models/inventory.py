@@ -829,7 +829,7 @@ class InventorySourceOptions(BaseModel):
     SOURCE_CHOICES = [
         ('', _('Manual')),
         ('file', _('File, Directory or Script')),
-        ('scm', _('Sourced from a project in Tower')),
+        ('scm', _('Sourced from a Project')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
         ('azure', _('Microsoft Azure Classic (deprecated)')),

@@ -67,7 +67,7 @@ HIDDEN_PASSWORD = '**********'
 
 OPENSSH_KEY_ERROR = u'''\
 It looks like you're trying to use a private key in OpenSSH format, which \
-isn't supported by the installed version of OpenSSH on this Tower instance. \
+isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
@@ -79,7 +79,7 @@ def celery_startup(conf=None, **kwargs):
     # Re-init all schedules
     # NOTE: Rework this during the Rampart work
     startup_logger = logging.getLogger('awx.main.tasks')
-    startup_logger.info("Syncing Tower Schedules")
+    startup_logger.info("Syncing Schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
@@ -190,7 +190,7 @@ def cluster_node_heartbeat(self):
         if other_inst.version == "":
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version) and not settings.DEBUG:
-            logger.error("Host {} reports Tower version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
+            logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
                                                                                                              other_inst.version,
                                                                                                              inst.hostname,
                                                                                                              inst.version))

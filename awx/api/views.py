@@ -213,7 +213,7 @@ class ApiV2RootView(ApiVersionRootView):
 
 
 class ApiV1PingView(APIView):
-    """A simple view that reports very basic information about this Tower
+    """A simple view that reports very basic information about this
     instance, which is acceptable to be public information.
     """
     permission_classes = (AllowAny,)
@@ -222,7 +222,7 @@ class ApiV1PingView(APIView):
     new_in_210 = True
 
     def get(self, request, format=None):
-        """Return some basic information about this Tower instance.
+        """Return some basic information about this instance.
 
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
@@ -320,7 +320,7 @@ class ApiV1ConfigView(APIView):
         try:
             data_actual = json.dumps(request.data)
         except Exception:
-            logger.info(smart_text(u"Invalid JSON submitted for Tower license."),
+            logger.info(smart_text(u"Invalid JSON submitted for license."),
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -328,7 +328,7 @@ class ApiV1ConfigView(APIView):
             license_data = json.loads(data_actual)
             license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
         except Exception:
-            logger.warning(smart_text(u"Invalid Tower license submitted."),
+            logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -338,7 +338,7 @@ class ApiV1ConfigView(APIView):
             settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        logger.warning(smart_text(u"Invalid Tower license submitted."),
+        logger.warning(smart_text(u"Invalid license submitted."),
                        extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -813,7 +813,7 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
 
-        If there is already an organization and the license of the Tower
+        If there is already an organization and the license of this
         instance does not permit multiple organizations, then raise
         LicenseForbids.
         """
@@ -822,7 +822,7 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
                 self.model.objects.exists()):
-            raise LicenseForbids(_('Your Tower license only permits a single '
+            raise LicenseForbids(_('Your license only permits a single '
                                    'organization to exist.'))
 
         # Okay, create the organization as usual.
@@ -1589,7 +1589,7 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.managed_by_tower:
-            raise PermissionDenied(detail=_("Deletion not allowed for credential types managed by Tower"))
+            raise PermissionDenied(detail=_("Deletion not allowed for managed credential types"))
         if instance.credentials.exists():
             raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted"))
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)

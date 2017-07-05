@@ -1653,7 +1653,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
         elif source=='scm' and not overwrite_vars:
             raise serializers.ValidationError({"detail": _(
-                "SCM type sources must set `overwrite_vars` to `true` until a future Tower release.")})
+                "SCM type sources must set `overwrite_vars` to `true`.")})
 
         return super(InventorySourceSerializer, self).validate(attrs)
 
@@ -1895,7 +1895,7 @@ class CredentialTypeSerializer(BaseSerializer):
     def validate(self, attrs):
         if self.instance and self.instance.managed_by_tower:
             raise PermissionDenied(
-                detail=_("Modifications not allowed for credential types managed by Tower")
+                detail=_("Modifications not allowed for managed credential types")
             )
         if self.instance and self.instance.credentials.exists():
             if 'inputs' in attrs and attrs['inputs'] != self.instance.inputs:

@@ -130,7 +130,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         if not feature_enabled('system_tracking'):
-            raise CommandError("The System Tracking feature is not enabled for your Tower instance")
+            raise CommandError("The System Tracking feature is not enabled for your instance")
         cleanup_facts = CleanupFacts()
         if not all([options[GRANULARITY], options[OLDER_THAN]]):
             raise CommandError('Both --granularity and --older_than are required.')

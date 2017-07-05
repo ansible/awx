@@ -270,7 +270,7 @@ register(
     field_class=fields.LDAPSearchField,
     default=[],
     label=_('LDAP Group Search'),
-    help_text=_('Users in Tower are mapped to organizations based on their '
+    help_text=_('Users are mapped to organizations based on their '
                 'membership in LDAP groups. This setting defines the LDAP search '
                 'query to find groups. Note that this, unlike the user search '
                 'above, does not support LDAPSearchUnion.'),
