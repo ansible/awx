@@ -1,23 +1,38 @@
 import LegacyCredentials from './legacy.credentials';
-import AddController from './add-credentials.controller.js';
-import EditController from './edit-credentials.controller.js';
-import { N_ } from '../../src/i18n';
+import AddController from './add-credentials.controller';
+import EditController from './edit-credentials.controller';
+import CredentialsStrings from './credentials.strings'
 
-function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType) {
+function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
     let id = $stateParams.credential_id;
+    let models;
 
     let promises = {
         me: new Me('get'),
-        credentialType: new CredentialType('get')
+        credentialType: new CredentialType('get'),
+        organization: new Organization('get')
     };
 
-    if (id) {
-        promises.credential = new Credential(['get', 'options'], [id, id]);
-    } else {
+    if (!id) {
         promises.credential = new Credential('options');
+
+        return $q.all(promises)
     }
 
-    return $q.all(promises);
+    promises.credential = new Credential(['get', 'options'], [id, id]);
+
+    return $q.all(promises)
+        .then(_models_ => {
+            models = _models_;
+            let credentialTypeId = models.credential.get('credential_type');
+
+            return models.credentialType.graft(credentialTypeId);
+        })
+        .then(selectedCredentialType => {
+            models.selectedCredentialType = selectedCredentialType;
+
+            return models;
+        });
 }
 
 CredentialsResolve.$inject = [
@@ -25,19 +40,23 @@ CredentialsResolve.$inject = [
     '$stateParams',
     'MeModel',
     'CredentialModel',
-    'CredentialTypeModel'
+    'CredentialTypeModel',
+    'OrganizationModel'
 ];
 
-function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider) {
+function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider, stringProvider) {
     let path = pathProvider.$get();
     let stateExtender = $stateExtenderProvider.$get();
     let legacy = legacyProvider.$get();
+    let strings = stringProvider.$get();
+
+    strings = strings.credentials.state;
 
     stateExtender.addState({
         name: 'credentials.add',
         route: '/add',
         ncyBreadcrumb: {
-            label: N_('CREATE CREDENTIALS')
+            label: strings.ADD_BREADCRUMB_LABEL
         },
         views: {
             'add@credentials': {
@@ -55,7 +74,7 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         name: 'credentials.edit',
         route: '/:credential_id',
         ncyBreadcrumb: {
-            label: N_('EDIT')
+            label: strings.EDIT_BREADCRUMB_LABEL
         },
         views: {
             'edit@credentials': {
@@ -81,7 +100,8 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
 CredentialsConfig.$inject = [
     '$stateExtenderProvider',
     'LegacyCredentialsServiceProvider',
-    'PathServiceProvider'
+    'PathServiceProvider',
+    'CredentialsStringsProvider'
 ];
 
 angular
@@ -89,4 +109,5 @@ angular
     .config(CredentialsConfig)
     .controller('AddController', AddController)
     .controller('EditController', EditController)
-    .service('LegacyCredentialsService', LegacyCredentials);
+    .service('LegacyCredentialsService', LegacyCredentials)
+    .service('CredentialsStrings', CredentialsStrings);

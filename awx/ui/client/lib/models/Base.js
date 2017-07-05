@@ -12,8 +12,10 @@ function request (method, resource) {
 }
 
 function httpGet (resource) {
+    this.method = this.method || 'GET';
+
     let req = {
-        method: 'GET',
+        method: this.method,
         url: this.path
     };
 
@@ -85,6 +87,26 @@ function get (keys) {
     return this.find('get', keys);
 }
 
+function match (method, key, value) {
+    let model = this.model[method.toUpperCase()];
+
+    if (!model) {
+        return null;
+    }
+
+    if (!model.results) {
+        if (model[key] === value) {
+            return model;
+        }
+
+        return null;
+    }
+
+    let result = model.results.filter(result => result[key] === value);
+
+    return result.length === 0 ? null : result[0];
+}
+
 function find (method, keys) {
     let value = this.model[method.toUpperCase()];
 
@@ -138,6 +160,7 @@ function BaseModel (path) {
     this.get = get;
     this.options = options;
     this.find = find;
+    this.match = match;
     this.normalizePath = normalizePath;
     this.getById = getById;
     this.request = request;

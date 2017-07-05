@@ -1,6 +1,7 @@
 /* jshint ignore:start */
 
 var sprintf = require('sprintf-js').sprintf;
+let defaultLanguage = 'en_US';
 
 /**
  * @ngdoc method
@@ -24,7 +25,12 @@ export default
                     $window.navigator.userLanguage ||
                     '';
             var langUrl = langInfo.replace('-', '_');
-            //gettextCatalog.debug = true;
+
+            if (langUrl === defaultLanguage) {
+                return;
+            }
+
+            // gettextCatalog.debug = true;
             gettextCatalog.setCurrentLanguage(langInfo);
             gettextCatalog.loadRemote('/static/languages/' + langUrl + '.json');
         };

@@ -113,7 +113,7 @@ function LegacyCredentialsService (pathService) {
         },
         ncyBreadcrumb: {
             parent: 'credentials.edit',
-            label: 'PERMISSIONS'
+            label: N_('PERMISSIONS')
         },
         views: {
             'related': {
@@ -336,7 +336,7 @@ function LegacyCredentialsService (pathService) {
                 return this.credentialType;
 
             default:
-                throw new Error(`Legacy state configuration for ${name} does not exist`);
+                throw new Error(N_(`Legacy state configuration for ${name} does not exist`));
         };
     };
 }

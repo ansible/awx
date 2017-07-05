@@ -34,12 +34,12 @@ function AtInputGroupController ($scope, $compile) {
     };
 
     vm.update = () => {
-        if (!vm.isValidSource()) {
-            return;
-        }
-
         if (state._group) {
             vm.clear();
+        }
+
+        if (!vm.isValidSource()) {
+            return;
         }
 
         state._value = source._value;
@@ -101,7 +101,8 @@ function AtInputGroupController ($scope, $compile) {
             config._data = input.choices;
             config._exp = 'index as choice for (index, choice) in state._data';
         } else {
-            throw new Error('Unsupported input type: ' + input.type)
+            let preface = vm.strings.components.UNSUPPORTED_ERROR_PREFACE;
+            throw new Error(`${preface}: ${input.type}`)
         }
 
         return config;
@@ -158,6 +159,8 @@ function AtInputGroupController ($scope, $compile) {
     vm.clear = () => {
         form.deregisterInputGroup(state._group);
         element.innerHTML = '';
+        state._group = undefined;
+        state._value = undefined;
     };
 }
 

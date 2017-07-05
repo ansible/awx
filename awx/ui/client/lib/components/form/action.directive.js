@@ -5,7 +5,7 @@ function link (scope, element, attrs, controllers) {
     actionController.init(formController, element, scope);
 }
 
-function atFormActionController ($state) {
+function atFormActionController ($state, strings) {
     let vm = this || {};
 
     let element;
@@ -36,21 +36,21 @@ function atFormActionController ($state) {
     };
 
     vm.setCancelDefaults = () => {
-        scope.text = 'CANCEL';
+        scope.text = strings.CANCEL;
         scope.fill = 'Hollow';
         scope.color = 'default';
         scope.action = () => $state.go(scope.to || '^');
     };
 
     vm.setSaveDefaults = () => {
-        scope.text = 'SAVE';
+        scope.text = strings.SAVE;
         scope.fill = '';
         scope.color = 'success';
         scope.action = () => form.submit();
     };
 }
 
-atFormAction.$inject = ['$state'];
+atFormActionController.$inject = ['$state', 'ComponentsStrings'];
 
 function atFormAction (pathService) {
     return {
