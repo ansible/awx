@@ -2390,7 +2390,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
-                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled',
+                  'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
                   'allow_simultaneous')
 
     def get_related(self, obj):
@@ -2454,7 +2454,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'allow_simultaneous', 'artifacts', 'scm_revision',
-                  'instance_group')
+                  'instance_group', 'diff_mode')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

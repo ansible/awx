@@ -1012,6 +1012,8 @@ class RunJob(BaseTask):
             args.append('--ask-pass')
         if job.become_enabled:
             args.append('--become')
+        if job.diff_mode:
+            args.append('--diff')
         if become_method:
             args.extend(['--become-method', become_method])
         if become_username:
@@ -2011,6 +2013,8 @@ class RunAdHocCommand(BaseTask):
             args.append('--forks=%d' % ad_hoc_command.forks)
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
+        # if ad_hoc_command.diff_mode:
+        #     args.append('--diff')
 
         if ad_hoc_command.extra_vars_dict:
             args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])

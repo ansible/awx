@@ -60,6 +60,9 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
+    diff_mode = models.BooleanField(
+        default=False,
+    )
     job_type = models.CharField(
         max_length=64,
         choices=JOB_TYPE_CHOICES,
@@ -293,7 +296,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'job_tags', 'extra_vars', 'launch_type', 'force_handlers',
                 'skip_tags', 'start_at_task', 'become_enabled', 'labels',
                 'survey_passwords', 'allow_simultaneous', 'timeout',
-                'use_fact_cache',]
+                'use_fact_cache', 'diff_mode',]
 
     def resource_validation_data(self):
         '''
