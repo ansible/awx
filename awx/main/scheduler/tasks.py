@@ -57,5 +57,3 @@ def run_fail_inconsistent_running_jobs():
 
             all_running_sorted_tasks = scheduler.get_running_tasks()
             scheduler.process_celery_tasks(celery_task_start_time, active_tasks, all_running_sorted_tasks)
-
-
