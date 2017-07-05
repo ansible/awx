@@ -474,7 +474,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         default='',
         editable=False,
-        help_text=_("The Tower node the job executed on."),
+        help_text=_("The node the job executed on."),
     )
     notifications = models.ManyToManyField(
         'Notification',

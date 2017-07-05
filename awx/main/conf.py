@@ -18,7 +18,7 @@ register(
     'ACTIVITY_STREAM_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream'),
-    help_text=_('Enable capturing activity for the Tower activity stream.'),
+    help_text=_('Enable capturing activity for the activity stream.'),
     category=_('System'),
     category_slug='system',
     feature_required='activity_streams',
@@ -28,7 +28,7 @@ register(
     'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream for Inventory Sync'),
-    help_text=_('Enable capturing activity for the Tower activity stream when running inventory sync.'),
+    help_text=_('Enable capturing activity for the activity stream when running inventory sync.'),
     category=_('System'),
     category_slug='system',
     feature_required='activity_streams',
@@ -46,8 +46,8 @@ register(
 register(
     'TOWER_ADMIN_ALERTS',
     field_class=fields.BooleanField,
-    label=_('Enable Tower Administrator Alerts'),
-    help_text=_('Allow Tower to email Admin users for system events that may require attention.'),
+    label=_('Enable Administrator Alerts'),
+    help_text=_('Email Admin users for system events that may require attention.'),
     category=_('System'),
     category_slug='system',
 )
@@ -99,9 +99,9 @@ register(
     'LICENSE',
     field_class=fields.DictField,
     default=_load_default_license_from_file,
-    label=_('Tower License'),
+    label=_('License'),
     help_text=_('The license controls which features and functionality are '
-                'enabled in Tower. Use /api/v1/config/ to update or change '
+                'enabled. Use /api/v1/config/ to update or change '
                 'the license.'),
     category=_('System'),
     category_slug='system',
@@ -121,7 +121,7 @@ register(
     'AWX_PROOT_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable job isolation'),
-    help_text=_('Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information.'),
+    help_text=_('Isolates an Ansible job from protected parts of the system to prevent exposing sensitive information.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -292,7 +292,7 @@ register(
     min_value=0,
     default=0,
     label=_('Per-Host Ansible Fact Cache Timeout'),
-    help_text=_('Maximum time, in seconds, that Tower stored Ansible facts are considered valid since '
+    help_text=_('Maximum time, in seconds, that stored Ansible facts are considered valid since '
                 'the last time they were modified. Only valid, non-stale, facts will be accessible by '
                 'a playbook. Note, this does not influence the deletion of ansible_facts from the database.'),
     category=_('Jobs'),
@@ -359,7 +359,7 @@ register(
     label=_('Loggers to send data to the log aggregator from'),
     help_text=_('List of loggers that will send HTTP logs to the collector, these can '
                 'include any or all of: \n'
-                'awx - Tower service logs\n'
+                'awx - service logs\n'
                 'activity_stream - activity stream records\n'
                 'job_events - callback data from Ansible job events\n'
                 'system_tracking - facts gathered from scan jobs.'),

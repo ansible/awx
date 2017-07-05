@@ -126,7 +126,7 @@ return {
             dataTitle: 'Source Regions',
             dataPlacement: 'right',
             awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
-                "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
+                "or choose <em>All</em> to include all regions. Only Hosts associated with the selected regions will be updated." +
                 "</p>",
             dataContainer: 'body',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -138,7 +138,7 @@ return {
             dataTitle: 'Instance Filters',
             dataPlacement: 'right',
             awPopOver: "<p>Provide a comma-separated list of filter expressions. " +
-                "Hosts are imported to Tower when <em>ANY</em> of the filters match.</p>" +
+                "Hosts are imported when <em>ANY</em> of the filters match.</p>" +
                 "Limit to hosts having a tag:<br />\n" +
                 "<blockquote>tag-key=TowerManaged</blockquote>\n" +
                 "Limit to hosts using either key pair:<br />\n" +
