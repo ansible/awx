@@ -376,7 +376,7 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug("Task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
 
-    def process_celery_tasks(self, active_tasks, all_running_sorted_tasks):
+    def process_celery_tasks(self, celery_task_start_time, active_tasks, all_running_sorted_tasks):
         '''
         Rectify tower db <-> celery inconsistent view of jobs state
         '''
@@ -384,13 +384,9 @@ class TaskManager():
 
             if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
                 # TODO: try catch the getting of the job. The job COULD have been deleted
-                # Ensure job did not finish running between the time we get the
-                # list of task id's from celery and now.
-                # Note: This is an actual fix, not a reduction in the time 
-                # window that this can happen.
                 if isinstance(task, WorkflowJob):
                     continue
-                if task.status != 'running':
+                if task_obj.modified > celery_task_start_time:
                     continue
                 task.status = 'failed'
                 task.job_explanation += ' '.join((

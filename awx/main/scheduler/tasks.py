@@ -5,6 +5,7 @@ import json
 
 # Django
 from django.db import transaction
+from django.utils.timezone import now as tz_now
 
 # Celery
 from celery import task
@@ -48,6 +49,7 @@ def run_fail_inconsistent_running_jobs():
                 return
 
             scheduler = TaskManager()
+            celery_task_start_time = tz_now()
             active_task_queues, active_tasks = scheduler.get_active_tasks()
             cache.set("active_celery_tasks", json.dumps(active_task_queues))
             if active_tasks is None:
@@ -55,5 +57,5 @@ def run_fail_inconsistent_running_jobs():
                 return None
 
             all_running_sorted_tasks = scheduler.get_running_tasks()
-            scheduler.process_celery_tasks(active_tasks, all_running_sorted_tasks)
+            scheduler.process_celery_tasks(celery_task_start_time, active_tasks, all_running_sorted_tasks)
 
