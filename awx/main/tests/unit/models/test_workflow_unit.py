@@ -242,11 +242,3 @@ class TestWorkflowWarnings:
         assert 'credential' in job_node_with_prompts.get_prompts_warnings()['ignored']
         assert len(job_node_with_prompts.get_prompts_warnings()['ignored']) == 2
 
-    def test_warn_scan_errors_node_prompts(self, job_node_with_prompts):
-        job_node_with_prompts.unified_job_template.job_type = 'scan'
-        job_node_with_prompts.char_prompts['job_type'] = 'run'
-        job_node_with_prompts.inventory = Inventory(name='different-inventory', pk=23)
-        assert 'ignored' in job_node_with_prompts.get_prompts_warnings()
-        assert 'job_type' in job_node_with_prompts.get_prompts_warnings()['ignored']
-        assert 'inventory' in job_node_with_prompts.get_prompts_warnings()['ignored']
-        assert len(job_node_with_prompts.get_prompts_warnings()['ignored']) == 2

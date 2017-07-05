@@ -1147,7 +1147,6 @@ class InventorySerializer(BaseSerializerWithVariables):
             update_inventory_sources = self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
             job_templates = self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
-            scan_job_templates = self.reverse('api:inventory_scan_job_template_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
@@ -2347,8 +2346,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
-            job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
-            if not project and job_type != PERM_INVENTORY_SCAN:
+            if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             if project and project.scm_type and playbook and force_text(playbook) not in project.playbook_files:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
@@ -2419,25 +2417,17 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        survey_enabled = get_field_from_model_or_attrs('survey_enabled')
-        job_type = get_field_from_model_or_attrs('job_type')
         inventory = get_field_from_model_or_attrs('inventory')
         credential = get_field_from_model_or_attrs('credential')
         project = get_field_from_model_or_attrs('project')
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
-        if job_type == "scan":
-            if inventory is None or attrs.get('ask_inventory_on_launch', False):
-                raise serializers.ValidationError({'inventory': _('Scan jobs must be assigned a fixed inventory.')})
-        elif project is None:
+        if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
         elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
             raise serializers.ValidationError({'credential': prompting_error_message})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
-
-        if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': _('Survey Enabled cannot be used with scan jobs.')})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
@@ -2581,7 +2571,7 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         if not obj.credential:
             raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
-        if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
+        if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))

@@ -858,10 +858,8 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
             organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
             organization__id=org_id).count()
-        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).exclude(
-            job_type='scan').filter(project__organization__id=org_id).count()
-        org_counts['job_templates'] += JobTemplate.accessible_objects(**access_kwargs).filter(
-            job_type='scan').filter(inventory__organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
+            project__organization__id=org_id).count()
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts
@@ -1905,21 +1903,6 @@ class InventoryJobTemplateList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(inventory=parent)
-
-
-class InventoryScanJobTemplateList(SubListAPIView):
-
-    model = JobTemplate
-    serializer_class = JobTemplateSerializer
-    parent_model = Inventory
-    relationship = 'jobtemplates'
-    new_in_220 = True
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(job_type=PERM_INVENTORY_SCAN, inventory=parent)
 
 
 class HostList(ListCreateAPIView):

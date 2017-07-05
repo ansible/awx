@@ -1141,9 +1141,6 @@ class JobTemplateAccess(BaseAccess):
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
 
-        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            self.check_license(feature='system_tracking')
-
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
@@ -1175,11 +1172,6 @@ class JobTemplateAccess(BaseAccess):
                 return False
 
         project = get_value(Project, 'project')
-        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            if not inventory:
-                return False
-            elif not project:
-                return True
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         if project:
@@ -1194,8 +1186,6 @@ class JobTemplateAccess(BaseAccess):
         # Check license.
         if validate_license:
             self.check_license()
-            if obj.job_type == PERM_INVENTORY_SCAN:
-                self.check_license(feature='system_tracking')
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
             if Instance.objects.active_count() > 1:
@@ -1204,12 +1194,6 @@ class JobTemplateAccess(BaseAccess):
         # Super users can start any job
         if self.user.is_superuser:
             return True
-
-        if obj.job_type == PERM_INVENTORY_SCAN:
-            # Scan job with default project, must have JT execute or be org admin
-            if obj.project is None and obj.inventory:
-                return (self.user in obj.execute_role or
-                        self.user in obj.inventory.organization.admin_role)
 
         return self.user in obj.execute_role
 
@@ -1221,9 +1205,6 @@ class JobTemplateAccess(BaseAccess):
             data = dict(data)
 
             if self.changes_are_non_sensitive(obj, data):
-                if 'job_type' in data and obj.job_type != data['job_type'] and data['job_type'] == PERM_INVENTORY_SCAN:
-                    self.check_license(feature='system_tracking')
-
                 if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
                     self.check_license(feature='surveys')
                 return True

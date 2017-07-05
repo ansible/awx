@@ -17,3 +17,7 @@ Tower will always inject the host `ansible_facts` into memcached. The Ansible To
 ## Tower Fact Logging
 New and changed facts will be logged via Tower's logging facility. Specifically, to the `system_tracking` namespace or logger. The logging payload will include the fields: `host_name`, `inventory_id`, and `ansible_facts`. Where `ansible_facts` is a dictionary of all ansible facts for `host_name` in Tower Inventory `inventory_id`. 
 
+## Integration Testing
+* ensure `clear_facts` set's `hosts/<id>/ansible_facts` to `{}`
+* ensure that `gather_facts: False` does NOT result in clearing existing facts
+* ensure that the when a host fact timeout is reached, that the facts are not used from the cache

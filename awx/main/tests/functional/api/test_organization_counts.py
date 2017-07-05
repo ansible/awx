@@ -163,12 +163,7 @@ def test_two_organizations(resourced_organization, organizations, user, get):
 @pytest.mark.django_db
 def test_scan_JT_counted(resourced_organization, user, get):
     admin_user = user('admin', True)
-    # Add a scan job template to the org
-    resourced_organization.projects.all()[0].jobtemplates.create(
-        job_type='scan', inventory=resourced_organization.inventories.all()[0],
-        name='scan-job-template')
     counts_dict = COUNTS_PRIMES
-    counts_dict['job_templates'] += 1
 
     # Test list view
     list_response = get(reverse('api:organization_list'), admin_user)
@@ -184,7 +179,7 @@ def test_scan_JT_counted(resourced_organization, user, get):
 @pytest.mark.django_db
 def test_JT_not_double_counted(resourced_organization, user, get):
     admin_user = user('admin', True)
-    # Add a scan job template to the org
+    # Add a run job template to the org
     resourced_organization.projects.all()[0].jobtemplates.create(
         job_type='run',
         inventory=resourced_organization.inventories.all()[0],
