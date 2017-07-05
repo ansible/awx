@@ -99,12 +99,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='credential_type',
-            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=False, help_text='Type for this credential.  Credential Types define valid fields (e.g,. "username", "password") and their properties (e.g,. "username is required" or "password should be stored with encryption").')
+            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=False, help_text='Specify the type of credential you want to create. Refer to the Ansible Tower documentation for details on each type.')
         ),
         migrations.AlterField(
             model_name='credential',
             name='inputs',
-            field=awx.main.fields.CredentialInputField(default={}, help_text='Data structure used to specify input values (e.g., {"username": "jane-doe", "password": "secret"}).  Valid fields and their requirements vary depending on the fields defined on the chosen CredentialType.', blank=True),
+            field=awx.main.fields.CredentialInputField(default={}, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.', blank=True),
         ),
         migrations.RemoveField(
             model_name='job',
