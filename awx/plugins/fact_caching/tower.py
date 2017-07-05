@@ -104,8 +104,7 @@ class CacheModule(BaseCacheModule):
             return False
 
     def delete(self, key):
-        self.mc.delete(self.translate_host_key(key))
-        self.mc.delete(self.translate_modified_key(key))
+        self.set(key, {})
 
     def flush(self):
         host_names = self.mc.get(self.host_names_key)
