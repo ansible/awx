@@ -5,15 +5,15 @@ import json
 
 # Django
 from django.db import transaction
-from django.db.utils import DatabaseError
 
 # Celery
 from celery import task
 
 # AWX
-from awx.main.models import Instance
 from awx.main.scheduler import TaskManager 
 from django.core.cache import cache
+
+from django_pglocks import advisory_lock
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -43,8 +43,10 @@ def run_fail_inconsistent_running_jobs():
     logger.debug("Running task to fail inconsistent running jobs.")
     with transaction.atomic():
         # Lock
-        try:
-            Instance.objects.select_for_update(nowait=True).all()[0]
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            if acquired is False:
+                return
+
             scheduler = TaskManager()
             active_task_queues, active_tasks = scheduler.get_active_tasks()
             cache.set("active_celery_tasks", json.dumps(active_task_queues))
@@ -54,6 +56,4 @@ def run_fail_inconsistent_running_jobs():
 
             all_running_sorted_tasks = scheduler.get_running_tasks()
             scheduler.process_celery_tasks(active_tasks, all_running_sorted_tasks)
-        except DatabaseError:
-            return
 
