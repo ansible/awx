@@ -33,6 +33,7 @@ import os
 import memcache
 import json
 import datetime
+import base64
 from dateutil import parser
 from dateutil.tz import tzutc
 
@@ -56,10 +57,10 @@ class CacheModule(BaseCacheModule):
         return '{}'.format(self._inventory_id)
 
     def translate_host_key(self, host_name):
-        return '{}-{}'.format(self._inventory_id, host_name)
+        return '{}-{}'.format(self._inventory_id, base64.b64encode(host_name))
 
     def translate_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self._inventory_id, host_name)
+        return '{}-{}-modified'.format(self._inventory_id, base64.b64encode(host_name))
 
     def get(self, key):
         host_key = self.translate_host_key(key)

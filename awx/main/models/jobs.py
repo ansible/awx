@@ -8,6 +8,7 @@ import hmac
 import logging
 import time
 import json
+import base64
 from urlparse import urljoin
 
 # Django
@@ -705,10 +706,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         return '{}'.format(self.inventory.id)
 
     def memcached_fact_host_key(self, host_name):
-        return '{}-{}'.format(self.inventory.id, host_name)
+        return '{}-{}'.format(self.inventory.id, base64.b64encode(host_name))
 
     def memcached_fact_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self.inventory.id, host_name)
+        return '{}-{}-modified'.format(self.inventory.id, base64.b64encode(host_name))
 
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
         return self.inventory.hosts.only(*only)
