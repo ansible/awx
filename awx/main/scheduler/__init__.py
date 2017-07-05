@@ -16,6 +16,7 @@ from django.utils.timezone import now as tz_now
 from awx.main.models import * # noqa
 #from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
+from awx.main.utils.pglock import advisory_lock
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.tasks import _send_notification_templates
@@ -23,7 +24,6 @@ from awx.main.tasks import _send_notification_templates
 # Celery
 from celery.task.control import inspect
 
-from django_pglocks import advisory_lock
 
 logger = logging.getLogger('awx.main.scheduler')
 

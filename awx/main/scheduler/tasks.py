@@ -6,6 +6,7 @@ import json
 # Django
 from django.db import transaction
 from django.utils.timezone import now as tz_now
+from awx.main.utils.pglock import advisory_lock
 
 # Celery
 from celery import task
@@ -14,7 +15,6 @@ from celery import task
 from awx.main.scheduler import TaskManager 
 from django.core.cache import cache
 
-from django_pglocks import advisory_lock
 
 logger = logging.getLogger('awx.main.scheduler')
 
