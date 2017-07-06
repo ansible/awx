@@ -127,6 +127,7 @@ _Scale.prototype.onMouseWheel = function (controller, msg_type, message) {
       controller.scope.updatePanAndScale();
       controller.changeState(Ready);
 };
+_Scale.prototype.onMouseWheel.transitions = ['Ready'];
 
 
 _Pressed.prototype.onMouseUp = function (controller) {
@@ -134,6 +135,7 @@ _Pressed.prototype.onMouseUp = function (controller) {
     controller.changeState(Ready);
 
 };
+_Pressed.prototype.onMouseUp.transitions = ['Ready'];
 
 _Pressed.prototype.onTouchEnd = _Pressed.prototype.onMouseUp;
 
@@ -142,6 +144,7 @@ _Pressed.prototype.onMouseMove = function (controller, msg_type, $event) {
     controller.changeState(Pan);
     controller.handle_message(msg_type, $event);
 };
+_Pressed.prototype.onMouseMove.transitions = ['Pan'];
 
 _Pressed.prototype.onTouchMove = _Pressed.prototype.onMouseMove;
 
@@ -186,5 +189,6 @@ _Pan.prototype.onMouseUp = function (controller) {
     controller.changeState(Ready);
 
 };
+_Pan.prototype.onMouseUp.transitions = ['Ready'];
 
 _Pan.prototype.onTouchEnd = _Pan.prototype.onMouseUp;
