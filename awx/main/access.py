@@ -31,7 +31,7 @@ __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_err
 logger = logging.getLogger('awx.main.access')
 
 access_registry = {
-    # <model_class>: [<access_class>, ...],
+    # <model_class>: <access_class>,
     # ...
 }
 
@@ -41,8 +41,7 @@ class StateConflict(ValidationError):
 
 
 def register_access(model_class, access_class):
-    access_classes = access_registry.setdefault(model_class, [])
-    access_classes.append(access_class)
+    access_registry[model_class] = access_class
 
 
 @property
@@ -66,19 +65,9 @@ def get_user_queryset(user, model_class):
     Return a queryset for the given model_class containing only the instances
     that should be visible to the given user.
     '''
-    querysets = []
-    for access_class in access_registry.get(model_class, []):
-        access_instance = access_class(user)
-        querysets.append(access_instance.get_queryset())
-    if not querysets:
-        return model_class.objects.none()
-    elif len(querysets) == 1:
-        return querysets[0]
-    else:
-        queryset = model_class.objects.all()
-        for qs in querysets:
-            queryset = queryset.filter(pk__in=qs.values_list('pk', flat=True))
-        return queryset
+    access_class = access_registry[model_class]
+    access_instance = access_class(user)
+    return access_instance.get_queryset()
 
 
 def check_user_access(user, model_class, action, *args, **kwargs):
@@ -86,33 +75,26 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     Return True if user can perform action against model_class with the
     provided parameters.
     '''
-    for access_class in access_registry.get(model_class, []):
-        access_instance = access_class(user)
-        access_method = getattr(access_instance, 'can_%s' % action, None)
-        if not access_method:
-            logger.debug('%s.%s not found', access_instance.__class__.__name__,
-                         'can_%s' % action)
-            continue
-        result = access_method(*args, **kwargs)
-        logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
-                     getattr(access_method, '__name__', 'unknown'), args, result)
-        if result:
-            return result
-    return False
+    access_class = access_registry[model_class]
+    access_instance = access_class(user)
+    access_method = getattr(access_instance, 'can_%s' % action)
+    result = access_method(*args, **kwargs)
+    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
+                 getattr(access_method, '__name__', 'unknown'), args, result)
+    return result
 
 
 def check_user_access_with_errors(user, model_class, action, *args, **kwargs):
     '''
     Return T/F permission and summary of problems with the action.
     '''
-    for access_class in access_registry.get(model_class, []):
-        access_instance = access_class(user, save_messages=True)
-        access_method = getattr(access_instance, 'can_%s' % action, None)
-        result = access_method(*args, **kwargs)
-        logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
-                     access_method.__name__, args, result)
-        return (result, access_instance.messages)
-    return (False, '')
+    access_class = access_registry[model_class]
+    access_instance = access_class(user, save_messages=True)
+    access_method = getattr(access_instance, 'can_%s' % action, None)
+    result = access_method(*args, **kwargs)
+    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
+                 access_method.__name__, args, result)
+    return (result, access_instance.messages)
 
 
 def get_user_capabilities(user, instance, **kwargs):
@@ -123,9 +105,8 @@ def get_user_capabilities(user, instance, **kwargs):
     convenient for the user interface to consume and hide or show various
     actions in the interface.
     '''
-    for access_class in access_registry.get(type(instance), []):
-        return access_class(user).get_user_capabilities(instance, **kwargs)
-    return None
+    access_class = access_registry[instance.__class__]
+    return access_class(user).get_user_capabilities(instance, **kwargs)
 
 
 def check_superuser(func):
@@ -392,7 +373,10 @@ class InstanceAccess(BaseAccess):
     model = Instance
 
     def get_queryset(self):
-        return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup))
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return Instance.objects.all().distinct()
+        else:
+            return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
 
     def can_add(self, data):
         return False
@@ -1157,9 +1141,6 @@ class JobTemplateAccess(BaseAccess):
         # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
 
-        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            self.check_license(feature='system_tracking')
-
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
@@ -1191,11 +1172,6 @@ class JobTemplateAccess(BaseAccess):
                 return False
 
         project = get_value(Project, 'project')
-        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            if not inventory:
-                return False
-            elif not project:
-                return True
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         if project:
@@ -1210,8 +1186,6 @@ class JobTemplateAccess(BaseAccess):
         # Check license.
         if validate_license:
             self.check_license()
-            if obj.job_type == PERM_INVENTORY_SCAN:
-                self.check_license(feature='system_tracking')
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
             if Instance.objects.active_count() > 1:
@@ -1220,12 +1194,6 @@ class JobTemplateAccess(BaseAccess):
         # Super users can start any job
         if self.user.is_superuser:
             return True
-
-        if obj.job_type == PERM_INVENTORY_SCAN:
-            # Scan job with default project, must have JT execute or be org admin
-            if obj.project is None and obj.inventory:
-                return (self.user in obj.execute_role or
-                        self.user in obj.inventory.organization.admin_role)
 
         return self.user in obj.execute_role
 
@@ -1237,9 +1205,6 @@ class JobTemplateAccess(BaseAccess):
             data = dict(data)
 
             if self.changes_are_non_sensitive(obj, data):
-                if 'job_type' in data and obj.job_type != data['job_type'] and data['job_type'] == PERM_INVENTORY_SCAN:
-                    self.check_license(feature='system_tracking')
-
                 if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
                     self.check_license(feature='surveys')
                 return True
@@ -2008,7 +1973,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         return qs.all()
 
     def can_start(self, obj, validate_license=True):
-        access_class = access_registry.get(obj.__class__, [])[0]
+        access_class = access_registry[obj.__class__]
         access_instance = access_class(self.user)
         return access_instance.can_start(obj, validate_license=validate_license)
 
@@ -2376,38 +2341,5 @@ class RoleAccess(BaseAccess):
         return False
 
 
-register_access(User, UserAccess)
-register_access(Organization, OrganizationAccess)
-register_access(Inventory, InventoryAccess)
-register_access(Host, HostAccess)
-register_access(Group, GroupAccess)
-register_access(InventorySource, InventorySourceAccess)
-register_access(InventoryUpdate, InventoryUpdateAccess)
-register_access(Credential, CredentialAccess)
-register_access(CredentialType, CredentialTypeAccess)
-register_access(Team, TeamAccess)
-register_access(Project, ProjectAccess)
-register_access(ProjectUpdate, ProjectUpdateAccess)
-register_access(JobTemplate, JobTemplateAccess)
-register_access(Job, JobAccess)
-register_access(JobHostSummary, JobHostSummaryAccess)
-register_access(JobEvent, JobEventAccess)
-register_access(SystemJobTemplate, SystemJobTemplateAccess)
-register_access(SystemJob, SystemJobAccess)
-register_access(AdHocCommand, AdHocCommandAccess)
-register_access(AdHocCommandEvent, AdHocCommandEventAccess)
-register_access(Schedule, ScheduleAccess)
-register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
-register_access(UnifiedJob, UnifiedJobAccess)
-register_access(ActivityStream, ActivityStreamAccess)
-register_access(CustomInventoryScript, CustomInventoryScriptAccess)
-register_access(Role, RoleAccess)
-register_access(NotificationTemplate, NotificationTemplateAccess)
-register_access(Notification, NotificationAccess)
-register_access(Label, LabelAccess)
-register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
-register_access(WorkflowJobNode, WorkflowJobNodeAccess)
-register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
-register_access(WorkflowJob, WorkflowJobAccess)
-register_access(Instance, InstanceAccess)
-register_access(InstanceGroup, InstanceGroupAccess)
+for cls in BaseAccess.__subclasses__():
+    access_registry[cls.model] = cls

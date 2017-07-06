@@ -18,7 +18,7 @@ register(
     'ACTIVITY_STREAM_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream'),
-    help_text=_('Enable capturing activity for the Tower activity stream.'),
+    help_text=_('Enable capturing activity for the activity stream.'),
     category=_('System'),
     category_slug='system',
     feature_required='activity_streams',
@@ -28,7 +28,7 @@ register(
     'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream for Inventory Sync'),
-    help_text=_('Enable capturing activity for the Tower activity stream when running inventory sync.'),
+    help_text=_('Enable capturing activity for the activity stream when running inventory sync.'),
     category=_('System'),
     category_slug='system',
     feature_required='activity_streams',
@@ -46,8 +46,8 @@ register(
 register(
     'TOWER_ADMIN_ALERTS',
     field_class=fields.BooleanField,
-    label=_('Enable Tower Administrator Alerts'),
-    help_text=_('Allow Tower to email Admin users for system events that may require attention.'),
+    label=_('Enable Administrator Alerts'),
+    help_text=_('Email Admin users for system events that may require attention.'),
     category=_('System'),
     category_slug='system',
 )
@@ -99,9 +99,9 @@ register(
     'LICENSE',
     field_class=fields.DictField,
     default=_load_default_license_from_file,
-    label=_('Tower License'),
+    label=_('License'),
     help_text=_('The license controls which features and functionality are '
-                'enabled in Tower. Use /api/v1/config/ to update or change '
+                'enabled. Use /api/v1/config/ to update or change '
                 'the license.'),
     category=_('System'),
     category_slug='system',
@@ -121,7 +121,7 @@ register(
     'AWX_PROOT_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable job isolation'),
-    help_text=_('Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information.'),
+    help_text=_('Isolates an Ansible job from protected parts of the system to prevent exposing sensitive information.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -129,8 +129,10 @@ register(
 register(
     'AWX_PROOT_BASE_PATH',
     field_class=fields.CharField,
-    label=_('Job isolation execution path'),
-    help_text=_('Create temporary working directories for isolated jobs in this location.'),
+    label=_('Job execution path'),
+    help_text=_('The directory in which Tower will create new temporary '
+                'directories for job execution and isolation '
+                '(such as credential files and custom inventory scripts).'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -159,7 +161,7 @@ register(
     'AWX_ISOLATED_CHECK_INTERVAL',
     field_class=fields.IntegerField,
     label=_('Isolated status check interval'),
-    help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),  # noqa
+    help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -168,7 +170,19 @@ register(
     'AWX_ISOLATED_LAUNCH_TIMEOUT',
     field_class=fields.IntegerField,
     label=_('Isolated launch timeout'),
-    help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
+    help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  '
+                'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_CONNECTION_TIMEOUT',
+    field_class=fields.IntegerField,
+    default=10,
+    label=_('Isolated connection timeout'),
+    help_text=_('Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
+                'Value should be substantially greater than expected network latency.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -278,7 +292,7 @@ register(
     min_value=0,
     default=0,
     label=_('Per-Host Ansible Fact Cache Timeout'),
-    help_text=_('Maximum time, in seconds, that Tower stored Ansible facts are considered valid since '
+    help_text=_('Maximum time, in seconds, that stored Ansible facts are considered valid since '
                 'the last time they were modified. Only valid, non-stale, facts will be accessible by '
                 'a playbook. Note, this does not influence the deletion of ansible_facts from the database.'),
     category=_('Jobs'),
@@ -345,7 +359,7 @@ register(
     label=_('Loggers to send data to the log aggregator from'),
     help_text=_('List of loggers that will send HTTP logs to the collector, these can '
                 'include any or all of: \n'
-                'awx - Tower service logs\n'
+                'awx - service logs\n'
                 'activity_stream - activity stream records\n'
                 'job_events - callback data from Ansible job events\n'
                 'system_tracking - facts gathered from scan jobs.'),
@@ -401,6 +415,31 @@ register(
     help_text=_('Number of seconds for a TCP connection to external log '
                 'aggregator to timeout. Applies to HTTPS and TCP log '
                 'aggregator protocols.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_VERIFY_CERT',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable/disable HTTPS certificate verification'),
+    help_text=_('Flag to control enable/disable of certificate verification'
+                ' when LOG_AGGREGATOR_PROTOCOL is "https". If enabled, Tower\'s'
+                ' log handler will verify certificate sent by external log aggregator'
+                ' before establishing connection.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_LEVEL',
+    field_class=fields.ChoiceField,
+    choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    default='WARNING',
+    label=_('Logging Aggregator Level Threshold'),
+    help_text=_('Level threshold used by log handler. Severities from lowest to highest'
+                ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
+                'than the threshold will be ignored by log handler. (messages under category '
+                'awx.anlytics ignore this setting)'),
     category=_('Logging'),
     category_slug='logging',
 )

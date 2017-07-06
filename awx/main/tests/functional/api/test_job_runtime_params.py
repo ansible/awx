@@ -76,14 +76,6 @@ def job_template_prompts_null(project):
     )
 
 
-@pytest.fixture
-def bad_scan_JT(job_template_prompts):
-    job_template = job_template_prompts(True)
-    job_template.job_type = 'scan'
-    job_template.save()
-    return job_template
-
-
 # End of setup, tests start here
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -257,18 +249,6 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
                     dict(job_type='scan'), admin_user, expect=400)
 
     assert 'job_type' in response.data
-
-
-@pytest.mark.django_db
-@pytest.mark.job_runtime_vars
-def test_job_block_scan_job_inv_change(mocker, bad_scan_JT, runtime_data, post, admin_user):
-    # Assure that giving a new inventory for a scan job blocks the launch
-    with mocker.patch('awx.main.access.BaseAccess.check_license'):
-        response = post(reverse('api:job_template_launch', kwargs={'pk': bad_scan_JT.pk}),
-                        dict(inventory=runtime_data['inventory']), admin_user,
-                        expect=400)
-
-    assert 'inventory' in response.data
 
 
 @pytest.mark.django_db

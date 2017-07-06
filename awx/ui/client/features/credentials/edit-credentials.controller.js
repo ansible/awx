@@ -1,12 +1,15 @@
-const DEFAULT_ORGANIZATION_PLACEHOLDER = 'SELECT AN ORGANIZATION';
-
-function EditCredentialsController (models, $state, $scope) {
+function EditCredentialsController (models, $state, $scope, strings) {
     let vm = this || {};
 
     let me = models.me;
     let credential = models.credential;
     let credentialType = models.credentialType;
-    let selectedCredentialType = credentialType.getById(credential.get('credential_type'));
+    let organization = models.organization;
+    let selectedCredentialType = models.selectedCredentialType;
+
+    vm.mode = 'edit';
+    vm.strings = strings.credentials;
+    vm.panelTitle = credential.get('name');
 
     vm.tab = {
         details: {  
@@ -33,21 +36,23 @@ function EditCredentialsController (models, $state, $scope) {
     // Only exists for permissions compatibility
     $scope.credential_obj = credential.get();
 
-    vm.panelTitle = credential.get('name');
-
     vm.form = credential.createFormSchema('put', {
         omit: ['user', 'team', 'inputs']
     });
 
     vm.form.organization._resource = 'organization';
+    vm.form.organization._model = organization;
     vm.form.organization._route = 'credentials.edit.organization';
     vm.form.organization._value = credential.get('summary_fields.organization.id');
     vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
+    vm.form.organization._placeholder = vm.strings.inputs.ORGANIZATION_PLACEHOLDER;
 
     vm.form.credential_type._resource = 'credential_type';
+    vm.form.credential_type._model = credentialType;
     vm.form.credential_type._route = 'credentials.edit.credentialType';
-    vm.form.credential_type._value = selectedCredentialType.id;
-    vm.form.credential_type._displayValue = selectedCredentialType.name;
+    vm.form.credential_type._value = selectedCredentialType.get('id');
+    vm.form.credential_type._displayValue = selectedCredentialType.get('name');
+    vm.form.credential_type._placeholder = vm.strings.inputs.CREDENTIAL_TYPE_PLACEHOLDER;
  
     vm.form.inputs = {
         _get (id) {
@@ -80,7 +85,8 @@ function EditCredentialsController (models, $state, $scope) {
 EditCredentialsController.$inject = [
     'resolvedModels',
     '$state',
-    '$scope'
+    '$scope',
+    'CredentialsStrings'
 ];
 
 export default EditCredentialsController;

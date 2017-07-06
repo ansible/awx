@@ -1,5 +1,3 @@
-const DEFAULT_HINT = 'HINT: Drag and drop an SSH private key file on the field below.';
-
 function atInputTextareaSecretLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -28,13 +26,13 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
         if (scope.state.format === 'ssh_private_key') {
             scope.ssh = true;
-            scope.state._hint = scope.state._hint || DEFAULT_HINT;
+            scope.state._hint = scope.state._hint || vm.strings.components.textarea.SSH_KEY_HINT;
             input = element.find('input')[0];
         }
 
         if (scope.state._value) {
-            scope.state._buttonText = 'REPLACE';
-            scope.state._placeholder = 'ENCRYPTED';
+            scope.state._buttonText = vm.strings.components.REPLACE;
+            scope.state._placeholder = vm.strings.components.ENCRYPTED;
         } else {
             if (scope.state.format === 'ssh_private_key') {
                 vm.listeners = vm.setFileListeners(textarea, input);
@@ -54,7 +52,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             vm.listeners = vm.setFileListeners(textarea, input);
         } else {
             scope.state._displayHint = false;
-            scope.state._placeholder = 'ENCRYPTED';
+            scope.state._placeholder = vm.strings.components.ENCRYPTED;
             eventService.remove(vm.listeners);
         }
     };
@@ -92,7 +90,11 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
     };
 }
 
-AtInputTextareaSecretController.$inject = ['BaseInputController', 'EventService'];
+AtInputTextareaSecretController.$inject = [
+    'BaseInputController',
+    'EventService',
+    'ComponentsStrings'
+];
 
 function atInputTextareaSecret (pathService) {
     return {

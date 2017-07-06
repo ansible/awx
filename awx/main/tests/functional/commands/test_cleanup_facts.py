@@ -108,7 +108,7 @@ def test_system_tracking_feature_disabled(mocker):
     cmd = Command()
     with pytest.raises(CommandError) as err:
         cmd.handle(None)
-    assert 'The System Tracking feature is not enabled for your Tower instance' in err.value
+    assert 'The System Tracking feature is not enabled for your instance' in err.value
 
 
 @mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)

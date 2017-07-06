@@ -124,7 +124,7 @@ def test_base_logging_handler_skip_log(params, logger_name, expected):
 
 def test_base_logging_handler_emit(dummy_log_record):
     handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
-                          message_type='logstash',
+                          message_type='logstash', lvl='INFO',
                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     sent_payloads = handler.emit(dummy_log_record)
@@ -137,9 +137,18 @@ def test_base_logging_handler_emit(dummy_log_record):
     assert body['message'] == 'User joe logged in'
 
 
+def test_base_logging_handler_ignore_low_severity_msg(dummy_log_record):
+    handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
+                          message_type='logstash', lvl='WARNING',
+                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler.setFormatter(LogstashFormatter())
+    sent_payloads = handler.emit(dummy_log_record)
+    assert len(sent_payloads) == 0
+
+
 def test_base_logging_handler_emit_system_tracking():
     handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
-                          message_type='logstash', indv_facts=True,
+                          message_type='logstash', indv_facts=True, lvl='INFO',
                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     record = logging.LogRecord(
@@ -205,7 +214,8 @@ def test_https_logging_handler_connectivity_test(http_adapter, status, reason, e
         'LOG_AGGREGATOR_PASSWORD': 'password',
         'LOG_AGGREGATOR_LOGGERS': ['awx', 'activity_stream', 'job_events', 'system_tracking'],
         'CLUSTER_HOST_ID': '',
-        'LOG_AGGREGATOR_TOWER_UUID': str(uuid4())
+        'LOG_AGGREGATOR_TOWER_UUID': str(uuid4()),
+        'LOG_AGGREGATOR_LEVEL': 'DEBUG',
     })
 
     class FakeHTTPSHandler(HTTPSHandler):
@@ -226,7 +236,7 @@ def test_https_logging_handler_connectivity_test(http_adapter, status, reason, e
 
 
 def test_https_logging_handler_logstash_auth_info():
-    handler = HTTPSHandler(message_type='logstash', username='bob', password='ansible')
+    handler = HTTPSHandler(message_type='logstash', username='bob', password='ansible', lvl='INFO')
     handler._add_auth_information()
     assert isinstance(handler.session.auth, requests.auth.HTTPBasicAuth)
     assert handler.session.auth.username == 'bob'
@@ -243,7 +253,7 @@ def test_https_logging_handler_splunk_auth_info():
 def test_https_logging_handler_connection_error(connection_error_adapter,
                                                 dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type='logstash',
+                           message_type='logstash', lvl='INFO',
                            enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', connection_error_adapter)
@@ -271,7 +281,7 @@ def test_https_logging_handler_connection_error(connection_error_adapter,
 def test_https_logging_handler_emit_without_cred(http_adapter, dummy_log_record,
                                                  message_type):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type=message_type,
+                           message_type=message_type, lvl='INFO',
                            enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
@@ -295,7 +305,7 @@ def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
                                                         dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            username='user', password='pass',
-                           message_type='logstash',
+                           message_type='logstash', lvl='INFO',
                            enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
@@ -310,7 +320,7 @@ def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
 def test_https_logging_handler_emit_splunk_with_creds(http_adapter,
                                                       dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           password='pass', message_type='splunk',
+                           password='pass', message_type='splunk', lvl='INFO',
                            enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
@@ -333,7 +343,7 @@ def test_encode_payload_for_socket(payload, encoded_payload):
 
 def test_udp_handler_create_socket_at_init():
     handler = UDPHandler(host='127.0.0.1', port=4399,
-                         enabled_flag=True, message_type='splunk',
+                         enabled_flag=True, message_type='splunk', lvl='INFO',
                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     assert hasattr(handler, 'socket')
     assert isinstance(handler.socket, socket.socket)
@@ -343,7 +353,7 @@ def test_udp_handler_create_socket_at_init():
 
 def test_udp_handler_send(dummy_log_record):
     handler = UDPHandler(host='127.0.0.1', port=4399,
-                         enabled_flag=True, message_type='splunk',
+                         enabled_flag=True, message_type='splunk', lvl='INFO',
                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     with mock.patch('awx.main.utils.handlers._encode_payload_for_socket', return_value="des") as encode_mock,\
@@ -355,7 +365,7 @@ def test_udp_handler_send(dummy_log_record):
 
 def test_tcp_handler_send(fake_socket, dummy_log_record):
     handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk',
+                         enabled_flag=True, message_type='splunk', lvl='INFO',
                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\
@@ -370,7 +380,7 @@ def test_tcp_handler_send(fake_socket, dummy_log_record):
 
 def test_tcp_handler_return_if_socket_unavailable(fake_socket, dummy_log_record):
     handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk',
+                         enabled_flag=True, message_type='splunk', lvl='INFO',
                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\
@@ -385,7 +395,7 @@ def test_tcp_handler_return_if_socket_unavailable(fake_socket, dummy_log_record)
 
 def test_tcp_handler_log_exception(fake_socket, dummy_log_record):
     handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk',
+                         enabled_flag=True, message_type='splunk', lvl='INFO',
                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\

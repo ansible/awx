@@ -50,10 +50,22 @@
             <div class="InsightsNav-badgeTitle"><translate>Not Solvable With Playbook</translate></div>
             <span class="badge List-titleBadge InsightsNav-solvableBadge">{{not_solvable_count}}</span>
         </div>
+        <div ng-click="refresh()">
+            <i class="fa fa-refresh InsightsNav-refresh"
+                aw-tool-tip="Refresh Insights" data-placement="left" data-original-title="" title=""
+                ng-hide="!insights_credential">
+            </i>
+        </div>
     </div>
 </div>
 
 <div class="InsightsBody">
+    <div class="InsightsBody-missingIssues" ng-show="reports.length===0 && insights_credential" translate>
+        No scan jobs have been run on this host.
+    </div>
+    <div class="InsightsBody-missingIssues" ng-show="!insights_credential" translate>
+        The Insights Credential for {{inventory.name}} was not found.
+    </div>
     <div class="InsightsRow" ng-repeat="report in reports">
         <div class="InsightsRow-title">
             <img class="InsightsIcon" src="/static/assets/i_severity_critical.svg" ng-show="report.rule.severity === 'CRITICAL'"
@@ -76,6 +88,6 @@
 
 <div class="buttons Form-buttons">
     <button type="button" class="btn btn-sm Form-primaryButton" ng-click="viewDataInInsights()"> <i class="fa fa-sign-out"></i> VIEW DATA IN INSIGHTS</button>
-    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, inventory.name, insights_credential)"> REMEDIATE INVENTORY</button>
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, inventory.name, insights_credential)" ng-hide="reports.length === 0 || !insights_credential"> REMEDIATE INVENTORY</button>
     <button type="button" class="btn btn-sm Form-cancelButton" ng-click="formCancel()"> Close</button>
 </div>

@@ -42,6 +42,20 @@
             },
             LOG_AGGREGATOR_ENABLED: {
                 type: 'toggleSwitch',
+            },
+            LOG_AGGREGATOR_PROTOCOL: {
+                type: 'select',
+                reset: 'LOG_AGGREGATOR_PROTOCOL',
+                ngOptions: 'type.label for type in LOG_AGGREGATOR_PROTOCOL_options track by type.value'
+            },
+            LOG_AGGREGATOR_TCP_TIMEOUT: {
+                type: 'text',
+                reset: 'LOG_AGGREGATOR_TCP_TIMEOUT',
+                ngShow: 'LOG_AGGREGATOR_PROTOCOL.value === "tcp" || LOG_AGGREGATOR_PROTOCOL.value === "https"',
+                awRequiredWhen: {
+                    reqExpression: "LOG_AGGREGATOR_PROTOCOL.value === 'tcp' || LOG_AGGREGATOR_PROTOCOL.value === 'https'",
+                    init: "false"
+                },
             }
          },
 

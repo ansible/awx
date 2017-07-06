@@ -163,6 +163,10 @@ export default ['$compile', 'Attr', 'Icon',
                     html += "</div>\n";
                 }
 
+                if (list.multiSelectPreview) {
+                    html += "<multi-select-preview selected-rows='" + list.multiSelectPreview.selectedRows + "' available-rows='" + list.multiSelectPreview.availableRows + "'></multi-select-preview>";
+                }
+
                 if (options.instructions) {
                     html += "<div class=\"instructions alert alert-info\">" + options.instructions + "</div>\n";
                 } else if (list.instructions) {
@@ -453,7 +457,7 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (options.paginate === undefined || options.paginate === true) {
-                    let hide_view_per_page = (options.mode === "lookup") ? true : false;
+                    let hide_view_per_page = (options.mode === "lookup" || options.hideViewPerPage) ? true : false;
                     html += `<paginate
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"

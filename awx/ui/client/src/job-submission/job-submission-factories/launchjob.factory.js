@@ -146,42 +146,40 @@ export default
                                 $state.go(state, {id: job}, {reload:true});
                             };
 
-                            if(_.has(data, 'job')) {
-                                goTojobResults('jobResult');
-                            } else if(base === 'jobs'){
-                                if(scope.clearDialog) {
-                                    scope.clearDialog();
-                                }
+                            if($state.includes('jobs')) {
                                 return;
-                            } else if(data.type && data.type === 'workflow_job') {
-                                job = data.id;
-                                goTojobResults('workflowResults');
                             }
-                            else if(_.has(data, 'ad_hoc_command')) {
-                                goTojobResults('adHocJobStdout');
-                            }
-                            else if(_.has(data, 'system_job')) {
-                                goTojobResults('managementJobStdout');
-                            }
-                            else if(_.has(data, 'project_update')) {
-                                // If we are on the projects list or any child state of that list
-                                // then we want to stay on that page.  Otherwise go to the stdout
-                                // view.
-                                if(!$state.includes('projects')) {
-                                    goTojobResults('scmUpdateStdout');
+
+                            else {
+                                if(_.has(data, 'job')) {
+                                    goTojobResults('jobResult');
+                                } else if(data.type && data.type === 'workflow_job') {
+                                    job = data.id;
+                                    goTojobResults('workflowResults');
+                                }
+                                else if(_.has(data, 'ad_hoc_command')) {
+                                    goTojobResults('adHocJobStdout');
+                                }
+                                else if(_.has(data, 'system_job')) {
+                                    goTojobResults('managementJobStdout');
+                                }
+                                else if(_.has(data, 'project_update')) {
+                                    // If we are on the projects list or any child state of that list
+                                    // then we want to stay on that page.  Otherwise go to the stdout
+                                    // view.
+                                    if(!$state.includes('projects')) {
+                                        goTojobResults('scmUpdateStdout');
+                                    }
+                                }
+                                else if(_.has(data, 'inventory_update')) {
+                                    // If we are on the inventory manage page or any child state of that
+                                    // page then we want to stay on that page.  Otherwise go to the stdout
+                                    // view.
+                                    if(!$state.includes('inventories.edit')) {
+                                        goTojobResults('inventorySyncStdout');
+                                    }
                                 }
                             }
-                            else if(_.has(data, 'inventory_update')) {
-                                // If we are on the inventory manage page or any child state of that
-                                // page then we want to stay on that page.  Otherwise go to the stdout
-                                // view.
-                                if(!$state.includes('inventories.edit')) {
-                                    goTojobResults('inventorySyncStdout');
-                                }
-                            }
-                        }
-                        if(scope.clearDialog) {
-                            scope.clearDialog();
                         }
                     })
                     .error(function(data, status) {

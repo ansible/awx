@@ -66,7 +66,7 @@ class Schedule(CommonModel):
     )
     enabled = models.BooleanField(
         default=True,
-        help_text=_("Enables processing of this schedule by Tower.")
+        help_text=_("Enables processing of this schedule.")
     )
     dtstart = models.DateTimeField(
         null=True,

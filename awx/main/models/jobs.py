@@ -8,6 +8,7 @@ import hmac
 import logging
 import time
 import json
+import base64
 from urlparse import urljoin
 
 # Django
@@ -223,6 +224,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
     '''
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
 
     class Meta:
         app_label = 'main'
@@ -308,10 +310,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
 
         # Job type dependent checks
-        if self.job_type == PERM_INVENTORY_SCAN:
-            if self.inventory is None or self.ask_inventory_on_launch:
-                validation_errors['inventory'] = [_("Scan jobs must be assigned a fixed inventory."),]
-        elif self.project is None:
+        if self.project is None:
             resources_needed_to_start.append('project')
             validation_errors['project'] = [_("Job types 'run' and 'check' must have assigned a project."),]
 
@@ -407,12 +406,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         """
         errors = {}
         if 'job_type' in data and self.ask_job_type_on_launch:
-            if ((self.job_type == PERM_INVENTORY_SCAN and not data['job_type'] == PERM_INVENTORY_SCAN) or
-                    (data['job_type'] == PERM_INVENTORY_SCAN and not self.job_type == PERM_INVENTORY_SCAN)):
+            if data['job_type'] == PERM_INVENTORY_SCAN and not self.job_type == PERM_INVENTORY_SCAN:
                 errors['job_type'] = _('Cannot override job_type to or from a scan job.')
-        if (self.job_type == PERM_INVENTORY_SCAN and ('inventory' in data) and self.ask_inventory_on_launch and
-                self.inventory != data['inventory']):
-            errors['inventory'] = _('Inventory cannot be changed at runtime for scan jobs.')
         return errors
 
     @property
@@ -647,8 +642,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         return data
 
     def _resources_sufficient_for_launch(self):
-        if self.job_type == PERM_INVENTORY_SCAN:
-            return self.inventory_id is not None
         return not (self.inventory_id is None or self.project_id is None)
 
     def display_artifacts(self):
@@ -714,10 +707,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         return '{}'.format(self.inventory.id)
 
     def memcached_fact_host_key(self, host_name):
-        return '{}-{}'.format(self.inventory.id, host_name)
+        return '{}-{}'.format(self.inventory.id, base64.b64encode(host_name))
 
     def memcached_fact_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self.inventory.id, host_name)
+        return '{}-{}-modified'.format(self.inventory.id, base64.b64encode(host_name))
 
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
         return self.inventory.hosts.only(*only)
@@ -1441,4 +1434,3 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
-

@@ -9,7 +9,6 @@ from sets import Set
 # Django
 from django.conf import settings
 from django.db import transaction, connection
-from django.db.utils import DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now
 
@@ -17,12 +16,14 @@ from django.utils.timezone import now as tz_now
 from awx.main.models import * # noqa
 #from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
+from awx.main.utils.pglock import advisory_lock
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.tasks import _send_notification_templates
 
 # Celery
 from celery.task.control import inspect
+
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -375,7 +376,7 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug("Task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
 
-    def process_celery_tasks(self, active_tasks, all_running_sorted_tasks):
+    def process_celery_tasks(self, celery_task_start_time, active_tasks, all_running_sorted_tasks):
         '''
         Rectify tower db <-> celery inconsistent view of jobs state
         '''
@@ -383,13 +384,9 @@ class TaskManager():
 
             if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
                 # TODO: try catch the getting of the job. The job COULD have been deleted
-                # Ensure job did not finish running between the time we get the
-                # list of task id's from celery and now.
-                # Note: This is an actual fix, not a reduction in the time 
-                # window that this can happen.
                 if isinstance(task, WorkflowJob):
                     continue
-                if task.status != 'running':
+                if task_obj.modified > celery_task_start_time:
                     continue
                 task.status = 'failed'
                 task.job_explanation += ' '.join((
@@ -459,13 +456,12 @@ class TaskManager():
         logger.debug("Starting Schedule")
         with transaction.atomic():
             # Lock
-            try:
-                Instance.objects.select_for_update(nowait=True).all()[0]
-            except DatabaseError:
-                return
+            with advisory_lock('task_manager_lock', wait=False) as acquired:
+                if acquired is False:
+                    return
 
-            finished_wfjs = self._schedule()
+                finished_wfjs = self._schedule()
 
-        # Operations whose queries rely on modifications made during the atomic scheduling session
-        for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-            _send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')
+                # Operations whose queries rely on modifications made during the atomic scheduling session
+                for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
+                    _send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')

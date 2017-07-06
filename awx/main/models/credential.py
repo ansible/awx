@@ -30,7 +30,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, to_python_boolean
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential']
 
@@ -219,10 +219,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         'CredentialType',
         related_name='credentials',
         null=False,
-        help_text=_('Type for this credential.  Credential Types define '
-                    'valid fields (e.g,. "username", "password") and their '
-                    'properties (e.g,. "username is required" or "password '
-                    'should be stored with encryption").')
+        help_text=_('Specify the type of credential you want to create. Refer '
+                    'to the Ansible Tower documentation for details on each type.')
     )
     organization = models.ForeignKey(
         'Organization',
@@ -235,10 +233,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     inputs = CredentialInputField(
         blank=True,
         default={},
-        help_text=_('Data structure used to specify input values (e.g., '
-                    '{"username": "jane-doe", "password": "secret"}).  Valid '
-                    'fields and their requirements vary depending on the '
-                    'fields defined on the chosen CredentialType.')
+        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -421,11 +418,17 @@ class CredentialType(CommonModelNameNotUnique):
     )
     inputs = CredentialTypeInputField(
         blank=True,
-        default={}
+        default={},
+        help_text=_('Enter inputs using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
-        default={}
+        default={},
+        help_text=_('Enter injectors using either JSON or YAML syntax. Use the '
+                    'radio button to toggle between the two. Refer to the '
+                    'Ansible Tower documentation for example syntax.')
     )
 
     def get_absolute_url(self, request=None):
@@ -535,6 +538,12 @@ class CredentialType(CommonModelNameNotUnique):
         # ansible-playbook) and a safe namespace with secret values hidden (for
         # DB storage)
         for field_name, value in credential.inputs.items():
+
+            if type(value) is bool:
+                # boolean values can't be secret/encrypted
+                safe_namespace[field_name] = namespace[field_name] = value
+                continue
+
             if field_name in self.secret_fields:
                 value = decrypt_field(credential, field_name)
                 safe_namespace[field_name] = '**********'
@@ -566,6 +575,13 @@ class CredentialType(CommonModelNameNotUnique):
         for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
             extra_vars[var_name] = Template(tmpl).render(**namespace)
             safe_extra_vars[var_name] = Template(tmpl).render(**safe_namespace)
+
+            # If the template renders to a stringified Boolean, they've _probably_
+            # set up an extra_var injection with a boolean field; extra_vars supports JSON,
+            # so give them the actual boolean type they want
+            for v in (extra_vars, safe_extra_vars):
+                if v[var_name] in ('True', 'False'):
+                    v[var_name] = to_python_boolean(v[var_name])
 
         if extra_vars:
             args.extend(['-e', json.dumps(extra_vars)])
@@ -608,7 +624,10 @@ def ssh(cls):
                 'id': 'become_method',
                 'label': 'Privilege Escalation Method',
                 'choices': map(operator.itemgetter(0),
-                               V1Credential.FIELDS['become_method'].choices)
+                               V1Credential.FIELDS['become_method'].choices),
+                'help_text': ('Specify a method for "become" operations. This is '
+                              'equivalent to specifying the --become-method '
+                              'Ansible parameter.')
             }, {
                 'id': 'become_username',
                 'label': 'Privilege Escalation Username',
@@ -738,6 +757,10 @@ def aws(cls):
                 'label': 'STS Token',
                 'type': 'string',
                 'secret': True,
+                'help_text': ('Security Token Service (STS) is a web service '
+                              'that enables you to request temporary, '
+                              'limited-privilege credentials for AWS Identity '
+                              'and Access Management (IAM) users.'),
             }],
             'required': ['username', 'password']
         }
@@ -764,6 +787,8 @@ def openstack(cls):
                 'id': 'host',
                 'label': 'Host (Authentication URL)',
                 'type': 'string',
+                'help_text': ('The host to authenticate with.  For example, '
+                              'https://openstack.business.com/v2.0/')
             }, {
                 'id': 'project',
                 'label': 'Project (Tenant Name)',
@@ -771,7 +796,11 @@ def openstack(cls):
             }, {
                 'id': 'domain',
                 'label': 'Domain Name',
-                'type': 'string'
+                'type': 'string',
+                'help_text': ('OpenStack domains define administrative boundaries. '
+                              'It is only needed for Keystone v3 authentication '
+                              'URLs. Refer to Ansible Tower documentation for '
+                              'common scenarios.')
             }],
             'required': ['username', 'password', 'host', 'project']
         }
@@ -789,6 +818,8 @@ def vmware(cls):
                 'id': 'host',
                 'label': 'VCenter Host',
                 'type': 'string',
+                'help_text': ('Enter the hostname or IP address which corresponds '
+                              'to your VMware vCenter.')
             }, {
                 'id': 'username',
                 'label': 'Username',
@@ -815,6 +846,8 @@ def satellite6(cls):
                 'id': 'host',
                 'label': 'Satellite 6 URL',
                 'type': 'string',
+                'help_text': ('Enter the URL which corresponds to your Red Hat '
+                              'Satellite 6 server. For example, https://satellite.example.org')
             }, {
                 'id': 'username',
                 'label': 'Username',
@@ -840,6 +873,9 @@ def cloudforms(cls):
                 'id': 'host',
                 'label': 'CloudForms URL',
                 'type': 'string',
+                'help_text': ('Enter the URL for the virtual machine which '
+                              'corresponds to your CloudForm instance. '
+                              'For example, https://cloudforms.example.org')
             }, {
                 'id': 'username',
                 'label': 'Username',
@@ -864,18 +900,25 @@ def gce(cls):
             'fields': [{
                 'id': 'username',
                 'label': 'Service Account Email Address',
-                'type': 'string'
+                'type': 'string',
+                'help_text': ('The email address assigned to the Google Compute '
+                              'Engine service account.')
             }, {
                 'id': 'project',
                 'label': 'Project',
-                'type': 'string'
+                'type': 'string',
+                'help_text': ('The Project ID is the GCE assigned identification. '
+                              'It is constructed as two words followed by a three '
+                              'digit number. Example: adjective-noun-000')
             }, {
                 'id': 'ssh_key_data',
                 'label': 'RSA Private Key',
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
-                'multiline': True
+                'multiline': True,
+                'help_text': ('Paste the contents of the PEM file associated '
+                              'with the service account email.')
             }]
         }
     )
@@ -891,14 +934,19 @@ def azure(cls):
             'fields': [{
                 'id': 'username',
                 'label': 'Subscription ID',
-                'type': 'string'
+                'type': 'string',
+                'help_text': ('Subscription ID is an Azure construct, which is '
+                              'mapped to a username.')
             }, {
                 'id': 'ssh_key_data',
                 'label': 'Management Certificate',
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
-                'multiline': True
+                'multiline': True,
+                'help_text': ('Paste the contents of the PEM file that corresponds '
+                              'to the certificate you uploaded in the Microsoft '
+                              'Azure console.')
             }]
         }
     )
@@ -914,7 +962,9 @@ def azure_rm(cls):
             'fields': [{
                 'id': 'subscription',
                 'label': 'Subscription ID',
-                'type': 'string'
+                'type': 'string',
+                'help_text': ('Subscription ID is an Azure construct, which is '
+                              'mapped to a username.')
             }, {
                 'id': 'username',
                 'label': 'Username',
@@ -946,16 +996,16 @@ def azure_rm(cls):
 def insights(cls):
     return cls(
         kind='insights',
-        name='Insights Basic Auth',
+        name='Insights',
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Basic Auth Username',
+                'label': 'Username',
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Basic Auth Password',
+                'label': 'Password',
                 'type': 'string',
                 'secret': True
             }],

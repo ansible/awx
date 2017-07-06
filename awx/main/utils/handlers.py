@@ -44,7 +44,8 @@ PARAM_NAMES = {
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
     'tcp_timeout': 'LOG_AGGREGATOR_TCP_TIMEOUT',
-    'verify_cert': 'LOG_AGGREGATOR_VERIFY_CERT'
+    'verify_cert': 'LOG_AGGREGATOR_VERIFY_CERT',
+    'lvl': 'LOG_AGGREGATOR_LEVEL',
 }
 
 
@@ -87,6 +88,15 @@ class VerboseThreadPoolExecutor(ThreadPoolExecutor):
                 raise
         return super(VerboseThreadPoolExecutor, self).submit(_wrapped, *args,
                                                              **kwargs)
+
+
+LEVEL_MAPPING = {
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARNING': logging.WARNING,
+    'ERROR': logging.ERROR,
+    'CRITICAL': logging.CRITICAL,
+}
 
 
 class BaseHandler(logging.Handler):
@@ -133,6 +143,8 @@ class BaseHandler(logging.Handler):
             Emit a log record.  Returns a list of zero or more
             implementation-specific objects for tests.
         """
+        if not record.name.startswith('awx.analytics') and record.levelno < LEVEL_MAPPING[self.lvl]:
+            return []
         if self._skip_log(record.name):
             return []
         try:

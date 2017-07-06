@@ -1,0 +1,28 @@
+@import "../../shared/branding/colors.default.less";
+
+capacity-bar {
+
+    width: 50%;
+    margin-right: 10px;
+    min-width: 100px;
+
+    .CapacityBar {
+        background-color: @default-bg;
+        display: flex;
+        flex: 0 0 auto;
+        height: 10px;
+        border: 1px solid @default-link;
+        width: 100%;
+        border-radius: 100vw;
+        overflow: hidden;
+    }
+
+    .CapacityBar-remaining {
+        background-color: @default-link;
+        flex: 0 0 auto;
+    }
+
+    .CapacityBar-consumed {
+        flex: 0 0 auto;
+    }
+}

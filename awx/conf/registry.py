@@ -86,7 +86,7 @@ class SettingsRegistry(object):
                 categories[category_slug] = kwargs.get('category', None) or category_slug
         return categories
 
-    def get_registered_settings(self, category_slug=None, read_only=None, features_enabled=None):
+    def get_registered_settings(self, category_slug=None, read_only=None, features_enabled=None, slugs_to_ignore=set()):
         setting_names = []
         if category_slug == 'user-defaults':
             category_slug = 'user'
@@ -94,6 +94,8 @@ class SettingsRegistry(object):
             category_slug = 'all'
         for setting, kwargs in self._registry.items():
             if category_slug not in {None, 'all', kwargs.get('category_slug', None)}:
+                continue
+            if kwargs.get('category_slug', None) in slugs_to_ignore:
                 continue
             if read_only in {True, False} and kwargs.get('read_only', False) != read_only:
                 # Note: Doesn't catch fields that set read_only via __init__;

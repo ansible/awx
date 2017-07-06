@@ -76,7 +76,8 @@ SUMMARIZABLE_FK_FIELDS = {
                                            'total_inventory_sources',
                                            'inventory_sources_with_failures',
                                            'organization_id',
-                                           'kind'),
+                                           'kind',
+                                           'insights_credential_id',),
     'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
                                       'has_inventory_sources'),
     'group': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
@@ -298,7 +299,8 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_related(self, obj):
         res = OrderedDict()
         view = self.context.get('view', None)
-        if view and hasattr(view, 'retrieve') and type(obj) in settings.NAMED_URL_GRAPH:
+        if view and (hasattr(view, 'retrieve') or view.request.method == 'POST') and \
+                type(obj) in settings.NAMED_URL_GRAPH:
             original_url = self.get_url(obj)
             if not original_url.startswith('/api/v1'):
                 res['named_url'] = self._generate_named_url(
@@ -1145,7 +1147,6 @@ class InventorySerializer(BaseSerializerWithVariables):
             update_inventory_sources = self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
             job_templates = self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
-            scan_job_templates = self.reverse('api:inventory_scan_job_template_list', kwargs={'pk': obj.pk}),
             ad_hoc_commands = self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
@@ -1652,7 +1653,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
         elif source=='scm' and not overwrite_vars:
             raise serializers.ValidationError({"detail": _(
-                "SCM type sources must set `overwrite_vars` to `true` until a future Tower release.")})
+                "SCM type sources must set `overwrite_vars` to `true`.")})
 
         return super(InventorySourceSerializer, self).validate(attrs)
 
@@ -1894,7 +1895,7 @@ class CredentialTypeSerializer(BaseSerializer):
     def validate(self, attrs):
         if self.instance and self.instance.managed_by_tower:
             raise PermissionDenied(
-                detail=_("Modifications not allowed for credential types managed by Tower")
+                detail=_("Modifications not allowed for managed credential types")
             )
         if self.instance and self.instance.credentials.exists():
             if 'inputs' in attrs and attrs['inputs'] != self.instance.inputs:
@@ -1921,6 +1922,17 @@ class CredentialTypeSerializer(BaseSerializer):
             kwargs={'pk': obj.pk}
         )
         return res
+
+    def to_representation(self, data):
+        value = super(CredentialTypeSerializer, self).to_representation(data)
+
+        # translate labels and help_text for credential fields "managed by Tower"
+        if value.get('managed_by_tower'):
+            for field in value.get('inputs', {}).get('fields', []):
+                field['label'] = _(field['label'])
+                if 'help_text' in field:
+                    field['help_text'] = _(field['help_text'])
+        return value
 
 
 # TODO: remove when API v1 is removed
@@ -2334,8 +2346,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
-            job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
-            if not project and job_type != PERM_INVENTORY_SCAN:
+            if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             if project and project.scm_type and playbook and force_text(playbook) not in project.playbook_files:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
@@ -2406,25 +2417,17 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        survey_enabled = get_field_from_model_or_attrs('survey_enabled')
-        job_type = get_field_from_model_or_attrs('job_type')
         inventory = get_field_from_model_or_attrs('inventory')
         credential = get_field_from_model_or_attrs('credential')
         project = get_field_from_model_or_attrs('project')
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
-        if job_type == "scan":
-            if inventory is None or attrs.get('ask_inventory_on_launch', False):
-                raise serializers.ValidationError({'inventory': _('Scan jobs must be assigned a fixed inventory.')})
-        elif project is None:
+        if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
         elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
             raise serializers.ValidationError({'credential': prompting_error_message})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
-
-        if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': _('Survey Enabled cannot be used with scan jobs.')})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
@@ -2568,7 +2571,7 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         if not obj.credential:
             raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
-        if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
+        if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))

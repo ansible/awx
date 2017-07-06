@@ -8,6 +8,7 @@ import inputLabel from './input/label.directive';
 import inputLookup from './input/lookup.directive';
 import inputMessage from './input/message.directive';
 import inputSecret from './input/secret.directive';
+import inputSelect from './input/select.directive';
 import inputText from './input/text.directive';
 import inputTextarea from './input/textarea.directive';
 import inputTextareaSecret from './input/textarea-secret.directive';
@@ -20,6 +21,7 @@ import tab from './tabs/tab.directive';
 import tabGroup from './tabs/group.directive';
 
 import BaseInputController from './input/base.controller';
+import ComponentsStrings from './components.strings';
 
 angular
     .module('at.lib.components', [])
@@ -33,6 +35,7 @@ angular
     .directive('atInputLookup', inputLookup)
     .directive('atInputMessage', inputMessage)
     .directive('atInputSecret', inputSecret)
+    .directive('atInputSelect', inputSelect)
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)
@@ -43,6 +46,7 @@ angular
     .directive('atPopover', popover)
     .directive('atTab', tab)
     .directive('atTabGroup', tabGroup)
-    .service('BaseInputController', BaseInputController);
+    .service('BaseInputController', BaseInputController)
+    .service('ComponentsStrings', ComponentsStrings);
 
 

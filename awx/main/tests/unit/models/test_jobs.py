@@ -8,6 +8,7 @@ from awx.main.models import (
 
 import datetime
 import json
+import base64
 from dateutil.tz import tzutc
 
 
@@ -89,8 +90,8 @@ def test_start_job_fact_cache(hosts, job, inventory, mocker):
 
     job._get_memcache_connection().set.assert_any_call('5', [h.name for h in hosts])
     for host in hosts:  
-        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), json.dumps(host.ansible_facts))
-        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), host.ansible_facts_modified.isoformat())
+        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, base64.b64encode(host.name)), json.dumps(host.ansible_facts))
+        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, base64.b64encode(host.name)), host.ansible_facts_modified.isoformat())
 
 
 def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory, mocker):
@@ -98,15 +99,15 @@ def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory,
     job.start_job_fact_cache()
 
     for host in hosts:  
-        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, host.name), json.dumps(host.ansible_facts))
-        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, host.name), host.ansible_facts_modified.isoformat())
+        job._get_memcache_connection().set.assert_any_call('{}-{}'.format(5, base64.b64encode(host.name)), json.dumps(host.ansible_facts))
+        job._get_memcache_connection().set.assert_any_call('{}-{}-modified'.format(5, base64.b64encode(host.name)), host.ansible_facts_modified.isoformat())
 
     job._get_memcache_connection().set.reset_mock()
 
     job2.start_job_fact_cache()
 
     # Ensure hosts2 ansible_facts didn't overwrite hosts ansible_facts
-    ansible_facts_cached = job._get_memcache_connection().get('{}-{}'.format(5, hosts2[0].name))
+    ansible_facts_cached = job._get_memcache_connection().get('{}-{}'.format(5, base64.b64encode(hosts2[0].name)))
     assert ansible_facts_cached == json.dumps(hosts[1].ansible_facts)
 
 

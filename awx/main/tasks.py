@@ -67,7 +67,7 @@ HIDDEN_PASSWORD = '**********'
 
 OPENSSH_KEY_ERROR = u'''\
 It looks like you're trying to use a private key in OpenSSH format, which \
-isn't supported by the installed version of OpenSSH on this Tower instance. \
+isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
@@ -79,7 +79,7 @@ def celery_startup(conf=None, **kwargs):
     # Re-init all schedules
     # NOTE: Rework this during the Rampart work
     startup_logger = logging.getLogger('awx.main.tasks')
-    startup_logger.info("Syncing Tower Schedules")
+    startup_logger.info("Syncing Schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
@@ -189,11 +189,11 @@ def cluster_node_heartbeat(self):
     for other_inst in recent_inst:
         if other_inst.version == "":
             continue
-        if Version(other_inst.version) > Version(tower_application_version):
-            logger.error("Host {} reports Tower version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
-                                                                                                             other_inst.version,
-                                                                                                             inst.hostname,
-                                                                                                             inst.version))
+        if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version) and not settings.DEBUG:
+            logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
+                                                                                                       other_inst.version,
+                                                                                                       inst.hostname,
+                                                                                                       inst.version))
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
 
 
@@ -444,7 +444,7 @@ class BaseTask(Task):
         '''
         Create a temporary directory for job-related files.
         '''
-        path = tempfile.mkdtemp(prefix='ansible_tower_%s_' % instance.pk)
+        path = tempfile.mkdtemp(prefix='ansible_tower_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         return path
 
@@ -481,7 +481,7 @@ class BaseTask(Task):
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
                 if credential.kind in ('ssh', 'scm') and not ssh_too_old:
-                    path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
+                    path = os.path.join(kwargs['private_data_dir'], name)
                     run.open_fifo_write(path, data)
                     private_data_files['credentials']['ssh'] = path
                 # Ansible network modules do not yet support ssh-agent.
@@ -682,6 +682,9 @@ class BaseTask(Task):
                     instance = self.update_model(pk)
                     status = instance.status
                     raise RuntimeError('not starting %s task' % instance.status)
+
+            if not os.path.exists(settings.AWX_PROOT_BASE_PATH):
+                raise RuntimeError('AWX_PROOT_BASE_PATH=%s does not exist' % settings.AWX_PROOT_BASE_PATH)
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
@@ -1057,18 +1060,13 @@ class RunJob(BaseTask):
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
-        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
-            args.append("scan_facts.yml")
-        else:
-            args.append(job.playbook)
+        args.append(job.playbook)
         return args
 
     def build_safe_args(self, job, **kwargs):
         return self.build_args(job, display=True, **kwargs)
 
     def build_cwd(self, job, **kwargs):
-        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
-            return self.get_path_to('..', 'playbooks')
         cwd = job.project.get_project_path()
         if not cwd:
             root = settings.PROJECTS_ROOT
@@ -1195,7 +1193,7 @@ class RunProjectUpdate(BaseTask):
             }
         }
         '''
-        handle, self.revision_path = tempfile.mkstemp()
+        handle, self.revision_path = tempfile.mkstemp(dir=settings.AWX_PROOT_BASE_PATH)
         private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
@@ -1815,7 +1813,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
+            runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_', dir=settings.AWX_PROOT_BASE_PATH)
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:

@@ -338,7 +338,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     multiSelect: true,
                     dataTitle: i18n._('Labels'),
                     dataPlacement: 'right',
-                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
                     dataContainer: 'body',
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },

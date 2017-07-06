@@ -28,7 +28,7 @@
              list.iterator = 'associate_host';
              list.name = 'associate_hosts';
              list.multiSelect = true;
-             list.fields.name.ngClick = 'linkoutHost(associate_host.id)';
+             list.fields.name.ngClick = 'linkoutHost(associate_host)';
              list.trackBy = 'associate_host.id';
              delete list.fields.toggleHost;
              delete list.fields.active_failures;
@@ -47,7 +47,8 @@
                      let html = generateList.build({
                          list: list,
                          mode: 'edit',
-                         title: false
+                         title: false,
+                         hideViewPerPage: true
                      });
 
                      $scope.compileList(html);
@@ -69,14 +70,14 @@
                  let item = value.value;
 
                  if (value.isSelected) {
-                     $scope.selectedItems.push(item.id);
+                     $scope.selectedItems.push(item);
                  }
                  else {
                      // _.remove() Returns the new array of removed elements.
                      // This will pull all the values out of the array that don't
                      // match the deselected item effectively removing it
                      $scope.selectedItems = _.remove($scope.selectedItems, function(selectedItem) {
-                         return selectedItem !== item.id;
+                         return selectedItem.id !== item.id;
                      });
                  }
              });
@@ -97,10 +98,8 @@
 
          };
 
-         $scope.linkoutHost = function(userId) {
-             // Open the edit user form in a new tab so as not to navigate the user
-             // away from the modal
-             $window.open('/#/users/' + userId,'_blank');
+         $scope.linkoutHost = function(host) {
+             $window.open('/#/inventories/inventory/' + host.inventory + '/hosts/edit/' + host.id,'_blank');
          };
      });
  }];

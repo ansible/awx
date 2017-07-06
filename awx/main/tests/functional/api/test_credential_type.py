@@ -171,6 +171,30 @@ def test_create_with_valid_inputs(get, post, admin):
 
 
 @pytest.mark.django_db
+def test_create_with_required_inputs(get, post, admin):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'MyCloud',
+        'inputs': {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': True
+            }],
+            'required': ['api_token'],
+        },
+        'injectors': {}
+    }, admin)
+    assert response.status_code == 201
+
+    response = get(reverse('api:credential_type_list'), admin)
+    assert response.data['count'] == 1
+    required = response.data['results'][0]['inputs']['required']
+    assert required == ['api_token']
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('inputs', [
     True,
     100,

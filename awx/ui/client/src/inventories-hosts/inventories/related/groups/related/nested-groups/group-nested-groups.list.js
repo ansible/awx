@@ -107,7 +107,7 @@
             "delete": {
                 mode: 'all',
                 ngClick: "disassociateGroup(nested_group)",
-                awToolTip: i18n._('Delete group'),
+                awToolTip: i18n._('Disassociate group'),
                 dataPlacement: "top",
                 ngShow: "nested_group.summary_fields.user_capabilities.delete"
             }

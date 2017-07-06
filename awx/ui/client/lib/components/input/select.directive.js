@@ -1,5 +1,3 @@
-const DEFAULT_EMPTY_PLACEHOLDER = 'NO OPTIONS AVAILABLE';
-
 function atInputSelectLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -11,7 +9,7 @@ function atInputSelectLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputSelectController (baseInputController, eventService) { 
+function AtInputSelectController (baseInputController, eventService) {
     let vm = this || {};
 
     let scope;
@@ -29,7 +27,7 @@ function AtInputSelectController (baseInputController, eventService) {
 
         if (!scope.state._data || scope.state._data.length === 0) {
             scope.state._disabled = true;
-            scope.state._placeholder = DEFAULT_EMPTY_PLACEHOLDER;
+            scope.state._placeholder = vm.strings.components.EMPTY_PLACEHOLDER;
         }
 
         vm.setListeners();
@@ -67,7 +65,7 @@ function AtInputSelectController (baseInputController, eventService) {
         } else if (scope.state._format === 'grouped-object') {
             scope.displayModel = scope.state._value[scope.state._display];
         } else {
-            throw new Error('Unsupported display model type');
+            throw new Error(vm.strings.components.UNSUPPORTED_TYPE_ERROR);
         }
     };
 }

@@ -19,7 +19,7 @@ from rest_framework import status
 # Tower
 from awx.api.generics import *  # noqa
 from awx.api.permissions import IsSuperUser
-from awx.api.versioning import reverse
+from awx.api.versioning import reverse, get_request_version
 from awx.main.utils import *  # noqa
 from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
@@ -30,6 +30,13 @@ from awx.conf import settings_registry
 
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
+
+VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE = {
+    1: set([
+        'named-url',
+    ]),
+    2: set([]),
+}
 
 
 class SettingCategoryList(ListAPIView):
@@ -50,6 +57,8 @@ class SettingCategoryList(ListAPIView):
         else:
             categories = {}
         for category_slug in sorted(categories.keys()):
+            if category_slug in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
+                continue
             url = reverse('api:setting_singleton_detail', kwargs={'category_slug': category_slug}, request=self.request)
             setting_categories.append(SettingCategory(url, category_slug, categories[category_slug]))
         return setting_categories
@@ -66,6 +75,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
         all_category_slugs = settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys()
+        for slug_to_delete in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
+            all_category_slugs.remove(slug_to_delete)
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
             category_slugs = all_category_slugs
         else:
@@ -75,7 +86,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.category_slug not in category_slugs:
             raise PermissionDenied()
 
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False, features_enabled=get_licensed_features())
+        registered_settings = settings_registry.get_registered_settings(
+            category_slug=self.category_slug, read_only=False, features_enabled=get_licensed_features(),
+            slugs_to_ignore=VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]
+        )
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
         else:
@@ -83,7 +97,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         settings_qs = self.get_queryset()
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, features_enabled=get_licensed_features())
+        registered_settings = settings_registry.get_registered_settings(
+            category_slug=self.category_slug, features_enabled=get_licensed_features(),
+            slugs_to_ignore=VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]
+        )
         all_settings = {}
         for setting in settings_qs:
             all_settings[setting.key] = setting.value
@@ -161,6 +178,12 @@ class SettingLoggingTest(GenericAPIView):
         obj = type('Settings', (object,), defaults)()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if request.data.get('LOG_AGGREGATOR_PASSWORD', '').startswith('$encrypted$'):
+            serializer.validated_data['LOG_AGGREGATOR_PASSWORD'] = getattr(
+                settings, 'LOG_AGGREGATOR_PASSWORD', ''
+            )
+
         try:
             class MockSettings:
                 pass

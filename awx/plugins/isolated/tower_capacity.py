@@ -24,6 +24,14 @@ def main():
     module = AnsibleModule(
         argument_spec = dict()
     )
+    try:
+        version = subprocess.check_output(
+            ['tower-expect', '--version'],
+            stderr=subprocess.STDOUT
+        ).strip()
+    except subprocess.CalledProcessError as e:
+        module.fail_json(msg=str(e))
+        return
     # Duplicated with awx.main.utils.common.get_system_task_capacity
     try:
         out = subprocess.check_output(['free', '-m'])
@@ -36,7 +44,7 @@ def main():
     cap = 50 + ((int(total_mem_value) / 1024) - 2) * 75
 
     # Module never results in a change
-    module.exit_json(changed=False, capacity=cap)
+    module.exit_json(changed=False, capacity=cap, version=version)
 
 
 if __name__ == '__main__':

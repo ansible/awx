@@ -274,17 +274,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             });
         }
 
-        $scope.lookupCredential = function(){
-            $state.go('.credential', {
-                credential_search: {
-                    // TODO: get kind sorting for credential properly implemented
-                    // kind: kind,
-                    page_size: '5',
-                    page: '1'
-                }
-            });
-        };
-
         $scope.lookupProject = function(){
             $state.go('.project', {
                 project_search: {

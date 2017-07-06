@@ -99,10 +99,10 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         }
 
         $scope.lookupCredential = function(){
+            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
             $state.go('.credential', {
                 credential_search: {
-                    // TODO: get kind sorting for credential properly implemented
-                    // kind: kind,
+                    kind: kind,
                     page_size: '5',
                     page: '1'
                 }

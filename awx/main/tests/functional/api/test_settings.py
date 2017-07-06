@@ -223,6 +223,25 @@ def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
 
 
 @pytest.mark.django_db
+def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch, post, admin):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    patch(url, user=admin, data={'LOG_AGGREGATOR_PASSWORD': 'password123'}, expect=200)
+
+    with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
+        url = reverse('api:setting_logging_test')
+        user_data = {
+            'LOG_AGGREGATOR_TYPE': 'logstash',
+            'LOG_AGGREGATOR_HOST': 'localhost',
+            'LOG_AGGREGATOR_PORT': 8080,
+            'LOG_AGGREGATOR_USERNAME': 'logger',
+            'LOG_AGGREGATOR_PASSWORD': '$encrypted$'
+        }
+        post(url, user_data, user=admin, expect=200)
+        create_settings = perform_test.call_args[0][0]
+        assert getattr(create_settings, 'LOG_AGGREGATOR_PASSWORD') == 'password123'
+
+
+@pytest.mark.django_db
 def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):
     with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
         perform_test.side_effect = LoggingConnectivityException('404: Not Found')

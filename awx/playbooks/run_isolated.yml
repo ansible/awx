@@ -5,18 +5,20 @@
 # dest: /tmp/some/path/
 # proot_temp_dir: /tmp/some/path
 
-- hosts: all
+- name: Prepare data, dispatch job in isolated environment.
+  hosts: all
   gather_facts: false
   vars_prompt:
     - prompt: "Secret"
       name: "secret"
+      private: yes
 
   tasks:
 
     - name: create a proot/bwrap temp dir (if necessary)
       synchronize:
         src: "{{proot_temp_dir}}"
-        dest: "/tmp"
+        dest: "{{dest}}"
       when: proot_temp_dir is defined
 
     - name: synchronize job environment with isolated host

@@ -6,6 +6,8 @@ import pytest
 from awx.api.versioning import reverse
 from awx.main.models import Project
 
+from django.core.exceptions import ValidationError
+
 
 #
 # Project listing and visibility tests
@@ -238,3 +240,14 @@ def test_cannot_schedule_manual_project(project, admin_user, post):
         }, admin_user, expect=400
     )
     assert 'Manual' in response.data['unified_job_template'][0]
+
+
+@pytest.mark.django_db
+def test_project_unique_together_with_org(organization):
+    proj1 = Project(name='foo', organization=organization)
+    proj1.save()
+    proj2 = Project(name='foo', organization=organization)
+    with pytest.raises(ValidationError):
+        proj2.validate_unique()
+    proj2 = Project(name='foo', organization=None)
+    proj2.validate_unique()

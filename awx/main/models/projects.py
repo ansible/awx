@@ -223,6 +223,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     A project represents a playbook git repo that can access a set of inventories
     '''
 
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+
     class Meta:
         app_label = 'main'
         ordering = ('id',)

@@ -382,6 +382,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "<a href=\"\" " + Attr(field, 'ngClick') + " ";
         } else if (field.ngHref) {
             html += "<a ng-href=\"" + field.ngHref + "\" ";
+        } else if (field.uiSref) {
+            html += "<a ui-sref=\"" + field.uiSref + "\" ";
         } else if (field.link || (field.key && (field.link === undefined || field.link))) {
             html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
         } else {
