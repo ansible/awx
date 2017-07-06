@@ -47,36 +47,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             }
         };
 
-        // Detect and alert user to potential SCM status issues
-        var checkSCMStatus = function () {
-            if (!Empty($scope.project)) {
-                Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
-                Rest.get()
-                    .success(function (data) {
-                        var msg;
-                        switch (data.status) {
-                        case 'failed':
-                            msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select an inventory file.";
-                            break;
-                        case 'never updated':
-                            msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select an inventory file.";
-                            break;
-                        case 'missing':
-                            msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
-                                ' the directory exists and file permissions are set correctly.</div>';
-                            break;
-                        }
-                        if (msg) {
-                            Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                            msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
-                    });
-            }
-        };
-
         // Register a watcher on project_name
         if ($scope.getInventoryFilesUnregister) {
             $scope.getInventoryFilesUnregister();
@@ -84,7 +54,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         $scope.getInventoryFilesUnregister = $scope.$watch('project', function (newValue, oldValue) {
             if (newValue !== oldValue) {
                 getInventoryFiles(newValue);
-                checkSCMStatus();
             }
         });
 

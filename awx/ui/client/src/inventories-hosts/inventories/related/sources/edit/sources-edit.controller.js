@@ -8,12 +8,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
     'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupsService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'inventorySourceData', 'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
-    'Wait', 'Rest', 'Alert', 'ProcessErrors',
+    'Wait', 'Rest', 'Alert',
     function($state, $stateParams, $scope, ParseVariableString,
         rbacUiControlService, ToJSON,ParseTypeChange, GroupsService,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
         inventorySourceData, SourcesService, inventoryData, inventorySourcesOptions, Empty,
-        Wait, Rest, Alert, ProcessErrors) {
+        Wait, Rest, Alert) {
 
         function init() {
             $scope.projectBasePath = GetBasePath('projects');
@@ -134,33 +134,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                     .error(function () {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
-                    });
-            }
-
-            if (!Empty($scope.project)) {
-                Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
-                Rest.get()
-                    .success(function (data) {
-                        var msg;
-                        switch (data.status) {
-                        case 'failed':
-                            msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select an inventory file.";
-                            break;
-                        case 'never updated':
-                            msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select an inventory file.";
-                            break;
-                        case 'missing':
-                            msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
-                                ' the directory exists and file permissions are set correctly.</div>';
-                            break;
-                        }
-                        if (msg) {
-                            Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                     });
             }
         }
