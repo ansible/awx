@@ -912,6 +912,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.panX = data.panX;
         $scope.panY = data.panX;
         $scope.current_scale = data.scale;
+        $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
+        $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
         $location.search({topology_id: data.topology_id});
     };
 
@@ -943,7 +945,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     };
 
     $scope.onSnapshot = function (data) {
-
 
         //Erase the existing state
         $scope.devices = [];
@@ -988,6 +989,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                            device.x,
                                            device.y,
                                            device.type);
+            new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             $scope.devices.push(new_device);
             device_map[device.id] = new_device;
             device_interface_map[device.id] = {};
