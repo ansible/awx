@@ -21,4 +21,9 @@ class Migration(migrations.Migration):
             name='diff_mode',
             field=models.BooleanField(default=False),
         ),
+        migrations.AddField(
+            model_name='adhoccommand',
+            name='diff_mode',
+            field=models.BooleanField(default=False),
+        ),
     ]

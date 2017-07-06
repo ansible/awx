@@ -34,6 +34,9 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     class Meta(object):
         app_label = 'main'
 
+    diff_mode = models.BooleanField(
+        default=False,
+    )
     job_type = models.CharField(
         max_length=64,
         choices=AD_HOC_JOB_TYPE_CHOICES,
@@ -195,7 +198,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
                       'module_name', 'module_args', 'forks', 'verbosity',
-                      'extra_vars', 'become_enabled'):
+                      'extra_vars', 'become_enabled', 'diff_mode'):
             data[field] = getattr(self, field)
         return AdHocCommand.objects.create(**data)
 
