@@ -81,9 +81,9 @@ _Resize.prototype.onMouseUp.transitions = ['CornerSelected'];
 
 
 
-_Start.prototype.start = function (controller) {
+_Start.prototype.start = function () {
 
-    controller.changeState(Ready);
+    //controller.changeState(Ready);
 
 };
 _Start.prototype.start.transitions = ['Ready'];

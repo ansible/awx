@@ -59,6 +59,9 @@
                <g awx-net-status-light></g>
                <g awx-net-task-status></g>
             </g> <!-- end devices -->
+            <g ng-repeat="group in groups">
+            <g awx-net-group></g>
+            </g>
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
                 <line x1="-5" y1="0" x2="5" y2="0"/>
                 <line x1="0" y1="-5" x2="0" y2="5"/>

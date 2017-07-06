@@ -6,6 +6,7 @@ var fsm = require('./fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
 var link = require('./link.js');
+var group = require('./group.js');
 var buttons = require('./buttons.js');
 var time = require('./time.js');
 var util = require('./util.js');
@@ -19,7 +20,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   window.scope = $scope;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -62,7 +63,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.view_controller = new fsm.FSMController($scope, view.Start, null);
   $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
   $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.link_controller);
+  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
+  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
   $scope.first_controller = $scope.time_controller;
   $scope.last_key = "";
@@ -86,19 +88,11 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.replay = false;
   $scope.touch_data = {};
   $scope.touches = [];
-
-
-  $scope.devices = [
-  ];
-
-  $scope.stencils = [
-    //{"name": "router", "size":50, 'x':10, 'y':100},
-    //{"name": "switch", "size":50, 'x':10, 'y':160},
-    //{"name": "rack", "size":50, 'x':10, 'y':220},
-  ];
-
-  $scope.links = [
-  ];
+  $scope.devices = [];
+  $scope.stencils = [];
+  $scope.links = [];
+  $scope.groups = [new models.Group(1, 'OSPF 0', 600, 100, null, null, true),
+                   new models.Group(2, 'OSPF 1', 100, 100, 500, 500, false)];
 
 
 

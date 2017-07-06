@@ -307,3 +307,46 @@ function Task(id, name) {
 exports.Task = Task;
 
 Task.prototype.describeArc = util.describeArc;
+
+
+function Group(id, name, x1, y1, x2, y2, selected) {
+    this.id = id;
+    this.name = name;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.selected = selected;
+    this.fsm = null;
+}
+exports.Group = Group;
+
+Group.prototype.width = function (scaledX) {
+    var x2 = this.x2 !== null ? this.x2 : scaledX;
+    return Math.abs(this.x1 - x2);
+};
+
+Group.prototype.height = function (scaledY) {
+    var y2 = this.y2 !== null ? this.y2 : scaledY;
+    return Math.abs(this.y1 - y2);
+};
+
+Group.prototype.top_extent = function (scaledY) {
+    var y2 = this.y2 !== null ? this.y2 : scaledY;
+    return (this.y1 < y2? this.y1 : y2);
+};
+
+Group.prototype.left_extent = function (scaledX) {
+    var x2 = this.x2 !== null ? this.x2 : scaledX;
+    return (this.x1 < x2? this.x1 : x2);
+};
+
+Group.prototype.bottom_extent = function (scaledY) {
+    var y2 = this.y2 !== null ? this.y2 : scaledY;
+    return (this.y1 > y2? this.y1 : y2);
+};
+
+Group.prototype.right_extent = function (scaledX) {
+    var x2 = this.x2 !== null ? this.x2 : scaledX;
+    return (this.x1 > x2? this.x1 : x2);
+};
