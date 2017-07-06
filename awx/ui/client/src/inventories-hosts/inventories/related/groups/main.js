@@ -22,5 +22,5 @@ export default
         nestedHosts.name
     ])
     .factory('GroupForm', groupFormDefinition)
-    .value('GroupList', groupListDefinition)
+    .factory('GroupList', groupListDefinition)
     .factory('GetHostsStatusMsg', GetHostsStatusMsg);
