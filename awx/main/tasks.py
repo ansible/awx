@@ -191,9 +191,9 @@ def cluster_node_heartbeat(self):
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version) and not settings.DEBUG:
             logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
-                                                                                                             other_inst.version,
-                                                                                                             inst.hostname,
-                                                                                                             inst.version))
+                                                                                                       other_inst.version,
+                                                                                                       inst.hostname,
+                                                                                                       inst.version))
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
 
 
