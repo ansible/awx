@@ -288,6 +288,9 @@ class _Persistence(object):
         d.y = device['y']
         d.type = device['type']
         d.save()
+        (Topology.objects
+                 .filter(topology_id=topology_id, device_id_seq__lt=device['id'])
+                 .update(device_id_seq=device['id']))
 
     def onDeviceDestroy(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).delete()
@@ -313,6 +316,11 @@ class _Persistence(object):
                                                                      topology_id=topology_id).pk,
                                         id=interface['id'],
                                         defaults=dict(name=interface['name']))
+        (Device.objects
+               .filter(id=interface['device_id'],
+                       topology_id=topology_id,
+                       interface_id_seq__lt=interface['id'])
+               .update(interface_id_seq=interface['id']))
 
     def onLinkCreate(self, link, topology_id, client_id):
         device_map = dict(Device.objects
@@ -326,6 +334,9 @@ class _Persistence(object):
                                                                            id=link['from_interface_id']).pk,
                                    to_interface_id=Interface.objects.get(device_id=device_map[link['to_device_id']],
                                                                          id=link['to_interface_id']).pk)
+        (Topology.objects
+                 .filter(topology_id=topology_id, link_id_seq__lt=link['id'])
+                 .update(link_id_seq=link['id']))
 
     def onLinkDestroy(self, link, topology_id, client_id):
         device_map = dict(Device.objects
@@ -662,7 +673,9 @@ def ws_connect(message):
                                         name='name',
                                         panX='panX',
                                         panY='panY',
-                                        scale='scale'), topology.__dict__)
+                                        scale='scale',
+                                        link_id_seq='link_id_seq',
+                                        device_id_seq='device_id_seq'), topology.__dict__)
 
     message.reply_channel.send({"text": json.dumps(["Topology", topology_data])})
     send_snapshot(message.reply_channel, topology_id)
