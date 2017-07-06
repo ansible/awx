@@ -247,9 +247,8 @@
                         <label class="JobResults-resultRowLabel">
                             Revision
                         </label>
-                        <div class="JobResults-resultRowText JobResults-resultRowText--revision">
-                            {{ job.scm_revision }}
-                        </div>
+                        <at-truncate string="{{job.scm_revision}}" maxLength="7" class="JobResults-resultRowText JobResults-resultRowText--revision">
+                        </at-truncate>
                     </div>
 
                     <!-- PLAYBOOK DETAIL -->

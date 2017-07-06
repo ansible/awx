@@ -94,14 +94,16 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
         }
 
         $scope.$on('copied', function(e) {
-            $scope.projects.map( (project) => {
-                if (project.id === e.targetScope.project.id) {
-                    project.tooltipContent = 'Copied to clipboard.';
-                }
-                else {
-                    project.tooltipContent = "Copy full revision to clipboard.";
-                }
-            });
+            // $scope.projects.map( (project) => {
+            //     if (project.id === e.targetScope.project.id) {
+            //         project.tooltipContent = 'Copied to clipboard.';
+            //     }
+            //     else {
+            //         project.tooltipContent = "Copy full revision to clipboard.";
+            //     }
+            // });
+            console.log('copied hi there');
+            console.log(e);
         });
 
         $scope.reloadList = function(){
