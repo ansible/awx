@@ -32,7 +32,7 @@ RUN mkdir -p /var/lib/awx/public/static
 # TODO: Handlers could be stripped of this
 RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
-RUN head -n 10 /dev/random | sha256sum > /etc/tower/SECRET_KEY
+RUN echo "ansibletower" > /etc/tower/SECRET_KEY
 RUN VENV_BASE=/var/lib/awx/venv make requirements_ansible && VENV_BASE=/var/lib/awx/venv make requirements_tower
 COPY dist/ansible-tower-3.2.0.tar.gz /tmp/ansible-tower-3.2.0.tar.gz
 RUN pip install /tmp/ansible-tower-3.2.0.tar.gz
