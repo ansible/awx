@@ -230,9 +230,9 @@ def test_patch_project_null_organization_xfail(patch, project, org_admin):
 
 
 @pytest.mark.django_db
-def test_cannot_schedule_manual_project(project, admin_user, post):
+def test_cannot_schedule_manual_project(manual_project, admin_user, post):
     response = post(
-        reverse('api:project_schedules_list', kwargs={'pk':project.pk,}),
+        reverse('api:project_schedules_list', kwargs={'pk':manual_project.pk,}),
         {
             "name": "foo", "description": "", "enabled": True,
             "rrule": "DTSTART:20160926T040000Z RRULE:FREQ=HOURLY;INTERVAL=1",
