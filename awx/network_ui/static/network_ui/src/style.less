@@ -46,6 +46,12 @@
     font-family: 'Open Sans';
 }
 
+.NetworkUI--debug {
+    fill-opacity: 0;
+    stroke: @debug-copynot;
+    stroke-width: 1;
+}
+
 
 .NetworkUI__link--selected {
     stroke: @selected-blue;
@@ -62,11 +68,6 @@
     stroke-width: 6;
 }
 
-.NetworkUI--debug {
-    fill-opacity: 0;
-    stroke: @debug-copynot;
-    stroke-width: 1;
-}
 
 .NetworkUI__link {
     stroke: @link;
@@ -83,14 +84,14 @@
     stroke-width: 2;
 }
 
-.NetworkUI__cursor {
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
-}
-
 .NetworkUI__link--debug {
     stroke: @debug-copynot;
     stroke-width: 1;
+}
+
+.NetworkUI__cursor {
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
 }
 
 .NetworkUI__debug-cursor {
@@ -408,3 +409,44 @@
     fill: none;
 }
 
+
+
+.NetworkUI__group--selected {
+    stroke: @selected-blue;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group--remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group--selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 6;
+    fill: none;
+}
+
+.NetworkUI__group {
+    stroke: @link;
+    stroke-width: 2;
+    fill: none;
+}
+
+.NetworkUI__group--debug {
+    stroke: @debug-copynot;
+    stroke-width: 1;
+    fill: none;
+}
+
+.NetworkUI__group-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__group-text--selected {
+    font-family: 'Open Sans';
+}
