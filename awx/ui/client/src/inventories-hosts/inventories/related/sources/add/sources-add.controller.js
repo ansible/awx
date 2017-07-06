@@ -130,10 +130,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
 
             $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
 
-            if (source === 'custom'){
-                $scope.credentialBasePath = GetBasePath('inventory_script');
-            }
-
             if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm') {
                 $scope.envParseType = 'yaml';
 
@@ -144,6 +140,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     varName = source + '_variables';
                 }
 
+                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
                 ParseTypeChange({
                     scope: $scope,
                     field_id: varName,
