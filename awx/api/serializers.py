@@ -3396,6 +3396,10 @@ class ScheduleSerializer(BaseSerializer):
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project can not have a schedule set.'))
+        elif type(value) == InventorySource and value.source == 'scm' and value.update_on_project_update:
+            raise serializers.ValidationError(_(
+                'Inventory sources with `update_on_project_update` can not be shceduled. '
+                'Schedule its source project `{}` instead.'.format(value.source_project.name)))
         return value
 
     # We reject rrules if:
