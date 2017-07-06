@@ -6,7 +6,7 @@ function atTruncateLink (scope, el, attr, ctrl) {
     truncateController.init(scope, string, maxlength);
 }
 
-function AtTruncateController ($filter) {
+function AtTruncateController ($filter, $scope) {
     let vm = this;
     vm.toolTipContent = 'Copy full revision to clipboard.';
 
@@ -55,8 +55,10 @@ function AtTruncateController ($filter) {
 
 }
 
+AtTruncateController.$inject = ['$filter', '$scope' ];
 
-function atTruncate($filter, pathService) {
+
+function atTruncate(pathService) {
     return {
         restrict: 'EA',
         replace: true,
@@ -73,7 +75,6 @@ function atTruncate($filter, pathService) {
 }
 
 atTruncate.$inject = [
-    '$filter',
     'PathService'
 ];
 
