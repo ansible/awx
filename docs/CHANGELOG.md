@@ -37,3 +37,6 @@
 * Tower now uses a modified version of [Fernet](https://github.com/fernet/spec/blob/master/Spec.md).
   Our `Fernet256` class uses `AES-256-CBC` instead of `AES-128-CBC` for all encrypted fields.
   [[#826](https://github.com/ansible/ansible-tower/issues/826)]
+* Added the ability to set custom environment variables set for playbook runs,
+  inventory updates, project updates, and notification sending.
+  [[#3508](https://github.com/ansible/ansible-tower/issues/3508)]

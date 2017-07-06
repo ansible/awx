@@ -290,6 +290,17 @@ class TestGenericRun(TestJobExecution):
         args, cwd, env, stdout = call_args
         assert args[0] == 'bwrap'
 
+    def test_awx_task_env(self):
+        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
+        patch.start()
+
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert env['FOO'] == 'BAR'
+
 
 class TestIsolatedExecution(TestJobExecution):
 
@@ -1035,6 +1046,17 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    def test_awx_task_env(self):
+        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
+        patch.start()
+
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert env['FOO'] == 'BAR'
+
 
 class TestProjectUpdateCredentials(TestJobExecution):
 
@@ -1053,6 +1075,11 @@ class TestProjectUpdateCredentials(TestJobExecution):
             dict(scm_type='svn'),
         ],
         'test_ssh_key_auth': [
+            dict(scm_type='git'),
+            dict(scm_type='hg'),
+            dict(scm_type='svn'),
+        ],
+        'test_awx_task_env': [
             dict(scm_type='git'),
             dict(scm_type='hg'),
             dict(scm_type='svn'),
@@ -1112,6 +1139,18 @@ class TestProjectUpdateCredentials(TestJobExecution):
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk)
+
+    def test_awx_task_env(self, scm_type):
+        self.instance.scm_type = scm_type
+        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
+        patch.start()
+
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert env['FOO'] == 'BAR'
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
@@ -1322,6 +1361,28 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
+
+    def test_awx_task_env(self):
+        gce = CredentialType.defaults['gce']()
+        self.instance.source = 'gce'
+        self.instance.credential = Credential(
+            pk=1,
+            credential_type=gce,
+            inputs = {
+                'username': 'bob',
+                'project': 'some-project',
+            }
+        )
+        patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
+        patch.start()
+
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert env['FOO'] == 'BAR'
+
 
 
 def test_os_open_oserror():
