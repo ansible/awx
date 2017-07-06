@@ -1,4 +1,4 @@
-app: prototype
+app: awx.network_ui
 external_models: []
 models:
 - display: name
@@ -22,6 +22,9 @@ models:
   - len: 200
     name: type
     type: CharField
+  - default: 0
+    name: interface_id_seq
+    type: IntegerField
   name: Device
   x: 348
   y: 124
@@ -71,6 +74,14 @@ models:
     type: FloatField
   - name: panY
     type: FloatField
+  - default: 0
+    name: device_id_seq
+    ref: Topology
+    ref_field: device_id_seq
+    type: IntegerField
+  - default: 0
+    name: link_id_seq
+    type: IntegerField
   name: Topology
   x: 111
   y: 127

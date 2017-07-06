@@ -16,7 +16,7 @@ from awx.network_ui.models import Interface
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    fields = ('topology', 'name', 'x', 'y', 'id', 'type',)
+    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
     raw_id_fields = ('topology',)
 
 
@@ -32,8 +32,8 @@ admin.site.register(Link, LinkAdmin)
 
 
 class TopologyAdmin(admin.ModelAdmin):
-    fields = ('name', 'scale', 'panX', 'panY',)
-    raw_id_fields = ()
+    fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq',)
+    raw_id_fields = ('device_id_seq',)
 
 
 admin.site.register(Topology, TopologyAdmin)
