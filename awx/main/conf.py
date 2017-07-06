@@ -430,6 +430,19 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_LEVEL',
+    field_class=fields.ChoiceField,
+    choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    default='WARNING',
+    label=_('Logging Aggregator Level Threshold'),
+    help_text=_('Level threshold used by log handler. Severities from lowest to highest'
+                ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
+                'than the threshold will be ignored by log handler. (messages under category '
+                'awx.anlytics ignore this setting)'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 def logging_validate(serializer, attrs):

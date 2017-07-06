@@ -917,6 +917,7 @@ TOWER_SETTINGS_MANIFEST = {}
 LOG_AGGREGATOR_ENABLED = False
 LOG_AGGREGATOR_TCP_TIMEOUT = 5
 LOG_AGGREGATOR_VERIFY_CERT = True
+LOG_AGGREGATOR_LEVEL = 'INFO'
 
 # The number of retry attempts for websocket session establishment
 # If you're encountering issues establishing websockets in clustered Tower,
