@@ -211,6 +211,17 @@ register(
 )
 
 register(
+    'AWX_TASK_ENV',
+    field_class=fields.DictField,
+    default={},
+    label=_('Extra Environment Variables'),
+    help_text=_('Additional environment variables set for playbook runs, inventory updates, project updates, and notification sending.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,

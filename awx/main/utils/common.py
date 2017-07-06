@@ -42,7 +42,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'callback_filter_out_ansible_extra_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched']
+           'has_model_field_prefetched', 'set_environ']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -581,6 +581,23 @@ def ignore_inventory_group_removal():
         yield
     finally:
         _inventory_updates.is_removing = previous_value
+
+
+@contextlib.contextmanager
+def set_environ(**environ):
+    '''
+    Temporarily set the process environment variables.
+
+    >>> with set_environ(FOO='BAR'):
+    ...   assert os.environ['FOO'] == 'BAR'
+    '''
+    old_environ = os.environ.copy()
+    try:
+        os.environ.update(environ)
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 
 @memoize()

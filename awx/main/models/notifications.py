@@ -4,6 +4,7 @@
 import logging
 
 from django.db import models
+from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, force_text
@@ -11,7 +12,7 @@ from django.utils.encoding import smart_str, force_text
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
-from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
@@ -117,7 +118,8 @@ class NotificationTemplate(CommonModelNameNotUnique):
         sender = self.notification_configuration.pop(self.notification_class.sender_parameter, None)
         backend_obj = self.notification_class(**self.notification_configuration)
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
-        return backend_obj.send_messages([notification_obj])
+        with set_environ(**settings.AWX_TASK_ENV):
+            return backend_obj.send_messages([notification_obj])
 
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
