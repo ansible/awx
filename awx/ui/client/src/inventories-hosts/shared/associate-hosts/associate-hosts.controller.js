@@ -30,6 +30,10 @@
              list.multiSelect = true;
              list.fields.name.ngClick = 'linkoutHost(associate_host)';
              list.trackBy = 'associate_host.id';
+             list.multiSelectPreview = {
+                 selectedRows: 'selectedItems',
+                 availableRows: 'associate_hosts'
+             };
              delete list.fields.toggleHost;
              delete list.fields.active_failures;
              delete list.fields.inventory;

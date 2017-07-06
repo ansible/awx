@@ -12,6 +12,6 @@ import NestedGroupForm from './group-nested-groups.form';
 export default
     angular.module('nestedGroups', [])
     .factory('NestedGroupForm', NestedGroupForm)
-    .value('NestedGroupListDefinition', nestedGroupListDefinition)
+    .factory('NestedGroupListDefinition', nestedGroupListDefinition)
     .controller('NestedGroupsListController', controller)
     .controller('NestedGroupsAddController', addController);
