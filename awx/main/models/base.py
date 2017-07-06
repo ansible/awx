@@ -10,7 +10,7 @@ import yaml
 
 # Django
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -286,6 +286,27 @@ class PrimordialModel(CreatedModifiedModel):
     def clean_description(self):
         # Description should always be empty string, never null.
         return self.description or ''
+
+    def validate_unique(self, exclude=None):
+        super(PrimordialModel, self).validate_unique(exclude=exclude)
+        model = type(self)
+        if not hasattr(model, 'SOFT_UNIQUE_TOGETHER'):
+            return
+        errors = []
+        for ut in model.SOFT_UNIQUE_TOGETHER:
+            kwargs = {}
+            for field_name in ut:
+                kwargs[field_name] = getattr(self, field_name, None)
+            try:
+                obj = model.objects.get(**kwargs)
+            except ObjectDoesNotExist:
+                continue
+            if not (self.pk and self.pk == obj.pk):
+                errors.append(
+                    '%s with this (%s) combination already exists.' % (model.__name__, ', '.join(ut))
+                )
+        if errors:
+            raise ValidationError(errors)
 
 
 class CommonModel(PrimordialModel):

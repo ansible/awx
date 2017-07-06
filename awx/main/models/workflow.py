@@ -328,6 +328,8 @@ class WorkflowJobOptions(BaseModel):
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+
     class Meta:
         app_label = 'main'
 

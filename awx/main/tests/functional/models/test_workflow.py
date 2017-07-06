@@ -3,13 +3,14 @@
 import pytest
 
 # AWX
-from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTemplateNode
+from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTemplateNode, WorkflowJobTemplate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 
 # Django
 from django.test import TransactionTestCase
+from django.core.exceptions import ValidationError
 
 
 @pytest.mark.django_db
@@ -154,6 +155,15 @@ class TestWorkflowJobTemplate:
         assert nodes[1].failure_nodes.all()[0] == nodes[2]
         assert nodes[1].unified_job_template == job_template
         assert nodes[2].inventory == inventory
+
+    def test_wfjt_unique_together_with_org(self, organization):
+        wfjt1 = WorkflowJobTemplate(name='foo', organization=organization)
+        wfjt1.save()
+        wfjt2 = WorkflowJobTemplate(name='foo', organization=organization)
+        with pytest.raises(ValidationError):
+            wfjt2.validate_unique()
+        wfjt2 = WorkflowJobTemplate(name='foo', organization=None)
+        wfjt2.validate_unique()
 
 
 @pytest.mark.django_db

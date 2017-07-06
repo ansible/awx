@@ -1183,6 +1183,8 @@ class InventorySourceOptions(BaseModel):
 
 class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
+    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'inventory')]
+
     class Meta:
         app_label = 'main'
 
