@@ -29,7 +29,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
     let clone = _.clone(NotificationsList);
     notifications_object = angular.extend(clone, notifications_object);
 return {
-    addTitle: 'CREATE SOURCE',
+    addTitle: i18n._('CREATE SOURCE'),
     editTitle: '{{ name }}',
     showTitle: true,
     name: 'inventory_source',
@@ -45,20 +45,20 @@ return {
     well: false,
     fields: {
         name: {
-            label: 'Name',
+            label: i18n._('Name'),
             type: 'text',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             required: true,
             tab: 'properties'
         },
         description: {
-            label: 'Description',
+            label: i18n._('Description'),
             type: 'text',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             tab: 'properties'
         },
         source: {
-            label: 'Source',
+            label: i18n._('Source'),
             type: 'select',
             ngOptions: 'source.label for source in source_type_options track by source.value',
             ngChange: 'sourceChange(source)',
@@ -66,7 +66,7 @@ return {
             ngModel: 'source'
         },
         credential: {
-            label: 'Credential',
+            label: i18n._('Credential'),
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
@@ -84,7 +84,7 @@ return {
         project: {
             // initializes a default value for this search param
             // search params with default values set will not generate user-interactable search tags
-            label: 'Project',
+            label: i18n._('Project'),
             type: 'lookup',
             list: 'ProjectList',
             basePath: 'projects',
@@ -118,21 +118,20 @@ return {
             includeInventoryFileNotFoundError: true
         },
         source_regions: {
-            label: 'Regions',
+            label: i18n._('Regions'),
             type: 'select',
             ngOptions: 'source.label for source in source_region_choices track by source.value',
             multiSelect: true,
             ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure' || source.value == 'azure_rm')",
-            dataTitle: 'Source Regions',
+            dataTitle: i18n._('Source Regions'),
             dataPlacement: 'right',
-            awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
-                "or choose <em>All</em> to include all regions. Only Hosts associated with the selected regions will be updated." +
-                "</p>",
+            awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
+                       "<em>" + i18n._("All") + "</em> " + i18n._("to include all regions. Only Hosts associated with the selected regions will be updated.") + "</p>",
             dataContainer: 'body',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         instance_filters: {
-            label: 'Instance Filters',
+            label: i18n._('Instance Filters'),
             type: 'text',
             ngShow: "source && source.value == 'ec2'",
             dataTitle: 'Instance Filters',
@@ -151,7 +150,7 @@ return {
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         group_by: {
-            label: 'Only Group By',
+            label: i18n._('Only Group By'),
             type: 'select',
             ngShow: "source && source.value == 'ec2'",
             ngOptions: 'source.label for source in group_by_choices track by source.value',
@@ -175,7 +174,7 @@ return {
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
         },
         inventory_script: {
-            label :  "Custom Inventory Script",
+            label :  i18n._("Custom Inventory Script"),
             type: 'lookup',
             basePath: 'inventory_scripts',
             list: 'InventoryScriptsList',
@@ -190,14 +189,14 @@ return {
         },
         custom_variables: {
             id: 'custom_variables',
-            label: 'Environment Variables', //"{{vars_label}}" ,
+            label: i18n._('Environment Variables'), //"{{vars_label}}" ,
             ngShow: "source && source.value=='custom' || source.value === 'scm'",
             type: 'textarea',
             class: 'Form-textAreaLabel Form-formGroup--fullWidth',
             rows: 6,
             'default': '---',
             parseTypeName: 'envParseType',
-            dataTitle: "Environment Variables",
+            dataTitle: i18n._("Environment Variables"),
             dataPlacement: 'right',
             awPopOver:  "<p>Provide environment variables to pass to the custom inventory script.</p>" +
                 "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
@@ -211,14 +210,14 @@ return {
         },
         ec2_variables: {
             id: 'ec2_variables',
-            label: 'Source Variables', //"{{vars_label}}" ,
+            label: i18n._('Source Variables'), //"{{vars_label}}" ,
             ngShow: "source && source.value == 'ec2'",
             type: 'textarea',
             class: 'Form-textAreaLabel Form-formGroup--fullWidth',
             rows: 6,
             'default': '---',
             parseTypeName: 'envParseType',
-            dataTitle: "Source Variables",
+            dataTitle: i18n._("Source Variables"),
             dataPlacement: 'right',
             awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
                 "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/ec2.ini\" target=\"_blank\">" +
@@ -234,7 +233,7 @@ return {
         },
         vmware_variables: {
             id: 'vmware_variables',
-            label: 'Source Variables', //"{{vars_label}}" ,
+            label: i18n._('Source Variables'), //"{{vars_label}}" ,
             ngShow: "source && source.value == 'vmware'",
             type: 'textarea',
             class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -257,7 +256,7 @@ return {
         },
         openstack_variables: {
             id: 'openstack_variables',
-            label: 'Source Variables', //"{{vars_label}}" ,
+            label: i18n._('Source Variables'), //"{{vars_label}}" ,
             ngShow: "source && source.value == 'openstack'",
             type: 'textarea',
             class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -293,60 +292,56 @@ return {
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
         },
         checkbox_group: {
-            label: 'Update Options',
+            label: i18n._('Update Options'),
             type: 'checkbox_group',
             ngShow: "source && (source.value !== '' && source.value !== null)",
             class: 'Form-checkbox--stacked',
             fields: [{
                 name: 'overwrite',
-                label: 'Overwrite',
+                label: i18n._('Overwrite'),
                 type: 'checkbox',
                 ngShow: "source.value !== '' && source.value !== null",
-
-
                 awPopOver: '<p>If checked, all child groups and hosts not found on the external source will be deleted from ' +
                     'the local inventory.</p><p>When not checked, local child hosts and groups not found on the external source will ' +
                     'remain untouched by the inventory update process.</p>',
-                dataTitle: 'Overwrite',
+                dataTitle: i18n._('Overwrite'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
                 ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
             }, {
                 name: 'overwrite_vars',
-                label: 'Overwrite Variables',
+                label: i18n._('Overwrite Variables'),
                 type: 'checkbox',
                 ngShow: "source.value !== '' && source.value !== null",
-
-
                 awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
                     'found on the external source.</p><p>When not checked, a merge will be performed, combining local variables with ' +
                     'those found on the external source.</p>',
-                dataTitle: 'Overwrite Variables',
+                dataTitle: i18n._('Overwrite Variables'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
                 ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
             }, {
                 name: 'update_on_launch',
-                label: 'Update on Launch',
+                label: i18n._('Update on Launch'),
                 type: 'checkbox',
                 ngShow: "source.value !== '' && source.value !== null",
                 awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
                     'executing job tasks.</p>',
-                dataTitle: 'Update on Launch',
+                dataTitle: i18n._('Update on Launch'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }, {
                 name: 'update_on_project_update',
-                label: 'Update on Project Update',
+                label: i18n._('Update on Project Update'),
                 type: 'checkbox',
                 ngShow: "source.value === 'scm'",
                 awPopOver: '<p>Each time the selected project is updated, refresh the inventory from the selected source before ' +
                     'executing job tasks.</p>',
-                dataTitle: 'Update on Project Update',
+                dataTitle: i18n._('Update on Project Update'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 labelClass: 'checkbox-options',
@@ -354,7 +349,7 @@ return {
             }]
         },
         update_cache_timeout: {
-            label: "Cache Timeout <span class=\"small-text\"> (seconds)</span>",
+            label: i18n._("Cache Timeout") + " <span class=\"small-text\"> " + i18n._("(seconds)") + "</span>",
             id: 'source-cache-timeout',
             type: 'number',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
@@ -366,7 +361,7 @@ return {
             awPopOver: '<p>Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will ' +
                 'evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, ' +
                 'and a new inventory sync will be performed.</p>',
-            dataTitle: 'Cache Timeout',
+            dataTitle: i18n._('Cache Timeout'),
             dataPlacement: 'right',
             dataContainer: "body"
         }

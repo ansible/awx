@@ -13,7 +13,7 @@
 export default ['i18n',
 function(i18n){
     return {
-        addTitle: 'CREATE GROUP',
+        addTitle: i18n._('CREATE GROUP'),
         editTitle: '{{ name }}',
         showTitle: true,
         name: 'group',
@@ -29,26 +29,26 @@ function(i18n){
         tabs: true,
         fields: {
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 type: 'text',
                 ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 required: true,
                 tab: 'properties'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 type: 'text',
                 ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 tab: 'properties'
             },
             group_variables: {
                 realName: 'variables',
-                label: 'Variables',
+                label: i18n._('Variables'),
                 type: 'textarea',
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                 rows: 6,
                 'default': '---',
-                dataTitle: 'Group Variables',
+                dataTitle: i18n._('Group Variables'),
                 dataPlacement: 'right',
                 parseTypeName: 'parseType',
                 awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +

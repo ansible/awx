@@ -33,9 +33,9 @@
             </div>
 
             <div class="row" ng-show="hosts.length === 0 && !(searchTags | isEmpty)">
-                <div class="col-lg-12 List-searchNoResults">No records matched your search.</div>
+                <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
             </div>
-            <div class="List-noItems" ng-show="hosts.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="List-noItems" ng-show="hosts.length === 0 && (searchTags | isEmpty)" translate>PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="list-table-container" ng-show="hosts.length > 0">
                 <table id="hosts_table" class="List-table table-no-border" is-extended="false">
                     <thead>
@@ -44,15 +44,15 @@
                             <th base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="active_failures" column-iterator="host" column-no-sort="true" column-label="" column-custom-class="status-column List-staticColumn--smallStatus" query-set="host_queryset"></th>
                             <th base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="name" column-iterator="host" column-no-sort="undefined" column-label="Name" column-custom-class="col-lg-6 col-md-8 col-sm-8 col-xs-7" query-set="host_queryset"></th>
                             <th base-path="hosts" collection="hosts" dataset="host_dataset" column-sort="" column-field="inventory" column-iterator="host" column-no-sort="undefined" column-label="Inventory" column-custom-class="col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis" query-set="host_queryset"></th>
-                            <th class="List-tableHeader List-tableHeader--actions actions-column col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right">Actions</th>
+                            <th class="List-tableHeader List-tableHeader--actions actions-column col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right" translate>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-class="[host.active_class]" id="{{ host.id }}" class="List-tableRow host_class" ng-repeat="host in hosts track by host.id">
                             <td class="List-tableCell toggleHost-column List-staticColumn--toggle">
                                 <div class="ScheduleToggle" ng-class="{'is-on': host.enabled, 'ScheduleToggle--disabled': host.has_inventory_sources}" aw-tool-tip="<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>" data-placement="right" data-tip-watch="undefined">
-                                    <button ng-disabled="host.has_inventory_sources" ng-show="host.enabled" class="ScheduleToggle-switch is-on" ng-click="toggleHost($event, host)">ON</button>
-                                    <button ng-disabled="host.has_inventory_sources" ng-show="!host.enabled" class="ScheduleToggle-switch" ng-click="toggleHost($event, host)">OFF</button>
+                                    <button ng-disabled="host.has_inventory_sources" ng-show="host.enabled" class="ScheduleToggle-switch is-on" ng-click="toggleHost($event, host)" translate>ON</button>
+                                    <button ng-disabled="host.has_inventory_sources" ng-show="!host.enabled" class="ScheduleToggle-switch" ng-click="toggleHost($event, host)" translate>OFF</button>
                                 </div>
                             </td>
                             <td class="List-tableCell active_failures-column status-column List-staticColumn--smallStatus">

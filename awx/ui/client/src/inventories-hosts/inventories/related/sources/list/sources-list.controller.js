@@ -9,12 +9,12 @@
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
     'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
-    'canAdd', 'hasSyncableSources',
+    'canAdd', 'hasSyncableSources', 'i18n',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources){
+        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources, i18n){
 
         let list = SourcesListDefinition;
         var inventory_source;
@@ -117,7 +117,7 @@
             $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
-            var body = '<div class=\"Prompt-bodyQuery\">Are you sure you want to permanently delete the inventory source below from the inventory?</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
+            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the inventory source below from the inventory?') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
             var action = function(){
                 delete $rootScope.promptActionBtnClass;
                 Wait('start');
@@ -139,10 +139,10 @@
             };
             // Prompt depends on having $rootScope.promptActionBtnClass available...
             Prompt({
-                hdr: 'Delete Source',
+                hdr: i18n._('Delete Source'),
                 body: body,
                 action: action,
-                actionText: 'DELETE',
+                actionText: i18n._('DELETE'),
             });
             $rootScope.promptActionBtnClass = 'Modal-errorButton';
         };

@@ -1,5 +1,5 @@
-export default ['templateUrl', 'Wait', '$filter', '$compile',
-    function(templateUrl, Wait, $filter, $compile) {
+export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
+    function(templateUrl, Wait, $filter, $compile, i18n) {
         return {
             restrict: 'E',
             replace: false,
@@ -50,9 +50,9 @@ export default ['templateUrl', 'Wait', '$filter', '$compile',
                         html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                         html += "<thead>\n";
                         html += "<tr>";
-                        html += "<th>Status</th>";
-                        html += "<th>Finished</th>";
-                        html += "<th>Name</th>";
+                        html += "<th>" + i18n._("Status") + "</th>";
+                        html += "<th>" + i18n._("Finished") + "</th>";
+                        html += "<th>" + i18n._("Name") + "</th>";
                         html += "</tr>\n";
                         html += "</thead>\n";
                         html += "<tbody>\n";
@@ -70,7 +70,7 @@ export default ['templateUrl', 'Wait', '$filter', '$compile',
                         html += "</table>\n";
                     }
                     else {
-                        html = "<p>No recent job data available for this inventory.</p>\n";
+                        html = "<p>" + i18n._("No recent job data available for this inventory.") + "</p>\n";
                     }
                     attachElem(event, html, title);
                 };

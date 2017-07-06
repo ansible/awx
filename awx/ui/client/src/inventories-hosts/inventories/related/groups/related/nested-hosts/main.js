@@ -11,7 +11,7 @@ import addController from './group-nested-hosts-add.controller';
 
 export default
     angular.module('nestedHosts', [])
-    .value('NestedHostsListDefinition', nestedHostsListDefinition)
+    .factory('NestedHostsListDefinition', nestedHostsListDefinition)
     .factory('NestedHostsFormDefinition', nestedHostsFormDefinition)
     .controller('NestedHostsAddController', addController)
     .controller('NestedHostsListController', controller);

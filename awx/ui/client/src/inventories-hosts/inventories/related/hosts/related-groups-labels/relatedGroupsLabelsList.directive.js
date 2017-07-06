@@ -9,7 +9,8 @@ export default
         '$q',
         '$filter',
         '$state',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state) {
+        'i18n',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state, i18n) {
             return {
                 restrict: 'E',
                 scope: false,
@@ -78,7 +79,7 @@ export default
 
                         Prompt({
                             hdr: 'Remove host from ' + group.name ,
-                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(host.name) + '</span> from the <span class="Prompt-emphasis">' + $filter('sanitize')(group.name) + '</span> group.</div>',
+                            body: '<div class="Prompt-bodyQuery">' + i18n._('Confirm the removal of the') + ' <span class="Prompt-emphasis">' + $filter('sanitize')(host.name) + '</span> ' + i18n._('from the') + ' <span class="Prompt-emphasis">' + $filter('sanitize')(group.name) + '</span> ' + i18n._('group') + '.</div>',
                             action: action,
                             actionText: 'REMOVE'
                         });
