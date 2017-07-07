@@ -10,7 +10,6 @@ import os
 import os.path
 from collections import OrderedDict
 from StringIO import StringIO
-from datetime import datetime
 
 # Django
 from django.conf import settings
@@ -376,7 +375,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         fields = self._get_unified_jt_copy_names()
         unified_jt = copy_model_by_class(self, unified_jt_class, fields, {})
 
-        time_now = datetime.now()
+        time_now = now()
         unified_jt.name = unified_jt.name.split('@', 1)[0] + ' @ ' + time_now.strftime('%I:%M:%S %p')
 
         unified_jt.save()
