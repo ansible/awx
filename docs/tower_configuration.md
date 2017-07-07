@@ -108,3 +108,5 @@ register_validate("category_a", validate_a)
 register_validate("category_b", validate_b)
 ...
 ```
+
+It should be noted that each validation function will be invoked in two places: when updating the category it's responsible for and when updating the general category `all`. Always keep this fact in mind and test both situations when developing new validation functions.

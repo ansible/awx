@@ -1089,7 +1089,9 @@ register(
 
 
 def tacacs_validate(serializer, attrs):
-    if not serializer.instance:
+    if not serializer.instance or \
+            not hasattr(serializer.instance, 'TACACSPLUS_HOST') or \
+            not hasattr(serializer.instance, 'TACACSPLUS_SECRET'):
         return attrs
     errors = []
     host = serializer.instance.TACACSPLUS_HOST
