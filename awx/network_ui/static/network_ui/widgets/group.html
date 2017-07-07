@@ -28,7 +28,7 @@
       ng-attr-y="{{group.bottom_extent(scaledY) - 10}}"
       ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
-<g ng-if="group.selected">
+<g ng-if="group.highlighted || group.selected">
 <rect ng-attr-width="10"
       ng-attr-height="10"
       ng-attr-x="{{group.left_extent(scaledX)}}"
@@ -63,6 +63,6 @@
 <text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="left"
-      x="{{group.left_extent(scaledX) + 20}}"
-      y="{{group.top_extent(scaledY) + 32}}"> {{group.name}} </text>
-<text class="NetworkUI__group-text" text-anchor="left" x="{{group.left_extent(scaledX) + 20}}" y="{{group.top_extent(scaledY) + 32}}">{{group.name}}{{group.edit_label?'_':''}}</text>
+      ng-attr-x="{{group.left_extent(scaledX) + 20}}"
+      ng-attr-y="{{group.top_extent(scaledY) + 32}}"> {{group.name}} </text>
+<text class="NetworkUI__group-text" text-anchor="left" ng-attr-x="{{group.left_extent(scaledX) + 20}}" ng-attr-y="{{group.top_extent(scaledY) + 32}}">{{group.name}}{{group.edit_label?'_':''}}</text>
