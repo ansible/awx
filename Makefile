@@ -631,6 +631,9 @@ $(UI_RELEASE_FLAG_FILE): languages $(UI_DEPS_FLAG_FILE)
 ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
+# A standard go-to target for API developers to use building the frontend
+ui: clean-ui ui-devel
+
 ui-test-ci: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:ci
 
