@@ -19,6 +19,13 @@ function natural_numbers (start) {
 }
 exports.natural_numbers = natural_numbers;
 
+
+function distance (x1, y1, x2, y2) {
+
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+exports.distance = distance;
+
 // polarToCartesian
 // @wdebeaum, @opsb
 // from http://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle

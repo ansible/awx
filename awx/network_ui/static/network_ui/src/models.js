@@ -317,9 +317,117 @@ function Group(id, name, x1, y1, x2, y2, selected) {
     this.x2 = x2;
     this.y2 = y2;
     this.selected = selected;
+    this.highlighted = false;
     this.fsm = null;
 }
 exports.Group = Group;
+
+Group.prototype.update_hightlighted = function (x, y) {
+
+    this.highlighted = this.is_highlighted(x, y);
+};
+
+Group.prototype.is_highlighted = function (x, y) {
+
+    return (x > this.left_extent() &&
+            x < this.right_extent() &&
+            y > this.top_extent() &&
+            y < this.bottom_extent());
+
+};
+
+var TOP_LEFT = 0;
+exports.TOP_LEFT = TOP_LEFT;
+var TOP_RIGHT = 1;
+exports.TOP_RIGHT = TOP_RIGHT;
+var BOTTOM_LEFT = 2;
+exports.BOTTOM_LEFT = BOTTOM_LEFT;
+var BOTTOM_RIGHT = 3;
+exports.BOTTOM_RIGHT = BOTTOM_RIGHT;
+
+Group.prototype.has_corner_selected = function (x, y) {
+
+    if (x > this.left_extent() &&
+        x < this.left_extent() + 10 &&
+        y > this.top_extent() &&
+        y < this.top_extent() + 10) {
+        return true;
+    }
+    if (x > this.left_extent() &&
+        x < this.left_extent() + 10 &&
+        y > this.bottom_extent() - 10 &&
+        y < this.bottom_extent()) {
+        return true;
+    }
+    if (x > this.right_extent() - 10 &&
+        x < this.right_extent() &&
+        y > this.bottom_extent() - 10 &&
+        y < this.bottom_extent()) {
+        return true;
+    }
+    if (x > this.right_extent() - 10 &&
+        x < this.right_extent() &&
+        y > this.top_extent() &&
+        y < this.top_extent() + 10) {
+        return true;
+    }
+
+    return false;
+};
+
+Group.prototype.selected_corner = function (x, y) {
+
+    var corners = [[util.distance(this.x1, this.y1, x, y), TOP_LEFT],
+                   [util.distance(this.x2, this.y2, x, y), BOTTOM_RIGHT],
+                   [util.distance(this.x1, this.y2, x, y), BOTTOM_LEFT],
+                   [util.distance(this.x2, this.y1, x, y), TOP_RIGHT]];
+
+    console.log(corners);
+
+    corners.sort(function(a, b) {
+        return a[0] - b[0];
+    });
+
+    return corners[0][1];
+};
+
+Group.prototype.is_selected = function (x, y) {
+
+    if (util.pDistance(x,
+                       y,
+                       this.left_extent(),
+                       this.top_extent(),
+                       this.left_extent(),
+                       this.bottom_extent()) < 10) {
+        return true;
+    }
+    if (util.pDistance(x,
+                       y,
+                       this.left_extent(),
+                       this.top_extent(),
+                       this.right_extent(),
+                       this.top_extent()) < 10) {
+        return true;
+    }
+    if (util.pDistance(x,
+                       y,
+                       this.right_extent(),
+                       this.bottom_extent(),
+                       this.right_extent(),
+                       this.top_extent()) < 10) {
+        return true;
+    }
+    if (util.pDistance(x,
+                       y,
+                       this.right_extent(),
+                       this.bottom_extent(),
+                       this.left_extent(),
+                       this.bottom_extent()) < 10) {
+        return true;
+    }
+
+    return false;
+};
 
 Group.prototype.width = function (scaledX) {
     var x2 = this.x2 !== null ? this.x2 : scaledX;

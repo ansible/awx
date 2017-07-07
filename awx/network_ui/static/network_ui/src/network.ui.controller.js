@@ -59,6 +59,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.selected_links = [];
   $scope.selected_interfaces = [];
   $scope.selected_items = [];
+  $scope.selected_groups = [];
   $scope.new_link = null;
   $scope.view_controller = new fsm.FSMController($scope, view.Start, null);
   $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
@@ -91,8 +92,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.devices = [];
   $scope.stencils = [];
   $scope.links = [];
-  $scope.groups = [new models.Group(1, 'OSPF 0', 600, 100, null, null, true),
-                   new models.Group(2, 'OSPF 1', 100, 100, 500, 500, false)];
+  $scope.groups = [new models.Group(2, 'OSPF 1', 100, 100, 500, 500, false)];
 
 
 
@@ -116,10 +116,12 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var j = 0;
         var devices = $scope.devices;
         var links = $scope.links;
+        var groups = $scope.groups;
         $scope.selected_items = [];
         $scope.selected_devices = [];
         $scope.selected_links = [];
         $scope.selected_interfaces = [];
+        $scope.selected_groups = [];
         for (i = 0; i < devices.length; i++) {
             for (j = 0; j < devices[i].interfaces.length; j++) {
                 devices[i].interfaces[j].selected = false;
@@ -134,6 +136,9 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                 $scope.send_control_message(new messages.LinkUnSelected($scope.client_id, links[i].id));
             }
             links[i].selected = false;
+        }
+        for (i = 0; i < groups.length; i++) {
+            groups[i].selected = false;
         }
     };
 
