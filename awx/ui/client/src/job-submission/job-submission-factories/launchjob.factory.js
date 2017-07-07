@@ -71,11 +71,11 @@ export default
                     }
 
                     if(scope.ask_job_type_on_launch && scope.other_prompt_data && scope.other_prompt_data.job_type) {
-                        job_launch_data.job_type = scope.other_prompt_data.job_type;
+                        job_launch_data.job_type = scope.other_prompt_data.job_type.value;
                     }
 
                     if(scope.ask_verbosity_on_launch && scope.other_prompt_data && scope.other_prompt_data.verbosity) {
-                        job_launch_data.verbosity = scope.other_prompt_data.verbosity;
+                        job_launch_data.verbosity = scope.other_prompt_data.verbosity.value;
                     }
 
                     if(scope.survey_enabled===true){
