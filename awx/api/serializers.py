@@ -3097,9 +3097,10 @@ class JobLaunchSerializer(BaseSerializer):
 
     def get_defaults(self, obj):
         ask_for_vars_dict = obj._ask_for_vars_dict()
+        ask_for_vars_dict['vault_credential'] = False
         defaults_dict = {}
         for field in ask_for_vars_dict:
-            if field in ('inventory', 'credential'):
+            if field in ('inventory', 'credential', 'vault_credential'):
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
                     id=getattrd(obj, '%s.pk' % field, None))
