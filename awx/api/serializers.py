@@ -3139,13 +3139,14 @@ class JobLaunchSerializer(BaseSerializer):
             credential = attrs.get('credential', None)
 
         # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            passwords = self.context.get('passwords')
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = data[p]
-            except KeyError:
-                errors['passwords_needed_to_start'] = credential.passwords_needed
+        for cred in (credential, obj.vault_credential):
+            if cred and cred.passwords_needed:
+                passwords = self.context.get('passwords')
+                try:
+                    for p in cred.passwords_needed:
+                        passwords[p] = data[p]
+                except KeyError:
+                    errors.setdefault('passwords_needed_to_start', []).extend(cred.passwords_needed)
 
         extra_vars = attrs.get('extra_vars', {})
 
