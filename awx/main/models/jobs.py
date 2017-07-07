@@ -60,6 +60,9 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
+    diff_mode = models.BooleanField(
+        default=False,
+    )
     job_type = models.CharField(
         max_length=64,
         choices=JOB_TYPE_CHOICES,
@@ -237,7 +240,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default='',
     )
-
+    ask_diff_mode_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
     ask_variables_on_launch = models.BooleanField(
         blank=True,
         default=False,
@@ -293,7 +299,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'job_tags', 'extra_vars', 'launch_type', 'force_handlers',
                 'skip_tags', 'start_at_task', 'become_enabled', 'labels',
                 'survey_passwords', 'allow_simultaneous', 'timeout',
-                'use_fact_cache',]
+                'use_fact_cache', 'diff_mode',]
 
     def resource_validation_data(self):
         '''
@@ -361,6 +367,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
     def _ask_for_vars_dict(self):
         return dict(
+            diff_mode=self.ask_diff_mode_on_launch,
             extra_vars=self.ask_variables_on_launch,
             limit=self.ask_limit_on_launch,
             job_tags=self.ask_tags_on_launch,
@@ -521,6 +528,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if self.status == 'running':
             h = hmac.new(settings.SECRET_KEY, self.created.isoformat(), digestmod=hashlib.sha1)
             return '%d-%s' % (self.pk, h.hexdigest())
+
+    @property
+    def ask_diff_mode_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_diff_mode_on_launch
+        return False
 
     @property
     def ask_variables_on_launch(self):

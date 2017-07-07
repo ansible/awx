@@ -331,4 +331,24 @@ class Migration(migrations.Migration):
             name='timeout',
             field=models.IntegerField(default=0, help_text='The amount of time (in seconds) to run before the task is canceled.', blank=True),
         ),
+        migrations.AddField(
+            model_name='job',
+            name='diff_mode',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='diff_mode',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='adhoccommand',
+            name='diff_mode',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='ask_diff_mode_on_launch',
+            field=models.BooleanField(default=False),
+        ),
     ]
