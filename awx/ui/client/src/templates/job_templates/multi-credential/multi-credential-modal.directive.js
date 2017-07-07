@@ -182,7 +182,8 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 });
 
                 $scope.$watchGroup(['credentials',
-                    'selectedCredentials.machine'], () => {
+                    'selectedCredentials.machine',
+                    'selectedCredentials.vault'], () => {
                         if($scope.credentials &&
                             $scope.credentials.length > 0) {
                                 if($scope.selectedCredentials &&
