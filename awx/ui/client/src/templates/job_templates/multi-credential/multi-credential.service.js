@@ -84,7 +84,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 data.results.forEach((credentialType => {
                     credential_types[credentialType.id] = credentialType;
                     if(credentialType.kind
-                        .match(/^(machine|cloud|net|ssh)$/)) {
+                        .match(/^(machine|cloud|net|ssh|vault)$/)) {
                             credentialTypeOptions.push({
                                 name: credentialType.name,
                                 value: credentialType.id
@@ -111,11 +111,18 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
     val.updateCredentialTags = (creds, typeOpts) => {
         let machineCred = [];
         let extraCreds = [];
+        let vaultCred = [];
 
         if (creds.machine) {
             let mach = creds.machine;
             mach.postType = "machine";
             machineCred = [mach];
+        }
+
+        if (creds.vault) {
+            let vault = creds.vault;
+            vault.postType = "vault";
+            vaultCred = [vault];
         }
 
         if (creds.extra) {
@@ -127,7 +134,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 });
         }
 
-        return machineCred.concat(extraCreds).map(cred => ({
+        return machineCred.concat(extraCreds).concat(vaultCred).map(cred => ({
             name: cred.name,
             id: cred.id,
             postType: cred.postType,
@@ -144,6 +151,8 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
         tagArr.forEach((cred) => {
             if (credToRemove === cred.id) {
                 if (cred.postType === 'machine') {
+                    structuredObj[cred.postType] = null;
+                } else if (cred.postType === 'vault') {
                     structuredObj[cred.postType] = null;
                 } else {
                     structuredObj[cred.postType] = structuredObj[cred.postType]
@@ -163,6 +172,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
     val.loadCredentials = (data) => {
         let selectedCredentials = {
             machine: null,
+            vault: null,
             extra: []
         }, credTypes, credTypeOptions, credTags;
 
@@ -174,6 +184,24 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
             credDefers.push(Rest.get()
                 .then(({data}) => {
                     selectedCredentials.machine = data;
+                })
+                .catch(({data, status}) => {
+                    ProcessErrors(
+                        null, data, status, null,
+                        {
+                            hdr: 'Error!',
+                            msg: 'Failed to get machine credential. ' +
+                            'Get returned status: ' +
+                            status
+                        });
+                }));
+        }
+
+        if (data.related.vault_credential) {
+            Rest.setUrl(data.related.vault_credential);
+            credDefers.push(Rest.get()
+                .then(({data}) => {
+                    selectedCredentials.vault = data;
                 })
                 .catch(({data, status}) => {
                     ProcessErrors(

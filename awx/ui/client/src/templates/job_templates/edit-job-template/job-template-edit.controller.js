@@ -487,13 +487,18 @@ export default
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ? $scope.skip_tags.join() : "";
                     if ($scope.selectedCredentials && $scope.selectedCredentials
                         .machine && $scope.selectedCredentials
-                            .machine) {
+                            .machine.id) {
                                 data.credential = $scope.selectedCredentials
                                     .machine.id;
                     } else {
                         data.credential = null;
                     }
-
+                    if ($scope.selectedCredentials && $scope.selectedCredentials
+                        .vault && $scope.selectedCredentials
+                            .vault.id) {
+                                data.vault_credential = $scope.selectedCredentials
+                                    .vault.id;
+                    }
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);
 
