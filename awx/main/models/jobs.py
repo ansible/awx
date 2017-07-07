@@ -288,11 +288,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'extra_credentials', 'forks',
-                'schedule', 'limit', 'verbosity', 'job_tags', 'extra_vars',
-                'launch_type', 'force_handlers', 'skip_tags', 'start_at_task',
-                'become_enabled', 'labels', 'survey_passwords',
-                'allow_simultaneous', 'timeout', 'use_fact_cache',]
+                'playbook', 'credential', 'vault_credential',
+                'extra_credentials', 'forks', 'schedule', 'limit', 'verbosity',
+                'job_tags', 'extra_vars', 'launch_type', 'force_handlers',
+                'skip_tags', 'start_at_task', 'become_enabled', 'labels',
+                'survey_passwords', 'allow_simultaneous', 'timeout',
+                'use_fact_cache',]
 
     def resource_validation_data(self):
         '''

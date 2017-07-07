@@ -4,6 +4,7 @@ from functools import partial
 import ConfigParser
 import json
 import os
+import re
 import shutil
 import tempfile
 
@@ -404,7 +405,6 @@ class TestJobCredentials(TestJobExecution):
             dict(field='password', password_name='ssh_password', expected_flag='--ask-pass'),
             dict(field='ssh_key_unlock', password_name='ssh_key_unlock', expected_flag=None),
             dict(field='become_password', password_name='become_password', expected_flag='--ask-become-pass'),
-            dict(field='vault_password', password_name='vault_password', expected_flag='--ask-vault-pass'),
         ]
     }
 
@@ -427,6 +427,26 @@ class TestJobCredentials(TestJobExecution):
         assert '-u bob' in ' '.join(args)
         if expected_flag:
             assert expected_flag in ' '.join(args)
+
+    def test_vault_password(self):
+        vault = CredentialType.defaults['vault']()
+        credential = Credential(
+            pk=1,
+            credential_type=vault,
+            inputs={'vault_password': 'vault-me'}
+        )
+        credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
+        self.instance.vault_credential = credential
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+
+        assert call_kwargs.get('expect_passwords')[
+            re.compile(r'Vault password:\s*?$', re.M)
+        ] == 'vault-me'
+        assert '--ask-vault-pass' in ' '.join(args)
 
     def test_ssh_key_with_agent(self):
         ssh = CredentialType.defaults['ssh']()

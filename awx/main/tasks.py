@@ -872,15 +872,19 @@ class RunJob(BaseTask):
         and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
-        creds = job.credential
-        if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
-                if field == 'ssh_password':
-                    value = kwargs.get(field, decrypt_field(creds, 'password'))
-                else:
-                    value = kwargs.get(field, decrypt_field(creds, field))
-                if value not in ('', 'ASK'):
-                    passwords[field] = value
+        for cred, fields in {
+            'credential': ('ssh_key_unlock', 'ssh_password', 'become_password'),
+            'vault_credential': ('vault_password',)
+        }.items():
+            cred = getattr(job, cred, None)
+            if cred:
+                for field in fields:
+                    if field == 'ssh_password':
+                        value = kwargs.get(field, decrypt_field(cred, 'password'))
+                    else:
+                        value = kwargs.get(field, decrypt_field(cred, field))
+                    if value not in ('', 'ASK'):
+                        passwords[field] = value
         return passwords
 
     def build_env(self, job, **kwargs):
