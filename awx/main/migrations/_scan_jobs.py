@@ -13,7 +13,7 @@ def _create_fact_scan_project(Project, org):
                    scm_update_on_launch=True,
                    scm_update_cache_timeout=86400,
                    organization=org)
-    proj.save(skip_update=True)
+    proj.save()
     return proj
 
 
