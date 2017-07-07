@@ -915,7 +915,7 @@ class TestJobCredentials(TestJobExecution):
         assert self.run_pexpect.call_count == 1
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
-        assert '-e {"turbo_button": true}' in ' '.join(args)
+        assert '-e {"turbo_button": "True"}' in ' '.join(args)
 
     def test_custom_environment_injectors_with_complicated_boolean_template(self):
         some_cloud = CredentialType(

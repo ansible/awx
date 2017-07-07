@@ -30,7 +30,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.utils import encrypt_field, to_python_boolean
+from awx.main.utils import encrypt_field
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential']
 
@@ -575,13 +575,6 @@ class CredentialType(CommonModelNameNotUnique):
         for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
             extra_vars[var_name] = Template(tmpl).render(**namespace)
             safe_extra_vars[var_name] = Template(tmpl).render(**safe_namespace)
-
-            # If the template renders to a stringified Boolean, they've _probably_
-            # set up an extra_var injection with a boolean field; extra_vars supports JSON,
-            # so give them the actual boolean type they want
-            for v in (extra_vars, safe_extra_vars):
-                if v[var_name] in ('True', 'False'):
-                    v[var_name] = to_python_boolean(v[var_name])
 
         if extra_vars:
             args.extend(['-e', json.dumps(extra_vars)])
