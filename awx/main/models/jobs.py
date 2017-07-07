@@ -213,10 +213,12 @@ class JobOptions(BaseModel):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
+        needed = []
         if self.credential:
-            return self.credential.passwords_needed
-        else:
-            return []
+            needed.extend(self.credential.passwords_needed)
+        if self.vault_credential:
+            needed.extend(self.vault_credential.passwords_needed)
+        return needed
 
 
 class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
