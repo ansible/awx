@@ -2,7 +2,7 @@ const DEFAULT_POSITION = 'right';
 const DEFAULT_ACTION = 'click';
 const DEFAULT_ICON = 'fa fa-question-circle';
 const DEFAULT_ALIGNMENT = 'inline';
-const DEFAULT_ARROW_HEIGHT = 16;
+const DEFAULT_ARROW_HEIGHT = 14;
 const DEFAULT_PADDING = 10;
 const DEFAULT_REFRESH_DELAY = 50;
 const DEFAULT_RESET_ON_EXIT = false;
@@ -40,7 +40,7 @@ function AtPopoverController () {
         scope.popover.position = scope.popover.position || DEFAULT_POSITION;
         scope.popover.icon = scope.popover.icon || DEFAULT_ICON;
         scope.popover.on = scope.popover.on || DEFAULT_ACTION;
-        scope.popover.resetOnExit = scope.popover.resetOnExit || DEFAULT_RESET_CONTENT;
+        scope.popover.resetOnExit = scope.popover.resetOnExit || DEFAULT_RESET_ON_EXIT;
 
         if (scope.popover.resetOnExit) {
             scope.originalText = scope.popover.text;
@@ -77,7 +77,7 @@ function AtPopoverController () {
     };
 
     vm.dismiss = (refresh) => {
-        if (refresh && scope.popover.resetOnExit) {
+        if (!refresh && scope.popover.resetOnExit) {
             scope.popover.text = scope.originalText;
             scope.popover.title = scope.originalTitle;
         }
@@ -187,10 +187,10 @@ function AtPopoverController () {
     };
 
     vm.displayTop = (pos) => {
-        let arrowTop = pos.icon.top - pos.icon.height;
+        let arrowTop = pos.icon.top - pos.icon.height - DEFAULT_PADDING;
         let arrowLeft = Math.floor(pos.icon.right - pos.icon.width - (pos.arrow.style.width / 2));
 
-        let popoverTop = pos.icon.top - pos.popover.height - DEFAULT_PADDING;
+        let popoverTop = pos.icon.top - pos.popover.height - pos.icon.height - 5;
         let popoverLeft = Math.floor(pos.cx - (pos.popover.width / 2));
 
         pos.arrow.style.top = `${arrowTop}px`; 
