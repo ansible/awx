@@ -5,6 +5,7 @@ const DEFAULT_ALIGNMENT = 'inline';
 const DEFAULT_ARROW_HEIGHT = 16;
 const DEFAULT_PADDING = 10;
 const DEFAULT_REFRESH_DELAY = 50;
+const DEFAULT_RESET_ON_EXIT = false;
 
 function atPopoverLink (scope, el, attr, controllers) {
     let popoverController = controllers[0];
@@ -39,6 +40,12 @@ function AtPopoverController () {
         scope.popover.position = scope.popover.position || DEFAULT_POSITION;
         scope.popover.icon = scope.popover.icon || DEFAULT_ICON;
         scope.popover.on = scope.popover.on || DEFAULT_ACTION;
+        scope.popover.resetOnExit = scope.popover.resetOnExit || DEFAULT_RESET_CONTENT;
+
+        if (scope.popover.resetOnExit) {
+            scope.originalText = scope.popover.text;
+            scope.originalTitle = scope.popover.title;
+        }
 
         icon.addEventListener(scope.popover.on, vm.createDisplayListener());
 
@@ -59,12 +66,22 @@ function AtPopoverController () {
 
             vm.dismiss();
 
-            window.removeEventListener(scope.popover.on, vm.dismissListener);
+            if (scope.popover.on === 'mouseenter') {
+                icon.removeEventListener('mouseleave', vm.dismissListener);
+            } else {
+                window.addEventListener(scope.popover.on, vm.dismissListener);
+            }
+
             window.removeEventListener('resize', vm.dismissListener);
         };
     };
 
-    vm.dismiss = () => {
+    vm.dismiss = (refresh) => {
+        if (refresh && scope.popover.resetOnExit) {
+            scope.popover.text = scope.originalText;
+            scope.popover.title = scope.originalTitle;
+        }
+
         vm.open = false;
 
         popover.style.visibility = 'hidden';
@@ -96,7 +113,12 @@ function AtPopoverController () {
 
             vm.dismissListener = vm.createDismissListener(event);
 
-            window.addEventListener(scope.popover.on, vm.dismissListener);
+            if (scope.popover.on === 'mouseenter') {
+                icon.addEventListener('mouseleave', vm.dismissListener);
+            } else {
+                window.addEventListener(scope.popover.on, vm.dismissListener);
+            }
+
             window.addEventListener('resize', vm.dismissListener);
         };
     };
@@ -106,7 +128,7 @@ function AtPopoverController () {
             return;
         }
 
-        vm.dismiss();
+        vm.dismiss(true);
         window.setTimeout(vm.display, DEFAULT_REFRESH_DELAY);
     };
 

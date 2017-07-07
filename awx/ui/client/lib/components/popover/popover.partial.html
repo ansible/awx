@@ -1,6 +1,6 @@
 <div ng-show="popover.text" class="at-Popover" ng-class="{ 'at-Popover--inline': popover.inline }">
     <span class="at-Popover-icon"
-          ng-class="{'at-Popover-icon--defaultCursor': popover.on === 'mouseover'}">
+          ng-class="{ 'at-Popover-icon--defaultCursor': popover.on === 'mouseenter' && !popover.click }">
         <i class="fa {{ popover.icon }}"></i>
     </span>
     <div class="at-Popover-container">
