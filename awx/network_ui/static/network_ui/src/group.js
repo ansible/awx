@@ -1,5 +1,6 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
+var models = require('./models.js');
 
 function _State () {
 }
@@ -74,35 +75,63 @@ exports.Selected2 = Selected2;
 
 _Resize.prototype.onMouseUp = function (controller) {
 
-    controller.changeState(CornerSelected);
+    controller.changeState(Selected2);
 
 };
-_Resize.prototype.onMouseUp.transitions = ['CornerSelected'];
+_Resize.prototype.onMouseUp.transitions = ['Selected2'];
 
 
+_Resize.prototype.onMouseMove = function (controller) {
 
-_Start.prototype.start = function () {
+    var groups = controller.scope.selected_groups;
 
-    //controller.changeState(Ready);
+    var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
+    var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
+    var x = controller.scope.scaledX;
+    var y = controller.scope.scaledY;
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        if (groups[i].selected_corner(x, y) === models.TOP_LEFT) {
+            groups[i].x1 = groups[i].x1 + diffX;
+            groups[i].y1 = groups[i].y1 + diffY;
+        }
+        if (groups[i].selected_corner(x, y) === models.BOTTOM_RIGHT) {
+            groups[i].x2 = groups[i].x2 + diffX;
+            groups[i].y2 = groups[i].y2 + diffY;
+        }
+        if (groups[i].selected_corner(x, y) === models.TOP_RIGHT) {
+            groups[i].x2 = groups[i].x2 + diffX;
+            groups[i].y1 = groups[i].y1 + diffY;
+        }
+        if (groups[i].selected_corner(x, y) === models.BOTTOM_LEFT) {
+            groups[i].x1 = groups[i].x1 + diffX;
+            groups[i].y2 = groups[i].y2 + diffY;
+        }
+    }
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+};
+
+
+_Start.prototype.start = function (controller) {
+
+    controller.changeState(Ready);
 
 };
 _Start.prototype.start.transitions = ['Ready'];
 
 
-
-_CornerSelected.prototype.onMouseDown = function (controller) {
+_CornerSelected.prototype.onMouseMove = function (controller) {
 
     controller.changeState(Resize);
-
 };
-_CornerSelected.prototype.onMouseDown.transitions = ['Resize'];
+_CornerSelected.prototype.onMouseMove.transitions = ['Resize'];
 
 _CornerSelected.prototype.onMouseUp = function (controller) {
 
-    controller.changeState(Ready);
-
+    controller.changeState(Selected2);
 };
-_CornerSelected.prototype.onMouseUp.transitions = ['Ready'];
+_CornerSelected.prototype.onMouseUp.transitions = ['Selected2'];
 
 
 
@@ -137,6 +166,22 @@ _Selected3.prototype.onMouseUp = function (controller) {
 _Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
 
 
+_Move.prototype.onMouseMove = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
+    var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].x1 = groups[i].x1 + diffX;
+        groups[i].y1 = groups[i].y1 + diffY;
+        groups[i].x2 = groups[i].x2 + diffX;
+        groups[i].y2 = groups[i].y2 + diffY;
+    }
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+};
 
 _Move.prototype.onMouseUp = function (controller) {
 
@@ -145,13 +190,54 @@ _Move.prototype.onMouseUp = function (controller) {
 };
 _Move.prototype.onMouseUp.transitions = ['Selected2'];
 
+_Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
+
+    var i = 0;
+
+    for (i = 0; i < controller.scope.groups.length; i++) {
+        controller.scope.groups[i].update_hightlighted(controller.scope.scaledX, controller.scope.scaledY);
+    }
+
+    controller.next_controller.handle_message(msg_type, $event);
+};
 
 
-_Ready.prototype.onMouseDown = function (controller) {
+_Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
-    controller.changeState(Selected1);
 
-    controller.changeState(CornerSelected);
+
+    //
+    var i = 0;
+    for (i = 0; i < controller.scope.groups.length; i++) {
+        if (controller.scope.groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            if (controller.scope.selected_groups.indexOf(controller.scope.groups[i]) === -1) {
+                controller.scope.selected_groups.push(controller.scope.groups[i]);
+            }
+            controller.scope.groups[i].selected = true;
+            controller.changeState(CornerSelected);
+            controller.scope.pressedX = controller.scope.mouseX;
+            controller.scope.pressedY = controller.scope.mouseY;
+            controller.scope.pressedScaledX = controller.scope.scaledX;
+            controller.scope.pressedScaledY = controller.scope.scaledY;
+
+            return;
+        } else if (controller.scope.groups[i].is_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            if (controller.scope.selected_groups.indexOf(controller.scope.groups[i]) === -1) {
+                controller.scope.selected_groups.push(controller.scope.groups[i]);
+            }
+            controller.scope.groups[i].selected = true;
+            controller.changeState(Selected1);
+            controller.scope.pressedX = controller.scope.mouseX;
+            controller.scope.pressedY = controller.scope.mouseY;
+            controller.scope.pressedScaledX = controller.scope.scaledX;
+            controller.scope.pressedScaledY = controller.scope.scaledY;
+
+            return;
+        }
+    }
+
+    controller.scope.selected_groups = [];
+    controller.next_controller.handle_message(msg_type, $event);
 
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
@@ -167,11 +253,12 @@ _EditLabel.prototype.onMouseDown.transitions = ['Ready'];
 
 
 
-_Selected2.prototype.onMouseDown = function (controller) {
+_Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
+    controller.handle_message(msg_type, $event);
 
-    controller.changeState(Selected3);
+    //controller.changeState(Selected3);
 
 };
 _Selected2.prototype.onMouseDown.transitions = ['Ready', 'Selected3'];
