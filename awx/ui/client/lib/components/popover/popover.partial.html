@@ -1,16 +1,16 @@
-<div ng-show="state.help_text"
-     class="at-Popover"
-     ng-class="{ 'at-Popover--inline': inline }">
-    <span class="at-Popover-icon">
-        <i class="fa fa-question-circle"></i>
+<div ng-show="vm.text" class="at-Popover" ng-class="{ 'at-Popover--inline': vm.inline }">
+    <span class="at-Popover-icon"
+          ng-class="{'at-Popover-icon--defaultCursor': vm.on === 'mouseover'}">
+        <i class="fa {{ vm.icon }}"></i>
     </span>
     <div class="at-Popover-container">
         <div class="at-Popover-arrow">
-            <i class="fa fa-caret-left fa-2x"></i>
+            <i ng-if="vm.position === 'right'" class="fa fa-caret-left fa-2x"></i>
+            <i ng-if="vm.position === 'top'" class="fa fa-caret-down fa-2x"></i>
         </div>
         <div class="at-Popover-content">
-            <h4 class="at-Popover-title">{{::state.label}}</h4>
-            <p class="at-Popover-text">{{::state.help_text}}</p>
+            <h4 class="at-Popover-title">{{ vm.title }}</h4>
+            <p class="at-Popover-text">{{ vm.text }}</p>
         </div>
     </div>
 </div>

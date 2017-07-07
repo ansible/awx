@@ -1,7 +1,7 @@
 <label class="at-InputLabel">
     <span ng-if="state.required" class="at-InputLabel-required">*</span>
     <span class="at-InputLabel-name">{{::state.label}}</span>
-    <at-popover state="state"></at-popover>
+    <at-popover position="right" on="mouseover" state="state"></at-popover>
     <span ng-if="state._displayHint" class="at-InputLabel-hint">{{::state._hint}}</span>
     <div ng-if="state._displayPromptOnLaunch" class="at-InputLabel-checkbox pull-right">
         <label class="at-InputLabel-checkboxLabel">
