@@ -2218,7 +2218,7 @@ class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
         # Inject parent group inventory ID into new host data.
         request.data['inventory'] = parent_group.inventory_id
-        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data['name'])
+        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data.get('name', ''))
         if existing_hosts.count() > 0 and ('variables' not in request.data or
                                            request.data['variables'] == '' or
                                            request.data['variables'] == '{}' or
