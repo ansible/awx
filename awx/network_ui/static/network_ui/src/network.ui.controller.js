@@ -92,7 +92,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.devices = [];
   $scope.stencils = [];
   $scope.links = [];
-  $scope.groups = [new models.Group(2, 'OSPF 1', 100, 100, 500, 500, false)];
+  $scope.groups = [new models.Group(2, 'OSPF 0', 100, 100, 500, 500, false),
+                   new models.Group(2, 'OSPF 1', 500, 100, 900, 500, false)];
 
 
 
@@ -487,9 +488,22 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                               true)
     ];
 
+    var STENCIL_X = 10;
+    var STENCIL_Y = 100;
+    var STENCIL_SPACING = 40;
+
+    $scope.stencils = [
+      new models.Button("Switch", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));}),
+      new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
+      new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
+      new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
+      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, util.noop),
+    ];
+
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.buttons);
     $scope.all_buttons.extend($scope.layers);
+    $scope.all_buttons.extend($scope.stencils);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
