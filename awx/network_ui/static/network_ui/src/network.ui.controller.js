@@ -82,6 +82,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                   'height': window.innerHeight};
   $scope.device_id_seq = util.natural_numbers(0);
   $scope.link_id_seq = util.natural_numbers(0);
+  $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
   $scope.time_pointer = -1;
   $scope.frame = 0;
@@ -497,7 +498,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
       new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
       new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
       new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
-      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, util.noop),
+      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup");}),
     ];
 
     $scope.all_buttons = [];

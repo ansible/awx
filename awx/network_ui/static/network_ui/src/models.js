@@ -319,6 +319,7 @@ function Group(id, name, x1, y1, x2, y2, selected) {
     this.selected = selected;
     this.highlighted = false;
     this.fsm = null;
+    this.selected_corner = null;
 }
 exports.Group = Group;
 
@@ -375,7 +376,7 @@ Group.prototype.has_corner_selected = function (x, y) {
     return false;
 };
 
-Group.prototype.selected_corner = function (x, y) {
+Group.prototype.select_corner = function (x, y) {
 
     var corners = [[util.distance(this.x1, this.y1, x, y), TOP_LEFT],
                    [util.distance(this.x2, this.y2, x, y), BOTTOM_RIGHT],
@@ -387,6 +388,10 @@ Group.prototype.selected_corner = function (x, y) {
     corners.sort(function(a, b) {
         return a[0] - b[0];
     });
+
+    if (corners[0][0] > 30) {
+        return null;
+    }
 
     return corners[0][1];
 };
