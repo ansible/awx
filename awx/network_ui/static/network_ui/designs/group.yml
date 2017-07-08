@@ -79,7 +79,7 @@ transitions:
   label: onNewGroup
   to_state: Placing
 - from_state: Placing
-  label: onMouseUp
+  label: onMouseDown
   to_state: CornerSelected
 - from_state: CornerSelected
   label: onMouseMove
@@ -87,6 +87,9 @@ transitions:
 - from_state: Resize
   label: onMouseUp
   to_state: Selected1
+- from_state: Selected2
+  label: onNewGroup
+  to_state: Ready
 - from_state: CornerSelected
   label: onMouseUp
   to_state: Selected1
