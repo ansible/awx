@@ -1,42 +1,46 @@
-finite_state_machine_id: 98
+finite_state_machine_id: 102
 name: fsm
 states:
 - id: 1
   label: Resize
-  x: 441
-  y: 905
-- id: 5
+  x: 571
+  y: 911
+- id: 2
   label: Start
   x: 744
   y: 69
-- id: 6
+- id: 3
   label: CornerSelected
-  x: 426
-  y: 587
-- id: 2
+  x: 359
+  y: 682
+- id: 4
   label: Selected1
   x: 839
   y: 640
-- id: 9
+- id: 5
   label: Selected3
-  x: 1453
-  y: 312
-- id: 4
+  x: 1528
+  y: 360
+- id: 6
   label: Move
-  x: 1232
-  y: 871
-- id: 3
+  x: 1297
+  y: 786
+- id: 7
   label: Ready
   x: 740
   y: 324
-- id: 7
+- id: 8
   label: EditLabel
   x: 1056
   y: 148
-- id: 8
+- id: 9
   label: Selected2
   x: 1179
   y: 435
+- id: 10
+  label: Placing
+  x: 410
+  y: 295
 transitions:
 - from_state: Ready
   label: onMouseDown
@@ -47,18 +51,12 @@ transitions:
 - from_state: Selected2
   label: onMouseDown
   to_state: Ready
-- from_state: CornerSelected
-  label: onMouseDown
-  to_state: Resize
 - from_state: Selected2
   label: onMouseDown
   to_state: Selected3
 - from_state: Selected1
   label: onMouseUp
   to_state: Selected2
-- from_state: CornerSelected
-  label: onMouseUp
-  to_state: Ready
 - from_state: Move
   label: onMouseUp
   to_state: Selected2
@@ -68,9 +66,6 @@ transitions:
 - from_state: Start
   label: start
   to_state: Ready
-- from_state: Resize
-  label: onMouseUp
-  to_state: CornerSelected
 - from_state: Ready
   label: onMouseDown
   to_state: CornerSelected
@@ -80,3 +75,21 @@ transitions:
 - from_state: Selected3
   label: onMouseUp
   to_state: EditLabel
+- from_state: Ready
+  label: onNewGroup
+  to_state: Placing
+- from_state: Placing
+  label: onMouseUp
+  to_state: CornerSelected
+- from_state: CornerSelected
+  label: onMouseMove
+  to_state: Resize
+- from_state: Resize
+  label: onMouseUp
+  to_state: Selected1
+- from_state: CornerSelected
+  label: onMouseUp
+  to_state: Selected1
+- from_state: Move
+  label: onMouseDown
+  to_state: Selected1
