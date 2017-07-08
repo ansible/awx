@@ -70,16 +70,21 @@ inherits(_Selected2, _State);
 var Selected2 = new _Selected2();
 exports.Selected2 = Selected2;
 
+function _Placing () {
+    this.name = 'Placing';
+}
+inherits(_Placing, _State);
+var Placing = new _Placing();
+exports.Placing = Placing;
 
 
+_Resize.prototype.onMouseUp = function (controller, msg_type, $event) {
 
-_Resize.prototype.onMouseUp = function (controller) {
-
-    controller.changeState(Selected2);
+    controller.changeState(Selected1);
+    controller.handle_message(msg_type, $event);
 
 };
-_Resize.prototype.onMouseUp.transitions = ['Selected2'];
-
+_Resize.prototype.onMouseUp.transitions = ['Selected1'];
 
 _Resize.prototype.onMouseMove = function (controller) {
 
@@ -87,23 +92,21 @@ _Resize.prototype.onMouseMove = function (controller) {
 
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
-    var x = controller.scope.scaledX;
-    var y = controller.scope.scaledY;
     var i = 0;
     for (i = 0; i < groups.length; i++) {
-        if (groups[i].selected_corner(x, y) === models.TOP_LEFT) {
+        if (groups[i].selected_corner === models.TOP_LEFT) {
             groups[i].x1 = groups[i].x1 + diffX;
             groups[i].y1 = groups[i].y1 + diffY;
         }
-        if (groups[i].selected_corner(x, y) === models.BOTTOM_RIGHT) {
+        if (groups[i].selected_corner === models.BOTTOM_RIGHT) {
             groups[i].x2 = groups[i].x2 + diffX;
             groups[i].y2 = groups[i].y2 + diffY;
         }
-        if (groups[i].selected_corner(x, y) === models.TOP_RIGHT) {
+        if (groups[i].selected_corner === models.TOP_RIGHT) {
             groups[i].x2 = groups[i].x2 + diffX;
             groups[i].y1 = groups[i].y1 + diffY;
         }
-        if (groups[i].selected_corner(x, y) === models.BOTTOM_LEFT) {
+        if (groups[i].selected_corner === models.BOTTOM_LEFT) {
             groups[i].x1 = groups[i].x1 + diffX;
             groups[i].y2 = groups[i].y2 + diffY;
         }
@@ -120,6 +123,16 @@ _Start.prototype.start = function (controller) {
 };
 _Start.prototype.start.transitions = ['Ready'];
 
+_CornerSelected.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+    var i = 0;
+    var x = controller.scope.scaledX;
+    var y = controller.scope.scaledY;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].selected_corner = groups[i].select_corner(x, y);
+    }
+};
 
 _CornerSelected.prototype.onMouseMove = function (controller) {
 
@@ -127,11 +140,12 @@ _CornerSelected.prototype.onMouseMove = function (controller) {
 };
 _CornerSelected.prototype.onMouseMove.transitions = ['Resize'];
 
-_CornerSelected.prototype.onMouseUp = function (controller) {
+_CornerSelected.prototype.onMouseUp = function (controller, msg_type, $event) {
 
-    controller.changeState(Selected2);
+    controller.changeState(Selected1);
+    controller.handle_message(msg_type, $event);
 };
-_CornerSelected.prototype.onMouseUp.transitions = ['Selected2'];
+_CornerSelected.prototype.onMouseUp.transitions = ['Selected1'];
 
 
 
@@ -145,7 +159,6 @@ _Selected1.prototype.onMouseMove.transitions = ['Move'];
 _Selected1.prototype.onMouseUp = function (controller) {
 
     controller.changeState(Selected2);
-
 };
 _Selected1.prototype.onMouseUp.transitions = ['Selected2'];
 
@@ -189,6 +202,12 @@ _Move.prototype.onMouseUp = function (controller) {
 
 };
 _Move.prototype.onMouseUp.transitions = ['Selected2'];
+
+_Move.prototype.onMouseDown = function (controller) {
+
+    controller.changeState(Selected1);
+};
+_Move.prototype.onMouseDown.transitions = ['Selected1'];
 
 _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
@@ -243,6 +262,14 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
 
 
+_Ready.prototype.onNewGroup = function (controller) {
+    controller.changeState(Placing);
+};
+_Ready.prototype.onNewGroup.transitions = ['Placing'];
+
+
+
+
 
 _EditLabel.prototype.onMouseDown = function (controller) {
 
@@ -251,6 +278,14 @@ _EditLabel.prototype.onMouseDown = function (controller) {
 };
 _EditLabel.prototype.onMouseDown.transitions = ['Ready'];
 
+
+_Selected2.prototype.onNewGroup = function (controller, msg_type, $event) {
+
+    controller.changeState(Ready);
+    controller.handle_message(msg_type, $event);
+
+};
+_Selected2.prototype.onNewGroup.transitions = ['Ready'];
 
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
@@ -263,4 +298,35 @@ _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 };
 _Selected2.prototype.onMouseDown.transitions = ['Ready', 'Selected3'];
 
+
+
+
+_Placing.prototype.onMouseDown = function (controller) {
+
+	var scope = controller.scope;
+    var group = null;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    scope.clear_selections();
+
+    group = new models.Group(scope.group_id_seq(),
+                             "Group",
+                             scope.scaledX,
+                             scope.scaledY,
+                             scope.scaledX,
+                             scope.scaledY,
+                             false);
+
+    scope.groups.push(group);
+    scope.selected_groups.push(group);
+    group.selected = true;
+    group.selected_corner = models.BOTTOM_RIGHT;
+
+    controller.changeState(Resize);
+};
+_Placing.prototype.onMouseDown.transitions = ['CornerSelected'];
 
