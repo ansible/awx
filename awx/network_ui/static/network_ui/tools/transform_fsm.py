@@ -39,9 +39,13 @@ def main(args=None):
         state['functions'] = dict()
 
     for transition in data['transitions']:
-        function_transitions = state_map[transition['from_state']]['functions'].get(transition['label'], list())
+        state = state_map.get(transition['from_state'], dict(label=transition['from_state'], functions=dict()))
+        state_map[transition['from_state']] = state
+        if state not in data['states']:
+            data['states'].append(state)
+        function_transitions = state['functions'].get(transition['label'], list())
         function_transitions.append(dict(to_state=transition['to_state']))
-        state_map[transition['from_state']]['functions'][transition['label']] = function_transitions
+        state['functions'][transition['label']] = function_transitions
 
     for state in data['states']:
         state['functions'] = sorted(state['functions'].items())
