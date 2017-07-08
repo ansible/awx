@@ -1,36 +1,38 @@
-app: move
-panX: 285.92999999999995
-panY: -151.52999999999997
-scaleXY: 0.8700000000000001
+finite_state_machine_id: 101
+name: move
 states:
-- label: Start
-  size: 100
+- id: 1
+  label: Start
   x: 533
   y: 121
-- label: Ready
-  size: 100
+- id: 2
+  label: Ready
   x: 531
   y: 320
-- label: Selected1
-  size: 100
+- id: 3
+  label: Selected1
   x: 226
   y: 325
-- label: Selected2
-  size: 100
+- id: 4
+  label: Selected2
   x: 230
   y: 582
-- label: Move
-  size: 100
+- id: 5
+  label: Move
   x: -54
   y: 587
-- label: EditLabel
-  size: 100
-  x: 535.7126436781609
-  y: 583.367816091954
-- label: Selected3
-  size: 100
-  x: 231.11494252873567
-  y: 867.2758620689654
+- id: 6
+  label: EditLabel
+  x: 535
+  y: 583
+- id: 7
+  label: Selected3
+  x: 175
+  y: 886
+- id: 9
+  label: Placing
+  x: 92
+  y: 82
 transitions:
 - from_state: Start
   label: start
@@ -51,6 +53,9 @@ transitions:
   label: onMouseUp
   to_state: Selected2
 - from_state: EditLabel
+  label: onKeyDown
+  to_state: Selected2
+- from_state: EditLabel
   label: onMouseDown
   to_state: Ready
 - from_state: Selected2
@@ -62,3 +67,18 @@ transitions:
 - from_state: Selected3
   label: onMouseUp
   to_state: EditLabel
+- from_state: Placing
+  label: onMouseMove
+  to_state: Move
+- from_state: Ready
+  label: onNewDevice
+  to_state: Placing
+- from_state: Placing
+  label: onMouseDown
+  to_state: Selected1
+- from_state: Move
+  label: onMouseDown
+  to_state: Selected1
+- from_state: Selected2
+  label: onNewDevice
+  to_state: Ready
