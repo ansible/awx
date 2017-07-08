@@ -59,6 +59,70 @@ inherits(_EditLabel, _State);
 var EditLabel = new _EditLabel();
 exports.EditLabel = EditLabel;
 
+
+function _Placing () {
+    this.name = 'Placing';
+}
+inherits(_Placing, _State);
+var Placing = new _Placing();
+exports.Placing = Placing;
+
+_Ready.prototype.onNewDevice = function (controller, msg_type, message) {
+
+    controller.scope.pressedX = controller.scope.mouseX;
+    controller.scope.pressedY = controller.scope.mouseY;
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+
+	var scope = controller.scope;
+    var device = null;
+
+    scope.clear_selections();
+
+	if (message.type === "router") {
+		device = new models.Device(controller.scope.device_id_seq(),
+                                   "Router",
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "router");
+	}
+    else if (message.type === "switch") {
+		device = new models.Device(controller.scope.device_id_seq(),
+                                   "Switch",
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "switch");
+	}
+    else if (message.type === "rack") {
+		device = new models.Device(controller.scope.device_id_seq(),
+                                   "Rack",
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "rack");
+	}
+    else if (message.type === "host") {
+		device = new models.Device(controller.scope.device_id_seq(),
+                                   "Host",
+                                   scope.scaledX,
+                                   scope.scaledY,
+                                   "host");
+	}
+
+    if (device !== null) {
+        scope.devices.push(device);
+        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
+                                                             device.id,
+                                                             device.x,
+                                                             device.y,
+                                                             device.name,
+                                                             device.type));
+        scope.selected_devices.push(device);
+        device.selected = true;
+        controller.changeState(Placing);
+    }
+};
+_Ready.prototype.onNewDevice.transitions = ['Placing'];
+
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     var last_selected = controller.scope.select_items($event.shiftKey);
@@ -133,6 +197,12 @@ _Start.prototype.start = function (controller) {
 _Start.prototype.start.transitions = ['Ready'];
 
 
+_Selected2.prototype.onNewDevice = function (controller, msg_type, message) {
+
+    controller.changeState(Ready);
+    controller.handle_message(msg_type, message);
+};
+_Selected2.prototype.onNewDevice.transitions = ['Ready'];
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -291,6 +361,12 @@ _Move.prototype.onMouseUp.transitions = ['Selected2'];
 
 _Move.prototype.onTouchEnd = _Move.prototype.onMouseUp;
 
+_Move.prototype.onMouseDown = function (controller) {
+
+    controller.changeState(Selected1);
+};
+_Move.prototype.onMouseDown.transitions = ['Selected1'];
+
 _Selected3.prototype.onMouseUp = function (controller) {
     controller.changeState(EditLabel);
 };
@@ -362,3 +438,20 @@ _EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
     }
 };
 _EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
+
+
+_Placing.prototype.onMouseDown = function (controller) {
+
+    controller.changeState(Selected1);
+
+};
+_Placing.prototype.onMouseDown.transitions = ['Selected1'];
+
+_Placing.prototype.onMouseMove = function (controller) {
+
+    controller.changeState(Move);
+
+};
+_Placing.prototype.onMouseMove.transitions = ['Move'];
+
+

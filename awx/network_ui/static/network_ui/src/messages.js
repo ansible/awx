@@ -241,3 +241,8 @@ function ViewPort(sender, scale, panX, panY) {
     this.panY = panY;
 }
 exports.ViewPort = ViewPort;
+
+function NewDevice(type) {
+    this.type = type;
+}
+exports.NewDevice = NewDevice;
