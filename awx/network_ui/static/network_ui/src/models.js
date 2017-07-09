@@ -416,6 +416,14 @@ Group.prototype.is_selected = function (x, y) {
     }
     if (util.pDistance(x,
                        y,
+                       this.left_extent(),
+                       this.top_extent(),
+                       this.right_extent(),
+                       this.top_extent()) < 40 && y > this.top_extent()) {
+        return true;
+    }
+    if (util.pDistance(x,
+                       y,
                        this.right_extent(),
                        this.bottom_extent(),
                        this.right_extent(),
