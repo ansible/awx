@@ -1,4 +1,4 @@
-finite_state_machine_id: 101
+finite_state_machine_id: 106
 name: move
 states:
 - id: 1
@@ -23,13 +23,13 @@ states:
   y: 587
 - id: 6
   label: EditLabel
-  x: 535
-  y: 583
+  x: 566
+  y: 677
 - id: 7
   label: Selected3
   x: 175
   y: 886
-- id: 9
+- id: 8
   label: Placing
   x: 92
   y: 82
@@ -51,7 +51,7 @@ transitions:
   to_state: Ready
 - from_state: Move
   label: onMouseUp
-  to_state: Selected2
+  to_state: Selected1
 - from_state: EditLabel
   label: onKeyDown
   to_state: Selected2
@@ -81,4 +81,7 @@ transitions:
   to_state: Selected1
 - from_state: Selected2
   label: onNewDevice
+  to_state: Ready
+- from_state: Selected2
+  label: onKeyDown
   to_state: Ready
