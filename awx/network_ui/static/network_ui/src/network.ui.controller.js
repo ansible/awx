@@ -93,8 +93,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.devices = [];
   $scope.stencils = [];
   $scope.links = [];
-  $scope.groups = [new models.Group(2, 'OSPF 0', 100, 100, 500, 500, false),
-                   new models.Group(2, 'OSPF 1', 500, 100, 900, 500, false)];
+  $scope.groups = [];
 
 
 
