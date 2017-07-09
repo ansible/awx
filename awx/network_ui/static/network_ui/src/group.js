@@ -350,6 +350,27 @@ _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 _Selected2.prototype.onMouseDown.transitions = ['Ready', 'Selected3'];
 
 
+_Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
+
+    if ($event.keyCode === 8) {
+        //Delete
+        controller.changeState(Ready);
+
+        var i = 0;
+        var index = -1;
+        var groups = controller.scope.selected_groups;
+        controller.scope.selected_groups = [];
+        for (i = 0; i < groups.length; i++) {
+            index = controller.scope.groups.indexOf(groups[i]);
+            if (index !== -1) {
+                groups[i].selected = false;
+                groups[i].remote_selected = false;
+                controller.scope.groups.splice(index, 1);
+            }
+        }
+    }
+};
+_Selected2.prototype.onKeyDown.transitions = ['Ready'];
 
 
 _Placing.prototype.onMouseDown = function (controller) {
