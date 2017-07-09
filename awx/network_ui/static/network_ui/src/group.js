@@ -317,6 +317,12 @@ _Selected2.prototype.onNewGroup.transitions = ['Ready'];
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
+    controller.scope.pressedX = controller.scope.mouseX;
+    controller.scope.pressedY = controller.scope.mouseY;
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+
+
 
     var groups = controller.scope.selected_groups;
     controller.scope.selected_groups = [];
