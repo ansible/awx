@@ -69,13 +69,13 @@ exports.Placing = Placing;
 
 _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 
-    controller.scope.pressedX = controller.scope.mouseX;
-    controller.scope.pressedY = controller.scope.mouseY;
-    controller.scope.pressedScaledX = controller.scope.scaledX;
-    controller.scope.pressedScaledY = controller.scope.scaledY;
-
 	var scope = controller.scope;
     var device = null;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
 
     scope.clear_selections();
 
@@ -354,10 +354,10 @@ _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
 
 _Move.prototype.onMouseUp = function (controller, msg_type, $event) {
 
-    controller.changeState(Selected2);
+    controller.changeState(Selected1);
     controller.handle_message(msg_type, $event);
 };
-_Move.prototype.onMouseUp.transitions = ['Selected2'];
+_Move.prototype.onMouseUp.transitions = ['Selected1'];
 
 _Move.prototype.onTouchEnd = _Move.prototype.onMouseUp;
 
