@@ -269,6 +269,13 @@ _Ready.prototype.onNewGroup.transitions = ['Placing'];
 
 
 
+_EditLabel.prototype.start = function (controller) {
+    controller.scope.selected_groups[0].edit_label = true;
+};
+
+_EditLabel.prototype.end = function (controller) {
+    controller.scope.selected_groups[0].edit_label = false;
+};
 
 
 _EditLabel.prototype.onMouseDown = function (controller) {
@@ -278,6 +285,26 @@ _EditLabel.prototype.onMouseDown = function (controller) {
 };
 _EditLabel.prototype.onMouseDown.transitions = ['Ready'];
 
+
+_EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
+    //Key codes found here:
+    //https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+	var item = controller.scope.selected_groups[0];
+	if ($event.keyCode === 8 || $event.keyCode === 46) { //Delete
+		item.name = item.name.slice(0, -1);
+	} else if ($event.keyCode >= 48 && $event.keyCode <=90) { //Alphanumeric
+        item.name += $event.key;
+	} else if ($event.keyCode >= 186 && $event.keyCode <=222) { //Punctuation
+        item.name += $event.key;
+	} else if ($event.keyCode === 13) { //Enter
+        controller.changeState(Selected2);
+	} else if ($event.keyCode === 32) { //Space
+        item.name += " ";
+    } else {
+        console.log($event.keyCode);
+    }
+};
+_EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
 
 _Selected2.prototype.onNewGroup = function (controller, msg_type, $event) {
 
@@ -290,10 +317,28 @@ _Selected2.prototype.onNewGroup.transitions = ['Ready'];
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
-    controller.changeState(Ready);
-    controller.handle_message(msg_type, $event);
 
-    //controller.changeState(Selected3);
+    var groups = controller.scope.selected_groups;
+    controller.scope.selected_groups = [];
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        if (controller.scope.groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            controller.scope.selected_groups = [];
+            break;
+        }
+        else if (groups[i].is_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            if (controller.scope.selected_groups.indexOf(groups[i]) === -1) {
+                controller.scope.selected_groups.push(groups[i]);
+            }
+        }
+    }
+
+    if (controller.scope.selected_groups.length > 0) {
+        controller.changeState(Selected3);
+    } else {
+        controller.changeState(Ready);
+        controller.handle_message(msg_type, $event);
+    }
 
 };
 _Selected2.prototype.onMouseDown.transitions = ['Ready', 'Selected3'];
