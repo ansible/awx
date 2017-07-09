@@ -227,6 +227,12 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     //
     var i = 0;
+
+    for (i = 0; i < controller.scope.groups.length; i++) {
+        controller.scope.groups[i].selected = false;
+    }
+    controller.scope.selected_groups = [];
+
     for (i = 0; i < controller.scope.groups.length; i++) {
         if (controller.scope.groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
             if (controller.scope.selected_groups.indexOf(controller.scope.groups[i]) === -1) {
@@ -255,7 +261,6 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
         }
     }
 
-    controller.scope.selected_groups = [];
     controller.next_controller.handle_message(msg_type, $event);
 
 };
