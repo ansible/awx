@@ -322,7 +322,7 @@ _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
     controller.scope.selected_groups = [];
     var i = 0;
     for (i = 0; i < groups.length; i++) {
-        if (controller.scope.groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+        if (groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
             controller.scope.selected_groups = [];
             break;
         }
