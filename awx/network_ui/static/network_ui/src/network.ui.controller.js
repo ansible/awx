@@ -1121,7 +1121,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 	}
 
     $scope.send_control_message = function (message) {
-        console.log(message);
         var i = 0;
         message.sender = $scope.client_id;
         message.message_id = $scope.message_id_seq();
@@ -1131,7 +1130,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             }
         }
         var data = messages.serialize(message);
-        console.log(data);
         if (!$scope.disconnected) {
             $scope.control_socket.send(data);
         } else {
