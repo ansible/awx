@@ -268,7 +268,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         }
 
         function initGroupBySelect(){
-            var add_new = false;
+            let add_new = false;
             if($scope && $scope.source && $scope.source === 'ec2' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'ec2'){
                 $scope.group_by_choices = $scope.ec2_group_by;
                 let group_by = inventorySourceData.group_by.split(',');
@@ -303,8 +303,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 $scope.group_by_choices = (inventorySourceData.group_by) ? inventorySourceData.group_by.split(',')
                     .map((i) => ({name: i, label: i, value: i})) : [];
                 $scope.group_by = $scope.group_by_choices;
-                $scope.groupByPopOver = "<p> ToDo: VMWare group by documentation here</p>";
-                $scope.instanceFilterPopOver = "<p> ToDo: VMWare instance groups popover content</p>";
+                $scope.groupByPopOver = `Specify which groups to create automatically.
+                    Group names will be created similar to the options selected.
+                    If blank, all groups above are created. Refer to Ansible Tower documentation for more detail.`;
+                $scope.instanceFilterPopOver = `Provide a comma-separated list of filter expressions.
+                    Hosts are imported when <em>ANY</em> of the filters match.
+                    Refer to Ansible Tower documentation for more detail.`;
             }
             CreateSelect2({
                 element: '#inventory_source_group_by',
