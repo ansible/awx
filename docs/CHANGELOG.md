@@ -41,5 +41,4 @@
   inventory updates, project updates, and notification sending.
   [[#3508](https://github.com/ansible/ansible-tower/issues/3508)]
 * Added --diff mode to Job Templates and Ad-Hoc Commands.  The diff can be found in the
-  standard out when --diff mode is enabled.  
-  [[#4525](https://github.com/ansible/ansible-tower/issues/4325)]
+  standard out when diff mode is enabled.  [[#4525](https://github.com/ansible/ansible-tower/issues/4325)]
