@@ -74,7 +74,6 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             project.scm_update_tooltip = i18n._("Start an SCM update");
             project.scm_schedule_tooltip = i18n._("Schedule future SCM updates");
             project.scm_type_class = "";
-            project.tooltipContent = 'Copy full revision to clipboard.';
 
             if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
                 project.statusTip = i18n._('Canceled. Click for details');

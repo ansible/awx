@@ -1,9 +1,9 @@
-<div class="RevisionHash">
-    <div class="RevisionHash-tag">
-        <span class="RevisionHash-name">{{vm.truncatedString}}</span>
+<div class="at-Truncate">
+    <div class="at-Truncate-tag">
+        <span class="at-Truncate-text">{{vm.truncatedString}}</span>
     </div>
-    <div class="RevisionHash-copy" aw-tool-tip="vm.toolTipContent" data-tip-watch="vm.toolTipContent"
-        data-placement="top" ng-click="vm.copy()">
-        <i class="fa fa-clone"></i>
+    <div class="at-Truncate-copy" data-placement="top">
+        <at-popover position="top" on="mouseover" state="vm.tooltip"></at-popover>
     </div>
+    <textarea class="at-Truncate-textarea"></textarea>
 </div>

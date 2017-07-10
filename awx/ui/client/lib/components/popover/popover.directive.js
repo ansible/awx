@@ -193,8 +193,8 @@ function AtPopoverController () {
         let popoverTop = pos.icon.top - pos.popover.height - pos.icon.height - 5;
         let popoverLeft = Math.floor(pos.cx - (pos.popover.width / 2));
 
-        pos.arrow.style.top = `${arrowTop}px`; 
-        pos.arrow.style.left = `${arrowLeft}px`; 
+        pos.arrow.style.top = `${arrowTop}px`;
+        pos.arrow.style.left = `${arrowLeft}px`;
 
         popover.style.top = `${popoverTop}px`;
         popover.style.left = `${popoverLeft}px`;
