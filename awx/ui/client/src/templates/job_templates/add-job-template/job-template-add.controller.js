@@ -286,6 +286,8 @@
                             .vault.id) {
                                 data.vault_credential = $scope.selectedCredentials
                                     .vault.id;
+                    } else {
+                        data.vault_credential = null;
                     }
 
                     data.extra_vars = ToJSON($scope.parseType,
