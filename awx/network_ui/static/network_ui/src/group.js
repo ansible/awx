@@ -282,6 +282,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     for (i = 0; i < controller.scope.groups.length; i++) {
         if (controller.scope.groups[i].has_corner_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            controller.scope.clear_selections();
             if (controller.scope.selected_groups.indexOf(controller.scope.groups[i]) === -1) {
                 controller.scope.selected_groups.push(controller.scope.groups[i]);
             }
@@ -294,6 +295,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
             return;
         } else if (controller.scope.groups[i].is_selected(controller.scope.scaledX, controller.scope.scaledY)) {
+            controller.scope.clear_selections();
             if (controller.scope.selected_groups.indexOf(controller.scope.groups[i]) === -1) {
                 controller.scope.selected_groups.push(controller.scope.groups[i]);
             }
