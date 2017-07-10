@@ -1,6 +1,7 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
+var messages = require('./messages.js');
 
 function _State () {
 }
@@ -95,7 +96,12 @@ _Resize.prototype.onMouseMove = function (controller) {
     var i = 0;
     var j = 0;
     var membership_old_new = [];
+    var previous_x1, previous_y1, previous_x2, previous_y2;
     for (i = 0; i < groups.length; i++) {
+        previous_x1 = groups[i].x1;
+        previous_y1 = groups[i].y1;
+        previous_x2 = groups[i].x2;
+        previous_y2 = groups[i].y2;
         if (groups[i].selected_corner === models.TOP_LEFT) {
             groups[i].x1 = groups[i].x1 + diffX;
             groups[i].y1 = groups[i].y1 + diffY;
@@ -120,6 +126,20 @@ _Resize.prototype.onMouseMove = function (controller) {
         for(j = 0; j < membership_old_new[1].length; j++) {
             membership_old_new[1][j].selected = true;
         }
+
+        controller.scope.send_control_message(new messages.GroupMove(controller.scope.client_id,
+                                                                      groups[i].id,
+                                                                      groups[i].x1,
+                                                                      groups[i].y1,
+                                                                      groups[i].x2,
+                                                                      groups[i].y2,
+                                                                      previous_x1,
+                                                                      previous_y1,
+                                                                      previous_x2,
+                                                                      previous_y2));
+        controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
+                                                                           groups[i].id,
+                                                                           membership_old_new[2]));
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
@@ -211,7 +231,12 @@ _Move.prototype.onMouseMove = function (controller) {
     var i = 0;
     var j = 0;
     var membership_old_new = [];
+    var previous_x1, previous_y1, previous_x2, previous_y2;
     for (i = 0; i < groups.length; i++) {
+        previous_x1 = groups[i].x1;
+        previous_y1 = groups[i].y1;
+        previous_x2 = groups[i].x2;
+        previous_y2 = groups[i].y2;
         groups[i].x1 = groups[i].x1 + diffX;
         groups[i].y1 = groups[i].y1 + diffY;
         groups[i].x2 = groups[i].x2 + diffX;
@@ -224,6 +249,20 @@ _Move.prototype.onMouseMove = function (controller) {
         for(j = 0; j < membership_old_new[1].length; j++) {
             membership_old_new[1][j].selected = true;
         }
+
+        controller.scope.send_control_message(new messages.GroupMove(controller.scope.client_id,
+                                                                      groups[i].id,
+                                                                      groups[i].x1,
+                                                                      groups[i].y1,
+                                                                      groups[i].x2,
+                                                                      groups[i].y2,
+                                                                      previous_x1,
+                                                                      previous_y1,
+                                                                      previous_x2,
+                                                                      previous_y2));
+        controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
+                                                                           groups[i].id,
+                                                                           membership_old_new[2]));
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
@@ -344,6 +383,7 @@ _EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
     //Key codes found here:
     //https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	var item = controller.scope.selected_groups[0];
+    var previous_name = item.name;
 	if ($event.keyCode === 8 || $event.keyCode === 46) { //Delete
 		item.name = item.name.slice(0, -1);
 	} else if ($event.keyCode >= 48 && $event.keyCode <=90) { //Alphanumeric
@@ -357,6 +397,10 @@ _EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
     } else {
         console.log($event.keyCode);
     }
+    controller.scope.send_control_message(new messages.GroupLabelEdit(controller.scope.client_id,
+                                                                      item.id,
+                                                                      item.name,
+                                                                      previous_name));
 };
 _EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
 
@@ -421,6 +465,13 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                 groups[i].remote_selected = false;
                 controller.scope.groups.splice(index, 1);
             }
+            controller.scope.send_control_message(new messages.GroupDestroy(controller.scope.client_id,
+                                                                            groups[i].id,
+                                                                            groups[i].x1,
+                                                                            groups[i].y1,
+                                                                            groups[i].x2,
+                                                                            groups[i].y2,
+                                                                            groups[i].name));
         }
     }
 };
@@ -446,6 +497,13 @@ _Placing.prototype.onMouseDown = function (controller) {
                              scope.scaledX,
                              scope.scaledY,
                              false);
+    scope.send_control_message(new messages.GroupCreate(scope.client_id,
+                                                        group.id,
+                                                        group.x1,
+                                                        group.y1,
+                                                        group.x2,
+                                                        group.y2,
+                                                        group.name));
 
     scope.groups.push(group);
     scope.selected_groups.push(group);
