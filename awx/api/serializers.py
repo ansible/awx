@@ -1904,6 +1904,11 @@ class CredentialTypeSerializer(BaseSerializer):
                 )
         ret = super(CredentialTypeSerializer, self).validate(attrs)
 
+        if 'kind' in attrs and attrs['kind'] not in ('cloud', 'network'):
+            raise serializers.ValidationError({
+                "kind": _("Must be 'cloud' or 'network', not %s") % attrs['kind']
+            })
+
         fields = attrs.get('inputs', {}).get('fields', [])
         for field in fields:
             if field.get('ask_at_runtime', False):
