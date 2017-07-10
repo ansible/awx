@@ -211,11 +211,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             else {
                 $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
             }
-            $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
-            if (source === 'ec2') {
-                var group_by = inventorySourceData.group_by.split(',');
-                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
-            }
             initRegionSelect();
         }
 
@@ -268,9 +263,57 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 element: '#inventory_source_source_regions',
                 multiple: true
             });
+
+            initGroupBySelect();
+        }
+
+        function initGroupBySelect(){
+            let add_new = false;
+            if($scope && $scope.source && $scope.source === 'ec2' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'ec2'){
+                $scope.group_by_choices = $scope.ec2_group_by;
+                let group_by = inventorySourceData.group_by.split(',');
+                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
+                $scope.groupByPopOver = "<p>Select which groups to create automatically. " +
+                    "Tower will create group names similar to the following examples based on the options selected:</p><ul>" +
+                    "<li>Availability Zone: <strong>zones &raquo; us-east-1b</strong></li>" +
+                    "<li>Image ID: <strong>images &raquo; ami-b007ab1e</strong></li>" +
+                    "<li>Instance ID: <strong>instances &raquo; i-ca11ab1e</strong></li>" +
+                    "<li>Instance Type: <strong>types &raquo; type_m1_medium</strong></li>" +
+                    "<li>Key Name: <strong>keys &raquo; key_testing</strong></li>" +
+                    "<li>Region: <strong>regions &raquo; us-east-1</strong></li>" +
+                    "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
+                    "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
+                    "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                    "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
+                    "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>";
+                $scope.instanceFilterPopOver = "<p>Provide a comma-separated list of filter expressions. " +
+                    "Hosts are imported to Tower when <em>ANY</em> of the filters match.</p>" +
+                    "Limit to hosts having a tag:<br />\n" +
+                    "<blockquote>tag-key=TowerManaged</blockquote>\n" +
+                    "Limit to hosts using either key pair:<br />\n" +
+                    "<blockquote>key-name=staging, key-name=production</blockquote>\n" +
+                    "Limit to hosts where the Name tag begins with <em>test</em>:<br />\n" +
+                    "<blockquote>tag:Name=test*</blockquote>\n" +
+                    "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
+                    "for a complete list of supported filters.</p>";
+
+            }
+            if($scope && $scope.source && $scope.source === 'vmware' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'vmware'){
+                add_new = true;
+                $scope.group_by_choices = (inventorySourceData.group_by) ? inventorySourceData.group_by.split(',')
+                    .map((i) => ({name: i, label: i, value: i})) : [];
+                $scope.group_by = $scope.group_by_choices;
+                $scope.groupByPopOver = `Specify which groups to create automatically.
+                    Group names will be created similar to the options selected.
+                    If blank, all groups above are created. Refer to Ansible Tower documentation for more detail.`;
+                $scope.instanceFilterPopOver = `Provide a comma-separated list of filter expressions.
+                    Hosts are imported when <em>ANY</em> of the filters match.
+                    Refer to Ansible Tower documentation for more detail.`;
+            }
             CreateSelect2({
                 element: '#inventory_source_group_by',
-                multiple: true
+                multiple: true,
+                addNew: add_new
             });
         }
 
@@ -314,7 +357,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 update_cache_timeout: $scope.update_cache_timeout || 0,
                 verbosity: $scope.verbosity.value,
                 // comma-delimited strings
-                group_by: _.map($scope.group_by, 'value').join(','),
+                group_by: SourcesService.encodeGroupBy($scope.source, $scope.group_by),
                 source_regions: _.map($scope.source_regions, 'value').join(',')
             };
 
@@ -341,14 +384,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         };
 
         $scope.sourceChange = function(source) {
-            if (source) {
-              source = source.value;
-            } else {
-              source = "";
-            }
-
+            source = (source && source.value) ? source.value : '';
             $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
-
             if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm') {
                 $scope.envParseType = 'yaml';
 
@@ -380,11 +417,14 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source === 'azure_rm' ? $scope.azure_regions : $scope[source + '_regions'];
             $scope.cloudCredentialRequired = source !== '' && source !== 'scm' && source !== 'custom' && source !== 'ec2' ? true : false;
-            $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
             $scope.credential_name = null;
+            $scope.group_by = null;
+            $scope.group_by_choices = [];
+
             initRegionSelect();
+
         };
 
         init();
