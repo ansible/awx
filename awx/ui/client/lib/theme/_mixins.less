@@ -27,6 +27,19 @@
     line-height: 1;
 }
 
+.at-mixin-InputButton () {
+    display: block;
+    height: @at-height-button;
+    line-height: 1;
+
+    &, &:active, &:hover, &:focus {
+        color: @at-color-button-text-default;
+        border-color: @at-color-input-border;
+        background-color: @at-color-default;
+        cursor: pointer;
+    }
+}
+
 .at-mixin-ButtonColor (@background, @color, @hover: '@{background}-hover') {
     background-color: @@background;
 
