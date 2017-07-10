@@ -62,6 +62,7 @@ class JobOptions(BaseModel):
 
     diff_mode = models.BooleanField(
         default=False,
+        help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
     )
     job_type = models.CharField(
         max_length=64,
