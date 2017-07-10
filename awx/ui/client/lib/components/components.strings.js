@@ -1,6 +1,6 @@
 function ComponentsStrings (BaseString) {
     BaseString.call(this, 'components');
-    
+
     let t = this.t;
     let ns = this.components;
 
@@ -42,6 +42,11 @@ function ComponentsStrings (BaseString) {
     ns.lookup = {
         NOT_FOUND: t('That value was not found. Please enter or select a valid value.')
     };
+
+    ns.truncate = {
+        DEFAULT: t('Copy full revision to clipboard.'),
+        COPIED: t('Copied to clipboard.')
+    }
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];
