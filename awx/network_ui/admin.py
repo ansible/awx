@@ -14,6 +14,10 @@ from awx.network_ui.models import MessageType
 
 from awx.network_ui.models import Interface
 
+from awx.network_ui.models import Group
+
+from awx.network_ui.models import GroupDevice
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
@@ -32,7 +36,7 @@ admin.site.register(Link, LinkAdmin)
 
 
 class TopologyAdmin(admin.ModelAdmin):
-    fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq',)
+    fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq',)
     raw_id_fields = ('device_id_seq',)
 
 
@@ -69,3 +73,19 @@ class InterfaceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Interface, InterfaceAdmin)
+
+
+class GroupAdmin(admin.ModelAdmin):
+    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2',)
+    raw_id_fields = ('id', 'y1', 'x2',)
+
+
+admin.site.register(Group, GroupAdmin)
+
+
+class GroupDeviceAdmin(admin.ModelAdmin):
+    fields = ('group', 'device',)
+    raw_id_fields = ('group', 'device',)
+
+
+admin.site.register(GroupDevice, GroupDeviceAdmin)
