@@ -2,6 +2,8 @@
 from channels import Group, Channel
 from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
+from awx.network_ui.models import Group as DeviceGroup
+from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
@@ -9,9 +11,9 @@ from collections import defaultdict
 from django.conf import settings
 import math
 import random
+import logging
 
 from awx.network_ui.utils import transform_dict
-from pprint import pprint
 import dpath.util
 
 import json
@@ -32,6 +34,8 @@ HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
 SPACING = 200
 RACK_SPACING = 50
 settings.RECORDING = False
+
+logger = logging.getLogger("awx.network_ui.consumers")
 
 
 def circular_layout(topology_id):
@@ -172,21 +176,16 @@ def tier_layout(topology_id):
         edges[device_map[l.from_device.pk]].add(device_map[l.to_device.pk])
         edges[device_map[l.to_device.pk]].add(device_map[l.from_device.pk])
 
-    pprint(devices)
 
     similar_connections = defaultdict(list)
 
     for device, connections in edges.iteritems():
         similar_connections[tuple(connections)].append(device)
 
-    pprint(dict(**similar_connections))
 
     for connections, from_devices in similar_connections.iteritems():
         if len(from_devices) > 0 and from_devices[0].role == "host":
             racks.append(from_devices)
-
-    pprint(racks)
-    pprint(devices)
 
     tiers = defaultdict(list)
 
@@ -211,8 +210,6 @@ def tier_layout(topology_id):
     for tier in tiers.values():
         tier.sort(key=lambda x: x.name)
 
-    pprint(tiers)
-
     for device in devices:
         print device, getattr(device, 'tier', None)
         if getattr(device, 'tier', None) is None:
@@ -227,7 +224,7 @@ def tier_layout(topology_id):
         x = 0 - (len(racks) * SPACING) / 2 + j * SPACING
         for i, device in enumerate(rack):
             device.x = x
-            device.y = SPACING * 3 +  i * RACK_SPACING
+            device.y = SPACING * 3 + i * RACK_SPACING
             device.save()
 
     send_snapshot(Group("topology-%s" % topology_id), topology_id)
@@ -381,13 +378,13 @@ class _Persistence(object):
                 print "Unsupported message ", message['msg_type']
 
     def onDeploy(self, message_value, topology_id, client_id):
-        Group("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
+        DeviceGroup("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
 
     def onDestroy(self, message_value, topology_id, client_id):
-        Group("workers").send({"text": json.dumps(["Destroy", topology_id])})
+        DeviceGroup("workers").send({"text": json.dumps(["Destroy", topology_id])})
 
     def onDiscover(self, message_value, topology_id, client_id):
-        Group("workers").send({"text": json.dumps(["Discover", topology_id, yaml_serialize_topology(topology_id)])})
+        DeviceGroup("workers").send({"text": json.dumps(["Discover", topology_id, yaml_serialize_topology(topology_id)])})
 
     def onLayout(self, message_value, topology_id, client_id):
         # circular_layout(topology_id)
@@ -418,6 +415,53 @@ class _Persistence(object):
     onTouchEvent = write_event
     onMouseWheelEvent = write_event
     onKeyEvent = write_event
+
+    def onGroupCreate(self, group, topology_id, client_id):
+        group = transform_dict(dict(x1='x1',
+                                    y1='y1',
+                                    x2='x2',
+                                    y2='y2',
+                                    name='name',
+                                    id='id'), group)
+        d, _ = DeviceGroup.objects.get_or_create(topology_id=topology_id, id=group['id'], defaults=group)
+        d.x1 = group['x1']
+        d.y1 = group['y1']
+        d.x2 = group['x2']
+        d.y2 = group['y2']
+        d.save()
+        (Topology.objects
+                 .filter(topology_id=topology_id, group_id_seq__lt=group['id'])
+                 .update(group_id_seq=group['id']))
+
+    def onGroupDestroy(self, group, topology_id, client_id):
+        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).delete()
+
+    def onGroupLabelEdit(self, group, topology_id, client_id):
+        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(name=group['name'])
+
+    def onGroupMove(self, group, topology_id, client_id):
+        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(x1=group['x1'],
+                                                                                   y1=group['y1'],
+                                                                                   x2=group['x2'],
+                                                                                   y2=group['y2'])
+
+    def onGroupMembership(self, group_membership, topology_id, client_id):
+        members = set(group_membership['members'])
+        group = DeviceGroup.objects.get(topology_id=topology_id, id=group_membership['id'])
+        existing = set(GroupDeviceMap.objects.filter(group=group).values_list('device__id', flat=True))
+        new = members - existing
+        removed = existing - members
+
+        GroupDeviceMap.objects.filter(group__group_id=group.group_id,
+                                      device__id__in=list(removed)).delete()
+
+        device_map = dict(Device.objects.filter(topology_id=topology_id, id__in=list(new)).values_list('id', 'device_id'))
+        new_entries = []
+        for i in new:
+            new_entries.append(GroupDeviceMap(group=group,
+                                              device_id=device_map[i]))
+        if new_entries:
+            GroupDeviceMap.objects.bulk_create(new_entries)
 
 
 persistence = _Persistence()
@@ -536,7 +580,9 @@ class _Discovery(object):
 
     def onFacts(self, message, topology_id):
         send_updates = False
-        print message['key']
+        logger.info("onFacts message key %s", message['key'])
+        logger.info("onFacts message %s", pformat(message))
+        return
         name = message['key']
         device, created = Device.objects.get_or_create(topology_id=topology_id,
                                                        name=name,
@@ -549,11 +595,14 @@ class _Discovery(object):
             device.id = device.pk
             device.save()
             send_updates = True
-            print "Created device ", device
+            logger.info("onFacts Created device %s", device)
 
-        interfaces = dpath.util.get(message, '/value/ansible_local/lldp/lldp') or []
+        try:
+            interfaces = dpath.util.get(message, '/value/ansible_local/lldp/lldp')
+        except KeyError:
+            interfaces = []
         for interface in interfaces:
-            pprint(interface)
+            logger.info("onFacts %s: ", pformat(interface))
             for inner_interface in interface.get('interface', []):
                 name = inner_interface.get('name')
                 if not name:
@@ -675,7 +724,8 @@ def ws_connect(message):
                                         panY='panY',
                                         scale='scale',
                                         link_id_seq='link_id_seq',
-                                        device_id_seq='device_id_seq'), topology.__dict__)
+                                        device_id_seq='device_id_seq',
+                                        group_id_seq='group_id_seq'), topology.__dict__)
 
     message.reply_channel.send({"text": json.dumps(["Topology", topology_data])})
     send_snapshot(message.reply_channel, topology_id)
