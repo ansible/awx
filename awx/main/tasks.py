@@ -83,7 +83,9 @@ def celery_startup(conf=None, **kwargs):
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
-            sch.save()
+            from awx.main.signals import disable_activity_stream
+            with disable_activity_stream():
+                sch.save()
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
