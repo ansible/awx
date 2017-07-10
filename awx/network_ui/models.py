@@ -87,10 +87,11 @@ class Group(models.Model):
     y1 = models.IntegerField('Group',)
     x2 = models.IntegerField('Group',)
     y2 = models.IntegerField()
+    topology = models.ForeignKey('Topology',)
 
 
 class GroupDevice(models.Model):
 
     group_device_id = models.AutoField(primary_key=True,)
-    group = models.ForeignKey('GroupDevice',)
+    group = models.ForeignKey('Group',)
     device = models.ForeignKey('Device',)
