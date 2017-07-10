@@ -17,7 +17,7 @@ from rest_framework.relations import RelatedField, ManyRelatedField
 from rest_framework.request import clone_request
 
 # Ansible Tower
-from awx.main.models import InventorySource, NotificationTemplate
+from awx.main.models import InventorySource, NotificationTemplate, CredentialType
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -148,6 +148,16 @@ class Metadata(metadata.SimpleMetadata):
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):
                     meta['choices'] = serializer.get_type_choices()
+
+                # API-created/modified CredentialType kinds are limited to
+                # `cloud` and `network`
+                if method != 'GET' and \
+                        hasattr(serializer, 'Meta') and \
+                        getattr(serializer.Meta, 'model', None) is CredentialType:
+                    actions[method]['kind']['choices'] = filter(
+                        lambda choice: choice[0] in ('cloud', 'net'),
+                        actions[method]['kind']['choices']
+                    )
 
                 # For GET method, remove meta attributes that aren't relevant
                 # when reading a field and remove write-only fields.
