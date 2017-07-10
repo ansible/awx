@@ -2498,6 +2498,8 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         inventory = self.get_object()
         update_data = []
+        successes = 0
+        failures = 0
         for inventory_source in inventory.inventory_sources.all():
             details = {'inventory_source': inventory_source.pk, 'status': None}
             can_update = inventory_source.can_update
@@ -2515,11 +2517,22 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
                     details['project_update'] = inventory_source.source_project.update().id
                 details['status'] = 'started'
                 details['inventory_update'] = inventory_source.update().id
+                successes += 1
             else:
                 if not details.get('status'):
                     details['status'] = 'Could not start because `can_update` returned False'
+                failures += 1
             update_data.append(details)
-        return Response(update_data, status=status.HTTP_202_ACCEPTED)
+        if failures and successes:
+            status_code = status.HTTP_202_ACCEPTED
+        elif failures and not successes:
+            status_code = status.HTTP_400_BAD_REQUEST
+        elif not failures and not successes:
+            return Response({'detail': 'No inventory sources to update.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            status_code = status.HTTP_200_OK
+        return Response(update_data, status=status_code)
 
 
 class InventorySourceList(ListCreateAPIView):
