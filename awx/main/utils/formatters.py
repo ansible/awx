@@ -39,8 +39,6 @@ class LogstashFormatter(LogstashFormatterVersion1):
             return raw_data
         elif kind == 'system_tracking':
             data = copy(raw_data['ansible_facts'])
-        elif kind == 'job_events':
-            data = copy(raw_data['event_model_data'])
         else:
             data = copy(raw_data)
         if isinstance(data, basestring):
