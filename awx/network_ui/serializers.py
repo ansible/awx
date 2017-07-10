@@ -54,6 +54,7 @@ def topology_data(topology_id):
                                       to_device_id=link.to_device.id,
                                       from_interface_id=link.from_interface.id,
                                       to_interface_id=link.to_interface.id,
+                                      name=link.name,
                                       network=link.pk))
         return data
 
