@@ -432,9 +432,7 @@ CELERY_QUEUES = (
     Queue('tower_scheduler', Exchange('scheduler', type='topic'), routing_key='tower_scheduler.job.#', durable=False),
     Broadcast('tower_broadcast_all')
 )
-CELERY_ROUTES = {'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs': {'queue': 'tower',
-                                                                                 'routing_key': 'tower'},
-                 'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
+CELERY_ROUTES = {'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
                                                                'routing_key': 'tower'},
                  'awx.main.scheduler.tasks.run_job_launch': {'queue': 'tower_scheduler',
                                                              'routing_key': 'tower_scheduler.job.launch'},
@@ -473,12 +471,8 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=20),
         'options': {'expires': 20,}
     },
-    'task_fail_inconsistent_running_jobs': {
-        'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
-        'schedule': timedelta(seconds=30),
-        'options': {'expires': 20,}
-    },
 }
+AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 
 # Django Caching Configuration
 if is_testing():

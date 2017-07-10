@@ -1,6 +1,9 @@
 import pytest
 import mock
-from datetime import timedelta
+from datetime import timedelta, datetime
+
+from django.core.cache import cache
+
 from awx.main.scheduler import TaskManager
 
 
@@ -198,3 +201,32 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1
     assert len(iu) == 1
+
+
+@pytest.mark.django_db
+def test_cleanup_interval():
+    assert cache.get('last_celery_task_cleanup') is None
+
+    TaskManager().cleanup_inconsistent_celery_tasks()
+    last_cleanup = cache.get('last_celery_task_cleanup')
+    assert isinstance(last_cleanup, datetime)
+
+    TaskManager().cleanup_inconsistent_celery_tasks()
+    assert cache.get('last_celery_task_cleanup') == last_cleanup
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks._send_notification_templates')
+@mock.patch.object(TaskManager, 'get_active_tasks', lambda self: [[], []])
+@mock.patch.object(TaskManager, 'get_running_tasks')
+def test_cleanup_inconsistent_task(get_running_tasks, notify):
+    orphaned_task = mock.Mock(job_explanation='')
+    get_running_tasks.return_value = [orphaned_task]
+    TaskManager().cleanup_inconsistent_celery_tasks()
+
+    notify.assert_called_once_with(orphaned_task, 'failed')
+    orphaned_task.websocket_emit_status.assert_called_once_with('failed')
+    assert orphaned_task.status == 'failed'
+    assert orphaned_task.job_explanation == (
+        'Task was marked as running in Tower but was not present in Celery, so it has been marked as failed.'
+    )
