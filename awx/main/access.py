@@ -730,14 +730,6 @@ class GroupAccess(BaseAccess):
         # Prevent assignments between different inventories.
         if obj.inventory != sub_obj.inventory:
             raise ParseError(_('Cannot associate two items from different inventories.'))
-        # Prevent group from being assigned as its own (grand)child.
-        if type(obj) == type(sub_obj):
-            parent_pks = set(obj.all_parents.values_list('pk', flat=True))
-            parent_pks.add(obj.pk)
-            child_pks = set(sub_obj.all_children.values_list('pk', flat=True))
-            child_pks.add(sub_obj.pk)
-            if parent_pks & child_pks:
-                return False
         return True
 
     def can_delete(self, obj):

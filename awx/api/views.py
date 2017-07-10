@@ -2182,6 +2182,16 @@ class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin, Su
         parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def is_valid_relation(self, parent, sub, created=False):
+        # Prevent any cyclical group associations.
+        parent_pks = set(parent.all_parents.values_list('pk', flat=True))
+        parent_pks.add(parent.pk)
+        child_pks = set(sub.all_children.values_list('pk', flat=True))
+        child_pks.add(sub.pk)
+        if parent_pks & child_pks:
+            return {'error': _('Cyclical Group association.')}
+        return None
+
 
 class GroupPotentialChildrenList(SubListAPIView):
 
