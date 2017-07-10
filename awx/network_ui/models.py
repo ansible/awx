@@ -36,6 +36,7 @@ class Topology(models.Model):
     panY = models.FloatField()
     device_id_seq = models.IntegerField('Topology', default=0)
     link_id_seq = models.IntegerField(default=0)
+    group_id_seq = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -75,3 +76,21 @@ class Interface(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class Group(models.Model):
+
+    group_id = models.AutoField(primary_key=True,)
+    id = models.IntegerField('Group',)
+    name = models.CharField(max_length=200,)
+    x1 = models.IntegerField()
+    y1 = models.IntegerField('Group',)
+    x2 = models.IntegerField('Group',)
+    y2 = models.IntegerField()
+
+
+class GroupDevice(models.Model):
+
+    group_device_id = models.AutoField(primary_key=True,)
+    group = models.ForeignKey('GroupDevice',)
+    device = models.ForeignKey('Device',)
