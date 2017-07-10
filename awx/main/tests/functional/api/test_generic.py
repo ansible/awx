@@ -1,11 +1,11 @@
 import pytest
 
-from django.core.urlresolvers import reverse
+from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
 def test_proxy_ip_whitelist(get, patch, admin):
-    url = reverse('api:setting_singleton_detail', args=('system',))
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'})
     patch(url, user=admin, data={
         'REMOTE_HOST_HEADERS': [
             'HTTP_X_FROM_THE_LOAD_BALANCER',
