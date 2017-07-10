@@ -93,6 +93,8 @@ _Resize.prototype.onMouseMove = function (controller) {
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
     var i = 0;
+    var j = 0;
+    var membership_old_new = [];
     for (i = 0; i < groups.length; i++) {
         if (groups[i].selected_corner === models.TOP_LEFT) {
             groups[i].x1 = groups[i].x1 + diffX;
@@ -110,9 +112,30 @@ _Resize.prototype.onMouseMove = function (controller) {
             groups[i].x1 = groups[i].x1 + diffX;
             groups[i].y2 = groups[i].y2 + diffY;
         }
+
+        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        for(j = 0; j < membership_old_new[0].length; j++) {
+            membership_old_new[0][j].selected = false;
+        }
+        for(j = 0; j < membership_old_new[1].length; j++) {
+            membership_old_new[1][j].selected = true;
+        }
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
+};
+
+_Resize.prototype.end = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    var j = 0;
+    for (i = 0; i < groups.length; i++) {
+        for(j = 0; j < groups[i].devices.length; j++) {
+            groups[i].devices[j].selected = false;
+        }
+    }
 };
 
 
@@ -186,11 +209,21 @@ _Move.prototype.onMouseMove = function (controller) {
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
     var i = 0;
+    var j = 0;
+    var membership_old_new = [];
     for (i = 0; i < groups.length; i++) {
         groups[i].x1 = groups[i].x1 + diffX;
         groups[i].y1 = groups[i].y1 + diffY;
         groups[i].x2 = groups[i].x2 + diffX;
         groups[i].y2 = groups[i].y2 + diffY;
+
+        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        for(j = 0; j < membership_old_new[0].length; j++) {
+            membership_old_new[0][j].selected = false;
+        }
+        for(j = 0; j < membership_old_new[1].length; j++) {
+            membership_old_new[1][j].selected = true;
+        }
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
@@ -208,6 +241,20 @@ _Move.prototype.onMouseDown = function (controller) {
     controller.changeState(Selected1);
 };
 _Move.prototype.onMouseDown.transitions = ['Selected1'];
+
+_Move.prototype.end = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    var j = 0;
+    for (i = 0; i < groups.length; i++) {
+        for(j = 0; j < groups[i].devices.length; j++) {
+            groups[i].devices[j].selected = false;
+        }
+    }
+};
+
 
 _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
