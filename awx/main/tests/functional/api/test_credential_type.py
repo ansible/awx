@@ -144,6 +144,28 @@ def test_create_managed_by_tower_readonly(get, post, admin):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('kind', ['ssh', 'vault', 'scm', 'insights'])
+def test_create_invalid_kind(kind, get, post, admin):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': kind,
+        'name': 'My Custom Type',
+        'inputs': {
+            'fields': [{
+                'id': 'api_token',
+                'label': 'API Token',
+                'type': 'string',
+                'secret': True
+            }]
+        },
+        'injectors': {}
+    }, admin)
+    assert response.status_code == 400
+
+    response = get(reverse('api:credential_type_list'), admin)
+    assert response.data['count'] == 0
+
+
+@pytest.mark.django_db
 def test_create_with_valid_inputs(get, post, admin):
     response = post(reverse('api:credential_type_list'), {
         'kind': 'cloud',
