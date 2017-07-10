@@ -480,6 +480,7 @@ Group.prototype.update_membership = function (devices) {
     var y2 = this.bottom_extent();
     var x2 = this.right_extent();
     var old_devices = this.devices;
+    var device_ids = [];
     this.devices = [];
     for (i = 0; i < devices.length; i++) {
         if (devices[i].x > x1 &&
@@ -487,7 +488,8 @@ Group.prototype.update_membership = function (devices) {
             devices[i].x < x2 &&
             devices[i].y < y2) {
             this.devices.push(devices[i]);
+            device_ids.push(devices[i].id);
         }
     }
-    return [old_devices, this.devices];
+    return [old_devices, this.devices, device_ids];
 };

@@ -327,6 +327,7 @@ _Move.prototype.onMouseMove = function (controller) {
     var i = 0;
     var j = 0;
     var previous_x, previous_y;
+    var membership_old_new;
     for (i = 0; i < devices.length; i++) {
         previous_x = devices[i].x;
         previous_y = devices[i].y;
@@ -352,7 +353,10 @@ _Move.prototype.onMouseMove = function (controller) {
 
     //TODO: Improve the performance of this code from O(n^2) to O(n) or better
     for (i = 0; i < groups.length; i++) {
-        groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
+                                                                           groups[i].id,
+                                                                           membership_old_new[2]));
     }
 };
 
