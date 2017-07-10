@@ -82,6 +82,9 @@ models:
   - default: 0
     name: link_id_seq
     type: IntegerField
+  - default: 0
+    name: group_id_seq
+    type: IntegerField
   name: Topology
   x: 111
   y: 127
@@ -146,6 +149,47 @@ models:
   name: Interface
   x: 600
   y: 243
+- fields:
+  - name: group_id
+    pk: true
+    type: AutoField
+  - name: id
+    ref: Group
+    ref_field: id
+    type: IntegerField
+  - len: 200
+    name: name
+    type: CharField
+  - name: x1
+    type: IntegerField
+  - name: y1
+    ref: Group
+    ref_field: y1
+    type: IntegerField
+  - name: x2
+    ref: Group
+    ref_field: x2
+    type: IntegerField
+  - name: y2
+    type: IntegerField
+  name: Group
+  x: 907
+  y: 520
+- fields:
+  - name: group_device_id
+    pk: true
+    type: AutoField
+  - name: group
+    ref: GroupDevice
+    ref_field: group
+    type: ForeignKey
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  name: GroupDevice
+  x: 631
+  y: 561
 modules: []
 view:
   panX: 213.72955551921206
