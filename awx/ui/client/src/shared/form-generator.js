@@ -766,8 +766,22 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     // toggle switches
                     if(field.type === 'toggleSwitch') {
-                        html += label();
-                            html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
+                        let labelOptions = {};
+
+                        if (field.subCheckbox) {
+                            labelOptions.checkbox = {
+                                id: `${this.form.name}_${fld}_ask_chbox`,
+                                ngModel: field.subCheckbox.variable,
+                                ngShow: field.subCheckbox.ngShow,
+                                ngChange: field.subCheckbox.ngChange,
+                                ngDisabled: field.ngDisabled || field.subCheckbox.ngDisabled,
+                                text: field.subCheckbox.text || ''
+                            };
+                        }
+
+                        html += label(labelOptions);
+
+                        html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
                             data-placement="top">
                             <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</button>
                             <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</button>

@@ -248,6 +248,19 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                diff_mode: {
+                    label: i18n._('Diff Mode'),
+                    type: 'toggleSwitch',
+                    toggleSource: 'diff_mode',
+                    dataTitle: i18n._('Diff Mode'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("If enabled, textual changes made to any templated files on the host are shown in the standard output.") + "</p>",
+                    subCheckbox: {
+                        variable: 'ask_diff_mode_on_launch',
+                        text: i18n._('Prompt on launch')
+                    },
+                },
                 checkbox_group: {
                     label: i18n._('Options'),
                     type: 'checkbox_group',

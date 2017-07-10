@@ -166,6 +166,10 @@ function adhocController($q, $scope, $stateParams,
     $scope.envParseType = 'yaml';
     ParseTypeChange({ scope: $scope, field_id: 'adhoc_extra_vars' , variable: "extra_vars"});
 
+    $scope.toggleForm = function(key) {
+        $scope[key] = !$scope[key];
+    };
+
     $scope.formCancel = function(){
         $state.go('^');
     };

@@ -244,6 +244,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_diff_mode_on_launch">
+                        <label for="diff_mode">
+                            <span class="Form-inputLabel" translate>Diff Mode</span>
+                        </label>
+                        <div>
+                            <div class="ScheduleToggle" ng-class="{'is-on': other_prompt_data.diff_mode}" aw-tool-tip="" data-placement="top" data-original-title="" title="">
+                                <button ng-show="other_prompt_data.diff_mode" class="ScheduleToggle-switch is-on" ng-click="toggleForm('diff_mode')" translate>ON</button>
+                                <button ng-show="!other_prompt_data.diff_mode" class="ScheduleToggle-switch ng-hide" ng-click="toggleForm('diff_mode')" translate>OFF</button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div ng-if="survey_enabled" ng-show="step === 'survey'" class="JobSubmission-form">

@@ -77,16 +77,6 @@ export default ['i18n', function(i18n) {
                     init: 'false'
                 }
             },
-            become_enabled: {
-                label: i18n._('Enable Privilege Escalation'),
-                type: 'checkbox',
-
-                column: 2,
-                awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible</code> command. </p>",
-                dataPlacement: 'right',
-                dataTitle: i18n._('Become Privilege Escalation'),
-                dataContainer: "body"
-            },
             verbosity: {
                 label: i18n._('Verbosity'),
                 excludeModal: true,
@@ -118,6 +108,24 @@ export default ['i18n', function(i18n) {
                     ' target=\"_blank\">ansible configuration file</a>.</p>',
                 dataTitle: i18n._('Forks'),
                 dataPlacement: 'right',
+                dataContainer: "body"
+            },
+            diff_mode: {
+                label: i18n._('Diff Mode'),
+                type: 'toggleSwitch',
+                toggleSource: 'diff_mode',
+                dataTitle: i18n._('Diff Mode'),
+                dataPlacement: 'right',
+                dataContainer: 'body',
+                awPopOver: "<p>" + i18n._("If enabled, textual changes made to any templated files on the host are shown in the standard output.") + "</p>",
+            },
+            become_enabled: {
+                label: i18n._('Enable Privilege Escalation'),
+                type: 'checkbox',
+                column: 2,
+                awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible</code> command. </p>",
+                dataPlacement: 'right',
+                dataTitle: i18n._('Become Privilege Escalation'),
                 dataContainer: "body"
             },
             extra_vars: {
