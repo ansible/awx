@@ -15,6 +15,7 @@ import logging
 
 from awx.network_ui.utils import transform_dict
 import dpath.util
+from pprint import pformat
 
 import json
 import time
@@ -759,9 +760,19 @@ def send_snapshot(channel, topology_id):
                                        'to_device__id',
                                        'from_interface__id',
                                        'to_interface__id'))]
+    groups = list(DeviceGroup.objects
+                             .filter(topology_id=topology_id).values())
+    group_map = {g['id']: g for g in groups}
+    for group_id, device_id in GroupDeviceMap.objects.filter(group__topology_id=topology_id).values_list('group__id', 'device__id'):
+        if 'members' not in group_map[group_id]:
+            group_map[group_id]['members'] = [device_id]
+        else:
+            group_map[group_id]['members'].append(device_id)
+
     snapshot = dict(sender=0,
                     devices=devices,
-                    links=links)
+                    links=links,
+                    groups=groups)
     channel.send({"text": json.dumps(["Snapshot", snapshot])})
 
 
