@@ -320,6 +320,7 @@ function Group(id, name, x1, y1, x2, y2, selected) {
     this.highlighted = false;
     this.fsm = null;
     this.selected_corner = null;
+    this.devices = [];
 }
 exports.Group = Group;
 
@@ -470,4 +471,23 @@ Group.prototype.bottom_extent = function (scaledY) {
 Group.prototype.right_extent = function (scaledX) {
     var x2 = this.x2 !== null ? this.x2 : scaledX;
     return (this.x1 > x2? this.x1 : x2);
+};
+
+Group.prototype.update_membership = function (devices) {
+    var i = 0;
+    var y1 = this.top_extent();
+    var x1 = this.left_extent();
+    var y2 = this.bottom_extent();
+    var x2 = this.right_extent();
+    var old_devices = this.devices;
+    this.devices = [];
+    for (i = 0; i < devices.length; i++) {
+        if (devices[i].x > x1 &&
+            devices[i].y > y1 &&
+            devices[i].x < x2 &&
+            devices[i].y < y2) {
+            this.devices.push(devices[i]);
+        }
+    }
+    return [old_devices, this.devices];
 };

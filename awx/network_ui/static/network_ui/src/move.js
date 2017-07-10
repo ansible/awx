@@ -320,6 +320,7 @@ _Selected1.prototype.onMouseDown = util.noop;
 _Move.prototype.onMouseMove = function (controller) {
 
     var devices = controller.scope.selected_devices;
+    var groups = controller.scope.groups;
 
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
@@ -347,6 +348,12 @@ _Move.prototype.onMouseMove = function (controller) {
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
+
+
+    //TODO: Improve the performance of this code from O(n^2) to O(n) or better
+    for (i = 0; i < groups.length; i++) {
+        groups[i].update_membership(controller.scope.devices);
+    }
 };
 
 _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
