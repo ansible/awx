@@ -172,6 +172,10 @@ models:
     type: IntegerField
   - name: y2
     type: IntegerField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
   name: Group
   x: 907
   y: 520
