@@ -76,8 +76,8 @@ admin.site.register(Interface, InterfaceAdmin)
 
 
 class GroupAdmin(admin.ModelAdmin):
-    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2',)
-    raw_id_fields = ('id', 'y1', 'x2',)
+    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology',)
+    raw_id_fields = ('id', 'y1', 'x2', 'topology',)
 
 
 admin.site.register(Group, GroupAdmin)
