@@ -978,6 +978,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var max_x = null;
         var max_y = null;
         var new_link = null;
+        var new_group = null;
 
         //Build the devices
         for (i = 0; i < data.devices.length; i++) {
@@ -1032,6 +1033,24 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             $scope.links.push(new_link);
             device_interface_map[link.from_device_id][link.from_interface_id].link = new_link;
             device_interface_map[link.to_device_id][link.to_interface_id].link = new_link;
+        }
+
+        //Build the groups
+        var group = null;
+        for (i = 0; i < data.groups.length; i++) {
+            group = data.groups[i];
+            console.log(group);
+            new_group = new models.Group(group.id,
+                                         group.name,
+                                         group.x1,
+                                         group.y1,
+                                         group.x2,
+                                         group.y2,
+                                         false);
+            for(j=0; j < group.members.length; j++) {
+                new_group.devices.push(device_map[group.members[j]]);
+            }
+            $scope.groups.push(new_group);
         }
 
         var diff_x;
