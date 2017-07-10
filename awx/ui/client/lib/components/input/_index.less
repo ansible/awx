@@ -5,6 +5,7 @@
     background: @at-color-input-background;
     border-radius: @at-border-radius;
     color: @at-color-input-text;
+    padding: 0 @at-padding-input;
 
     &, &:active {
         border-color: @at-color-input-border;
@@ -43,16 +44,20 @@
 }
 
 .at-Input-button {
-    display: block;
-    height: @at-height-button;
-    line-height: 1;
+    .at-mixin-InputButton();
+}
 
-    &, &:active, &:hover, &:focus {
-        color: @at-color-button-text-default;
-        border-color: @at-color-input-border;
-        background-color: @at-color-default;
-        cursor: pointer;
-    }
+.at-Input-button--fixed-sm {
+    .at-mixin-InputButton();
+    min-width: @at-width-input-button-sm;
+    height: @at-height-input;
+}
+
+.at-Input-button--fixed-md {
+    .at-mixin-InputButton();
+    display: inherit;
+    min-width: @at-width-input-button-md;
+    height: @at-height-textarea;
 }
 
 .at-Input--focus {
@@ -89,17 +94,6 @@
     height: 100%;
     background: @at-color-panel-border;
     left: -5px;
-}
-
-.at-InputGroup-button {
-    height: 100%;
-
-    & > button {
-        height: 100%;
-        border-right: none;
-        color: @at-color-button-text-default;
-        min-width: @at-input-button-width;
-    }
 }
 
 .at-InputGroup-title {
@@ -211,4 +205,6 @@
 
 .at-InputTextarea {
     .at-mixin-FontFixedWidth();
+    min-height: @at-height-textarea;
+    padding: 6px @at-padding-input 0 @at-padding-input;
 }
