@@ -2,15 +2,17 @@
 # All Rights Reserved
 
 # Python
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
+import json
 from sets import Set
 
 # Django
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction, connection
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now as tz_now
+from django.utils.timezone import now as tz_now, utc
 
 # AWX
 from awx.main.models import * # noqa
@@ -19,7 +21,7 @@ from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
-from awx.main.tasks import _send_notification_templates
+from awx.main import tasks as awx_tasks
 
 # Celery
 from celery.task.control import inspect
@@ -376,17 +378,32 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug("Task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
 
-    def process_celery_tasks(self, celery_task_start_time, active_tasks, all_running_sorted_tasks):
+    def cleanup_inconsistent_celery_tasks(self):
         '''
         Rectify tower db <-> celery inconsistent view of jobs state
         '''
+        last_cleanup = cache.get('last_celery_task_cleanup') or datetime.min.replace(tzinfo=utc)
+        if (tz_now() - last_cleanup).seconds < settings.AWX_INCONSISTENT_TASK_INTERVAL:
+            return
+
+        logger.debug("Failing inconsistent running jobs.")
+        celery_task_start_time = tz_now()
+        active_task_queues, active_tasks = self.get_active_tasks()
+        cache.set("active_celery_tasks", json.dumps(active_task_queues))
+        cache.set('last_celery_task_cleanup', tz_now())
+
+        if active_tasks is None:
+            logger.error('Failed to retrieve active tasks from celery')
+            return None
+
+        all_running_sorted_tasks = self.get_running_tasks()
         for task in all_running_sorted_tasks:
 
             if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
                 # TODO: try catch the getting of the job. The job COULD have been deleted
                 if isinstance(task, WorkflowJob):
                     continue
-                if task_obj.modified > celery_task_start_time:
+                if task.modified > celery_task_start_time:
                     continue
                 task.status = 'failed'
                 task.job_explanation += ' '.join((
@@ -394,7 +411,7 @@ class TaskManager():
                     'Celery, so it has been marked as failed.',
                 ))
                 task.save()
-                _send_notification_templates(task, 'failed')
+                awx_tasks._send_notification_templates(task, 'failed')
                 task.websocket_emit_status('failed')
                 logger.error("Task %s appears orphaned... marking as failed" % task)
 
@@ -460,8 +477,9 @@ class TaskManager():
                 if acquired is False:
                     return
 
+                self.cleanup_inconsistent_celery_tasks()
                 finished_wfjs = self._schedule()
 
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-                    _send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')
+                    awx_tasks._send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')
