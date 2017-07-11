@@ -227,7 +227,7 @@ register(
 
 register(
     'AWX_TASK_ENV',
-    field_class=fields.DictField,
+    field_class=fields.KeyValueField,
     default={},
     label=_('Extra Environment Variables'),
     help_text=_('Additional environment variables set for playbook runs, inventory updates, project updates, and notification sending.'),
