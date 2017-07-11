@@ -55,6 +55,7 @@ export default [
         var formTracker = $scope.$parent.vm.formTracker;
         var dropdownValue = 'azure';
         var activeAuthForm = 'azure';
+        let codeInputInitialized = false;
 
         // Default active form
         if ($stateParams.currentTab === '' || $stateParams.currentTab === 'auth') {
@@ -244,8 +245,6 @@ export default [
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
 
-
-
         function populateLDAPGroupType(flag){
             if($scope.$parent.AUTH_LDAP_GROUP_TYPE !== null) {
                 $scope.$parent.AUTH_LDAP_GROUP_TYPE = _.find($scope.$parent.AUTH_LDAP_GROUP_TYPE_options, { value: $scope.$parent.AUTH_LDAP_GROUP_TYPE });
@@ -292,12 +291,24 @@ export default [
             populateTacacsProtocol(flag);
         });
 
-        $scope.$on('codeMirror_populated', function(e, key) {
-            startCodeMirrors(key);
+        $scope.$on('$locationChangeStart', (event, url) => {
+            let parts = url.split('/');
+            let tab = parts[parts.length - 1];
+
+            if (tab === 'auth' && !codeInputInitialized) {
+                startCodeMirrors();
+                codeInputInitialized = true;
+            }
         });
 
         $scope.$on('populated', function() {
-            startCodeMirrors();
+            let tab = $stateParams.currentTab;
+
+            if (tab === 'auth') {
+                startCodeMirrors();
+                codeInputInitialized = true;
+            }
+
             populateLDAPGroupType(false);
             populateTacacsProtocol(false);
         });
