@@ -91,8 +91,8 @@
                         <div class="JobSubmission-instructions" translate>Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>
                         <form name="forms.credentialpasswords" autocomplete="off" novalidate>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_password_required">
-                                <label for="ssh_password">
-                                    <span class="Form-inputLabel prepend-asterisk" translate> Password</span>
+                                <label for="ssh_password" class="prepend-asterisk Form-inputLabelContainer">
+                                    <span class="Form-inputLabel" translate> Password</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-btn">
@@ -104,8 +104,8 @@
                                 <div class="error api-error" ng-bind="ssh_password_api_error"></div>
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_key_unlock_required">
-                                <label for="ssh_key_unlock">
-                                    <span class="Form-inputLabel prepend-asterisk" translate> Private Key Passphrase</span>
+                                <label for="ssh_key_unlock" class="prepend-asterisk Form-inputLabelContainer">
+                                    <span class="Form-inputLabel" translate> Private Key Passphrase</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-btn">
@@ -117,8 +117,8 @@
                                 <div class="error api-error" ng-bind="ssh_key_unlock_api_error"></div>
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="become_password_required">
-                                <label for="become_password">
-                                    <span class="Form-inputLabel prepend-asterisk" translate> Privilege Escalation Password</span>
+                                <label for="become_password" class="prepend-asterisk Form-inputLabelContainer">
+                                    <span class="Form-inputLabel" translate> Privilege Escalation Password</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-btn">
@@ -130,8 +130,8 @@
                                 <div class="error api-error" ng-bind="become_password_api_error"></div>
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="vault_password_required">
-                                <label for="vault_password">
-                                    <span class="Form-inputLabel prepend-asterisk" translate> Vault Password</span>
+                                <label for="vault_password" class="prepend-asterisk Form-inputLabelContainer">
+                                    <span class="Form-inputLabel" translate> Vault Password</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-btn">
@@ -166,8 +166,8 @@
                         </div>
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_verbosity_on_launch">
-                        <label for="verbosity">
-                            <span class="Form-inputLabel prepend-asterisk"> Verbosity</span>
+                        <label for="verbosity" class="prepend-asterisk Form-inputLabelContainer">
+                            <span class="Form-inputLabel"> Verbosity</span>
                         </label>
                         <div>
                             <select
@@ -184,8 +184,8 @@
                         </div>
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_job_type_on_launch">
-                        <label for="job_type">
-                            <span class="Form-inputLabel prepend-asterisk" translate> Job Type</span>
+                        <label for="job_type" class="prepend-asterisk Form-inputLabelContainer">
+                            <span class="Form-inputLabel" translate> Job Type</span>
                         </label>
                         <div>
                             <select
@@ -249,8 +249,8 @@
             <div ng-if="survey_enabled" ng-show="step === 'survey'" class="JobSubmission-form">
                 <form name="forms.survey" autocomplete="off" novalidate>
                     <div ng-repeat="question in survey_questions" id="taker_'+question.index+'" class="form-group Form-formGroup Form-formGroup--singleColumn">
-                        <label ng-attr-for="{{question.variable}}">
-                            <span class="label-text Form-inputLabel" ng-class="{'prepend-asterisk': question.required===true}"> {{question.question_name}}</span>
+                        <label ng-attr-for="{{question.variable}}" class="Form-inputLabelContainer" ng-class="{'prepend-asterisk': question.required===true}">
+                            <span class="label-text Form-inputLabel"> {{question.question_name}}</span>
                         </label>
 
                         <div class="survey_taker_description" ng-if="question.question_description">
