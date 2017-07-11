@@ -32,21 +32,11 @@ export default ['$compile', 'i18n', 'generateList',
 
                 list = _.cloneDeep(listMap[scope.resourceType]);
 
-                list.fieldActions = {
-                    remove: {
-                        ngClick: `removeSelection(${list.iterator}, resourceType)`,
-                        iconClass: 'fa fa-times-circle',
-                        awToolTip: i18n._(`Remove ${list.iterator}`),
-                        label: i18n._('Remove'),
-                        class: 'btn-sm'
-                    }
-                };
                 delete list.actions;
 
                 list.listTitleBadge = false;
 
                 switch(scope.resourceType){
-
                     case 'projects':
                         list.fields = {
                             name: list.fields.name,
@@ -55,7 +45,6 @@ export default ['$compile', 'i18n', 'generateList',
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
-
                     case 'inventories':
                         list.fields = {
                             name: list.fields.name,
@@ -64,21 +53,40 @@ export default ['$compile', 'i18n', 'generateList',
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
-
                     case 'job_templates':
-                    case 'workflow_templates':
-                    case 'credentials':
-                    case 'organizations':
                         list.name = 'job_templates';
                         list.iterator = 'job_template';
                         list.fields = {
-                            name: list.fields.name,
-                            description: list.fields.description
+                            name: list.fields.name
                         };
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                        break;
+                    case 'workflow_templates':
+                        list.name = 'workflow_job_templates';
+                        list.iterator = 'workflow_job_template';
+                        list.fields = {
+                            name: list.fields.name
+                        };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        break;
+                    case 'credentials':
+                    case 'organizations':
+                        list.fields = {
+                            name: list.fields.name
+                        };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         break;
                 }
+
+                list.fieldActions = {
+                    remove: {
+                        ngClick: `removeSelection(${list.iterator}, resourceType)`,
+                        iconClass: 'fa fa-times-circle',
+                        awToolTip: i18n._(`Remove ${list.iterator.replace(/_/g, ' ')}`),
+                        label: i18n._('Remove'),
+                        class: 'btn-sm'
+                    }
+                };
 
                 list.fields = _.each(list.fields, (field) => field.nosort = true);
 
@@ -104,6 +112,10 @@ export default ['$compile', 'i18n', 'generateList',
 
                     delete scope.collection[resource.id];
                     delete scope.selected[type][resource.id];
+
+                    $('.tooltip').each(function() {
+                        $(this).remove();
+                    });
 
                     // a quick & dirty hack
                     // section 1 and section 2 elements produce sibling scopes

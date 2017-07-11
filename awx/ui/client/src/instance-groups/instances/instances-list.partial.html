@@ -13,7 +13,7 @@
                         dataset="instance_dataset" column-sort="" column-field="hostname" column-iterator="instance" column-no-sort="undefined"
                         column-label="Name" column-custom-class="col-md-5 col-sm-5 col-xs-5" query-set="instance_queryset">
                         "{{'Name' | translate}}"
-                        <i ng-hide="columnNoSort === 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
+                        <i ng-if="columnNoSort !== 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
                     </th>
                     <th id="instance-percent_capacity_remaining-header" class="List-tableHeader list-header  list-header-noSort" translate>
                         Capacity
