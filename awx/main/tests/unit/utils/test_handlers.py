@@ -177,8 +177,6 @@ def test_base_logging_handler_emit_system_tracking():
 
 
 @pytest.mark.parametrize('host, port, normalized, hostname_only', [
-    ('localhost', None, 'http://localhost', False),
-    ('localhost', 8080, 'http://localhost:8080', False),
     ('http://localhost', None, 'http://localhost', False),
     ('http://localhost', 8080, 'http://localhost:8080', False),
     ('https://localhost', 443, 'https://localhost:443', False),
@@ -190,6 +188,12 @@ def test_base_logging_handler_emit_system_tracking():
      'http://splunk.server:8088/services/collector/event', False),
     ('http://splunk.server/services/collector/event', 8088,
      'http://splunk.server:8088/services/collector/event', False),
+    ('splunk.server:8088/services/collector/event', 80,
+     'http://splunk.server:8088/services/collector/event', False),
+    ('splunk.server/services/collector/event', 8088,
+     'http://splunk.server:8088/services/collector/event', False),
+    ('localhost', None, 'http://localhost', False),
+    ('localhost', 8080, 'http://localhost:8080', False),
     ('localhost', 4399, 'localhost', True),
     ('tcp://localhost:4399/foo/bar', 4399, 'localhost', True),
 ])

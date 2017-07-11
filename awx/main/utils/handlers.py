@@ -160,7 +160,8 @@ class BaseHandler(logging.Handler):
         """
         host = self.host or ''
         # urlparse requires '//' to be provided if scheme is not specified
-        if not urlparse.urlsplit(host).scheme and not host.startswith('//'):
+        original_parsed = urlparse.urlsplit(host)
+        if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
             host = '%s://%s' % (scheme, host) if scheme else '//%s' % host
         parsed = urlparse.urlsplit(host)
 
