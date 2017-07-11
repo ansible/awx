@@ -107,51 +107,25 @@
       when: "'after' in scm_result"
 
     - block:
-      - name: update project using insights
-        uri:
-          url: "{{insights_url}}/r/insights/v1/maintenance?ansible=true"
-          user: "{{scm_username}}"
-          password: "{{scm_password}}"
-          force_basic_auth: yes
-        register: insights_output
-
-      - name: Set the insights cache version
-        set_fact:
-          scm_version: "{{ insights_output.etag|default(scm_revision)|regex_replace('\"(.*)\"$', '\\1') }}"
-
-      when: scm_type == 'insights'
-
-    - block:
       - name: Ensure the project directory is present
         file:
           dest: "{{project_path|quote}}"
           state: directory
 
-      - name: Fetch Insights Playbook With Name
-        get_url:
-          url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
-          dest: "{{project_path|quote}}/{{item.name}}-{{item.maintenance_id}}.yml"
-          url_username: "{{scm_username}}"
-          url_password: "{{scm_password}}"
-          force_basic_auth: yes
-          force: yes
-        when: item.name != None and item.name != ""
-        with_items: "{{ insights_output.json|default([]) }}"
-        failed_when: false
+      - name: Fetch Insights Playbook(s)
+        insights:
+          insights_url: "{{insights_url}}"
+          username: "{{scm_username}}"
+          password: "{{scm_password}}"
+          project_path: "{{project_path}}"
+        register: results
 
-      - name: Fetch Insights Playbook
-        get_url:
-          url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
-          dest: "{{project_path|quote}}/insights-plan-{{item.maintenance_id}}.yml"
-          url_username: "{{scm_username}}"
-          url_password: "{{scm_password}}"
-          force_basic_auth: yes
-          force: yes
-        when: (item.name == None or item.name == "")
-        with_items: "{{ insights_output.json|default([]) }}"
-        failed_when: false
+      when: scm_type == 'insights'
 
-      when: scm_type == 'insights' and scm_version != scm_revision
+    - name: Save Insights Version
+      set_fact:
+        scm_version: "{{results.version}}"
+      when: scm_type == 'insights' and results is defined
 
     - name: detect requirements.yml
       stat: path={{project_path|quote}}/roles/requirements.yml
