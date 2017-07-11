@@ -375,11 +375,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return this.build(options);
             },
 
-            applyDefaults: function (form, scope) {
-                // Note: This is a hack. Ideally, mode should be set in each <resource>-<mode>.controller.js
-                // The mode is needed by the awlookup directive to auto-populate form fields when there is a
-                // single related resource.
-                scope.mode = this.mode;
+            applyDefaults: function (form, scope, ignoreMode) {
+                if(!ignoreMode) {
+                    // Note: This is a hack. Ideally, mode should be set in each <resource>-<mode>.controller.js
+                    // The mode is needed by the awlookup directive to auto-populate form fields when there is a
+                    // single related resource.
+                    scope.mode = this.mode;
+                }
 
                 for (var fld in form.fields) {
                     if (form.fields[fld]['default'] || form.fields[fld]['default'] === 0) {
