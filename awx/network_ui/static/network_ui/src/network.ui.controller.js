@@ -77,6 +77,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.hide_buttons = false;
   $scope.hide_links = false;
   $scope.hide_interfaces = false;
+  $scope.hide_groups = false;
   $scope.graph = {'width': window.innerWidth,
                   'right_column': window.innerWidth - 300,
                   'height': window.innerHeight};
@@ -462,6 +463,14 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.hide_links = true;
     };
 
+    $scope.onToggleGroup = function () {
+        $scope.hide_groups = false;
+    };
+
+    $scope.onUnToggleGroup = function () {
+        $scope.hide_groups = true;
+    };
+
     // Buttons
 
     $scope.buttons = [
@@ -474,17 +483,24 @@ var NetworkUIController = function($scope, $document, $location, $window) {
       new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
     ];
 
+    var LAYERS_X = 160;
+
     $scope.layers = [
-      new models.ToggleButton("APPLICATION", $scope.graph.width - 140, 10, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("PRESENTATION", $scope.graph.width - 140, 50, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("SESSION", $scope.graph.width - 140, 90, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("TRANSPORT", $scope.graph.width - 140, 130, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("NETWORK", $scope.graph.width - 140, 170, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("DATA-LINK", $scope.graph.width - 140, 210, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true),
       new models.ToggleButton("PHYSICAL",
-                              $scope.graph.width - 140, 250, 120, 30,
+                              $scope.graph.width - LAYERS_X, 250, 120, 30,
                               $scope.onTogglePhysical,
                               $scope.onUnTogglePhysical,
+                              true),
+      new models.ToggleButton("GROUP",
+                              $scope.graph.width - LAYERS_X, 290, 120, 30,
+                              $scope.onToggleGroup,
+                              $scope.onUnToggleGroup,
                               true)
     ];
 
@@ -926,6 +942,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.panY = data.panX;
         $scope.current_scale = data.scale;
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
+        $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
         $location.search({topology_id: data.topology_id});
     };
@@ -973,6 +990,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var new_intf = null;
         var max_device_id = null;
         var max_link_id = null;
+        var max_group_id = null;
         var min_x = null;
         var min_y = null;
         var max_x = null;
@@ -1039,7 +1057,9 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var group = null;
         for (i = 0; i < data.groups.length; i++) {
             group = data.groups[i];
-            console.log(group);
+            if (max_group_id === null || group.id > max_group_id) {
+                max_group_id = group.id;
+            }
             new_group = new models.Group(group.id,
                                          group.name,
                                          group.x1,
@@ -1083,6 +1103,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         //Update the link_id_seq to be greater than all link ids to prevent duplicate ids.
         if (max_link_id !== null) {
             $scope.link_id_seq = util.natural_numbers(max_link_id);
+        }
+        //Update the group_id_seq to be greater than all group ids to prevent duplicate ids.
+        if (max_group_id !== null) {
+            $scope.group_id_seq = util.natural_numbers(max_group_id);
         }
 
         $scope.updateInterfaceDots();
