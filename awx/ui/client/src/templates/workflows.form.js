@@ -51,6 +51,9 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataTitle: i18n._('Organization'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
+                    awRequiredWhen: {
+                        reqExpression: '!current_user.is_superuser'
+                    },
                     column: 1,
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditOrg',
                     awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && canEditOrg'
@@ -98,7 +101,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "workflow_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "workflow_job_template_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 }
             },
