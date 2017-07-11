@@ -2119,7 +2119,7 @@ class HostInsights(GenericAPIView):
         if host.inventory and host.inventory.insights_credential:
             cred = host.inventory.insights_credential
         else:
-            return Response(dict(error=_('No Insights Credential found for the Inventory, "{}", that this host belongs to.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
+            return Response(dict(error=_('The Insights Credential for "{}" was not found.').format(host.inventory.name)), status=status.HTTP_404_NOT_FOUND)
 
         url = settings.INSIGHTS_URL_BASE + '/r/insights/v3/systems/{}/reports/'.format(host.insights_system_id)
         (username, password) = self._extract_insights_creds(cred)
