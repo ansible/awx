@@ -73,6 +73,12 @@
                                             <span><span class="JobSubmission-previewTagLabel">{{credential_types[extraCredential.credential_type].name | uppercase}}</span>:&nbsp;{{extraCredential.name}}</span>
                                         </div>
                                     </div>
+                                    <div class="JobSubmission-previewTagContainer JobSubmission-previewTagContainer--vault" ng-show="selected_credentials.vault">
+                                        <div class="JobSubmission-previewTag JobSubmission-previewTag--vault" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
+                                            <span>
+                                                <span class="JobSubmission-previewTagLabel">VAULT</span>:&nbsp;{{selected_credentials.vault.name}}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="JobSubmission-previewTagRevert" ng-if="ask_credential_on_launch">
@@ -167,7 +173,7 @@
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_verbosity_on_launch">
                         <label for="verbosity">
-                            <span class="Form-inputLabel prepend-asterisk"> Verbosity</span>
+                            <span class="Form-inputLabel prepend-asterisk" translate> Verbosity</span>
                         </label>
                         <div>
                             <select
@@ -332,6 +338,10 @@
                     <div ng-repeat="extraCredential in selected_credentials.extra">
                         <span class="JobSubmission-previewItemSubTitle">{{credential_types[extraCredential.credential_type].name}}:&nbsp;</span>
                         <span>{{extraCredential.name}}</span>
+                    </div>
+                    <div>
+                        <span ng-show="selected_credentials.vault" class="JobSubmission-previewItemSubTitle"><span translate>Vault</span>:&nbsp;</span>
+                        <span ng-show="selected_credentials.vault">{{selected_credentials.vault.name}}</span>
                     </div>
                 </div>
             </div>
