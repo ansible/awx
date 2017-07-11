@@ -37,6 +37,8 @@ export default ['templateUrl', function(templateUrl) {
                 $scope.$watch(list.name, function(){
                     selectRowIfPresent();
                 });
+
+                $scope.modalTitle = list.iterator.replace(/_/g, ' ');
             };
 
             function selectRowIfPresent(){
