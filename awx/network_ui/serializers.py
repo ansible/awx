@@ -1,8 +1,9 @@
 
-from awx.network_ui.models import Topology, Device, Link, Interface
+from awx.network_ui.models import Topology, Device, Link, Interface, Group, GroupDevice
 from django.db.models import Q
 import yaml
 import json
+from collections import defaultdict
 
 NetworkAnnotatedInterface = Interface.objects.values('name',
                                                      'id',
@@ -17,12 +18,28 @@ NetworkAnnotatedInterface = Interface.objects.values('name',
 def topology_data(topology_id):
 
         data = dict(devices=[],
-                    links=[])
+                    links=[],
+                    groups=[])
 
         topology = Topology.objects.get(pk=topology_id)
 
         data['name'] = topology.name
         data['topology_id'] = topology_id
+
+        groups = list(Group.objects.filter(topology_id=topology_id).values())
+        group_devices = GroupDevice.objects.filter(group__topology_id=topology_id).values('group_id', 'device_id', 'device__name', 'group__name')
+        group_device_map = defaultdict(list)
+
+        for group_device in group_devices:
+            group_device_map[group_device['group_id']].append(group_device)
+
+        device_group_map = defaultdict(list)
+        for group_device in group_devices:
+            device_group_map[group_device['device_id']].append(group_device)
+
+        for group in groups:
+            group['members'] = [x['device__name'] for x in group_device_map[group['group_id']]]
+        data['groups'] = groups
 
         links = list(Link.objects
                          .filter(Q(from_device__topology_id=topology_id) |
@@ -43,7 +60,8 @@ def topology_data(topology_id):
                                         x=device.x,
                                         y=device.y,
                                         id=device.id,
-                                        interfaces=interfaces))
+                                        interfaces=interfaces,
+                                        groups=[x['group__name'] for x in device_group_map[device.device_id]]))
 
         for link in links:
             data['links'].append(dict(from_device=link.from_device.name,
@@ -56,6 +74,7 @@ def topology_data(topology_id):
                                       to_interface_id=link.to_interface.id,
                                       name=link.name,
                                       network=link.pk))
+
         return data
 
 
