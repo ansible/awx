@@ -20,27 +20,19 @@ EXAMPLES = '''
 # Example fact output:
 # host | success >> {
 #    "ansible_facts": {
-#        "services": [
-#            {
-#                "name": "acpid",
-#                "source": "sysv",
-#                "state": "running"
+#	"services": {
+#            "network": {
+#                    "source": "sysv",
+#                    "state": "running",
+#                    "name": "network"
 #            },
-#            {
-#                "name": "apparmor",
-#                "source": "sysv",
-#                "state": "stopped"
-#            },
-#            {
-#                "name": "atd",
-#                "source": "sysv",
-#                "state": "running"
-#            },
-#            {
-#                "name": "cron",
-#                "source": "sysv",
-#                "state": "running"
-#            }, .... ] } }
+#            "arp-ethers.service": {
+#                    "source": "systemd",
+#                    "state": "stopped",
+#                    "name": "arp-ethers.service"
+#            }
+#	}
+#   }
 '''
 
 
@@ -54,7 +46,7 @@ class BaseService(object):
 class ServiceScanService(BaseService):
 
     def gather_services(self):
-        services = []
+        services = {}
         service_path = self.module.get_bin_path("service")
         if service_path is None:
             return None
@@ -73,7 +65,7 @@ class ServiceScanService(BaseService):
                     service_state = "running"
                 else:
                     service_state = "stopped"
-                services.append({"name": service_name, "state": service_state, "source": "sysv"})
+                services[service_name] = {"name": service_name, "state": service_state, "source": "sysv"}
 
         # Upstart
         if initctl_path is not None and chkconfig_path is None:
@@ -92,7 +84,7 @@ class ServiceScanService(BaseService):
                 else:
                     pid = None  # NOQA
                 payload = {"name": service_name, "state": service_state, "goal": service_goal, "source": "upstart"}
-                services.append(payload)
+                services[service_name] = payload
 
         # RH sysvinit
         elif chkconfig_path is not None:
@@ -134,7 +126,7 @@ class ServiceScanService(BaseService):
                             else:
                                 service_state = 'stopped'
                     service_data = {"name": service_name, "state": service_state, "source": "sysv"}
-                    services.append(service_data)
+                    services[service_name] = service_data
         return services
 
 
@@ -153,7 +145,7 @@ class SystemctlScanService(BaseService):
         return False
 
     def gather_services(self):
-        services = []
+        services = {}
         if not self.systemd_enabled():
             return None
         systemctl_path = self.module.get_bin_path("systemctl", opt_dirs=["/usr/bin", "/usr/local/bin"])
@@ -168,22 +160,20 @@ class SystemctlScanService(BaseService):
                 state_val = "running"
             else:
                 state_val = "stopped"
-            services.append({"name": line_data[0],
-                             "state": state_val,
-                             "source": "systemd"})
+            services[line_data[0]] = {"name": line_data[0], "state": state_val, "source": "systemd"}
         return services
 
 
 def main():
     module = AnsibleModule(argument_spec = dict())
     service_modules = (ServiceScanService, SystemctlScanService)
-    all_services = []
+    all_services = {}
     incomplete_warning = False
     for svc_module in service_modules:
         svcmod = svc_module(module)
         svc = svcmod.gather_services()
         if svc is not None:
-            all_services += svc
+            all_services.update(svc)
             if svcmod.incomplete_warning:
                 incomplete_warning = True
     if len(all_services) == 0:

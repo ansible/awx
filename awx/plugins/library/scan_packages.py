@@ -18,32 +18,45 @@ EXAMPLES = '''
 # Example fact output:
 # host | success >> {
 #    "ansible_facts": {
-#        "services": [
-#            {
-#                "source": "apt",
-#               "version": "1.0.6-5",
-#               "arch": "amd64",
-#               "name": "libbz2-1.0"
-#           },
-#           {
-#               "source": "apt",
-#               "version": "2.7.1-4ubuntu1",
-#               "arch": "amd64",
-#               "name": "patch"
-#           },
-#           {
-#               "source": "apt",
-#               "version": "4.8.2-19ubuntu1",
-#               "arch": "amd64",
-#               "name": "gcc-4.8-base"
-#           }, ... ] } }
+#        "packages": {
+#              "libbz2-1.0": [
+#                {
+#                  "version": "1.0.6-5",
+#                  "source": "apt",
+#                  "arch": "amd64",
+#                  "name": "libbz2-1.0"
+#                }
+#              ],
+#              "patch": [
+#                {
+#                  "version": "2.7.1-4ubuntu1",
+#                  "source": "apt",
+#                  "arch": "amd64",
+#                  "name": "patch"
+#                }
+#              ],
+#              "gcc-4.8-base": [
+#                {
+#                  "version": "4.8.2-19ubuntu1",
+#                  "source": "apt",
+#                  "arch": "amd64",
+#                  "name": "gcc-4.8-base"
+#                },
+#                {
+#                  "version": "4.9.2-19ubuntu1",
+#                  "source": "apt",
+#                  "arch": "amd64",
+#                  "name": "gcc-4.8-base"
+#                }
+#              ]
+#       }
 '''
 
 
 def rpm_package_list():
     import rpm
     trans_set = rpm.TransactionSet()
-    installed_packages = []
+    installed_packages = {}
     for package in trans_set.dbMatch():
         package_details = dict(name=package[rpm.RPMTAG_NAME],
                                version=package[rpm.RPMTAG_VERSION],
@@ -51,7 +64,10 @@ def rpm_package_list():
                                epoch=package[rpm.RPMTAG_EPOCH],
                                arch=package[rpm.RPMTAG_ARCH],
                                source='rpm')
-        installed_packages.append(package_details)
+        if package_details['name'] not in installed_packages:
+            installed_packages[package_details['name']] = [package_details]
+        else:
+            installed_packages[package_details['name']].append(package_details)
     return installed_packages
 
 
@@ -66,7 +82,10 @@ def deb_package_list():
                                version=ac_pkg.version,
                                arch=ac_pkg.architecture,
                                source='apt')
-        installed_packages.append(package_details)
+        if package_details['name'] not in installed_packages:
+            installed_packages[package_details['name']] = [package_details]
+        else:
+            installed_packages[package_details['name']].append(package_details)
     return installed_packages
 
 
