@@ -104,7 +104,7 @@ export default
                         }
                     }
                     else {
-                        if($scope.selected_credentials.machine.credential_type === 1){
+                        if(parseInt($scope.selected_credentials.machine.credential_type) === 1){
                             $scope.ssh_password_required = ($scope.selected_credentials.machine.inputs && $scope.selected_credentials.machine.inputs.password === "ASK") ? true : false;
                             $scope.ssh_key_unlock_required = ($scope.selected_credentials.machine.inputs && $scope.selected_credentials.machine.inputs.ssh_key_unlock === "ASK") ? true : false;
                             $scope.become_password_required = $scope.selected_credentials.machine.inputs && ($scope.selected_credentials.machine.inputs.become_password === "ASK") ? true : false;
