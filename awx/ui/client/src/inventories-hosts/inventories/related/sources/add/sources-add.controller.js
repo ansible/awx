@@ -113,7 +113,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             }
 
             if (source === 'scm') {
-                $scope.projectBasePath = GetBasePath('projects');
+                $scope.projectBasePath = GetBasePath('projects')  + '?not__status=never updated';
                 $scope.overwrite_vars = true;
                 $scope.inventory_source_form.inventory_file.$setPristine();
             } else {

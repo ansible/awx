@@ -16,7 +16,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         Wait, Rest, Alert) {
 
         function init() {
-            $scope.projectBasePath = GetBasePath('projects');
+            $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
             $scope.canAdd = inventorySourcesOptions.actions.POST;
             // instantiate expected $scope values from inventorySourceData
             _.assign($scope,
