@@ -21,6 +21,7 @@ from __future__ import (absolute_import, division, print_function)
 import contextlib
 import sys
 import uuid
+from copy import copy
 
 # Ansible
 from ansible.plugins.callback import CallbackBase
@@ -73,6 +74,8 @@ class BaseCallbackModule(CallbackBase):
         if event_data.get('res'):
             if event_data['res'].get('_ansible_no_log', False):
                 event_data['res'] = {'censored': CENSORED}
+            if event_data['res'].get('results', []):
+                event_data['res']['results'] = copy(event_data['res']['results'])
             for i, item in enumerate(event_data['res'].get('results', [])):
                 if isinstance(item, dict) and item.get('_ansible_no_log', False):
                     event_data['res']['results'][i] = {'censored': CENSORED}

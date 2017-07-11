@@ -210,6 +210,38 @@ def test_callback_plugin_task_args_leak(executor, cache, playbook):
 
 
 @pytest.mark.parametrize('playbook', [
+{'loop_with_no_log.yml': '''
+- name: playbook variable should not be overwritten when using no log
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+    - command: "{{ item }}"
+      register: command_register
+      no_log: True
+      with_items:
+        - "echo helloworld!"
+    - debug: msg="{{ command_register.results|map(attribute='stdout')|list }}"
+'''},  # noqa
+])
+def test_callback_plugin_censoring_does_not_overwrite(executor, cache, playbook):
+    executor.run()
+    events = cache.values()
+    assert events[0]['event'] == 'playbook_on_start'
+    assert events[1]['event'] == 'playbook_on_play_start'
+
+    # task 1
+    assert events[2]['event'] == 'playbook_on_task_start'
+    # Ordering of task and item events may differ randomly
+    assert set(['runner_on_ok', 'runner_item_on_ok']) == set([data['event'] for data in events[3:5]])
+
+    # task 2 no_log=True
+    assert events[5]['event'] == 'playbook_on_task_start'
+    assert events[6]['event'] == 'runner_on_ok'
+    assert 'helloworld!' in events[6]['event_data']['res']['msg']
+
+
+@pytest.mark.parametrize('playbook', [
 {'strip_env_vars.yml': '''
 - name: sensitive environment variables should be stripped from events
   connection: local
