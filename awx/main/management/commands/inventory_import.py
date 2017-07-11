@@ -679,6 +679,7 @@ class Command(NoArgsCommand):
                 logger.info('Host "%s" is now disabled', mem_host.name)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
+    @transaction.atomic
     def _create_update_hosts(self):
         '''
         For each host in the local list, create it if it doesn't exist in the
@@ -748,7 +749,7 @@ class Command(NoArgsCommand):
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
-            db_host = self.inventory.hosts.create(**host_attrs)
+            db_host, createdHost = self.inventory.hosts.get_or_create(**host_attrs)
             if enabled is False:
                 logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
