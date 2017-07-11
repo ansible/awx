@@ -1,3 +1,4 @@
+<g ng-if="!hide_groups">
 <rect ng-attr-width="{{group.width(scaledX)}}"
       ng-attr-height="{{group.height(scaledY)}}"
       ng-attr-x="{{group.left_extent(scaledX)}}"
@@ -66,3 +67,4 @@
       ng-attr-x="{{group.left_extent(scaledX) + 20}}"
       ng-attr-y="{{group.top_extent(scaledY) + 32}}"> {{group.name}} </text>
 <text class="NetworkUI__group-text" text-anchor="left" ng-attr-x="{{group.left_extent(scaledX) + 20}}" ng-attr-y="{{group.top_extent(scaledY) + 32}}">{{group.name}}{{group.edit_label?'_':''}}</text>
+</g>
