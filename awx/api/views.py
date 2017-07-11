@@ -6,7 +6,6 @@
 import os
 import re
 import cgi
-import datetime
 import dateutil
 import time
 import socket
@@ -477,7 +476,7 @@ class DashboardJobsGraphView(APIView):
         success_qss = qsstats.QuerySetStats(success_query, 'finished')
         failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
 
-        start_date = datetime.datetime.utcnow()
+        start_date = now()
         if period == 'month':
             end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
             interval = 'days'
