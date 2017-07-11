@@ -1670,6 +1670,11 @@ class RunInventoryUpdate(BaseTask):
             cp.set(section, 'group_by_resource_group', 'yes')
             cp.set(section, 'group_by_location', 'yes')
             cp.set(section, 'group_by_tag', 'yes')
+            if inventory_update.source_regions:
+                cp.set(
+                    section, 'locations',
+                    ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
+                )
 
         # Return INI content.
         if cp.sections():
@@ -1747,6 +1752,7 @@ class RunInventoryUpdate(BaseTask):
                 env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
                 env['AZURE_AD_USER'] = passwords.get('source_username', '')
                 env['AZURE_PASSWORD'] = passwords.get('source_password', '')
+            env['AZURE_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
