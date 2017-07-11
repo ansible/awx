@@ -4,76 +4,82 @@
  * All Rights Reserved
  *************************************************/
 
- export default ['i18n', function(i18n) {
-     return {
-         showHeader: false,
-         name: 'configuration_jobs_template',
-         showActions: true,
+export default ['i18n', function(i18n) {
+    return {
+        showHeader: false,
+        name: 'configuration_jobs_template',
+        showActions: true,
+        fields: {
+            AD_HOC_COMMANDS: {
+                type: 'select',
+                ngOptions: 'command.label for command in AD_HOC_COMMANDS_options track by command.value',
+                reset: 'AD_HOC_COMMANDS',
+                multiSelect: true
+            },
+            AWX_PROOT_BASE_PATH: {
+                type: 'text',
+                reset: 'AWX_PROOT_BASE_PATH',
+            },
+            SCHEDULE_MAX_JOBS: {
+                type: 'number',
+                reset: 'SCHEDULE_MAX_JOBS'
+            },
+            AWX_PROOT_SHOW_PATHS: {
+                type: 'textarea',
+                reset: 'AWX_PROOT_SHOW_PATHS',
+                rows: 6
+            },
+            AWX_ANSIBLE_CALLBACK_PLUGINS: {
+                type: 'textarea',
+                reset: 'AWX_ANSIBLE_CALLBACK_PLUGINS',
+                rows: 6
+            },
+            AWX_PROOT_HIDE_PATHS: {
+                type: 'textarea',
+                reset: 'AWX_PROOT_HIDE_PATHS',
+                rows: 6
+            },
+            AWX_PROOT_ENABLED: {
+                type: 'toggleSwitch',
+            },
+            DEFAULT_JOB_TIMEOUT: {
+                type: 'text',
+                reset: 'DEFAULT_JOB_TIMEOUT',
+            },
+            DEFAULT_INVENTORY_UPDATE_TIMEOUT: {
+                type: 'text',
+                reset: 'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
+            },
+            DEFAULT_PROJECT_UPDATE_TIMEOUT: {
+                type: 'text',
+                reset: 'DEFAULT_PROJECT_UPDATE_TIMEOUT',
+            },
+            ANSIBLE_FACT_CACHE_TIMEOUT: {
+                type: 'text',
+                reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
+            },
+            AWX_TASK_ENV: {
+                type: 'textarea',
+                reset: 'AWX_TASK_ENV',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            }
+        },
+        buttons: {
+            reset: {
+                ngClick: 'vm.resetAllConfirm()',
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
+            },
+            cancel: {
+                ngClick: 'vm.formCancel()',
+            },
+            save: {
+                ngClick: 'vm.formSave()',
+                ngDisabled: true
+            }
+        }
+    };
+}];
 
-         fields: {
-             AD_HOC_COMMANDS: {
-                 type: 'select',
-                 ngOptions: 'command.label for command in AD_HOC_COMMANDS_options track by command.value',
-                 reset: 'AD_HOC_COMMANDS',
-                 multiSelect: true
-             },
-             AWX_PROOT_BASE_PATH: {
-                 type: 'text',
-                 reset: 'AWX_PROOT_BASE_PATH',
-             },
-             SCHEDULE_MAX_JOBS: {
-                 type: 'number',
-                 reset: 'SCHEDULE_MAX_JOBS'
-             },
-             AWX_PROOT_SHOW_PATHS: {
-                 type: 'textarea',
-                 reset: 'AWX_PROOT_SHOW_PATHS',
-                 rows: 6
-             },
-             AWX_ANSIBLE_CALLBACK_PLUGINS: {
-                 type: 'textarea',
-                 reset: 'AWX_ANSIBLE_CALLBACK_PLUGINS',
-                 rows: 6
-             },
-             AWX_PROOT_HIDE_PATHS: {
-                 type: 'textarea',
-                 reset: 'AWX_PROOT_HIDE_PATHS',
-                 rows: 6
-             },
-             AWX_PROOT_ENABLED: {
-                 type: 'toggleSwitch',
-             },
-             DEFAULT_JOB_TIMEOUT: {
-                 type: 'text',
-                 reset: 'DEFAULT_JOB_TIMEOUT',
-             },
-             DEFAULT_INVENTORY_UPDATE_TIMEOUT: {
-                 type: 'text',
-                 reset: 'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
-             },
-             DEFAULT_PROJECT_UPDATE_TIMEOUT: {
-                 type: 'text',
-                 reset: 'DEFAULT_PROJECT_UPDATE_TIMEOUT',
-             },
-             ANSIBLE_FACT_CACHE_TIMEOUT: {
-                 type: 'text',
-                 reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
-             },
-         },
-
-         buttons: {
-             reset: {
-                 ngClick: 'vm.resetAllConfirm()',
-                 label: i18n._('Revert all to default'),
-                 class: 'Form-resetAll'
-             },
-             cancel: {
-                 ngClick: 'vm.formCancel()',
-             },
-             save: {
-                 ngClick: 'vm.formSave()',
-                 ngDisabled: true
-             }
-         }
-     };
- }];
