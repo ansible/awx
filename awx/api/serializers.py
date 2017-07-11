@@ -1390,7 +1390,9 @@ class GroupSerializer(BaseSerializerWithVariables):
     def create(self, validated_data):  # TODO: remove in 3.3
         instance = super(GroupSerializer, self).create(validated_data)
         if self.version == 1:  # TODO: remove in 3.3
-            InventorySource.objects.create(deprecated_group=instance, inventory=instance.inventory)
+            manual_src = InventorySource(deprecated_group=instance, inventory=instance.inventory)
+            manual_src.v1_group_name = instance.name
+            manual_src.save()
         return instance
 
     def validate_name(self, value):

@@ -1249,10 +1249,11 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         replace_text = '__replace_%s__' % now()
         old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
         if not self.name or old_name_re.match(self.name) or '__replace_' in self.name:
+            group_name = getattr(self, 'v1_group_name', '')
             if self.inventory and self.pk:
-                self.name = '%s (%s)' % (self.inventory.name, self.pk)
+                self.name = '%s (%s - %s)' % (group_name, self.inventory.name, self.pk)
             elif self.inventory:
-                self.name = '%s (%s)' % (self.inventory.name, replace_text)
+                self.name = '%s (%s - %s)' % (group_name, self.inventory.name, replace_text)
             elif not is_new_instance:
                 self.name = 'inventory source (%s)' % self.pk
             else:
