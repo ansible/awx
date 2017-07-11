@@ -8,7 +8,7 @@
   * used in the related tabs
   */
 
-export default ['i18n', function(i18n){
+export default ['i18n', 'templateUrl', function(i18n, templateUrl){
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
         dataPlacement: 'top',
@@ -58,12 +58,8 @@ export default ['i18n', function(i18n){
         },
         actions: {
             add: {
-                label: i18n._('Add Notification'),
-                mode: 'all', // One of: edit, select, all
-                ngClick: 'addNotificationTemplate()',
-                awToolTip: i18n._('Create a new notification template'),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD NOTIFICATION TEMPLATE'),
+                type: 'template',
+                template: templateUrl('notifications/notification-templates-list/add-notifications-action'),
                 ngShow: 'current_user.is_superuser || (current_user_admin_orgs && current_user_admin_orgs.length > 0)'
             }
         }
