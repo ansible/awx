@@ -29,10 +29,11 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import get_ansible_version
 from awx.sso.backends import LDAPSettings
 from awx.main.tests.URI import URI # noqa
+
+from tower_license import TowerLicense
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -179,7 +180,7 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         return __name__ + '-generated-' + string + rnd_str
 
     def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features={}):
-        settings.LICENSE = TaskEnhancer(
+        settings.LICENSE = TowerLicense(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
@@ -187,17 +188,17 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
             instance_count=instance_count,
             license_type='enterprise',
             features=features,
-        ).enhance()
+        ).generate()
 
     def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
-        settings.LICENSE = TaskEnhancer(
+        settings.LICENSE = TowerLicense(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
             license_type='basic',
-        ).enhance()
+        ).generate()
 
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1

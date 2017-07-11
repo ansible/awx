@@ -6,19 +6,20 @@ import pytest
 from datetime import datetime
 
 from awx.main.models import Host
-from awx.main.task_engine import TaskEnhancer
+from awx.main.utils import get_licenser, StubLicense
+from tower_license import TowerLicense
 
 
 @pytest.mark.django_db
 def test_license_writer(inventory, admin):
-    task_enhancer = TaskEnhancer(
+    license_actual = TowerLicense(
         company_name='acmecorp',
         contact_name='Michael DeHaan',
         contact_email='michael@ansibleworks.com',
         license_date=25000, # seconds since epoch
         instance_count=500)
 
-    data = task_enhancer.enhance()
+    data = license_actual.generate()
 
     Host.objects.bulk_create(
         [
@@ -38,7 +39,7 @@ def test_license_writer(inventory, admin):
     assert data['license_date'] == 25000
     assert data['license_key'] == "11bae31f31c6a6cdcb483a278cdbe98bd8ac5761acd7163a50090b0f098b3a13"
 
-    vdata = task_enhancer.validate_enhancements()
+    vdata = license_actual.validate()
 
     assert vdata['available_instances'] == 500
     assert vdata['current_instances'] == 12
@@ -52,43 +53,51 @@ def test_license_writer(inventory, admin):
     assert vdata['subscription_name']
 
 
+def test_stub_license():
+    license_actual = StubLicense()
+    assert license_actual['license_key'] == 'OPEN'
+    assert license_actual['valid_key']
+    assert license_actual['compliant']
+    assert license_actual['license_type'] == 'open'
+
+
 @pytest.mark.django_db
 def test_expired_licenses():
-    task_enhancer = TaskEnhancer(
+    license_actual = TowerLicense(
         company_name='Tower',
         contact_name='Tower Admin',
         contact_email='tower@ansible.com',
         license_date=int(time.time() - 3600),
         instance_count=100,
         trial=True)
-    task_enhancer.enhance()
-    vdata = task_enhancer.validate_enhancements()
+    license_actual.generate()
+    vdata = license_actual.validate()
 
     assert vdata['compliant'] is False
     assert vdata['grace_period_remaining'] < 0
 
-    task_enhancer = TaskEnhancer(
+    license_actual = TowerLicense(
         company_name='Tower',
         contact_name='Tower Admin',
         contact_email='tower@ansible.com',
         license_date=int(time.time() - 2592001),
         instance_count=100,
         trial=False)
-    task_enhancer.enhance()
-    vdata = task_enhancer.validate_enhancements()
+    license_actual.generate()
+    vdata = license_actual.validate()
 
     assert vdata['compliant'] is False
     assert vdata['grace_period_remaining'] < 0
 
-    task_enhancer = TaskEnhancer(
+    license_actual = TowerLicense(
         company_name='Tower',
         contact_name='Tower Admin',
         contact_email='tower@ansible.com',
         license_date=int(time.time() - 3600),
         instance_count=100,
         trial=False)
-    task_enhancer.enhance()
-    vdata = task_enhancer.validate_enhancements()
+    license_actual.generate()
+    vdata = license_actual.validate()
 
     assert vdata['compliant'] is False
     assert vdata['grace_period_remaining'] > 0
@@ -96,9 +105,9 @@ def test_expired_licenses():
 
 @pytest.mark.django_db
 def test_cloudforms_license(mocker):
-    with mocker.patch('awx.main.task_engine.TaskEnhancer._check_cloudforms_subscription', return_value=True):
-        task_enhancer = TaskEnhancer()
-        vdata = task_enhancer.validate_enhancements()
+    with mocker.patch('tower_license.TowerLicense._check_cloudforms_subscription', return_value=True):
+        license_actual = TowerLicense()
+        vdata = license_actual.validate()
         assert vdata['compliant'] is True
         assert vdata['subscription_name'] == "Red Hat CloudForms License"
         assert vdata['available_instances'] == 9999999

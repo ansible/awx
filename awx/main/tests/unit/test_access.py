@@ -268,7 +268,7 @@ class TestCheckLicense:
                 def exists(self):
                     return host_exists
 
-            mocker.patch('awx.main.tasks.TaskEnhancer.validate_enhancements', return_value={'free_instances': free_instances, 'available_instances': available_instances, 'date_warning': True})
+            mocker.patch('tower_license.TowerLicense.validate', return_value={'free_instances': free_instances, 'available_instances': available_instances, 'date_warning': True})
 
             mock_filter = MockFilter()
             mocker.patch('awx.main.models.Host.objects.filter', return_value=mock_filter)

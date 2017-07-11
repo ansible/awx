@@ -2,6 +2,7 @@ FROM centos:7
 
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
+COPY tools/docker-compose/tower-license/dist/tower-license-0.1.tar.gz /tmp/tower-license.tar.gz
 ADD requirements/requirements.txt \
 requirements/requirements_git.txt \
 requirements/requirements_ansible.txt \
@@ -33,6 +34,7 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/n
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 WORKDIR /tmp
 RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
+RUN /venv/tower/bin/pip install /tmp/tower-license.tar.gz
 RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en

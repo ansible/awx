@@ -33,7 +33,7 @@ from django.apps import apps
 logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
-           'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
+           'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class',
            'copy_m2m_relationships' ,'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
@@ -159,6 +159,23 @@ def get_awx_version():
         return pkg_resources.require('ansible_tower')[0].version
     except:
         return __version__
+
+
+class StubLicense(object):
+
+    def validate(self):
+        return dict(license_key='OPEN',
+                    valid_key=True,
+                    compliant=True,
+                    license_type='open')
+
+
+def get_licenser(*args, **kwargs):
+    try:
+        from tower_license import TowerLicense
+        return TowerLicense(*args, **kwargs)
+    except ImportError:
+        return StubLicense(*args, **kwargs)
 
 
 def update_scm_url(scm_type, url, username=True, password=True,

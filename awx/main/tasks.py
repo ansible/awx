@@ -47,10 +47,9 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.queue import CallbackQueueDispatcher
-from awx.main.task_engine import TaskEnhancer
 from awx.main.isolated import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            check_proot_installed, build_proot_temp_dir,
+                            check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal)
 from awx.main.utils.reload import restart_local_services, stop_local_services
@@ -140,8 +139,8 @@ def run_administrative_checks(self):
     logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
         return
-    validation_info = TaskEnhancer().validate_enhancements()
-    if validation_info.get('instance_count', 0) < 1:
+    validation_info = get_licenser().validate()
+    if validation_info['license_type'] != 'open' and validation_info.get('instance_count', 0) < 1:
         return
     used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
     tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)

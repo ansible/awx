@@ -101,12 +101,12 @@ def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_f
 
 @pytest.fixture
 def enterprise_license():
-    from awx.main.task_engine import TaskEnhancer
-    return TaskEnhancer(
+    from tower_license import TowerLicense
+    return TowerLicense(
         company_name='AWX',
         contact_name='AWX Admin',
         contact_email='awx@example.com',
         license_date=int(time.time() + 3600),
         instance_count=10000,
         license_type='enterprise',
-    ).enhance()
+    ).generate()
