@@ -2474,7 +2474,7 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
     always_allow_superuser = False
     relationship = 'inventory_sources'
     parent_key = 'inventory'
-    new_in_14 = True
+    new_in_320 = True
 
 
 class InventoryInventorySourcesUpdate(RetrieveAPIView):
@@ -2540,7 +2540,7 @@ class InventorySourceList(ListCreateAPIView):
     model = InventorySource
     serializer_class = InventorySourceSerializer
     always_allow_superuser = False
-    new_in_14 = True
+    new_in_320 = True
 
 
 class InventorySourceDetail(RetrieveUpdateDestroyAPIView):
