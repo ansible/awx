@@ -2,7 +2,7 @@
 var angular = require('angular');
 var ui_router = require('angular-ui-router');
 
-var tower = angular.module('tower', ['networkUI', 'ui.router']);
+var tower = angular.module('tower', ['tablesUI', 'networkUI', 'ui.router']);
 
 tower.config(function($stateProvider, $urlRouterProvider) {
 
@@ -12,7 +12,7 @@ tower.config(function($stateProvider, $urlRouterProvider) {
         .state({
             name: 'index',
             url: '/index',
-            template: '<a href="#!/topology">Topology</a>'
+            template: '<ul><li><a href="#!/topology">Topology</a></li><li><a href="#!/tables">Tables</a></li></ul>'
         });
 
     $stateProvider
@@ -20,6 +20,13 @@ tower.config(function($stateProvider, $urlRouterProvider) {
             name: 'topology',
             url: '/topology',
             template: "<awx-network-ui></awx-network-ui>"
+        });
+
+    $stateProvider
+        .state({
+            name: 'tables',
+            url: '/tables',
+            template: "<awx-tables-ui></awx-tables-ui>"
         });
 });
 
