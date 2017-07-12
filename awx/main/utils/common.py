@@ -21,6 +21,7 @@ import tempfile
 from decorator import decorator
 
 # Django
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 
@@ -354,7 +355,10 @@ def model_to_dict(obj, serializer_mapping=None):
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
-        attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
+        try:
+            attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
+        except ObjectDoesNotExist:
+            logger.warn(_('%s no longer exists for %s') % (field.name, obj))
 
     return attr_d
 
