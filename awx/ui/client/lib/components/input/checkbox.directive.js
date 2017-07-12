@@ -15,7 +15,7 @@ function AtInputCheckboxController (baseInputController) {
     vm.init = (scope, element, form) => {
         baseInputController.call(vm, 'input', scope, element, form);
         scope.label = scope.state.label;
-        scope.state.label = vm.strings.components.OPTIONS;
+        scope.state.label = vm.strings.get('OPTIONS');
 
         vm.check();
     };

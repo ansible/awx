@@ -22,7 +22,7 @@ function AtTruncateController (strings) {
 
     vm.tooltip = {
         popover: {
-            text: vm.strings.components.truncate.DEFAULT,
+            text: vm.strings.get('truncate.DEFAULT'),
             on: 'mouseover',
             position: 'top',
             icon: 'fa fa-clone',
@@ -32,7 +32,7 @@ function AtTruncateController (strings) {
     };
 
     function copyToClipboard() {
-        vm.tooltip.popover.text = vm.strings.components.truncate.COPIED;
+        vm.tooltip.popover.text = vm.strings.get('truncate.COPIED');
 
         let textarea = el[0].getElementsByClassName('at-Truncate-textarea')[0];
         textarea.value = string;

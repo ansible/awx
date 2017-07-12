@@ -27,7 +27,7 @@ function AtInputSelectController (baseInputController, eventService) {
 
         if (!scope.state._data || scope.state._data.length === 0) {
             scope.state._disabled = true;
-            scope.state._placeholder = vm.strings.components.EMPTY_PLACEHOLDER;
+            scope.state._placeholder = vm.strings.get('select.EMPTY_PLACEHOLDER');
         }
 
         vm.setListeners();
@@ -65,7 +65,7 @@ function AtInputSelectController (baseInputController, eventService) {
         } else if (scope.state._format === 'grouped-object') {
             scope.displayModel = scope.state._value[scope.state._display];
         } else {
-            throw new Error(vm.strings.components.UNSUPPORTED_TYPE_ERROR);
+            throw new Error(vm.strings.get('select.UNSUPPORTED_TYPE_ERROR'));
         }
     };
 }

@@ -50,13 +50,11 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
     let legacy = legacyProvider.$get();
     let strings = stringProvider.$get();
 
-    strings = strings.credentials.state;
-
     stateExtender.addState({
         name: 'credentials.add',
         route: '/add',
         ncyBreadcrumb: {
-            label: strings.ADD_BREADCRUMB_LABEL
+            label: strings.get('state.ADD_BREADCRUMB_LABEL')
         },
         views: {
             'add@credentials': {
@@ -74,7 +72,7 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         name: 'credentials.edit',
         route: '/:credential_id',
         ncyBreadcrumb: {
-            label: strings.EDIT_BREADCRUMB_LABEL
+            label: strings.get('state.EDIT_BREADCRUMB_LABEL')
         },
         views: {
             'edit@credentials': {

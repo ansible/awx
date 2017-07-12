@@ -101,7 +101,7 @@ function AtInputGroupController ($scope, $compile) {
             config._data = input.choices;
             config._exp = 'index as choice for (index, choice) in state._data';
         } else {
-            let preface = vm.strings.components.UNSUPPORTED_ERROR_PREFACE;
+            let preface = vm.strings.get('group.UNSUPPORTED_ERROR_PREFACE');
             throw new Error(`${preface}: ${input.type}`)
         }
 

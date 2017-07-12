@@ -15,8 +15,6 @@ function AtFormController (eventService, strings) {
     let modal;
     let form;
 
-    strings = strings.components.forms;
-   
     vm.components = [];
     vm.state = {
         isValid: false,
@@ -101,8 +99,8 @@ function AtFormController (eventService, strings) {
 
         if (!handled) {
             let message;
-            let title = strings.SUBMISSION_ERROR_TITLE;
-            let preface = strings.SUBMISSION_ERROR_PREFACE;
+            let title = strings.get('form.SUBMISSION_ERROR_TITLE');
+            let preface = strings.get('form.SUBMISSION_ERROR_PREFACE');
 
             if (typeof err.data === 'object') {
                 message = JSON.stringify(err.data);  
@@ -115,8 +113,8 @@ function AtFormController (eventService, strings) {
     };
 
     vm.handleUnexpectedError = err => {
-        let title = strings.SUBMISSION_ERROR_TITLE;
-        let message = strings.SUBMISSION_ERROR_MESSAGE;
+        let title = strings.get('form.SUBMISSION_ERROR_TITLE');
+        let message = strings.get('form.SUBMISSION_ERROR_MESSAGE');
 
         modal.show(title, message);
 
