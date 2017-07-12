@@ -25,7 +25,7 @@
 }
 .datepicker-dropdown:before {
   content: '';
-  display: inline-block;
+  display: none;
   border-left: 7px solid transparent;
   border-right: 7px solid transparent;
   border-bottom: 7px solid #ccc;
@@ -35,7 +35,7 @@
 }
 .datepicker-dropdown:after {
   content: '';
-  display: inline-block;
+  display: none;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-bottom: 6px solid #fff;
@@ -87,13 +87,14 @@
   -ms-user-select: none;
   user-select: none;
 }
-.datepicker table tr td,
-.datepicker table tr th {
+.datepicker .datepicker-days .table-condensed tr td,
+.datepicker .datepicker-days .table-condensed tr th {
   text-align: center;
   width: 30px;
   height: 30px;
   border-radius: 4px;
   border: none;
+  padding: 0.5em 0.7em;
 }
 .table-striped .datepicker table tr td,
 .table-striped .datepicker table tr th {
