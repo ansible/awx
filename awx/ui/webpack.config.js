@@ -69,19 +69,27 @@ var baseConfig = function() {
             new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js')
         ],
         module: {
-            loaders: [{
-                // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
-                test: /\.angular-tz-extensions.js$/,
-                loader: 'imports?define=>false'
-            }, {
-                // es6 -> es5
-                test: /\.js$/,
-                loader: 'babel-loader',
-                exclude: /(node_modules)/,
-                query: {
-                    presets: ['es2015']
+            loaders: [
+                {
+                    // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
+                    test: /\.angular-tz-extensions.js$/,
+                    loader: 'imports?define=>false'
+                },
+                {
+                    // es6 -> es5
+                    test: /\.js$/,
+                    loader: 'babel-loader',
+                    exclude: /(node_modules)/,
+                    query: {
+                        presets: ['es2015']
+                    }
+                },
+                {
+                    test: /\.json$/,
+                    loader: 'json-loader',
+                    exclude: /(node_modules)/
                 }
-            }]
+            ]
         },
         resolve: {
             alias: {
