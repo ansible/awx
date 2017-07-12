@@ -1637,6 +1637,11 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             ret['inventory'] = None
         return ret
 
+    def validate_source_project(self, value):
+        if value.scm_type == '':
+            raise serializers.ValidationError(_("Can not use manual project for SCM-based inventory."))
+        return value
+
     def validate(self, attrs):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)

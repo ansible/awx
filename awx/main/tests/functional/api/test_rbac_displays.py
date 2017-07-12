@@ -333,8 +333,8 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory,
 
 
 @pytest.mark.django_db
-def test_manual_projects_no_update(project, get, admin_user):
-    response = get(reverse('api:project_detail', kwargs={'pk': project.pk}), admin_user, expect=200)
+def test_manual_projects_no_update(manual_project, get, admin_user):
+    response = get(reverse('api:project_detail', kwargs={'pk': manual_project.pk}), admin_user, expect=200)
     assert not response.data['summary_fields']['user_capabilities']['start']
     assert not response.data['summary_fields']['user_capabilities']['schedule']
 

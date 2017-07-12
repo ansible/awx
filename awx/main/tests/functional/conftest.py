@@ -133,7 +133,21 @@ def project(instance, organization):
                                  organization=organization,
                                  playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
                                  local_path='_92__test_proj',
-                                 scm_revision='1234567890123456789012345678901234567890'
+                                 scm_revision='1234567890123456789012345678901234567890',
+                                 scm_url='localhost',
+                                 scm_type='git'
+                                 )
+    return prj
+
+
+@pytest.fixture
+@mock.patch.object(Project, "update", lambda self, **kwargs: None)
+def manual_project(instance, organization):
+    prj = Project.objects.create(name="test-manual-proj",
+                                 description="manual-proj-desc",
+                                 organization=organization,
+                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml'],
+                                 local_path='_92__test_proj'
                                  )
     return prj
 
