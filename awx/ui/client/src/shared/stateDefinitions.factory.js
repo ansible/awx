@@ -313,9 +313,14 @@ function($injector, $stateExtender, $log, i18n) {
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],
-                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath',
-                            function(list, qs, $stateParams, GetBasePath) {
+                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath', 'resourceData',
+                            function(list, qs, $stateParams, GetBasePath, resourceData) {
                                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+
+                                if(resourceData.data.type === "team") {
+                                    $stateParams[`${list.iterator}_search`].organization = resourceData.data.organization;
+                                }
+
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],

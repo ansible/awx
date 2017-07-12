@@ -41,7 +41,7 @@
                     <div class="Form-tab"
                         ng-click="selectTab('workflow_templates')"
                         ng-class="{'is-selected': tab.workflow_templates}"
-                        ng-hide="resolve.workflowTemplatesDataset.status === 402" 
+                        ng-hide="resolve.workflowTemplatesDataset.status === 402"
                     translate>
                         Workflow Templates
                     </div>
@@ -65,6 +65,7 @@
                     <div class="Form-tab"
                         ng-click="selectTab('organizations')"
                         ng-class="{'is-selected': tab.organizations}"
+                        ng-hide="owner.type === 'team'"
                     translate>
                         Organizations
                     </div>
