@@ -216,7 +216,7 @@ register(
                 'mapped into an Tower organization (as defined in the '
                 'AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries '
                 'need to be supported use of "LDAPUnion" is possible. See '
-                'python-ldap documentation as linked at the top of this section.'),
+                'Tower documentation for details.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=(
