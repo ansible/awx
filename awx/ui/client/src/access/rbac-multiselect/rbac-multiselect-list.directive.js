@@ -7,10 +7,10 @@
 /* jshint unused: vars */
 export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList',
     'InventoryList', 'CredentialList', '$compile', 'generateList',
-    'OrganizationList',
+    'OrganizationList', '$window',
     function(addPermissionsTeamsList, addPermissionsUsersList, TemplateList, ProjectList,
     InventoryList, CredentialList, $compile, generateList,
-    OrganizationList) {
+    OrganizationList, $window) {
     return {
         restrict: 'E',
         scope: {
@@ -46,6 +46,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         scm_type: list.fields.scm_type
                     };
+                    list.fields.name.ngClick = 'linkoutResource("project", project)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
@@ -55,6 +56,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         organization: list.fields.organization
                     };
+                    list.fields.name.ngClick = 'linkoutResource("inventory", inventory)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
@@ -64,12 +66,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.iterator = 'job_template';
                     list.basePath = 'job_templates';
                     list.fields = {
-                        name: list.fields.name,
-                        description: list.fields.description
+                        name: list.fields.name
                     };
+                    list.fields.name.ngClick = 'linkoutResource("job_template", job_template)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
-                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
                 case 'WorkflowTemplates':
@@ -77,12 +78,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.iterator = 'workflow_template';
                     list.basePath = 'workflow_job_templates';
                     list.fields = {
-                        name: list.fields.name,
-                        description: list.fields.description
+                        name: list.fields.name
                     };
+                    list.fields.name.ngClick = 'linkoutResource("workflow_job_template", workflow_template)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.name.ngHref = '#/templates/workflow_job_template/{{workflow_template.id}}';
-                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 case 'Users':
                     list.fields = {
@@ -90,6 +90,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         first_name: list.fields.first_name,
                         last_name: list.fields.last_name
                     };
+                    list.fields.username.ngClick = 'linkoutResource("user", user)';
                     list.fields.username.columnClass = 'col-md-5 col-sm-5 col-xs-11';
                     list.fields.first_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
                     list.fields.last_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
@@ -99,16 +100,23 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         organization: list.fields.organization,
                     };
+                    list.fields.name.ngClick = 'linkoutResource("team", team)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 case 'Organizations':
                     list.fields = {
-                        name: list.fields.name,
-                        description: list.fields.description,
+                        name: list.fields.name
                     };
+                    list.fields.name.ngClick = 'linkoutResource("organization", organization)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    break;
+                case 'Credentials':
+                    list.fields = {
+                        name: list.fields.name
+                    };
+                    list.fields.name.ngClick = 'linkoutResource("credential", credential)';
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     break;
                 default:
                     list.fields = {
@@ -123,7 +131,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 mode: 'edit',
                 list: list,
                 related: false,
-                title: false
+                title: false,
+                hideViewPerPage: true
             });
 
             scope.list = list;
@@ -171,6 +180,41 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             }
             element.append(list_html);
             $compile(element.contents())(scope);
+
+            scope.linkoutResource = function(type, resource) {
+
+                let url;
+
+                switch(type){
+                    case 'project':
+                        url = "/#/projects/" + resource.id;
+                        break;
+                    case 'inventory':
+                        url = resource.kind && resource.kind === "smart" ? "/#/inventories/smart/" + resource.id : "/#/inventories/inventory/" + resource.id;
+                        break;
+                    case 'job_template':
+                        url = "/#/templates/job_template/" + resource.id;
+                        break;
+                    case 'workflow_job_template':
+                        url = "/#/templates/workflow_job_template/" + resource.id;
+                        break;
+                    case 'user':
+                        url = "/#/users/" + resource.id;
+                        break;
+                    case 'team':
+                        url = "/#/teams/" + resource.id;
+                        break;
+                    case 'organization':
+                        url = "/#/organizations/" + resource.id;
+                        break;
+                    case 'credential':
+                        url = "/#/credentials/" + resource.id;
+                        break;
+                }
+
+                $window.open(url,'_blank');
+            };
         }
     };
+
 }];

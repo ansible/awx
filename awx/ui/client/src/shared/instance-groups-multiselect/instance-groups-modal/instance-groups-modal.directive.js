@@ -1,4 +1,4 @@
-export default ['templateUrl', function(templateUrl) {
+export default ['templateUrl', '$window', function(templateUrl, $window) {
     return {
         restrict: 'E',
         scope: {
@@ -50,6 +50,8 @@ export default ['templateUrl', function(templateUrl) {
                                 selectedRows: 'igTags',
                                 availableRows: 'instance_groups'
                             };
+                            instanceGroupList.fields.name.ngClick = "linkoutInstanceGroup(instance_group)";
+                            instanceGroupList.fields.name.columnClass = 'col-md-11 col-sm-11 col-xs-11';
                             delete instanceGroupList.fields.percent_capacity_remaining;
                             delete instanceGroupList.fields.jobs_running;
 
@@ -97,6 +99,10 @@ export default ['templateUrl', function(templateUrl) {
                     _.remove($scope.igTags, { id: item.id });
                 }
             });
+
+            $scope.linkoutInstanceGroup = function(instanceGroup) {
+                $window.open('/#/instance_groups/' + instanceGroup.id + '/instances','_blank');
+            };
 
             $scope.cancelForm = function() {
                 $scope.destroyModal();
