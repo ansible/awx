@@ -1,7 +1,8 @@
 export default
-	['$scope', '$state', 'ConfigService',
-        function($scope, $state, ConfigService){
+	['$scope', '$state', 'ConfigService', 'AppStrings',
+        function($scope, $state, ConfigService, AppStrings){
 		var init = function(){
+			$scope.name = AppStrings.get('BRAND_NAME');
 			ConfigService.getConfig()
 				.then(function(config){
 					$scope.version = config.version.split('-')[0];
