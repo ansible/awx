@@ -16,7 +16,6 @@ export default {
     fields: {
         name: {
             label: 'Name',
-            ngBind: 'inventory_source.summary_fields.group.name',
             columnClass: 'col-md-11',
             simpleTip: {
                 awToolTip: "Inventory: {{inventory_source.summary_fields.inventory.name}}",
