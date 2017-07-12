@@ -525,7 +525,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 Attr(field, 'columnClass') : "";
                 html += `
                 <td ${classList}>
-                    <at-truncate string="{{project.scm_revision}}" maxLength="7"></at-truncate>
+                    <at-truncate ng-if="project.scm_revision" string="{{project.scm_revision}}" maxLength="7"></at-truncate>
                 </td>`;
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
