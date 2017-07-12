@@ -73,49 +73,10 @@ export default
                 $scope.ssh_password_required = false;
                 $scope.ssh_key_unlock_required = false;
                 $scope.become_password_required = false;
-                $scope.vault_password_required = false;
 
                 $scope.ssh_password = "";
                 $scope.ssh_key_unlock = "";
                 $scope.become_password = "";
-                $scope.vault_password = "";
-            };
-
-            var updateRequiredPasswords = function() {
-                if($scope.selected_credentials.machine) {
-                    if($scope.selected_credentials.machine.id === $scope.defaults.credential.id) {
-                        clearRequiredPasswords();
-                        for(var i=0; i<$scope.passwords_needed_to_start.length; i++) {
-                            var password = $scope.passwords_needed_to_start[i];
-                            switch(password) {
-                                case "ssh_password":
-                                    $scope.ssh_password_required = true;
-                                    break;
-                                case "ssh_key_unlock":
-                                    $scope.ssh_key_unlock_required = true;
-                                    break;
-                                case "become_password":
-                                    $scope.become_password_required = true;
-                                    break;
-                                case "vault_password":
-                                    $scope.vault_password_required = true;
-                                    break;
-                            }
-                        }
-                    }
-                    else {
-                        if($scope.selected_credentials.machine.kind === "ssh"){
-                            $scope.ssh_password_required = ($scope.selected_credentials.machine.password === "ASK") ? true : false;
-                            $scope.ssh_key_unlock_required = ($scope.selected_credentials.machine.ssh_key_unlock === "ASK") ? true : false;
-                            $scope.become_password_required = ($scope.selected_credentials.machine.become_password === "ASK") ? true : false;
-                            $scope.vault_password_required = ($scope.selected_credentials.machine.vault_password === "ASK") ? true : false;
-                        }
-                        else {
-                            clearRequiredPasswords();
-                        }
-                    }
-                }
-
             };
 
             var launchJob = function() {
@@ -158,7 +119,33 @@ export default
                 }
 
                 $scope.$watch('selected_credentials.machine', function(){
-                    updateRequiredPasswords();
+                    if($scope.selected_credentials.machine) {
+                        if($scope.selected_credentials.machine.id === $scope.defaults.credential.id) {
+                            clearRequiredPasswords();
+                            for(var i=0; i<$scope.passwords_needed_to_start.length; i++) {
+                                var password = $scope.passwords_needed_to_start[i];
+                                switch(password) {
+                                    case "ssh_password":
+                                        $scope.ssh_password_required = true;
+                                        break;
+                                    case "ssh_key_unlock":
+                                        $scope.ssh_key_unlock_required = true;
+                                        break;
+                                    case "become_password":
+                                        $scope.become_password_required = true;
+                                        break;
+                                }
+                            }
+                        }
+                        else {
+                            $scope.ssh_password_required = ($scope.selected_credentials.machine.inputs && $scope.selected_credentials.machine.inputs.password === "ASK") ? true : false;
+                            $scope.ssh_key_unlock_required = ($scope.selected_credentials.machine.inputs && $scope.selected_credentials.machine.inputs.ssh_key_unlock === "ASK") ? true : false;
+                            $scope.become_password_required = $scope.selected_credentials.machine.inputs && ($scope.selected_credentials.machine.inputs.become_password === "ASK") ? true : false;
+                        }
+                    }
+                    else {
+                        clearRequiredPasswords();
+                    }
                 });
 
                 // Get the job or job_template record
