@@ -9,5 +9,5 @@ import HostNestedGroupsListController from './host-nested-groups-list.controller
 
 export default
     angular.module('hostNestedGroups', [])
-    .value('HostNestedGroupListDefinition', HostNestedGroupListDefinition)
+    .factory('HostNestedGroupListDefinition', HostNestedGroupListDefinition)
     .controller('HostNestedGroupsListController', HostNestedGroupsListController);
