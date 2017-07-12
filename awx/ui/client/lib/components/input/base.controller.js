@@ -51,13 +51,13 @@ function BaseInputController (strings) {
 
             if (scope.state._required && !scope.state._value && !scope.state._displayValue) {
                 isValid = false;    
-                message = vm.strings.components.message.REQUIRED_INPUT_MISSING;
+                message = vm.strings.get('message.REQUIRED_INPUT_MISSING');
             } else if (scope.state._validate) {
                 let result = scope.state._validate(scope.state._value);
 
                 if (!result.isValid) {
                     isValid = false;
-                    message = result.message || vm.strings.components.message.INVALID_INPUT;
+                    message = result.message || vm.strings.get('message.INVALID_INPUT');
                 }
             }
 
@@ -83,14 +83,14 @@ function BaseInputController (strings) {
             scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
 
             if (!scope.state._isBeingReplaced) {
-                scope.state._buttonText = vm.strings.components.REPLACE;
+                scope.state._buttonText = vm.strings.get('REPLACE');
                 scope.state._disabled = true;
                 scope.state._enableToggle = true;
                 scope.state._value = scope.state._preEditValue;
                 scope.state._activeModel = '_displayValue';
-                scope.state._placeholder = vm.strings.components.ENCRYPTED;
+                scope.state._placeholder = vm.strings.get('ENCRYPTED');
             } else {
-                scope.state._buttonText = vm.strings.components.REVERT;
+                scope.state._buttonText = vm.strings.get('REVERT');
                 scope.state._disabled = false;
                 scope.state._enableToggle = false;
                 scope.state._activeModel = '_value';

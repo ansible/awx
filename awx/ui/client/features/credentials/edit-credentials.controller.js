@@ -8,7 +8,7 @@ function EditCredentialsController (models, $state, $scope, strings) {
     let selectedCredentialType = models.selectedCredentialType;
 
     vm.mode = 'edit';
-    vm.strings = strings.credentials;
+    vm.strings = strings;
     vm.panelTitle = credential.get('name');
 
     vm.tab = {
@@ -45,14 +45,14 @@ function EditCredentialsController (models, $state, $scope, strings) {
     vm.form.organization._route = 'credentials.edit.organization';
     vm.form.organization._value = credential.get('summary_fields.organization.id');
     vm.form.organization._displayValue = credential.get('summary_fields.organization.name');
-    vm.form.organization._placeholder = vm.strings.inputs.ORGANIZATION_PLACEHOLDER;
+    vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
 
     vm.form.credential_type._resource = 'credential_type';
     vm.form.credential_type._model = credentialType;
     vm.form.credential_type._route = 'credentials.edit.credentialType';
     vm.form.credential_type._value = selectedCredentialType.get('id');
     vm.form.credential_type._displayValue = selectedCredentialType.get('name');
-    vm.form.credential_type._placeholder = vm.strings.inputs.CREDENTIAL_TYPE_PLACEHOLDER;
+    vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
  
     vm.form.inputs = {
         _get (id) {

@@ -26,13 +26,13 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
 
         if (scope.state.format === 'ssh_private_key') {
             scope.ssh = true;
-            scope.state._hint = scope.state._hint || vm.strings.components.textarea.SSH_KEY_HINT;
+            scope.state._hint = scope.state._hint || vm.strings.get('textarea.SSH_KEY_HINT');
             input = element.find('input')[0];
         }
 
         if (scope.state._value) {
-            scope.state._buttonText = vm.strings.components.REPLACE;
-            scope.state._placeholder = vm.strings.components.ENCRYPTED;
+            scope.state._buttonText = vm.strings.get('REPLACE');
+            scope.state._placeholder = vm.strings.get('ENCRYPTED');
         } else {
             if (scope.state.format === 'ssh_private_key') {
                 vm.listeners = vm.setFileListeners(textarea, input);
@@ -52,7 +52,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             vm.listeners = vm.setFileListeners(textarea, input);
         } else {
             scope.state._displayHint = false;
-            scope.state._placeholder = vm.strings.components.ENCRYPTED;
+            scope.state._placeholder = vm.strings.get('ENCRYPTED');
             eventService.remove(vm.listeners);
         }
     };

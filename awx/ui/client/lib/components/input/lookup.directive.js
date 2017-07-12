@@ -68,7 +68,7 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
 
         return {
             isValid: false,
-            message: vm.strings.components.lookup.NOT_FOUND
+            message: vm.strings.get('lookup.NOT_FOUND')
         };
     };
 }
