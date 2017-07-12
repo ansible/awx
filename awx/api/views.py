@@ -2507,7 +2507,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
 
             if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
                 if not request.user or not request.user.can_access(Project, 'start', inventory_source.source_project):
-                    details['status'] = 'You do not have permission to update project `{}`'.format(inventory_source.source_project.name)
+                    details['status'] = _('You do not have permission to update project `{}`').format(inventory_source.source_project.name)
                     can_update = False
                 else:
                     project_update = True
@@ -2520,7 +2520,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
                 successes += 1
             else:
                 if not details.get('status'):
-                    details['status'] = 'Could not start because `can_update` returned False'
+                    details['status'] = _('Could not start because `can_update` returned False')
                 failures += 1
             update_data.append(details)
         if failures and successes:
@@ -2528,7 +2528,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         elif failures and not successes:
             status_code = status.HTTP_400_BAD_REQUEST
         elif not failures and not successes:
-            return Response({'detail': 'No inventory sources to update.'},
+            return Response({'detail': _('No inventory sources to update.')},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
             status_code = status.HTTP_200_OK
@@ -3274,7 +3274,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
         for relation in mutex_list:
             if getattr(parent, relation).all().exists():
-                return {'Error': 'Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation)}
+                return {'Error': _('Cannot associate {0} when {1} have been associated.').format(self.relationship, relation)}
 
         if created:
             return None
@@ -3299,12 +3299,12 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
             sub_node = graph[sub.pk]
             parent_node = graph[parent.pk]
             if sub_node['metadata']['parent'] is not None:
-                return {"Error": "Multiple parent relationship not allowed."}
+                return {"Error": _("Multiple parent relationship not allowed.")}
             sub_node['metadata']['parent'] = parent_node
             iter_node = sub_node
             while iter_node is not None:
                 if iter_node['metadata']['traversed']:
-                    return {"Error": "Cycle detected."}
+                    return {"Error": _("Cycle detected.")}
                 iter_node['metadata']['traversed'] = True
                 iter_node = iter_node['metadata']['parent']
 
