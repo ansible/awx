@@ -126,14 +126,15 @@
     display: flex;
     flex: 0 0 auto;
     margin-top: 15px;
+    justify-content: space-between;
 }
 .JobSubmission-footerPreview {
     display: flex;
-    flex: 1 0 auto;
 }
 .JobSubmission-footerButtons {
     justify-content: flex-end;
     display: flex;
+    align-items: flex-end;
 }
 .JobSubmission-previewItem {
     min-width: 150px;
@@ -193,6 +194,8 @@
     border: 1px solid @default-border;
     padding: 10px;
     border-radius: 5px;
+    max-height: 120px;
+    overflow-y: scroll;
 }
 .JobSubmission-selectedItemRevert {
     display: flex;

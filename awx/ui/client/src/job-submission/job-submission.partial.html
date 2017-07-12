@@ -57,7 +57,7 @@
                             </div>
                             <div class="JobSubmission-previewTags--outer">
                                 <div class="JobSubmission-previewTags--inner">
-                                    <div class="JobSubmission-previewTagContainer" ng-show="selected_credentials.machine">
+                                    <div class="JobSubmission-previewTagContainer u-wordwrap" ng-show="selected_credentials.machine">
                                         <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteMachineCred()" ng-show="ask_credential_on_launch">
                                             <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
@@ -333,15 +333,15 @@
                     </div>
                     <div>
                         <span ng-show="selected_credentials.machine" class="JobSubmission-previewItemSubTitle"><span translate>Machine</span>:&nbsp;</span>
-                        <span ng-show="selected_credentials.machine">{{selected_credentials.machine.name}}</span>
+                        <span class="u-wordwrap" ng-show="selected_credentials.machine">{{selected_credentials.machine.name}}</span>
                     </div>
                     <div ng-repeat="extraCredential in selected_credentials.extra">
                         <span class="JobSubmission-previewItemSubTitle">{{credential_types[extraCredential.credential_type].name}}:&nbsp;</span>
-                        <span>{{extraCredential.name}}</span>
+                        <span class="u-wordwrap">{{extraCredential.name}}</span>
                     </div>
                     <div>
                         <span ng-show="selected_credentials.vault" class="JobSubmission-previewItemSubTitle"><span translate>Vault</span>:&nbsp;</span>
-                        <span ng-show="selected_credentials.vault">{{selected_credentials.vault.name}}</span>
+                        <span ng-show="selected_credentials.vault" class="u-wordwrap">{{selected_credentials.vault.name}}</span>
                     </div>
                 </div>
             </div>
