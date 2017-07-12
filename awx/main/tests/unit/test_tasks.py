@@ -494,8 +494,8 @@ class TestJobCredentials(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
 
-        assert env['AWS_ACCESS_KEY'] == 'bob'
-        assert env['AWS_SECRET_KEY'] == 'secret'
+        assert env['AWS_ACCESS_KEY_ID'] == 'bob'
+        assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert 'AWS_SECURITY_TOKEN' not in env
 
     def test_aws_cloud_credential_with_sts_token(self):
@@ -514,8 +514,8 @@ class TestJobCredentials(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
 
-        assert env['AWS_ACCESS_KEY'] == 'bob'
-        assert env['AWS_SECRET_KEY'] == 'secret'
+        assert env['AWS_ACCESS_KEY_ID'] == 'bob'
+        assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert env['AWS_SECURITY_TOKEN'] == 'token'
 
     def test_gce_credentials(self):
