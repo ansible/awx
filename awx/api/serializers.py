@@ -1640,6 +1640,12 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def validate_source_project(self, value):
         if value.scm_type == '':
             raise serializers.ValidationError(_("Can not use manual project for SCM-based inventory."))
+
+    def validate_source(self, value):
+        if value == '':
+            raise serializers.ValidationError(
+                {"source": "Manual inventory sources are created automatically "
+                           "when a group is created in the v1 API."})
         return value
 
     def validate(self, attrs):

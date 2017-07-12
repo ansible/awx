@@ -342,8 +342,10 @@ class TestControlledBySCM:
 
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)
-        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
-             {'name': 'new inv src', 'source_project': project.pk}, rando, expect=403)
+        post(
+            reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
+            {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
+            rando, expect=403)
 
     def test_no_post_in_options(self, options, scm_inventory, admin_user):
         r = options(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
