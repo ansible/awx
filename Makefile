@@ -971,9 +971,6 @@ docker-compose-test: docker-auth
 docker-compose-build: tower-devel-build tower-isolated-build
 
 tower-devel-build:
-	rm -rf tools/docker-compose/tower-license
-	git clone git@github.com:ansible/tower-license.git tools/docker-compose/tower-license
-	cd tools/docker-compose/tower-license && $(PYTHON) setup.py sdist
 	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
 	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
 	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)

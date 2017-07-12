@@ -97,16 +97,3 @@ def get_ssh_version(mocker):
 @pytest.fixture
 def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_factory):
     return job_template_with_survey_passwords_factory(persisted=False)
-
-
-@pytest.fixture
-def enterprise_license():
-    from tower_license import TowerLicense
-    return TowerLicense(
-        company_name='AWX',
-        contact_name='AWX Admin',
-        contact_email='awx@example.com',
-        license_date=int(time.time() + 3600),
-        instance_count=10000,
-        license_type='enterprise',
-    ).generate()

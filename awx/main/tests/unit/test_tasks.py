@@ -31,7 +31,6 @@ from awx.main.models import (
 from awx.main import tasks
 from awx.main.utils import encrypt_field
 
-from tower_license import TowerLicense
 
 
 @contextmanager
@@ -77,27 +76,6 @@ def test_send_notifications_list(mocker):
 
         assert mock_job.notifications.add.called
         assert mock_job.notifications.add.called_with(*mock_notifications)
-
-
-@pytest.mark.parametrize("current_instances,call_count", [(91, 2), (89,1)])
-def test_run_admin_checks_usage(mocker, current_instances, call_count):
-    patches = list()
-    patches.append(mocker.patch('awx.main.tasks.User'))
-
-    mock_te = mocker.Mock(spec=TowerLicense)
-    mock_te.validate.return_value = {'instance_count': 100, 'current_instances': current_instances, 'date_warning': True}
-    patches.append(mocker.patch('tower_license.TowerLicense', return_value=mock_te))
-
-    mock_sm = mocker.Mock()
-    patches.append(mocker.patch('awx.main.tasks.send_mail', wraps=mock_sm))
-
-    with apply_patches(patches):
-        tasks.run_administrative_checks()
-        assert mock_sm.called
-        if call_count == 2:
-            assert '90%' in mock_sm.call_args_list[0][0][0]
-        else:
-            assert 'expire' in mock_sm.call_args_list[0][0][0]
 
 
 @pytest.mark.parametrize("key,value", [

@@ -33,8 +33,6 @@ from awx.main.utils import get_ansible_version
 from awx.sso.backends import LDAPSettings
 from awx.main.tests.URI import URI # noqa
 
-from tower_license import TowerLicense
-
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
   tasks:
@@ -178,34 +176,6 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
     def unique_name(self, string):
         rnd_str = '____' + str(random.randint(1, 9999999))
         return __name__ + '-generated-' + string + rnd_str
-
-    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features={}):
-        settings.LICENSE = TowerLicense(
-            company_name='AWX',
-            contact_name='AWX Admin',
-            contact_email='awx@example.com',
-            license_date=license_date,
-            instance_count=instance_count,
-            license_type='enterprise',
-            features=features,
-        ).generate()
-
-    def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
-        settings.LICENSE = TowerLicense(
-            company_name='AWX',
-            contact_name='AWX Admin',
-            contact_email='awx@example.com',
-            license_date=license_date,
-            instance_count=instance_count,
-            license_type='basic',
-        ).generate()
-
-    def create_expired_license_file(self, instance_count=1000, grace_period=False):
-        license_date = time.time() - 1
-        if not grace_period:
-            license_date -= 2592000
-        self.create_test_license_file(instance_count, license_date)
-        os.environ['SKIP_LICENSE_FIXUP_FOR_TEST'] = '1'
 
     def assertElapsedLessThan(self, seconds):
         elapsed = time.time() - self._start_time
