@@ -191,6 +191,10 @@ export default
                 });
             }
 
+            $scope.toggleForm = function(key) {
+                $scope[key] = !$scope[key];
+            };
+
             $scope.jobTypeChange = function() {
                 sync_playbook_select2();
             };
@@ -475,6 +479,7 @@ export default
                         }
                     }
 
+                    data.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch ? $scope.ask_diff_mode_on_launch : false;
                     data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
                     data.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch ? $scope.ask_skip_tags_on_launch : false;
                     data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;

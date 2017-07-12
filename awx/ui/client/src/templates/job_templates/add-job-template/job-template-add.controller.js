@@ -132,6 +132,10 @@
                 });
             }
 
+            $scope.toggleForm = function(key) {
+                $scope[key] = !$scope[key];
+            };
+
             // Update playbook select whenever project value changes
             selectPlaybook = function (oldValue, newValue) {
                 var url;
@@ -262,7 +266,7 @@
                             }
                         }
                     }
-
+                    data.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch ? $scope.ask_diff_mode_on_launch : false;
                     data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
                     data.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch ? $scope.ask_skip_tags_on_launch : false;
                     data.ask_limit_on_launch = $scope.ask_limit_on_launch ? $scope.ask_limit_on_launch : false;

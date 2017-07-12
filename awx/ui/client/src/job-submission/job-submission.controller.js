@@ -159,7 +159,7 @@ export default
 
                     // General catch-all for "other prompts" - used in this link function and to hide the Other Prompts tab when
                     // it should be hidden
-                    $scope.has_other_prompts = (data.ask_verbosity_on_launch || data.ask_job_type_on_launch || data.ask_limit_on_launch || data.ask_tags_on_launch || data.ask_skip_tags_on_launch || data.ask_variables_on_launch) ? true : false;
+                    $scope.has_other_prompts = (data.ask_verbosity_on_launch || data.ask_job_type_on_launch || data.ask_limit_on_launch || data.ask_tags_on_launch || data.ask_skip_tags_on_launch || data.ask_variables_on_launch || data.ask_diff_mode_on_launch) ? true : false;
                     $scope.password_needed = data.passwords_needed_to_start && data.passwords_needed_to_start.length > 0;
                     $scope.has_default_inventory = data.defaults && data.defaults.inventory && data.defaults.inventory.id;
                     $scope.has_default_credential = data.defaults && data.defaults.credential && data.defaults.credential.id;
@@ -216,6 +216,10 @@ export default
                         $scope.other_prompt_data.skip_tags_options = (data.defaults && data.defaults.skip_tags) ? data.defaults.skip_tags.split(',')
                             .map((i) => ({name: i, label: i, value: i})) : [];
                         $scope.other_prompt_data.skip_tags = $scope.other_prompt_data.skip_tags_options;
+                    }
+
+                    if($scope.ask_diff_mode_on_launch) {
+                        $scope.other_prompt_data.diff_mode = (data.defaults && data.defaults.diff_mode) ? data.defaults.diff_mode : false;
                     }
 
                     if($scope.ask_variables_on_launch) {
@@ -497,6 +501,10 @@ export default
                 else {
                     launchJob();
                 }
+            };
+
+            $scope.toggleForm = function(key) {
+                $scope.other_prompt_data[key] = !$scope.other_prompt_data[key];
             };
 
             $scope.updateParseType = function() {
