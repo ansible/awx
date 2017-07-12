@@ -323,6 +323,21 @@
                         </div>
                     </div>
 
+                    <!-- VAULT CREDENTAIL DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.summary_fields.vault_credential.name">
+                        <label class="JobResults-resultRowLabel">
+                            Vault Credential
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            <a href="{{ vault_credential_link }}"
+                                aw-tool-tip="Edit the credential"
+                                data-placement="top">
+                                {{ job.summary_fields.vault_credential.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- FORKS DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.forks !== undefined">

@@ -281,6 +281,14 @@
                     } else {
                         data.credential = null;
                     }
+                    if ($scope.selectedCredentials && $scope.selectedCredentials
+                        .vault && $scope.selectedCredentials
+                            .vault.id) {
+                                data.vault_credential = $scope.selectedCredentials
+                                    .vault.id;
+                    } else {
+                        data.vault_credential = null;
+                    }
 
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.variables, true);

@@ -8,28 +8,35 @@ export default [
     '$scope',
     '$rootScope',
     '$state',
+    '$stateParams',
     '$timeout',
     'ConfigurationJobsForm',
     'ConfigurationService',
     'ConfigurationUtils',
     'CreateSelect2',
     'GenerateForm',
+    'ParseTypeChange',
     'i18n',
     function(
         $scope,
         $rootScope,
         $state,
+        $stateParams,
         $timeout,
         ConfigurationJobsForm,
         ConfigurationService,
         ConfigurationUtils,
         CreateSelect2,
         GenerateForm,
+        ParseTypeChange,
         i18n
     ) {
-        var jobsVm = this;
         var generator = GenerateForm;
         var form = ConfigurationJobsForm;
+
+        let tab;
+        let codeInputInitialized = false;
+
         $scope.$parent.AD_HOC_COMMANDS_options = [];
         _.each($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, function(command) {
             $scope.$parent.AD_HOC_COMMANDS_options.push({
@@ -75,6 +82,18 @@ export default [
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
 
+        function initializeCodeInput () {
+            let name = 'AWX_TASK_ENV';
+
+            ParseTypeChange({
+               scope: $scope.$parent,
+               variable: name,
+               parseType: 'application/json',
+               field_id: `configuration_jobs_template_${name}`
+             });
+
+            $scope.parseTypeChange('parseType', name);
+        }
 
         function populateAdhocCommand(flag){
             $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.toString();
@@ -107,22 +126,55 @@ export default [
             }
         }
 
-        $scope.$on('AD_HOC_COMMANDS_populated', function(e, data, flag) {
-            populateAdhocCommand(flag);
-        });
-
-        $scope.$on('populated', function() {
-            populateAdhocCommand(false);
-        });
-
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
         // TODO Find better solution for this bug
         $timeout(function(){
             $scope.$parent.configuration_jobs_template_form.$setPristine();
         }, 1000);
 
-        angular.extend(jobsVm, {
+        $scope.$on('AD_HOC_COMMANDS_populated', function(e, data, flag) {
+            populateAdhocCommand(flag);
         });
 
+        /*
+         * Controllers for each tab are initialized when configuration is opened. A listener
+         * on the URL itself is necessary to determine which tab is active. If a non-active
+         * tab initializes a codemirror, it doesn't display properly until the user navigates
+         * to the tab and it's been clicked.
+         */
+        $scope.$on('$locationChangeStart', (event, url) => {
+            let parts = url.split('/');
+            tab = parts[parts.length - 1];
+
+            if (tab === 'jobs' && !codeInputInitialized) {
+                initializeCodeInput();
+                codeInputInitialized = true;
+            }
+        });
+
+        /*
+         * Necessary to listen for revert clicks and relaunch the codemirror instance.
+         */
+        $scope.$on('codeMirror_populated', () => {
+            if (tab === 'jobs') {
+                initializeCodeInput();
+            }
+        });
+
+        /*
+         * This event is fired if the user navigates directly to this tab, where the
+         * $locationChangeStart does not. Watching this and location ensure proper display on 
+         * direct load of this tab or if the user comes from a different tab.
+         */
+        $scope.$on('populated', () => {
+            tab = $stateParams.currentTab;
+
+            if (tab === 'jobs') {
+                initializeCodeInput();
+                codeInputInitialized = true;
+            }
+
+            populateAdhocCommand(false);
+        });
     }
 ];

@@ -199,5 +199,5 @@ class TestHostInsights():
 
         resp = view.get(None)
 
-        assert resp.data['error'] == 'No Insights Credential found for the Inventory, "inventory_name_here", that this host belongs to.'
+        assert resp.data['error'] == 'The Insights Credential for "inventory_name_here" was not found.'
         assert resp.status_code == 404

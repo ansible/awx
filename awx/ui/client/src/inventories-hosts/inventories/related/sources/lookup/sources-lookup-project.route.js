@@ -4,6 +4,7 @@ export default {
             value: {
                 page_size:"5",
                 order_by:"name",
+                not__status:"never updated",
                 role_level:"use_role",
             },
             dynamic:true,

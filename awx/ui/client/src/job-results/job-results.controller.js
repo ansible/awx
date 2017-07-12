@@ -89,6 +89,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         $scope.machine_credential_link = getTowerLink('credential');
         $scope.cloud_credential_link = getTowerLink('cloud_credential');
         $scope.network_credential_link = getTowerLink('network_credential');
+        $scope.vault_credential_link = getTowerLink('vault_credential');
         $scope.schedule_link = getTowerLink('schedule');
     };
 
