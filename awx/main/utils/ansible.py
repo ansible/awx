@@ -10,15 +10,15 @@ from itertools import islice
 from django.utils.encoding import smart_str
 
 
-__all__ = ['could_be_playbook', 'could_be_inventory']
+__all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory']
 
 
 valid_playbook_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
 valid_inventory_re = re.compile(r'^[a-zA-Z0-9_.=\[\]]')
 
 
-def _skip_directory(rel_path):
-    path_elements = rel_path.split(os.sep)
+def skip_directory(relative_directory_path):
+    path_elements = relative_directory_path.split(os.sep)
     # Exclude files in a roles subdirectory.
     if 'roles' in path_elements:
         return True
@@ -29,6 +29,9 @@ def _skip_directory(rel_path):
         # Do not include dot files or dirs
         if element.startswith('.'):
             return True
+    # Exclude anything inside of group or host vars directories
+    if 'group_vars' in path_elements or 'host_vars' in path_elements:
+        return True
     return False
 
 
@@ -52,18 +55,20 @@ def could_be_playbook(project_path, dir_path, filename):
         return None
     if not matched:
         return None
-    playbook = os.path.relpath(playbook_path, smart_str(project_path))
-    if _skip_directory(playbook):
-        return None
-    return playbook
+    return os.path.relpath(playbook_path, smart_str(project_path))
 
 
 def could_be_inventory(project_path, dir_path, filename):
-    suspected_ext = os.path.splitext(filename)[-1]
-    # Allow for files with no extension, or with extensions in a certain set
-    if '.' in suspected_ext and suspected_ext not in ['.yml', '.yaml', '.ini']:
-        return None
+    # Decisions based exclusively on filename
     inventory_path = os.path.join(dir_path, filename)
+    suspected_ext = os.path.splitext(filename)[-1]
+    if suspected_ext in ['.yml', '.yaml', '.ini']:
+        # Files with any of these extensions are always included
+        return os.path.relpath(inventory_path, smart_str(project_path))
+    elif '.' in suspected_ext:
+        # If not using those extensions, inventory must have _no_ extension
+        return None
+
     # Filter files that do not use a character set consistent with
     # Ansible inventory mainly
     try:
@@ -74,7 +79,4 @@ def could_be_inventory(project_path, dir_path, filename):
                     return None
     except IOError:
         return None
-    inventory = os.path.relpath(inventory_path, smart_str(project_path))
-    if _skip_directory(inventory):
-        return None
-    return inventory
+    return os.path.relpath(inventory_path, smart_str(project_path))

@@ -25,7 +25,7 @@ from awx.main.models.notifications import (
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
-from awx.main.utils.ansible import could_be_inventory, could_be_playbook
+from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -180,6 +180,8 @@ class ProjectOptions(models.Model):
         project_path = self.get_project_path()
         if project_path:
             for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
+                if skip_directory(dirpath):
+                    continue
                 for filename in filenames:
                     playbook = could_be_playbook(project_path, dirpath, filename)
                     if playbook is not None:
@@ -195,7 +197,7 @@ class ProjectOptions(models.Model):
             # Cap the number of results, because it could include lots
             max_inventory_listing = 50
             for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
-                if dirpath.startswith('.'):
+                if skip_directory(dirpath):
                     continue
                 for filename in filenames:
                     inv_path = could_be_inventory(project_path, dirpath, filename)
