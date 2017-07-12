@@ -472,7 +472,9 @@ register(
 
 
 def logging_validate(serializer, attrs):
-    if not serializer.instance:
+    if not serializer.instance or \
+            not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or \
+            not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
         return attrs
     errors = []
     if attrs.get('LOG_AGGREGATOR_ENABLED', False):
