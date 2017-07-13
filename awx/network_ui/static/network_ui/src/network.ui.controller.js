@@ -20,7 +20,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   window.scope = $scope;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -469,6 +469,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onUnToggleGroup = function () {
         $scope.hide_groups = true;
+        $scope.group_controller.changeState(group.Ready);
     };
 
     // Buttons

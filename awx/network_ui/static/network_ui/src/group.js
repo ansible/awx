@@ -297,6 +297,11 @@ _Move.prototype.end = function (controller) {
 
 _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
+    if (controller.scope.hide_groups) {
+        controller.next_controller.handle_message(msg_type, $event);
+        return;
+    }
+
     var i = 0;
 
     for (i = 0; i < controller.scope.groups.length; i++) {
@@ -309,7 +314,10 @@ _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
-
+    if (controller.scope.hide_groups) {
+        controller.next_controller.handle_message(msg_type, $event);
+        return;
+    }
 
     //
     var i = 0;
@@ -356,6 +364,7 @@ _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
 
 
 _Ready.prototype.onNewGroup = function (controller) {
+    controller.scope.hide_groups = false;
     controller.changeState(Placing);
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
