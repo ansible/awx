@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import APIException
 
 # Tower
-from awx.main.task_engine import TaskEnhancer
+from awx.main.utils.common import get_licenser
 
 __all__ = ['LicenseForbids', 'get_license', 'get_licensed_features',
            'feature_enabled', 'feature_exists']
@@ -20,7 +20,7 @@ class LicenseForbids(APIException):
 
 
 def _get_validated_license_data():
-    return TaskEnhancer().validate_enhancements()
+    return get_licenser().validate()
 
 
 def get_license(show_key=False):
@@ -42,7 +42,10 @@ def get_licensed_features():
 
 def feature_enabled(name):
     """Return True if the requested feature is enabled, False otherwise."""
-    return _get_validated_license_data().get('features', {}).get(name, False)
+    validated_license_data = _get_validated_license_data()
+    if validated_license_data['license_type'] == 'open':
+        return True
+    return validated_license_data.get('features', {}).get(name, False)
 
 
 def feature_exists(name):

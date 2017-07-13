@@ -30,26 +30,6 @@ def mock_no_license_file(mocker):
 
 
 @pytest.mark.django_db
-def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get, put, patch, delete, admin, enterprise_license):
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'})
-    response = get(url, user=admin, expect=200)
-    assert not response.data['LICENSE']
-    Setting.objects.create(key='TOWER_URL_BASE', value='https://towerhost')
-    Setting.objects.create(key='LICENSE', value=enterprise_license)
-    response = get(url, user=admin, expect=200)
-    assert response.data['LICENSE']
-    put(url, user=admin, data=response.data, expect=200)
-    response = get(url, user=admin, expect=200)
-    assert response.data['LICENSE']
-    patch(url, user=admin, data={}, expect=200)
-    response = get(url, user=admin, expect=200)
-    assert response.data['LICENSE']
-    delete(url, user=admin, expect=204)
-    response = get(url, user=admin, expect=200)
-    assert response.data['LICENSE']
-
-
-@pytest.mark.django_db
 def test_url_base_defaults_to_request(options, admin):
     # If TOWER_URL_BASE is not set, default to the Tower request hostname
     resp = options(reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'}), user=admin, expect=200)
@@ -98,10 +78,8 @@ def test_awx_task_env_validity(get, patch, admin, value, expected):
 
 
 @pytest.mark.django_db
-def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
+def test_ldap_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
-    get(url, user=admin, expect=404)
-    Setting.objects.create(key='LICENSE', value=enterprise_license)
     get(url, user=admin, expect=200)
     # The PUT below will fail at the moment because AUTH_LDAP_GROUP_TYPE
     # defaults to None but cannot be set to None.
@@ -124,11 +102,8 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     'AUTH_LDAP_DENY_GROUP',
 ])
 @pytest.mark.django_db
-def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
-                       setting):
+def test_empty_ldap_dn(get, put, patch, delete, admin, setting):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
-    Setting.objects.create(key='LICENSE', value=enterprise_license)
-
     patch(url, user=admin, data={setting: ''}, expect=200)
     resp = get(url, user=admin, expect=200)
     assert resp.data[setting] is None
@@ -139,10 +114,8 @@ def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
 
 
 @pytest.mark.django_db
-def test_radius_settings(get, put, patch, delete, admin, enterprise_license, settings):
+def test_radius_settings(get, put, patch, delete, admin, settings):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'radius'})
-    get(url, user=admin, expect=404)
-    Setting.objects.create(key='LICENSE', value=enterprise_license)
     response = get(url, user=admin, expect=200)
     put(url, user=admin, data=response.data, expect=200)
     # Set secret via the API.
@@ -173,12 +146,8 @@ def test_radius_settings(get, put, patch, delete, admin, enterprise_license, set
 
 
 @pytest.mark.django_db
-def test_ui_settings(get, put, patch, delete, admin, enterprise_license):
+def test_ui_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'})
-    response = get(url, user=admin, expect=200)
-    assert 'CUSTOM_LOGO' not in response.data
-    assert 'CUSTOM_LOGIN_INFO' not in response.data
-    Setting.objects.create(key='LICENSE', value=enterprise_license)
     response = get(url, user=admin, expect=200)
     assert not response.data['CUSTOM_LOGO']
     assert not response.data['CUSTOM_LOGIN_INFO']

@@ -21,8 +21,6 @@ from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
-from awx.main.task_engine import TaskEnhancer
-from awx.conf.license import LicenseForbids
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',
@@ -255,7 +253,10 @@ class BaseAccess(object):
         return True  # User has access to both, permission check passed
 
     def check_license(self, add_host_name=None, feature=None, check_expiration=True):
-        validation_info = TaskEnhancer().validate_enhancements()
+        validation_info = get_licenser().validate()
+        if validation_info['license_type'] == 'open':
+            return
+
         if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999

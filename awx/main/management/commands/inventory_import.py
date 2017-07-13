@@ -22,12 +22,12 @@ from django.utils.encoding import smart_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (
     ignore_inventory_computed_fields,
     check_proot_installed,
     wrap_args_with_proot,
-    build_proot_temp_dir
+    build_proot_temp_dir,
+    get_licenser
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
@@ -845,10 +845,12 @@ class Command(NoArgsCommand):
         self._create_update_group_hosts()
 
     def check_license(self):
-        license_info = TaskEnhancer().validate_enhancements()
+        license_info = get_licenser().validate()
         if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No license found!')
+        elif license_info['license_type'] == 'open':
+            return
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)

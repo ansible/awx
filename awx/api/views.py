@@ -279,7 +279,7 @@ class ApiV1ConfigView(APIView):
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
-            eula=render_to_string("eula.md"),
+            eula=render_to_string("eula.md") if license_data['license_type'] != 'open' else '',
             analytics_status=pendo_state
         )
 
@@ -323,9 +323,9 @@ class ApiV1ConfigView(APIView):
                         extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            from awx.main.task_engine import TaskEnhancer
+            from awx.main.utils.common import get_licenser
             license_data = json.loads(data_actual)
-            license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
+            license_data_validated = get_licenser(**license_data).validate()
         except Exception:
             logger.warning(smart_text(u"Invalid license submitted."),
                            extra=dict(actor=request.user.username))
