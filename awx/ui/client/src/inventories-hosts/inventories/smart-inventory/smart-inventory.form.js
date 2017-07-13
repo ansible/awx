@@ -65,10 +65,6 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     label: i18n._('Smart Host Filter'),
                     type: 'custom',
                     control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
-                    basePath: 'hosts',
-                    list: 'HostsList',
-                    sourceModel: 'host',
-                    sourceField: 'name',
                     required: true,
                     class: 'Form-formGroup--fullWidth'
                 },
