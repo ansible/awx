@@ -77,8 +77,9 @@ export default [
                                 // behind the comma.
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key].toString();
-                                }
-                                else {
+                                } else if (key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH") {
+                                    $scope[key] = JSON.stringify(data[key]);
+                                } else {
                                     $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
                                 }
 

@@ -9,16 +9,30 @@ export default ['$q',
 
         return {
             listToArray: function(input) {
-                if (input.indexOf('\n') !== -1) {
+                var payload;
+
+                if (input.indexOf('[') !== -1) {
+                    try {
+                        payload = JSON.parse(input);
+
+                        if (!Array.isArray(payload)) {
+                            payload = [];
+                        }
+                    } catch(err) {
+                        payload = [];
+                    }
+                } else if (input.indexOf('\n') !== -1) {
                     //Parse multiline input
-                    return input.replace(/^\s+|\s+$/g, "").split('\n');
+                    payload = input.replace(/^\s+|\s+$/g, "").split('\n');
                 } else {
-                    if (input === '') {
-                        return [];
+                    if (input === '' || input === '{}') {
+                        payload = [];
                     } else {
-                        return input.replace(/^\s+|\s+$/g, "").split(/\s*,\s*/);
+                        payload = input.replace(/^\s+|\s+$/g, "")
+                            .split(/\s*,\s*/);
                     }
                 }
+                return payload;
             },
 
             arrayToList: function(input) {
