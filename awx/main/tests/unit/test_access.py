@@ -1,11 +1,9 @@
 import pytest
 import mock
-import os
 
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ParseError
-from rest_framework.exceptions import PermissionDenied
 
 from awx.main.access import (
     BaseAccess,

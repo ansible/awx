@@ -163,10 +163,23 @@ def get_awx_version():
 
 class StubLicense(object):
 
+    features = {
+        'activity_streams': True,
+        'ha': True,
+        'ldap': True,
+        'multiple_organizations': True,
+        'surveys': True,
+        'system_tracking': True,
+        'rebranding': True,
+        'enterprise_auth': True,
+        'workflows': True,
+    }
+
     def validate(self):
         return dict(license_key='OPEN',
                     valid_key=True,
                     compliant=True,
+                    features=self.features,
                     license_type='open')
 
 

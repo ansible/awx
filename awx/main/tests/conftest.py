@@ -1,6 +1,5 @@
 
 # Python
-import time
 import pytest
 import mock
 from contextlib import contextmanager

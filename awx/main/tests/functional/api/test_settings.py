@@ -127,9 +127,6 @@ def test_radius_settings(get, put, patch, delete, admin, settings):
 def test_ui_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'})
     response = get(url, user=admin, expect=200)
-    assert 'CUSTOM_LOGO' not in response.data
-    assert 'CUSTOM_LOGIN_INFO' not in response.data
-    response = get(url, user=admin, expect=200)
     assert not response.data['CUSTOM_LOGO']
     assert not response.data['CUSTOM_LOGIN_INFO']
     put(url, user=admin, data=response.data, expect=200)
