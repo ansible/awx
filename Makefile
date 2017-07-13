@@ -843,6 +843,8 @@ deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
 	cd deb-build && tar -xf $(DEB_TAR_FILE)
 	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
 	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
+	cd deb-build/$(DEB_TAR_NAME)/debian/ && git clone git@github.com:ansible/tower-license.git
+	rm -rf deb-build/$(DEB_TAR_NAME)/debian/tower-license/.git
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
 
 ifeq ($(OFFICIAL),yes)
