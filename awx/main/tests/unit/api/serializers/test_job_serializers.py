@@ -89,13 +89,11 @@ class TestJobSerializerSubstitution():
 @mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', lambda x,y: {})
 class TestJobOptionsSerializerGetSummaryFields():
     def test__summary_field_labels_10_max(self, mocker, job_template, labels):
-        job_template.labels.all = mocker.MagicMock(**{'order_by.return_value': labels})
-        job_template.labels.all.return_value = job_template.labels.all
+        job_template.labels.all = mocker.MagicMock(**{'return_value': labels})
 
         serializer = JobOptionsSerializer()
         summary_labels = serializer._summary_field_labels(job_template)
 
-        job_template.labels.all.order_by.assert_called_with('name')
         assert len(summary_labels['results']) == 10
         assert summary_labels['results'] == [{'id': x.id, 'name': x.name} for x in labels[:10]]
 

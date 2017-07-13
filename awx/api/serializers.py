@@ -1250,9 +1250,9 @@ class HostSerializer(BaseSerializerWithVariables):
         except (KeyError, AttributeError):
             pass
         if has_model_field_prefetched(obj, 'groups'):
-            group_list = sorted([{'id': g.id, 'name': g.name} for g in obj.groups.all()], key=lambda x: x['name'])[:5]
+            group_list = sorted([{'id': g.id, 'name': g.name} for g in obj.groups.all()], key=lambda x: x['id'])[:5]
         else:
-            group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.all().order_by('name')[:5]]
+            group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.all().order_by('id')[:5]]
         group_cnt = obj.groups.count()
         d.setdefault('groups', {'count': group_cnt, 'results': group_list})
         d.setdefault('recent_jobs', [{
@@ -2216,11 +2216,10 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
         if has_model_field_prefetched(obj, 'labels'):
-            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
             label_ct = len(obj.labels.all())
         else:
-            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
             if len(label_list) < 10:
                 label_ct = len(label_list)
             else:
