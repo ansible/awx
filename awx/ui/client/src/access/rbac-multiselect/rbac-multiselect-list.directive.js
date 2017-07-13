@@ -59,6 +59,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.fields.name.ngClick = 'linkoutResource("inventory", inventory)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    delete list.disableRow;
                     break;
 
                 case 'JobTemplates':
