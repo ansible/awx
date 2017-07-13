@@ -557,7 +557,7 @@ class BaseTask(Task):
         urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
         safe_env = dict(env)
         for k,v in safe_env.items():
-            if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
+            if k in ('REST_API_URL', 'AWS_ACCESS_KEY_ID'):
                 continue
             elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
@@ -943,8 +943,8 @@ class RunJob(BaseTask):
         cred_files = kwargs.get('private_data_files', {}).get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.kind == 'aws':
-                env['AWS_ACCESS_KEY'] = cloud_cred.username
-                env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
+                env['AWS_ACCESS_KEY_ID'] = cloud_cred.username
+                env['AWS_SECRET_ACCESS_KEY'] = decrypt_field(cloud_cred, 'password')
                 if len(cloud_cred.security_token) > 0:
                     env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
                 # FIXME: Add EC2_URL, maybe EC2_REGION!
