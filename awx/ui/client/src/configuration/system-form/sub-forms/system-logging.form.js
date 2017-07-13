@@ -40,9 +40,6 @@
             LOG_AGGREGATOR_INDIVIDUAL_FACTS: {
                 type: 'toggleSwitch',
             },
-            LOG_AGGREGATOR_ENABLED: {
-                type: 'toggleSwitch',
-            },
             LOG_AGGREGATOR_PROTOCOL: {
                 type: 'select',
                 reset: 'LOG_AGGREGATOR_PROTOCOL',

@@ -66,7 +66,17 @@ export default [
             ConfigurationService.getCurrentValues()
                 .then(function(data) {
                     var currentKeys = _.keys(data);
+                    $scope.requiredLogValues = {};
                     _.each(currentKeys, function(key) {
+
+                        if(key === "LOG_AGGREGATOR_HOST") {
+                            $scope.requiredLogValues.LOG_AGGREGATOR_HOST = data[key];
+                        }
+
+                        if(key === "LOG_AGGREGATOR_TYPE") {
+                            $scope.requiredLogValues.LOG_AGGREGATOR_TYPE = data[key];
+                        }
+
                         if (data[key] !== null && typeof data[key] === 'object') {
                             if (Array.isArray(data[key])) {
                                 //handle arrays
@@ -301,6 +311,11 @@ export default [
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
+
+                    if(key === "LOG_AGGREGATOR_HOST" || key === "LOG_AGGREGATOR_TYPE") {
+                        $scope.requiredLogValues[key] = $scope.configDataResolve[key].default;
+                    }
+
                     if($scope[key + '_field'].type === "select"){
                         // We need to re-instantiate the Select2 element
                         // after resetting the value. Example:
@@ -410,6 +425,10 @@ export default [
             ConfigurationService.patchConfiguration(getFormPayload())
                 .then(function(data) {
                     loginUpdate();
+
+                    $scope.requiredLogValues.LOG_AGGREGATOR_HOST = $scope.LOG_AGGREGATOR_HOST;
+                    $scope.requiredLogValues.LOG_AGGREGATOR_TYPE = $scope.LOG_AGGREGATOR_TYPE;
+
                     saveDeferred.resolve(data);
                     $scope[formTracker.currentFormName()].$setPristine();
                 })
