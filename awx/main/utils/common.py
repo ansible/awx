@@ -21,6 +21,7 @@ import tempfile
 from decorator import decorator
 
 # Django
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 
@@ -288,7 +289,10 @@ def get_allowed_fields(obj, serializer_mapping):
 def _convert_model_field_for_display(obj, field_name, password_fields=None):
     # NOTE: Careful modifying the value of field_val, as it could modify
     # underlying model object field value also.
-    field_val = getattr(obj, field_name, None)
+    try:
+        field_val = getattr(obj, field_name, None)
+    except ObjectDoesNotExist:
+        return '<missing {}>-{}'.format(obj._meta.verbose_name, getattr(obj, '{}_id'.format(field_name)))
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields:
