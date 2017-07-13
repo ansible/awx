@@ -40,7 +40,6 @@ data:
     LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
     LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
     LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
-    LOGGING['loggers']['awx.main.commands.run_fact_cache_receiver']['handlers'] = ['console']
     LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
     LOGGING['loggers']['social']['handlers'] = ['console']
     LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
