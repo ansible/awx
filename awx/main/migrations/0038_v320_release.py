@@ -341,12 +341,12 @@ class Migration(migrations.Migration):
             name='ask_diff_mode_on_launch',
             field=models.BooleanField(default=False),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='job',
             name='diff_mode',
             field=models.BooleanField(default=False, help_text='If enabled, textual changes made to any templated files on the host are shown in the standard output'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='jobtemplate',
             name='diff_mode',
             field=models.BooleanField(default=False, help_text='If enabled, textual changes made to any templated files on the host are shown in the standard output'),
