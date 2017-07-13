@@ -624,7 +624,7 @@ class Command(NoArgsCommand):
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
-            group, createdGroup = self.inventory.groups.get_or_create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
+            group = self.inventory.groups.get_or_create(name=group_name, defaults={'variables':json.dumps(mem_group.variables), 'description':'imported'})[0]
             logger.info('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
@@ -748,14 +748,14 @@ class Command(NoArgsCommand):
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
             host_attrs = dict(variables=json.dumps(mem_host.variables),
-                              name=mem_host_name, description='imported')
+                              description='imported')
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
-            db_host, createdHost = self.inventory.hosts.get_or_create(**host_attrs)
+            db_host = self.inventory.hosts.get_or_create(name=mem_host_name, defaults={'variables':json.dumps(host_attrs)})[0]
             if enabled is False:
                 logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
