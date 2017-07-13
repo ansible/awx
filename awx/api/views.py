@@ -2907,10 +2907,14 @@ class JobTemplateSurveySpec(GenericAPIView):
 
             if survey_item["type"] == "password":
                 if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
-                    old_spec = obj.survey_spec
-                    for old_item in old_spec['spec']:
-                        if old_item['variable'] == survey_item['variable']:
-                            survey_item['default'] = old_item['default']
+                    if not obj.survey_spec:
+                        return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))), 
+                                        status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        old_spec = obj.survey_spec
+                        for old_item in old_spec['spec']:
+                            if old_item['variable'] == survey_item['variable']:
+                                survey_item['default'] = old_item['default']
             idx += 1
 
         obj.survey_spec = new_spec
