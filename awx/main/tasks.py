@@ -769,6 +769,8 @@ class BaseTask(Task):
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
+                if settings.DEBUG:
+                    logger.exception('exception occurred while running task')
         finally:
             if kwargs.get('private_data_dir', ''):
                 try:
