@@ -280,7 +280,7 @@ class ApiV1ConfigView(APIView):
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
-            eula=render_to_string("eula.md"),
+            eula=render_to_string("eula.md") if license_data['license_type'] != 'open' else '',
             analytics_status=pendo_state
         )
 
