@@ -347,7 +347,7 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
 def update_host_smart_inventory_memberships():
     try:
         with transaction.atomic():
-            smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False)
+            smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
             SmartInventoryMembership.objects.all().delete()
             memberships = []
             for smart_inventory in smart_inventories:
