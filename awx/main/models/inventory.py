@@ -384,6 +384,21 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         self.websocket_emit_status('pending_deletion')
         delete_inventory.delay(self.pk)
 
+    def _update_host_smart_inventory_memeberships(self):
+        if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:
+            def on_commit():
+                from awx.main.tasks import update_host_smart_inventory_memberships
+                update_host_smart_inventory_memberships.delay()
+            connection.on_commit(on_commit)
+
+    def save(self, *args, **kwargs):
+        self._update_host_smart_inventory_memeberships()
+        super(Inventory, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self._update_host_smart_inventory_memeberships()
+        super(Inventory, self).delete(*args, **kwargs)
+
 
 class SmartInventoryMembership(BaseModel):
     '''
@@ -567,6 +582,21 @@ class Host(CommonModelNameNotUnique):
         if 'ansible_host' in self.variables_dict:
             host_name = self.variables_dict['ansible_host']
         return host_name
+
+    def _update_host_smart_inventory_memeberships(self):
+        if settings.AWX_REBUILD_SMART_MEMBERSHIP:
+            def on_commit():
+                from awx.main.tasks import update_host_smart_inventory_memberships
+                update_host_smart_inventory_memberships.delay()
+            connection.on_commit(on_commit)
+
+    def save(self, *args, **kwargs):
+        self._update_host_smart_inventory_memeberships()
+        super(Host, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self._update_host_smart_inventory_memeberships()
+        super(Host, self).delete(*args, **kwargs)
 
 
 class Group(CommonModelNameNotUnique):
