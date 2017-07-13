@@ -306,7 +306,7 @@ export default [
         $scope.resetValue = function(key) {
             Wait('start');
             var payload = {};
-            payload[key] = $scope.configDataResolve[key].default ? $scope.configDataResolve[key].default : null;
+            payload[key] = $scope.configDataResolve[key].default;
 
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
