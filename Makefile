@@ -742,6 +742,10 @@ rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_
 	cp packaging/bytecompile.sh rpm-build/
 	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
 
+	cd rpm-build && git clone git@github.com:ansible/tower-license.git
+	cd rpm-build/tower-license && $(PYTHON) setup.py sdist
+	cp rpm-build/tower-license/dist/* rpm-build/ && rm -rf rpm-build/tower-license
+
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
