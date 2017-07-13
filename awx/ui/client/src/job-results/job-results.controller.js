@@ -54,8 +54,8 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     $scope.jobExtraCredentials = jobExtraCredentials;
 
-    var getTowerLinks = function() {
-        var getTowerLink = function(key) {
+    var getLinks = function() {
+        var getLink = function(key) {
             if(key === 'schedule') {
                 if($scope.job.related.schedule) {
                     return '/#/templates/job_template/' + $scope.job.job_template + '/schedules' + $scope.job.related.schedule.split(/api\/v\d+\/schedules/)[1];
@@ -82,21 +82,21 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             }
         };
 
-        $scope.created_by_link = getTowerLink('created_by');
-        $scope.scheduled_by_link = getTowerLink('schedule');
-        $scope.inventory_link = getTowerLink('inventory');
-        $scope.project_link = getTowerLink('project');
-        $scope.machine_credential_link = getTowerLink('credential');
-        $scope.cloud_credential_link = getTowerLink('cloud_credential');
-        $scope.network_credential_link = getTowerLink('network_credential');
-        $scope.vault_credential_link = getTowerLink('vault_credential');
-        $scope.schedule_link = getTowerLink('schedule');
+        $scope.created_by_link = getLink('created_by');
+        $scope.scheduled_by_link = getLink('schedule');
+        $scope.inventory_link = getLink('inventory');
+        $scope.project_link = getLink('project');
+        $scope.machine_credential_link = getLink('credential');
+        $scope.cloud_credential_link = getLink('cloud_credential');
+        $scope.network_credential_link = getLink('network_credential');
+        $scope.vault_credential_link = getLink('vault_credential');
+        $scope.schedule_link = getLink('schedule');
     };
 
     // uses options to set scope variables to their readable string
     // value
-    var getTowerLabels = function() {
-        var getTowerLabel = function(key) {
+    var getLabels = function() {
+        var getLabel = function(key) {
             if ($scope.jobOptions && $scope.jobOptions[key]) {
                 return $scope.jobOptions[key].choices
                     .filter(val => val[0] === $scope.job[key])
@@ -106,8 +106,8 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             }
         };
 
-        $scope.type_label = getTowerLabel('job_type');
-        $scope.verbosity_label = getTowerLabel('verbosity');
+        $scope.type_label = getLabel('job_type');
+        $scope.verbosity_label = getLabel('verbosity');
     };
 
     var getTotalHostCount = function(count) {
@@ -174,10 +174,10 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         $scope.job_status = jobData.status;
     }
 
-    // turn related api browser routes into tower routes
-    getTowerLinks();
+    // turn related api browser routes into front end routes
+    getLinks();
 
-    // the links below can't be set in getTowerLinks because the
+    // the links below can't be set in getLinks because the
     // links on the UI don't directly match the corresponding URL
     // on the API browser
     if(jobData.summary_fields && jobData.summary_fields.job_template &&
@@ -201,7 +201,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     }
 
     // use options labels to manipulate display of details
-    getTowerLabels();
+    getLabels();
 
     // set up a read only code mirror for extra vars
     $scope.variables = ParseVariableString($scope.job.extra_vars);

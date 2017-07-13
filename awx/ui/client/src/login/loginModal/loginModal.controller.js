@@ -10,7 +10,7 @@
  * @description
  * Controller for handling /#/login and /#/logout routes.
  *
- * Tower (app.js) verifies the user is authenticated and that the user session is not expired. If either condition is not true,
+ * (app.js) verifies the user is authenticated and that the user session is not expired. If either condition is not true,
  * the user is redirected to /#/login and the Authentication controller.
  *
  * Methods for checking the session state are found in [js/shared/AuthService.js](/static/docs/api/shared.function:AuthService), which is referenced here as Authorization.
@@ -43,10 +43,10 @@
  * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
  * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v2/me
  * - Store user information in the session cookie by calling Authorization.setUser().
- * - Get the Tower license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
- * - Stores the license object in memory by calling CheckLicense.test(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
+ * - Get the license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
+ * - Stores the license object in memory by calling CheckLicense.test(). This adds the version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
  *
- * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, Tower (in app.js) calls
+ * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, app.js calls
  * Timer.isExpired(). This verifies the UI does not think the session is expired, and if not, moves the expiration time into the future. The number of
  * seconds between API calls before a session is considered expired is set in config.js as session_timeout.
  *

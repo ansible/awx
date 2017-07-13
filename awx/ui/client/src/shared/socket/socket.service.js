@@ -165,7 +165,7 @@ export default
                     if(self.socket){
                         if (self.socket.readyState === 0 ) {
                             $rootScope.socketStatus = 'connecting';
-                            $rootScope.socketTip = i18n._("Live events: attempting to connect to the Tower server.");
+                            $rootScope.socketTip = i18n._(`Live events: attempting to connect to the ${$rootScope.BRAND_NAME} server.`);
                         }
                         else if (self.socket.readyState === 1){
                             $rootScope.socketStatus = 'ok';
@@ -173,7 +173,7 @@ export default
                         }
                         else if (self.socket.readyState === 2 || self.socket.readyState === 3 ){
                             $rootScope.socketStatus = 'error';
-                            $rootScope.socketTip = i18n._("Live events: error connecting to the Tower server.");
+                            $rootScope.socketTip = i18n._(`Live events: error connecting to the ${$rootScope.BRAND_NAME} server.`);
                         }
                         return;
                     }

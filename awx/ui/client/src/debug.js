@@ -22,7 +22,7 @@
  *
  *      ?aw.suspend=true
  *
- * to the end of the URL. When you see the Tower logo loaded on an otherwise blank page,
+ * to the end of the URL. When you see the main logo loaded on an otherwise blank page,
  * open the Dev Tools console and execute the code:
  *
  *      angular.resumeBootstrap()
@@ -55,4 +55,3 @@ export function time(fn, label) {
     };
 }
 /* jshint ignore:end */
-

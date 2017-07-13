@@ -6,8 +6,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     ParseVariableString, WorkflowService, count, $state, i18n, moment) {
         var runTimeElapsedTimer = null;
 
-        var getTowerLinks = function() {
-            var getTowerLink = function(key) {
+        var getLinks = function() {
+            var getLink = function(key) {
                 if(key === 'schedule') {
                     if($scope.workflow.related.schedule) {
                         return '/#/templates/workflow_job_template/' + $scope.workflow.workflow_job_template + '/schedules' + $scope.workflow.related.schedule.split(/api\/v\d+\/schedules/)[1];
@@ -27,14 +27,14 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             };
 
             $scope.workflow_template_link = '/#/templates/workflow_job_template/'+$scope.workflow.workflow_job_template;
-            $scope.created_by_link = getTowerLink('created_by');
-            $scope.scheduled_by_link = getTowerLink('schedule');
-            $scope.cloud_credential_link = getTowerLink('cloud_credential');
-            $scope.network_credential_link = getTowerLink('network_credential');
+            $scope.created_by_link = getLink('created_by');
+            $scope.scheduled_by_link = getLink('schedule');
+            $scope.cloud_credential_link = getLink('cloud_credential');
+            $scope.network_credential_link = getLink('network_credential');
         };
 
-        var getTowerLabels = function() {
-            var getTowerLabel = function(key) {
+        var getLabels = function() {
+            var getLabel = function(key) {
                 if ($scope.workflowOptions && $scope.workflowOptions[key]) {
                     return $scope.workflowOptions[key].choices
                         .filter(val => val[0] === $scope.workflow[key])
@@ -44,9 +44,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                 }
             };
 
-            $scope.status_label = getTowerLabel('status');
-            $scope.type_label = getTowerLabel('job_type');
-            $scope.verbosity_label = getTowerLabel('verbosity');
+            $scope.status_label = getLabel('status');
+            $scope.type_label = getLabel('job_type');
+            $scope.verbosity_label = getLabel('verbosity');
         };
 
         var updateWorkflowJobElapsedTimer = function(time) {
@@ -75,11 +75,11 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             // stdout full screen toggle tooltip text
             $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
-            // turn related api browser routes into tower routes
-            getTowerLinks();
+            // turn related api browser routes into front end routes
+            getLinks();
 
             // use options labels to manipulate display of details
-            getTowerLabels();
+            getLabels();
 
             // set up a read only code mirror for extra vars
             $scope.variables = ParseVariableString($scope.workflow.extra_vars);

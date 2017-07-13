@@ -26,7 +26,7 @@ export default ['i18n', function(i18n) {
                     ' track by module.value',
                 ngChange: 'moduleChange()',
                 required: true,
-                awPopOver: i18n._('These are the modules that Tower supports running commands against.'),
+                awPopOver: i18n._('These are the modules that {{BRAND_NAME}} supports running commands against.'),
                 dataTitle: i18n._('Module'),
                 dataPlacement: 'right',
                 dataContainer: 'body'

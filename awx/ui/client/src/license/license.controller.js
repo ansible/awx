@@ -37,7 +37,7 @@ export default
         var init = function(){
             // license/license.partial.html compares fileName
             $scope.fileName = N_("No file selected.");
-            $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
+            $scope.title = $rootScope.licenseMissing ? ($rootScope.BRAND_NAME + i18n._(" License")) : i18n._("License Management");
             $scope.license = config;
             $scope.license.version = config.version.split('-')[0];
             $scope.time = {};

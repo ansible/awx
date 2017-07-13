@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-// import listGenerator from 'tower/shared/list-generator/main';
 
 export default
     [   'Wait',  'CreateDialog', 'GetBasePath' ,

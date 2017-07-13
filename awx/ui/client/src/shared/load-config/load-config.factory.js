@@ -4,7 +4,7 @@ export default
 
             // These ettings used to be found in config.js, hardcoded now.
             var configSettings = {
-                //custom_logo: false, // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard tower console logo
+                //custom_logo: false, // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard console logo
                 // custom_login_info: "example notice", // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
                 "tooltip_delay": {
                     "show": 500,

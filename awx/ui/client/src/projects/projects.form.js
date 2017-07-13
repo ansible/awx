@@ -67,7 +67,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.  ' +
                     'Either that directory is empty, or all of the contents are already assigned to other projects.  ' +
                     'Create a new directory there and make sure the playbook files can be read by the "awx" system user, ' +
-                    'or have Tower directly retrieve your playbooks from source control using the SCM Type option above.</p>',
+                    'or have {{BRAND_NAME}} directly retrieve your playbooks from source control using the SCM Type option above.</p>',
                 closeable: false
             },
             base_dir: {
@@ -78,7 +78,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>' + i18n._('Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Change %s under "Configure Tower" to change this location.'), 'PROJECTS_ROOT') + '</p>',
+                    '<p>' + i18n.sprintf(i18n._('Change %s under "Configure {{BRAND_NAME}}" to change this location.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
