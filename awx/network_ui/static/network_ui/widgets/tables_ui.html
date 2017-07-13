@@ -1,3 +1,23 @@
 <div ng-controller="TablesUIController">
-    <h1>hello {{hello}}</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                </th>
+                <th ng-repeat="column_header in data[0]">
+                    {{column_header}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="(row_index, row) in data track by $index" ng-if="$index > 0">
+                <th>
+                    {{row[0]}}
+                </th>
+                <td ng-repeat="(column_index, cell) in row track by $index" ng-if="$index > 0" buttons="no" onbeforesave="updateData(cell, $data, column_index, row_index, data[0][column_index], row[0])" editable-text="cell">
+                    {{cell}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
