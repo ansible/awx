@@ -6,7 +6,8 @@ module.exports = {
                  "angular-ui-router",
                  "hamsterjs",
                  "angular-mousewheel",
-                 "reconnectingwebsocket"],
+                 "reconnectingwebsocket",
+                 "angular-xeditable"],
     },
     output: {
         path: __dirname + "/js",
