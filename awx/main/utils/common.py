@@ -289,7 +289,10 @@ def get_allowed_fields(obj, serializer_mapping):
 def _convert_model_field_for_display(obj, field_name, password_fields=None):
     # NOTE: Careful modifying the value of field_val, as it could modify
     # underlying model object field value also.
-    field_val = getattr(obj, field_name, None)
+    try:
+        field_val = getattr(obj, field_name, None)
+    except ObjectDoesNotExist:
+        return '<missing {}>-{}'.format(obj._meta.verbose_name, getattr(obj, '{}_id'.format(field_name)))
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields:
@@ -355,10 +358,7 @@ def model_to_dict(obj, serializer_mapping=None):
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
-        try:
-            attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
-        except ObjectDoesNotExist:
-            logger.warn(_('%s no longer exists for %s') % (field.name, obj))
+        attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
 
     return attr_d
 

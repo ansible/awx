@@ -8,9 +8,18 @@ from awx.main.models import (
     Organization,
     JobTemplate,
     Credential,
-    CredentialType
+    CredentialType,
+    InventorySource
 )
 
+# other AWX
+from awx.main.utils import model_to_dict
+from awx.api.serializers import InventorySourceSerializer
+
+
+model_serializer_mapping = {
+    InventorySource: InventorySourceSerializer
+}
 
 
 class TestImplicitRolesOmitted:
@@ -140,3 +149,11 @@ class TestUserModels:
         entry = ActivityStream.objects.filter(user=alice)[0]
         assert entry.operation == 'create'
         assert json.loads(entry.changes)['password'] == 'hidden'
+
+
+@pytest.mark.django_db
+def test_missing_related_on_delete(inventory_source):
+    old_is = InventorySource.objects.get(name=inventory_source.name)
+    inventory_source.inventory.delete()
+    d = model_to_dict(old_is, serializer_mapping=model_serializer_mapping)
+    assert d['inventory'] == '<missing inventory source>-{}'.format(old_is.inventory_id)
