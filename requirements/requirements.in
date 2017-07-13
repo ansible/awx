@@ -7,7 +7,7 @@ backports.ssl-match-hostname==3.5.0.1
 boto==2.46.1
 boto3==1.4.4
 channels==0.17.3
-celery==3.1.25
+celery==3.1.17
 daphne>=0.15.0,<1.0.0
 Django==1.8.16
 django-auth-ldap==1.2.8
