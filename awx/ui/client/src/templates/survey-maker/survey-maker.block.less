@@ -1,8 +1,11 @@
 @import "./client/src/shared/branding/colors.default.less";
 
 .SurveyMaker-dialog {
+    left: 50vw !important;
+    max-width: 1200px;
     padding: 0px;
-    margin-bottom: 20px;
+    transform: translate(-50%, 0%);
+    width: ~"calc(100vw - 50px)" !important;
 
     .ui-dialog-buttonpane, .ui-dialog-titlebar {
         display:none;
@@ -62,15 +65,14 @@
     display: flex;
     margin-top: 25px;
     min-height: 560px;
+    flex-flow: row nowrap;
+    justify-content: space-around;
 }
-.SurveyMaker-questionPanel {
-    display: flex;
-    flex: 0 0 475px;
-}
+.SurveyMaker-questionPanel,
 .SurveyMaker-previewPanel {
     display: flex;
-    flex: 0 0 637px;
-    max-width: 637px;
+    flex: 0 0 90%;
+    max-width: 500px;
 }
 
 .SurveyMaker-previewPanel--viewOnly {
@@ -151,8 +153,7 @@
     margin-bottom: 20px;
 }
 .SurveyMaker-previewInput {
-    flex: 1 0 523px;
-    max-width: 523px;
+    width: 100%;
 }
 .SurveyMaker-previewActions {
     display: flex;
@@ -228,6 +229,21 @@
     #survey_question_default_password {
         button {
             height: 30px; /* show/hide button should match our input height */
+        }
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .SurveyMaker-content {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .SurveyMaker-separatorPanel {
+        flex: 0 0 90%;
+        .SurveyMaker-contentSeparator {
+            width: 100%;
+            margin: 25px 0;
+            height: 1px;
         }
     }
 }
