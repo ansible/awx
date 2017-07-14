@@ -157,7 +157,7 @@ register(
     field_class=fields.StringListField,
     required=False,
     label=_('Paths to hide from isolated jobs'),
-    help_text=_('Additional paths to hide from isolated processes.'),
+    help_text=_('Additional paths to hide from isolated processes. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -167,7 +167,7 @@ register(
     field_class=fields.StringListField,
     required=False,
     label=_('Paths to expose to isolated jobs'),
-    help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs.'),
+    help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -271,7 +271,7 @@ register(
     field_class=fields.StringListField,
     required=False,
     label=_('Ansible Callback Plugins'),
-    help_text=_('List of paths to search for extra callback plugins to be used when running jobs.'),
+    help_text=_('List of paths to search for extra callback plugins to be used when running jobs. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
