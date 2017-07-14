@@ -16,7 +16,7 @@
         </div>
     </div>
     <!-- tags -->
-    <div class="SmartSearch-tags">
+    <div class="SmartSearch-tags" ng-show="!(searchTags | isEmpty)">
         <div class="SmartSearch-tagSection">
             <div class="SmartSearch-flexContainer">
                 <div class="SmartSearch-tagContainer" ng-repeat="tag in searchTags track by $index">
@@ -27,7 +27,7 @@
                         <span class="SmartSearch-name">{{tag}}</span>
                     </div>
                 </div>
-                <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" ng-show="!(searchTags | isEmpty)" translate>CLEAR ALL</a>
+                <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" translate>CLEAR ALL</a>
             </div>
         </div>
     </div>
