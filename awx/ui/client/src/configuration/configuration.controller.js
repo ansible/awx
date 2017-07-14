@@ -505,9 +505,6 @@ export default [
                         else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                             $scope.$broadcast(key+'_reverted');
                         }
-                        else if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
-                            $scope[key] = ConfigurationUtils.arrayToList($scope[key], key);
-                        }
                         else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
                             $scope[key] = '{}';
                             $scope.$broadcast('codeMirror_populated', key);

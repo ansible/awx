@@ -295,7 +295,7 @@ export default [
             let parts = url.split('/');
             let tab = parts[parts.length - 1];
 
-            if (tab === 'auth' && !codeInputInitialized) {
+            if (tab === 'auth') {
                 startCodeMirrors();
                 codeInputInitialized = true;
             }
