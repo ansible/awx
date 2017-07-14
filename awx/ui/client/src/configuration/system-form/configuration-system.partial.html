@@ -35,8 +35,8 @@
                             </a>
                     	</label>
                         <div class="ScheduleToggle" ng-class="{'is-on': LOG_AGGREGATOR_ENABLED, 'ScheduleToggle--disabled': (!LOG_AGGREGATOR_ENABLED && (!requiredLogValues.LOG_AGGREGATOR_HOST || requiredLogValues.LOG_AGGREGATOR_HOST === '' || !requiredLogValues.LOG_AGGREGATOR_TYPE || requiredLogValues.LOG_AGGREGATOR_TYPE === '')) || $rootScope.user_is_system_auditor}">
-                            <button ng-show="LOG_AGGREGATOR_ENABLED" class="ScheduleToggle-switch is-on" ng-click="toggleForm('LOG_AGGREGATOR_ENABLED')">ON</button>
-                            <button ng-show="!LOG_AGGREGATOR_ENABLED" class="ScheduleToggle-switch" ng-click="toggleForm('LOG_AGGREGATOR_ENABLED')">OFF</button>
+                            <button ng-show="LOG_AGGREGATOR_ENABLED" class="ScheduleToggle-switch is-on" ng-click="toggleForm('LOG_AGGREGATOR_ENABLED')" ng-disabled="$rootScope.user_is_system_auditor">ON</button>
+                            <button ng-show="!LOG_AGGREGATOR_ENABLED" class="ScheduleToggle-switch" ng-click="toggleForm('LOG_AGGREGATOR_ENABLED')" ng-disabled="!requiredLogValues.LOG_AGGREGATOR_HOST || requiredLogValues.LOG_AGGREGATOR_HOST === '' || !requiredLogValues.LOG_AGGREGATOR_TYPE || requiredLogValues.LOG_AGGREGATOR_TYPE === '' || $rootScope.user_is_system_auditor">OFF</button>
                         </div>
                     </div>
                     <div id="system-logging-form">
