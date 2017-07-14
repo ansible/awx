@@ -22,6 +22,8 @@ from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
 
+from awx.conf.license import LicenseForbids
+
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',
            'user_admin_role', 'StateConflict',]
