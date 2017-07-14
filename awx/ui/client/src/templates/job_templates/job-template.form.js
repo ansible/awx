@@ -304,7 +304,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         label: i18n._('Use Fact Cache'),
                         type: 'checkbox',
                         column: 2,
-                        awPopOver: "<p>" + i18n._("If enabled, a fact scan will be done when this job is launched.") + "</p>",
+                        awPopOver: "<p>" + i18n._("If enabled, use cached facts if available and store discovered facts in the cache.") + "</p>",
                         dataPlacement: 'right',
                         dataTitle: i18n._('Use Fact Cache'),
                         dataContainer: "body",
