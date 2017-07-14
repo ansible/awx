@@ -13,14 +13,14 @@ var moduleConfig =
                 sortKey: 2
             },
         'files':
-            {   compareKey: ['size', 'mode', 'md5', 'mtime', 'gid', 'uid'],
+            {   compareKey: ['size', 'mode', 'checksum', 'mtime', 'gid', 'uid'],
                 keyNameMap:
                     {   'uid': 'ownership'
                     },
                 factTemplate:
                     {   'uid': 'user id: {{uid}}, group id: {{gid}}',
                         'mode': true,
-                        'md5': true,
+                        'checksum': true,
                         'size': true,
                         'mtime': '{{mtime|formatEpoch}}'
                     },
