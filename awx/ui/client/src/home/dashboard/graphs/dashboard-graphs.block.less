@@ -112,7 +112,7 @@
     color: @db-graph-per-dd-icon;
     font-size: 12px;
     width: 20px;
-    padding-left:10px;
+    padding-left: 10px;
     padding-right: 10px;
     float: right;
 }
@@ -125,7 +125,11 @@
     text-transform: uppercase;
     cursor: pointer;
     border-color: @d7grey;
-    min-width: 105px;
+    min-width: 115px;
+
+    a > span {
+        float: none;
+    }
 }
 
 .DashboardGraphs-filterDropdownItems {
@@ -139,8 +143,8 @@
 .DashboardGraphs-statusDropdown {
     font-size: 10px;
     display: inline-block;
-    padding-top:0px;
-    min-width: 105px;
+    padding-top: 0px;
+    min-width: 115px;
     width: inherit;
 
     span {
@@ -226,7 +230,7 @@
     .DashboardGraphs-filterLabel {
         margin-top: 10px;
         width: 50%;
-        float:left;
+        float: left;
         padding-left: 0;
     }
 
