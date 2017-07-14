@@ -2,9 +2,11 @@
 # All Rights Reserved
 
 from awx.main.models import Instance
+from awx.main.utils.pglock import advisory_lock
 from django.conf import settings
 
 from optparse import make_option
+from django.db import transaction
 from django.core.management.base import BaseCommand
 
 
@@ -25,15 +27,17 @@ class Command(BaseCommand):
     def _register_hostname(self, hostname):
         if not hostname:
             return
-        instance = Instance.objects.filter(hostname=hostname)
-        if instance.exists():
-            print("Instance already registered {}".format(instance[0]))
-            return
-        instance = Instance(uuid=self.uuid, hostname=hostname)
-        instance.save()
+        with advisory_lock('instance_registration_%s' % hostname):
+            instance = Instance.objects.filter(hostname=hostname)
+            if instance.exists():
+                print("Instance already registered {}".format(instance[0]))
+                return
+            instance = Instance(uuid=self.uuid, hostname=hostname)
+            instance.save()
         print('Successfully registered instance {}'.format(hostname))
         self.changed = True
 
+    @transaction.atomic
     def handle(self, **options):
         self.uuid = settings.SYSTEM_UUID
         self.changed = False
