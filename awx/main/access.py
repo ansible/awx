@@ -254,7 +254,7 @@ class BaseAccess(object):
 
     def check_license(self, add_host_name=None, feature=None, check_expiration=True):
         validation_info = get_licenser().validate()
-        if validation_info['license_type'] == 'open':
+        if validation_info.get('license_type', 'UNLICENSED') == 'open':
             return
 
         if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):

@@ -43,7 +43,7 @@ def get_licensed_features():
 def feature_enabled(name):
     """Return True if the requested feature is enabled, False otherwise."""
     validated_license_data = _get_validated_license_data()
-    if validated_license_data['license_type'] == 'open':
+    if validated_license_data.get('license_type', 'UNLICENSED') == 'open':
         return True
     return validated_license_data.get('features', {}).get(name, False)
 

@@ -852,7 +852,7 @@ class Command(NoArgsCommand):
         if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No license found!')
-        elif license_info['license_type'] == 'open':
+        elif license_info('license_type', 'UNLICENSED') == 'open':
             return
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
