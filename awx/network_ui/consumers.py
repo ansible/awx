@@ -851,3 +851,71 @@ def tester_message(message):
 @channel_session
 def tester_disconnect(message):
     pass
+
+# Tables UI channel events
+
+
+def make_sheet(data, column_headers=[]):
+
+    sheet = []
+
+    n_columns = max([len(x) for x in data])
+
+    row_i = 0
+    sheet.append([dict(value=x, editable=False) for x in list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")[0:n_columns]])
+    row_i += 1
+    if column_headers:
+        sheet.append([dict(value=row_i, editable=False)] + [dict(value=x, editable=False) for x in column_headers])
+        row_i += 1
+    for row in data:
+        sheet_row = [dict(value=row_i, editable=False)]
+        row_i += 1
+        sheet_row.extend([dict(value=x, editable=True, col=i, row=row_i) for i, x in enumerate(row)])
+        sheet.append(sheet_row)
+    return sheet
+
+
+
+def make_bindings(klass, filter_q, values_list, order_by):
+
+    values_list = ['pk'] + values_list
+    data = list(klass.objects.filter(**filter_q).values_list(*values_list).order_by(*order_by))
+
+    for row_i, row in enumerate(data):
+        pk = row[0]
+        for col_i, cell in enumerate(row):
+            field = values_list[col_i]
+            logger.info("make_bindings %s %s %s %s %s %s", klass.__name__, pk, col_i, row_i, field, type(cell).__name__)
+    return data
+
+
+
+@channel_session
+def tables_connect(message):
+    data = urlparse.parse_qs(message.content['query_string'])
+    topology_id = parse_topology_id(data)
+    message.channel_session['topology_id'] = topology_id
+    client = Client()
+    client.save()
+    message.channel_session['client_id'] = client.pk
+    message.reply_channel.send({"text": json.dumps(["id", client.pk])})
+    message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
+
+    data = make_bindings(Device, dict(topology_id=topology_id), ['name'], ['name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Devices", data=make_sheet(data, ['pk', 'Device Name']))])})
+
+    data = make_bindings(Interface, dict(device__topology_id=topology_id), ['device__name', 'name'], ['device__name', 'name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Interfaces", data=make_sheet(data, ['pk', 'Device Name', 'Interface Name']))])})
+
+    data = make_bindings(DeviceGroup, dict(topology_id=topology_id), ['name', 'groupdevice__device__name'], ['name', 'groupdevice__device__name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Groups", data=make_sheet(data, ['pk', 'Group Name', 'Device Name']))])})
+
+
+@channel_session
+def tables_message(message):
+    pass
+
+
+@channel_session
+def tables_disconnect(message):
+    pass
