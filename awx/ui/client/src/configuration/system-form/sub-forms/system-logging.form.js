@@ -53,6 +53,14 @@
                     reqExpression: "LOG_AGGREGATOR_PROTOCOL.value === 'tcp' || LOG_AGGREGATOR_PROTOCOL.value === 'https'",
                     init: "false"
                 },
+            },
+            LOG_AGGREGATOR_LEVEL: {
+                type: 'select',
+                reset: 'LOG_AGGREGATOR_LEVEL',
+                ngOptions: 'type.label for type in LOG_AGGREGATOR_LEVEL_options track by type.value'
+            },
+            LOG_AGGREGATOR_VERIFY_CERT: {
+                type: 'toggleSwitch'
             }
          },
 
