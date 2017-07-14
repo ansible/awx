@@ -20,7 +20,8 @@
     "mathjs": "",
     "reconnectingwebsocket": "^1.0.0",
     "hamsterjs": "~1.1.2",
-    "angular-mousewheel": "~1.0.5"
+    "angular-mousewheel": "~1.0.5",
+    "angular-xeditable": "~0.8.0"
   },
   "devDependencies": {
     "eslint": "^3.17.1",
