@@ -2,9 +2,11 @@
 # All Rights Reserved.
 import sys
 
+from awx.main.utils.pglock import advisory_lock
 from awx.main.models import InstanceGroup
 
 from optparse import make_option
+from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -20,14 +22,17 @@ class Command(BaseCommand):
                     help='Queue to create/update'),
     )
 
+    @transaction.atomic
     def handle(self, **options):
-        if not options.get('queuename'):
+        queuename = options.get('queuename')
+        if not queuename:
             raise CommandError('Must specify `--queuename` in order to use command.')
-        ig = InstanceGroup.objects.filter(name=options.get('queuename'))
-        if not ig.exists():
-            print("Instance group doesn't exist")
-            sys.exit(1)
-        ig = ig.first()
-        ig.delete()
-        print("Instance Group Removed")
-        print('(changed: True)')
+        with advisory_lock('instance_group_registration_%s' % queuename):
+            ig = InstanceGroup.objects.filter(name=queuename)
+            if not ig.exists():
+                print("Instance group doesn't exist")
+                sys.exit(1)
+            ig = ig.first()
+            ig.delete()
+            print("Instance Group Removed")
+            print('(changed: True)')
