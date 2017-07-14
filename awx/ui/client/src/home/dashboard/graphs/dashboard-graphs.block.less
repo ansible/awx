@@ -57,6 +57,15 @@
     padding-right: 10px;
     padding-left: 10px;
     text-transform: uppercase;
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+
+    & > span {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 20px;
+    }
 }
 
 .DashboardGraphs-graph {
@@ -80,17 +89,19 @@
 }
 
 .DashboardGraphs-filterDropdownText {
-    flex: initial;
     background-color: @db-graph-per-dd-bg;
     font-size: 10px;
     text-transform: uppercase;
     white-space: nowrap;
     padding-right: 5px;
-    padding-left: 10px;
+    padding-left: 5px;
     height: 20px;
     border: 1px solid @b7grey;
     border-radius: 5px;
     transition: background-color 0.2s;
+    display: inline-block;
+    vertical-align: middle;
+    width: 100%;
 }
 
 .DashboardGraphs-filterDropdownText:hover {
@@ -103,6 +114,7 @@
     width: 20px;
     padding-left:10px;
     padding-right: 10px;
+    float: right;
 }
 
 .DashboardGraphs-filterDropdownItems {
@@ -113,6 +125,7 @@
     text-transform: uppercase;
     cursor: pointer;
     border-color: @d7grey;
+    min-width: 105px;
 }
 
 .DashboardGraphs-filterDropdownItems {
@@ -125,11 +138,25 @@
 .DashboardGraphs-jobTypeDropdown,
 .DashboardGraphs-statusDropdown {
     font-size: 10px;
+    display: inline-block;
     padding-top:0px;
-}
+    min-width: 105px;
+    width: inherit;
 
-.DashboardGraphs-filterDropdownItems {
-    min-width: 0;
+    span {
+        height: 18px;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 18px;
+        float: left;
+    }
+
+    i {
+        height: 18px;
+        line-height: 18px;
+        display: inline-block;
+        vertical-align: middle;
+    }
 }
 
 .DashboardGraphs-statusFilters{
@@ -169,10 +196,12 @@
 
 .DashboardGraphs-filteringDropdowns {
     display: inherit;
+    margin-left: 10px;
 }
 
 .DashboardGraphs-filterDropdownItems {
     li > a {
+        text-align: left;
         color: @default-interface-txt;
     }
 }
@@ -183,18 +212,28 @@
         margin-right: 0px;
     }
 
+    .DashboardGraphs-filterDropdownItems {
+        left: 50%;
+        right: 35px;
+    }
+
     .DashboardGraphs-filteringDropdowns {
         float: left;
         width: 100%;
-        margin-left: -10px;
+        margin-left: 0;
     }
 
     .DashboardGraphs-filterLabel {
+        margin-top: 10px;
         width: 50%;
         float:left;
+        padding-left: 0;
     }
 
-    .DashboardGraphs-periodDropdown {
+    .DashboardGraphs-periodDropdown,
+    .DashboardGraphs-jobTypeDropdown,
+    .DashboardGraphs-statusDropdown {
+        margin-top: 10px;
         width: 50%;
         float: left;
     }
