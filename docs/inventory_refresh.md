@@ -99,14 +99,18 @@ hosts with a name containing "nyc".
 
 ### Acceptance Critera
 When verifying acceptance we should ensure the following statements are true:
+``
 
 * `Inventory` has a new field named `kind` that defaults to empty and
 can only be set to `smart`.
 * `Inventory` has a new field named `host_filter` to empty and can only be
 set to a valid _SmartFilter_ string.
-* `Inventory` with a `host_filter` set and a `kind` of `smart` will have
-a `hosts` list reflecting the results of searching `/api/v2/hosts` with the same
+* `Inventory` with a `host_filter` set and a `kind` of `smart`:
+    * `hosts` list reflecting the results of searching `/api/v2/hosts` with the same
 search that is set in the `host_filter`.
+    * Not allow creation of Hosts
+    * Not allow creation of Groups
+    * Not allow creation of Inventory Sources
 
 ### API Concerns
 There are no breaking or backwards incompatible changes for this feature.
