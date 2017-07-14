@@ -47,7 +47,7 @@
         <div class="InsightsNav-anchor" ng-click="filterReports('not_solvable')"
             ng-class="{'is-currentFilter' : (currentFilter === 'not_solvable')}"
             ng-show="not_solvable_count>0">
-            <div class="InsightsNav-badgeTitle"><translate>Not Solvable With Playbook</translate></div>
+            <div class="InsightsNav-badgeTitle"><translate>No Remediation Playbook Available</translate></div>
             <span class="badge List-titleBadge InsightsNav-solvableBadge">{{not_solvable_count}}</span>
         </div>
         <div ng-click="refresh()">
