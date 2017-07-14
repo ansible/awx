@@ -23,7 +23,8 @@ export default
                         "styleActiveLine": true,
                         "lineNumbers": true,
                         "gutters": ["CodeMirror-lint-markers"],
-                        "lint": true
+                        "lint": true,
+                        "scrollbarStyle": null
                     },
                     "json": {
                         "mode": "application/json",
@@ -32,7 +33,8 @@ export default
                         "autoCloseBrackets": true,
                         "lineNumbers": true,
                         "gutters": ["CodeMirror-lint-markers"],
-                        "lint": true
+                        "lint": true,
+                        "scrollbarStyle": null
                     }
                 },
             };
