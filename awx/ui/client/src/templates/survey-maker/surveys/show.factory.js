@@ -3,18 +3,20 @@ export default
         return function(params) {
             // Set modal dimensions based on viewport width
 
-            var scope = params.scope,
+            let scope = params.scope,
                 callback = params.callback,
                 mode = (params.mode) ? params.mode : "survey-maker",
                 title = params.title,
                 element,
-                target = (mode==='survey-taker') ? 'password-modal' : "survey-modal-dialog";
+                target = (mode==='survey-taker') ? 'password-modal' : "survey-modal-dialog",
+                width = params.scope.can_edit ? 1200 : 600;
+
 
             CreateDialog({
                 id: target,
                 title: title,
                 scope: scope,
-                width: 1200,
+                width: width,
                 minWidth: 400,
                 draggable: false,
                 dialogClass: 'SurveyMaker-dialog',
