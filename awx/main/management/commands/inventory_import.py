@@ -421,7 +421,6 @@ class Command(NoArgsCommand):
                 mem_host.instance_id = instance_id
                 self.mem_instance_id_map[instance_id] = mem_host.name
 
-    @transaction.atomic
     def _delete_hosts(self):
         '''
         For each host in the database that is NOT in the local list, delete
@@ -463,7 +462,6 @@ class Command(NoArgsCommand):
                            len(connection.queries) - queries_before,
                            len(all_del_pks))
 
-    @transaction.atomic
     def _delete_groups(self):
         '''
         # If overwrite is set, for each group in the database that is NOT in
@@ -495,7 +493,6 @@ class Command(NoArgsCommand):
                            len(connection.queries) - queries_before,
                            len(all_del_pks))
 
-    @transaction.atomic
     def _delete_group_children_and_hosts(self):
         '''
         Clear all invalid child relationships for groups and all invalid host
@@ -557,7 +554,6 @@ class Command(NoArgsCommand):
                            len(connection.queries) - queries_before,
                            group_group_count + group_host_count)
 
-    @transaction.atomic
     def _update_inventory(self):
         '''
         Update/overwrite variables from "all" group.  If importing from a
@@ -582,7 +578,6 @@ class Command(NoArgsCommand):
         else:
             logger.info('%s variables unmodified', all_name.capitalize())
 
-    @transaction.atomic
     def _create_update_groups(self):
         '''
         For each group in the local list, create it if it doesn't exist in the
@@ -633,7 +628,6 @@ class Command(NoArgsCommand):
                            len(connection.queries) - queries_before,
                            len(self.all_group.all_groups))
 
-    @transaction.atomic
     def _update_db_host_from_mem_host(self, db_host, mem_host):
         # Update host variables.
         db_variables = db_host.variables_dict
@@ -685,7 +679,6 @@ class Command(NoArgsCommand):
                 logger.info('Host "%s" is now disabled', mem_host.name)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
-    @transaction.atomic
     def _create_update_hosts(self):
         '''
         For each host in the local list, create it if it doesn't exist in the
