@@ -9,7 +9,7 @@
         <a ui-sref="users" class="SetupItem">
             <h4 class="SetupItem-title" translate>Users</h4>
             <p class="SetupItem-description" translate>
-              Allow others to sign into Tower and own the content they create.
+              Allow others to sign into {{BRAND_NAME}} and own the content they create.
             </p>
         </a>
         <a ui-sref="teams" class="SetupItem">
@@ -59,19 +59,19 @@
         <a ui-sref="instanceGroups" class="SetupItem">
           <h4 class="SetupItem-title" translate>Instance Groups</h4>
           <p class="SetupItem-description" translate>
-          View list and capacity of Tower instances.
+          View list and capacity of {{BRAND_NAME}} instances.
           </p>
         </a>
         <a ui-sref="configuration" class="SetupItem" ng-if="user_is_superuser || user_is_system_auditor">
-          <h4 class="SetupItem-title" translate>Configure Tower</h4>
+          <h4 class="SetupItem-title" translate>Configure {{BRAND_NAME}}</h4>
           <p class="SetupItem-description" translate>
-          Edit Tower's configuration.
+          Edit {{BRAND_NAME}}'s configuration.
           </p>
         </a>
         <a ui-sref="setup.about" class="SetupItem">
-          <h4 class="SetupItem-title" translate>About Tower</h4>
+          <h4 class="SetupItem-title" translate>About {{BRAND_NAME}}</h4>
           <p class="SetupItem-description" translate>
-          View information about this version of Ansible Tower.
+          View information about this version of Ansible {{BRAND_NAME}}.
           </p>
       </a>
     </div>

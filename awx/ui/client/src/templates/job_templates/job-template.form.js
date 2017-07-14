@@ -138,7 +138,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                             credentials-to-post="credentialsToPost">
                         </multi-credential>`,
                     required: true,
-                    awPopOver: "<p>" + i18n._("Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Select credentials that allow {{BRAND_NAME}} to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
                     dataTitle: i18n._('Credentials'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -281,7 +281,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         type: 'checkbox',
                         ngChange: "toggleCallback('host_config_key')",
                         column: 2,
-                        awPopOver: "<p>" + i18n._("Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
+                        awPopOver: "<p>" + i18n._("Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update " +
                             "using this job template.") + "</p>",
                         dataPlacement: 'right',
                         dataTitle: i18n._('Allow Provisioning Callbacks'),

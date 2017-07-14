@@ -10,7 +10,7 @@
  * @description This form is for adding/editing a Job Template
 */
 
-export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
+export default ['NotificationsList', 'i18n', '$rootScope', function(NotificationsList, i18n, $rootScope) {
     return function() {
         var WorkflowMakerFormObject = {
 
@@ -99,7 +99,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                         i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook. Instead, %s will check playbook " +
                         " syntax, test environment setup and report problems."), "<em>check</em>", "<code>ansible</code>") + "</p> <p>" +
                         i18n.sprintf(i18n._("Setting the type to %s will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature."), "<em>scan</em>") + "</p>",
+                        " scanned facts for use with " + $rootScope.BRAND_NAME + "'s System Tracking feature."), "<em>scan</em>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",

@@ -139,7 +139,7 @@ export default
                     .success(function(data) {
                         Wait('stop');
                         var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
-                        if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
+                        if(base !== 'portal' && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
                             var goTojobResults = function(state) {

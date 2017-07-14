@@ -9,10 +9,12 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'rbacUiControlService', 'ToJSON', 'SourcesService', 'Empty',
     'Wait', 'Rest', 'Alert', 'ProcessErrors', 'inventorySourcesOptions',
+    '$rootScope',
     function($state, $stateParams, $scope, SourcesFormDefinition,  ParseTypeChange,
         GenerateForm, inventoryData, GroupsService, GetChoices,
         GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService,
-        ToJSON, SourcesService, Empty, Wait, Rest, Alert, ProcessErrors, inventorySourcesOptions) {
+        ToJSON, SourcesService, Empty, Wait, Rest, Alert, ProcessErrors,
+        inventorySourcesOptions,$rootScope) {
 
         let form = SourcesFormDefinition;
         init();
@@ -152,7 +154,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             if($scope && $scope.source && $scope.source === 'ec2' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'ec2'){
                 $scope.group_by_choices = $scope.ec2_group_by;
                 $scope.groupByPopOver = "<p>Select which groups to create automatically. " +
-                    "Tower will create group names similar to the following examples based on the options selected:</p><ul>" +
+                    $rootScope.BRAND_NAME + " will create group names similar to the following examples based on the options selected:</p><ul>" +
                     "<li>Availability Zone: <strong>zones &raquo; us-east-1b</strong></li>" +
                     "<li>Image ID: <strong>images &raquo; ami-b007ab1e</strong></li>" +
                     "<li>Instance ID: <strong>instances &raquo; i-ca11ab1e</strong></li>" +
@@ -165,7 +167,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                     "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>";
                 $scope.instanceFilterPopOver = "<p>Provide a comma-separated list of filter expressions. " +
-                    "Hosts are imported to Tower when <em>ANY</em> of the filters match.</p>" +
+                    "Hosts are imported to " + $rootScope.BRAND_NAME + " when <em>ANY</em> of the filters match.</p>" +
                     "Limit to hosts having a tag:<br />\n" +
                     "<blockquote>tag-key=TowerManaged</blockquote>\n" +
                     "Limit to hosts using either key pair:<br />\n" +

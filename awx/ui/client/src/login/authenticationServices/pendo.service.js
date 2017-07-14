@@ -44,7 +44,7 @@ export default
                 // Detailed mode
                     // VisitorId: username+hash of license_key
                     // AccountId: hash of license_key from license
-                    // email: contact_email from license OR email from Tower account
+                    // email: contact_email from license OR email from user account
 
                 options.visitor.id = $rootScope.current_user.username + '@' + config.deployment_id;
                 options.account.id = config.deployment_id;

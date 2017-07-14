@@ -15,7 +15,7 @@
             </div>
             <div class="LoginModal-body">
                 <div class="LoginModal-alert" ng-show="!sessionExpired && !sessionLimitExpired && !attemptFailed && !thirdPartyAttemptFailed" translate>
-                    Welcome to Ansible Tower! &nbsp;Please sign in.
+                    Welcome to Ansible {{BRAND_NAME}}! &nbsp;Please sign in.
                 </div>
                 <div class="LoginModal-alert LoginModal-alert--error" ng-show="sessionExpired">
                     <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
