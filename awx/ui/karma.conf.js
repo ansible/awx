@@ -49,7 +49,11 @@ module.exports = function(config) {
                         test: /\.angular.js$/,
                         loader: 'expose?angular'
                     },
-
+                    {
+                        test: /\.json$/,
+                        loader: 'json-loader',
+                        exclude: '/(node_modules)/'
+                    },
                     {
                         test: /\.js$/,
                         loader: 'babel-loader',
