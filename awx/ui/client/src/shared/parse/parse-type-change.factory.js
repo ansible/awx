@@ -51,11 +51,16 @@ export default
                     // converting yaml to json
                     try {
                         removeField(fld);
+
                         json_obj = jsyaml.load(scope[fld]);
+
                         if ($.isEmptyObject(json_obj)) {
-                            scope[fld] = "{}";
-                        }
-                        else {
+                            if (Array.isArray(json_obj)) {
+                                scope[fld] = "[]";
+                            } else {
+                                scope[fld] = "{}";
+                            }
+                        } else {
                             scope[fld] = JSON.stringify(json_obj, null, " ");
                         }
                         createField(onReady, onChange, fld);

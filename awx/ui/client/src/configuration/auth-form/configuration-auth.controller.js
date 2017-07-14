@@ -313,6 +313,15 @@ export default [
             populateTacacsProtocol(false);
         });
 
+        $scope.$on('codeMirror_populated', function() {
+            let tab = $stateParams.currentTab;
+            if (tab === 'auth') {
+                startCodeMirrors();
+                codeInputInitialized = true;
+            }
+        });
+
+
         angular.extend(authVm, {
             activeForm: activeForm,
             activeAuthForm: activeAuthForm,
