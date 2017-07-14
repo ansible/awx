@@ -1644,9 +1644,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     def validate_source(self, value):
         if value == '':
-            raise serializers.ValidationError(
-                {"source": "Manual inventory sources are created automatically "
-                           "when a group is created in the v1 API."})
+            raise serializers.ValidationError(_(
+                "Manual inventory sources are created automatically when a group is created in the v1 API."))
         return value
 
     def validate(self, attrs):
