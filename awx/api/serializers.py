@@ -1638,7 +1638,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return ret
 
     def validate_source_project(self, value):
-        if value.scm_type == '':
+        if value and value.scm_type == '':
             raise serializers.ValidationError(_("Can not use manual project for SCM-based inventory."))
         return value
 
@@ -1646,6 +1646,11 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if value == '':
             raise serializers.ValidationError(_(
                 "Manual inventory sources are created automatically when a group is created in the v1 API."))
+        return value
+
+    def validate_update_on_project_update(self, value):
+        if value and self.instance and self.instance.schedules.exists():
+            raise serializers.ValidationError(_("Setting not compatible with existing schedules."))
         return value
 
     def validate(self, attrs):
@@ -3418,7 +3423,7 @@ class ScheduleSerializer(BaseSerializer):
             raise serializers.ValidationError(_('Manual Project can not have a schedule set.'))
         elif type(value) == InventorySource and value.source == 'scm' and value.update_on_project_update:
             raise serializers.ValidationError(_(
-                'Inventory sources with `update_on_project_update` can not be shceduled. '
+                'Inventory sources with `update_on_project_update` cannot be scheduled. '
                 'Schedule its source project `{}` instead.'.format(value.source_project.name)))
         return value
 
