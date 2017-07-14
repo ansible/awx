@@ -619,7 +619,7 @@ class Command(NoArgsCommand):
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
-            group = self.inventory.groups.create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
+            group = self.inventory.groups.update_or_create(name=group_name, defaults={'variables':json.dumps(mem_group.variables), 'description':'imported'})[0]
             logger.info('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
@@ -741,14 +741,15 @@ class Command(NoArgsCommand):
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
             host_attrs = dict(variables=json.dumps(mem_host.variables),
-                              name=mem_host_name, description='imported')
+                              description='imported')
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
-            db_host = self.inventory.hosts.create(**host_attrs)
+            db_host = self.inventory.hosts.update_or_create(name=mem_host_name,
+                                                            defaults={'variables':host_attrs['variables'], 'description':host_attrs['description']})[0]
             if enabled is False:
                 logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
@@ -762,6 +763,7 @@ class Command(NoArgsCommand):
                            len(connection.queries) - queries_before,
                            len(self.all_group.all_hosts))
 
+    @transaction.atomic
     def _create_update_group_children(self):
         '''
         For each imported group, create all parent-child group relationships.
@@ -789,6 +791,7 @@ class Command(NoArgsCommand):
             logger.warning('Group-group updates took %d queries for %d group-group relationships',
                            len(connection.queries) - queries_before, group_group_count)
 
+    @transaction.atomic
     def _create_update_group_hosts(self):
         # For each host in a mem group, add it to the parent(s) to which it
         # belongs.
