@@ -67,7 +67,6 @@ import users from './users/main';
 import projects from './projects/main';
 import RestServices from './rest/main';
 import access from './access/main';
-import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
@@ -94,7 +93,6 @@ var tower = angular.module('Tower', [
     'I18N',
     uiRouter,
     'ui.router.state.events',
-    'pendolytics',
     'lrInfiniteScroll',
 
     about.name,
@@ -149,9 +147,6 @@ var tower = angular.module('Tower', [
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled($ENV['ng-debug'] || false);
-    }])
-    .config(['$pendolyticsProvider', function($pendolyticsProvider) {
-        $pendolyticsProvider.doNotAutoStart();
     }])
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({

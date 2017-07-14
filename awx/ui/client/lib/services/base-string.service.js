@@ -20,6 +20,7 @@ function BaseStringService (namespace) {
      * default.strings.json and fall back to defaults defined inline.
      */
     this.BRAND_NAME = defaults.BRAND_NAME || 'AWX';
+    this.PENDO_API_KEY = defaults.PENDO_API_KEY || '';
 
     /*
      * Globally relevant strings should be defined here to avoid duplication of content across the
