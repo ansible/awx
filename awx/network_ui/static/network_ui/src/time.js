@@ -45,6 +45,7 @@ _Past.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceDestroy',
          'DeviceMove',
          'DeviceLabelEdit',
+         'GroupLabelEdit',
          'LinkLabelEdit',
          'InterfaceLabelEdit',
          'InterfaceCreate',
@@ -272,6 +273,7 @@ _Present.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceDestroy',
          'DeviceMove',
          'DeviceLabelEdit',
+         'GroupLabelEdit',
          'InterfaceCreate',
          'InterfaceLabelEdit',
          'LinkCreate',
@@ -340,6 +342,11 @@ _Present.prototype.onLinkDestroy = function(controller, msg_type, message) {
 _Present.prototype.onDeviceLabelEdit = function(controller, msg_type, message) {
         if (message.sender !== controller.scope.client_id) {
             controller.scope.onDeviceLabelEdit(message);
+        }
+};
+_Present.prototype.onGroupLabelEdit = function(controller, msg_type, message) {
+        if (message.sender !== controller.scope.client_id) {
+            controller.scope.onGroupLabelEdit(message);
         }
 };
 _Present.prototype.onLinkLabelEdit = function(controller, msg_type, message) {
