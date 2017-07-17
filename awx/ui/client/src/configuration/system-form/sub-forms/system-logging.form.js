@@ -43,7 +43,8 @@
             LOG_AGGREGATOR_PROTOCOL: {
                 type: 'select',
                 reset: 'LOG_AGGREGATOR_PROTOCOL',
-                ngOptions: 'type.label for type in LOG_AGGREGATOR_PROTOCOL_options track by type.value'
+                ngOptions: 'type.label for type in LOG_AGGREGATOR_PROTOCOL_options track by type.value',
+                disableChooseOption: true
             },
             LOG_AGGREGATOR_TCP_TIMEOUT: {
                 type: 'text',
@@ -53,6 +54,15 @@
                     reqExpression: "LOG_AGGREGATOR_PROTOCOL.value === 'tcp' || LOG_AGGREGATOR_PROTOCOL.value === 'https'",
                     init: "false"
                 },
+            },
+            LOG_AGGREGATOR_LEVEL: {
+                type: 'select',
+                reset: 'LOG_AGGREGATOR_LEVEL',
+                ngOptions: 'type.label for type in LOG_AGGREGATOR_LEVEL_options track by type.value',
+                disableChooseOption: true
+            },
+            LOG_AGGREGATOR_VERIFY_CERT: {
+                type: 'toggleSwitch'
             }
          },
 
