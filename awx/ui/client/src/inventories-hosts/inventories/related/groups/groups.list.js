@@ -98,7 +98,7 @@
                 //label: 'Delete',
                 mode: 'all',
                 ngClick: "deleteGroup(group)",
-                awToolTip: i18n._('Disassociate group'),
+                awToolTip: i18n._('Delete group'),
                 dataPlacement: "top",
                 ngShow: "group.summary_fields.user_capabilities.delete"
             }

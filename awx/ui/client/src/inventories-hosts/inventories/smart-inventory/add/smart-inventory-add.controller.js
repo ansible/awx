@@ -13,7 +13,7 @@
 function SmartInventoryAdd($scope, $location,
     GenerateForm, smartInventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
-    $state, canAdd) {
+    $state, canAdd, InstanceGroupsService) {
 
     $scope.canAdd = canAdd;
 
@@ -64,9 +64,21 @@ function SmartInventoryAdd($scope, $location,
             Rest.setUrl(defaultUrl);
             Rest.post(data)
                 .success(function(data) {
-                    var inventory_id = data.id;
-                    Wait('stop');
-                    $state.go('inventories.editSmartInventory', {smartinventory_id: inventory_id}, {reload: true});
+                    const inventory_id = data.id,
+                        instance_group_url = data.related.instance_groups;
+
+                    InstanceGroupsService.addInstanceGroups(instance_group_url, $scope.instance_groups)
+                        .then(() => {
+                            Wait('stop');
+                            $state.go('inventories.editSmartInventory', {smartinventory_id: inventory_id}, {reload: true});
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, form, {
+                                hdr: 'Error!',
+                                msg: 'Failed to post instance groups. POST returned ' +
+                                    'status: ' + status
+                            });
+                        });
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, form, {
@@ -89,5 +101,5 @@ function SmartInventoryAdd($scope, $location,
 export default ['$scope', '$location',
     'GenerateForm', 'smartInventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange',
-    'Wait', 'ToJSON', '$state', 'canAdd', SmartInventoryAdd
+    'Wait', 'ToJSON', '$state', 'canAdd', 'InstanceGroupsService', SmartInventoryAdd
 ];

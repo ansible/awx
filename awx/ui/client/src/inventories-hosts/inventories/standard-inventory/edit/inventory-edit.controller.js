@@ -55,6 +55,7 @@ function InventoriesEdit($scope, $location,
         });
 
         $scope.inventory_obj = inventoryData;
+        $scope.inventory_name = inventoryData.name;
         $rootScope.breadcrumb.inventory_name = inventoryData.name;
 
         $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {

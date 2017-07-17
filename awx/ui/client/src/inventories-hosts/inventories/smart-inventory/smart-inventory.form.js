@@ -65,8 +65,20 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     label: i18n._('Smart Host Filter'),
                     type: 'custom',
                     control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
-                    required: true,
-                    class: 'Form-formGroup--fullWidth'
+                    awPopOver: "<p>" + i18n._("Filter that will be applied to the hosts of this inventory.") + "</p>",
+                    dataTitle: i18n._('Smart Host Filter'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    required: true
+                },
+                instance_groups: {
+                    label: i18n._('Instance Groups'),
+                    type: 'custom',
+                    awPopOver: "<p>" + i18n._("Select the Instance Groups for this Inventory to run on.") + "</p>",
+                    dataTitle: i18n._('Instance Groups'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
                 },
                 smartinventory_variables: {
                     label: i18n._('Variables'),
