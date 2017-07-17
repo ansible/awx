@@ -694,6 +694,16 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         }
     };
 
+    $scope.forGroup = function(group_id, data, fn) {
+        var i = 0;
+        for (i = 0; i < $scope.groups.length; i++) {
+            if ($scope.groups[i].id === group_id) {
+                fn($scope.groups[i], data);
+                break;
+            }
+        }
+    };
+
     $scope.onDeviceLabelEdit = function(data) {
         $scope.edit_device_label(data);
     };
@@ -860,6 +870,17 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                 }
             }
         }
+    };
+
+
+    $scope.onGroupLabelEdit = function(data) {
+        $scope.edit_group_label(data);
+    };
+
+    $scope.edit_group_label = function(data) {
+        $scope.forGroup(data.id, data, function(group, data) {
+            group.name = data.name;
+        });
     };
 
     $scope.redo = function(type_data) {
