@@ -171,6 +171,8 @@ ifeq ($(DISTRO),ubuntu)
     SETUP_INSTALL_ARGS += --install-layout=deb
 endif
 
+I18N_FLAG_FILE = .i18n_built
+
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
 UI_RELEASE_FLAG_FILE = awx/ui/.release_built
@@ -242,6 +244,7 @@ clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-di
 	rm -f awx/awx_test.sqlite3
 	rm -rf requirements/vendor
 	rm -rf tmp
+	rm -rf $(I18N_FLAG_FILE)
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -595,9 +598,12 @@ messages:
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
 # generate l10n .json .mo
-languages: $(UI_DEPS_FLAG_FILE) check-po
+languages: $(I18N_FLAG_FILE)
+
+$(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run languages
 	$(PYTHON) tools/scripts/compilemessages.py
+	touch $(I18N_FLAG_FILE)
 
 # End l10n TASKS
 # --------------------------------------
@@ -624,7 +630,7 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-$(UI_RELEASE_FLAG_FILE): languages $(UI_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 
