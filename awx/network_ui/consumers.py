@@ -270,7 +270,7 @@ class _Persistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported message ", message_type
+            logger.warning("Unsupported message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -376,7 +376,7 @@ class _Persistence(object):
             if handler is not None:
                 handler(message, topology_id, client_id)
             else:
-                print "Unsupported message ", message['msg_type']
+                logger.warning("Unsupported message %s", message['msg_type'])
 
     def onDeploy(self, message_value, topology_id, client_id):
         DeviceGroup("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
@@ -480,7 +480,7 @@ class _UndoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported undo message ", message_type
+            logger.warnding("Unsupported undo message %s", message_type)
 
     def onSnapshot(self, snapshot, topology_id, client_id):
         pass
@@ -541,7 +541,7 @@ class _RedoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported redo message ", message_type
+            logger.warning("Unsupported redo message %s", message_type)
 
     def onDeviceSelected(self, message_value, topology_id, client_id):
         'Ignore DeviceSelected messages'
@@ -574,7 +574,7 @@ class _Discovery(object):
         if handler is not None:
             handler(message_value, topology_id)
         else:
-            print "Unsupported message ", message_type
+            logger.warning("Unsupported message ", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -913,7 +913,9 @@ def tables_connect(message):
 
 @channel_session
 def tables_message(message):
-    pass
+    data = json.loads(message['text'])
+    logger.info(data[0])
+    logger.info(data[1])
 
 
 @channel_session
