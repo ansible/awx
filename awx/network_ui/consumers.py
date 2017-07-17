@@ -4,6 +4,7 @@ from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
 from awx.network_ui.models import Group as DeviceGroup
 from awx.network_ui.models import GroupDevice as GroupDeviceMap
+from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
@@ -859,7 +860,7 @@ def make_sheet(data, column_headers=[]):
 
     sheet = []
 
-    n_columns = max([len(x) for x in data])
+    n_columns = max([len(x) for x in data]) - 1
 
     row_i = 0
     sheet.append([dict(value=x, editable=False) for x in list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")[0:n_columns]])
@@ -870,22 +871,48 @@ def make_sheet(data, column_headers=[]):
     for row in data:
         sheet_row = [dict(value=row_i, editable=False)]
         row_i += 1
-        sheet_row.extend([dict(value=x, editable=True, col=i, row=row_i) for i, x in enumerate(row)])
+        sheet_row.extend([dict(value=x, editable=True, col=i, row=row_i) for i, x in enumerate(row[1:])])
         sheet.append(sheet_row)
     return sheet
 
 
 
-def make_bindings(klass, filter_q, values_list, order_by):
+def make_bindings(sheet_id, klass, filter_q, values_list, order_by):
 
     values_list = ['pk'] + values_list
     data = list(klass.objects.filter(**filter_q).values_list(*values_list).order_by(*order_by))
 
+    data_types = set()
+
+    for row in data:
+        for cell in row:
+            data_types.add(type(cell).__name__)
+
+    data_type_map = dict()
+
+    logger.info(repr(data_types))
+
+    for dt in list(data_types):
+        data_type_map[dt] = DataType.objects.get_or_create(type_name=dt)[0].pk
+
+    logger.info(repr(data_type_map))
+
+    bindings = []
+
     for row_i, row in enumerate(data):
         pk = row[0]
-        for col_i, cell in enumerate(row):
-            field = values_list[col_i]
-            logger.info("make_bindings %s %s %s %s %s %s", klass.__name__, pk, col_i, row_i, field, type(cell).__name__)
+        for col_i, cell in enumerate(row[1:]):
+            field = values_list[col_i + 1]
+            if '__' in field:
+                continue
+            logger.info("make_bindings %s %s %s %s %s %s %s", sheet_id, klass.__name__, pk, col_i, row_i, field, data_type_map[type(cell).__name__])
+            bindings.append(DataBinding.objects.get_or_create(sheet_id=sheet_id,
+                                                              column=col_i,
+                                                              row=row_i,
+                                                              table=klass.__name__,
+                                                              primary_key_id=pk,
+                                                              field=field,
+                                                              data_type_id=data_type_map[type(cell).__name__])[0])
     return data
 
 
@@ -901,14 +928,17 @@ def tables_connect(message):
     message.reply_channel.send({"text": json.dumps(["id", client.pk])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
 
-    data = make_bindings(Device, dict(topology_id=topology_id), ['name'], ['name'])
-    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Devices", data=make_sheet(data, ['pk', 'Device Name']))])})
+    device_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Devices")
+    data = make_bindings(device_sheet.pk, Device, dict(topology_id=topology_id), ['name'], ['name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Devices", data=make_sheet(data, ['Device Name']))])})
 
-    data = make_bindings(Interface, dict(device__topology_id=topology_id), ['device__name', 'name'], ['device__name', 'name'])
-    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Interfaces", data=make_sheet(data, ['pk', 'Device Name', 'Interface Name']))])})
+    interface_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Interfaces")
+    data = make_bindings(interface_sheet.pk, Interface, dict(device__topology_id=topology_id), ['device__name', 'name'], ['device__name', 'name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Interfaces", data=make_sheet(data, ['Device Name', 'Interface Name']))])})
 
-    data = make_bindings(DeviceGroup, dict(topology_id=topology_id), ['name', 'groupdevice__device__name'], ['name', 'groupdevice__device__name'])
-    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Groups", data=make_sheet(data, ['pk', 'Group Name', 'Device Name']))])})
+    group_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Groups")
+    data = make_bindings(group_sheet.pk, DeviceGroup, dict(topology_id=topology_id), ['name'], ['name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Groups", data=make_sheet(data, ['Group Name']))])})
 
 
 @channel_session
@@ -916,6 +946,38 @@ def tables_message(message):
     data = json.loads(message['text'])
     logger.info(data[0])
     logger.info(data[1])
+
+    data_type_mapping = {'unicode': unicode,
+                         'int': int}
+
+
+    table_mapping = {'Device': Device,
+                     'Interface': Interface,
+                     'Group': DeviceGroup}
+
+
+    if data[0] == "TableCellEdit":
+
+        topology_id = message.channel_session['topology_id']
+        client_id = message.channel_session['client_id']
+        data_sheet = DataSheet.objects.get(topology_id=topology_id, client_id=client_id, name=data[1]['sheet']).pk
+        logger.info("DataSheet %s", data_sheet)
+
+        data_bindings = DataBinding.objects.filter(sheet_id=data_sheet,
+                                                   column=data[1]['col'] - 1,
+                                                   row=data[1]['row'] - 2)
+
+        logger.info("Found %s bindings", data_bindings.count())
+        logger.info(repr(data_bindings.values('table', 'data_type__type_name', 'field', 'primary_key_id')))
+
+        for table, data_type, field, pk in data_bindings.values_list('table', 'data_type__type_name', 'field', 'primary_key_id'):
+            value = data_type_mapping[data_type](data[1]['new_value'])
+            logger.info("Updating %s", table_mapping[table].objects.filter(pk=pk).values())
+            table_mapping[table].objects.filter(pk=pk).update(**{field: value})
+            logger.info("Updated %s", table_mapping[table].objects.filter(pk=pk).count())
+
+
+
 
 
 @channel_session
