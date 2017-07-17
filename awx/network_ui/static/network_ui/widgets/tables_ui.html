@@ -3,6 +3,9 @@
         <li ng-repeat="sheet in sheets" role="presentation" class="{{sheet === name ? 'active': ''}}"><a href ng-click="changeSheet(sheet)">{{sheet}}</a></li>
     </ul>
     <table class="table table-bordered">
+        <colgroup>
+            <col ng-repeat="column_header in data[0]" style="width:10%">
+        </colgroup>
         <thead>
             <tr>
                 <th>
