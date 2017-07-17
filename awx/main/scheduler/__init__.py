@@ -19,6 +19,7 @@ from awx.main.models import * # noqa
 #from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
+from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main import tasks as awx_tasks
@@ -221,9 +222,13 @@ class TaskManager():
             if not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
+                logger.debug('Submitting isolated job {} to queue {} via {}.'.format(
+                    task.id, task.instance_group_id, rampart_group.controller_id))
             else:
                 task.instance_group = rampart_group
-            task.save()
+                logger.debug('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
+            with disable_activity_stream():
+                task.save()
 
             self.consume_capacity(task, rampart_group.name)
 
