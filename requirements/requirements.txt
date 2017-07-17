@@ -168,7 +168,7 @@ service-identity==16.0.0
 shade==1.20.0
 simplejson==3.11.1        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
 six==1.10.0               # via asgi-amqp, asgiref, autobahn, cliff, cmd2, cryptography, debtcollector, django-extensions, irc, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, pygerduty, pyopenssl, pyrad, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, python-social-auth, pyvmomi, setuptools, shade, slackclient, stevedore, tacacs-plus, tempora, twilio, txaio, warlock, websocket-client
-slackclient==1.0.5
+slackclient==1.0.6
 stevedore==1.23.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
 suds==0.4                 # via psphere
 tacacs_plus==1.0
@@ -180,7 +180,7 @@ typing==3.6.1             # via m2crypto
 unicodecsv==0.14.1        # via cliff
 uwsgi==2.0.14
 warlock==1.2.0            # via python-glanceclient
-websocket-client==0.43.0  # via slackclient
+websocket-client==0.44.0  # via slackclient
 wrapt==1.10.10            # via debtcollector, positional, python-glanceclient
 xmltodict==0.11.0
 zope.interface==4.4.2     # via twisted
