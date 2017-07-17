@@ -18,6 +18,12 @@ from awx.network_ui.models import Group
 
 from awx.network_ui.models import GroupDevice
 
+from awx.network_ui.models import DataBinding
+
+from awx.network_ui.models import DataType
+
+from awx.network_ui.models import DataSheet
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
@@ -89,3 +95,27 @@ class GroupDeviceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(GroupDevice, GroupDeviceAdmin)
+
+
+class DataBindingAdmin(admin.ModelAdmin):
+    fields = ('column', 'row', 'table', 'primary_key_id', 'field', 'data_type', 'sheet',)
+    raw_id_fields = ('data_binding_id', 'data_type', 'sheet',)
+
+
+admin.site.register(DataBinding, DataBindingAdmin)
+
+
+class DataTypeAdmin(admin.ModelAdmin):
+    fields = ('type_name',)
+    raw_id_fields = ()
+
+
+admin.site.register(DataType, DataTypeAdmin)
+
+
+class DataSheetAdmin(admin.ModelAdmin):
+    fields = ('name', 'topology',)
+    raw_id_fields = ('topology',)
+
+
+admin.site.register(DataSheet, DataSheetAdmin)
