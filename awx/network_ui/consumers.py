@@ -941,6 +941,33 @@ def tables_connect(message):
     message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Groups", data=make_sheet(data, ['Group Name']))])})
 
 
+def device_label_edit(o):
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'DeviceLabelEdit'
+    return ['DeviceLabelEdit', d]
+
+
+def group_label_edit(o):
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'GroupLabelEdit'
+    return ['GroupLabelEdit', d]
+
+
+def interface_label_edit(o):
+    d = o.__dict__
+    d['device_id'] = o.device.id
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            device_id='device_id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'InterfaceLabelEdit'
+    return ['InterfaceLabelEdit', d]
+
+
 @channel_session
 def tables_message(message):
     data = json.loads(message['text'])
@@ -956,9 +983,15 @@ def tables_message(message):
                      'Group': DeviceGroup}
 
 
+    transformation_mapping = {('Device', 'name'): device_label_edit,
+                              ('Interface', 'name'): interface_label_edit,
+                              ('Group', 'name'): group_label_edit}
+
+
     if data[0] == "TableCellEdit":
 
         topology_id = message.channel_session['topology_id']
+        group_channel = Group("topology-%s" % topology_id)
         client_id = message.channel_session['client_id']
         data_sheet = DataSheet.objects.get(topology_id=topology_id, client_id=client_id, name=data[1]['sheet']).pk
         logger.info("DataSheet %s", data_sheet)
@@ -971,12 +1004,18 @@ def tables_message(message):
         logger.info(repr(data_bindings.values('table', 'data_type__type_name', 'field', 'primary_key_id')))
 
         for table, data_type, field, pk in data_bindings.values_list('table', 'data_type__type_name', 'field', 'primary_key_id'):
-            value = data_type_mapping[data_type](data[1]['new_value'])
+            new_value = data_type_mapping[data_type](data[1]['new_value'])
+            old_value = data_type_mapping[data_type](data[1]['old_value'])
             logger.info("Updating %s", table_mapping[table].objects.filter(pk=pk).values())
-            table_mapping[table].objects.filter(pk=pk).update(**{field: value})
+            table_mapping[table].objects.filter(pk=pk).update(**{field: new_value})
             logger.info("Updated %s", table_mapping[table].objects.filter(pk=pk).count())
 
-
+            for o in table_mapping[table].objects.filter(pk=pk):
+                o.old_value = old_value
+                message = transformation_mapping[(table, field)](o)
+                message['sender'] = 0
+                logger.info("Sending %r", message)
+                group_channel.send({"text": json.dumps(message)})
 
 
 
