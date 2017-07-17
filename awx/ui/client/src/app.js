@@ -77,7 +77,7 @@ import '../lib/models';
 import '../lib/services';
 import '../features';
 
-var tower = angular.module('Tower', [
+var app = angular.module('app', [
     // how to add CommonJS / AMD  third-party dependencies:
     // 1. npm install --save package-name
     // 2. add package name to ./grunt-tasks/webpack.vendorFiles
@@ -460,4 +460,4 @@ var tower = angular.module('Tower', [
         }
     ]);
 
-export default tower;
+export default app;

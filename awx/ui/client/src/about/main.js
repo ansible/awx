@@ -8,8 +8,8 @@
  import route from './about.route';
 
  export default
- 	angular.module('aboutTower', [])
- 		.controller('aboutTower', controller)
+ 	angular.module('about', [])
+ 		.controller('about', controller)
  		.run(['$stateExtender', function($stateExtender){
  			$stateExtender.addState(route);
  		}]);

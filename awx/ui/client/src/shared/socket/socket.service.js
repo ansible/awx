@@ -98,7 +98,7 @@ export default
                     str = `ws-${data.group_name}-${data.ad_hoc_command}`;
                 }
                 else if(data.group_name==="control"){
-                    // As of Tower v. 3.1.0, there is only 1 "control"
+                    // As of v. 3.1.0, there is only 1 "control"
                     // message, which is for expiring the session if the
                     // session limit is breached.
                     $log.debug(data.reason);

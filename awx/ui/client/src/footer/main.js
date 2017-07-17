@@ -8,4 +8,4 @@ import footerDirective from './footer.directive';
 
 export default
     angular.module('footer', [])
-        .directive('towerFooter', footerDirective);
+        .directive('customFooter', footerDirective);
