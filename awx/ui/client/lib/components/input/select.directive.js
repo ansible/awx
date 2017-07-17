@@ -59,7 +59,7 @@ function AtInputSelectController (baseInputController, eventService) {
 
     vm.updateDisplayModel = () => {
         if (scope.state._format === 'array') {
-            scope.displayModel = scope.state._data[scope.state._value];
+            scope.displayModel = scope.state._value;
         } else if (scope.state._format === 'objects') {
             scope.displayModel = scope.state._value[scope.state._display];
         } else if (scope.state._format === 'grouped-object') {
