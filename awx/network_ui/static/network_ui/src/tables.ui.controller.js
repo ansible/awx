@@ -55,6 +55,7 @@ var TablesUIController = function($scope, $window, $location) {
         var data = messages.serialize(message);
         if (!$scope.disconnected) {
             $scope.control_socket.send(data);
+            console.log("Sent message");
         } else {
             console.log(data);
         }
@@ -115,8 +116,13 @@ var TablesUIController = function($scope, $window, $location) {
     });
 
     $scope.updateData = function (old_data, new_data, column_index, row_index, column_name, row_name) {
-        console.log(['updateData', old_data, new_data, column_index, row_index, column_name, row_name]);
-        //$scope.data[row_index][column_index] = new_data;
+        console.log(['updateData', $scope.name, old_data, new_data, column_index, row_index, column_name, row_name]);
+        $scope.send_control_message(new messages.TableCellEdit($scope.client_id,
+                                                               $scope.name,
+                                                               column_index,
+                                                               row_index,
+                                                               old_data,
+                                                               new_data));
     };
 
     $scope.changeSheet = function(sheet) {
