@@ -37,9 +37,13 @@ export default ['$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     $scope.timeChange = () => {
         if (!Number($scope.schedulerStartHour)) {
             $scope.schedulerStartHour = '00';
-        } else if (!Number($scope.schedulerStartMinute)) {
+        }
+
+        if (!Number($scope.schedulerStartMinute)) {
             $scope.schedulerStartMinute = '00';
-        } else if (!Number($scope.schedulerStartSecond)) {
+        }
+
+        if (!Number($scope.schedulerStartSecond)) {
             $scope.schedulerStartSecond = '00';
         }
 
