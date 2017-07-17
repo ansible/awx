@@ -115,7 +115,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             if ($scope.scm_type) {
                 $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
                 $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
-                $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
+                $scope.scmBranchLabel = i18n._('SCM Branch');
                 // Dynamically update popover values
                 if ($scope.scm_type.value) {
                     if(($scope.lookupType === 'insights_credential' && $scope.scm_type.value !== 'insights') || ($scope.lookupType === 'scm_credential' && $scope.scm_type.value === 'insights')) {
@@ -134,6 +134,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                                 'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                             $scope.credRequired = false;
                             $scope.lookupType = 'scm_credential';
+                            $scope.scmBranchLabel = i18n._('SCM Branch/Tag/Commit');
                             break;
                         case 'svn':
                             $scope.credentialLabel = "SCM Credential";
@@ -142,6 +143,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                                 '<li>svn+ssh://servername.example.com/path</li></ul>';
                             $scope.credRequired = false;
                             $scope.lookupType = 'scm_credential';
+                            $scope.scmBranchLabel = i18n._('Revision #');
                             break;
                         case 'hg':
                             $scope.credentialLabel = "SCM Credential";
@@ -153,6 +155,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                                 'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                             $scope.credRequired = false;
                             $scope.lookupType = 'scm_credential';
+                            $scope.scmBranchLabel = i18n._('SCM Branch/Tag/Revision');
                             break;
                         case 'insights':
                             $scope.pathRequired = false;
