@@ -76,8 +76,6 @@ models:
     type: FloatField
   - default: 0
     name: device_id_seq
-    ref: Topology
-    ref_field: device_id_seq
     type: IntegerField
   - default: 0
     name: link_id_seq
@@ -154,8 +152,6 @@ models:
     pk: true
     type: AutoField
   - name: id
-    ref: Group
-    ref_field: id
     type: IntegerField
   - len: 200
     name: name
@@ -163,12 +159,8 @@ models:
   - name: x1
     type: IntegerField
   - name: y1
-    ref: Group
-    ref_field: y1
     type: IntegerField
   - name: x2
-    ref: Group
-    ref_field: x2
     type: IntegerField
   - name: y2
     type: IntegerField
@@ -197,8 +189,6 @@ models:
 - fields:
   - name: data_binding_id
     pk: true
-    ref: DataBinding
-    ref_field: data_binding_id
     type: AutoField
   - name: column
     type: IntegerField
@@ -243,6 +233,10 @@ models:
   - name: topology
     ref: Topology
     ref_field: topology_id
+    type: ForeignKey
+  - name: client
+    ref: Client
+    ref_field: client_id
     type: ForeignKey
   name: DataSheet
   x: -207

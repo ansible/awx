@@ -34,7 +34,7 @@ class Topology(models.Model):
     scale = models.FloatField()
     panX = models.FloatField()
     panY = models.FloatField()
-    device_id_seq = models.IntegerField('Topology', default=0)
+    device_id_seq = models.IntegerField(default=0)
     link_id_seq = models.IntegerField(default=0)
     group_id_seq = models.IntegerField(default=0)
 
@@ -81,11 +81,11 @@ class Interface(models.Model):
 class Group(models.Model):
 
     group_id = models.AutoField(primary_key=True,)
-    id = models.IntegerField('Group',)
+    id = models.IntegerField()
     name = models.CharField(max_length=200,)
     x1 = models.IntegerField()
-    y1 = models.IntegerField('Group',)
-    x2 = models.IntegerField('Group',)
+    y1 = models.IntegerField()
+    x2 = models.IntegerField()
     y2 = models.IntegerField()
     topology = models.ForeignKey('Topology',)
 
@@ -99,7 +99,7 @@ class GroupDevice(models.Model):
 
 class DataBinding(models.Model):
 
-    data_binding_id = models.AutoField('DataBinding', primary_key=True,)
+    data_binding_id = models.AutoField(primary_key=True,)
     column = models.IntegerField()
     row = models.IntegerField()
     table = models.CharField(max_length=200,)
@@ -120,3 +120,4 @@ class DataSheet(models.Model):
     data_sheet_id = models.AutoField(primary_key=True,)
     name = models.CharField(max_length=200,)
     topology = models.ForeignKey('Topology',)
+    client = models.ForeignKey('Client',)
