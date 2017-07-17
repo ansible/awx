@@ -68,7 +68,7 @@ def test_filter_by_v1_kind_with_vault(get, admin, organization):
 
 
 @pytest.mark.django_db
-def test_insights_credentials_not_in_v1_api_list(get, admin, organization):
+def test_insights_credentials_in_v1_api_list(get, admin, organization):
     credential_type = CredentialType.defaults['insights']()
     credential_type.save()
     cred = Credential(
@@ -87,7 +87,34 @@ def test_insights_credentials_not_in_v1_api_list(get, admin, organization):
         admin
     )
     assert response.status_code == 200
-    assert response.data['count'] == 0
+    assert response.data['count'] == 1
+    cred = response.data['results'][0]
+    assert cred['kind'] == 'insights'
+    assert cred['username'] == 'joe'
+    assert cred['password'] == '$encrypted$'
+
+
+@pytest.mark.django_db
+def test_create_insights_credentials_in_v1(get, post, admin, organization):
+    credential_type = CredentialType.defaults['insights']()
+    credential_type.save()
+
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v1'}),
+        {
+            'name': 'Best Credential Ever',
+            'organization': organization.id,
+            'kind': 'insights',
+            'username': 'joe',
+            'password': 'secret'
+        },
+        admin
+    )
+    assert response.status_code == 201
+    cred = Credential.objects.get(pk=response.data['id'])
+    assert cred.username == 'joe'
+    assert decrypt_field(cred, 'password') == 'secret'
+    assert cred.credential_type == credential_type
 
 
 @pytest.mark.django_db

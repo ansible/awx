@@ -43,7 +43,6 @@ class V1CredentialFilterBackend(BaseFilterBackend):
         from awx.api.versioning import get_request_version
         if get_request_version(request) == 1:
             queryset = queryset.filter(credential_type__managed_by_tower=True)
-            queryset = queryset.filter(~Q(credential_type__kind='insights'))
         return queryset
 
 

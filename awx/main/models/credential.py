@@ -59,6 +59,7 @@ class V1Credential(object):
         ('azure', 'Microsoft Azure Classic (deprecated)'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
+        ('insights', 'Insights'),
     ]
     FIELDS = {
         'kind': models.CharField(
@@ -480,7 +481,7 @@ class CredentialType(CommonModelNameNotUnique):
                 requirements['kind'] = 'vault'
             else:
                 requirements['kind'] = 'ssh'
-        elif kind in ('net', 'scm'):
+        elif kind in ('net', 'scm', 'insights'):
             requirements['kind'] = kind
         elif kind in kind_choices:
             requirements.update(dict(
