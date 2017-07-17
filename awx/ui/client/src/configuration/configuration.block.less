@@ -1,16 +1,15 @@
 @import "./client/src/shared/branding/colors.default.less";
 @import "../shared/branding/colors.less";
 
-.Form-resetValue, .Form-resetFile {
+.Form-resetValue, .Form-resetAll {
     text-transform: uppercase;
     font-weight: normal;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .Form-resetValue {
     float: right;
-    font-size: 14px;
 }
 
 .Form-resetAll {
@@ -19,7 +18,6 @@
     background-color: @white;
     margin-right: auto;
     color: @default-link;
-    font-size: 12px;
 
     &:hover {
         color: @default-link-hov;
@@ -36,14 +34,19 @@
 }
 
 .Form-nav--dropdownContainer {
-    width: 285px;
-    margin-bottom: 22px;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 22px auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
 }
 
 .Form-nav--dropdown {
-    width: 60%;
+    width: 285px;
+}
+
+.Form-nav--dropdown .select2-container {
+    margin: 0;
 }
 
 .Form-nav--dropdownLabel {
@@ -51,8 +54,7 @@
     color: @default-interface-txt;
     font-size: 14px;
     font-weight: bold;
-    padding-right: 5px;
-    padding-top: 5px;
+    padding-right: 15px;
 }
 
 .Form-tabRow {
