@@ -177,23 +177,76 @@ models:
     ref_field: topology_id
     type: ForeignKey
   name: Group
-  x: 907
-  y: 520
+  x: 407
+  y: -379
 - fields:
   - name: group_device_id
     pk: true
     type: AutoField
   - name: group
-    ref: GroupDevice
-    ref_field: group
+    ref: Group
+    ref_field: group_id
     type: ForeignKey
   - name: device
     ref: Device
     ref_field: device_id
     type: ForeignKey
   name: GroupDevice
-  x: 631
-  y: 561
+  x: 739
+  y: -234
+- fields:
+  - name: data_binding_id
+    pk: true
+    ref: DataBinding
+    ref_field: data_binding_id
+    type: AutoField
+  - name: column
+    type: IntegerField
+  - name: row
+    type: IntegerField
+  - len: 200
+    name: table
+    type: CharField
+  - name: primary_key_id
+    type: IntegerField
+  - len: 200
+    name: field
+    type: CharField
+  - name: data_type
+    ref: DataType
+    ref_field: data_type_id
+    type: ForeignKey
+  - name: sheet
+    ref: DataSheet
+    ref_field: data_sheet_id
+    type: ForeignKey
+  name: DataBinding
+  x: -515
+  y: -370
+- fields:
+  - name: data_type_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: type_name
+    type: CharField
+  name: DataType
+  x: -782
+  y: -172
+- fields:
+  - name: data_sheet_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  name: DataSheet
+  x: -207
+  y: -282
 modules: []
 view:
   panX: 213.72955551921206

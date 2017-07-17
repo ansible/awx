@@ -95,3 +95,28 @@ class GroupDevice(models.Model):
     group_device_id = models.AutoField(primary_key=True,)
     group = models.ForeignKey('Group',)
     device = models.ForeignKey('Device',)
+
+
+class DataBinding(models.Model):
+
+    data_binding_id = models.AutoField('DataBinding', primary_key=True,)
+    column = models.IntegerField()
+    row = models.IntegerField()
+    table = models.CharField(max_length=200,)
+    primary_key_id = models.IntegerField()
+    field = models.CharField(max_length=200,)
+    data_type = models.ForeignKey('DataType',)
+    sheet = models.ForeignKey('DataSheet',)
+
+
+class DataType(models.Model):
+
+    data_type_id = models.AutoField(primary_key=True,)
+    type_name = models.CharField(max_length=200,)
+
+
+class DataSheet(models.Model):
+
+    data_sheet_id = models.AutoField(primary_key=True,)
+    name = models.CharField(max_length=200,)
+    topology = models.ForeignKey('Topology',)
