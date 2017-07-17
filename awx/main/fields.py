@@ -48,6 +48,17 @@ from awx.main import utils
 __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'SmartFilterField']
 
 
+# Provide a (better) custom error message for enum jsonschema validation
+def __enum_validate__(validator, enums, instance, schema):
+    if instance not in enums:
+        yield jsonschema.exceptions.ValidationError(
+            _("'%s' is not one of ['%s']") % (instance, "', '".join(enums))
+        )
+
+
+Draft4Validator.VALIDATORS['enum'] = __enum_validate__
+
+
 class JSONField(upstream_JSONField):
 
     def db_type(self, connection):
@@ -451,6 +462,8 @@ class CredentialInputField(JSONSchemaField):
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
             properties[field['id']] = field
+            if field.get('choices', []):
+                field['enum'] = field['choices'][:]
         return {
             'type': 'object',
             'properties': properties,

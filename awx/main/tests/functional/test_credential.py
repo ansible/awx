@@ -1,11 +1,13 @@
 # Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
+import itertools
+
 import pytest
 from django.core.exceptions import ValidationError
 
 from awx.main.utils import decrypt_field
-from awx.main.models import Credential, CredentialType
+from awx.main.models import Credential, CredentialType, V1Credential
 
 from rest_framework import serializers
 
@@ -243,6 +245,31 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
         with pytest.raises(Exception) as e:
             cred.full_clean()
         assert e.type in (ValidationError, serializers.ValidationError)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('become_method, valid', zip(
+    dict(V1Credential.FIELDS['become_method'].choices).keys(),
+    itertools.repeat(True)
+) + [('invalid-choice', False)])
+def test_choices_validity(become_method, valid, organization):
+    inputs = {'become_method': become_method}
+    cred_type = CredentialType.defaults['ssh']()
+    cred_type.save()
+    cred = Credential(
+        credential_type=cred_type,
+        name="Best credential ever",
+        inputs=inputs,
+        organization=organization
+    )
+    cred.save()
+
+    if valid:
+        cred.full_clean()
+    else:
+        with pytest.raises(serializers.ValidationError) as e:
+            cred.full_clean()
+        assert "'%s' is not one of" % become_method in str(e)
 
 
 @pytest.mark.django_db
