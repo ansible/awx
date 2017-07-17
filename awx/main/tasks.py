@@ -717,7 +717,8 @@ class BaseTask(Task):
             else:
                 base_handle = super(self.__class__, self).get_stdout_handle(instance)
                 stdout_handle = isolated_manager.IsolatedManager.wrap_stdout_handle(
-                    instance, kwargs['private_data_dir'], base_handle)
+                    instance, kwargs['private_data_dir'], base_handle,
+                    event_data_key=self.event_data_key)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
                     raise RuntimeError('bubblewrap is not installed')
@@ -832,6 +833,7 @@ class RunJob(BaseTask):
 
     name = 'awx.main.tasks.run_job'
     model = Job
+    event_data_key= 'job_id'
 
     def build_private_data(self, job, **kwargs):
         '''
@@ -1117,7 +1119,7 @@ class RunJob(BaseTask):
             dispatcher = CallbackQueueDispatcher()
 
             def job_event_callback(event_data):
-                event_data.setdefault('job_id', instance.id)
+                event_data.setdefault(self.event_data_key, instance.id)
                 if 'uuid' in event_data:
                     cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
                     if cache_event is not None:
@@ -1125,7 +1127,7 @@ class RunJob(BaseTask):
                 dispatcher.dispatch(event_data)
         else:
             def job_event_callback(event_data):
-                event_data.setdefault('job_id', instance.id)
+                event_data.setdefault(self.event_data_key, instance.id)
                 JobEvent.create_from_data(**event_data)
 
         return OutputEventFilter(stdout_handle, job_event_callback)
@@ -1910,6 +1912,7 @@ class RunAdHocCommand(BaseTask):
 
     name = 'awx.main.tasks.run_ad_hoc_command'
     model = AdHocCommand
+    event_data_key = 'ad_hoc_command_id'
 
     def build_private_data(self, ad_hoc_command, **kwargs):
         '''
@@ -2074,7 +2077,7 @@ class RunAdHocCommand(BaseTask):
             dispatcher = CallbackQueueDispatcher()
 
             def ad_hoc_command_event_callback(event_data):
-                event_data.setdefault('ad_hoc_command_id', instance.id)
+                event_data.setdefault(self.event_data_key, instance.id)
                 if 'uuid' in event_data:
                     cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
                     if cache_event is not None:
@@ -2082,7 +2085,7 @@ class RunAdHocCommand(BaseTask):
                 dispatcher.dispatch(event_data)
         else:
             def ad_hoc_command_event_callback(event_data):
-                event_data.setdefault('ad_hoc_command_id', instance.id)
+                event_data.setdefault(self.event_data_key, instance.id)
                 AdHocCommandEvent.create_from_data(**event_data)
 
         return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
