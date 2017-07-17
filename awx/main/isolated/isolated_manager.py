@@ -412,11 +412,11 @@ class IsolatedManager(object):
                     instance.hostname, task_result.get('msg', 'unknown failure')))
 
     @staticmethod
-    def wrap_stdout_handle(instance, private_data_dir, stdout_handle):
+    def wrap_stdout_handle(instance, private_data_dir, stdout_handle, event_data_key='job_id'):
         dispatcher = CallbackQueueDispatcher()
 
         def job_event_callback(event_data):
-            event_data.setdefault('job_id', instance.id)
+            event_data.setdefault(event_data_key, instance.id)
             if 'uuid' in event_data:
                 filename = '{}-partial.json'.format(event_data['uuid'])
                 partial_filename = os.path.join(private_data_dir, 'artifacts', 'job_events', filename)
