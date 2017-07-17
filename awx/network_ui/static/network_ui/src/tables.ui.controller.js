@@ -3,7 +3,7 @@ var util = require('./util.js');
 var messages = require('./messages.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var TablesUIController = function($scope, $window, $location) {
+var TablesUIController = function($scope, $window, $location, $timeout) {
 
     $window.scope = $scope;
     $scope.disconnected = false;
@@ -123,6 +123,13 @@ var TablesUIController = function($scope, $window, $location) {
                                                                row_index,
                                                                old_data,
                                                                new_data));
+
+        $timeout(function () {
+            var q = document.querySelectorAll("#" + $scope.name + "_" + column_index + "_" + (row_index + 1));
+            if (q.length > 0) {
+                q[0].click();
+            }
+        });
     };
 
     $scope.changeSheet = function(sheet) {

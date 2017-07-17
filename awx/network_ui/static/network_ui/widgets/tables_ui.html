@@ -20,7 +20,7 @@
                 <th>
                     {{row[0].value}}
                 </th>
-                <td ng-repeat="(column_index, cell) in row track by $index" ng-if="$index > 0" buttons="no" onbeforesave="updateData(cell.value, $data, column_index, row_index, data[0][column_index-1].value, row[0].value)" editable-text="cell.value" edit-disabled="{{!cell.editable}}">
+                <td ng-repeat="(column_index, cell) in row track by $index" ng-if="$index > 0" buttons="no" onbeforesave="updateData(cell.value, $data, column_index, row_index, data[0][column_index-1].value, row[0].value)" editable-text="cell.value" edit-disabled="{{!cell.editable}}" ng-attr-id="{{name + '_' + column_index + '_' + row_index}}">
                     {{cell.value}}
                 </td>
             </tr>
