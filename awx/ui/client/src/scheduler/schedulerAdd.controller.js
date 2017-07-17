@@ -25,6 +25,27 @@ export default ['$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     $scope.schedulerEndSecond = "00";
     $scope.parentObject = ParentObject;
 
+    /*
+     * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
+     * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars 
+     * in that case.
+     *
+     * Because this same problem exists in the edit mode and because there's no inheritence, this
+     * block of code is duplicated in both add/edit controllers pending a much needed broader
+     * refactoring effort.
+     */
+    $scope.timeChange = () => {
+        if (!Number($scope.schedulerStartHour)) {
+            $scope.schedulerStartHour = '00';
+        } else if (!Number($scope.schedulerStartMinute)) {
+            $scope.schedulerStartMinute = '00';
+        } else if (!Number($scope.schedulerStartSecond)) {
+            $scope.schedulerStartSecond = '00';
+        }
+
+        $scope.scheduleTimeChange();
+    };
+
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);
