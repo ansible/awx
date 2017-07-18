@@ -6,15 +6,16 @@
 
 
 export default
-   [ '$rootScope', '$pendolytics', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
-        'ConfigService', '$log',
-   function ($rootScope, $pendolytics, Rest, GetBasePath, ProcessErrors, $q,
-        ConfigService, $log) {
+   [ '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
+        'ConfigService', '$log', 'AppStrings',
+   function ($rootScope, Rest, GetBasePath, ProcessErrors, $q,
+        ConfigService, $log, AppStrings) {
        return {
             setPendoOptions: function (config) {
                 var tower_version = config.version.split('-')[0],
                 trial = (config.trial) ? config.trial : false,
                 options = {
+                    apiKey: AppStrings.get('PENDO_API_KEY'),
                     visitor: {
                       id: null,
                       role: null,
@@ -93,6 +94,16 @@ export default
                 return deferred.promise;
             },
 
+            bootstrap: function(){
+                /* jshint ignore:start */
+                (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=[];
+                v=['initialize','identify','updateOptions','pageLoad'];for(w=0,x=v.length;w<x;++w)(function(m){
+                o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
+                y=e.createElement(n);y.async=!0;y.src=`https://cdn.pendo.io/agent/static/${AppStrings.get('PENDO_API_KEY')}/pendo.js`;
+                z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
+                /* jshint ignore:end */
+            },
+
             issuePendoIdentity: function () {
                 var options,
                     c = ConfigService.get(),
@@ -102,12 +113,14 @@ export default
                 config.version = c.version;
                 config.ansible_version = c.ansible_version;
                 if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
-                    $pendolytics.bootstrap();
+                    this.bootstrap();
                     options = this.setPendoOptions(config);
                     this.setRole(options).then(function(options){
                         $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
                         $log.debug(options);
-                        $pendolytics.identify(options);
+                        /* jshint ignore:start */
+                        pendo.initialize(options);
+                        /* jshint ignore:end */
                     }, function(reason){
                         // reject function for setRole
                         $log.debug(reason);
