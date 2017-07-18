@@ -200,6 +200,9 @@ def cluster_node_heartbeat(self):
             inst.capacity = 0
             inst.save()
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
+            # We wait for the Popen call inside stop_local_services above
+            # so the line below will rarely if ever be executed.
+            raise RuntimeError("Shutting down.")
 
 
 @task(bind=True)
