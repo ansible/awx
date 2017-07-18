@@ -112,7 +112,7 @@ class AnsibleInventoryLoader(object):
         self.method = 'ansible-inventory backport'
 
         if not os.path.exists(abs_module_path):
-            raise ImproperlyConfigured('Can not find inventory module')
+            raise ImproperlyConfigured('Cannot find inventory module')
         logger.debug('Using backported ansible-inventory module: {}'.format(abs_module_path))
         return [abs_module_path, '-i', self.source]
 
@@ -128,7 +128,7 @@ class AnsibleInventoryLoader(object):
             kwargs['proot_temp_dir'] = self.source_dir
             cwd = self.source_dir
         else:
-            # we can not safely store tmp data in source dir or trust script contents
+            # we cannot safely store tmp data in source dir or trust script contents
             if env['AWX_PRIVATE_DATA_DIR']:
                 # If this is non-blank, file credentials are being used and we need access
                 private_data_dir = functioning_dir(env['AWX_PRIVATE_DATA_DIR'])
