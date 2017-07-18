@@ -4362,8 +4362,18 @@ class UnifiedJobStdout(RetrieveAPIView):
                 write_fd = open(unified_job.result_stdout_file, 'w')
                 with connection.cursor() as cursor:
                     try:
-                        cursor.copy_expert("copy (select stdout from main_jobevent where job_id={} order by start_line) to stdout".format(unified_job.id),
-                                           write_fd)
+                        tablename, related_name = {
+                            Job: ('main_jobevent', 'job_id'),
+                            AdHocCommand: ('main_adhoccommandevent', 'ad_hoc_command_id'),
+                        }[unified_job.__class__]
+                        cursor.copy_expert(
+                            "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
+                                tablename,
+                                related_name,
+                                unified_job.id
+                            ),
+                            write_fd
+                        )
                         write_fd.close()
                         subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
                                          shell=True).wait()
