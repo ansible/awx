@@ -6,6 +6,8 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
 
         $scope.pageSize = pageSize;
 
+        $scope.basePageSize = parseInt(pageSize) === 5 ? 5 : 20;
+
         function init() {
 
             let updatePaginationVariables = function() {
@@ -28,7 +30,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             $('#period-dropdown')
                 .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+id+
             "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
-            
+
             if($scope.querySet){
                 let origQuerySet = _.cloneDeep($scope.querySet);
                 queryset = _.merge(origQuerySet, { page_size: $scope.pageSize });
@@ -44,7 +46,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         };
 
         $scope.toPage = function(page) {
-            if(page === 0) {
+            if(page === 0 || page > $scope.last) {
                 return;
             }
             if (GetBasePath($scope.basePath) || $scope.basePath) {

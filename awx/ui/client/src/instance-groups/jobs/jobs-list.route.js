@@ -11,7 +11,7 @@ export default {
     params: {
         job_search: {
             value: {
-                page_size: '10',
+                page_size: '20',
                 order_by: '-finished',
                 not__launch_type: 'sync'
             }
