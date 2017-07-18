@@ -35,14 +35,14 @@
         <span id="total-pages">{{last}}</span>
         </span>
     </div>
-    <div class="Paginate-total page-label" ng-hide="dataCount === 0">
+    <div class="Paginate-total page-label" ng-hide="dataset.count === 0">
         <!-- TODO: Move the ITEMS line into paginate.directive.js
              so that i18n.sprintf("A of B") can be used but
              it seems $sce.trustAsHtml() does not work with html tag.
          -->
         <span class="Paginate-itemsOf" translate>ITEMS&nbsp;
             <span>{{dataRange}}</span>
-            <span ng-hide="dataset.count <= basePageSize">of {{dataCount()}}</span>
+            <span ng-hide="dataset.count <= basePageSize">of {{dataset.count | number}}</span>
         </span>
         <div class="Paginate-filteringDropdowns" ng-hide="hideViewPerPage || dataset.count <= basePageSize">
             <div class="Paginate-filterLabel" translate>VIEW PER PAGE</div>
