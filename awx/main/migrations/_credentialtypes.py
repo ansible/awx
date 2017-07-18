@@ -125,8 +125,10 @@ def migrate_to_v2_credentials(apps, schema_editor):
                 if any([getattr(cred, field) for field in ssh_type.defined_fields]):
                     new_cred.save(force_insert=True)
 
-                    # copy parent roles
+                    # copy rbac roles
                     for role_type in ('read_role', 'admin_role', 'use_role'):
+                        for member in getattr(cred, role_type).members.all():
+                            getattr(new_cred, role_type).members.add(member)
                         for role in getattr(cred, role_type).parents.all():
                             getattr(new_cred, role_type).parents.add(role)
 
