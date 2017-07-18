@@ -249,13 +249,13 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 diff_mode: {
-                    label: i18n._('Diff Mode'),
+                    label: i18n._('Show Changes'),
                     type: 'toggleSwitch',
                     toggleSource: 'diff_mode',
-                    dataTitle: i18n._('Diff Mode'),
+                    dataTitle: i18n._('Show Changes'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("If enabled, textual changes made to any templated files on the host are shown in the standard output.") + "</p>",
+                    awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode.") + "</p>",
                     subCheckbox: {
                         variable: 'ask_diff_mode_on_launch',
                         text: i18n._('Prompt on launch')

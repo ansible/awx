@@ -111,13 +111,13 @@ export default ['i18n', function(i18n) {
                 dataContainer: "body"
             },
             diff_mode: {
-                label: i18n._('Diff Mode'),
+                label: i18n._('Show Changes'),
                 type: 'toggleSwitch',
                 toggleSource: 'diff_mode',
-                dataTitle: i18n._('Diff Mode'),
+                dataTitle: i18n._('Show Changes'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                awPopOver: "<p>" + i18n._("If enabled, textual changes made to any templated files on the host are shown in the standard output.") + "</p>",
+                awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode.") + "</p>",
             },
             become_enabled: {
                 label: i18n._('Enable Privilege Escalation'),
