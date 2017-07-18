@@ -195,6 +195,10 @@ def cluster_node_heartbeat(self):
                                                                                                        other_inst.version,
                                                                                                        inst.hostname,
                                                                                                        inst.version))
+            # Set the capacity to zero to ensure no Jobs get added to this instance.
+            # The heartbeat task will reset the capacity to the system capacity after upgrade.
+            inst.capacity = 0
+            inst.save()
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
 
 
