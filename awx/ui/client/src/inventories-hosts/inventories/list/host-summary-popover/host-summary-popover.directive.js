@@ -59,10 +59,10 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
 
                         data.results.forEach(function(row) {
                             html += "<tr>\n";
-                            html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                            html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                                 ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
                             html += "<td>" + ($filter('longDate')(row.finished)) + "</td>";
-                            html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                            html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                                 ". Click for details\" aw-tip-placement=\"top\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                             html += "</tr>\n";
                         });
