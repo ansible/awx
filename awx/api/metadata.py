@@ -173,6 +173,8 @@ class Metadata(metadata.SimpleMetadata):
                     meta.pop('defined_in_file', False)
 
                     if meta.pop('read_only', False):
+                        if field == 'id' and hasattr(view, 'attach'):
+                            continue
                         actions[method].pop(field)
 
         return actions
@@ -252,3 +254,15 @@ class JobTypeMetadata(Metadata):
                     index += 1
             return res
 
+
+class SublistAttachDetatchMetadata(Metadata):
+
+    def determine_actions(self, request, view):
+        actions = super(SublistAttachDetatchMetadata, self).determine_actions(request, view)
+        method = 'POST'
+        if method in actions:
+            for field in actions[method]:
+                if field == 'id':
+                    continue
+                actions[method].pop(field)
+        return actions
