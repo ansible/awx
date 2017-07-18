@@ -3,7 +3,7 @@
 describe('Filter: prepend', () => {
     var filter;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
 
     beforeEach(function(){
       inject(function($injector){

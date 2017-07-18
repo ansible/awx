@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 {% load i18n %}
-<html lang="en" ng-app="app">
+<html lang="en" ng-app="awApp">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>{% trans 'Ansible Tower' %}</title>
+    <title ng-bind="tabTitle"></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{{ STATIC_URL }}assets/custom-theme/jquery-ui-1.10.3.custom.min.css" />
     <link rel="stylesheet" href="{{ STATIC_URL }}assets/ansible-bootstrap.min.css" />

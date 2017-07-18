@@ -18,7 +18,7 @@ describe('Controller: WorkflowAdd', () => {
         ToJSON,
         availableLabels;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('RestServices'));
     beforeEach(angular.mock.module('templates', ($provide) => {
 

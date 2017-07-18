@@ -10,7 +10,7 @@ import low_insights_json from './data/low.insights-data.js';
 describe('Service: InsightsService', () => {
     let InsightsService;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
 
     beforeEach(angular.mock.inject(( _InsightsService_) => {
         InsightsService = _InsightsService_;

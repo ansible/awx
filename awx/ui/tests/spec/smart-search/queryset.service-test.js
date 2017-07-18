@@ -6,7 +6,7 @@ describe('Service: QuerySet', () => {
         Authorization,
         SmartSearchService;
 
-    beforeEach(angular.mock.module('Tower', ($provide) =>{
+    beforeEach(angular.mock.module('awApp', ($provide) =>{
         // @todo: improve app source / write testing utilities for interim
         // we don't want to be concerned with this provision in every test that involves the Rest module
         Authorization = {

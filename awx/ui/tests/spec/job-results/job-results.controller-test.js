@@ -196,7 +196,7 @@ describe('Controller: jobResultsController', () => {
         });
     });
 
-    describe('getTowerLinks()', () => {
+    describe('getLinks()', () => {
         beforeEach(() => {
             jobData.related = {
                 "created_by": "api/v2/users/12",
@@ -225,7 +225,7 @@ describe('Controller: jobResultsController', () => {
         });
     });
 
-    describe('getTowerLabels()', () => {
+    describe('getLabels()', () => {
         beforeEach(() => {
             jobDataOptions.actions.GET = {
                 status: {

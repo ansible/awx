@@ -3,7 +3,7 @@
 describe('Service: SmartSearch', () => {
     let SmartSearchService;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
 
     beforeEach(angular.mock.module('SmartSearchModule'));
 

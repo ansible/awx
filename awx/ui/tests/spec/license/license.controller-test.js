@@ -8,7 +8,7 @@ describe('Controller: LicenseController', () => {
         ProcessErrors,
         config;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('license', ($provide) => {
         ConfigService = jasmine.createSpyObj('ConfigService', [
             'getConfig',
