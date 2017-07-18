@@ -1772,7 +1772,7 @@ class RunInventoryUpdate(BaseTask):
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'file':
-            raise NotImplementedError('Can not update file sources through the task system.')
+            raise NotImplementedError('Cannot update file sources through the task system.')
         # add private_data_files
         env['AWX_PRIVATE_DATA_DIR'] = kwargs.get('private_data_dir', '')
         return env
