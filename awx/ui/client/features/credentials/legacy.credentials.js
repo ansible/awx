@@ -18,6 +18,8 @@ function LegacyCredentialsService (pathService) {
             },
             'list@credentials': {
                 templateProvider: function(CredentialList, generateList) {
+                    CredentialList.iterator = 'credential';
+
                     let html = generateList.build({
                         list: CredentialList,
                         mode: 'edit'
@@ -33,6 +35,7 @@ function LegacyCredentialsService (pathService) {
             Dataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath',
                 function(list, qs, $stateParams, GetBasePath) {
                     let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+
                     return qs.search(path, $stateParams[`${list.iterator}_search`]);
                 }
             ]
