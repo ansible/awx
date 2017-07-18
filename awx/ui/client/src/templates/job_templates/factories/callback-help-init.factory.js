@@ -78,8 +78,8 @@ export default
                         }
                         if (fld === 'forks') {
                             if (data[fld] !== 0) {
-                                $scope[fld] = data[fld];
-                                master[fld] = scope[fld]
+                                scope[fld] = data[fld];
+                                master[fld] = scope[fld];
                             }
                         }
                         if (fld === 'variables') {
