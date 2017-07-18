@@ -10,5 +10,5 @@ import hostGroupsDefinition from './hosts-related-groups.list';
 
 export default
     angular.module('hostGroups', [])
-        .value('HostsRelatedGroupsList', hostGroupsDefinition)
+        .factory('HostsRelatedGroupsList', hostGroupsDefinition)
         .controller('HostsRelatedGroupsController', controller);

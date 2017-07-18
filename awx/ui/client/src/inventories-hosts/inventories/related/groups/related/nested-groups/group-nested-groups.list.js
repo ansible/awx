@@ -108,6 +108,7 @@
                 mode: 'all',
                 ngClick: "disassociateGroup(nested_group)",
                 awToolTip: i18n._('Disassociate group'),
+                iconClass: 'fa fa-times',
                 dataPlacement: "top",
                 ngShow: "nested_group.summary_fields.user_capabilities.delete"
             }

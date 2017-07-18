@@ -83,7 +83,7 @@ export default ['i18n', function(i18n) {
             "delete": {
                 //label: 'Delete',
                 ngClick: "disassociateHost(nested_host)",
-                icon: 'icon-trash',
+                iconClass: 'fa fa-times',
                 awToolTip: i18n._('Disassociate host'),
                 dataPlacement: 'top',
                 ngShow: 'nested_host.summary_fields.user_capabilities.delete'

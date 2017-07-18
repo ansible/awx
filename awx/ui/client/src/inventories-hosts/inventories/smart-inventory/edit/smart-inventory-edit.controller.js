@@ -7,13 +7,15 @@
 function SmartInventoryEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup, resourceData, $rootScope) {
+    ParseVariableString, $state, OrgAdminLookup, resourceData,
+    $rootScope, InstanceGroupsService, InstanceGroupsData) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm,
         inventory_id = $stateParams.smartinventory_id,
-        inventoryData = resourceData.data;
+        inventoryData = resourceData.data,
+        instance_group_url = inventoryData.related.instance_groups;
     init();
 
     function init() {
@@ -25,6 +27,7 @@ function SmartInventoryEdit($scope, $location,
 
         $scope.smartinventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.organization_name = inventoryData.summary_fields.organization.name;
+        $scope.instance_groups = InstanceGroupsData;
 
         $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
@@ -75,8 +78,17 @@ function SmartInventoryEdit($scope, $location,
         Rest.setUrl(defaultUrl + inventory_id + '/');
         Rest.put(data)
             .success(function() {
-                Wait('stop');
-                $state.go($state.current, {}, { reload: true });
+                InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
+                    .then(() => {
+                        Wait('stop');
+                        $state.go($state.current, {}, { reload: true });
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to update instance groups. POST returned status: ' + status
+                        });
+                    });
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, form, {
@@ -96,5 +108,6 @@ export default [ '$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
-    '$state', 'OrgAdminLookup', 'resourceData', '$rootScope', SmartInventoryEdit
+    '$state', 'OrgAdminLookup', 'resourceData',
+    '$rootScope', 'InstanceGroupsService', 'InstanceGroupsData', SmartInventoryEdit
 ];

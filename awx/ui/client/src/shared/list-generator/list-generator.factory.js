@@ -182,7 +182,7 @@ export default ['$compile', 'Attr', 'Icon',
                     html += (list.actionHolderClass) ? list.actionHolderClass : "List-actionHolder";
                     html += "\">";
                     html += "<div class=\"List-actions\">";
-                    html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
+                    html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'" class="List-actionsInner">`;
 
                     for (action in list.actions) {
                         list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });

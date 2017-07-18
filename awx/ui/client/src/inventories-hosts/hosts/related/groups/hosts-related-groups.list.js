@@ -62,7 +62,8 @@ export default ['i18n', function(i18n) {
                 //label: 'Delete',
                 mode: 'all',
                 ngClick: "disassociateHost(group)",
-                awToolTip: i18n._('Disassociate host'),
+                awToolTip: i18n._('Disassociate group'),
+                iconClass: 'fa fa-times',
                 dataPlacement: "top",
                 ngShow: "group.summary_fields.user_capabilities.delete"
             }

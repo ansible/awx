@@ -19,7 +19,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
         include: "NotificationsList",
         title: i18n._('Notifications'),
         iterator: 'notification',
-        disabled: "source === undefined || source.value === ''",
+        ngIf: "!(inventory_source_obj.source === undefined || inventory_source_obj.source === '')",
         generateList: true,
         ngClick: "$state.go('inventories.edit.inventory_sources.edit.notifications')"
         // search: {
