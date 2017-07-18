@@ -11,4 +11,4 @@ services:
       TEST_DIRS: awx/main/tests/functional awx/main/tests/unit awx/conf/tests awx/sso/tests
     command: ["make test"]
     volumes:
-      - ../../../:/tower_devel
+      - ../../../:/awx_devel

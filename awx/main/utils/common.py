@@ -157,7 +157,7 @@ def get_awx_version():
     from awx import __version__
     try:
         import pkg_resources
-        return pkg_resources.require('ansible_tower')[0].version
+        return pkg_resources.require('ansible-awx')[0].version
     except:
         return __version__
 

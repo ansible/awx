@@ -8,17 +8,23 @@ NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+MANAGEMENT_COMMAND ?= awx-manage
+GCLOUD_AUTH ?=
 
-GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
+VERSION=$(shell git describe --long)
+VERSION3=$(shell git describe --long | sed 's/\-g.*//'
+VERSION3DOT=$(shell git describe --long | sed 's/\-g.*//' | sed 's/\-/\./')
+RELEASE_VERSION=$(shell git describe --long | sed 's@\([0-9.]\{1,\}\).*@\1@')
+
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
-
 COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
+DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering/
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
@@ -36,41 +42,21 @@ endif
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
-NAME ?= ansible-tower
-VERSION = $(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
+NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
-BUILD = 0.git$(DATE)
 ifeq ($(OFFICIAL),yes)
-    RELEASE ?= 1
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
-    RELEASE ?= $(BUILD)
     AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
-endif
-
-# Allow AMI license customization
-AWS_INSTANCE_COUNT ?= 0
-
-# GPG signature parameters (BETA key not yet used)
-GPG_BIN ?= gpg
-GPG_RELEASE = 442667A9
-GPG_RELEASE_FILE = GPG-KEY-ansible-release
-GPG_BETA = D7B00447
-GPG_BETA_FILE = GPG-KEY-ansible-beta
-
-# Determine GPG key for package signing
-ifeq ($(OFFICIAL),yes)
-    GPG_KEY = $(GPG_RELEASE)
-    GPG_FILE = $(GPG_RELEASE_FILE)
 endif
 
 # TAR build parameters
 ifeq ($(OFFICIAL),yes)
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)
+    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
+    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(RELEASE)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(RELEASE)
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION3DOT)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
 endif
 
 SDIST_COMMAND ?= sdist
@@ -79,99 +65,6 @@ SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
-
-# DEB build parameters
-DEBUILD_BIN ?= debuild
-DEBUILD_OPTS =
-DPUT_BIN ?= dput
-DPUT_OPTS ?= -c .dput.cf -u
-REPREPRO_BIN ?= reprepro
-REPREPRO_OPTS ?= -b reprepro --export=changed
-DEB_DIST ?=
-ifeq ($(OFFICIAL),yes)
-    # Sign official builds
-    DEBUILD_OPTS += -k$(GPG_KEY)
-    REPREPRO_OPTS += --ask-passphrase
-else
-    # Do not sign development builds
-    DEBUILD_OPTS += -uc -us
-endif
-DEBUILD = $(DEBUILD_BIN) $(DEBUILD_OPTS)
-DEB_PPA ?= mini_dinstall
-DEB_ARCH ?= amd64
-DEB_NVR = $(NAME)_$(VERSION)-$(RELEASE)~$(DEB_DIST)
-DEB_NVRA = $(DEB_NVR)_$(DEB_ARCH)
-DEB_NVRS = $(DEB_NVR)_source
-DEB_TAR_NAME=$(NAME)-$(VERSION)
-DEB_TAR_FILE=$(NAME)_$(VERSION).orig.tar.gz
-
-# pbuilder parameters
-PBUILDER_CACHE_DIR = /var/cache/pbuilder
-PBUILDER_BIN ?= pbuilder
-PBUILDER_OPTS ?= --debootstrapopts --variant=buildd --distribution $(DEB_DIST) --architecture $(DEB_ARCH) --basetgz $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz --buildresult $(PWD)/deb-build
-
-# RPM build parameters
-MOCK_BIN ?= mock
-MOCK_CFG ?=
-RPM_SPECDIR= packaging/rpm
-RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
-
-# Provide a fallback value for RPM_DIST
-ifeq ($(RPM_DIST),)
-    RPM_DIST = .el6
-endif
-RPM_ARCH ?= $(shell rpm --eval '%{_arch}' 2>/dev/null)
-# Provide a fallback value for RPM_ARCH
-ifeq ($(RPM_ARCH),)
-    RPM_ARCH = $(shell uname -m)
-endif
-
-# Software collections settings if on EL6
-ifeq ($(RPM_DIST),.el6)
-    SCL_PREFIX = python27-
-    SCL_DEFINES = --define 'scl python27'
-else
-    SCL_PREFIX =
-    SCL_DEFINES =
-endif
-
-RPM_NVR = $(SCL_PREFIX)$(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
-
-# TAR Bundle build parameters
-DIST = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\1|')
-DIST_MAJOR = $(shell echo $(RPM_DIST) | sed -e 's|^\.\(el\)\([0-9]\).*|\2|')
-DIST_FULL = $(DIST)$(DIST_MAJOR)
-OFFLINE_TAR_NAME = $(NAME)-setup-bundle-$(VERSION)-$(RELEASE).$(DIST_FULL)
-OFFLINE_TAR_FILE = $(OFFLINE_TAR_NAME).tar.gz
-OFFLINE_TAR_LINK = $(NAME)-setup-bundle-latest.$(DIST_FULL).tar.gz
-OFFLINE_TAR_CHECKSUM=$(NAME)-setup-bundle-CHECKSUM
-
-# Detect underlying OS distribution
-DISTRO ?=
-ifneq (,$(wildcard /etc/lsb-release))
-    DISTRO = $(shell . /etc/lsb-release && echo $${DISTRIB_ID} | tr '[:upper:]' '[:lower:]')
-endif
-ifneq (,$(wildcard /etc/os-release))
-    DISTRO = $(shell . /etc/os-release && echo $${ID})
-endif
-ifneq (,$(wildcard /etc/fedora-release))
-    DISTRO = fedora
-endif
-ifneq (,$(wildcard /etc/centos-release))
-    DISTRO = centos
-endif
-ifneq (,$(wildcard /etc/redhat-release))
-    DISTRO = redhat
-endif
-
-# Adjust `setup.py install` parameters based on OS distribution
-SETUP_INSTALL_ARGS = --skip-build --no-compile --root=$(DESTDIR) -v
-ifeq ($(DISTRO),ubuntu)
-    SETUP_INSTALL_ARGS += --install-layout=deb
-endif
-
-I18N_FLAG_FILE = .i18n_built
 
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
@@ -188,33 +81,6 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
-
-
-# Remove setup build files
-clean-tar:
-	rm -rf tar-build
-
-# Remove rpm build files
-clean-rpm:
-	rm -rf rpm-build
-
-# Remove debian build files
-clean-deb:
-	rm -rf deb-build reprepro
-
-# Remove packer artifacts
-clean-packer:
-	rm -rf packer_cache
-	rm -rf packaging/packer/packer_cache
-	rm -rf packaging/packer/output-virtualbox-iso/
-	rm -rf packaging/packer/output-vmware-iso
-	rm -f packaging/packer/ansible-tower-*.box
-	rm -rf packaging/packer/ansible-tower*-ova
-	rm -rf packaging/packer/ansible-tower*-vmx
-	rm -f Vagrantfile
-
-clean-bundle:
-	rm -rf setup-bundle-build
 
 # remove ui build artifacts
 clean-ui:
@@ -265,7 +131,7 @@ rebase:
 push:
 	git push origin master
 
-virtualenv: virtualenv_ansible virtualenv_tower
+virtualenv: virtualenv_ansible virtualenv_awx
 
 virtualenv_ansible:
 	if [ "$(VENV_BASE)" ]; then \
@@ -280,16 +146,16 @@ virtualenv_ansible:
 		fi; \
 	fi
 
-virtualenv_tower:
+virtualenv_awx:
 	if [ "$(VENV_BASE)" ]; then \
 		if [ ! -d "$(VENV_BASE)" ]; then \
 			mkdir $(VENV_BASE); \
 		fi; \
-		if [ ! -d "$(VENV_BASE)/tower" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/tower && \
-			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+		if [ ! -d "$(VENV_BASE)/awx" ]; then \
+			virtualenv --system-site-packages $(VENV_BASE)/awx && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
 
@@ -307,34 +173,34 @@ requirements_ansible_dev:
 	fi
 
 requirements_isolated:
-	if [ ! -d "$(VENV_BASE)/tower" ]; then \
-		virtualenv --system-site-packages $(VENV_BASE)/tower && \
-		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-		$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+	if [ ! -d "$(VENV_BASE)/awx" ]; then \
+		virtualenv --system-site-packages $(VENV_BASE)/awx && \
+		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
+		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 	fi;
-	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_isolated.txt
+	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_isolated.txt
 
-# Install third-party requirements needed for Tower's environment.
-requirements_tower: virtualenv_tower
+# Install third-party requirements needed for AWX's environment.
+requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
-	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_local.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed -r /dev/stdin ; \
 	else \
-	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
+	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
+	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
-requirements_tower_dev:
-	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt
-	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
+requirements_awx_dev:
+	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
+	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
 
-requirements: requirements_ansible requirements_tower
+requirements: requirements_ansible requirements_awx
 
-requirements_dev: requirements requirements_tower_dev requirements_ansible_dev
+requirements_dev: requirements requirements_awx_dev requirements_ansible_dev
 
 requirements_test: requirements
 
-# "Install" ansible-tower package in development mode.
+# "Install" awx package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -346,21 +212,21 @@ develop:
 
 version_file:
 	mkdir -p /var/lib/awx/
-	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.tower_version
+	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version
 
 # Do any one-time init tasks.
 init:
 	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	tower-manage register_instance --hostname=$(COMPOSE_HOST); \
-	tower-manage register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
+	$(MANAGEMENT_COMMAND) register_instance --hostname=$(COMPOSE_HOST); \
+	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
 	if [ "$(EXTRA_GROUP_QUEUES)" == "thepentagon" ]; then \
-		tower-manage register_instance --hostname=isolated; \
-		tower-manage register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		tower-manage generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
+		$(MANAGEMENT_COMMAND) register_instance --hostname=isolated; \
+		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
+		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
 	elif [ "$(EXTRA_GROUP_QUEUES)" != "" ]; then \
-		tower-manage register_queue --queuename=$(EXTRA_GROUP_QUEUES) --hostnames=$(COMPOSE_HOST); \
+		$(MANAGEMENT_COMMAND) register_queue --queuename=$(EXTRA_GROUP_QUEUES) --hostnames=$(COMPOSE_HOST); \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -368,48 +234,48 @@ refresh: clean requirements_dev version_file develop migrate
 
 # Create Django superuser.
 adduser:
-	tower-manage createsuperuser
+	$(MANAGEMENT_COMMAND) createsuperuser
 
 # Create database tables and apply any new migrations.
 migrate:
 	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	tower-manage migrate --noinput --fake-initial
+	$(MANAGEMENT_COMMAND) migrate --noinput --fake-initial
 
 # Run after making changes to the models to create a new migration.
 dbchange:
-	tower-manage makemigrations
+	$(MANAGEMENT_COMMAND) makemigrations
 
 # access database shell, asks for password
 dbshell:
 	sudo -u postgres psql -d awx-dev
 
 server_noattach:
-	tmux new-session -d -s tower 'exec make uwsgi'
-	tmux rename-window 'Tower'
-	tmux select-window -t tower:0
+	tmux new-session -d -s awx 'exec make uwsgi'
+	tmux rename-window 'AWX'
+	tmux select-window -t awx:0
 	tmux split-window -v 'exec make celeryd'
 	tmux new-window 'exec make daphne'
-	tmux select-window -t tower:1
+	tmux select-window -t awx:1
 	tmux rename-window 'WebSockets'
 	tmux split-window -h 'exec make runworker'
 	tmux split-window -v 'exec make nginx'
 	tmux new-window 'exec make receiver'
-	tmux select-window -t tower:2
+	tmux select-window -t awx:2
 	tmux rename-window 'Extra Services'
-	tmux select-window -t tower:0
+	tmux select-window -t awx:0
 
 server: server_noattach
-	tmux -2 attach-session -t tower
+	tmux -2 attach-session -t awx
 
 # Use with iterm2's native tmux protocol support
 servercc: server_noattach
-	tmux -2 -CC attach-session -t tower
+	tmux -2 -CC attach-session -t awx
 
 supervisor:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
 
@@ -417,51 +283,51 @@ supervisor:
 # Procfile.  https://youtu.be/OPMgaibszjk
 honcho:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	honcho start -f tools/docker-compose/Procfile
 
 flower:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
 
 collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/awxfifo --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
+    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/awxfifo --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
 runworker:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py runworker --only-channels websocket.*
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py runserver
 
 # Run to start the background celery worker for development.
 celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,tower,$(COMPOSE_HOST),$(EXTRA_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
@@ -469,13 +335,13 @@ celeryd:
 # Run to start the zeromq callback receiver
 receiver:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
 
 socketservice:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_socketio_service
 
@@ -493,7 +359,7 @@ pep8: reports
 
 flake8: reports
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	(set -o pipefail && $@ | tee reports/$@.report)
 
@@ -509,13 +375,13 @@ TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
 test: test_ansible
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test $(TEST_DIRS)
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
@@ -528,7 +394,7 @@ test_ansible:
 # Run all API unit tests with coverage enabled.
 test_coverage:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
@@ -548,7 +414,7 @@ test_jenkins : test_coverage
 DATA_GEN_PRESET = ""
 bulk_data:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
 
@@ -593,7 +459,7 @@ pot: $(UI_DEPS_FLAG_FILE)
 LANG = "en-us"
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
+		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
@@ -663,34 +529,6 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-# Build setup tarball
-tar-build/$(SETUP_TAR_FILE):
-	@mkdir -p tar-build
-	@rsync -az --exclude /test setup/ tar-build/$(SETUP_TAR_NAME)
-	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
-	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
-	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
-
-tar-build/$(SETUP_TAR_CHECKSUM):
-	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
-	else \
-	    cd tar-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
-	fi
-
-setup_tarball: tar-build/$(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_CHECKSUM)
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo tar-build/$(SETUP_TAR_FILE)
-	@echo tar-build/$(SETUP_TAR_LINK)
-	@echo tar-build/$(SETUP_TAR_CHECKSUM)
-	@echo "#############################################"
-
-release_clean:
-	-(rm *.tar)
-	-(rm -rf ($RELEASE))
-
 dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
 
@@ -707,296 +545,50 @@ sdist: dist/$(SDIST_TAR_FILE)
 setup-bundle-build:
 	mkdir -p $@
 
-# TODO - Somehow share implementation with setup_tarball
-setup-bundle-build/$(OFFLINE_TAR_FILE):
-	rsync -az --exclude /test setup/ setup-bundle-build/$(OFFLINE_TAR_NAME)
-	rsync -az docs/licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/
-	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
-	cd setup-bundle-build && tar -czf $(OFFLINE_TAR_FILE) --exclude "*/all.in" $(OFFLINE_TAR_NAME)/
-	ln -sf $(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_LINK)
-
-setup-bundle-build/$(OFFLINE_TAR_CHECKSUM):
-	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz > $(notdir $@) ; \
-	else \
-	    cd setup-bundle-build && $(SHASUM_BIN) $(NAME)*.tar.gz | $(GPG_BIN) --clearsign --batch --passphrase "$(GPG_PASSPHRASE)" -u "$(GPG_KEY)" -o $(notdir $@) - ; \
-	fi
-
-setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
-	@echo "#############################################"
-	@echo "Offline artifacts:"
-	@echo setup-bundle-build/$(OFFLINE_TAR_FILE)
-	@echo setup-bundle-build/$(OFFLINE_TAR_LINK)
-	@echo setup-bundle-build/$(OFFLINE_TAR_CHECKSUM)
-	@echo "#############################################"
-
-rpm-build:
-	mkdir -p $@
-
-rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_TAR_FILE)
-	ansible localhost \
-	    -m template \
-	    -a "src=packaging/rpm/$(NAME).spec.j2 dest=rpm-build/$(NAME).spec" \
-	    -e tower_version=$(VERSION) \
-	    -e tower_release=$(RELEASE)
-
-	cp packaging/rpm/tower.te rpm-build/
-	cp packaging/rpm/tower.fc rpm-build/
-	cp packaging/rpm/ansible-tower.sysconfig rpm-build/
-	cp packaging/remove_tower_source.py rpm-build/
-	cp packaging/bytecompile.sh rpm-build/
-	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
-
-	cd rpm-build && git clone git@github.com:ansible/tower-license.git
-	cd rpm-build/tower-license && $(PYTHON) setup.py sdist
-	cp rpm-build/tower-license/dist/* rpm-build/ && rm -rf rpm-build/tower-license
-
-	if [ "$(OFFICIAL)" != "yes" ] ; then \
-	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
-	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
-	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
-	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
-	  (cd tar-build/ && tar zxf $(SETUP_TAR_FILE)) ; \
-	  (cd tar-build/ && mv $(NAME)-setup-$(VERSION)-$(BUILD) $(NAME)-setup-$(VERSION)) ; \
-	  (cd tar-build/ && tar czf ../rpm-build/$(SETUP_TAR_FILE) $(NAME)-setup-$(VERSION)) ; \
-	  ln -sf $(SETUP_TAR_FILE) rpm-build/$(NAME)-setup-$(VERSION).tar.gz ; \
-	else \
-	  cp -a dist/$(SDIST_TAR_FILE) rpm-build/ ; \
-	fi
-
-rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
-
-brewrpmtar: rpm-build/python-deps.tar.gz requirements/requirements_local.txt requirements/requirements_ansible_local.txt rpmtar
-
-rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
-	tar czf rpm-build/python-deps.tar.gz requirements/vendor
-
-requirements/vendor:
-	cat requirements/requirements.txt requirements/requirements_git.txt | pip download \
-	    --no-binary=:all: \
-	    --requirement=/dev/stdin \
-	    --dest=$@ \
-	    --exists-action=i
-
-	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | pip download \
-	    --no-binary=:all: \
-	    --requirement=/dev/stdin \
-	    --dest=$@ \
-	    --exists-action=i
-
-	pip download \
-	    --no-binary=:all: \
-	    --requirement=requirements/requirements_setup_requires.txt \
-	    --dest=$@ \
-	    --exists-action=i
-
-requirements/requirements_local.txt:
-	@echo "This is going to take a while..."
-	pip download \
-	    --requirement=requirements/requirements_git.txt \
-	    --no-deps \
-	    --exists-action=w \
-	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
-
-requirements/requirements_ansible_local.txt:
-	pip download \
-	    --requirement=requirements/requirements_ansible_git.txt \
-	    --no-deps \
-	    --exists-action=w \
-	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
-
-rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build
-
-mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo rpm-build/$(RPM_NVR).src.rpm
-	@echo "#############################################"
-
-brew-srpm: brewrpmtar mock-srpm
-
-rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm
-
-mock-rpm: rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	@echo "#############################################"
-
-ifeq ($(OFFICIAL),yes)
-rpm-build/$(GPG_FILE): rpm-build
-	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
-
-rpm-sign: rpm-build/$(GPG_FILE) rpmtar rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm
-	rpm --define "_signature gpg" --define "_gpg_name $(GPG_KEY)" --addsign rpm-build/*.$(RPM_ARCH).rpm
-endif
-
-deb-build:
-	mkdir -p $@
-
-deb-build/$(DEB_TAR_NAME): dist/$(SDIST_TAR_FILE)
-	mkdir -p $(dir $@)
-	@if [ "$(OFFICIAL)" != "yes" ] ; then \
-	  tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE) ; \
-	  mv deb-build/$(SDIST_TAR_NAME) deb-build/$(DEB_TAR_NAME) ; \
-	  cd deb-build && tar czf $(DEB_TAR_FILE) $(DEB_TAR_NAME) ; \
-	else \
-	  cp -a dist/$(SDIST_TAR_FILE) deb-build/$(DEB_TAR_FILE) ; \
-	fi
-	cd deb-build && tar -xf $(DEB_TAR_FILE)
-	cp -a packaging/debian deb-build/$(DEB_TAR_NAME)/
-	cp packaging/remove_tower_source.py deb-build/$(DEB_TAR_NAME)/debian/
-	cd deb-build/$(DEB_TAR_NAME)/debian/ && git clone git@github.com:ansible/tower-license.git
-	rm -rf deb-build/$(DEB_TAR_NAME)/debian/tower-license/.git
-	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)~$(DEB_DIST)) $(DEB_DIST);#" deb-build/$(DEB_TAR_NAME)/debian/changelog
-
-ifeq ($(OFFICIAL),yes)
-debian: deb-build/$(DEB_TAR_NAME) deb-build/$(GPG_FILE)
-
-deb-build/$(GPG_FILE): deb-build
-	$(GPG_BIN) --export -a "${GPG_KEY}" > "$@"
-else
-debian: deb-build/$(DEB_TAR_NAME)
-endif
-
-deb-build/$(DEB_NVR).dsc: deb-build/$(DEB_TAR_NAME)
-	cd deb-build/$(DEB_TAR_NAME) && \
-		cp debian/control.$(DEB_DIST) debian/control && \
-		$(DEBUILD) -S
-
-deb-src: deb-build/$(DEB_NVR).dsc
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo deb-build/$(DEB_NVR).dsc
-	@echo deb-build/$(DEB_NVRS).changes
-	@echo "#############################################"
-
-$(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz:
-	$(PBUILDER_BIN) create $(PBUILDER_OPTS)
-
-pbuilder: $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz deb-build/$(DEB_NVRA).deb
-
-deb-build/$(DEB_NVRA).deb: deb-build/$(DEB_NVR).dsc $(PBUILDER_CACHE_DIR)/$(DEB_DIST)-$(DEB_ARCH)-base.tgz
-	# cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -b
-	$(PBUILDER_BIN) update $(PBUILDER_OPTS)
-	$(PBUILDER_BIN) execute $(PBUILDER_OPTS) --save-after-exec packaging/pbuilder/setup.sh $(DEB_DIST)
-	$(PBUILDER_BIN) build $(PBUILDER_OPTS) deb-build/$(DEB_NVR).dsc
-
-deb: guard-DEB_DIST deb-build/$(DEB_NVRA).deb
-	@echo "#############################################"
-	@echo "Artifacts:"
-	@echo deb-build/$(DEB_NVRA).deb
-	@echo "#############################################"
-
-deb-upload: deb-build/$(DEB_NVRA).changes
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
-
-dput: deb-build/$(DEB_NVRA).changes
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRA).changes
-
-deb-src-upload: deb-build/$(DEB_NVRS).changes
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(DEB_NVRS).changes
-
-debsign: deb-build/$(DEB_NVRS).changes debian deb-build/$(DEB_NVR).dsc
-	debsign -k$(GPG_KEY) deb-build/$(DEB_NVRS).changes deb-build/$(DEB_NVR).dsc
-
-reprepro/conf:
-	mkdir -p $@
-	cp -a packaging/reprepro/* $@/
-	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	    sed -i -e 's|^\(Codename:\)|SignWith: $(GPG_KEY)\n\1|' $@/distributions ; \
-	fi
-
-reprepro: deb-build/$(DEB_NVRA).deb reprepro/conf
-	$(REPREPRO_BIN) $(REPREPRO_OPTS) clearvanished
-	for COMPONENT in non-free $(VERSION); do \
-	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT remove $(DEB_DIST) $(NAME) ; \
-	  $(REPREPRO_BIN) $(REPREPRO_OPTS) -C $$COMPONENT --keepunreferencedfiles --ignore=brokenold includedeb $(DEB_DIST) deb-build/$(DEB_NVRA).deb ; \
-	done
-
-
-#
-# Packer build targets
-#
-
-amazon-ebs:
-	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
-
-# Vagrant box using virtualbox provider
-vagrant-virtualbox: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box tar-build/$(SETUP_TAR_FILE)
-
-packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
-	cd packaging/packer && $(PACKER) build -only virtualbox-ovf $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
-
-packaging/packer/output-virtualbox-iso/centos-7.ovf:
-	cd packaging/packer && $(PACKER) build -only virtualbox-iso packer-centos-7.json
-
-virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-7.ovf
-
-# Vagrant box using VMware provider
-vagrant-vmware: packaging/packer/ansible-tower-$(VERSION)-vmware.box tar-build/$(SETUP_TAR_FILE)
-
-packaging/packer/output-vmware-iso/centos-7.vmx:
-	cd packaging/packer && $(PACKER) build -only vmware-iso packer-centos-7.json
-
-packaging/packer/ansible-tower-$(VERSION)-vmware.box: packaging/packer/output-vmware-iso/centos-7.vmx
-	cd packaging/packer && $(PACKER) build -only vmware-vmx $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
-
-# TODO - figure out how to build the front-end and python requirements with
-# 'build'
-build:
-	export SCL_PREFIX
-	$(PYTHON) setup.py build
-
-install:
-	export SCL_PREFIX HTTPD_SCL_PREFIX
-	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
-
 docker-auth:
-	docker login -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
+	if [ "$(GCLOUD_AUTH)" ]; then \
+		docker login -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io; \
+	fi;
 
 # Docker isolated rampart
 docker-isolated:
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
-	docker start tools_tower_1
+	docker start tools_awx_1
 	docker start tools_isolated_1
-	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub`" ]; then \
+	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub`" ]; then \
 		echo "SSH keys already copied to isolated instance"; \
 	else \
-		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && rm -f /root/.ssh/authorized_keys && echo $$(docker exec -t tools_tower_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
+		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && rm -f /root/.ssh/authorized_keys && echo $$(docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
 	fi
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate awx
 
 docker-compose-cluster: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
-	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports awx /bin/bash
 
-docker-compose-build: tower-devel-build tower-isolated-build
+docker-compose-build: awx-devel-build awx-isolated-build
 
-tower-devel-build:
-	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
-	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
-	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
+awx-devel-build:
+	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
+	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
 
-tower-isolated-build:
-	docker build -t ansible/tower_isolated -f tools/docker-isolated/Dockerfile .
-	docker tag ansible/tower_isolated gcr.io/ansible-tower-engineering/tower_isolated:$(COMPOSE_TAG)
-	#docker push gcr.io/ansible-tower-engineering/tower_isolated:$(COMPOSE_TAG)
+awx-isolated-build:
+	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
+	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
 	eval $$(docker-machine env $(MACHINE))
-	$(foreach container_id,$(shell docker ps -f name=tools_tower -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	-docker images | grep "tower_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
+	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq),docker stop $(container_id); docker rm -f $(container_id);)
+	-docker images | grep "awx_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
 
@@ -1017,35 +609,3 @@ clean-elk:
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
-
-# Openshift placeholders, these are good for bootstrapping a totally fresh Openshift Node but not for re-running
-# So you may want to pick and choose the functionality in these targets based on what you are doing
-openshift-production-build: dist/ansible-tower.tar.gz
-	docker build -t ansible/tower_web -f installer/openshift/Dockerfile .
-	docker build -t ansible/tower_task -f installer/openshift/Dockerfile.celery .
-
-openshift-production-tag: openshift-production-build
-	docker tag ansible/tower_web:latest 172.30.1.1:5000/tower/tower_web:latest
-	docker tag ansible/tower_task:latest 172.30.1.1:5000/tower/tower_task:latest
-
-openshift-image-push: openshift-production-tag
-	oc login -u developer && \
-	docker login -u developer -p $(shell oc whoami -t) 172.30.1.1:5000 && \
-	docker push 172.30.1.1:5000/tower/tower_web:latest && \
-	docker push 172.30.1.1:5000/tower/tower_task:latest
-
-openshift-preconfig:
-	oc login -u developer || true && \
-	oc new-project tower || true && \
-	oc adm policy add-role-to-user admin developer -n tower
-
-openshift-deploy: openshift-preconfig openshift-image-push
-	oc login -u developer && \
-	oc new-app --template=postgresql-persistent -e MEMORY_LIMIT=512Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql -e POSTGRESQL_USER=tower -e POSTGRESQL_PASSWORD=password123 -e POSTGRESQL_DATABASE=tower -e VOLUME_CAPACITY=1Gi -e POSTGRESQL_VERSION=9.5 -n tower && \
-	echo "Waiting for PG to come online" && \
-	sleep 15 && \
-	oc apply -f installer/openshift/config/configmap.yml && \
-	oc apply -f installer/openshift/config/deployment.yml
-
-openshift-delete:
-	oc delete -f installer/openshift/config/deployment.yml

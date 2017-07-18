@@ -4,18 +4,13 @@
 # All Rights Reserved.
 
 import os
-import datetime
 import glob
 import sys
+import subprocess
+import re
 from setuptools import setup
 from distutils.command.sdist import sdist
 
-from awx import __version__
-
-if os.getenv('OFFICIAL', 'no') == 'yes':
-    build_timestamp = ''
-else:
-    build_timestamp = '-' + os.getenv("BUILD", datetime.datetime.now().strftime('0.git%Y%m%d%H%M'))
 
 # Paths we'll use later
 etcpath = "/etc/tower"
@@ -23,6 +18,12 @@ homedir = "/var/lib/awx"
 bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
 docdir = "/usr/share/doc/ansible-tower"
+
+
+def get_version():
+    ver = subprocess.Popen("git describe --long", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+    return re.sub(r'-([0-9]+)-.*', r'.\1', ver)
+
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
@@ -56,7 +57,6 @@ class sdist_isolated(sdist):
 
     def __init__(self, dist):
         sdist.__init__(self, dist)
-        dist.metadata.version += build_timestamp
 
     def get_file_list(self):
         self.filelist.process_template_line('include setup.py')
@@ -112,16 +112,16 @@ def proc_data_files(data_files):
 
 
 setup(
-    name=os.getenv('NAME', 'ansible-tower'),
-    version=__version__.split("-")[0], # FIXME: Should keep full version here?
+    name=os.getenv('NAME', 'ansible-awx'),
+    version=get_version(),
     author='Ansible, Inc.',
     author_email='info@ansible.com',
-    description='ansible-tower: API, UI and Task Engine for Ansible',
-    long_description='Ansible Tower provides a web-based user interface, REST API and '
+    description='ansible-awx: API, UI and Task Engine for Ansible',
+    long_description='Ansible AWX provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
-    license='Proprietary',
+    license='MIT',
     keywords='ansible',
-    url='http://github.com/ansible/ansible-tower',
+    url='http://github.com/ansible/awx',
     packages=['awx'],
     include_package_data=True,
     zip_safe=False,
@@ -144,7 +144,6 @@ setup(
     entry_points = {
         'console_scripts': [
             'awx-manage = awx:manage',
-            'tower-manage = awx:manage'
         ],
     },
     data_files = proc_data_files([
@@ -163,9 +162,6 @@ setup(
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
-        'egg_info': {
-            'tag_build': build_timestamp,
-        },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',

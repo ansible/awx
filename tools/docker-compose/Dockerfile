@@ -17,19 +17,16 @@ RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap zanata-python-client gettext gcc-c++ bzip2
 RUN pip install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
-RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db
-ADD tools/docker-compose/license /etc/tower/license
 RUN pip2 install honcho
 RUN pip2 install supervisor
 ADD tools/docker-compose/ansible-tower.egg-link /tmp/ansible-tower.egg-link
-ADD tools/docker-compose/tower-manage /usr/local/bin/tower-manage
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/ansible_tower.egg-info /tmp/ansible_tower.egg-info
-RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
-RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
-RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_development.sh
-RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=Tower Development/CN=tower.localhost"
+RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
+RUN ln -s /awx_devel/tools/docker-compose/start_development.sh /start_development.sh
+RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 WORKDIR /tmp
 RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev

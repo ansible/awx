@@ -5,7 +5,9 @@ import os
 import sys
 import warnings
 
-__version__ = '3.2.0'
+from pkg_resources import get_distribution
+
+__version__ = get_distribution('ansible-awx').version
 
 __all__ = ['__version__']
 

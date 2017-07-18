@@ -1,9 +1,9 @@
 version: '3'
 services:
-  # Primary Tower Development Container
-  tower:
-    image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
-    hostname: tower
+  # Primary AWX Development Container
+  awx:
+    image: gcr.io/ansible-tower-engineering/awx_devel:${TAG}
+    hostname: awx
     environment:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: guest
@@ -26,7 +26,7 @@ services:
     # volumes_from:
     #   - sync
     volumes:
-      - "../:/tower_devel"
+      - "../:/awx_devel"
     privileged: true
   logstash:
     build:
