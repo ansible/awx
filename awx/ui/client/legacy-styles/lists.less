@@ -22,6 +22,7 @@ table, tbody {
     width: 100%;
     margin-top: 20px;
     table-layout: fixed;
+    overflow: hidden;
 }
 
 .List-tableHeader{
@@ -71,9 +72,8 @@ table, tbody {
     background-color: #f2f2f2;
 }
 
-.List-tableRow--selected,
-.List-tableRow--selected > :first-child {
-    border-left: 5px solid @list-row-select-bord;
+.List-tableRow--selected {
+    border-left: 10px solid @list-row-select-bord;
 }
 
 .List-tableRow--selected > :first-child {
@@ -353,6 +353,8 @@ table, tbody {
 .modal-body > .List-noItems {
     margin-top: 0px;
 }
+
+.List-actionButton--selected,
 .List-editButton--selected {
     background-color: @list-actn-bg-hov !important;
     color: @list-actn-icn-hov;
