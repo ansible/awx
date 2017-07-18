@@ -60,7 +60,7 @@
                      $scope.$watchCollection('associate_hosts', function () {
                          if($scope.selectedItems) {
                              $scope.associate_hosts.forEach(function(row, i) {
-                                 if (_.includes($scope.selectedItems, row.id)) {
+                                 if ($scope.selectedItems.filter(function(e) { return e.id === row.id; }).length > 0) {
                                      $scope.associate_hosts[i].isSelected = true;
                                  }
                              });

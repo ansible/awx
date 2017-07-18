@@ -63,11 +63,9 @@
                      $scope.$watchCollection('associate_groups', function () {
                          if($scope.selectedItems) {
                              $scope.associate_groups.forEach(function(row, i) {
-                                 $scope.selectedItems.forEach(function(selectedItem) {
-                                     if(selectedItem.id === row.id) {
-                                         $scope.associate_groups[i].isSelected = true;
-                                     }
-                                 });
+                                 if ($scope.selectedItems.filter(function(e) { return e.id === row.id; }).length > 0) {
+                                     $scope.associate_groups[i].isSelected = true;
+                                 }
                              });
                          }
                      });
