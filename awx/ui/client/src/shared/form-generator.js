@@ -776,7 +776,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngModel: field.subCheckbox.variable,
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
-                                ngDisabled: field.ngDisabled || field.subCheckbox.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -800,7 +800,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
                                 ngModel: field.subCheckbox.variable,
-                                ngDisabled: field.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -1019,7 +1019,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngModel: field.subCheckbox.variable,
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
-                                ngDisabled: field.ngDisabled || field.subCheckbox.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -1074,7 +1074,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngShow: field.subCheckbox.ngShow,
                                 ngModel: field.subCheckbox.variable,
                                 ngChange: field.subCheckbox.ngChange,
-                                ngDisabled: field.subCheckbox.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text
                             };
                         }
@@ -1147,7 +1147,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
                                 ngModel: field.subCheckbox.variable,
-                                ngDisabled: field.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -1171,6 +1171,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
                         html += buildId(field, fld, this.form);
+                        html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (field.min || field.min === 0) ? this.attr(field, 'min') : "";
                         html += (field.max) ? this.attr(field, 'max') : "";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
@@ -1365,7 +1366,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
                                 ngModel: field.subCheckbox.variable,
-                                ngDisabled: field.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -1448,7 +1449,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngShow: field.subCheckbox.ngShow,
                                 ngChange: field.subCheckbox.ngChange,
                                 ngModel: field.subCheckbox.variable,
-                                ngDisabled: field.ngDisabled,
+                                ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text || ''
                             };
                         }
@@ -2049,7 +2050,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             let ngShow = options.ngShow ? `ng-show="${options.ngShow}"` : '';
 
             return `
-                <label class="checkbox-inline Form-checkbox" ${ngShow}>
+                <label class="checkbox-inline Form-checkbox Form-checkbox--subCheckbox" ${ngShow}>
                     <input type="checkbox" id="${options.id}" ${ngModel} ${ngChange} ${ngDisabled} />
                     ${options.text}
                 </label> `;

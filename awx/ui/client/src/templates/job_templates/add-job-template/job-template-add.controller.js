@@ -261,11 +261,13 @@
                         }
                         else {
                             if (fld !== 'variables' &&
-                                fld !== 'survey') {
+                                fld !== 'survey' &&
+                                fld !== 'forks') {
                                 data[fld] = $scope[fld];
                             }
                         }
                     }
+                    data.forks = $scope.forks || 0;
                     data.ask_diff_mode_on_launch = $scope.ask_diff_mode_on_launch ? $scope.ask_diff_mode_on_launch : false;
                     data.ask_tags_on_launch = $scope.ask_tags_on_launch ? $scope.ask_tags_on_launch : false;
                     data.ask_skip_tags_on_launch = $scope.ask_skip_tags_on_launch ? $scope.ask_skip_tags_on_launch : false;

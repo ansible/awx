@@ -42,8 +42,10 @@ function adhocController($q, $scope, $stateParams,
                 $scope.verbosity = verbosity_options[verbosity];
             }
         }
-        $("#forks-number").spinner("value", forks_default);
-        $scope.forks = forks_default;
+        if (forks_default !== 0) {
+            $("#forks-number").spinner("value", forks_default);
+            $scope.forks = forks_default;
+        }
     };
 
     // set when "working" starts and stops

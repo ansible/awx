@@ -216,6 +216,17 @@
     }
 }
 
+.Form-checkbox--subCheckbox {
+    font-size: 10px;
+    color: @default-stdout-txt;
+    text-transform: uppercase;
+    margin-top: 2px;
+
+    input {
+        margin-top: 2px;
+    }
+}
+
 .Form-textUneditable {
     .Form-textInput {
         border: none;
@@ -732,4 +743,17 @@ input[type='radio']:checked:before {
 .select2-results__option:hover {
     overflow-wrap: break-word;
     white-space: normal;
+}
+
+::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: @b7grey;
+}
+::-moz-placeholder { /* Firefox 19+ */
+  color: @b7grey;
+}
+:-ms-input-placeholder { /* IE 10+ */
+  color: @b7grey;
+}
+:-moz-placeholder { /* Firefox 18- */
+  color: @b7grey;
 }
