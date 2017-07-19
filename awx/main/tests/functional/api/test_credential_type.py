@@ -13,6 +13,26 @@ def test_list_as_unauthorized_xfail(get):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('method, valid', [
+    ('GET', sorted(dict(CredentialType.KIND_CHOICES).keys())),
+    ('POST', ['cloud', 'net']),
+])
+def test_options_valid_kinds(method, valid, options, admin):
+    response = options(reverse('api:credential_type_list'), admin)
+    choices = sorted(dict(response.data['actions'][method]['kind']['choices']).keys())
+    assert valid == choices
+
+
+@pytest.mark.django_db
+def test_options_valid_put_kinds(options, admin):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+    response = options(reverse('api:credential_type_detail', kwargs={'pk': ssh.pk}), admin)
+    choices = sorted(dict(response.data['actions']['PUT']['kind']['choices']).keys())
+    assert ['cloud', 'net'] == choices
+
+
+@pytest.mark.django_db
 def test_list_as_normal_user(get, alice):
     ssh = CredentialType.defaults['ssh']()
     ssh.save()

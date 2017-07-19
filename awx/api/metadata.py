@@ -17,7 +17,7 @@ from rest_framework.relations import RelatedField, ManyRelatedField
 from rest_framework.request import clone_request
 
 # Ansible Tower
-from awx.main.models import InventorySource, NotificationTemplate, CredentialType
+from awx.main.models import InventorySource, NotificationTemplate
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -117,6 +117,13 @@ class Metadata(metadata.SimpleMetadata):
 
         return field_info
 
+    def get_serializer_info(self, serializer, method=None):
+        filterer = getattr(serializer, 'filter_field_metadata', lambda fields, method: fields)
+        return filterer(
+            super(Metadata, self).get_serializer_info(serializer),
+            method
+        )
+
     def determine_actions(self, request, view):
         # Add field information for GET requests (so field names/labels are
         # available even when we can't POST/PUT).
@@ -137,7 +144,7 @@ class Metadata(metadata.SimpleMetadata):
                 # If user has appropriate permissions for the view, include
                 # appropriate metadata about the fields that should be supplied.
                 serializer = view.get_serializer(instance=obj)
-                actions[method] = self.get_serializer_info(serializer)
+                actions[method] = self.get_serializer_info(serializer, method=method)
             finally:
                 view.request = request
 
@@ -148,16 +155,6 @@ class Metadata(metadata.SimpleMetadata):
                 # Add type choices if available from the serializer.
                 if field == 'type' and hasattr(serializer, 'get_type_choices'):
                     meta['choices'] = serializer.get_type_choices()
-
-                # API-created/modified CredentialType kinds are limited to
-                # `cloud` and `network`
-                if method != 'GET' and \
-                        hasattr(serializer, 'Meta') and \
-                        getattr(serializer.Meta, 'model', None) is CredentialType:
-                    actions[method]['kind']['choices'] = filter(
-                        lambda choice: choice[0] in ('cloud', 'net'),
-                        actions[method]['kind']['choices']
-                    )
 
                 # For GET method, remove meta attributes that aren't relevant
                 # when reading a field and remove write-only fields.

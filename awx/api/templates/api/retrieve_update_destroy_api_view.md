@@ -15,7 +15,7 @@ Make a PUT or PATCH request to this resource to update this
 {{ model_verbose_name }}.  The following fields may be modified:
 
 {% with write_only=1 %}
-{% include "api/_result_fields_common.md" %}
+{% include "api/_result_fields_common.md" with serializer_fields=serializer_update_fields %}
 {% endwith %}
 
 For a PUT request, include **all** fields in the request.

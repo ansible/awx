@@ -287,6 +287,13 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.get_absolute_url(request=self.context.get('request'))
 
+    def filter_field_metadata(self, fields, method):
+        """
+        Filter field metadata based on the request method.
+        This it intended to be extended by subclasses.
+        """
+        return fields
+
     def _get_related(self, obj):
         return {} if obj is None else self.get_related(obj)
 
@@ -1956,6 +1963,16 @@ class CredentialTypeSerializer(BaseSerializer):
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
         return value
+
+    def filter_field_metadata(self, fields, method):
+        # API-created/modified CredentialType kinds are limited to
+        # `cloud` and `net`
+        if method in ('PUT', 'POST'):
+            fields['kind']['choices'] = filter(
+                lambda choice: choice[0] in ('cloud', 'net'),
+                fields['kind']['choices']
+            )
+        return fields
 
 
 # TODO: remove when API v1 is removed

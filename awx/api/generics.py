@@ -287,7 +287,13 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                     'model_verbose_name': smart_text(self.model._meta.verbose_name),
                     'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
                 })
-            d['serializer_fields'] = self.metadata_class().get_serializer_info(self.get_serializer())
+            serializer = self.get_serializer()
+            for method, key in [
+                ('GET', 'serializer_fields'),
+                ('POST', 'serializer_create_fields'),
+                ('PUT', 'serializer_update_fields')
+            ]:
+                d[key] = self.metadata_class().get_serializer_info(serializer, method=method)
         d['settings'] = settings
         d['has_named_url'] = self.model in settings.NAMED_URL_GRAPH
         return d
