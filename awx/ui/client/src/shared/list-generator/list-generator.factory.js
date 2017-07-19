@@ -296,6 +296,27 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += options.mode === 'lookup' ? `<tbody ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `"<tbody>\n"`;
                 innerTable += "<tr ng-class=\"[" + list.iterator;
                 innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
+
+                let handleEditStateParams = function(stateParams){
+                    let matchingConditions = [];
+
+                    angular.forEach(stateParams, function(stateParam) {
+                        matchingConditions.push(`$stateParams['` + stateParam + `'] == ${list.iterator}.id`);
+                    });
+                    return matchingConditions;
+                };
+
+                if(list && list.fieldActions && list.fieldActions.edit && list.fieldActions.edit.editStateParams) {
+                    let matchingConditions = handleEditStateParams(list.fieldActions.edit.editStateParams);
+                    innerTable += `, {'List-tableRow--selected' : ${matchingConditions.join(' || ')}}`;
+                }
+                else if (list.iterator === 'inventory') {
+                    innerTable += `, {'List-tableRow--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}`;
+                }
+                else {
+                    innerTable += `, {'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}`;
+                }
+
                 innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.pending_deletion]` : "";
 
                 if (list.multiSelect) {
@@ -364,16 +385,6 @@ export default ['$compile', 'Attr', 'Icon',
 
                     innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
 
-                    let handleEditStateParams = function(stateParams){
-                        let matchingConditions = [];
-
-                        angular.forEach(stateParams, function(stateParam) {
-                            matchingConditions.push(`$stateParams['` + stateParam + `'] == ${list.iterator}.id`);
-                        });
-
-                        return matchingConditions;
-                    };
-
                     for (field_action in list.fieldActions) {
                         if (field_action !== 'columnClass') {
                             if (list.fieldActions[field_action].type && list.fieldActions[field_action].type === 'DropDown') {
@@ -407,6 +418,12 @@ export default ['$compile', 'Attr', 'Icon',
                                     if(list.fieldActions[field_action].editStateParams) {
                                         let matchingConditions = handleEditStateParams(list.fieldActions[field_action].editStateParams);
                                         innerTable += `ng-class="{'List-editButton--selected' : ${matchingConditions.join(' || ')}}"`;
+                                    }
+                                    else if (list.iterator === 'inventory') {
+                                        innerTable += `ng-class="{'List-editButton--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}"`;
+                                    }
+                                    else if (list.iterator === 'host') {
+                                        innerTable += `ng-class="{'List-editButton--selected': $stateParams['${list.iterator}_id'] == ${list.iterator}.id && $state.is('inventories.edit.hosts.edit') }"`;
                                     }
                                     else {
                                         innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;

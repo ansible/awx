@@ -78,7 +78,8 @@ export default ['i18n', function(i18n) {
                 icon: 'fa-info',
                 awToolTip: i18n._('View Insights Data'),
                 dataPlacement: 'top',
-                ngShow: 'host.insights_system_id && host.summary_fields.inventory.hasOwnProperty("insights_credential_id")'
+                ngShow: 'host.insights_system_id && host.summary_fields.inventory.hasOwnProperty("insights_credential_id")',
+                ngClass: "{'List-actionButton--selected': $stateParams['host_id'] == host.id && $state.is('inventories.edit.hosts.edit.insights')}"
             },
             edit: {
                 ngClick: "editHost(host)",

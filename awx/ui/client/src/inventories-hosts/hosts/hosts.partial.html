@@ -48,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-class="[host.active_class]" id="{{ host.id }}" class="List-tableRow host_class" ng-repeat="host in hosts track by host.id">
+                        <tr ng-class="{'List-tableRow--selected': $stateParams['host_id'] == host.id}" id="{{ host.id }}" class="List-tableRow host_class" ng-repeat="host in hosts track by host.id">
                             <td class="List-tableCell toggleHost-column List-staticColumn--toggle">
                                 <div class="ScheduleToggle" ng-class="{'is-on': host.enabled, 'ScheduleToggle--disabled': host.has_inventory_sources}" aw-tool-tip="<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>" data-placement="right" data-tip-watch="undefined">
                                     <button ng-disabled="host.has_inventory_sources" ng-show="host.enabled" class="ScheduleToggle-switch is-on" ng-click="toggleHost($event, host)" translate>ON</button>
@@ -74,10 +74,10 @@
                             </td>
                             <td class="List-actionsContainer">
                                 <div class="List-actionButtonCell List-tableCell">
-                                    <button id="insights-action" class="List-actionButton " data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="View Insights Data" ng-show="host.insights_system_id && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')">
+                                    <button id="insights-action" class="List-actionButton " ng-class="{'List-actionButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit.insights')}" data-placement="top" ng-click="goToInsights(host.id)" aw-tool-tip="View Insights Data" ng-show="host.insights_system_id && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')">
                                         <i class="fa fa-info"></i>
                                     </button>
-                                    <button id="edit-action" class="List-actionButton " ng-class="{'List-editButton--selected' : $stateParams['host_id'] == host.id}" data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="Edit host" ng-show="host.summary_fields.user_capabilities.edit">
+                                    <button id="edit-action" class="List-actionButton " ng-class="{'List-editButton--selected' : $stateParams['host_id'] == host.id && $state.is('hosts.edit') }" data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="Edit host" ng-show="host.summary_fields.user_capabilities.edit">
                                         <i class="fa fa-pencil"></i>
                                     </button>
                                     <button id="view-action" class="List-actionButton " data-placement="top" ng-click="editHost(host.id)" aw-tool-tip="View host" ng-show="!host.summary_fields.user_capabilities.edit"><i class="fa fa-search-plus"></i>

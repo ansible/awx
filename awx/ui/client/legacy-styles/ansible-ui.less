@@ -1727,6 +1727,8 @@ tr td button i {
     padding: 0;
     border: none;
     margin-top: 0;
+    display: flex;
+    justify-content: flex-end;
 
     .btn.btn-primary {
       text-transform: uppercase;
@@ -1744,6 +1746,10 @@ tr td button i {
         background-color: @default-succ-disabled;
         border-color: @default-succ-disabled;
       }
+    }
+
+    .btn + .btn {
+        margin: 0;
     }
 }
 
