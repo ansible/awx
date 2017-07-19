@@ -1,5 +1,5 @@
-export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors',
-    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors) {
+export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessErrors', '$state',
+    function($scope, Empty, Wait, GetBasePath, Rest, ProcessErrors, $state) {
 
         $scope.gatherRecentJobs = function(event) {
             if (!Empty($scope.inventory.id)) {
@@ -20,6 +20,10 @@ export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessError
                         });
                 }
             }
+        };
+
+        $scope.viewJob = function(jobId) {
+            $state.go('jobResult', {id: jobId});
         };
 
     }
