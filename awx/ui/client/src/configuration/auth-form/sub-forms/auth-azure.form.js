@@ -42,6 +42,7 @@
 
          buttons: {
              reset: {
+                 ngShow: '!user_is_system_auditor',
                  ngClick: 'vm.resetAllConfirm()',
                  label: i18n._('Revert all to default'),
                  class: 'Form-resetAll'
