@@ -23,7 +23,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                         var putActions = data.actions.PUT;
 
                         _.each(getKeys, function(key) {
-                            if(putActions[key]) {
+                            if(putActions && putActions[key]) {
                                 returnData[key] = putActions[key];
                             } else {
                                 returnData[key] = _.extend(getActions[key], {
