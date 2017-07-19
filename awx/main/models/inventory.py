@@ -370,6 +370,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
     def clean_insights_credential(self):
+        if self.kind == 'smart':
+            raise ValidationError(_("Assignment not allowed for Smart Inventory"))
         if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
             raise ValidationError(_("Credential kind must be 'insights'."))
         return self.insights_credential
