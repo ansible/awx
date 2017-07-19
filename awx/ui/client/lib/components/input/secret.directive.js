@@ -20,11 +20,13 @@ function AtInputSecretController (baseInputController) {
         scope = _scope_;
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
+            scope.mode = 'input';
             scope.state._buttonText = vm.strings.get('SHOW');
             scope.type = 'password';
 
             vm.toggle = vm.toggleShowHide;
         } else {
+            scope.mode = 'encrypted';
             scope.state._buttonText = vm.strings.get('REPLACE');
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
             vm.toggle = vm.toggleRevertReplace;

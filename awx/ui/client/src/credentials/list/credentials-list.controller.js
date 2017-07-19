@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'Rest', 'CredentialList', 'Prompt',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
+export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', 'GetBasePath',
+        'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'credentialType', 'i18n',
     function($scope, Rest, CredentialList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
-    i18n) {
+    credentialType, i18n) {
 
         var list = CredentialList,
             defaultUrl = GetBasePath('credentials');
@@ -27,6 +27,10 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt',
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
             $scope.selected = [];
+
+            $scope[list.name].forEach(credential => {
+                credential.kind = credentialType.getById(credential.credential_type).name;
+            });
         }
 
         $scope.$on(`${list.iterator}_options`, function(event, data){

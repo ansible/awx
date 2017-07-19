@@ -9,7 +9,6 @@
 
 export default ['i18n', function(i18n) {
     return {
-
         name: 'credentials',
         iterator: 'credential',
         selectTitle: i18n._('Add Credentials'),
@@ -31,8 +30,8 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top'
             },
             kind: {
-                label: i18n._('Type'),
-                ngBind: 'credential.kind_label',
+                label: i18n._('Kind'),
+                ngBind: 'credential.kind',
                 excludeModal: true,
                 nosort: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'

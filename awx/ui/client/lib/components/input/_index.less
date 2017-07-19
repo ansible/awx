@@ -47,9 +47,15 @@
     .at-mixin-InputButton();
 }
 
-.at-Input-button--fixed-sm {
+.at-Input-button--fixed-xs {
     .at-mixin-InputButton();
     min-width: @at-width-input-button-sm;
+    height: @at-height-input;
+}
+
+.at-Input-button--fixed-sm {
+    .at-mixin-InputButton();
+    min-width: @at-width-input-button-md;
     height: @at-height-input;
 }
 

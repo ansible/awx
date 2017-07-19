@@ -35,7 +35,10 @@ function LegacyCredentialsService (pathService) {
                     let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                     return qs.search(path, $stateParams[`${list.iterator}_search`]);
                 }
-            ]
+            ],
+            credentialType: ['CredentialTypeModel', CredentialType => {
+                return new CredentialType('get');
+            }]
         }
     };
 
