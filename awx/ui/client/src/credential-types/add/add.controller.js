@@ -92,7 +92,7 @@ export default ['Rest', 'Wait',
             Rest.post({
                     name: $scope.name,
                     description: $scope.description,
-                    kind: $scope.kind.value,
+                    kind: "cloud",
                     inputs: inputs,
                     injectors: injectors
                 })

@@ -159,7 +159,7 @@ export default ['Rest', 'Wait',
             Rest.put({
                     name: $scope.name,
                     description: $scope.description,
-                    kind: $scope.kind.value,
+                    kind: "cloud",
                     inputs: inputs,
                     injectors: injectors
                 })
