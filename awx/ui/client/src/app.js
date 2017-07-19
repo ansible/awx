@@ -76,7 +76,7 @@ import '../lib/models';
 import '../lib/services';
 import '../features';
 
-var tower = angular.module('Tower', [
+var awApp = angular.module('awApp', [
     // how to add CommonJS / AMD  third-party dependencies:
     // 1. npm install --save package-name
     // 2. add package name to ./grunt-tasks/webpack.vendorFiles
@@ -227,6 +227,10 @@ var tower = angular.module('Tower', [
 
             $rootScope.breadcrumb = {};
             $rootScope.BRAND_NAME = AppStrings.get('BRAND_NAME');
+            $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME}`;
+            $rootScope.$watch('$state.current.ncyBreadcrumbLabel', function(title) {
+                $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${title || ""}`;
+            });
 
             function activateTab() {
                 // Make the correct tab active
@@ -276,6 +280,8 @@ var tower = angular.module('Tower', [
                 $rootScope.crumbCache = [];
 
                 $rootScope.$on("$stateChangeStart", function (event, next) {
+                    // let current_title = $rootScope.$state.current.ncyBreadcrumbLabel || "";
+                    // $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${current_title}`;
                     // Remove any lingering intervals
                     // except on jobResults.* states
                     var jobResultStates = [
@@ -455,4 +461,4 @@ var tower = angular.module('Tower', [
         }
     ]);
 
-export default tower;
+export default awApp;

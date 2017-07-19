@@ -32,7 +32,7 @@
  * that with the login form. Doing this each time the controller is instantiated insures the form is clean and not pre-populated with a prior user's username and password.
  *
  * Just before the release of 2.0 a bug was discovered where clicking logout and then immediately clicking login without providing a username and password would successfully log
- * the user back into Tower. Implementing the above approach fixed this, forcing a new username/password to be entered each time the login dialog appears.
+ * the user back into the app. Implementing the above approach fixed this, forcing a new username/password to be entered each time the login dialog appears.
  *
  * #Login Workflow
  *
@@ -44,7 +44,7 @@
  * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v2/me
  * - Store user information in the session cookie by calling Authorization.setUser().
  * - Get the license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
- * - Stores the license object in memory by calling CheckLicense.test(). This adds the version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
+ * - Stores the license object in memory by calling CheckLicense.test(). This adds the version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services
  *
  * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, app.js calls
  * Timer.isExpired(). This verifies the UI does not think the session is expired, and if not, moves the expiration time into the future. The number of

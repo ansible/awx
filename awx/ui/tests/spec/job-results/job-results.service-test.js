@@ -3,7 +3,7 @@
 describe('jobResultsService', () => {
     let jobResultsService;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
 
     beforeEach(angular.mock.inject(( _jobResultsService_) => {
         jobResultsService = _jobResultsService_;

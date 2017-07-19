@@ -13,6 +13,7 @@ function loadFactTemplate(factTemplate, fact) {
     }
 }
 
+
 FactTemplate.prototype.render = function(factData) {
 
     if (_.isUndefined(factData) || _.isEmpty(factData)) {

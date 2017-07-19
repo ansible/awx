@@ -4,7 +4,7 @@ describe('parseStdoutService', () => {
     let parseStdoutService,
         log;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
 
     beforeEach(angular.mock.module('jobResults',($provide) => {
         log = jasmine.createSpyObj('$log', [

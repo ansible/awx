@@ -5,7 +5,7 @@ describe('Service: InventoriesService', () => {
     let Rest,
         InventoriesService;
 
-    beforeEach(angular.mock.module('Tower'), ($provide)=>{
+    beforeEach(angular.mock.module('awApp'), ($provide)=>{
         $provide.value('Rest', Rest);
     });
     beforeEach(angular.mock.module('inventoryManage'));

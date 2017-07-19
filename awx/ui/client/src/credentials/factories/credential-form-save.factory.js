@@ -65,7 +65,7 @@ export default
                 })
                 .error(function (data, status) {
                     Wait('stop');
-                    // TODO: hopefully this conditional error handling will to away in a future version of tower.  The reason why we cannot
+                    // TODO: hopefully this conditional error handling will to away in a future versions.  The reason why we cannot
                     // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
                     // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
                     // error is never shown.  In the future, the API will hopefully either behave or respond differently.

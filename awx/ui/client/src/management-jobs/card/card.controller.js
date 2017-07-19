@@ -42,7 +42,7 @@ export default
                  // Cancel
                 scope.cancelConfigure = function () {
                     try {
-                        $('#configure-tower-dialog').dialog('close');
+                        $('#configure-dialog').dialog('close');
                         $("#configure-save-button").remove();
                     }
                     catch(e) {
@@ -131,7 +131,7 @@ export default
                                         .success(function(data) {
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
-                                            $("#configure-tower-dialog").dialog('close');
+                                            $("#configure-dialog").dialog('close');
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
@@ -151,7 +151,7 @@ export default
                         scope.removePromptForDays();
                     }
                     scope.removePromptForDays = scope.$on('PromptForDaysFacts', function() {
-                        // $('#configure-tower-dialog').dialog('close');
+                        // $('#configure-dialog').dialog('close');
                         $('#prompt-for-days-facts').show();
                         $('#prompt-for-days-facts').dialog('open');
                         CreateSelect2({
@@ -221,7 +221,7 @@ export default
                                         .success(function(data) {
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
-                                            // $("#configure-tower-dialog").dialog('close');
+                                            // $("#configure-dialog").dialog('close');
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
@@ -241,7 +241,7 @@ export default
                             scope.removePromptForDays();
                         }
                         scope.removePromptForDays = scope.$on('PromptForDays', function() {
-                            // $('#configure-tower-dialog').dialog('close');
+                            // $('#configure-dialog').dialog('close');
                             $('#prompt-for-days').show();
                             $('#prompt-for-days').dialog('open');
                             Wait('stop');

@@ -18,7 +18,7 @@ describe('Controller: TemplatesList', () => {
         deleteJobTemplateDeferred,
         Dataset;
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('templates', ($provide) => {
 
         state = jasmine.createSpyObj('state', [
