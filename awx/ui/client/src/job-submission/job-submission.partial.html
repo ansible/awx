@@ -271,7 +271,7 @@
                         </label>
 
                         <div class="survey_taker_description" ng-if="question.question_description">
-                            <i ng-bind="question.question_description"></i>
+                            <i ng-bind-html="question.question_description"></i>
                         </div>
                         <div ng-if="question.type === 'text'">
                             <input type="text" id="survey_question_{{$index}}" ng-model="question.model" name="survey_question_{{$index}}" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" ng-required="question.required">
