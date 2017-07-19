@@ -17,6 +17,14 @@ export default ['Rest', 'Wait',
         init();
 
         function init() {
+
+            // for add, don't show ssh
+            $scope.$on('loadCredentialKindOptions', function() {
+                $scope.credential_kind_options = $scope.credential_kind_options
+                        .filter(val => val.value === 'net' ||
+                            val.value === 'cloud');
+            });
+
             // Load the list of options for Kind
             $scope.$parent.optionsDefer.promise
                 .then(function(options) {
@@ -25,7 +33,8 @@ export default ['Rest', 'Wait',
                         url: url,
                         field: 'kind',
                         variable: 'credential_kind_options',
-                        options: options
+                        options: options,
+                        callback: 'loadCredentialKindOptions'
                     });
 
                     if (!options.actions.POST) {

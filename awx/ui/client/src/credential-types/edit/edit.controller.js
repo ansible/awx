@@ -43,6 +43,11 @@ export default ['Rest', 'Wait',
         }
         $scope.removeChoicesReady = $scope.$on('choicesReadyCredentialTypes',
             function() {
+                if (!resourceData.data.managed_by_tower) {
+                    $scope.credential_kind_options = $scope.credential_kind_options
+                            .filter(val => val.value === 'net' ||
+                                val.value === 'cloud');
+                }
 
                 $scope.credential_type = credential_typeData;
 
