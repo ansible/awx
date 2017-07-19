@@ -19,9 +19,13 @@ bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
 docdir = "/usr/share/doc/ansible-tower"
 
+if os.getenv('OFFICIAL', 'no') == 'yes':
+    build_tag = ''
+else:
+    build_tag = '-' + '0.git' + subprocess.Popen("git describe --long | cut -d - -f 2-2", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
 
 def get_version():
-    ver = subprocess.Popen("git describe --long", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+    ver = subprocess.Popen("git describe --long | cut -f1-1 -d -", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
     return re.sub(r'-([0-9]+)-.*', r'.\1', ver)
 
 
@@ -57,6 +61,7 @@ class sdist_isolated(sdist):
 
     def __init__(self, dist):
         sdist.__init__(self, dist)
+        dist.metadata.version += build_tag
 
     def get_file_list(self):
         self.filelist.process_template_line('include setup.py')
@@ -162,6 +167,9 @@ setup(
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
+        'egg_info': {
+            'tag_build': build_tag,
+        },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',

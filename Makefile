@@ -12,7 +12,7 @@ MANAGEMENT_COMMAND ?= awx-manage
 GCLOUD_AUTH ?=
 
 VERSION=$(shell git describe --long)
-VERSION3=$(shell git describe --long | sed 's/\-g.*//'
+VERSION3=$(shell git describe --long | sed 's/\-g.*//')
 VERSION3DOT=$(shell git describe --long | sed 's/\-g.*//' | sed 's/\-/\./')
 RELEASE_VERSION=$(shell git describe --long | sed 's@\([0-9.]\{1,\}\).*@\1@')
 
@@ -45,8 +45,10 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 ifeq ($(OFFICIAL),yes)
+    RELEASE ?= 1
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
+    RELEASE ?= 0.git$(shell git describe --long | cut -d - -f 2-2)
     AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
 endif
 
@@ -55,8 +57,8 @@ ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION3DOT)
-    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
+    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)-$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
 endif
 
 SDIST_COMMAND ?= sdist
@@ -101,7 +103,7 @@ clean-dist:
 	rm -rf dist
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-dist
+clean: clean-ui clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf awx/job_status
