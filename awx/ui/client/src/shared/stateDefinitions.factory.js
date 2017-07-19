@@ -738,8 +738,9 @@ function($injector, $stateExtender, $log, i18n) {
                     },
                     resolve: {
                         ListDefinition: [field.list, function(list) {
-                            list.iterator = field.sourceModel;
-                            return list;
+                            let listClone = _.cloneDeep(list);
+                            listClone.iterator = field.sourceModel;
+                            return listClone;
                         }],
                         OrganizationId: ['ListDefinition', 'InventoriesService', '$stateParams', '$rootScope',
                             function(list, InventoriesService, $stateParams, $rootScope){

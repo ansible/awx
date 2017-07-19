@@ -18,8 +18,6 @@ function LegacyCredentialsService (pathService) {
             },
             'list@credentials': {
                 templateProvider: function(CredentialList, generateList) {
-                    CredentialList.iterator = 'credential';
-
                     let html = generateList.build({
                         list: CredentialList,
                         mode: 'edit'
