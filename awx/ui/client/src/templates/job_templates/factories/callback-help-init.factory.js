@@ -57,7 +57,7 @@ export default
                     scope.name = data.name;
                     var fld, i;
                     for (fld in form.fields) {
-                        if (fld !== 'variables' && fld !== 'survey' && data[fld] !== null && data[fld] !== undefined) {
+                        if (fld !== 'variables' && fld !== 'survey' && fld !== 'forks' && data[fld] !== null && data[fld] !== undefined) {
                             if (form.fields[fld].type === 'select') {
                                 if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
                                     for (i = 0; i < scope[fld + '_options'].length; i++) {
@@ -75,6 +75,12 @@ export default
                                 }
                             }
                             master[fld] = scope[fld];
+                        }
+                        if (fld === 'forks') {
+                            if (data[fld] !== 0) {
+                                scope[fld] = data[fld];
+                                master[fld] = scope[fld];
+                            }
                         }
                         if (fld === 'variables') {
                             // Parse extra_vars, converting to YAML.

@@ -153,15 +153,15 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     id: 'forks-number',
                     type: 'number',
                     integer: true,
-                    min: 0,
+                    min: 1,
                     spinner: true,
-                    "default": '0',
                     'class': "input-small",
                     column: 1,
-                    awPopOver: '<p>' + i18n.sprintf(i18n._('The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
+                    awPopOver: '<p>' + i18n.sprintf(i18n._('The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use ' +
                         'the default value from the %sansible configuration file%s.'), '' +
                         '<a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
                         ' target=\"_blank\">', '</a>') +'</p>',
+                    placeholder: 'DEFAULT',
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
