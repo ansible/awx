@@ -78,7 +78,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
-from awx.api.metadata import RoleMetadata
+from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
@@ -2713,6 +2713,7 @@ class InventoryUpdateNotificationsList(SubListAPIView):
 class JobTemplateList(ListCreateAPIView):
 
     model = JobTemplate
+    metadata_class = JobTypeMetadata
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
     capabilities_prefetch = [
@@ -2731,6 +2732,7 @@ class JobTemplateList(ListCreateAPIView):
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
+    metadata_class = JobTypeMetadata
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
 
@@ -3731,12 +3733,14 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetac
 class JobList(ListCreateAPIView):
 
     model = Job
+    metadata_class = JobTypeMetadata
     serializer_class = JobListSerializer
 
 
 class JobDetail(RetrieveUpdateDestroyAPIView):
 
     model = Job
+    metadata_class = JobTypeMetadata
     serializer_class = JobSerializer
 
     def update(self, request, *args, **kwargs):
