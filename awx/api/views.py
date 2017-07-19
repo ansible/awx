@@ -1917,7 +1917,7 @@ class HostList(ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs
+        return qs.distinct()
 
     def list(self, *args, **kwargs):
         try:
