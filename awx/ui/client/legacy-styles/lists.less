@@ -485,7 +485,7 @@ table, tbody {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .List-header {
         flex-direction: column;
         align-items: stretch;
@@ -502,8 +502,13 @@ table, tbody {
     .List-well {
         margin-top: 20px;
     }
-    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
-        margin-left: 0;
+
+    .List-action {
+        margin-left: 20px;
+    }
+
+    .List-actionsInner {
+        margin-left: -20px;
     }
 }
 

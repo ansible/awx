@@ -117,19 +117,6 @@ export default ['i18n', function(i18n) {
                 // TODO: we don't always want to show this
                 ngShow: true
             },
-            system_tracking: {
-                buttonContent: i18n._('System Tracking'),
-                ngClick: 'systemTracking()',
-                awToolTip: i18n._("Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts."),
-                dataTipWatch: "systemTrackingTooltip",
-                dataPlacement: 'top',
-                awFeature: 'system_tracking',
-                actionClass: 'btn List-buttonDefault system-tracking',
-                ngDisabled: 'systemTrackingDisabled || !hostsSelected',
-                showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide",
-                ngShow: true
-            },
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
