@@ -376,7 +376,7 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
         'forks': 14,
         'limit': 'something',
         'verbosity': 5,
-        'extra_vars': '--',
+        'extra_vars': '---',
         'job_tags': 'sometags',
         'force_handlers': True,
         'skip_tags': 'thistag,thattag',

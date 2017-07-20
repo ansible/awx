@@ -3,6 +3,7 @@ from awx.main.validators import (
     validate_private_key,
     validate_certificate,
     validate_ssh_private_key,
+    vars_validate_or_raise,
 )
 from awx.main.tests.data.ssh import (
     TEST_SSH_RSA1_KEY_DATA,
@@ -12,6 +13,7 @@ from awx.main.tests.data.ssh import (
     TEST_OPENSSH_KEY_DATA_LOCKED,
     TEST_SSH_CERT_KEY,
 )
+from rest_framework.serializers import ValidationError as RestValidationError
 
 import pytest
 
@@ -96,3 +98,33 @@ def test_cert_with_key():
     assert pem_objects[0]['type'] == 'CERTIFICATE'
     assert pem_objects[1]['key_type'] == 'rsa'
     assert not pem_objects[1]['key_enc']
+
+
+@pytest.mark.parametrize("var_str", [
+    '{"a": "b"}',
+    '---\na: b\nc: d',
+    '',
+    '""',
+])
+def test_valid_vars(var_str):
+    vars_validate_or_raise(var_str)
+
+
+@pytest.mark.parametrize("var_str", [
+    '["a": "b"]',
+    '["a", "b"]',
+    "('a=4', 'c=5')",
+    '"',
+    "''",
+    "5",
+    "6.74",
+    "hello",
+    "OrderedDict([('a', 'b')])",
+    "True",
+    "False",
+])
+def test_invalid_vars(var_str):
+    with pytest.raises(RestValidationError):
+        vars_validate_or_raise(var_str)
+
+

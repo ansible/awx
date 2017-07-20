@@ -179,15 +179,21 @@ def vars_validate_or_raise(vars_str):
     job templates, inventories, or hosts are either an acceptable
     blank string, or are valid JSON or YAML dict
     """
-    try:
-        json.loads((vars_str or '').strip() or '{}')
+    if isinstance(vars_str, dict) or (isinstance(vars_str, basestring) and vars_str == '""'):
         return vars_str
+
+    try:
+        r = json.loads((vars_str or '').strip() or '{}')
+        if isinstance(r, dict):
+            return vars_str
     except ValueError:
         pass
     try:
         r = yaml.safe_load(vars_str)
-        if not (isinstance(r, basestring) and r.startswith('OrderedDict(')):
+        # Can be None if '---'
+        if isinstance(r, dict) or r is None:
             return vars_str
     except yaml.YAMLError:
         pass
     raise RestValidationError(_('Must be valid JSON or YAML.'))
+
