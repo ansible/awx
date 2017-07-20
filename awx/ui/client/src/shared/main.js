@@ -33,6 +33,7 @@ import features from './features/main';
 import orgAdminLookup from './org-admin-lookup/main';
 import limitPanels from './limit-panels/main';
 import multiSelectPreview from './multi-select-preview/main';
+import credentialTypesLookup from './credentialTypesLookup.factory';
 import 'angular-duration-format';
 
 export default
@@ -68,5 +69,6 @@ angular.module('shared', [listGenerator.name,
     ])
     .factory('stateDefinitions', stateDefinitions)
     .factory('lodashAsPromised', lodashAsPromised)
+    .factory('credentialTypesLookup', credentialTypesLookup)
     .directive('truncatedText', truncatedText)
     .provider('$stateExtender', stateExtender);
