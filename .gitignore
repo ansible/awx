@@ -109,6 +109,7 @@ reports
 local/
 *.mo
 requirements/vendor
+.i18n_built
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
