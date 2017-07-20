@@ -1165,6 +1165,24 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
         )
 
+    def test_source_without_credential(self):
+        self.instance.source = 'ec2'
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+
+            assert 'AWS_ACCESS_KEY_ID' not in env
+            assert 'AWS_SECRET_ACCESS_KEY' not in env
+            assert 'EC2_INI_PATH' in env
+
+            config = ConfigParser.ConfigParser()
+            config.read(env['EC2_INI_PATH'])
+            assert 'ec2' in config.sections()
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
     def test_ec2_source(self):
         aws = CredentialType.defaults['aws']()
         self.instance.source = 'ec2'

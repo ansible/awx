@@ -481,14 +481,14 @@ class BaseTask(Task):
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
             for credential, data in private_data.get('credentials', {}).iteritems():
-                name = 'credential_%d' % credential.pk
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if credential.kind in ('ssh', 'scm') and not ssh_too_old:
+                if credential and credential.kind in ('ssh', 'scm') and not ssh_too_old:
+                    name = 'credential_%d' % credential.pk
                     path = os.path.join(kwargs['private_data_dir'], name)
                     run.open_fifo_write(path, data)
                     private_data_files['credentials']['ssh'] = path
