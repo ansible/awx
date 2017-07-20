@@ -4,7 +4,6 @@ import codecs
 import StringIO
 import json
 import os
-import re
 import shutil
 import stat
 import tempfile
@@ -150,6 +149,13 @@ class IsolatedManager(object):
             secrets['ssh_key_data'] = buff.getvalue()
             os.remove(self.ssh_key_path)
 
+        # write the entire secret payload to a named pipe
+        # the run_isolated.yml playbook will use a lookup to read this data
+        # into a variable, and will replicate the data into a named pipe on the
+        # isolated instance
+        secrets_path = os.path.join(self.private_data_dir, 'env')
+        run.open_fifo_write(secrets_path, base64.b64encode(json.dumps(secrets)))
+
         self.build_isolated_job_data()
 
         extra_vars = {
@@ -172,9 +178,6 @@ class IsolatedManager(object):
         logger.debug('Starting job on isolated host with `run_isolated.yml` playbook.')
         status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.management_env, buff,
-            expect_passwords={
-                re.compile(r'Secret:\s*?$', re.M): base64.b64encode(json.dumps(secrets))
-            },
             idle_timeout=self.idle_timeout,
             job_timeout=settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
             pexpect_timeout=5
@@ -216,7 +219,9 @@ class IsolatedManager(object):
             '- /project/.svn',
             '- /project/.hg',
             # don't rsync job events that are in the process of being written
-            '- /artifacts/job_events/*-partial.json.tmp'
+            '- /artifacts/job_events/*-partial.json.tmp',
+            # rsync can't copy named pipe data - we're replicating this manually ourselves in the playbook
+            '- /env'
         ]
 
         for filename, data in (
