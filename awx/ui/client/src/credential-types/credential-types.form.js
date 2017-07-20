@@ -35,35 +35,6 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 ngDisabled: '!(credential_type.summary_fields.user_capabilities.edit || canAdd)'
             },
-            kind: {
-                label: i18n._('Kind'),
-                excludeModal: true,
-                type: 'select',
-                ngOptions: 'kind.label for kind in credential_kind_options track by kind.value',
-                required: true,
-                awPopOver: '<dl>\n' +
-                        '<dt>' + i18n._('Machine') + '</dt>\n' +
-                        '<dd>' + i18n._('Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
-                        'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
-                        'remote hosts.') + '</dd>' +
-                        '<dt>' + i18n._('Network') + '</dt>\n' +
-                        '<dd>' + i18n._('Authentication for network device access. This can include SSH keys, usernames, passwords, ' +
-                        'and authorize information. Network credentials are used when submitting jobs to run playbooks against ' +
-                        'network devices.') + '</dd>' +
-                        '<dt>' + i18n._('Source Control') + '</dt>\n' +
-                        '<dd>' + i18n._('Used to check out and synchronize playbook repositories with a remote source control ' +
-                        'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                        'used by Projects.') + '</dd>\n' +
-                        '<dt>' + i18n._('Cloud') + '</dt>\n' +
-                        '<dd>' + i18n._('Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
-                        'provider. These are used for smart inventory sources and for cloud provisioning and deployment ' +
-                        'in playbook runs.') + '</dd>\n' +
-                        '</dl>\n',
-                dataTitle: i18n._('Kind'),
-                dataPlacement: 'right',
-                dataContainer: "body",
-                ngDisabled: '!(credential_type.summary_fields.user_capabilities.edit || canAdd)'
-            },
             inputs: {
                 label: i18n._('Input Configuration'),
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
