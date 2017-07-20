@@ -3444,6 +3444,24 @@ class ScheduleSerializer(BaseSerializer):
                 'Schedule its source project `{}` instead.'.format(value.source_project.name)))
         return value
 
+    def validate_extra_data(self, value):
+        if isinstance(value, dict):
+            return value
+        return vars_validate_or_raise(value)
+
+    def validate(self, attrs):
+        extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
+        if extra_data:
+            ujt = None
+            if 'unified_job_template' in attrs:
+                ujt = attrs['unified_job_template']
+            elif self.instance:
+                ujt = self.instance.unified_job_template
+            if ujt and isinstance(ujt, (Project, InventorySource)):
+                raise serializers.ValidationError({'extra_data': _(
+                    'Projects and inventory updates cannot accept extra variables.')})
+        return super(ScheduleSerializer, self).validate(attrs)
+
     # We reject rrules if:
     # - DTSTART is not include
     # - INTERVAL is not included
