@@ -5,9 +5,9 @@
  *************************************************/
 
  export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
- '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'HostsList',
+ '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'RelatedHostsListDefinition',
  function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-     $state, Rest, $q, Wait, $window, qs, HostsList) {
+     $state, Rest, $q, Wait, $window, qs, RelatedHostsListDefinition) {
      $scope.$on("linkLists", function() {
 
          init();
@@ -23,12 +23,14 @@
                  page_size: 5
              };
 
-             let list = _.cloneDeep(HostsList);
+             let list = _.cloneDeep(RelatedHostsListDefinition);
              list.basePath = GetBasePath('inventory') + $state.params.inventory_id + '/hosts';
              list.iterator = 'associate_host';
              list.name = 'associate_hosts';
              list.multiSelect = true;
              list.fields.name.ngClick = 'linkoutHost(associate_host)';
+             list.fields.name.ngClass = "{ 'host-disabled-label': !associate_host.enabled }";
+             list.fields.name.dataHostId = "{{ associate_host.id }}";
              list.trackBy = 'associate_host.id';
              list.multiSelectPreview = {
                  selectedRows: 'selectedItems',
@@ -36,7 +38,7 @@
              };
              delete list.fields.toggleHost;
              delete list.fields.active_failures;
-             delete list.fields.inventory;
+             delete list.fields.groups;
              delete list.actions;
              delete list.fieldActions;
              list.well = false;
