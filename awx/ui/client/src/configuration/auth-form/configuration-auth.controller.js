@@ -110,8 +110,8 @@ export default [
             {label: i18n._('Google OAuth2'), value: 'google_oauth'},
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
-            {label: i18n._('TACACS+'), value: 'tacacs'},
-            {label: i18n._('SAML'), value: 'saml'}
+            {label: i18n._('SAML'), value: 'saml'},
+            {label: i18n._('TACACS+'), value: 'tacacs'}
         ];
 
         CreateSelect2({

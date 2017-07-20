@@ -83,9 +83,9 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: i18n._('Misc. System'), value: 'misc'},
             {label: i18n._('Activity Stream'), value: 'activity_stream'},
             {label: i18n._('Logging'), value: 'logging'},
+            {label: i18n._('Misc. System'), value: 'misc'}
         ];
 
         CreateSelect2({
