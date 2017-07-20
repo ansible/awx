@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Project, ProjectUpdate
+from awx.main.models import InventorySource
 
 
 @pytest.fixture
@@ -246,31 +246,6 @@ def test_inventory_update_access_called(post, inventory_source, alice, mock_acce
         post(reverse('api:inventory_source_update_view', kwargs={'pk': inventory_source.id}),
              {}, alice, expect=expected_status_code)
         mock_instance.can_start.assert_called_once_with(inventory_source)
-
-
-@pytest.mark.django_db
-class TestUpdateOnProjUpdate:
-
-    def test_no_access_update_denied(self, admin_user, scm_inventory, mock_access, post):
-        inv_src = scm_inventory.inventory_sources.first()
-        with mock_access(Project) as mock_access:
-            mock_access.can_start = mock.MagicMock(return_value=False)
-            r = post(reverse('api:inventory_source_update_view', kwargs={'pk': inv_src.id}),
-                     {}, admin_user, expect=403)
-        assert 'You do not have permission to update project' in r.data['detail']
-
-    def test_no_access_update_allowed(self, admin_user, scm_inventory, mock_access, post):
-        inv_src = scm_inventory.inventory_sources.first()
-        inv_src.source_project.scm_type = 'git'
-        inv_src.source_project.save()
-        with mock.patch('awx.api.views.InventorySourceUpdateView.get_object') as get_object:
-            get_object.return_value = inv_src
-            with mock.patch.object(inv_src.source_project, 'update') as mock_update:
-                mock_update.return_value = ProjectUpdate(pk=48, id=48)
-                r = post(reverse('api:inventory_source_update_view', kwargs={'pk': inv_src.id}),
-                         {}, admin_user, expect=202)
-        assert 'dependent project' in r.data['detail']
-        assert not r.data['inventory_update']
 
 
 @pytest.mark.django_db
