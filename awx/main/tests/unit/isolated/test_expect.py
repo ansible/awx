@@ -163,7 +163,8 @@ def test_build_isolated_job_data(private_data_dir, rsa_key):
             '- /project/.git',
             '- /project/.svn',
             '- /project/.hg',
-            '- /artifacts/job_events/*-partial.json.tmp'
+            '- /artifacts/job_events/*-partial.json.tmp',
+            '- /env'
         ])
 
 

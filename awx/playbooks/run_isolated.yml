@@ -8,10 +8,8 @@
 - name: Prepare data, dispatch job in isolated environment.
   hosts: all
   gather_facts: false
-  vars_prompt:
-    - prompt: "Secret"
-      name: "secret"
-      private: yes
+  vars:
+      secret: "{{ lookup('pipe', 'cat ' + src + '/env') }}"
 
   tasks:
 
