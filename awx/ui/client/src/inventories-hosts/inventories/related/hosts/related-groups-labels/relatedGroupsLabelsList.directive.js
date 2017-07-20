@@ -33,7 +33,7 @@ export default
 
                     scope.seeMore = function () {
                         var seeMoreResolve = $q.defer();
-                        Rest.setUrl(scope[scope.$parent.list.iterator].related.groups);
+                        Rest.setUrl(`${scope[scope.$parent.list.iterator].related.groups}/?order_by=id`);
                         Rest.get()
                             .success(function(data) {
                                 if (data.next) {
@@ -50,7 +50,7 @@ export default
                     };
 
                     scope.seeLess = function() {
-                        // Trim the groups array back down to 10 items
+                        // Trim the groups array back down to 5 items
                         scope.related_groups = scope.related_groups.slice(0, 5);
                         // Re-set the seeMoreInteractive flag so that the "See More" will be displayed
                         scope.seeMoreInactive = true;
