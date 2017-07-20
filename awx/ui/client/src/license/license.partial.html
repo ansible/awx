@@ -101,8 +101,8 @@
 				<form id="License-form" name="uploadlicense">
 					<div class="License-subTitleText prepend-asterisk"> <translate>License File</translate></div>
 					<div class="input-group License-file--container">
-						<span class="btn btn-primary" ng-click="fakeClick()" translate>Browse</span>
-                                                <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
+						<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser" translate>Browse</span>
+                        <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
 					<div class="License-subTitleText prepend-asterisk"> <translate>End User License Agreement</translate>
@@ -112,13 +112,13 @@
 					<div class="form-group License-detailsGroup">
 						<div class="checkbox">
 							<label class="License-details--label">
-								<input type="checkbox" ng-model="newLicense.eula" required>
+								<input type="checkbox" ng-model="newLicense.eula" ng-disabled="!user_is_superuser" required>
 								<translate>I agree to the End User License Agreement</translate>
 							</label>
 						</div>
 					</div>
 					<div>
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null" translate>Submit</button>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
 						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
 					</div>
 				</form>

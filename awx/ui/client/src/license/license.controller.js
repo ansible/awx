@@ -73,7 +73,9 @@ export default
         // HTML5 spec doesn't provide a way to customize file input css
         // So we hide the default input, show our own, and simulate clicks to the hidden input
         $scope.fakeClick = function(){
-            $('#License-file').click();
+            if($scope.user_is_superuser) {
+                $('#License-file').click();
+            }
         };
 
         $scope.downloadLicense = function(){
