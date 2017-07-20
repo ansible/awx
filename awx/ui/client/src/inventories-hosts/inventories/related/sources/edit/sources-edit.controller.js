@@ -300,7 +300,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         };
 
         $scope.lookupCredential = function(){
-            if($scope.source.value !== "scm") {
+            if($scope.source.value !== "scm" && $scope.source.value !== "custom") {
                 let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
                 $state.go('.credential', {
                     credential_search: {
