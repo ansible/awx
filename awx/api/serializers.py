@@ -1672,7 +1672,9 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if attrs.get('source_path', None) and source!='scm':
             raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
         elif update_on_launch and source=='scm' and update_on_project_update:
-            raise serializers.ValidationError({"detail": _("Cannot update SCM-based inventory source on launch.")})
+            raise serializers.ValidationError({"detail": _(
+                "Cannot update SCM-based inventory source on launch if set to update on project update. "
+                "Instead, configure the corresponding source project to update on launch.")})
         elif not self.instance and attrs.get('inventory', None) and InventorySource.objects.filter(
                 inventory=attrs.get('inventory', None), update_on_project_update=True, source='scm').exists():
             raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
