@@ -71,7 +71,7 @@ return {
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
-            ngShow: "source && source.value !== '' && source.value !== 'custom'",
+            ngShow: "source && source.value !== ''",
             sourceModel: 'credential',
             sourceField: 'name',
             ngClick: 'lookupCredential()',

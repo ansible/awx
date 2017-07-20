@@ -300,14 +300,25 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         };
 
         $scope.lookupCredential = function(){
-            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
-            $state.go('.credential', {
-                credential_search: {
-                    kind: kind,
-                    page_size: '5',
-                    page: '1'
-                }
-            });
+            if($scope.source.value !== "scm" && $scope.source.value !== "custom") {
+                let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
+                $state.go('.credential', {
+                    credential_search: {
+                        kind: kind,
+                        page_size: '5',
+                        page: '1'
+                    }
+                });
+            }
+            else {
+                $state.go('.credential', {
+                    credential_search: {
+                        credential_type__kind: "cloud",
+                        page_size: '5',
+                        page: '1'
+                    }
+                });
+            }
         };
 
         $scope.formCancel = function() {
