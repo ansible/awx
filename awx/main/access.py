@@ -794,11 +794,14 @@ class InventorySourceAccess(BaseAccess):
                 inventory=data.get('inventory'),
                 update_on_project_update=True, source='scm').exists())
 
-    @check_superuser
     def can_delete(self, obj):
-        if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'admin', obj.inventory, None)
-        return False
+        if not (self.user.is_superuser or not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None))):
+            return False
+        active_jobs_qs = InventoryUpdate.objects.filter(inventory_source=obj, status__in=ACTIVE_STATES)
+        if active_jobs_qs.exists():
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
+                                 "active_jobs": [dict(type="inventory_update", id=o.id) for o in active_jobs_qs.all()]})
+        return True
 
     @check_superuser
     def can_change(self, obj, data):
