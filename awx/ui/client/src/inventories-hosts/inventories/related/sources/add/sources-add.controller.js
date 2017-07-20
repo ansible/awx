@@ -219,7 +219,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 multiple: false
             });
 
-            $scope.verbosity = $scope.verbosity_options[0];
+            $scope.verbosity = $scope.verbosity_options[1];
         }
 
         function initSources(){

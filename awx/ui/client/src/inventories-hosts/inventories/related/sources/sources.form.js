@@ -264,7 +264,6 @@ return {
             type: 'select',
             ngOptions: 'v.label for v in verbosity_options track by v.value',
             ngShow: "source && (source.value !== '' && source.value !== null)",
-            "default": 0,
             disableChooseOption: true,
             column: 1,
             awPopOver: "<p>" + i18n._("Control the level of output ansible will produce for inventory source update jobs.") + "</p>",
