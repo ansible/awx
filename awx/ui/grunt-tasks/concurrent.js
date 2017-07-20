@@ -1,6 +1,6 @@
 module.exports = {
     dev: {
-        tasks: ['copy:vendor', 'copy:assets', 'copy:partials', 'copy:views', 'copy:languages', 'copy:config', 'less:dev'],
+        tasks: ['copy:vendor', 'copy:assets', 'copy:partials', 'copy:views', 'copy:languages', 'copy:config'],
     },
     // This concurrent target is intended for development ui builds that do not require raising browser-sync or filesystem polling
     devNoSync: {

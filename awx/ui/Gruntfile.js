@@ -30,7 +30,13 @@ module.exports = function(grunt) {
         'clean:tmp',
         'clean:static',
         'concurrent:dev',
-        'sync',
+        'copy:icons',
+        'copy:fonts',
+        'concat:css',
+        'cssmin:vendor',
+        'less:dev',
+        'cssmin:source',
+        'sync'
     ]);
 
     grunt.registerTask('devNoSync', [
@@ -45,5 +51,4 @@ module.exports = function(grunt) {
         'webpack:prod',
         'concurrent:prod',
     ]);
-
 };

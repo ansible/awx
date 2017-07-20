@@ -7,17 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title ng-bind="tabTitle"></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}assets/custom-theme/jquery-ui-1.10.3.custom.min.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}assets/ansible-bootstrap.min.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}assets/fontcustom/fontcustom.css" type="text/css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/dist/css/select2.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/nvd3/build/nv.d3.css" type="text/css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}lib/ng-toast/dist/ngToast.min.css" type="text/css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}" type="text/css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/tower.vendor.min.css?v={{version}}" type="text/css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/tower.min.css?v={{version}}" type="text/css">
     <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
     <script>
     var $basePath = "{{ STATIC_URL }}";
