@@ -262,6 +262,17 @@ class TestGenericRun(TestJobExecution):
         ]:
             assert c in self.task.update_model.call_args_list
 
+    def test_artifact_cleanup(self):
+        path = tempfile.NamedTemporaryFile(delete=False).name
+        try:
+            self.task.cleanup_paths.append(path)
+            assert os.path.exists(path)
+            self.task.run(self.pk)
+            assert not os.path.exists(path)
+        finally:
+            if os.path.exists(path):
+                os.remove(path)
+
     def test_uses_bubblewrap(self):
         self.task.run(self.pk)
 

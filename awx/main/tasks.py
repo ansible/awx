@@ -6,6 +6,7 @@ import codecs
 from collections import OrderedDict
 import ConfigParser
 import cStringIO
+import functools
 import imp
 import json
 import logging
@@ -382,10 +383,29 @@ def delete_inventory(inventory_id):
             return
 
 
+def with_path_cleanup(f):
+    @functools.wraps(f)
+    def _wrapped(self, *args, **kwargs):
+        try:
+            return f(self, *args, **kwargs)
+        finally:
+            for p in self.cleanup_paths:
+                try:
+                    if os.path.isdir(p):
+                        shutil.rmtree(p, ignore_errors=True)
+                    elif os.path.exists(p):
+                        os.remove(p)
+                except OSError:
+                    logger.exception("Failed to remove tmp file: {}".format(p))
+            self.cleanup_paths = []
+    return _wrapped
+
+
 class BaseTask(Task):
     name = None
     model = None
     abstract = True
+    cleanup_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -454,6 +474,7 @@ class BaseTask(Task):
         '''
         path = tempfile.mkdtemp(prefix='ansible_tower_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+        self.cleanup_paths.append(path)
         return path
 
     def build_private_data_files(self, instance, **kwargs):
@@ -666,6 +687,7 @@ class BaseTask(Task):
         Hook for any steps to run after job/task is marked as complete.
         '''
 
+    @with_path_cleanup
     def run(self, pk, isolated_host=None, **kwargs):
         '''
         Run the job/task and capture its output.
@@ -730,6 +752,7 @@ class BaseTask(Task):
                 if not check_proot_installed():
                     raise RuntimeError('bubblewrap is not installed')
                 kwargs['proot_temp_dir'] = build_proot_temp_dir()
+                self.cleanup_paths.append(kwargs['proot_temp_dir'])
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
             # If there is an SSH key path defined, wrap args with ssh-agent.
@@ -779,16 +802,6 @@ class BaseTask(Task):
                 if settings.DEBUG:
                     logger.exception('exception occurred while running task')
         finally:
-            if kwargs.get('private_data_dir', ''):
-                try:
-                    shutil.rmtree(kwargs['private_data_dir'], True)
-                except OSError:
-                    pass
-            if kwargs.get('proot_temp_dir', ''):
-                try:
-                    shutil.rmtree(kwargs['proot_temp_dir'], True)
-                except OSError:
-                    pass
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
@@ -1215,6 +1228,7 @@ class RunProjectUpdate(BaseTask):
         }
         '''
         handle, self.revision_path = tempfile.mkstemp(dir=settings.AWX_PROOT_BASE_PATH)
+        self.cleanup_paths.append(self.revision_path)
         private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
@@ -1497,13 +1511,6 @@ class RunProjectUpdate(BaseTask):
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
-
-    def final_run_hook(self, instance, status, **kwargs):
-        super(RunProjectUpdate, self).final_run_hook(instance, status, **kwargs)
-        try:
-            os.remove(self.revision_path)
-        except Exception, e:
-            logger.error("Failed removing revision tmp file: {}".format(e))
 
 
 class RunInventoryUpdate(BaseTask):
@@ -1841,7 +1848,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_', dir=settings.AWX_PROOT_BASE_PATH)
+            runpath = tempfile.mkdtemp(prefix='ansible_tower_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
@@ -1851,7 +1858,7 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(path)
             args.append("--custom")
-            self.custom_dir_path.append(runpath)
+            self.cleanup_paths.append(runpath)
         args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')
@@ -1873,8 +1880,6 @@ class RunInventoryUpdate(BaseTask):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
 
     def pre_run_hook(self, inventory_update, **kwargs):
-        self.custom_dir_path = []
-
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
@@ -1905,14 +1910,6 @@ class RunInventoryUpdate(BaseTask):
                     job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
                                      ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
-
-    def final_run_hook(self, instance, status, **kwargs):
-        if self.custom_dir_path:
-            for p in self.custom_dir_path:
-                try:
-                    shutil.rmtree(p, True)
-                except OSError:
-                    pass
 
 
 class RunAdHocCommand(BaseTask):
@@ -2105,12 +2102,6 @@ class RunAdHocCommand(BaseTask):
         Return whether this task should use proot.
         '''
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
-    def final_run_hook(self, ad_hoc_command, status, **kwargs):
-        '''
-        Hook for actions to run after ad hoc command is marked as completed.
-        '''
-        super(RunAdHocCommand, self).final_run_hook(ad_hoc_command, status, **kwargs)
 
 
 class RunSystemJob(BaseTask):
