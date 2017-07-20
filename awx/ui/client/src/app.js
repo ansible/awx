@@ -229,7 +229,8 @@ var awApp = angular.module('awApp', [
             $rootScope.BRAND_NAME = AppStrings.get('BRAND_NAME');
             $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME}`;
             $rootScope.$watch('$state.current.ncyBreadcrumbLabel', function(title) {
-                $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${title || ""}`;
+                title = (title) ? "| " + title : "";
+                $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
             });
 
             function activateTab() {
