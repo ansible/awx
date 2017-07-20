@@ -1874,8 +1874,7 @@ class RunInventoryUpdate(BaseTask):
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
-        if (inventory_update.source=='scm' and source_project and
-                not inventory_update.inventory_source.update_on_project_update):
+        if (inventory_update.source=='scm' and inventory_update.launch_type=='manual' and source_project):
             request_id = '' if self.request.id is None else self.request.id
             local_project_sync = source_project.create_project_update(
                 launch_type="sync",
