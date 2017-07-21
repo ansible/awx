@@ -1,3 +1,5 @@
+import itertools
+
 import mock # noqa
 import pytest
 
@@ -705,6 +707,59 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
     )
     assert response.status_code == 400
     assert "'invalid_field' was unexpected" in response.data['inputs'][0]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('field_name, field_value', itertools.product(
+    ['username', 'password', 'ssh_key_data', 'ssh_key_unlock', 'become_method', 'become_username', 'become_password'],  # noqa
+    ['', None]
+))
+def test_nullish_field_data(get, post, organization, admin, field_name, field_value):
+    ssh = CredentialType.defaults['ssh']()
+    ssh.save()
+    params = {
+        'name': 'Best credential ever',
+        'credential_type': ssh.pk,
+        'organization': organization.id,
+        'inputs': {
+            field_name: field_value
+        }
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        params,
+        admin
+    )
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert getattr(cred, field_name) == ''
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('field_value', ['', None, False])
+def test_falsey_field_data(get, post, organization, admin, field_value):
+    net = CredentialType.defaults['net']()
+    net.save()
+    params = {
+        'name': 'Best credential ever',
+        'credential_type': net.pk,
+        'organization': organization.id,
+        'inputs': {
+            'authorize': field_value
+        }
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        params,
+        admin
+    )
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert cred.authorize is False
 
 
 #
