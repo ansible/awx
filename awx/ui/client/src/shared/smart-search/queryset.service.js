@@ -254,7 +254,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
             },
             error(data, status) {
                 if(data && data.detail){
-                    let error = JSON.parse(data.detail);
+                    let error = typeof data.detail === "string" ? data.detail : JSON.parse(data.detail);
+
                     if(_.isArray(error)){
                         data.detail = error[0];
                     }
