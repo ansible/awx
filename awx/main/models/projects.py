@@ -479,7 +479,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
 
     @property
     def task_impact(self):
-        return 20
+        return 0 if self.job_type == 'run' else 20
 
     @property
     def result_stdout(self):
