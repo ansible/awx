@@ -236,3 +236,19 @@ class RoleMetadata(Metadata):
                 "disassociate": {"type": "integer", "label": "Disassociate", "help_text": "Provide to remove this role."},
             }
         return metadata
+
+
+# TODO: Tower 3.3 remove class and all uses in views.py when API v1 is removed
+class JobTypeMetadata(Metadata):
+        def get_field_info(self, field):
+            res = super(JobTypeMetadata, self).get_field_info(field)
+
+            if field.field_name == 'job_type':
+                index = 0
+                for choice in res['choices']:
+                    if choice[0] == 'scan':
+                        res['choices'].pop(index)
+                        break
+                    index += 1
+            return res
+
