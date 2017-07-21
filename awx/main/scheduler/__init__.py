@@ -222,11 +222,11 @@ class TaskManager():
             if not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
-                logger.debug('Submitting isolated job {} to queue {} via {}.'.format(
+                logger.info('Submitting isolated job {} to queue {} via {}.'.format(
                     task.id, task.instance_group_id, rampart_group.controller_id))
             else:
                 task.instance_group = rampart_group
-                logger.debug('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
+                logger.info('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
             with disable_activity_stream():
                 task.save()
 
@@ -263,8 +263,10 @@ class TaskManager():
 
     def capture_chain_failure_dependencies(self, task, dependencies):
         for dep in dependencies:
-            dep.dependent_jobs.add(task.id)
-            dep.save()
+            with disable_activity_stream():
+                logger.info('Adding unified job {} to list of dependencies of {}.'.format(task.id, dep.id))
+                dep.dependent_jobs.add(task.id)
+                dep.save()
 
     def should_update_inventory_source(self, job, inventory_source):
         now = tz_now()
