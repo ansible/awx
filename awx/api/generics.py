@@ -10,6 +10,7 @@ import time
 from django.conf import settings
 from django.db import connection
 from django.db.models.fields import FieldDoesNotExist
+from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -350,8 +351,11 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             if getattr(field, 'related_model', None):
                 fields.add('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
-            name = rel.related_model._meta.verbose_name.replace(" ", "_")
-            if skip_related_name(name):
+            name = rel.related_name
+            if isinstance(rel, OneToOneRel) and self.model._meta.verbose_name.startswith('unified'):
+                # Add underscores for polymorphic subclasses for user utility
+                name = rel.related_model._meta.verbose_name.replace(" ", "_")
+            if skip_related_name(name) or name.endswith('+'):
                 continue
             fields.add('{}__search'.format(name))
         m2m_rel = []

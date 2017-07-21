@@ -13,9 +13,10 @@ from awx.api.generics import (
     ParentMixin,
     SubListCreateAttachDetachAPIView, SubListAttachDetachAPIView,
     DeleteLastUnattachLabelMixin,
-    ResourceAccessList
+    ResourceAccessList,
+    ListAPIView
 )
-from awx.main.models import Organization
+from awx.main.models import Organization, Credential
 
 
 @pytest.fixture
@@ -263,3 +264,9 @@ class TestResourceAccessList:
             with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
                 self.mock_view().check_permissions(self.mock_request())
                 mock_access.assert_called_once_with(mock_organization)
+
+
+def test_related_search_reverse_FK_field():
+    view = ListAPIView()
+    view.model = Credential
+    assert 'jobtemplates__search' in view.related_search_fields
