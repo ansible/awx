@@ -7,7 +7,8 @@ export default {
         inventory_source_search: {
             value: {
                 page_size: "20",
-                order_by: "name"
+                order_by: "name",
+                not__source: ""
             },
             dynamic: true,
             squash: ""
