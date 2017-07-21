@@ -9,7 +9,6 @@ export default ['i18n', function(i18n) {
         name: 'hosts',
         iterator: 'host',
         editTitle: '{{ selected_group }}',
-        searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         singleSearchParam: {
             param: 'host_filter'
         },

@@ -16,6 +16,7 @@ export default ['i18n', function(i18n) {
         hover: true,
         well: true,
         emptyListText: i18n._('There are no job templates to display at this time'),
+        searchBarFullWidth: true,
         fields: {
             name: {
                 key: true,

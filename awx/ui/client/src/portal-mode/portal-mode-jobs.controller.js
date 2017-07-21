@@ -29,10 +29,6 @@ export function PortalModeJobsController($scope, $state, qs, GetBasePath, Portal
         $scope.iterator = list.iterator;
     }
 
-    $scope.$on('filterPortalJobs', function(e, data){
-        init(data);
-    });
-
     $scope.refresh = function() {
         $state.go('.', null, {reload: true});
     };
