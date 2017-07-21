@@ -12,7 +12,11 @@ import awx.main.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0033_v303_v245_host_variable_fix'),
+        ('main', '0003_squashed_v300_v303_updates'),
+    ]
+
+    replaces = [
+        (b'main', '0034_v310_release'),
     ]
 
     operations = [
@@ -610,5 +614,4 @@ class Migration(migrations.Migration):
             name='started',
             field=models.DateTimeField(default=None, help_text='The date and time the job was queued for starting.', null=True, editable=False),
         ),
-
     ]
