@@ -32,6 +32,7 @@ from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
 from awx.api.versioning import URLPathVersioning, get_request_version
+from awx.api.metadata import SublistAttachDetatchMetadata
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -611,6 +612,8 @@ class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
     '''
     Derived version of SubListCreateAttachDetachAPIView that prohibits creation
     '''
+    metadata_class = SublistAttachDetatchMetadata
+
     def post(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if not sub_id:
