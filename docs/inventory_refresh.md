@@ -131,10 +131,12 @@ functions in the same way that `/api/v2/inventory_source/:id/update` functions f
 sources and if they will be updated when a POST to the same endpoint is made. The result of
 this request will look like this:
 
+> *Note:* All manual inventory sources (source='') will be ignored by the update_inventory_sources endpoint.
+
     {
         results: [
-            {"inventory_source": 1, "can_update": True},
-            {"inventory_source": 2, "can_update": False},
+            "inventory_source": 1, "can_update": True,
+            "inventory_source": 2, "can_update": False,
         ]
     }
 
@@ -144,12 +146,22 @@ When making a POST to the same endpoint, the response will contain a status as w
 
     {
         results: [
-            {"inventory_update": 20, "inventory_source": 1, "status": "started"},
-            {"inventory_update": 21, "inventory_source": 2, "status": "Could not start because `can_update` returned False"}
+            "inventory_update": 20, "inventory_source": 1, "status": "started",
+            "inventory_update": 21, "inventory_source": 2, "status": "Could not start because `can_update` returned False"
         ]
     }
 
 
+Response code from this action will be:
+
+ - 200 if all inventory source updates were successful
+ - 202 if some inventory source updates were successful, but some failed
+ - 400 if all of the inventory source updates failed
+ - 400 if there are no inventory sources in the inventory
+
+
 ### Background deletion of Inventory
+
+If a DELETE request is submitted to an inventory, the field `pending_delete` will be True until a separate task fully completes the task of deleting the inventory and all its contents.
 
 ### InventorySource Hosts and Groups read-only
