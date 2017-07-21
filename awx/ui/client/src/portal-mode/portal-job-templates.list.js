@@ -16,12 +16,13 @@ export default ['i18n', function(i18n) {
         hover: true,
         well: true,
         emptyListText: i18n._('There are no job templates to display at this time'),
+        searchBarFullWidth: true,
         fields: {
             name: {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8',
-                linkTo: '/#/templates/{{job_template.id}}',
+                linkTo: '/#/templates/job_template/{{job_template.id}}',
                 awToolTip: '{{job_template.description}}',
                 dataPlacement: 'top'
             }

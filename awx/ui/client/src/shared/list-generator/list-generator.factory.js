@@ -23,7 +23,6 @@
  * | mode | Yes | One of 'edit', 'lookup', 'select', or 'summary'. Generally this will be 'edit'. helpers/Lookup.js uses 'lookup' to generate the lookup dialog. The 'select' option is used in certain controllers when multiple objects are being added to a parent object. For example, building a select list of Users that can be added to an Oranization. 'summary' is no longer used. |
  * | scope |  | If the HTML will be injected into the DOM by list generator, pass in an optional $scope to be used in conjuction with $compile. The list will be associated with the scope value. Otherwise, the scope of the DOM element will be fetched passed to $compile. |
  * | showSearch | | true or false. Set to false, if the search widget should not be included in the generated HTML. |
- * | searchSize | | Bootstrap size class (e.g. col-lg-3, col-md-4, col-sm-5, etc.) to apply to the search widget. Defaults to 'col-lg-4 col-md-6 col-sm-8 col-xs-9'. |
  *
  * #HTML only
  *
@@ -198,16 +197,12 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 html += (list.searchRowActions) ? "<div class='row'><div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\">" : "";
-                if (list.searchRowActions && !list.searchSize) {
-                    list.searchSize = 'col-lg-7 col-md-12 col-sm-12 col-xs-12';
-                }
                 if (options.showSearch === undefined || options.showSearch === true) {
                     let singleSearchParam = list.singleSearchParam && list.singleSearchParam.param ? `single-search-param="${list.singleSearchParam.param}"` : '';
                     html += `
                     <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
                         <smart-search
                             django-model="${list.name}"
-                            search-size="${list.searchSize}"
                             ${singleSearchParam}
                             base-path="${list.basePath || list.name}"
                             iterator="${list.iterator}"
@@ -216,6 +211,7 @@ export default ['$compile', 'Attr', 'Icon',
                             collection="${list.name}"
                             default-params="${list.iterator}_default_params"
                             query-set="${list.iterator}_queryset"
+                            search-bar-full-width="${list.searchBarFullWidth}"
                             search-tags="searchTags">
                         </smart-search>
                     </div>

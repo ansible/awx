@@ -8,7 +8,6 @@ export default ['templateUrl',
             },
             scope: {
                 djangoModel: '@',
-                searchSize: '@',
                 basePath: '@',
                 iterator: '@',
                 list: '=',
@@ -18,7 +17,8 @@ export default ['templateUrl',
                 disableSearch: '=',
                 defaultParams: '=',
                 querySet: '=',
-                singleSearchParam: '@'
+                singleSearchParam: '@',
+                searchBarFullWidth: '='
             },
             controller: 'SmartSearchController',
             templateUrl: templateUrl('shared/smart-search/smart-search')

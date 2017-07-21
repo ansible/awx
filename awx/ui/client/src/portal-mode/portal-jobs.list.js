@@ -16,6 +16,7 @@ export default ['i18n', function(i18n) {
         well: true,
         listTitle: i18n._('JOBS'),
         emptyListText: i18n._('There are no jobs to display at this time'),
+        searchBarFullWidth: true,
 
         fields: {
             status: {

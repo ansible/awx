@@ -67,7 +67,6 @@ export default [{
                     ngClick: 'addUsers()'
                 }
             };
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             return list;
         }]
     }
@@ -107,7 +106,6 @@ export default [{
             delete list.fieldActions.delete;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/teams`;
             list.emptyListText = "This list is populated by teams added from the&nbsp;<a ui-sref='teams.add'>Teams</a>&nbsp;section";
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             return list;
         }],
         OrgTeamsDataset: ['OrgTeamList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -153,7 +151,6 @@ export default [{
             delete list.fieldActions.delete;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/inventories`;
             list.emptyListText = "This list is populated by inventories added from the&nbsp;<a ui-sref='inventories.add'>Inventories</a>&nbsp;section";
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             return list;
         }],
         OrgInventoryDataset: ['OrgInventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -204,7 +201,6 @@ export default [{
             delete list.fieldActions.delete;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/projects`;
             list.emptyListText = "This list is populated by projects added from the&nbsp;<a ui-sref='projects.add'>Projects</a>&nbsp;section";
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             return list;
         }],
         OrgProjectDataset: ['OrgProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -265,7 +261,6 @@ export default [{
             delete list.fields.type;
             list.listTitle = N_('Job Templates');
             list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='templates.addJobTemplate'>Job Templates</a>&nbsp;section";
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.iterator = 'template';
             list.name = 'job_templates';
             list.basePath = "job_templates";
@@ -349,7 +344,6 @@ export default [{
                     ngClick: 'addUsers()'
                 }
             };
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.listTitle = 'Admins';
             return list;
         }]

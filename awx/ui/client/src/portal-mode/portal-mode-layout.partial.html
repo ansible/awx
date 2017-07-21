@@ -8,13 +8,13 @@
                     <div class="PortalMode-filterHolder">
                         <div class="FormToggle-container">
                             <div class="btn-group">
-                                <button ng-class="{'btn-primary': activeFilter === 'user', 'Button-primary--hollow': activeFilter !== 'user'}"
+                                <button ng-class="{'btn-primary': $state.is('portalMode.myJobs'), 'Button-primary--hollow': $state.is('portalMode.allJobs')}"
                                         ng-click='filterUser()'
                                         class="btn btn-xs"
                                         translate>
                                     My Jobs
                                 </button>
-                                <button ng-class="{'btn-primary': activeFilter === 'all', 'Button-primary--hollow': activeFilter !== 'all'}"
+                                <button ng-class="{'btn-primary': $state.is('portalMode.allJobs'), 'Button-primary--hollow': $state.is('portalMode.myJobs')}"
                                         ng-click='filterAll()'
                                         class="btn btn-xs"
                                         translate>
@@ -23,7 +23,7 @@
                             </div>
                         </div>
                         <div class="PortalMode-refresh">
-                            <button id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault" 
+                            <button id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault"
                                     ng-click="refresh()" ng-show="socketStatus == 'error'">
                                 <span>REFRESH</span>
                             </button>

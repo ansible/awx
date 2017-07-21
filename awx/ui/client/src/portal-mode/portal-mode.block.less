@@ -1,7 +1,12 @@
 @import "./client/src/shared/layouts/one-plus-one.less";
 
 .PortalMode-container{
-	.OnePlusOne-container;
+	display: flex;
+	flex-direction: row;
+	@media screen and(max-width: 900px){
+		flex-direction: column;
+		height: 100%;
+	}
 }
 
 .PortalMode-panel--left{
