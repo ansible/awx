@@ -7,6 +7,8 @@ from psycopg2.extensions import AsIs
 
 # Django
 from django.db import migrations, models
+from django.conf import settings
+import taggit.managers
 
 # AWX
 import awx.main.fields
@@ -16,7 +18,7 @@ from awx.main.models import Host
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0037_v313_instance_version'),
+        ('main', '0005_squashed_v310_v313_updates'),
     ]
 
     operations = [
@@ -351,4 +353,114 @@ class Migration(migrations.Migration):
             name='diff_mode',
             field=models.BooleanField(default=False, help_text='If enabled, textual changes made to any templated files on the host are shown in the standard output'),
         ),
+
+        migrations.CreateModel(
+            name='CredentialType',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(default=None, editable=False)),
+                ('modified', models.DateTimeField(default=None, editable=False)),
+                ('description', models.TextField(default=b'', blank=True)),
+                ('name', models.CharField(max_length=512)),
+                ('kind', models.CharField(max_length=32, choices=[(b'ssh', 'Machine'), (b'vault', 'Vault'), (b'net', 'Network'), (b'scm', 'Source Control'), (b'cloud', 'Cloud'), (b'insights', 'Insights')])),
+                ('managed_by_tower', models.BooleanField(default=False, editable=False)),
+                ('inputs', awx.main.fields.CredentialTypeInputField(default={}, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('injectors', awx.main.fields.CredentialTypeInjectorField(default={}, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
+                ('created_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_created+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name="{u'class': 'credentialtype', u'app_label': 'main'}(class)s_modified+", on_delete=models.deletion.SET_NULL, default=None, editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('tags', taggit.managers.TaggableManager(to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+            ],
+            options={
+                'ordering': ('kind', 'name'),
+            },
+        ),
+        migrations.AlterModelOptions(
+            name='credential',
+            options={'ordering': ('name',)},
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='inputs',
+            field=awx.main.fields.CredentialInputField(default={}, blank=True),
+        ),
+        migrations.AddField(
+            model_name='credential',
+            name='credential_type',
+            field=models.ForeignKey(related_name='credentials', to='main.CredentialType', null=True),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='job',
+            name='vault_credential',
+            field=models.ForeignKey(related_name='jobs_as_vault_credential+', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='vault_credential',
+            field=models.ForeignKey(related_name='jobtemplates_as_vault_credential+', on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.Credential', null=True),
+        ),
+        migrations.AddField(
+            model_name='job',
+            name='extra_credentials',
+            field=models.ManyToManyField(related_name='_job_extra_credentials_+', to='main.Credential'),
+        ),
+        migrations.AddField(
+            model_name='jobtemplate',
+            name='extra_credentials',
+            field=models.ManyToManyField(related_name='_jobtemplate_extra_credentials_+', to='main.Credential'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='credential',
+            unique_together=set([('organization', 'name', 'credential_type')]),
+        ),
+
+        # Connecting activity stream
+        migrations.AddField(
+            model_name='activitystream',
+            name='credential_type',
+            field=models.ManyToManyField(to='main.CredentialType', blank=True),
+        ),
+
+        migrations.CreateModel(
+            name='InstanceGroup',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(unique=True, max_length=250)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('modified', models.DateTimeField(auto_now=True)),
+                ('controller', models.ForeignKey(related_name='controlled_groups', default=None, editable=False, to='main.InstanceGroup', help_text='Instance Group to remotely control this group.', null=True)),
+                ('instances', models.ManyToManyField(help_text='Instances that are members of this InstanceGroup', related_name='rampart_groups', editable=False, to='main.Instance')),
+            ],
+        ),
+        migrations.AddField(
+            model_name='inventory',
+            name='instance_groups',
+            field=models.ManyToManyField(to='main.InstanceGroup', blank=True),
+        ),
+        migrations.AddField(
+            model_name='unifiedjob',
+            name='instance_group',
+            field=models.ForeignKey(on_delete=models.deletion.SET_NULL, default=None, blank=True, to='main.InstanceGroup', help_text='The Rampart/Instance group the job was run under', null=True),
+        ),
+        migrations.AddField(
+            model_name='unifiedjobtemplate',
+            name='instance_groups',
+            field=models.ManyToManyField(to='main.InstanceGroup', blank=True),
+        ),
+        migrations.AddField(
+            model_name='organization',
+            name='instance_groups',
+            field=models.ManyToManyField(to='main.InstanceGroup', blank=True),
+        ),
+        migrations.AddField(
+            model_name='activitystream',
+            name='instance_group',
+            field=models.ManyToManyField(to='main.InstanceGroup', blank=True),
+        ),
+        migrations.AddField(
+            model_name='instance',
+            name='last_isolated_check',
+            field=models.DateTimeField(auto_now_add=True, null=True),
+        ),
+
     ]

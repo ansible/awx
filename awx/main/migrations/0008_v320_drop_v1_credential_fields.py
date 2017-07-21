@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
+# Python
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+# Django
+from django.db import migrations
+from django.db import models
+# AWX
 import awx.main.fields
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0041_v320_migrate_v1_credentials'),
+        ('main', '0007_v320_data_migrations'),
     ]
 
     operations = [
