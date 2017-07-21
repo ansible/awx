@@ -401,7 +401,7 @@ class CredentialType(CommonModelNameNotUnique):
         unique_together = (('name', 'kind'),)
 
     KIND_CHOICES = (
-        ('ssh', _('SSH')),
+        ('ssh', _('Machine')),
         ('vault', _('Vault')),
         ('net', _('Network')),
         ('scm', _('Source Control')),
@@ -588,7 +588,7 @@ class CredentialType(CommonModelNameNotUnique):
 def ssh(cls):
     return cls(
         kind='ssh',
-        name='SSH',
+        name='Machine',
         managed_by_tower=True,
         inputs={
             'fields': [{

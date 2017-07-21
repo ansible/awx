@@ -45,7 +45,7 @@ def test_ssh_migration():
             'become_password': 'superpassword',
         })
 
-    assert cred.credential_type.name == 'SSH'
+    assert cred.credential_type.name == 'Machine'
     assert cred.inputs['username'] == 'bob'
     assert cred.inputs['password'].startswith('$encrypted$')
     assert decrypt_field(cred, 'password') == 'secret'
@@ -117,9 +117,9 @@ def test_vault_with_ssh_migration():
     assert cred.inputs['vault_password'].startswith('$encrypted$')
     assert decrypt_field(cred, 'vault_password') == 'vault'
 
-    ssh_cred = Credential.objects.filter(credential_type__name='SSH').get()
+    ssh_cred = Credential.objects.filter(credential_type__name='Machine').get()
     assert sorted(ssh_cred.inputs.keys()) == sorted(CredentialType.from_v1_kind('ssh').defined_fields)
-    assert ssh_cred.credential_type.name == 'SSH'
+    assert ssh_cred.credential_type.name == 'Machine'
     assert ssh_cred.inputs['username'] == 'bob'
     assert ssh_cred.inputs['password'].startswith('$encrypted$')
     assert decrypt_field(ssh_cred, 'password') == 'secret'

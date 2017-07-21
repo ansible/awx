@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('description', models.TextField(default=b'', blank=True)),
                 ('name', models.CharField(max_length=512)),
-                ('kind', models.CharField(max_length=32, choices=[(b'ssh', 'SSH'), (b'vault', 'Vault'), (b'net', 'Network'), (b'scm', 'Source Control'), (b'cloud', 'Cloud'), (b'insights', 'Insights')])),
+                ('kind', models.CharField(max_length=32, choices=[(b'ssh', 'Machine'), (b'vault', 'Vault'), (b'net', 'Network'), (b'scm', 'Source Control'), (b'cloud', 'Cloud'), (b'insights', 'Insights')])),
                 ('managed_by_tower', models.BooleanField(default=False, editable=False)),
                 ('inputs', awx.main.fields.CredentialTypeInputField(default={}, blank=True, help_text='Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
                 ('injectors', awx.main.fields.CredentialTypeInjectorField(default={}, blank=True, help_text='Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.')),
