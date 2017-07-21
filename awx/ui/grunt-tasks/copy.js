@@ -40,7 +40,7 @@ module.exports = {
             expand: true,
             flatten: true,
             filter: 'isFile',
-            src: 'assets/images/images.new/*',
+            src: 'assets/custom-theme/images.new/*',
             dest: 'static/images/'
         }]
     },
