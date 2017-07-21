@@ -1436,18 +1436,24 @@ class RunProjectUpdate(BaseTask):
                 # Runs in the same Celery task as project update
                 task_instance.request.id = project_request_id
                 task_instance.run(local_inv_update.id)
-            except Exception as e:
-                # A failed file update does not block other actions
-                logger.error('Encountered error updating project dependent inventory: {}'.format(e))
+            except Exception:
+                logger.exception('Encountered unhandled exception updating dependent SCM inventory sources.')
 
-            # Stop rest of updates if project or inventory update was canceled
-            project_update.refresh_from_db()
-            local_inv_update.refresh_from_db()
+            try:
+                project_update.refresh_from_db()
+            except ProjectUpdate.DoesNotExist:
+                logger.warning('Project update deleted during updates of dependent SCM inventory sources.')
+                break
+            try:
+                local_inv_update.refresh_from_db()
+            except InventoryUpdate.DoesNotExist:
+                logger.warning('Inventory update deleted during execution.')
+                continue
             if project_update.cancel_flag or local_inv_update.cancel_flag:
                 if not project_update.cancel_flag:
                     self.update_model(project_update.pk, cancel_flag=True, job_explanation=_(
                         'Dependent inventory update {} was canceled.'.format(local_inv_update.name)))
-                break
+                break  # Stop rest of updates if project or inventory update was canceled
             if local_inv_update.status == 'successful':
                 inv_src.scm_last_revision = scm_revision
                 inv_src.save(update_fields=['scm_last_revision'])
