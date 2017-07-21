@@ -7,7 +7,7 @@ var autoPrefixer = new AutoPrefixer({
 module.exports = {
     dev: {
         files: {
-            'static/css/tower.css': 'client/lib/theme/index.less'
+            'static/css/app.css': 'client/lib/theme/index.less'
         },
         options: {
             sourceMap: true,
@@ -16,7 +16,7 @@ module.exports = {
     },
     prod: {
         files: {
-            'static/css/tower.css': 'client/lib/theme/index.less'
+            'static/css/app.css': 'client/lib/theme/index.less'
         },
         options: {
             compress: true,

@@ -30,12 +30,8 @@ module.exports = function(grunt) {
         'clean:tmp',
         'clean:static',
         'concurrent:dev',
-        'copy:icons',
-        'copy:fonts',
         'concat:css',
-        'cssmin:vendor',
-        'less:dev',
-        'cssmin:source',
+        'webpack:dev',
         'sync'
     ]);
 
@@ -43,12 +39,16 @@ module.exports = function(grunt) {
         'clean:tmp',
         'clean:static',
         'concurrent:devNoSync',
+        'concat:css'
     ]);
 
     grunt.registerTask('release', [
         'clean:tmp',
         'clean:static',
-        'webpack:prod',
         'concurrent:prod',
+        'webpack:prod',
+        'concat:css',
+        'cssmin:vendor',
+        'cssmin:source'
     ]);
 };

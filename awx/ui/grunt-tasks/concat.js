@@ -12,6 +12,6 @@ module.exports = {
             'static/lib/nvd3/build/nv.d3.css',
             'static/lib/ng-toast/dist/ngToast.min.css'
         ],
-        dest: 'static/css/tower.vendor.css'
+        dest: 'static/css/app.vendor.css'
     }
 };

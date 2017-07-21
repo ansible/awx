@@ -3,9 +3,9 @@ module.exports = {
         files: [
             {
                 expand: true,
-                src: 'static/css/tower.vendor.css',
+                src: 'static/css/app.vendor.css',
                 dest: '.',
-                ext: '.vendor.min.css'
+                ext: '.vendor.css'
             }
         ]
     },
@@ -13,9 +13,9 @@ module.exports = {
         files: [
             {
                 expand: true,
-                src: 'static/css/tower.css',
+                src: 'static/css/app.css',
                 dest: '.',
-                ext: '.min.css'
+                ext: '.css'
             }
         ]
     }

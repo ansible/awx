@@ -20,11 +20,8 @@ module.exports = {
             expand: true,
             flatten: true,
             filter: 'isFile',
-            src: [
-                'assets/fontcustom/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.woff',
-                'assets/fontcustom/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.ttf'
-            ],
-            dest: 'static/css/'
+            src: 'assets/fontcustom/**/*',
+            dest: 'static/fonts/'
         }]
     },
     icons: {
@@ -33,12 +30,18 @@ module.exports = {
             expand: true,
             flatten: true,
             filter: 'isFile',
-            src: [
-                'components-font-awesome/fonts/fontawesome-webfont.ttf',
-                'components-font-awesome/fonts/fontawesome-webfont.woff',
-                'components-font-awesome/fonts/fontawesome-webfont.woff2'
-            ],
+            src: 'components-font-awesome/fonts/*',
             dest: 'static/fonts/'
+        }]
+    },
+    images: {
+        files: [{
+            cwd: 'client/',
+            expand: true,
+            flatten: true,
+            filter: 'isFile',
+            src: 'assets/images/images.new/*',
+            dest: 'static/images/'
         }]
     },
     assets: {
