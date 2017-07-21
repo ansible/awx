@@ -6,8 +6,8 @@
 
 import jobSubmissionController from './job-submission.controller';
 
-export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions', 'i18n',
-    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions, i18n) {
+export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions', 'i18n', 'credentialTypesLookup',
+    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions, i18n, credentialTypesLookup) {
     return {
         scope: {
             submitJobId: '=',
@@ -24,14 +24,17 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                     scope.removeLaunchJobModalReady();
                 }
                 scope.removeLaunchJobModalReady = scope.$on('LaunchJobModalReady', function() {
+                    credentialTypesLookup()
+                        .then(kinds => {
+                            if(scope.ask_credential_on_launch) {
+                                scope.credentialKind = "" + kinds.SSH;
+                                scope.includeCredentialList = true;
+                            }
+                        });
+
                     // Go get the list/survey data that we need from the server
                     if(scope.ask_inventory_on_launch) {
                         scope.includeInventoryList = true;
-                    }
-                    if(scope.ask_credential_on_launch) {
-                        scope.credentialKind = (scope.ask_credential_on_launch) ? "1" : "5";
-
-                        scope.includeCredentialList = true;
                     }
                     if(scope.survey_enabled) {
                         GetSurveyQuestions({
