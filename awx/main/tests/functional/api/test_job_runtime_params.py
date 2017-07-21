@@ -317,6 +317,47 @@ def test_job_launch_JT_enforces_unique_extra_credential_kinds(machine_credential
 
 
 @pytest.mark.django_db
+def test_job_launch_with_no_credentials(deploy_jobtemplate):
+    deploy_jobtemplate.credential = None
+    deploy_jobtemplate.vault_credential = None
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data={},
+        context={'obj': deploy_jobtemplate, 'data': {}, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated is False
+    assert serializer.errors['credential'] == ["Job Template 'credential' is missing or undefined."]
+
+
+@pytest.mark.django_db
+def test_job_launch_with_only_vault_credential(vault_credential, deploy_jobtemplate):
+    deploy_jobtemplate.credential = None
+    deploy_jobtemplate.vault_credential = vault_credential
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data={},
+        context={'obj': deploy_jobtemplate, 'data': {}, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated
+
+    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
+    job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
+
+    assert job_obj.vault_credential.pk == vault_credential.pk
+
+
+@pytest.mark.django_db
+def test_job_launch_with_vault_credential_ask_for_machine(vault_credential, deploy_jobtemplate):
+    deploy_jobtemplate.credential = None
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.vault_credential = vault_credential
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data={},
+        context={'obj': deploy_jobtemplate, 'data': {}, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated is False
+    assert serializer.errors['credential'] == ["Job Template 'credential' is missing or undefined."]
+
+
+@pytest.mark.django_db
 def test_job_launch_JT_with_default_vault_credential(machine_credential, vault_credential, deploy_jobtemplate):
     deploy_jobtemplate.credential = machine_credential
     deploy_jobtemplate.vault_credential = vault_credential

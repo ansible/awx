@@ -314,10 +314,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             resources_needed_to_start.append('inventory')
             if not self.ask_inventory_on_launch:
                 validation_errors['inventory'] = [_("Job Template must provide 'inventory' or allow prompting for it."),]
-        if self.credential is None:
+        if self.credential is None and self.vault_credential is None:
             resources_needed_to_start.append('credential')
             if not self.ask_credential_on_launch:
                 validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
+        elif self.credential is None and self.ask_credential_on_launch:
+            resources_needed_to_start.append('credential')
 
         # Job type dependent checks
         if self.project is None:
@@ -695,7 +697,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if not super(Job, self).can_start:
             return False
 
-        if not (self.credential):
+        if not (self.credential) and not (self.vault_credential):
             return False
 
         return True
