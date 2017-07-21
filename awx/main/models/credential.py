@@ -457,6 +457,13 @@ class CredentialType(CommonModelNameNotUnique):
             if field.get('ask_at_runtime', False) is True
         ]
 
+    def default_for_field(self, field_id):
+        for field in self.inputs.get('fields', []):
+            if field['id'] == field_id:
+                if 'choices' in field:
+                    return field['choices'][0]
+                return {'string': '', 'boolean': False}[field['type']]
+
     @classmethod
     def default(cls, f):
         func = functools.partial(f, cls)

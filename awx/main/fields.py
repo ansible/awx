@@ -420,15 +420,15 @@ def format_ssh_private_key(value):
     # These end in a unicode-encoded final character that gets double
     # escaped due to being in a Python 2 bytestring, and that causes
     # Python's key parsing to barf. Detect this issue and correct it.
-    if value == '$encrypted$':
-        return value
+    if not value or value == '$encrypted$':
+        return True
     if r'\u003d' in value:
         value = value.replace(r'\u003d', '=')
     try:
         validate_ssh_private_key(value)
     except django_exceptions.ValidationError as e:
         raise jsonschema.exceptions.FormatError(e.message)
-    return value
+    return True
 
 
 class CredentialInputField(JSONSchemaField):
@@ -477,6 +477,13 @@ class CredentialInputField(JSONSchemaField):
         if not isinstance(value, dict):
             return super(CredentialInputField, self).validate(value,
                                                               model_instance)
+
+        # Backwards compatability: in prior versions, if you submit `null` for
+        # a credential field value, it just considers the value an empty string
+        for unset in [key for key, v in model_instance.inputs.items() if not v]:
+            default_value = model_instance.credential_type.default_for_field(unset)
+            if default_value is not None:
+                model_instance.inputs[unset] = default_value
 
         decrypted_values = {}
         for k, v in value.items():
