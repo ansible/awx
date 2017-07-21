@@ -318,11 +318,12 @@ return {
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }, {
                 name: 'update_on_project_update',
-                label: i18n._('Update on Project Update'),
+                label: i18n._('Update on Project Change'),
                 type: 'checkbox',
                 ngShow: "source.value === 'scm'",
-                awPopOver: '<p>Each time the selected project is updated, refresh the inventory from the selected source before ' +
-                    'executing job tasks.</p>',
+                awPopOver: '<p>After every project update where the SCM revision changes, refresh the inventory ' +
+                    'from the selected source before executing job tasks. This is intended for ' +
+                    'static content, like the Ansible inventory .ini file format.</p>',
                 dataTitle: i18n._('Update on Project Update'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
