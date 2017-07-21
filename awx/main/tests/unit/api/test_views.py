@@ -112,7 +112,10 @@ class TestInventoryInventorySourcesUpdate:
                 return [InventorySource(pk=1, source=is_source, source_project=Project,
                                         update_on_project_update=is_up_on_proj,
                                         can_update=can_update, update=lambda:InventoryUpdate)]
-
+                                        
+            def exclude(self, **kwargs):
+                return self.all()
+                
         Inventory = namedtuple('Inventory', ['inventory_sources'])
         obj = Inventory(inventory_sources=InventorySources())
 
