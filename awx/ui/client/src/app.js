@@ -354,7 +354,30 @@ var awApp = angular.module('awApp', [
                     activateTab();
                 });
 
-                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
+                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+
+                    if(toState === fromState) {
+                        // check to see if something other than a search param has changed
+                        let toParamsWithoutSearchKeys = {};
+                        let fromParamsWithoutSearchKeys = {};
+                        for (let key in toParams) {
+                            if (toParams.hasOwnProperty(key) && !/_search/.test(key)) {
+                                toParamsWithoutSearchKeys[key] = toParams[key];
+                            }
+                        }
+                        for (let key in fromParams) {
+                            if (fromParams.hasOwnProperty(key) && !/_search/.test(key)) {
+                                fromParamsWithoutSearchKeys[key] = fromParams[key];
+                            }
+                        }
+
+                        if(!_.isEqual(toParamsWithoutSearchKeys, fromParamsWithoutSearchKeys)) {
+                            document.body.scrollTop = document.documentElement.scrollTop = 0;
+                        }
+                    }
+                    else {
+                        document.body.scrollTop = document.documentElement.scrollTop = 0;
+                    }
 
                     if (fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')) {
                         $rootScope.licenseMissing = toParams.licenseMissing;
