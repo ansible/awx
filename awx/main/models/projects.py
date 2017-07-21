@@ -337,7 +337,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             if self.scm_type and not self.local_path.startswith('_'):
                 update_fields.append('local_path')
             if update_fields:
-                self.save(update_fields=update_fields)
+                from awx.main.signals import disable_activity_stream
+                with disable_activity_stream():
+                    self.save(update_fields=update_fields)
         # If we just created a new project with SCM, start the initial update.
         if new_instance and self.scm_type and not skip_update:
             self.update()
