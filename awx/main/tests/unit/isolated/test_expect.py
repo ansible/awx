@@ -89,7 +89,7 @@ def test_password_prompt():
     expect_passwords = OrderedDict()
     expect_passwords[re.compile(r'Password:\s*?$', re.M)] = 'secret123'
     status, rc = run.run_pexpect(
-        ['python', '-c', 'print raw_input("Password: ")'],
+        ['python', '-c', 'import time; print raw_input("Password: "); time.sleep(.05)'],
         HERE,
         {},
         stdout,
