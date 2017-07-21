@@ -20,4 +20,13 @@ inventory sources:
 * `project_update`: ID of the project update job that was started if this inventory source is an SCM source.
   (interger, read-only, optional)
 
+> *Note:* All manual inventory sources (source='') will be ignored by the update_inventory_sources endpoint.
+
+Response code from this action will be:
+
+ - 200 if all inventory source updates were successful
+ - 202 if some inventory source updates were successful, but some failed
+ - 400 if all of the inventory source updates failed
+ - 400 if there are no inventory sources in the inventory
+
 {% include "api/_new_in_awx.md" %}
