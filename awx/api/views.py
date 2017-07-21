@@ -2481,7 +2481,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
         update_data = []
-        for inventory_source in inventory.inventory_sources.all():
+        for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk,
                        'can_update': inventory_source.can_update}
             update_data.append(details)
@@ -2492,18 +2492,16 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         update_data = []
         successes = 0
         failures = 0
-        for inventory_source in inventory.inventory_sources.all():
+        for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk, 'status': None}
             can_update = inventory_source.can_update
             project_update = False
-
             if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
                 if not request.user or not request.user.can_access(Project, 'start', inventory_source.source_project):
                     details['status'] = _('You do not have permission to update project `{}`').format(inventory_source.source_project.name)
                     can_update = False
                 else:
                     project_update = True
-
             if can_update:
                 if project_update:
                     details['project_update'] = inventory_source.source_project.update().id
@@ -2887,7 +2885,7 @@ class JobTemplateSurveySpec(GenericAPIView):
             if survey_item["type"] == "password":
                 if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
                     if not obj.survey_spec:
-                        return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))), 
+                        return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))),
                                         status=status.HTTP_400_BAD_REQUEST)
                     else:
                         old_spec = obj.survey_spec
