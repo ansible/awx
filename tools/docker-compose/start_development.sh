@@ -21,8 +21,10 @@ else
     echo "Failed to find awx source tree, map your development tree volume"
 fi
 
-cp -nR /tmp/ansible_tower.egg-info /awx_devel/ || true
-cp /tmp/ansible-tower.egg-link /venv/awx/lib/python2.7/site-packages/ansible-tower.egg-link
+cp -R /tmp/ansible_awx.egg-info /awx_devel/ || true
+sed -i "s/placeholder/$(git describe --long | sed 's/\./\\./g')/" /awx_devel/ansible_awx.egg-info/PKG-INFO
+sed -i "s/placeholder/$(git describe --long | sed 's/\./\\./g')/" /usr/local/bin/awx-manage
+cp /tmp/ansible-awx.egg-link /venv/awx/lib/python2.7/site-packages/ansible-awx.egg-link
 ln -s /awx_devel/tools/rdb.py /venv/awx/lib/python2.7/site-packages/rdb.py || true
 yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 
