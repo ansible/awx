@@ -2480,6 +2480,8 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
+        if inventory.kind =='smart':
+            return Response(dict(error=_("Smart Inventories cannot host dynamic inventory sources.")), status=status.HTTP_400_BAD_REQUEST)
         update_data = []
         for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk,
@@ -2492,6 +2494,8 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         update_data = []
         successes = 0
         failures = 0
+        if inventory.kind =='smart':
+            return Response(dict(error=_("Action cannot be completed with Smart Inventory.")), status=status.HTTP_400_BAD_REQUEST)
         for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk, 'status': None}
             can_update = inventory_source.can_update

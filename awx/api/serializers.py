@@ -1289,6 +1289,11 @@ class HostSerializer(BaseSerializerWithVariables):
         host, port = self._get_host_port_from_name(name)
         return value
 
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
+        return value
+
     def validate(self, attrs):
         name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
         host, port = self._get_host_port_from_name(name)
@@ -1405,6 +1410,11 @@ class GroupSerializer(BaseSerializerWithVariables):
     def validate_name(self, value):
         if value in ('all', '_meta'):
             raise serializers.ValidationError(_('Invalid group name.'))
+        return value
+    
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
         return value
 
     def to_representation(self, obj):
@@ -1658,6 +1668,11 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def validate_update_on_project_update(self, value):
         if value and self.instance and self.instance.schedules.exists():
             raise serializers.ValidationError(_("Setting not compatible with existing schedules."))
+        return value
+
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
 
     def validate(self, attrs):
