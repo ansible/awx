@@ -122,16 +122,18 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         user = self.request.user if self.category_slug == 'user' else None
         settings_change_list = []
         for key, value in serializer.validated_data.items():
-            if key == 'LICENSE':
+            if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
                 continue
-            if settings_registry.is_setting_encrypted(key) and isinstance(value, basestring) and value.startswith('$encrypted$'):
+            if settings_registry.is_setting_encrypted(key) and \
+                    isinstance(value, basestring) and \
+                    value.startswith('$encrypted$'):
                 continue
             setattr(serializer.instance, key, value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
                 setting = Setting.objects.create(key=key, user=user, value=value)
                 settings_change_list.append(key)
-            elif setting.value != value or type(setting.value) != type(value):
+            elif setting.value != value:
                 setting.value = value
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
