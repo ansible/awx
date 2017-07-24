@@ -3719,6 +3719,13 @@ class JobList(ListCreateAPIView):
     metadata_class = JobTypeMetadata
     serializer_class = JobListSerializer
 
+    @property
+    def allowed_methods(self):
+        methods = super(JobList, self).allowed_methods
+        if get_request_version(self.request) > 1:
+            methods.remove('POST')
+        return methods
+
 
 class JobDetail(RetrieveUpdateDestroyAPIView):
 
