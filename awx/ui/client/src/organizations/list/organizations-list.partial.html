@@ -52,7 +52,7 @@
                     ng-repeat="card in orgCards track by card.id">
                     <div class="OrgCards-header">
                         <h3 class="OrgCards-label"
-                            aw-tool-tip="{{ card.description || 'Place organization description here' }}"
+                            aw-tool-tip="{{ (card.description || 'Place organization description here') | sanitize }}"
                             aw-tip-placement="top">
                             {{ card.name }}
                         </h3>

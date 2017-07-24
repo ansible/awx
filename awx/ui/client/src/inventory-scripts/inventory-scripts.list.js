@@ -20,7 +20,7 @@ export default ['i18n', function(i18n){
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8',
-                awToolTip: '{{inventory_script.description}}',
+                awToolTip: '{{inventory_script.description | sanitize}}',
                 dataPlacement: 'top'
             },
             organization: {

@@ -16,7 +16,7 @@ export default function(){
             name: {
                 label: 'Name',
                 columnClass: 'col-sm-4 col-xs-4',
-                awToolTip: '{{configure_job.description}}',
+                awToolTip: '{{configure_job.description | sanitize}}',
                 dataPlacement: 'top'
             }
         },
