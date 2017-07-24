@@ -30,7 +30,7 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships
@@ -414,7 +414,7 @@ class UnifiedJobTypeStringMixin(object):
         return UnifiedJobTypeStringMixin._camel_to_underscore(self.__class__.__name__)
 
 
-class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -1058,8 +1058,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.DEBUG:
                 raise
 
-    def cancel(self, job_explanation=None):
+    def _build_job_explanation(self):
+        if not self.job_explanation:
+            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                   (self.model_to_str(), self.name, self.id)
+        return None
+
+    def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
+            if not is_chain:
+                map(lambda x: x.cancel(job_explanation=self._build_job_explanation(), is_chain=True), self.get_jobs_fail_chain())
+
             if not self.cancel_flag:
                 self.cancel_flag = True
                 cancel_fields = ['cancel_flag']

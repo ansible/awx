@@ -23,7 +23,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin
 from awx.main.utils import update_scm_url
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
@@ -430,7 +430,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
 
-class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -512,8 +512,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
                         update_fields.append('scm_delete_on_next_update')
             parent_instance.save(update_fields=update_fields)
 
-    def cancel(self, job_explanation=None):
-        res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation)
+    def cancel(self, job_explanation=None, is_chain=False):
+        res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res and self.launch_type != 'sync':
             for inv_src in self.scm_inventory_updates.filter(status='running'):
                 inv_src.cancel(job_explanation='Source project update `{}` was canceled.'.format(self.name))

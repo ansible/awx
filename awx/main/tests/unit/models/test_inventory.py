@@ -7,33 +7,23 @@ from django.core.exceptions import ValidationError
 from awx.main.models import (
     UnifiedJob,
     InventoryUpdate,
-    Job,
     Inventory,
     Credential,
     CredentialType,
 )
 
 
-@pytest.fixture
-def dependent_job(mocker):
-    j = Job(id=3, name='I_am_a_job')
-    j.cancel = mocker.MagicMock(return_value=True)
-    return [j]
-
-
-def test_cancel(mocker, dependent_job):
+def test_cancel(mocker):
     with mock.patch.object(UnifiedJob, 'cancel', return_value=True) as parent_cancel:
         iu = InventoryUpdate()
 
-        iu.get_dependent_jobs = mocker.MagicMock(return_value=dependent_job)
         iu.save = mocker.MagicMock()
         build_job_explanation_mock = mocker.MagicMock()
         iu._build_job_explanation = mocker.MagicMock(return_value=build_job_explanation_mock)
 
         iu.cancel()
 
-        parent_cancel.assert_called_with(job_explanation=None)
-        dependent_job[0].cancel.assert_called_with(job_explanation=build_job_explanation_mock)
+        parent_cancel.assert_called_with(is_chain=False, job_explanation=None)
         
 
 def test__build_job_explanation():

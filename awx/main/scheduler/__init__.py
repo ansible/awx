@@ -47,6 +47,10 @@ class TaskManager():
         for g in self.graph:
             if self.graph[g]['graph'].is_job_blocked(task):
                 return True
+
+        if not task.dependent_jobs_finished():
+            return True
+
         return False
 
     def get_tasks(self, status_list=('pending', 'waiting', 'running')):
@@ -262,11 +266,12 @@ class TaskManager():
         return inventory_task
 
     def capture_chain_failure_dependencies(self, task, dependencies):
-        for dep in dependencies:
-            with disable_activity_stream():
-                logger.info('Adding unified job {} to list of dependencies of {}.'.format(task.id, dep.id))
-                dep.dependent_jobs.add(task.id)
-                dep.save()
+        with disable_activity_stream():
+            task.dependent_jobs.add(*dependencies)
+
+            for dep in dependencies:
+                # Add task + all deps except self
+                dep.dependent_jobs.add(*([task] + filter(lambda d: d != dep, dependencies)))
 
     def should_update_inventory_source(self, job, inventory_source):
         now = tz_now()
@@ -342,7 +347,9 @@ class TaskManager():
                     if self.should_update_inventory_source(task, inventory_source):
                         inventory_task = self.create_inventory_update(task, inventory_source)
                         dependencies.append(inventory_task)
-        self.capture_chain_failure_dependencies(task, dependencies)
+
+            if len(dependencies) > 0:
+                self.capture_chain_failure_dependencies(task, dependencies)
         return dependencies
 
     def process_dependencies(self, dependent_task, dependency_tasks):
@@ -359,7 +366,9 @@ class TaskManager():
                 if not self.would_exceed_capacity(task, rampart_group.name):
                     logger.debug("Starting dependent task {} in group {}".format(task, rampart_group.name))
                     self.graph[rampart_group.name]['graph'].add_job(task)
-                    self.start_task(task, rampart_group, dependency_tasks)
+                    tasks_to_fail = filter(lambda t: t != task, dependency_tasks)
+                    tasks_to_fail += [dependent_task]
+                    self.start_task(task, rampart_group, tasks_to_fail)
                     found_acceptable_queue = True
             if not found_acceptable_queue:
                 logger.debug("Dependent task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
@@ -379,7 +388,7 @@ class TaskManager():
                 if not self.would_exceed_capacity(task, rampart_group.name):
                     logger.debug("Starting task {} in group {}".format(task, rampart_group.name))
                     self.graph[rampart_group.name]['graph'].add_job(task)
-                    self.start_task(task, rampart_group)
+                    self.start_task(task, rampart_group, task.get_jobs_fail_chain())
                     found_acceptable_queue = True
                     break
             if not found_acceptable_queue:
