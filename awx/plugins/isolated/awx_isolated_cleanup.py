@@ -39,7 +39,7 @@ def main():
     job_cutoff = datetime.datetime.now() - datetime.timedelta(hours=1)
 
     for search_pattern in [
-        '/tmp/ansible_tower_[0-9]*_*', '/tmp/ansible_tower_proot_*',
+        '/tmp/ansible_awx_[0-9]*_*', '/tmp/ansible_awx_proot_*',
     ]:
         for path in glob.iglob(search_pattern):
             st = os.stat(path)
@@ -49,7 +49,7 @@ def main():
                 continue
             elif modtime > folder_cutoff:
                 try:
-                    re_match = re.match(r'\/tmp\/ansible_tower_\d+_.+', path)
+                    re_match = re.match(r'\/tmp\/ansible_awx_\d+_.+', path)
                     if re_match is not None:
                         if subprocess.check_call(['awx-expect', 'is-alive', path]) == 0:
                             continue

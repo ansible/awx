@@ -472,7 +472,7 @@ class BaseTask(Task):
         '''
         Create a temporary directory for job-related files.
         '''
-        path = tempfile.mkdtemp(prefix='ansible_tower_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
+        path = tempfile.mkdtemp(prefix='ansible_awx_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         self.cleanup_paths.append(path)
         return path
@@ -1855,7 +1855,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='ansible_tower_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
+            runpath = tempfile.mkdtemp(prefix='ansible_awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:

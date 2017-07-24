@@ -143,7 +143,7 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
 
     :param private_data_dir:  an absolute path on the local file system where
                               job metadata exists (i.e.,
-                              `/tmp/ansible_tower_xyz/`)
+                              `/tmp/ansible_awx_xyz/`)
     :param secrets:           a dict containing sensitive job metadata, {
                                   'env': { ... }  # environment variables,
                                   'passwords': { ... } # pexpect password prompts

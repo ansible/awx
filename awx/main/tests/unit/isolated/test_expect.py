@@ -28,7 +28,7 @@ def rsa_key(request):
 
 @pytest.fixture(scope='function')
 def private_data_dir(request):
-    path = tempfile.mkdtemp(prefix='ansible_tower_unit_test')
+    path = tempfile.mkdtemp(prefix='ansible_awx_unit_test')
     request.addfinalizer(lambda: shutil.rmtree(path))
     return path
 

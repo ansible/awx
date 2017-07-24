@@ -193,7 +193,7 @@ class IsolatedManager(object):
         isolated_ssh_path = None
         try:
             if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None):
-                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_tower_isolated', dir=settings.AWX_PROOT_BASE_PATH)
+                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_awx_isolated', dir=settings.AWX_PROOT_BASE_PATH)
                 os.chmod(isolated_ssh_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
                 isolated_key = os.path.join(isolated_ssh_path, '.isolated')
                 ssh_sock = os.path.join(isolated_ssh_path, '.isolated_ssh_auth.sock')
@@ -446,7 +446,7 @@ class IsolatedManager(object):
                                  isolated job on
         :param private_data_dir: an absolute path on the local file system
                                  where job-specific data should be written
-                                 (i.e., `/tmp/ansible_tower_xyz/`)
+                                 (i.e., `/tmp/ansible_awx_xyz/`)
         :param proot_temp_dir:   a temporary directory which bwrap maps
                                  restricted paths to
 
