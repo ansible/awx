@@ -29,8 +29,7 @@ from awx.main.fields import (
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.jobs import Job
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerInventoryUpdateMixin
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -1391,7 +1390,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         return source
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -1508,20 +1507,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
             return self.global_instance_groups
         return selected_groups
 
-    def _build_job_explanation(self):
-        if not self.job_explanation:
-            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                   (self.model_to_str(), self.name, self.id)
-        return None
-
-    def get_dependent_jobs(self):
-        return Job.objects.filter(dependent_jobs__in=[self.id])
-
-    def cancel(self, job_explanation=None):
-
-        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation)
+    def cancel(self, job_explanation=None, is_chain=False):
+        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res:
-            map(lambda x: x.cancel(job_explanation=self._build_job_explanation()), self.get_dependent_jobs())
             if self.launch_type != 'scm' and self.source_project_update:
                 self.source_project_update.cancel(job_explanation=job_explanation)
         return res

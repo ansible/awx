@@ -38,7 +38,7 @@ from awx.main.utils import (
     parse_yaml_or_json,
 )
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
 from awx.main.fields import JSONField
 
@@ -449,7 +449,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -708,16 +708,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Job"
-
-    '''
-    Canceling a job also cancels the implicit project update with launch_type
-    run.
-    '''
-    def cancel(self, job_explanation=None):
-        res = super(Job, self).cancel(job_explanation=job_explanation)
-        if self.project_update:
-            self.project_update.cancel(job_explanation=job_explanation)
-        return res
 
     @property
     def memcached_fact_key(self):

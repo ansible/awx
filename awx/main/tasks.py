@@ -314,7 +314,7 @@ def handle_work_error(self, task_id, subtasks=None):
                 first_instance = instance
                 first_instance_type = each_task['type']
 
-            if instance.celery_task_id != task_id:
+            if instance.celery_task_id != task_id and not instance.cancel_flag:
                 instance.status = 'failed'
                 instance.failed = True
                 if not instance.job_explanation:
@@ -1398,11 +1398,12 @@ class RunProjectUpdate(BaseTask):
 
     def get_stdout_handle(self, instance):
         stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
+        pk = instance.pk
 
         def raw_callback(data):
-            instance_actual = ProjectUpdate.objects.get(pk=instance.pk)
-            instance_actual.result_stdout_text += data
-            instance_actual.save()
+            instance_actual = self.update_model(pk)
+            result_stdout_text = instance_actual.result_stdout_text + data
+            self.update_model(pk, result_stdout_text=result_stdout_text)
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
@@ -1872,11 +1873,12 @@ class RunInventoryUpdate(BaseTask):
 
     def get_stdout_handle(self, instance):
         stdout_handle = super(RunInventoryUpdate, self).get_stdout_handle(instance)
+        pk = instance.pk
 
         def raw_callback(data):
-            instance_actual = InventoryUpdate.objects.get(pk=instance.pk)
-            instance_actual.result_stdout_text += data
-            instance_actual.save()
+            instance_actual = self.update_model(pk)
+            result_stdout_text = instance_actual.result_stdout_text + data
+            self.update_model(pk, result_stdout_text=result_stdout_text)
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_cwd(self, inventory_update, **kwargs):
@@ -2138,11 +2140,12 @@ class RunSystemJob(BaseTask):
 
     def get_stdout_handle(self, instance):
         stdout_handle = super(RunSystemJob, self).get_stdout_handle(instance)
+        pk = instance.pk
 
         def raw_callback(data):
-            instance_actual = SystemJob.objects.get(pk=instance.pk)
-            instance_actual.result_stdout_text += data
-            instance_actual.save()
+            instance_actual = self.update_model(pk)
+            result_stdout_text = instance_actual.result_stdout_text + data
+            self.update_model(pk, result_stdout_text=result_stdout_text)
         return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_env(self, instance, **kwargs):

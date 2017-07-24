@@ -29,7 +29,7 @@ def test_multi_group_basic_job_launch(instance_factory, default_instance_group, 
         mock_task_impact.return_value = 500
         with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
             TaskManager().schedule()
-            TaskManager.start_task.assert_has_calls([mock.call(j1, ig1), mock.call(j2, ig2)])
+            TaskManager.start_task.assert_has_calls([mock.call(j1, ig1, []), mock.call(j2, ig2, [])])
 
 
 
@@ -63,13 +63,26 @@ def test_multi_group_with_shared_dependency(instance_factory, default_instance_g
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         pu = p.project_updates.first()
-        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [pu])
+        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [j1])
         pu.finished = pu.created + timedelta(seconds=1)
         pu.status = "successful"
         pu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls([mock.call(j1, ig1), mock.call(j2, ig2)])
+        TaskManager.start_task.assert_called_once_with(j1, ig1, [])
+        j1.finished = j1.created + timedelta(seconds=2)
+        j1.status = "successful"
+        j1.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.last()
+        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [j2])
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.status = "successful"
+        pu.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j2, ig2, [])
 
 
 @pytest.mark.django_db
@@ -114,8 +127,8 @@ def test_overcapacity_blocking_other_groups_unaffected(instance_factory, default
         mock_task_impact.return_value = 500
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_has_calls([mock.call(j1, ig1), mock.call(j1_1, ig1),
-                                       mock.call(j2, ig2)])
+            mock_job.assert_has_calls([mock.call(j1, ig1, []), mock.call(j1_1, ig1, []),
+                                       mock.call(j2, ig2, [])])
             assert mock_job.call_count == 3
 
 
@@ -146,5 +159,5 @@ def test_failover_group_run(instance_factory, default_instance_group, mocker,
         mock_task_impact.return_value = 500
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_has_calls([mock.call(j1, ig1), mock.call(j1_1, ig2)])
+            mock_job.assert_has_calls([mock.call(j1, ig1, []), mock.call(j1_1, ig2, [])])
             assert mock_job.call_count == 2

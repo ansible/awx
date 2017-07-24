@@ -16,7 +16,9 @@ from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 
-__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin']
+__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin', 
+           'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin', 
+           'TaskManagerInventoryUpdateMixin',]
 
 
 class ResourceMixin(models.Model):
@@ -249,3 +251,45 @@ class SurveyJobMixin(models.Model):
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
+
+
+class TaskManagerUnifiedJobMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    def get_jobs_fail_chain(self):
+        return []
+
+    def dependent_jobs_finished(self):
+        return True
+
+
+class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
+    class Meta:
+        abstract = True
+
+    def dependent_jobs_finished(self):
+        for j in self.dependent_jobs.all():
+            if j.status in ['pending', 'waiting', 'running']:
+                return False
+        return True
+
+
+class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
+    class Meta:
+        abstract = True
+
+    def get_jobs_fail_chain(self):
+        return list(self.dependent_jobs.all())
+
+
+class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
+    class Meta:
+        abstract = True
+
+
+class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
+    class Meta:
+        abstract = True
+
+
