@@ -41,6 +41,10 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
         });
 
         function assignCredentialKinds () {
+            if (!Array.isArray($scope[list.name])) {
+                return;
+            }
+
             $scope[list.name].forEach(credential => {
                 credential.kind = credentialType.getById(credential.credential_type).name;
             });
