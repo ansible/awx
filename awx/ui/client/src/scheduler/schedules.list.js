@@ -12,7 +12,7 @@ export default ['i18n', function(i18n) {
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'SCHEDULES',
-        listTitle: '{{parentObject}} || SCHEDULES',
+        listTitle: '{{parentObject | sanitize}} || SCHEDULES',
         index: false,
         hover: true,
 
