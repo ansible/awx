@@ -322,8 +322,8 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += "]\" ";
                 innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                 innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
-                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name + "\"";
-                innerTable += (list.disableRow) ? " disable-row=" + list.disableRow + " " : "";
+                innerTable += (list.disableRow) ? " disable-row=\"" + list.disableRow + "\" " : "";
+                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
                 innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                 innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                 innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
