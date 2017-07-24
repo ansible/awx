@@ -1312,7 +1312,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             # Schedule a new Project update if one is not already queued
             if self.source_project and not self.source_project.project_updates.filter(
                     status__in=['new', 'pending', 'waiting']).exists():
-                self.source_project.update()
+                self.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields(update_groups=False, update_hosts=False)

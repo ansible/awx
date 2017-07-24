@@ -1421,7 +1421,7 @@ class RunProjectUpdate(BaseTask):
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
                     logger.info('Skipping SCM inventory update for `{}` because '
-                                'another update is already active.'.format(inv.name))
+                                'another update is already active.'.format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     launch_type='scm',

@@ -314,7 +314,7 @@ def scm_inventory_source(inventory, project):
         update_on_project_update=True,
         inventory=inventory,
         scm_last_revision=project.scm_revision)
-    with mock.patch.object(inv_src.source_project, 'update'):
+    with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inv_src.save()
     return inv_src
 
