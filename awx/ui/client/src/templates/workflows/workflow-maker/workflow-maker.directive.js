@@ -29,7 +29,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                     width: availableWidth > minimumWidth ? availableWidth : minimumWidth,
                     height: availableHeight > minimumHeight ? availableHeight : minimumHeight,
                     draggable: false,
-                    dialogClass: 'SurveyMaker-dialog',
+                    dialogClass: 'WorkflowMaker-dialog',
                     position: ['center', 20],
                     onClose: function() {
                         $('#workflow-modal-dialog').empty();
