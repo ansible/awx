@@ -71,7 +71,6 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     list.fields.name.ngClick = 'linkoutResource("job_template", job_template)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
                     break;
 
                 case 'WorkflowTemplates':
@@ -83,7 +82,6 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     list.fields.name.ngClick = 'linkoutResource("workflow_job_template", workflow_template)';
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.name.ngHref = '#/templates/workflow_job_template/{{workflow_template.id}}';
                     break;
                 case 'Users':
                     list.fields = {

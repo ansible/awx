@@ -22,7 +22,7 @@ export default [function() {
                 key: true,
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
-                awToolTip: '{{organization.description}}',
+                awToolTip: '{{organization.description | sanitize}}',
                 dataPlacement: 'top'
             },
         },

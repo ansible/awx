@@ -23,7 +23,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-3 col-md-4 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8',
-                awToolTip: '{{team.description}}',
+                awToolTip: '{{team.description | sanitize}}',
                 dataPlacement: 'top'
             },
             organization: {

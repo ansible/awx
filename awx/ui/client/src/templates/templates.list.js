@@ -24,7 +24,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9',
                 ngHref: '#/templates/{{template.type}}/{{template.id}}',
-                awToolTip: '{{template.description}}',
+                awToolTip: '{{template.description | sanitize}}',
                 dataPlacement: 'top'
             },
             type: {

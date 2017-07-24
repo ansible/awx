@@ -7,10 +7,10 @@
 /* jshint unused: vars */
 export default ['$compile', 'i18n', 'generateList',
     'ProjectList', 'TemplateList', 'InventoryList', 'CredentialList',
-    'OrganizationList',
+    'OrganizationList', '$window',
     function($compile, i18n, generateList,
     ProjectList, TemplateList, InventoryList, CredentialList,
-    OrganizationList) {
+    OrganizationList, $window) {
         return {
             restrict: 'E',
             scope: {
@@ -60,6 +60,7 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name
                         };
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.ngClick = 'linkoutResource("job_template", job_template)';
                         break;
                     case 'workflow_templates':
                         list.name = 'workflow_job_templates';
@@ -68,6 +69,7 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name
                         };
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.name.ngClick = 'linkoutResource("workflow_job_template", workflow_job_template)';
                         break;
                     case 'credentials':
                     case 'organizations':
@@ -124,6 +126,40 @@ export default ['$compile', 'i18n', 'generateList',
                     multiselect_scope = angular.element('#AddPermissions-body').find(`#${type}_table`).scope();
                     deselectedIdx = _.findIndex(multiselect_scope[type], {id: resource.id});
                     multiselect_scope[type][deselectedIdx].isSelected = false;
+                };
+
+                scope.linkoutResource = function(type, resource) {
+
+                    let url;
+
+                    switch(type){
+                        case 'project':
+                            url = "/#/projects/" + resource.id;
+                            break;
+                        case 'inventory':
+                            url = resource.kind && resource.kind === "smart" ? "/#/inventories/smart/" + resource.id : "/#/inventories/inventory/" + resource.id;
+                            break;
+                        case 'job_template':
+                            url = "/#/templates/job_template/" + resource.id;
+                            break;
+                        case 'workflow_job_template':
+                            url = "/#/templates/workflow_job_template/" + resource.id;
+                            break;
+                        case 'user':
+                            url = "/#/users/" + resource.id;
+                            break;
+                        case 'team':
+                            url = "/#/teams/" + resource.id;
+                            break;
+                        case 'organization':
+                            url = "/#/organizations/" + resource.id;
+                            break;
+                        case 'credential':
+                            url = "/#/credentials/" + resource.id;
+                            break;
+                    }
+
+                    $window.open(url,'_blank');
                 };
 
                 element.append(list_html);
