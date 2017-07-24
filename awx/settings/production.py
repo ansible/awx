@@ -46,7 +46,7 @@ SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
 
 # Tower base virtualenv paths and enablement
-TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
+TOWER_VENV_PATH = "/var/lib/awx/venv/awx"
 
 AWX_ISOLATED_USERNAME = 'awx'
 
