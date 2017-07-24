@@ -21,16 +21,14 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                     $scope.canAdd = params.canAdd;
                 });
 
+            $scope.$watch(list.name, assignCredentialKinds);
+
             // search init
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
             $scope.selected = [];
-
-            $scope[list.name].forEach(credential => {
-                credential.kind = credentialType.getById(credential.credential_type).name;
-            });
         }
 
         $scope.$on(`${list.iterator}_options`, function(event, data){
@@ -41,6 +39,16 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
         $scope.$watchCollection(`${$scope.list.name}`, function() {
             optionsRequestDataProcessing();
         });
+
+        function assignCredentialKinds () {
+            if (!Array.isArray($scope[list.name])) {
+                return;
+            }
+
+            $scope[list.name].forEach(credential => {
+                credential.kind = credentialType.getById(credential.credential_type).name;
+            });
+        }
 
         // iterate over the list and add fields like type label, after the
         // OPTIONS request returns, or the list is sorted/paginated/searched
