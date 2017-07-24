@@ -550,8 +550,8 @@ class BaseTask(Task):
         return env
 
     def add_tower_venv(self, env):
-        env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
-        env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
+        env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
+        env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
         return env
 
     def build_env(self, instance, **kwargs):
