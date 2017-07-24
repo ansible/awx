@@ -272,7 +272,7 @@ def test_check_isolated_job(private_data_dir, rsa_key):
                 '-e', '{"src": "%s"}' % private_data_dir,
                 '-vvvvv'
             ],
-            '/tower_devel/awx/playbooks', mgr.management_env, mock.ANY,
+            '/awx_devel/awx/playbooks', mgr.management_env, mock.ANY,
             cancelled_callback=None,
             idle_timeout=0,
             job_timeout=0,
