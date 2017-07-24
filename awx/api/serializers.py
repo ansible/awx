@@ -2460,12 +2460,17 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
         inventory = get_field_from_model_or_attrs('inventory')
         credential = get_field_from_model_or_attrs('credential')
+        vault_credential = get_field_from_model_or_attrs('vault_credential')
         project = get_field_from_model_or_attrs('project')
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
-        elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
+        elif all([
+            credential is None,
+            vault_credential is None,
+            not get_field_from_model_or_attrs('ask_credential_on_launch'),
+        ]):
             raise serializers.ValidationError({'credential': prompting_error_message})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
