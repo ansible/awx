@@ -740,17 +740,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>\n";
                 }
 
-                if (field.type === 'hidden') {
-                    if ((options.mode === 'edit' && field.includeOnEdit) ||
-                        (options.mode === 'add' && field.includeOnAdd)) {
-                        html += "<input type=\"hidden\" ng-model=\"" + fld + "\" name=\"" + fld + "\" />";
-                    }
-                }
-
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
                     if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock' && field.type !== 'workflow-chart') {
-
 
                     html += "<div class='form-group Form-formGroup ";
                     html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
