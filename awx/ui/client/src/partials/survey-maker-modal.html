@@ -53,7 +53,7 @@
                                 </div>
 
                                 <div ng-if="question.question_description" class="SurveyMaker-previewDescription">
-                                    <i>{{question.question_description | sanitize}}</i>
+                                    <i>{{question.question_description}}</i>
                                 </div>
                                 <div class="SurveyMaker-previewInputRow">
                                     <span dnd-handle class="SurveyMaker-reorderButton" data-placement="top" aw-tool-tip="Drag to reorder question" data-original-title="" title="" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">
