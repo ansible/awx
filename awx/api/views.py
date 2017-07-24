@@ -2532,6 +2532,13 @@ class InventorySourceList(ListCreateAPIView):
     always_allow_superuser = False
     new_in_320 = True
 
+    @property
+    def allowed_methods(self):
+        methods = super(InventorySourceList, self).allowed_methods
+        if get_request_version(self.request) == 1:
+            methods.remove('POST')
+        return methods
+
 
 class InventorySourceDetail(RetrieveUpdateDestroyAPIView):
 
