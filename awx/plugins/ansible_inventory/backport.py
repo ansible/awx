@@ -22,13 +22,9 @@ __metaclass__ = type
 import optparse
 from operator import attrgetter
 
-from ansible import constants as C
 from ansible.cli import CLI
 from ansible.errors import AnsibleOptionsError
-from ansible.inventory import Inventory
 from ansible.parsing.dataloader import DataLoader
-from ansible.vars import VariableManager
-
 
 try:
     from __main__ import display
@@ -60,8 +56,12 @@ class InventoryCLI(CLI):
     def __init__(self, args):
 
         super(InventoryCLI, self).__init__(args)
+        self.args = args
         self.vm = None
         self.loader = None
+        self.inventory = None
+
+        self._new_api = True
 
     def parse(self):
 
@@ -71,6 +71,8 @@ class InventoryCLI(CLI):
             inventory_opts=True,
             vault_opts=True
         )
+        self.parser.add_option("--optimize", action="store_true", default=False, dest='optimize',
+                               help='Output variables on the group or host where they are defined')
 
         # Actions
         action_group = optparse.OptionGroup(self.parser, "Actions", "One of following must be used on invocation, ONLY ONE!")
@@ -93,32 +95,6 @@ class InventoryCLI(CLI):
                 raise
             # --- Start of 2.3+ super(InventoryCLI, self).parse() ---
             self.options, self.args = self.parser.parse_args(self.args[1:])
-            if hasattr(self.options, 'tags') and not self.options.tags:
-                # optparse defaults does not do what's expected
-                self.options.tags = ['all']
-            if hasattr(self.options, 'tags') and self.options.tags:
-                if not C.MERGE_MULTIPLE_CLI_TAGS:
-                    if len(self.options.tags) > 1:
-                        display.deprecated('Specifying --tags multiple times on the command line currently uses the last specified value. In 2.4, values will be merged instead.  Set merge_multiple_cli_tags=True in ansible.cfg to get this behavior now.', version=2.5, removed=False)
-                        self.options.tags = [self.options.tags[-1]]
-
-                tags = set()
-                for tag_set in self.options.tags:
-                    for tag in tag_set.split(u','):
-                        tags.add(tag.strip())
-                self.options.tags = list(tags)
-
-            if hasattr(self.options, 'skip_tags') and self.options.skip_tags:
-                if not C.MERGE_MULTIPLE_CLI_TAGS:
-                    if len(self.options.skip_tags) > 1:
-                        display.deprecated('Specifying --skip-tags multiple times on the command line currently uses the last specified value. In 2.4, values will be merged instead.  Set merge_multiple_cli_tags=True in ansible.cfg to get this behavior now.', version=2.5, removed=False)
-                        self.options.skip_tags = [self.options.skip_tags[-1]]
-
-                skip_tags = set()
-                for tag_set in self.options.skip_tags:
-                    for tag in tag_set.split(u','):
-                        skip_tags.add(tag.strip())
-                self.options.skip_tags = list(skip_tags)
             # --- End of 2.3+ super(InventoryCLI, self).parse() ---
 
         display.verbosity = self.options.verbosity
@@ -148,30 +124,38 @@ class InventoryCLI(CLI):
         super(InventoryCLI, self).run()
 
         # Initialize needed objects
-        self.loader = DataLoader()
-        self.vm = VariableManager()
-
-        # use vault if needed
-        if self.options.vault_password_file:
-            vault_pass = CLI.read_vault_password_file(self.options.vault_password_file, loader=self.loader)
-        elif self.options.ask_vault_pass:
-            vault_pass = self.ask_vault_passwords()
+        if getattr(self, '_play_prereqs', False):
+            self.loader, self.inventory, self.vm = self._play_prereqs(self.options)
         else:
-            vault_pass = None
+            # fallback to pre 2.4 way of initialzing
+            from ansible.vars import VariableManager
+            from ansible.inventory import Inventory
 
-        if vault_pass:
-            self.loader.set_vault_password(vault_pass)
+            self._new_api = False
+            self.loader = DataLoader()
+            self.vm = VariableManager()
 
-        # actually get inventory and vars
-        self.inventory = Inventory(loader=self.loader, variable_manager=self.vm, host_list=self.options.inventory)
-        self.vm.set_inventory(self.inventory)
+            # use vault if needed
+            if self.options.vault_password_file:
+                vault_pass = CLI.read_vault_password_file(self.options.vault_password_file, loader=self.loader)
+            elif self.options.ask_vault_pass:
+                vault_pass = self.ask_vault_passwords()
+            else:
+                vault_pass = None
+
+            if vault_pass:
+                self.loader.set_vault_password(vault_pass)
+                # actually get inventory and vars
+
+            self.inventory = Inventory(loader=self.loader, variable_manager=self.vm, host_list=self.options.inventory)
+            self.vm.set_inventory(self.inventory)
 
         if self.options.host:
             hosts = self.inventory.get_hosts(self.options.host)
             if len(hosts) != 1:
                 raise AnsibleOptionsError("You must pass a single valid host to --hosts parameter")
 
-            myvars = self.vm.get_vars(self.loader, host=hosts[0])
+            myvars = self._get_host_variables(host=hosts[0])
             self._remove_internal(myvars)
 
             # FIXME: should we template first?
@@ -180,7 +164,7 @@ class InventoryCLI(CLI):
         elif self.options.graph:
             results = self.inventory_graph()
         elif self.options.list:
-            top = self.inventory.get_group('all')
+            top = self._get_group('all')
             if self.options.yaml:
                 results = self.yaml_inventory(top)
             else:
@@ -188,6 +172,7 @@ class InventoryCLI(CLI):
             results = self.dump(results)
 
         if results:
+            # FIXME: pager?
             display.display(results)
             exit(0)
 
@@ -204,6 +189,20 @@ class InventoryCLI(CLI):
             results = json.dumps(stuff, sort_keys=True, indent=4)
 
         return results
+
+    def _get_host_variables(self, host):
+        if self._new_api:
+            hostvars = self.vm.get_vars(host=host)
+        else:
+            hostvars = self.vm.get_vars(self.loader, host=host)
+        return hostvars
+
+    def _get_group(self, gname):
+        if self._new_api:
+            group = self.inventory.groups.get(gname)
+        else:
+            group = self.inventory.get_group(gname)
+        return group
 
     def _remove_internal(self, dump):
 
@@ -248,7 +247,7 @@ class InventoryCLI(CLI):
 
     def inventory_graph(self):
 
-        start_at = self.inventory.get_group(self.options.pattern)
+        start_at = self._get_group(self.options.pattern)
         if start_at:
             return '\n'.join(self._graph_group(start_at))
         else:
@@ -276,7 +275,7 @@ class InventoryCLI(CLI):
         results['_meta'] = {'hostvars': {}}
         hosts = self.inventory.get_hosts()
         for host in hosts:
-            results['_meta']['hostvars'][host.name] = self.vm.get_vars(self.loader, host=host)
+            results['_meta']['hostvars'][host.name] = self._get_host_variables(host=host)
             self._remove_internal(results['_meta']['hostvars'][host.name])
 
         return results
@@ -305,7 +304,7 @@ class InventoryCLI(CLI):
                     myvars = {}
                     if h.name not in seen:  # avoid defining host vars more than once
                         seen.append(h.name)
-                        myvars = self.vm.get_vars(self.loader, host=h)
+                        myvars = self._get_host_variables(host=h)
                         self._remove_internal(myvars)
                     results[group.name]['hosts'][h.name] = myvars
 
