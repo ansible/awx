@@ -1810,7 +1810,7 @@ class RunInventoryUpdate(BaseTask):
         inventory = inventory_source.inventory
 
         # Piece together the initial command to run via. the shell.
-        args = ['tower-manage', 'inventory_import']
+        args = ['awx-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
 
         # Add appropriate arguments for overwrite if the inventory_update
@@ -2116,7 +2116,7 @@ class RunSystemJob(BaseTask):
     model = SystemJob
 
     def build_args(self, system_job, **kwargs):
-        args = ['tower-manage', system_job.job_type]
+        args = ['awx-manage', system_job.job_type]
         try:
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':

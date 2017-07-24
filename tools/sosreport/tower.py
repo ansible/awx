@@ -6,7 +6,7 @@ from distutils.version import LooseVersion
 
 SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
-    "tower-manage --version", # tower version
+    "awx-manage --version", # tower version
     "supervisorctl status",   # tower process status
     "/var/lib/awx/venv/tower/bin/pip freeze",             # pip package list
     "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
