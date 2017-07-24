@@ -624,7 +624,7 @@ class CredentialTypeInputField(JSONSchemaField):
                 # If no type is specified, default to string
                 field['type'] = 'string'
 
-            for key in ('choices', 'multiline', 'format'):
+            for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':
                     raise django_exceptions.ValidationError(
                         _('%s not allowed for %s type (%s)' % (key, field['type'], field['id'])),
