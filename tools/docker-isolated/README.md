@@ -1,7 +1,7 @@
 ## Instructions on using an isolated node
 
 The building of the isolated node is done in the `make docker-compose-build`
-target. Its image uses a different tag from the tools_tower container.
+target. Its image uses a different tag from the tools_awx container.
 
 Given that the images are built, you can run the combined docker compose target. This uses
 the base `docker-compose.yml` with modifications found in `docker-isolated-override.yml`.
@@ -12,7 +12,7 @@ base branch is. For example:
 make docker-isolated COMPOSE_TAG=devel
 ```
 
-This will automatically exchange the keys in order for the `tools_tower_1`
+This will automatically exchange the keys in order for the `tools_awx_1`
 container to access the `tools_isolated_1` container over ssh.
 After that, it will bring up all the containers like the normal docker-compose
 workflow.
@@ -61,7 +61,7 @@ Example location of a private data directory:
 The following command would run the playbook corresponding to that job.
 
 ```bash
-tower-expect start /tmp/ansible_tower_29_OM6Mnx/
+awx-expect start /tmp/ansible_tower_29_OM6Mnx/
 ```
 
-Other tower-expect commands include `start`, `is-alive`, and `stop`.
+Other awx-expect commands include `start`, `is-alive`, and `stop`.

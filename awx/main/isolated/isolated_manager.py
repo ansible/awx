@@ -170,7 +170,7 @@ class IsolatedManager(object):
         # - sets up a temporary directory for proot/bwrap (if necessary)
         # - copies encrypted job data from the controlling host to the isolated host (with rsync)
         # - writes the encryption secret to a named pipe on the isolated host
-        # - launches the isolated playbook runner via `tower-expect start <job-id>`
+        # - launches the isolated playbook runner via `awx-expect start <job-id>`
         args = self._build_args('run_isolated.yml', '%s,' % self.host, extra_vars)
         if self.instance.verbosity:
             args.append('-%s' % ('v' * min(5, self.instance.verbosity)))

@@ -26,7 +26,7 @@ def main():
     )
     try:
         version = subprocess.check_output(
-            ['tower-expect', '--version'],
+            ['awx-expect', '--version'],
             stderr=subprocess.STDOUT
         ).strip()
     except subprocess.CalledProcessError as e:
