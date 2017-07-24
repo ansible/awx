@@ -1,17 +1,17 @@
 version: '3'
 services:
   # Primary Tower Development Container link
-  tower:
+  awx:
     environment:
       EXTRA_GROUP_QUEUES: thepentagon
     links:
       - isolated
   # Isolated Rampart Container
   isolated:
-    image: gcr.io/ansible-tower-engineering/tower_isolated:${TAG}
+    image: gcr.io/ansible-tower-engineering/awx_isolated:${TAG}
     hostname: isolated
     volumes:
-      - "../awx/main/isolated:/tower_devel"
-      - "../awx/lib:/tower_lib"
+      - "../awx/main/isolated:/awx_devel"
+      - "../awx/lib:/awx_lib"
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
     privileged: true

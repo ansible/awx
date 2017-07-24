@@ -10,7 +10,7 @@
   tasks:
 
     - name: Determine if daemon process is alive.
-      shell: "tower-expect is-alive {{src}}"
+      shell: "awx-expect is-alive {{src}}"
       register: is_alive
       ignore_errors: true
 

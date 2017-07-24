@@ -1,3 +1,0 @@
-#!/bin/bash
-. /venv/tower/bin/activate
-exec env TOWER_LIB_DIRECTORY=/tower_lib /tower_devel/run.py "$@"
