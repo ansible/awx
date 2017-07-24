@@ -110,7 +110,7 @@ include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 ANSIBLE_VENV_PATH = "/venv/ansible"
-TOWER_VENV_PATH = "/venv/tower"
+AWX_VENV_PATH = "/venv/awx"
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
