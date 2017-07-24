@@ -42,6 +42,7 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name,
                             scm_type: list.fields.scm_type
                         };
+                        list.fields.name.ngClick = 'linkoutResource("project", project)';
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
@@ -50,6 +51,7 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name,
                             organization: list.fields.organization
                         };
+                        list.fields.name.ngClick = 'linkoutResource("inventory", inventory)';
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
@@ -72,10 +74,17 @@ export default ['$compile', 'i18n', 'generateList',
                         list.fields.name.ngClick = 'linkoutResource("workflow_job_template", workflow_job_template)';
                         break;
                     case 'credentials':
+                        list.fields = {
+                            name: list.fields.name
+                        };
+                        list.fields.name.ngClick = 'linkoutResource("credential", credential)';
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        break;
                     case 'organizations':
                         list.fields = {
                             name: list.fields.name
                         };
+                        list.fields.name.ngClick = 'linkoutResource("organization", organization)';
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         break;
                 }
