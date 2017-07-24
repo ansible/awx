@@ -64,6 +64,12 @@ def test_invalid_clean_insights_credential():
     assert json.dumps(str(e.value)) == json.dumps(str([u"Credential kind must be 'insights'."]))
 
 
+def test_valid_kind_clean_insights_credential():
+    inv = Inventory(kind='smart')
+
+    inv.clean_insights_credential()
+
+
 def test_invalid_kind_clean_insights_credential():
     cred_type = CredentialType.defaults['insights']()
     insights_cred = Credential(credential_type=cred_type)
