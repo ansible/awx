@@ -14,14 +14,14 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 .then(kinds => {
                     scope.credentialKinds = kinds;
 
-                    scope.credentialKind = "" + kinds.SSH;
+                    scope.credentialKind = "" + kinds.Machine;
 
                     scope.showModal = function() {
                         $('#multi-credential-modal').modal('show');
                     };
 
                     scope.destroyModal = function() {
-                        scope.credentialKind = kinds.SSH;
+                        scope.credentialKind = kinds.Machine;
                         $('#multi-credential-modal').modal('hide');
                     };
 
@@ -62,7 +62,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 let extraCredIds = $scope.selectedCredentials.extra
                     .map(cred => cred.id);
                 $scope.credentials.forEach(cred => {
-                    if (cred.credential_type !== $scope.credentialKinds.SSH) {
+                    if (cred.credential_type !== $scope.credentialKinds.Machine) {
                         cred.checked = (extraCredIds
                             .indexOf(cred.id) > - 1) ? 1 : 0;
                     }
@@ -75,7 +75,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
             let updateMachineCredentialList = function() {
                 $scope.credentials.forEach(cred => {
-                    if (cred.credential_type === $scope.credentialKinds.SSH) {
+                    if (cred.credential_type === $scope.credentialKinds.Machine) {
                         cred.checked = ($scope.selectedCredentials
                             .machine !== null &&
                             cred.id === $scope.selectedCredentials
@@ -158,9 +158,9 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                     if($scope.credentials && $scope.credentials.length > 0) {
                         if($scope.selectedCredentials.extra &&
                             $scope.selectedCredentials.extra.length > 0 &&
-                            parseInt($scope.credentialKind) !== $scope.credentialKinds.SSH) {
+                            parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
                             updateExtraCredentialsList();
-                        } else if (parseInt($scope.credentialKind) !== $scope.credentialKinds.SSH) {
+                        } else if (parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
                             uncheckAllCredentials();
                         }
                     }
@@ -169,7 +169,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 $scope.$watch('selectedCredentials.machine', () => {
                     if($scope.selectedCredentials &&
                         $scope.selectedCredentials.machine &&
-                        parseInt($scope.credentialKind) === $scope.credentialKinds.SSH) {
+                        parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
                         updateMachineCredentialList();
                     } else {
                         uncheckAllCredentials();
@@ -193,7 +193,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                             $scope.credentials.length > 0) {
                                 if($scope.selectedCredentials &&
                                       $scope.selectedCredentials.machine &&
-                                      parseInt($scope.credentialKind) === $scope.credentialKinds.SSH) {
+                                      parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
                                           updateMachineCredentialList();
                                 } else if($scope.selectedCredentials &&
                                       $scope.selectedCredentials.vault &&
@@ -202,7 +202,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                                 } else if($scope.selectedCredentials &&
                                       $scope.selectedCredentials.extra &&
                                       $scope.selectedCredentials.extra.length > 0 &&
-                                      parseInt($scope.credentialKind) !== $scope.credentialKinds.SSH) {
+                                      parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
                                           updateExtraCredentialsList();
                                 } else {
                                     uncheckAllCredentials();
@@ -216,7 +216,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
             });
 
             $scope.toggle_row = function(selectedRow) {
-                if(parseInt($scope.credentialKind) === $scope.credentialKinds.SSH) {
+                if(parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
                     if($scope.selectedCredentials &&
                         $scope.selectedCredentials.machine &&
                         $scope.selectedCredentials.machine.id === selectedRow.id) {
