@@ -42,7 +42,7 @@ endif
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
-NAME ?= awx
+NAME ?= ansible_awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 ifeq ($(OFFICIAL),yes)
     RELEASE ?= 1
@@ -56,13 +56,17 @@ endif
 ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
+	WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
+	WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)_$(RELEASE)
 endif
 
 SDIST_COMMAND ?= sdist
+WHEEL_COMMAND ?= bdist_wheel
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
+WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
@@ -534,13 +538,19 @@ release_build:
 dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/ansible-tower.tar.gz: ui-release
-	OFFICIAL="yes" $(PYTHON) setup.py sdist
+dist/$(WHEEL_FILE): ui-release
+	BUILD="$(BUILD)" $(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 	@echo "Artifacts:"
 	@echo dist/$(SDIST_TAR_FILE)
+	@echo "#############################################"
+
+wheel: dist/$(WHEEL_FILE)
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo dist/$(WHEEL_FILE)
 	@echo "#############################################"
 
 # Build setup bundle tarball
