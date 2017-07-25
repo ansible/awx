@@ -33,7 +33,7 @@ export default
 
                     scope.seeMore = function () {
                         var seeMoreResolve = $q.defer();
-                        Rest.setUrl(`${scope[scope.$parent.list.iterator].related.groups}/?order_by=id`);
+                        Rest.setUrl(`${scope[scope.$parent.list.iterator].related.groups}?order_by=id`);
                         Rest.get()
                             .success(function(data) {
                                 if (data.next) {
