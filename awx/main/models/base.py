@@ -225,7 +225,13 @@ class PasswordFieldsModel(BaseModel):
                 saved_value = getattr(self, '_saved_%s' % field, '')
                 setattr(self, field, saved_value)
                 self.mark_field_for_save(update_fields, field)
-            self.save(update_fields=update_fields)
+
+            from awx.main.signals import disable_activity_stream
+            with disable_activity_stream():
+                # We've already got an activity stream record for the object
+                # creation, there's no need to have an extra one for the
+                # secondary save for secrets
+                self.save(update_fields=update_fields)
 
     def encrypt_field(self, field, ask):
         encrypted = encrypt_field(self, field, ask)
