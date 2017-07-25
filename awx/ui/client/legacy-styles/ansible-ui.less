@@ -27,12 +27,6 @@ body.modal-open {
   margin-right: 0;
 }
 
-
-
-.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
-    border-color: @b7grey;
-}
-
 /* Helper Classes */
 .pad-right-sm { padding-right: 10px; }
 .pad-left-md { padding-left: 30px; }
@@ -607,13 +601,13 @@ dd {
 .ui-widget-content a.help-link,
 .ui-widget-content a.help-link:active,
 .ui-widget-content a.help-link:visited {
-  color: @grey;
+  color: @default-icon;
   text-decoration: none;
 }
 
 .help-link:hover,
 .ui-widget-content a.help-link:hover {
-  color: @default-icon;
+  color: @default-interface-txt;
   text-decoration: none;
 }
 
@@ -2085,8 +2079,8 @@ tr td button i {
 }
 
 .form-control {
-    border-color: @d7grey;
-    background-color: @default-no-items-bord;
+    border-color: @b7grey;
+    background-color: @f2grey;
     color: @default-data-txt;
     transition: border-color 0.3s;
     box-shadow: none;
@@ -2096,7 +2090,7 @@ tr td button i {
 
 .form-control + .select2 .select2-selection {
     border-color: @b7grey !important;
-    background-color: @default-bg !important;
+    background-color: @f2grey !important;
     color: @default-data-txt !important;
     transition: border-color 0.3s !important;
     box-shadow: none !important;
@@ -2108,7 +2102,7 @@ tr td button i {
 }
 
 .form-control + .select2-container--disabled .select2-selection {
-  background-color: @egrey !important;
+  background-color: @ebgrey !important;
 }
 
 .form-control:active, .form-control:focus {
@@ -2146,7 +2140,7 @@ tr td button i {
 .select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
     cursor: not-allowed;
     opacity: 100;
-    background: @egrey;
+    background: @ebgrey;
     border-radius: 5px;
 }
 
@@ -2311,7 +2305,7 @@ html input[disabled] {
 
 .select2-container--disabled .select2-selection,
 .select2-container--disabled .select2-arrow {
-    background: @egrey;
+    background: @ebgrey;
 }
 
 .btn.disabled,.btn[disabled],fieldset[disabled] .bt {
@@ -2320,11 +2314,11 @@ html input[disabled] {
 
 .ui-state-disabled,.ui-widget-content .ui-state-disabled,.ui-widget-header .ui-state-disabled {
     opacity: 1;
-    background: @egrey;
+    background: @ebgrey;
 }
 
 input[disabled].ui-spinner-input {
-  background-color: @egrey;
+  background-color: @ebgrey;
 }
 
 .CodeMirror-scroll {
@@ -2338,4 +2332,14 @@ input[disabled].ui-spinner-input {
 
 .CodeMirror-lines {
     margin-bottom: 20px;
+}
+
+.btn-default {
+    border-color: @b7grey;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+    background-color: @f2grey;
+    border-color: @b7grey;
+    color: @default-interface-txt;
 }

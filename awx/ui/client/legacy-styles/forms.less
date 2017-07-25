@@ -156,7 +156,7 @@
 }
 
 .Form-tab--disabled {
-    opacity: 0.4;
+    opacity: 0.65;
 }
 
 .Form-tab--disabled:hover {
@@ -200,7 +200,7 @@
 
 .Form-formGroup {
     input.form-control {
-       background-color: @default-secondary-bg;
+       background-color: @f2grey;
        border-color: @b7grey;
        border-radius: 5px;
        height: 30px;
@@ -247,7 +247,7 @@
     left: -20px;
     position: absolute;
     width: 5px;
-    background-color: @default-border;
+    background-color: @b7grey;
     height: 100%;
 }
 
@@ -318,7 +318,7 @@
 
 .ui-spinner{
     height: 30px;
-    background-color: @field-secondary-bg !important;
+    background-color: @f2grey !important;
     border-radius: 5px;
     border:1px solid @field-border !important;
     color: @field-input-text;
@@ -366,13 +366,12 @@
     border-left:1px solid @field-border;
     border-bottom-right-radius: 5px;
     border-top-right-radius: 5px;
-    background-color: @field-button-bg !important;
     width: 30px!important;
     height: 28px!important;
 }
 
 .select2-container--disabled .select2-selection__arrow {
-    background: @egrey !important;
+    background: @ebgrey !important;
 }
 
 .select2-results__option{
@@ -420,19 +419,19 @@
 
 .Form-passwordButton{
     height: 30px;
-    color: @field-lookup-btn-icon!important;
+    color: @default-interface-txt;
     text-transform: uppercase;
     line-height: 1;
     padding-left: 7px;
     padding-right: 7px;
-    background-color: @field-lookup-btn-bg;
-    border:1px solid @field-border;
+    background-color: @default-bg;
+    border:1px solid @b7grey;
 }
 
 .Form-passwordButton:hover {
     cursor: pointer;
-    background-color: @field-lookup-btn-hov-bg;
-    border: 1px solid @field-border;
+    background-color: @f2grey;
+    border: 1px solid @b7grey;
     color: @field-lookup-btn-icon;
 }
 
@@ -753,4 +752,9 @@ input[type='radio']:checked:before {
 }
 :-moz-placeholder { /* Firefox 18- */
   color: @b7grey;
+}
+
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    border-color: @b7grey;
+    background: @ebgrey;
 }

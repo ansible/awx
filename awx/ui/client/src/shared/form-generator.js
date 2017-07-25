@@ -844,7 +844,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         if (field.genMD5) {
-                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
+                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
                                 "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
                         }
@@ -1371,7 +1371,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += `<div class="input-group Form-mixedInputGroup">`;
                         html += "<span class=\"input-group-btn\">\n";
-                        html += `<button type="button" class="Form-lookupButton btn btn-default" ng-click="${field.ngClick || defaultLookupNgClick}"
+                        html += `<button type="button" class="Form-lookupButton btn" ng-click="${field.ngClick || defaultLookupNgClick}"
                         ${field.readonly || field.showonly}
                         ${this.attr(field, "ngDisabled")}
                         id="${fld}-lookup-btn"><i class="fa fa-search"></i></button>`;
