@@ -189,6 +189,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
+# Do not allow non-browser clients to read the CSRF cookie.
+CSRF_COOKIE_HTTPONLY = True
+
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
 
