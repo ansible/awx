@@ -9,6 +9,6 @@ services:
     environment:
       SWIG_FEATURES: "-cpperraswarn -includeall -I/usr/include/openssl"
       TEST_DIRS: awx/main/tests/functional awx/main/tests/unit awx/conf/tests awx/sso/tests
-    command: ["cp /tmp/ansible-awx.egg-link /venv/awx/lib/python2.7/site-packages/ansible-awx.egg-link; make test"]
+    command: ["make test"]
     volumes:
       - ../../../:/awx_devel
