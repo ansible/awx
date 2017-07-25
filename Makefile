@@ -537,10 +537,10 @@ release_build:
 	$(PYTHON) setup.py release_build
 
 dist/$(SDIST_TAR_FILE): ui-release VERSION
-	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
+	$(PYTHON) setup.py $(SDIST_COMMAND)
 
 dist/$(WHEEL_FILE): ui-release
-	BUILD="$(BUILD)" $(PYTHON) setup.py $(WHEEL_COMMAND)
+	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
