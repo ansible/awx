@@ -27,7 +27,7 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                     credentialTypesLookup()
                         .then(kinds => {
                             if(scope.ask_credential_on_launch) {
-                                scope.credentialKind = "" + kinds.SSH;
+                                scope.credentialKind = "" + kinds.Machine;
                                 scope.includeCredentialList = true;
                             }
                         });
