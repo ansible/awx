@@ -7,7 +7,6 @@ import os
 import glob
 import sys
 import subprocess
-import re
 from setuptools import setup
 from distutils.command.sdist import sdist
 
@@ -26,8 +25,14 @@ else:
 
 
 def get_version():
-    ver = subprocess.Popen("git describe --long | cut -f1-1 -d -", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-    return re.sub(r'-([0-9]+)-.*', r'.\1', ver)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    version_file = os.path.join(current_dir, 'VERSION')
+    if os.path.isfile(version_file):
+        with open(version_file, 'r') as file:
+            version = file.read().strip()
+    else:
+        version = subprocess.Popen("git describe --long | cut -d - -f 1-1", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+    return version
 
 
 if os.path.exists("/etc/debian_version"):

@@ -22,6 +22,7 @@ include tools/scripts/failure-event-handler
 include tools/scripts/tower-python
 include awx/playbooks/library/mkfifo.py
 include tools/sosreport/*
+include VERSION
 include COPYING
 include Makefile
 prune awx/public
