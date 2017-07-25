@@ -376,14 +376,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         return self.insights_credential
 
     @transaction.atomic
-    def schedule_deletion(self):
+    def schedule_deletion(self, user_id=None):
         from awx.main.tasks import delete_inventory
         if self.pending_deletion is True:
             raise RuntimeError("Inventory is already pending deletion.")
         self.pending_deletion = True
         self.save(update_fields=['pending_deletion'])
         self.websocket_emit_status('pending_deletion')
-        delete_inventory.delay(self.pk)
+        delete_inventory.delay(self.pk, user_id)
 
     def _update_host_smart_inventory_memeberships(self):
         if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:

@@ -1848,7 +1848,7 @@ class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
         try:
-            obj.schedule_deletion()
+            obj.schedule_deletion(getattr(request.user, 'id', None))
             return Response(status=status.HTTP_202_ACCEPTED)
         except RuntimeError, e:
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
