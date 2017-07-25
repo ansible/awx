@@ -79,11 +79,6 @@ function(i18n) {
                     dataTitle: i18n._('Host Variables'),
                     dataPlacement: 'right',
                     dataContainer: 'body'
-                },
-                inventory: {
-                    type: 'hidden',
-                    includeOnEdit: true,
-                    includeOnAdd: true
                 }
             },
 
