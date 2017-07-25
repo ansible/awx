@@ -41,7 +41,7 @@ class DjangoSearchModel {
                 stringFound = true;
             }
             if(!dateTimeFound && value.type === 'datetime') {
-                this.searchExamples.push(key + ":>=\"2000-01-01T00:00:00Z\"");
+                this.searchExamples.push(key + ":>=2000-01-01T00:00:00Z");
                 this.searchExamples.push(key + ":<2000-01-01");
                 dateTimeFound = true;
             }
