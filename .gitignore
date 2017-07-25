@@ -107,6 +107,7 @@ local/
 *.mo
 requirements/vendor
 .i18n_built
+VERSION
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

@@ -56,11 +56,11 @@ endif
 ifeq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
-	WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
+    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)-$(RELEASE)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
-	WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)_$(RELEASE)
+    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)_$(RELEASE)
 endif
 
 SDIST_COMMAND ?= sdist
@@ -86,7 +86,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
 	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
+	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska VERSION
 
 # remove ui build artifacts
 clean-ui:
@@ -117,6 +117,7 @@ clean: clean-ui clean-dist
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
+	rm -f VERSION
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -535,11 +536,11 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release
-	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
+dist/$(SDIST_TAR_FILE): ui-release VERSION
+	$(PYTHON) setup.py $(SDIST_COMMAND)
 
 dist/$(WHEEL_FILE): ui-release
-	BUILD="$(BUILD)" $(PYTHON) setup.py $(WHEEL_COMMAND)
+	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
@@ -621,3 +622,6 @@ clean-elk:
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+
+VERSION:
+	echo $(RELEASE_VERSION) > $@
