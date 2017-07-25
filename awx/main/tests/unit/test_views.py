@@ -45,6 +45,7 @@ def test_disable_post_on_v2_jobs_list(version, supports_post):
     with mock.patch('awx.api.views.get_request_version', return_value=version):
         assert ('POST' in job_list.allowed_methods) == supports_post
 
+
 @pytest.mark.parametrize('version, supports_post', [(1, False), (2, True)])
 def test_disable_post_on_v1_inventory_source_list(version, supports_post):
     inv_source_list = InventorySourceList()
