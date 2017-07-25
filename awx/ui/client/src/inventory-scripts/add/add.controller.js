@@ -43,7 +43,7 @@ export default ['Rest', 'Wait',
                     organization: $scope.organization,
                     script: $scope.script
                 })
-                .success(function(data) {
+                .success(function() {
                     $state.go('inventoryScripts', null, { reload: true });
                     Wait('stop');
                 })
