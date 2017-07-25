@@ -20,7 +20,7 @@ class TestSCMUpdateFeatures:
             inventory=inventory,
             update_on_project_update=True,
             source='scm')
-        with mock.patch.object(inv_src.source_project, 'update') as mck_update:
+        with mock.patch.object(inv_src, 'update') as mck_update:
             inv_src.save()
             mck_update.assert_called_once_with()
 
