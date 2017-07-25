@@ -1,10 +1,10 @@
 #!/venv/awx/bin/python
-# EASY-INSTALL-ENTRY-SCRIPT: 'ansible-awx==placeholder','console_scripts','awx-manage'
-__requires__ = 'ansible-awx==placeholder'
+# EASY-INSTALL-ENTRY-SCRIPT: 'ansible-awx','console_scripts','awx-manage'
+__requires__ = 'ansible-awx'
 import sys
 from pkg_resources import load_entry_point
 
 if __name__ == '__main__':
     sys.exit(
-        load_entry_point('ansible-awx==placeholder', 'console_scripts', 'awx-manage')()
+        load_entry_point('ansible-awx', 'console_scripts', 'awx-manage')()
     )
