@@ -19,6 +19,7 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
@@ -135,15 +136,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=[
-                ('', _('None')),
-                ('sudo', _('Sudo')),
-                ('su', _('Su')),
-                ('pbrun', _('Pbrun')),
-                ('pfexec', _('Pfexec')),
-                ('dzdo', _('DZDO')),
-                ('pmrun', _('Pmrun')),
-            ],
+            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
