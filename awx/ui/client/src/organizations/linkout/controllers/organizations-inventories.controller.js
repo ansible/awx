@@ -235,8 +235,13 @@ export default ['$scope', '$rootScope', '$location',
 
         };
 
-        $scope.editInventory = function(id) {
-            $state.go('inventories.edit', { inventory_id: id });
+        $scope.editInventory = function (inventory) {
+            if(inventory.kind && inventory.kind === 'smart') {
+                $state.go('inventories.editSmartInventory', {smartinventory_id: inventory.id});
+            }
+            else {
+                $state.go('inventories.edit', {inventory_id: inventory.id});
+            }
         };
 
         // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
