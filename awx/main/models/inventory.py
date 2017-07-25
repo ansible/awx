@@ -334,7 +334,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         failed_hosts = active_hosts.filter(has_active_failures=True)
         active_groups = self.groups
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter( source__in=CLOUD_INVENTORY_SOURCES)
+        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
