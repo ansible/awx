@@ -1,5 +1,5 @@
 export default
-     function ShowDetail($filter, Find) {
+     function ShowDetail($filter, Find, ParseTypeChange, ParseVariableString) {
          return function (params, scope) {
 
              var activity_id = params.activity_id,
@@ -20,6 +20,13 @@ export default
                  scope.operation = activity.description;
                  scope.header = "Event " + activity.id;
 
+                 scope.variables = ParseVariableString(scope.changes);
+                 scope.parseType = 'json';
+                 ParseTypeChange({ scope: scope,
+                    field_id: 'activity-stream-changes',
+                    readOnly: true });
+                 scope.parseTypeChange('parseType', 'variables');
+
                  // Open the modal
                  $('#stream-detail-modal').modal({
                      show: true,
@@ -35,4 +42,4 @@ export default
          };
      }
 
- ShowDetail.$inject = ['$filter', 'Find'];
+ ShowDetail.$inject = ['$filter', 'Find', 'ParseTypeChange', 'ParseVariableString'];
