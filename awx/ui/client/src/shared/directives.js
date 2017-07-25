@@ -278,7 +278,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
         restrict: 'A',
         link: function(scope, element, attrs) {
             element.bind('click', function(event) {
-                if (attrs.disableRow) {
+                if (scope.$eval(attrs.disableRow)) {
                     event.preventDefault();
                 }
                 return;
