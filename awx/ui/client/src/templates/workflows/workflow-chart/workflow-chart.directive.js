@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state','moment', '$timeout', '$window',
-    function($state, moment, $timeout, $window) {
+export default ['$state','moment', '$timeout', '$window', '$filter',
+    function($state, moment, $timeout, $window, $filter) {
 
     return {
         scope: {
@@ -363,7 +363,7 @@ export default ['$state','moment', '$timeout', '$window',
                                             });
                                             // Render the tooltip quickly in the dom and then remove.  This lets us know how big the tooltip is so that we can place
                                             // it properly on the workflow
-                                            let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div>");
+                                            let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div>");
                                             $('body').append(tooltipDimensionChecker);
                                             let tipWidth = $(tooltipDimensionChecker).outerWidth();
                                             let tipHeight = $(tooltipDimensionChecker).outerHeight();
@@ -376,7 +376,7 @@ export default ['$state','moment', '$timeout', '$window',
                                                 .attr("height", tipHeight+20)
                                                 .attr("class", "WorkflowChart-tooltip")
                                                 .html(function(){
-                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
+                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
                                                 });
                                         }
                                         d3.select("#node-" + d.id)
