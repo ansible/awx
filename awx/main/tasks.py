@@ -44,7 +44,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
 from awx import __version__ as tower_application_version
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.queue import CallbackQueueDispatcher
@@ -1115,20 +1115,9 @@ class RunJob(BaseTask):
         d = super(RunJob, self).get_password_prompts()
         d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PMRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pmrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        for method in PRIVILEGE_ESCALATION_METHODS:
+            d[re.compile(r'%s password.*:\s*?$' % (method[0]), re.M)] = 'become_password'
+            d[re.compile(r'%s password.*:\s*?$' % (method[0].upper()), re.M)] = 'become_password'
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
@@ -2068,20 +2057,9 @@ class RunAdHocCommand(BaseTask):
         d = super(RunAdHocCommand, self).get_password_prompts()
         d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PMRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pmrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        for method in PRIVILEGE_ESCALATION_METHODS:
+            d[re.compile(r'%s password.*:\s*?$' % (method[0]), re.M)] = 'become_password'
+            d[re.compile(r'%s password.*:\s*?$' % (method[0].upper()), re.M)] = 'become_password'
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         return d

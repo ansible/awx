@@ -414,6 +414,12 @@ class Migration(migrations.Migration):
             unique_together=set([('organization', 'name', 'credential_type')]),
         ),
 
+        migrations.AlterField(
+            model_name='credential',
+            name='become_method',
+            field=models.CharField(default=b'', help_text='Privilege escalation method.', max_length=32, blank=True, choices=[(b'', 'None'), (b'sudo', 'Sudo'), (b'su', 'Su'), (b'pbrun', 'Pbrun'), (b'pfexec', 'Pfexec'), (b'dzdo', 'DZDO'), (b'pmrun', 'Pmrun'), (b'runas', 'Runas')]),
+        ),
+
         # Connecting activity stream
         migrations.AddField(
             model_name='activitystream',
