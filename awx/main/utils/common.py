@@ -655,7 +655,7 @@ def build_proot_temp_dir():
     Create a temporary directory for proot to use.
     '''
     from django.conf import settings
-    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
+    path = tempfile.mkdtemp(prefix='ansible_awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 

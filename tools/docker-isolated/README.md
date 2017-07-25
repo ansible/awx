@@ -56,12 +56,12 @@ by disabling some parts of the cleanup_isolated.yml playbook.
 
 Example location of a private data directory:
 
-`/tmp/ansible_tower_29_OM6Mnx/`
+`/tmp/ansible_awx_29_OM6Mnx/`
 
 The following command would run the playbook corresponding to that job.
 
 ```bash
-awx-expect start /tmp/ansible_tower_29_OM6Mnx/
+awx-expect start /tmp/ansible_awx_29_OM6Mnx/
 ```
 
 Other awx-expect commands include `start`, `is-alive`, and `stop`.
