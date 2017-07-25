@@ -6,7 +6,8 @@ module.exports = {
     partials: {
         files: [
             'client/lib/components/**/*.partial.html',
-            'client/src/**/*.partial.html'
+            'client/src/**/*.partial.html',
+            'client/src/partials/*.html'
         ],
         tasks: ['newer:copy:partials']
     },
