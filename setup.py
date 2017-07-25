@@ -168,7 +168,7 @@ setup(
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
                          "tools/scripts/failure-event-handler",
-                         "tools/scripts/tower-python",
+                         "tools/scripts/awx-python",
                          "tools/scripts/ansible-tower-setup"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
@@ -182,7 +182,7 @@ setup(
             'isolated_build': 'clean --all egg_info -b "" sdist_isolated',
         },
         'build_scripts': {
-            'executable': '/usr/bin/tower-python',
+            'executable': '/usr/bin/awx-python',
         },
     },
 )
