@@ -10,7 +10,7 @@ from awx.main.models import InventorySource
 
 @pytest.fixture
 def scm_inventory(inventory, project):
-    with mock.patch.object(project, 'update'):
+    with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inventory.inventory_sources.create(
             name='foobar', update_on_project_update=True, source='scm',
             source_project=project, scm_last_revision=project.scm_revision)
