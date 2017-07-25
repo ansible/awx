@@ -1141,6 +1141,20 @@
       "resolved": "https://registry.npmjs.org/circular-json/-/circular-json-0.3.1.tgz",
       "dev": true
     },
+    "clean-css": {
+      "version": "4.1.7",
+      "from": "clean-css@>=4.1.1 <4.2.0",
+      "resolved": "https://registry.npmjs.org/clean-css/-/clean-css-4.1.7.tgz",
+      "dev": true,
+      "dependencies": {
+        "source-map": {
+          "version": "0.5.6",
+          "from": "source-map@>=0.5.0 <0.6.0",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.6.tgz",
+          "dev": true
+        }
+      }
+    },
     "cli": {
       "version": "1.0.1",
       "from": "cli@>=1.0.0 <1.1.0",
@@ -1573,6 +1587,12 @@
       "version": "1.4.3",
       "from": "domutils@>=1.4.0 <1.5.0",
       "resolved": "https://registry.npmjs.org/domutils/-/domutils-1.4.3.tgz",
+      "dev": true
+    },
+    "duplexer": {
+      "version": "0.1.1",
+      "from": "duplexer@>=0.1.1 <0.2.0",
+      "resolved": "https://registry.npmjs.org/duplexer/-/duplexer-0.1.1.tgz",
       "dev": true
     },
     "duplexify": {
@@ -2524,6 +2544,12 @@
       "resolved": "https://registry.npmjs.org/grunt-contrib-copy/-/grunt-contrib-copy-1.0.0.tgz",
       "dev": true
     },
+    "grunt-contrib-cssmin": {
+      "version": "2.2.0",
+      "from": "grunt-contrib-cssmin@latest",
+      "resolved": "https://registry.npmjs.org/grunt-contrib-cssmin/-/grunt-contrib-cssmin-2.2.0.tgz",
+      "dev": true
+    },
     "grunt-contrib-jshint": {
       "version": "1.1.0",
       "from": "grunt-contrib-jshint@>=1.0.0 <2.0.0",
@@ -2637,6 +2663,12 @@
           "dev": true
         }
       }
+    },
+    "gzip-size": {
+      "version": "3.0.0",
+      "from": "gzip-size@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/gzip-size/-/gzip-size-3.0.0.tgz",
+      "dev": true
     },
     "handlebars": {
       "version": "4.0.10",
@@ -3950,6 +3982,12 @@
       "resolved": "https://registry.npmjs.org/map-obj/-/map-obj-1.0.1.tgz",
       "dev": true
     },
+    "maxmin": {
+      "version": "2.1.0",
+      "from": "maxmin@>=2.1.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/maxmin/-/maxmin-2.1.0.tgz",
+      "dev": true
+    },
     "media-typer": {
       "version": "0.3.0",
       "from": "media-typer@0.3.0",
@@ -4493,6 +4531,12 @@
       "version": "0.2.0",
       "from": "preserve@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/preserve/-/preserve-0.2.0.tgz"
+    },
+    "pretty-bytes": {
+      "version": "3.0.1",
+      "from": "pretty-bytes@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/pretty-bytes/-/pretty-bytes-3.0.1.tgz",
+      "dev": true
     },
     "pretty-ms": {
       "version": "2.1.0",

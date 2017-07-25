@@ -14,6 +14,36 @@ var staticFiles = ['angular-tz-extensions/tz/data/*',
 ];
 
 module.exports = {
+    fonts: {
+        files: [{
+            cwd: 'client/',
+            expand: true,
+            flatten: true,
+            filter: 'isFile',
+            src: 'assets/fontcustom/**/*',
+            dest: 'static/fonts/'
+        }]
+    },
+    icons: {
+        files: [{
+            cwd: 'node_modules/',
+            expand: true,
+            flatten: true,
+            filter: 'isFile',
+            src: 'components-font-awesome/fonts/*',
+            dest: 'static/fonts/'
+        }]
+    },
+    images: {
+        files: [{
+            cwd: 'client/',
+            expand: true,
+            flatten: true,
+            filter: 'isFile',
+            src: 'assets/custom-theme/images.new/*',
+            dest: 'static/images/'
+        }]
+    },
     assets: {
         files: [{
             cwd: 'client/',

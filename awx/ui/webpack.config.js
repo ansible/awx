@@ -52,7 +52,7 @@ var baseConfig = function() {
         },
         output: {
             path: './static/',
-            filename: 'tower.js'
+            filename: 'app.js'
         },
         plugins: [
             // vendor shims:
@@ -66,7 +66,7 @@ var baseConfig = function() {
                 'jsyaml': 'js-yaml',
                 'jsonlint': 'codemirror.jsonlint'
             }),
-            new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js')
+            new webpack.optimize.CommonsChunkPlugin('vendor', 'app.vendor.js')
         ],
         module: {
             loaders: [

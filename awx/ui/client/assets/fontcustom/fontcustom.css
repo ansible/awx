@@ -4,11 +4,11 @@
 
 @font-face {
   font-family: "fontcustom";
-  src: url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.eot");
-  src: url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.eot?#iefix") format("embedded-opentype"),
-       url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.woff") format("woff"),
-       url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.ttf") format("truetype"),
-       url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.svg#fontcustom") format("svg");
+  src: url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.eot");
+  src: url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.eot?#iefix") format("embedded-opentype"),
+       url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.woff") format("woff"),
+       url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.ttf") format("truetype"),
+       url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.svg#fontcustom") format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -16,7 +16,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: "fontcustom";
-    src: url("./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.svg#fontcustom") format("svg");
+    src: url("/static/fonts/fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.svg#fontcustom") format("svg");
   }
 }
 
