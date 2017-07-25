@@ -359,7 +359,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_job.save()
 
         # Labels and extra credentials copied here
-        copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
+        from awx.main.signals import disable_activity_stream
+        with disable_activity_stream():
+            copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
         return unified_job
 
     @classmethod
