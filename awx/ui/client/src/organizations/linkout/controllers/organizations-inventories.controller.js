@@ -7,12 +7,12 @@
 export default ['$scope', '$rootScope', '$location',
     '$stateParams', '$compile', '$filter', 'Rest', 'InventoryList',
     'OrgInventoryDataset', 'OrgInventoryList',
-    'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state',
+    'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'i18n',
     function($scope, $rootScope, $location,
         $stateParams, $compile, $filter, Rest, InventoryList,
         Dataset, OrgInventoryList,
         ProcessErrors, GetBasePath, Wait,
-        Find, Empty, $state) {
+        Find, Empty, $state, i18n) {
 
         var list = OrgInventoryList,
             orgBase = GetBasePath('organizations');
@@ -38,11 +38,11 @@ export default ['$scope', '$rootScope', '$location',
                 });
 
             $scope.$watch('inventories', ()=>{
-                _.forEach($scope.inventories, buildInventorySyncStatus);
+                _.forEach($scope.inventories, processInventoryRow);
             });
         }
 
-        function buildInventorySyncStatus(item) {
+        function processInventoryRow(item) {
             if (item.has_inventory_sources) {
                 if (item.inventory_sources_with_failures > 0) {
                     item.syncStatus = 'error';
@@ -66,6 +66,9 @@ export default ['$scope', '$rootScope', '$location',
                 item.hostsStatus = 'none';
                 item.hostsTip = 'Inventory contains 0 hosts.';
             }
+
+            item.kind_label = item.kind === '' ? 'Inventory' : (item.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
+
             return item;
         }
 
