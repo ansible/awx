@@ -627,6 +627,13 @@ class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
                 status=status.HTTP_400_BAD_REQUEST)
         return super(SubListAttachDetachAPIView, self).post(request, *args, **kwargs)
 
+    def update_raw_data(self, data):
+        request_method = getattr(self, '_raw_data_request_method', None)
+        response_status = getattr(self, '_raw_data_response_status', 0)
+        if request_method == 'POST' and response_status in xrange(400, 500):
+            return super(SubListAttachDetachAPIView, self).update_raw_data(data)
+        return {'id': None}
+
 
 class DeleteLastUnattachLabelMixin(object):
     '''
