@@ -93,13 +93,8 @@
              $scope.saveFunction({selectedItems: $scope.selectedItems})
                  .then(() =>{
                      $scope.closeModal();
-                 }).catch((error) => {
+                 }).catch(() => {
                      $scope.closeModal();
-                     ProcessErrors(null, error.data, error.status, null, {
-                         hdr: 'Error!',
-                         msg: 'Failed to associate host to host(s): POST returned status' +
-                             error.status
-                     });
                  });
 
          };
