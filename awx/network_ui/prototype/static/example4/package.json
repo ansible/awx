@@ -1,0 +1,29 @@
+{
+  "name": "hamsterjs",
+  "version": "1.1.2",
+  "description": "A standalone javascript library for cross-browser mouse wheel support.",
+  "keywords": [
+    "hamster",
+    "hamsterjs",
+    "mousewheel",
+    "mouse",
+    "wheel"
+  ],
+  "homepage": "http://monospaced.github.io/hamster.js/",
+  "main": "hamster.js",
+  "bugs": "http://github.com/monospaced/hamster.js/issues",
+  "license" : "MIT",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/monospaced/hamster.js"
+  },
+  "author": {
+    "name" : "Scott Boyle",
+    "email" : "scott@monospaced.com",
+    "url" : "http://scottboyle.co.uk/about"
+  },
+  "files": [
+    "hamster.js",
+    "package.json"
+  ]
+}

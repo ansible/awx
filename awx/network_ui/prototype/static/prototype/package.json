@@ -1,0 +1,24 @@
+{
+  "name": "prototype",
+  "version": "1.0.0",
+  "description": "A prototype of the Ansible Tower networking UI",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Thomasson",
+  "license": "ISC",
+  "dependencies": {
+    "webpack": "",
+    "browserify": "",
+    "inherits": "",
+    "require": "",
+    "jshint": "",
+    "less": "",
+    "mathjs": ""
+  },
+  "devDependencies": {
+    "eslint": "^3.17.1",
+    "eslint-config-google": "^0.7.1"
+  }
+}

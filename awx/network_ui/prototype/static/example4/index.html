@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hamster.js</title>
+  <meta name="description" content="A standalone javascript library for cross-browser mouse wheel support.">
+  <meta name="viewport" content="width=device-width">
+  <link rel="icon" href="http://monospaced.com/favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 93.75%;
+      width: 880px;
+      background: #E7F3FF;
+      color: #1C000E;
+      text-shadow: 0 1px 0 #FFF;
+      font: 13px/1.230769231 sans-serif;
+    }
+
+    a {
+      color: #0074E7;
+      text-decoration: none;
+    }
+
+    a:focus,
+    a:hover,
+    a:active {
+      color: #0067CE;
+    }
+
+    h1 {
+      margin: 16px 0 0 24px;
+      font-weight: normal;
+      font-size: 39px;
+    }
+
+    small {
+      display: block;
+      margin: 0 0 11px 24px;
+      font-size: 11px;
+      line-height: 1.181818182;
+    }
+
+    h2 {
+      margin: 16px 0 8px 24px;
+      font-weight: normal;
+    }
+
+    ol {
+      margin: 0 0 16px 0;
+      padding: 0 0 0 24px;
+    }
+
+    li {
+      padding: 4px 24px 4px 0;
+    }
+
+    p {
+      margin: 0 0 16px 24px;
+    }
+
+    pre {
+      margin: 0 0 0 24px;
+      font-size: 12px;
+    }
+
+    #info {
+      float: left;
+      margin-right: 16px;
+      width: 50%;
+    }
+
+    #tests {
+      position: relative;
+      overflow: hidden;
+      height: 480px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      text-align: right;
+    }
+
+    #tests p {
+      margin: 16px 16px 16px 0;
+      color: #fff;
+      text-shadow: 0 -1px 0 #030001;
+    }
+
+    #test1 {
+      float: left;
+      width: 12.5%;
+      height: 25%;
+      background-color: #4F0027;
+    }
+
+    #test2 {
+      float: left;
+      width: 12.5%;
+      height: 25%;
+      background-color: #690034;
+    }
+
+    #test3 {
+      float: left;
+      width: 12.5%;
+      height: 25%;
+      background-color: #820041;
+    }
+
+    #test4 {
+      float: left;
+      width: 12.5%;
+      height: 25%;
+      background-color: #4F0027;
+    }
+
+    #test5 {
+      float: left;
+      width: 50%;
+      height: 100%;
+      background-color: #690034;
+    }
+
+    #test6 {
+      float: left;
+      margin: 25%;
+      width: 50%;
+      height: 50%;
+      background-color: #820041;
+    }
+
+    #test7 {
+      float: left;
+      margin: 25%;
+      width: 50%;
+      height: 50%;
+      background-color: #4F0027;
+    }
+
+    #logger {
+      position: absolute;
+      top: 25%;
+      left: 0;
+      padding: 0;
+      list-style: none;
+      margin: 0;
+      overflow: hidden;
+      overflow-y: scroll;
+      width: 50%;
+      height: 75%;
+      background-color: #FFE8F3;
+    }
+
+    #logger li {
+      padding: 4px 16px;
+      background-color: #FFF;
+    }
+
+    #logger li:nth-child(even) {
+      background-color: #FFE8F3;
+    }
+
+    #userAgent {
+      float: right;
+      margin: 16px 0 16px 24px;
+      max-width: 440px;
+      text-align: right;
+    }
+
+    #forceScroll {
+      clear: both;
+      height: 1000px;
+    }
+
+    @media all and (max-width: 650px) {
+      #info {
+        float: none;
+        width: auto;
+      }
+      #logger p {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Hamster.js</h1>
+
+  <p><a href="http://github.com/monospaced/hamster.js">github.com/monospaced/hamster.js</a></p>
+
+  <div id="info">
+
+    <p>A standalone javascript library for cross-browser mouse wheel&nbsp;support.</p>
+
+    <p>In addition to normalising the wheel event, the event callback receives 3 extra arguments which are the normalized “deltas” of the mouse&nbsp;wheel.</p>
+
+    <pre>Hamster(el).wheel(function(event, delta, deltaX, deltaY){
+  console.log(delta, deltaX, deltaY);
+});
+    </pre>
+
+    <p>No jQuery or other libraries required, but an <a href="https://github.com/monospaced/angular-mousewheel">adapter for AngularJS</a> is available. Tested in these <a href="http://monospaced.github.io/obs/">core&nbsp;browsers</a>.
+
+    <h2>Tests</h2>
+
+    <ol>
+      <li>Plain wheel() with a function passed in, does not prevent default. (Also logs the value of pageX and pageY event&nbsp;properties.)</li>
+      <li>Should prevent the default&nbsp;action.</li>
+      <li>Should not log an event. Testing&nbsp;unwheel().</li>
+      <li>Has two&nbsp;handlers.</li>
+      <li>Is like <i>2.</i> but has children. The children should not scroll until mousing over&nbsp;them.</li>
+      <li>Is like <i>5.</i> but should not scroll children or&nbsp;parents.</li>
+      <li>Is like <i>6.</i> but has no children. It will propagate the event and scroll <i>6.</i> as&nbsp;well.</li>
+    </ol>
+
+     <p><a href="http://monospaced.github.io">Monospaced Labs</a></p>
+
+  </div>
+
+  <div id="tests">
+
+    <div id="test1"><p>1.</p></div>
+    <div id="test2"><p>2.</p></div>
+    <div id="test3"><p>3.</p></div>
+    <div id="test4"><p>4.</p></div>
+    <div id="test5">
+      <p>5.</p>
+      <div id="test6">
+        <p>6.</p>
+        <div id="test7"><p>7.</p></div>
+      </div>
+    </div>
+
+    <ul id="logger"></ul>
+
+  </div>
+
+  <p id="userAgent"></p>
+
+  <div id="forceScroll"></div>
+
+  <script src="hamster.js"></script>
+
+  <script>
+    (function() {
+
+      document.getElementById('userAgent').innerHTML = navigator.userAgent;
+
+      var logger = document.getElementById('logger'),
+          node = document.createElement('li');
+
+      function log(msg){
+        var logNode = node.cloneNode();
+        logNode.innerHTML = msg;
+        logger.appendChild(logNode);
+        logger.scrollTop = 999999;
+      };
+
+      // test 1
+
+      var test1 = document.getElementById('test1');
+
+      var hammer1 = Hamster(test1);
+
+      hammer1.wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test1: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test1: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if (o != '') {
+          log(o);
+        }
+
+        var pageX = event.pageX || event.originalEvent.pageX || event.originalEvent.clientX,
+            pageY = event.pageY || event.originalEvent.pageY || event.originalEvent.clientX;
+
+        log('pageX: ' + pageX + ', pageY: ' + pageY);
+
+      });
+
+      // test 2
+
+      var test2 = document.getElementById('test2');
+
+      Hamster(test2).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test2: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test2: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o);
+        }
+
+        event.preventDefault();
+
+      });
+
+      // test 3
+
+      var test3 = document.getElementById('test3');
+
+      Hamster(test3).wheel(function(event, delta, deltaX, deltaY){
+        log('#test3: I should not have been logged');
+      }).unwheel();
+
+      // test 4
+
+      var test4 = document.getElementById('test4');
+
+      function testRemoval2() {
+        log('#test4: I should not have been logged');
+      };
+
+      Hamster(test4).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test4: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test4: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o);
+        }
+
+        event.preventDefault();
+
+      }).wheel(testRemoval2).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test4: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test4: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o + ' - 2nd handler');
+        }
+
+        event.preventDefault();
+
+      }).unwheel(testRemoval2);
+
+      // test 5
+
+      var test5 = document.getElementById('test5');
+
+      Hamster(test5).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test5: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test5: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o);
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+
+      });
+
+      // test 6
+
+      var test6 = document.getElementById('test6');
+
+      Hamster(test6).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test6: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test6: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        }
+        else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        }
+        else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o);
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
+
+      });
+
+      // test 7
+
+      var test7 = document.getElementById('test7');
+
+      Hamster(test7).wheel(function(event, delta, deltaX, deltaY){
+
+        var o = '';
+
+        if (delta > 0) {
+          o = '#test7: up ('+delta+')';
+        } else if (delta < 0) {
+          o = '#test7: down ('+delta+')';
+        }
+
+        if (deltaX > 0) {
+          o = o + ', east ('+deltaX+')';
+        } else if (deltaX < 0) {
+          o = o + ', west ('+deltaX+')';
+        }
+
+        if (deltaY > 0) {
+          o = o + ', north ('+deltaY+')';
+        } else if (deltaY < 0) {
+          o = o + ', south ('+deltaY+')';
+        }
+
+        if(o != '') {
+          log(o);
+        }
+
+        event.preventDefault();
+
+      });
+
+    })();
+  </script>
+
+</body>
+</html>

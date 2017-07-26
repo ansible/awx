@@ -1,0 +1,27 @@
+app: time
+panX: 0
+panY: 0
+scaleXY: 1
+states:
+- label: Start
+  size: 100
+  x: 634
+  y: 117
+- label: Present
+  size: 100
+  x: 632
+  y: 379
+- label: Past
+  size: 100
+  x: 367
+  y: 369
+transitions:
+- from_state: Start
+  label: start
+  to_state: Present
+- from_state: Present
+  label: onMouseWheel
+  to_state: Past
+- from_state: Past
+  label: onMouseWheel
+  to_state: Present
