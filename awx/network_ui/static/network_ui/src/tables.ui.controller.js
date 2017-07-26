@@ -101,6 +101,16 @@ var TablesUIController = function($scope, $window, $location, $timeout) {
         $scope.sheets_by_name[message.name] = message.data;
     };
 
+    $scope.onTableCellEdit = function(msg_type, message) {
+        if (message.sender === $scope.client_id) {
+            return;
+        }
+        console.log(["Updating data", message.sheet, message.row, message.col, message.new_value]);
+
+        $scope.sheets_by_name[message.sheet][message.row][message.col].value = message.new_value;
+        $scope.$apply();
+    };
+
     $scope.user = {
         name: 'world'
     };
