@@ -20,9 +20,9 @@ RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
 RUN pip2 install honcho
 RUN pip2 install supervisor
-ADD tools/docker-compose/ansible-awx.egg-link /tmp/ansible-awx.egg-link
+ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
-ADD tools/docker-compose/ansible_awx.egg-info /tmp/ansible_awx.egg-info
+ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
 RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 RUN ln -s /awx_devel/tools/docker-compose/start_development.sh /start_development.sh

@@ -152,12 +152,12 @@ def get_ssh_version():
 
 def get_awx_version():
     '''
-    Return Ansible Tower version as reported by setuptools.
+    Return AWX version as reported by setuptools.
     '''
     from awx import __version__
     try:
         import pkg_resources
-        return pkg_resources.require('ansible-awx')[0].version
+        return pkg_resources.require('awx')[0].version
     except:
         return __version__
 
@@ -655,7 +655,7 @@ def build_proot_temp_dir():
     Create a temporary directory for proot to use.
     '''
     from django.conf import settings
-    path = tempfile.mkdtemp(prefix='ansible_awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
+    path = tempfile.mkdtemp(prefix='awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 

@@ -181,7 +181,7 @@ class TestJobExecution:
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
     def setup_method(self, method):
-        self.project_path = tempfile.mkdtemp(prefix='ansible_awx_project_')
+        self.project_path = tempfile.mkdtemp(prefix='awx_project_')
         with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
             f.write('---')
 
@@ -312,7 +312,7 @@ class TestIsolatedExecution(TestJobExecution):
         credential.inputs['password'] = encrypt_field(credential, 'password')
         self.instance.credential = credential
 
-        private_data = tempfile.mkdtemp(prefix='ansible_awx_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         inventory = json.dumps({"all": {"hosts": ["localhost"]}})
 
@@ -351,7 +351,7 @@ class TestIsolatedExecution(TestJobExecution):
         extra_vars = json.loads(extra_vars)
         assert extra_vars['dest'] == '/tmp'
         assert extra_vars['src'] == private_data
-        assert extra_vars['proot_temp_dir'].startswith('/tmp/ansible_awx_proot_')
+        assert extra_vars['proot_temp_dir'].startswith('/tmp/awx_proot_')
 
     def test_systemctl_failure(self):
         # If systemctl fails, read the contents of `artifacts/systemctl_logs`
@@ -364,7 +364,7 @@ class TestIsolatedExecution(TestJobExecution):
         )
         self.instance.credential = credential
 
-        private_data = tempfile.mkdtemp(prefix='ansible_awx_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         inventory = json.dumps({"all": {"hosts": ["localhost"]}})
 
@@ -464,7 +464,7 @@ class TestJobCredentials(TestJobExecution):
             )
             return ['successful', 0]
 
-        private_data = tempfile.mkdtemp(prefix='ansible_awx_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk, private_data_dir=private_data)
@@ -1145,7 +1145,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
             assert 'bob' in kwargs.get('expect_passwords').values()
             return ['successful', 0]
 
-        private_data = tempfile.mkdtemp(prefix='ansible_awx_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk)

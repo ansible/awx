@@ -123,12 +123,12 @@ def proc_data_files(data_files):
 
 
 setup(
-    name=os.getenv('NAME', 'ansible-awx'),
+    name=os.getenv('NAME', 'awx'),
     version=get_version(),
     author='Ansible, Inc.',
     author_email='info@ansible.com',
-    description='ansible-awx: API, UI and Task Engine for Ansible',
-    long_description='Ansible AWX provides a web-based user interface, REST API and '
+    description='awx: API, UI and Task Engine for Ansible',
+    long_description='AWX provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
     license='MIT',
     keywords='ansible',

@@ -20,7 +20,7 @@ from taggit.managers import TaggableManager
 # Django-CRUM
 from crum import get_current_user
 
-# Ansible Tower
+# AWX
 from awx.main.utils import encrypt_field
 
 __all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',

@@ -7,7 +7,7 @@ import warnings
 
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('ansible-awx').version
+__version__ = get_distribution('awx').version
 
 __all__ = ['__version__']
 
