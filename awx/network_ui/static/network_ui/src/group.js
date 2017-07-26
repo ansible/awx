@@ -499,8 +499,10 @@ _Placing.prototype.onMouseDown = function (controller) {
 
     scope.clear_selections();
 
-    group = new models.Group(scope.group_id_seq(),
-                             "Group",
+    var id = scope.group_id_seq();
+
+    group = new models.Group(id,
+                             "Group" + id,
                              scope.scaledX,
                              scope.scaledY,
                              scope.scaledX,
