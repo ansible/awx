@@ -299,6 +299,23 @@ class _Persistence(object):
 
     def onDeviceLabelEdit(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(name=device['name'])
+        for pk in Device.objects.filter(topology_id=topology_id, id=device['id']).values_list('pk', flat=True):
+            for db in DataBinding.objects.filter(primary_key_id=pk,
+                                                 table="Device",
+                                                 field="name").values('sheet__client_id',
+                                                                      'sheet__name',
+                                                                      'column',
+                                                                      'row'):
+                message = ['TableCellEdit', dict(sender=0,
+                                                 msg_type="TableCellEdit",
+                                                 sheet=db['sheet__name'],
+                                                 col=db['column'] + 1, 
+                                                 row=db['row'] + 2, 
+                                                 new_value=device['name'],
+                                                 old_value=device['previous_name'])]
+                logger.info("Sending message %r", message)
+                Group("topology-%s-client-%s" % (topology_id, db['sheet__client_id'])).send({"text": json.dumps(message)})
+
 
     def onInterfaceLabelEdit(self, interface, topology_id, client_id):
         (Interface.objects
@@ -575,7 +592,7 @@ class _Discovery(object):
         if handler is not None:
             handler(message_value, topology_id)
         else:
-            logger.warning("Unsupported message ", message_type)
+            logger.warning("Unsupported message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -924,6 +941,7 @@ def tables_connect(message):
     message.channel_session['topology_id'] = topology_id
     client = Client()
     client.save()
+    Group("topology-%s-client-%s" % (topology_id, client.pk)).add(message.reply_channel)
     message.channel_session['client_id'] = client.pk
     message.reply_channel.send({"text": json.dumps(["id", client.pk])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
@@ -1013,7 +1031,7 @@ def tables_message(message):
             for o in table_mapping[table].objects.filter(pk=pk):
                 o.old_value = old_value
                 message = transformation_mapping[(table, field)](o)
-                message['sender'] = 0
+                message[1]['sender'] = 0
                 logger.info("Sending %r", message)
                 group_channel.send({"text": json.dumps(message)})
 
