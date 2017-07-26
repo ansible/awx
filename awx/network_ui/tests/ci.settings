@@ -1,0 +1,15 @@
+# Continuous integration settings for your tests
+#
+# Run with : hitch test . --settings ci.settings
+#
+# * Does not stop test run on first failure.
+# * Firefox is run headless.
+# * Start up timeout is higher (CI machines are not always powerful)
+
+failfast: false
+xvfb: true
+startup_timeout: 60
+
+# Comment out in Jenkins or other CI environments that don't print
+# color characters correctly:
+# colorless: true
