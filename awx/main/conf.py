@@ -329,6 +329,7 @@ register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator'),
     help_text=_('Hostname/IP where external logs will be sent to.'),
     category=_('Logging'),
@@ -338,6 +339,7 @@ register(
     'LOG_AGGREGATOR_PORT',
     field_class=fields.IntegerField,
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator Port'),
     help_text=_('Port on Logging Aggregator to send logs to (if required and not'
                 ' provided in Logging Aggregator).'),
@@ -350,6 +352,7 @@ register(
     field_class=fields.ChoiceField,
     choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator Type'),
     help_text=_('Format messages for the chosen log aggregator.'),
     category=_('Logging'),

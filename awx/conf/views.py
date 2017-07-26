@@ -11,7 +11,7 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
@@ -180,6 +180,13 @@ class SettingLoggingTest(GenericAPIView):
         obj = type('Settings', (object,), defaults)()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
+        # Special validation specific to logging test.
+        errors = {}
+        for key in ['LOG_AGGREGATOR_TYPE', 'LOG_AGGREGATOR_HOST']:
+            if not request.data.get(key, ''):
+                errors[key] = 'This field is required.'
+        if errors:
+            raise ValidationError(errors)
 
         if request.data.get('LOG_AGGREGATOR_PASSWORD', '').startswith('$encrypted$'):
             serializer.validated_data['LOG_AGGREGATOR_PASSWORD'] = getattr(

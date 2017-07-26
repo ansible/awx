@@ -84,6 +84,8 @@ Here is the details of each argument:
 
 During Tower bootstrapping, All settings registered in `conf.py` modules of Tower Django apps will be loaded (registered). The set of Tower configuration settings will form a new top-level of `django.conf.settings` object. Later all Tower configuration settings will be available as attributes of it, just like normal Django settings. Note Tower configuration settings take higher priority over normal settings, meaning if a setting `FOOBAR` is both defined in a settings file and registered in a `conf.py`, the registered attribute will be used over the defined attribute every time.
 
+Note when registering new configurations, it is desired to provide a default value if it is possible to do so, as Tower configuration UI has a 'revert all' functionality that revert all settings to it's default value.
+
 Starting from 3.2, Tower configuration supports category-specific validation functions. They should also be defined under `conf.py` in the form
 ```python
 def custom_validate(serializer, attrs):
