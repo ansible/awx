@@ -57,10 +57,10 @@ class CacheModule(BaseCacheModule):
         return '{}'.format(self._inventory_id)
 
     def translate_host_key(self, host_name):
-        return '{}-{}'.format(self._inventory_id, base64.b64encode(host_name))
+        return '{}-{}'.format(self._inventory_id, base64.b64encode(host_name.encode('utf-8')))
 
     def translate_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self._inventory_id, base64.b64encode(host_name))
+        return '{}-{}-modified'.format(self._inventory_id, base64.b64encode(host_name.encode('utf-8')))
 
     def get(self, key):
         host_key = self.translate_host_key(key)
