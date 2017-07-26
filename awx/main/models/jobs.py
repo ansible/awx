@@ -318,8 +318,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             resources_needed_to_start.append('credential')
             if not self.ask_credential_on_launch:
                 validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
-        elif self.credential is None and self.ask_credential_on_launch:
-            resources_needed_to_start.append('credential')
 
         # Job type dependent checks
         if self.project is None:

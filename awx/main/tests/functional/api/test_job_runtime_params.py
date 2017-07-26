@@ -317,9 +317,11 @@ def test_job_launch_JT_enforces_unique_extra_credential_kinds(machine_credential
 
 
 @pytest.mark.django_db
-def test_job_launch_with_no_credentials(deploy_jobtemplate):
+@pytest.mark.parametrize('ask_credential_on_launch', [True, False])
+def test_job_launch_with_no_credentials(deploy_jobtemplate, ask_credential_on_launch):
     deploy_jobtemplate.credential = None
     deploy_jobtemplate.vault_credential = None
+    deploy_jobtemplate.ask_credential_on_launch = ask_credential_on_launch
     serializer = JobLaunchSerializer(
         instance=deploy_jobtemplate, data={},
         context={'obj': deploy_jobtemplate, 'data': {}, 'passwords': {}})
@@ -353,8 +355,31 @@ def test_job_launch_with_vault_credential_ask_for_machine(vault_credential, depl
         instance=deploy_jobtemplate, data={},
         context={'obj': deploy_jobtemplate, 'data': {}, 'passwords': {}})
     validated = serializer.is_valid()
-    assert validated is False
-    assert serializer.errors['credential'] == ["Job Template 'credential' is missing or undefined."]
+    assert validated
+
+    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
+    job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
+    assert job_obj.credential is None
+    assert job_obj.vault_credential.pk == vault_credential.pk
+
+
+@pytest.mark.django_db
+def test_job_launch_with_vault_credential_and_prompted_machine_cred(machine_credential, vault_credential,
+                                                                    deploy_jobtemplate):
+    deploy_jobtemplate.credential = None
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.vault_credential = vault_credential
+    kv = dict(credential=machine_credential.id)
+    serializer = JobLaunchSerializer(
+        instance=deploy_jobtemplate, data=kv,
+        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    validated = serializer.is_valid()
+    assert validated
+
+    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
+    assert job_obj.credential.pk == machine_credential.pk
+    assert job_obj.vault_credential.pk == vault_credential.pk
 
 
 @pytest.mark.django_db
