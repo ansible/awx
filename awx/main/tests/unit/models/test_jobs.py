@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 
 from awx.main.models import (
@@ -109,6 +111,18 @@ def test_start_job_fact_cache_existing_host(hosts, hosts2, job, job2, inventory,
     # Ensure hosts2 ansible_facts didn't overwrite hosts ansible_facts
     ansible_facts_cached = job._get_memcache_connection().get('{}-{}'.format(5, base64.b64encode(hosts2[0].name)))
     assert ansible_facts_cached == json.dumps(hosts[1].ansible_facts)
+
+
+def test_memcached_fact_host_key_unicode(job):
+    host_name = u'Iñtërnâtiônàlizætiøn'
+    host_key = job.memcached_fact_host_key(host_name)
+    assert host_key == '5-ScOxdMOrcm7DonRpw7Ruw6BsaXrDpnRpw7hu'
+
+
+def test_memcached_fact_modified_key_unicode(job):
+    host_name = u'Iñtërnâtiônàlizætiøn'
+    host_key = job.memcached_fact_modified_key(host_name)
+    assert host_key == '5-ScOxdMOrcm7DonRpw7Ruw6BsaXrDpnRpw7hu-modified'
 
 
 def test_finish_job_fact_cache(job, hosts, inventory, mocker, new_time):
