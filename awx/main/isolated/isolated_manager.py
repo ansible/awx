@@ -193,7 +193,7 @@ class IsolatedManager(object):
         isolated_ssh_path = None
         try:
             if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None):
-                isolated_ssh_path = tempfile.mkdtemp(prefix='ansible_awx_isolated', dir=settings.AWX_PROOT_BASE_PATH)
+                isolated_ssh_path = tempfile.mkdtemp(prefix='awx_isolated', dir=settings.AWX_PROOT_BASE_PATH)
                 os.chmod(isolated_ssh_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
                 isolated_key = os.path.join(isolated_ssh_path, '.isolated')
                 ssh_sock = os.path.join(isolated_ssh_path, '.isolated_ssh_auth.sock')

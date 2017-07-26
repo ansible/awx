@@ -213,7 +213,7 @@ def cluster_node_heartbeat(self):
 
 
 @task(bind=True, base=LogErrorsTask)
-def tower_isolated_heartbeat(self):
+def awx_isolated_heartbeat(self):
     local_hostname = settings.CLUSTER_HOST_ID
     logger.debug("Controlling node checking for any isolated management tasks.")
     poll_interval = settings.AWX_ISOLATED_PERIODIC_CHECK
@@ -237,7 +237,7 @@ def tower_isolated_heartbeat(self):
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask)
-def tower_periodic_scheduler(self):
+def awx_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
     last_run = state.schedule_last_run

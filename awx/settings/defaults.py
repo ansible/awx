@@ -445,7 +445,7 @@ CELERY_ROUTES = {'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
 
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
-        'task': 'awx.main.tasks.tower_periodic_scheduler',
+        'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
         'options': {'expires': 20,}
     },

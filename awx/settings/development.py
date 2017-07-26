@@ -126,7 +126,7 @@ CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_
 # Production only runs this schedule on controlling nodes
 # but development will just run it on all nodes
 CELERYBEAT_SCHEDULE['isolated_heartbeat'] = {
-    'task': 'awx.main.tasks.tower_isolated_heartbeat',
+    'task': 'awx.main.tasks.awx_isolated_heartbeat',
     'schedule': timedelta(seconds = AWX_ISOLATED_PERIODIC_CHECK),
     'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2,}
 }
