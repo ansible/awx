@@ -8,7 +8,7 @@ from django.core.mail.backends.base import BaseEmailBackend
 from django.utils.translation import ugettext_lazy as _
 
 
-class TowerBaseEmailBackend(BaseEmailBackend):
+class AWXBaseEmailBackend(BaseEmailBackend):
 
     def format_body(self, body):
         if "body" in body:

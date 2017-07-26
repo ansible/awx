@@ -6,12 +6,12 @@ import pygerduty
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
-from awx.main.notifications.base import TowerBaseEmailBackend
+from awx.main.notifications.base import AWXBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.pagerduty_backend')
 
 
-class PagerDutyBackend(TowerBaseEmailBackend):
+class PagerDutyBackend(AWXBaseEmailBackend):
 
     init_parameters = {"subdomain": {"label": "Pagerduty subdomain", "type": "string"},
                        "token": {"label": "API Token", "type": "password"},
