@@ -804,12 +804,15 @@ function(ConfigurationUtils, i18n, $rootScope) {
         link: function(scope, element, attrs) {
             var delay = { show: 200, hide: 0 },
                 placement,
+                container,
                 stateChangeWatcher;
             if (attrs.awTipPlacement) {
                 placement = attrs.awTipPlacement;
             } else {
                 placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
             }
+
+            container = attrs.container ? attrs.container : 'body';
 
             var template, custom_class;
             if (attrs.tooltipInnerClass || attrs.tooltipinnerclass) {
@@ -849,7 +852,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 delay: delay,
                 html: true,
                 title: attrs.awToolTip,
-                container: 'body',
+                container: container,
                 trigger: 'hover',
                 template: template
             });
