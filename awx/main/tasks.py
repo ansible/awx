@@ -949,7 +949,7 @@ class RunJob(BaseTask):
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
-            env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
+            env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['REST_API_URL'] = settings.INTERNAL_API_URL
             env['REST_API_TOKEN'] = job.task_auth_token or ''
             env['TOWER_HOST'] = settings.TOWER_URL_BASE

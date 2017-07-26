@@ -27,7 +27,7 @@ from copy import copy
 from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule
 
-# Tower Display Callback
+# AWX Display Callback
 from .events import event_context
 from .minimal import CallbackModule as MinimalCallbackModule
 
@@ -448,12 +448,12 @@ class BaseCallbackModule(CallbackBase):
             super(BaseCallbackModule, self).v2_runner_retry(result)
 
 
-class TowerDefaultCallbackModule(BaseCallbackModule, DefaultCallbackModule):
+class AWXDefaultCallbackModule(BaseCallbackModule, DefaultCallbackModule):
 
-    CALLBACK_NAME = 'tower_display'
+    CALLBACK_NAME = 'awx_display'
 
 
-class TowerMinimalCallbackModule(BaseCallbackModule, MinimalCallbackModule):
+class AWXMinimalCallbackModule(BaseCallbackModule, MinimalCallbackModule):
 
     CALLBACK_NAME = 'minimal'
 

@@ -11,10 +11,10 @@ import pytest
 # search for a plugin implementation (which should be named `CallbackModule`)
 #
 # this code modifies the Python path to make our
-# `awx.lib.tower_display_callback` callback importable (because `awx.lib`
+# `awx.lib.awx_display_callback` callback importable (because `awx.lib`
 # itself is not a package)
 #
-# we use the `tower_display_callback` imports below within this file, but
+# we use the `awx_display_callback` imports below within this file, but
 # Ansible also uses them when it discovers this file in
 # `ANSIBLE_CALLBACK_PLUGINS`
 CALLBACK = os.path.splitext(os.path.basename(__file__))[0]
@@ -32,8 +32,8 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
     if path not in sys.path:
         sys.path.insert(0, path)
 
-    from tower_display_callback import TowerDefaultCallbackModule as CallbackModule  # noqa
-    from tower_display_callback.events import event_context  # noqa
+    from awx_display_callback import AWXDefaultCallbackModule as CallbackModule  # noqa
+    from awx_display_callback.events import event_context  # noqa
 
 
 @pytest.fixture()

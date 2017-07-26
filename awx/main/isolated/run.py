@@ -188,7 +188,7 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
     if 'AD_HOC_COMMAND_ID' in env:
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'
     else:
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
     env['AWX_ISOLATED_DATA_DIR'] = private_data_dir
     env['PYTHONPATH'] = env.get('PYTHONPATH', '') + callback_dir + ':'
 
