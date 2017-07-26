@@ -292,7 +292,7 @@ export default ['i18n', function(i18n) {
                     ngChange: 'becomeMethodChange()',
                 },
                 "become_username": {
-                    labelBind: 'becomeUsernameLabel',
+                    label: i18n._('Privilege Escalation Username'),
                     type: 'text',
                     ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
 
@@ -302,7 +302,7 @@ export default ['i18n', function(i18n) {
                     ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 "become_password": {
-                    labelBind: 'becomePasswordLabel',
+                    label: i18n._('Privilege Escalation Password'),
                     type: 'sensitive',
                     ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
                     ngDisabled: "become_password_ask || !(credential_obj.summary_fields.user_capabilities.edit || canAdd)",
