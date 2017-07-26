@@ -37,15 +37,15 @@ function clearTypeInputs () {
     delete this.model.GET.inputs;
 }
 
-function CredentialModel (method, resource) {
+function CredentialModel (method, resource, graft) {
     BaseModel.call(this, 'credentials');
 
+    this.Constructor = CredentialModel;
     this.createFormSchema = createFormSchema.bind(this);
     this.assignInputGroupValues = assignInputGroupValues.bind(this);
     this.clearTypeInputs = clearTypeInputs.bind(this);
 
-    return this.request(method, resource)
-        .then(() => this);
+    return this.create(method, resource, graft);
 }
 
 function CredentialModelLoader (_BaseModel_ ) {

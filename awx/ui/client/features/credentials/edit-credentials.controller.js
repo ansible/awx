@@ -56,14 +56,15 @@ function EditCredentialsController (models, $state, $scope, strings) {
  
     vm.form.inputs = {
         _get (id) {
-            let type = credentialType.getById(id);
-            let inputs = credentialType.mergeInputProperties(type);
+            let type = credentialType.graft(id);
+
+            type.mergeInputProperties();
             
-            if (type.id === credential.get('credential_type')) {
-                inputs = credential.assignInputGroupValues(inputs);
+            if (type.get('id') === credential.get('credential_type')) {
+                return credential.assignInputGroupValues(type.get('inputs.fields'));
             }
 
-            return inputs;
+            return type.get('inputs.fields');
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',

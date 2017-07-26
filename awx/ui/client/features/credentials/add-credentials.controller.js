@@ -31,9 +31,10 @@ function AddCredentialsController (models, $state, strings) {
 
     vm.form.inputs = {
         _get: id => {
-            let type = credentialType.getById(id);
+            let type = credentialType.graft(id);
+            type.mergeInputProperties();
 
-            return credentialType.mergeInputProperties(type);
+            return type.get('inputs.fields');
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',

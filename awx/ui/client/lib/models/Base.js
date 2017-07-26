@@ -87,7 +87,34 @@ function get (keys) {
     return this.find('get', keys);
 }
 
+function set (method, keys, value) {
+    if (!value) {
+        value = keys;
+        keys = method;
+        method = 'GET';
+    }
+    
+    keys = keys.split('.');
+
+    if (keys.length === 1) {
+        model[keys[0]] = value;
+    } else {
+        let property = keys.splice(-1);
+        keys = keys.join('.');
+
+        let model = this.find(method, keys)
+
+        model[property] = value;
+    }
+}
+
 function match (method, key, value) {
+    if(!value) {
+        value = key;
+        key = method;
+        method = 'GET';
+    }
+
     let model = this.model[method.toUpperCase()];
 
     if (!model) {
@@ -149,20 +176,39 @@ function normalizePath (resource) {
     return `${version}${resource}/`;
 }
 
-function getById (id) {
+function graft (id) {
     let item = this.get('results').filter(result => result.id === id);
 
-    return item ? item[0] : undefined;
+    item = item ? item[0] : undefined;
+
+    if (!item) {
+        return undefined;
+    }
+
+    return new this.Constructor('get', item, true);
+}
+
+function create (method, resource, graft) {
+    this.promise = this.request(method, resource);
+
+    if (graft) {
+        return this;
+    }
+
+    return this.promise
+        .then(() => this);
 }
 
 function BaseModel (path) {
     this.model = {};
     this.get = get;
+    this.set = set;
     this.options = options;
     this.find = find;
     this.match = match;
     this.normalizePath = normalizePath;
-    this.getById = getById;
+    this.graft = graft;
+    this.create = create;
     this.request = request;
     this.http = {
         get: httpGet.bind(this),
