@@ -1089,8 +1089,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                          group.x2,
                                          group.y2,
                                          false);
-            for(j=0; j < group.members.length; j++) {
-                new_group.devices.push(device_map[group.members[j]]);
+            if (group.members !== undefined) {
+                for (j=0; j < group.members.length; j++) {
+                    new_group.devices.push(device_map[group.members[j]]);
+                }
             }
             $scope.groups.push(new_group);
         }
