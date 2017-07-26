@@ -44,7 +44,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.queue import CallbackQueueDispatcher
