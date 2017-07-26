@@ -1,0 +1,64 @@
+app: move
+panX: 285.92999999999995
+panY: -151.52999999999997
+scaleXY: 0.8700000000000001
+states:
+- label: Start
+  size: 100
+  x: 533
+  y: 121
+- label: Ready
+  size: 100
+  x: 531
+  y: 320
+- label: Selected1
+  size: 100
+  x: 226
+  y: 325
+- label: Selected2
+  size: 100
+  x: 230
+  y: 582
+- label: Move
+  size: 100
+  x: -54
+  y: 587
+- label: EditLabel
+  size: 100
+  x: 535.7126436781609
+  y: 583.367816091954
+- label: Selected3
+  size: 100
+  x: 231.11494252873567
+  y: 867.2758620689654
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseDown
+  to_state: Selected1
+- from_state: Selected1
+  label: onMouseUp
+  to_state: Selected2
+- from_state: Selected1
+  label: onMouseMove
+  to_state: Move
+- from_state: Selected2
+  label: onMouseDown
+  to_state: Ready
+- from_state: Move
+  label: onMouseUp
+  to_state: Selected2
+- from_state: EditLabel
+  label: onMouseDown
+  to_state: Ready
+- from_state: Selected2
+  label: onMouseDown
+  to_state: Selected3
+- from_state: Selected3
+  label: onMouseMove
+  to_state: Move
+- from_state: Selected3
+  label: onMouseUp
+  to_state: EditLabel
