@@ -206,7 +206,7 @@ var awApp = angular.module('awApp', [
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
             $filter, SocketService, AppStrings) {
-
+            console.log("This works fine!");
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;
