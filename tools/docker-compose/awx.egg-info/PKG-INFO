@@ -6,7 +6,7 @@ Home-page: http://github.com/ansible/awx
 Author: Ansible, Inc.
 Author-email: info@ansible.com
 License: Proprietary
-Description: Ansible AWX provides a web-based user interface, REST API and task engine built on top of Ansible
+Description: AWX provides a web-based user interface, REST API and task engine built on top of Ansible
 Keywords: ansible
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
