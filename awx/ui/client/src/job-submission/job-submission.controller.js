@@ -164,6 +164,7 @@ export default
                     $scope.has_default_inventory = data.defaults && data.defaults.inventory && data.defaults.inventory.id;
                     $scope.has_default_credential = data.defaults && data.defaults.credential && data.defaults.credential.id;
                     $scope.has_default_vault_credential = data.defaults && data.defaults.vault_credential && data.defaults.vault_credential.id;
+                    $scope.vault_password_required = ($scope.password_needed && data.passwords_needed_to_start.includes('vault_password'));
                     $scope.has_default_extra_credentials = data.defaults && data.defaults.extra_credentials && data.defaults.extra_credentials.length > 0;
 
                     $scope.other_prompt_data = {};
@@ -434,7 +435,7 @@ export default
                     }
                 }
                 else if($scope.step === "credential") {
-                    if($scope.selected_credentials.machine && $scope.forms.credentialpasswords && $scope.forms.credentialpasswords.$valid) {
+                    if(($scope.selected_credentials.machine || $scope.selected_credentials.vault) && $scope.forms.credentialpasswords && $scope.forms.credentialpasswords.$valid) {
                         return false;
                     }
                     else {
