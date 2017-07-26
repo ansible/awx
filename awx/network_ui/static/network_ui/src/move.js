@@ -71,6 +71,7 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     var device = null;
+    var id = null;
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -80,29 +81,33 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
     scope.clear_selections();
 
 	if (message.type === "router") {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Router",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Router" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "router");
 	}
     else if (message.type === "switch") {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Switch",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Switch" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "switch");
 	}
     else if (message.type === "rack") {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Rack",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Rack" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "rack");
 	}
     else if (message.type === "host") {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Host",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Host" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "host");
@@ -146,31 +151,36 @@ _Ready.prototype.onKeyDown = function(controller, msg_type, $event) {
 
 	var scope = controller.scope;
     var device = null;
+    var id = null;
 
 	if ($event.key === 'r') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Router",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Router" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "router");
 	}
     else if ($event.key === 's') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Switch",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Switch" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "switch");
 	}
     else if ($event.key === 'a') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Rack",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Rack" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "rack");
 	}
     else if ($event.key === 'h') {
-		device = new models.Device(controller.scope.device_id_seq(),
-                                   "Host",
+        id = controller.scope.device_id_seq();
+		device = new models.Device(id,
+                                   "Host" + id,
                                    scope.scaledX,
                                    scope.scaledY,
                                    "host");
