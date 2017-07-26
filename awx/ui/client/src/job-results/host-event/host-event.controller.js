@@ -104,7 +104,9 @@
                 minHeight: 450,
                 minWidth: 600
             });
-            $('.modal-dialog').draggable();
+            $('.modal-dialog').draggable({
+                cancel: '.CodeMirror'
+            });
 
             $('#HostEvent').on('hidden.bs.modal', function () {
                 $scope.closeHostEvent();
