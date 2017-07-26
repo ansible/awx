@@ -1611,8 +1611,7 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('route53', 'False')
             ec2_opts.setdefault('all_instances', 'True')
             ec2_opts.setdefault('all_rds_instances', 'False')
-            # TODO: Include this option when boto3 support comes.
-            #ec2_opts.setdefault('include_rds_clusters', 'False')
+            ec2_opts.setdefault('include_rds_clusters', 'False')
             ec2_opts.setdefault('rds', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
             ec2_opts.setdefault('elasticache', 'False')
@@ -1654,10 +1653,17 @@ class RunInventoryUpdate(BaseTask):
             section = 'foreman'
             cp.add_section(section)
 
+            group_patterns = '[]'
+            group_prefix = 'foreman_'
             foreman_opts = dict(inventory_update.source_vars_dict.items())
             foreman_opts.setdefault('ssl_verify', 'False')
             for k, v in foreman_opts.items():
-                cp.set(section, k, unicode(v))
+                if k == 'satellite6_group_patterns' and isinstance(v, basestring):
+                    group_patterns = v
+                elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
+                    group_prefix = v
+                else:
+                    cp.set(section, k, unicode(v))
 
             credential = inventory_update.credential
             if credential:
@@ -1667,9 +1673,9 @@ class RunInventoryUpdate(BaseTask):
 
             section = 'ansible'
             cp.add_section(section)
-            cp.set(section, 'group_patterns', os.environ.get('SATELLITE6_GROUP_PATTERNS', []))
+            cp.set(section, 'group_patterns', group_patterns)
             cp.set(section, 'want_facts', True)
-            cp.set(section, 'group_prefix', os.environ.get('SATELLITE6_GROUP_PREFIX', 'foreman_'))
+            cp.set(section, 'group_prefix', group_prefix)
 
             section = 'cache'
             cp.add_section(section)
