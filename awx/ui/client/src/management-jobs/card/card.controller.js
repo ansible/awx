@@ -258,7 +258,7 @@ export default
                 };
 
                 $scope.configureSchedule = function(id) {
-                    $state.transitionTo('managementJobSchedules', {
+                    $state.transitionTo('managementJobsList.schedule', {
                         id: id
                     });
                 };
