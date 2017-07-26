@@ -183,7 +183,7 @@ export default [
 
                     case 'system_job':
                         deferred.resolve({
-                            name: 'managementJobSchedules.edit',
+                            name: 'managementJobsList.schedule.edit',
                             params: {
                                 id: schedule.unified_job_template,
                                 schedule_id: schedule.id

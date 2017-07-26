@@ -19,14 +19,14 @@ angular.module('managementJobScheduler', [])
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState({
             searchPrefix: 'schedule',
-            name: 'managementJobSchedules',
+            name: 'managementJobsList.schedule',
             route: '/management_jobs/:id/schedules',
             ncyBreadcrumb: {
                 parent: 'managementJobsList',
                 label: N_('SCHEDULES')
             },
             views: {
-                '@': {
+                '@managementJobsList': {
                     templateProvider: function(ScheduleList, generateList, ParentObject) {
                         // include name of parent resource in listTitle
                         ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
@@ -74,10 +74,10 @@ angular.module('managementJobScheduler', [])
             }
         });
         $stateExtender.addState({
-            name: 'managementJobSchedules.add',
+            name: 'managementJobsList.schedule.add',
             route: '/add',
             ncyBreadcrumb: {
-                parent: 'managementJobSchedules',
+                parent: 'managementJobsList.schedule',
                 label: N_('CREATE SCHEDULED JOB')
             },
             views: {
@@ -88,10 +88,10 @@ angular.module('managementJobScheduler', [])
             }
         });
         $stateExtender.addState({
-            name: 'managementJobSchedules.edit',
+            name: 'managementJobsList.schedule.edit',
             route: '/edit/:schedule_id',
             ncyBreadcrumb: {
-                parent: 'managementJobSchedules',
+                parent: 'managementJobsList.schedule',
                 label: N_('EDIT SCHEDULED JOB')
             },
             views: {
