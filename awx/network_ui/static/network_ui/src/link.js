@@ -90,10 +90,10 @@ _Connecting.prototype.onMouseUp = function (controller) {
     if (selected_device !== null) {
         controller.scope.new_link.to_device = selected_device;
         i = controller.scope.new_link.to_device.interface_seq();
-        to_device_interface = new models.Interface(i, "swp" + i);
+        to_device_interface = new models.Interface(i, "eth" + i);
         controller.scope.new_link.to_device.interfaces.push(to_device_interface);
         i = controller.scope.new_link.from_device.interface_seq();
-        from_device_interface = new models.Interface(i, "swp" + i);
+        from_device_interface = new models.Interface(i, "eth" + i);
         controller.scope.new_link.from_device.interfaces.push(from_device_interface);
         to_device_interface.link = controller.scope.new_link;
         from_device_interface.link = controller.scope.new_link;
