@@ -17,26 +17,26 @@
                                   not supported by any browser */
 }
 
-.Form{
+.Form {
     display:flex;
     flex-wrap:wrap;
     flex-direction: row;
 }
 
-.Form-header--fields{
+.Form-header--fields {
     flex: 1 1 auto;
 }
 
-.Form-header-field{
+.Form-header-field {
     margin-left: 10px;
     flex: 1 1 auto;
 }
 
-.Form-header{
+.Form-header {
     display: flex;
 }
 
-.Form-title{
+.Form-title {
     flex: 0 1 auto;
     color: @list-header-txt;
     font-size: 14px;
@@ -51,7 +51,7 @@
     text-transform: uppercase;
 }
 
-.Form-secondaryTitle{
+.Form-secondaryTitle {
     color: @default-icon;
     padding-bottom: 20px;
     min-height: 40px;
@@ -61,7 +61,7 @@
 .Form-title--is_superuser,
 .Form-title--is_system_auditor,
 .Form-title--is_ldap_user,
-.Form-title--is_external_account{
+.Form-title--is_external_account {
     height:15px;
     color: @default-interface-txt;
     background-color: @default-list-header-bg;
@@ -77,12 +77,12 @@
     height: 16px;
 }
 
-.Form-exitHolder{
+.Form-exitHolder {
     justify-content: flex-end;
     display:flex;
 }
 
-.Form-exit{
+.Form-exit {
     cursor:pointer;
     padding:0px;
     border: none;
@@ -94,11 +94,11 @@
     line-height:1;
 }
 
-.Form-exit:hover{
+.Form-exit:hover {
     color:@default-icon;
 }
 
-.Form-tabHolder{
+.Form-tabHolder {
     display: flex;
     min-height: 30px;
     flex-wrap:wrap;
@@ -165,12 +165,12 @@
     cursor:not-allowed!important;
 }
 
-.Form-tabSection{
+.Form-tabSection {
     display: none;
     width: 0%;
 }
 
-.Form-tabSection.is-selected{
+.Form-tabSection.is-selected {
     width: 100%;
     display: block;
 }
@@ -261,7 +261,7 @@
   margin-bottom: 10px;
 }
 
-.Form-textAreaLabel{
+.Form-textAreaLabel {
     width:100%;
     order: 1;
 }
@@ -270,7 +270,7 @@
     max-width: 100%;
 }
 
-.Form-textArea{
+.Form-textArea {
     border-radius: 5px;
     color: @field-input-text;
     background-color: @field-secondary-bg;
@@ -285,11 +285,11 @@
     color: @field-input-text;
 }
 
-.Form-textInput:active{
+.Form-textInput:active {
     border:1px solid @field-border-sel;
 }
 
-.Form-monospace{
+.Form-monospace {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace!important;
 }
 
@@ -316,7 +316,7 @@
     border: 1px solid @default-link-hov;
 }
 
-.ui-spinner{
+.ui-spinner {
     height: 30px;
     background-color: @f2grey !important;
     border-radius: 5px;
@@ -325,21 +325,21 @@
     width:100%
 }
 
-.ui-spinner-input{
+.ui-spinner-input {
     color: @field-input-text;
-    background-color: @field-secondary-bg;
+    background-color: @f2grey;
 }
 
-.ui-spinner-input:focus{
+.ui-spinner-input:focus {
     outline: none;
 }
 
-.ui-spinner-button{
+.ui-spinner-button {
     border-left:1px solid @field-border!important;
     background-color: @field-button-bg !important;
 }
 
-.ui-spinner-button:hover{
+.ui-spinner-button:hover {
     background-color:@field-button-hov !important;
     cursor: pointer!important;
 }
@@ -349,7 +349,7 @@
     color: @default-data-txt;
 }
 
-.Form-numberInputButton{
+.Form-numberInputButton {
     color: @default-icon!important;
     font-size: 14px;
 
@@ -362,7 +362,7 @@
     color: @field-input-text!important;
 }
 
-.select2-selection__arrow{
+.select2-selection__arrow {
     border-left:1px solid @field-border;
     border-bottom-right-radius: 5px;
     border-top-right-radius: 5px;
@@ -374,23 +374,23 @@
     background: @ebgrey !important;
 }
 
-.select2-results__option{
+.select2-results__option {
     color: @field-label !important;
 }
 
-.select2-container--default .select2-results__option--highlighted[aria-selected]{
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
     background-color: @field-button-hov !important;
 }
 
-.select2-container--default .select2-results__option[aria-selected=true]{
+.select2-container--default .select2-results__option[aria-selected=true] {
     background-color: @default-white-button-bord !important;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow b{
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
     border-color: @field-dropdown-icon transparent transparent transparent !important;
 }
 
-.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b{
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
     border-color: transparent transparent @field-dropdown-icon transparent!important;
 }
 
@@ -399,7 +399,7 @@
     border-bottom-right-radius: 0 !important;
 }
 
-.select2-dropdown{
+.select2-dropdown {
     border:1px solid @field-border;
 
 }
@@ -409,15 +409,15 @@
     border-top: 1px solid @field-border;
 }
 
-.Form-dropDown:focus{
+.Form-dropDown:focus {
     outline: none!important;
 }
 
-.Form-dropDown--scmType{
+.Form-dropDown--scmType {
     width: 100%;
 }
 
-.Form-passwordButton{
+.Form-passwordButton {
     height: 30px;
     color: @default-interface-txt;
     text-transform: uppercase;
@@ -435,7 +435,7 @@
     color: @field-lookup-btn-icon;
 }
 
-.Form-passwordButton:focus{
+.Form-passwordButton:focus {
     border: 1px solid @field-border;
     background-color: @field-lookup-btn-hov-bg;
 }
@@ -470,13 +470,13 @@
     border-right: 0px;
 }
 
-.CodeMirror{
+.CodeMirror {
     border-radius: 5px;
     font-style: normal;
     color: @field-input-text;
 }
 
-.CodeMirror-gutters{
+.CodeMirror-gutters {
     background-color:@code-mirror-gutter !important;
 }
 
@@ -562,7 +562,7 @@ input[type='radio']:checked:before {
     display: inline-block !important;
 }
 
-.Form-inputLabel{
+.Form-inputLabel {
     text-transform: uppercase;
     color: @default-interface-txt;
     font-weight: normal;
@@ -582,7 +582,7 @@ input[type='radio']:checked:before {
     .noselect;
 }
 
-.Form-buttons{
+.Form-buttons {
     height: 30px;
     display: flex;
     justify-content: flex-end;
@@ -592,7 +592,7 @@ input[type='radio']:checked:before {
     }
 }
 
-.Form-button{
+.Form-button {
     margin-left: 4px;
 }
 
@@ -602,7 +602,7 @@ input[type='radio']:checked:before {
     border-color: @default-border;
 }
 
-.Form-saveButton, .Form-launchButton{
+.Form-saveButton, .Form-launchButton {
     background-color: @submit-button-bg;
     color: @submit-button-text;
     text-transform: uppercase;
@@ -611,11 +611,11 @@ input[type='radio']:checked:before {
     padding-right: 15px;
 }
 
-.Form-saveButton:disabled, .Form-launchButton:disabled{
+.Form-saveButton:disabled, .Form-launchButton:disabled {
     background-color: @submit-button-bg-dis;
 }
 
-.Form-saveButton:hover, .Form-launchButton:hover{
+.Form-saveButton:hover, .Form-launchButton:hover {
     background-color: @submit-button-bg-hov;
     color: @submit-button-text;
 }
@@ -632,7 +632,7 @@ input[type='radio']:checked:before {
     margin-left: 20px;
 }
 
-.Form-cancelButton:hover{
+.Form-cancelButton:hover {
     background-color: @btn-bg-hov;
     color: @btn-txt;
 }
