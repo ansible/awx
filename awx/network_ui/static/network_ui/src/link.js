@@ -46,19 +46,11 @@ exports.Selecting = Selecting;
 
 
 
-_Ready.prototype.onKeyDown = function(controller, msg_type, $event) {
-
-    if ($event.key === 'l') {
-        controller.handle_message("NewLink", $event);
-    }
-
-	controller.next_controller.handle_message(msg_type, $event);
-};
-
-_Ready.prototype.onNewLink = function (controller) {
+_Ready.prototype.onNewLink = function (controller, msg_type, message) {
 
     controller.scope.clear_selections();
     controller.changeState(Selecting);
+    controller.next_controller.handle_message(msg_type, message);
 };
 
 
