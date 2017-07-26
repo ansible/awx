@@ -18,11 +18,11 @@ function AtInputSecretController (baseInputController) {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
+        scope.type = 'password';
 
         if (!scope.state._value || scope.state._promptOnLaunch) {
             scope.mode = 'input';
             scope.state._buttonText = vm.strings.get('SHOW');
-            scope.type = 'password';
 
             vm.toggle = vm.toggleShowHide;
         } else {
