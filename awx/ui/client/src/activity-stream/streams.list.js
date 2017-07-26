@@ -18,7 +18,6 @@ export default ['i18n', function(i18n) {
         selectInstructions: '',
         index: false,
         hover: true,
-        "class": "table-condensed",
         toolbarAuxAction: "<stream-dropdown-nav></stream-dropdown-nav>",
 
         fields: {
