@@ -9,6 +9,7 @@ var tablesUI = angular.module('tablesUI', ['xeditable'])
     .directive('awxTablesUi', awxTablesUI.awxTablesUI)
     .run(function(editableOptions) {
           editableOptions.theme = 'bs3';
+          editableOptions.activate = 'select';
     });
 
 exports.tablesUI = tablesUI;
