@@ -93,24 +93,29 @@ def test_update_kwargs_survey_invalid_default(survey_spec_factory):
 
 
 @pytest.mark.survey
-@pytest.mark.parametrize("question_type,default,expect_use,expect_value", [
-    ("multiplechoice", "",       False, 'N/A'),  # historical bug
-    ("multiplechoice", "zeb",    False, 'N/A'),  # zeb not in choices
-    ("multiplechoice", "coffee", True,  'coffee'),
-    ("multiselect",    None,     False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
-    ("multiselect",    "",       False, 'N/A'),
-    ("multiselect",    ["zeb"],  False, 'N/A'),
-    ("multiselect",    ["milk"], True,  ["milk"]),
-    ("multiselect",    ["orange\nmilk"], False,  'N/A'),  # historical bug
+@pytest.mark.parametrize("question_type,default,min,max,expect_use,expect_value", [
+    ("text",           "",       0, 0,  True, ''),      # default used
+    ("text",           "",       1, 0,  False, 'N/A'),  # value less than min length
+    ("password",       "",       1, 0,  False, 'N/A'),  # passwords behave the same as text
+    ("multiplechoice", "",       0, 0,  False, 'N/A'),  # historical bug
+    ("multiplechoice", "zeb",    0, 0,  False, 'N/A'),  # zeb not in choices
+    ("multiplechoice", "coffee", 0, 0,  True,  'coffee'),
+    ("multiselect",    None,     0, 0,  False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
+    ("multiselect",    "",       0, 0,  False, 'N/A'),
+    ("multiselect",    ["zeb"],  0, 0,  False, 'N/A'),
+    ("multiselect",    ["milk"], 0, 0,  True,  ["milk"]),
+    ("multiselect",    ["orange\nmilk"], 0, 0, False,  'N/A'),  # historical bug
 ])
 def test_optional_survey_question_defaults(
-        survey_spec_factory, question_type, default, expect_use, expect_value):
+        survey_spec_factory, question_type, default, min, max, expect_use, expect_value):
     spec = survey_spec_factory([
         {
             "required": False,
             "default": default,
             "choices": "orange\nmilk\nchocolate\ncoffee",
             "variable": "c",
+            "min": min,
+            "max": max,
             "type": question_type
         },
     ])
