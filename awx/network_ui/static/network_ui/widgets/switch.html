@@ -1,0 +1,61 @@
+
+
+                    <line ng-attr-x1="{{-50 - 10}}"
+                           ng-attr-y1="0"
+                           ng-attr-x2="{{50 + 10}}"
+                           ng-attr-y2="0"
+                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                     <line ng-attr-x1="0"
+                           ng-attr-y1="{{-50 - 10}}"
+                           ng-attr-x2="0"
+                           ng-attr-y2="{{50 + 10}}"
+                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                     <rect ng-attr-x="{{-50}}"
+                           ng-attr-y="{{-50}}"
+                           ng-attr-width="{{50 * 2}}"
+                           ng-attr-height="{{50 * 2}}"
+                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                    <rect
+                        x="-52"
+                        y="-52"
+                        ng-attr-width="{{100 + 4}}"
+                        ng-attr-height="{{100 + 4}}"
+                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'selected-conflict' : device.selected ? 'selected' : 'remote-selected' : 'hidden'}}"
+                        rx=10>
+                    </rect>
+
+                    <rect
+                        x="-50"
+                        y="-50"
+                        ng-attr-width="{{100}}"
+                        ng-attr-height="{{100}}"
+                        rx=10>
+                    </rect>
+                    <line ng-attr-x1="2"
+                          ng-attr-y1="-28"
+                          ng-attr-x2="38"
+                          ng-attr-y2="-28"/>
+                    <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(0) translate(28, -48) scale(2.0)"/>
+                    <line ng-attr-x1="2"
+                          ng-attr-y1="14"
+                          ng-attr-x2="38"
+                          ng-attr-y2="14"/>
+                    <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(0) translate(28, -6) scale(2.0)"/>
+                    <line ng-attr-x1="-2"
+                          ng-attr-y1="28"
+                          ng-attr-x2="-38"
+                          ng-attr-y2="28"/>
+                    <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate(28, -48) scale(2.0)"/>
+                    <line ng-attr-x1="-2"
+                          ng-attr-y1="-14"
+                          ng-attr-x2="-38"
+                          ng-attr-y2="-14"/>
+                    <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate(28, -6) scale(2.0)"/>
+                    <g ng-show="current_scale > 0.5">
+                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'selected' : 'hidden'}}"
+                          filter="url(#selected)"
+                          text-anchor="middle"
+						  x="0"
+						  y="0"> {{device.name}} </text>
+                    <text text-anchor="middle" x="0" y="0">{{device.name}}{{device.edit_label?'_':''}}</text>
+                    </g>

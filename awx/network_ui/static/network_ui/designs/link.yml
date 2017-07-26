@@ -1,0 +1,41 @@
+app: link
+panX: -15
+panY: 0
+scaleXY: 1
+states:
+- label: Ready
+  size: 100
+  x: 540
+  y: 307
+- label: Start
+  size: 100
+  x: 533
+  y: 96
+- label: Selecting
+  size: 100
+  x: 780
+  y: 299
+- label: Connecting
+  size: 100
+  x: 782
+  y: 541
+- label: Connected
+  size: 100
+  x: 546
+  y: 543
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onNewLink
+  to_state: Selecting
+- from_state: Selecting
+  label: onMouseUp
+  to_state: Connecting
+- from_state: Connecting
+  label: onMouseUp
+  to_state: Connected
+- from_state: Connected
+  label: free
+  to_state: Ready
