@@ -377,10 +377,18 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def _can_update(self):
         return bool(self.scm_type)
 
-    def _update_unified_job_kwargs(self, **kwargs):
+    def _update_unified_job_kwargs(self, create_kwargs, kwargs):
+        '''
+        :param create_kwargs: key-worded arguments to be updated and later used for creating unified job.
+        :type create_kwargs: dict
+        :param kwargs: request parameters used to override unified job template fields with runtime values.
+        :type kwargs: dict
+        :return: modified create_kwargs.
+        :rtype: dict
+        '''
         if self.scm_delete_on_next_update:
-            kwargs['scm_delete_on_update'] = True
-        return kwargs
+            create_kwargs['scm_delete_on_update'] = True
+        return create_kwargs
 
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)

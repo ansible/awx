@@ -424,7 +424,7 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
 
     # Apply class-specific extra processing for origination of unified jobs
     if hasattr(obj1, '_update_unified_job_kwargs') and obj1.__class__ != Class2:
-        new_kwargs = obj1._update_unified_job_kwargs(**create_kwargs)
+        new_kwargs = obj1._update_unified_job_kwargs(create_kwargs, kwargs)
     else:
         new_kwargs = create_kwargs
 

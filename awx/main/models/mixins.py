@@ -16,8 +16,8 @@ from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 
-__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin', 
-           'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin', 
+__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
+           'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
            'TaskManagerInventoryUpdateMixin',]
 
 
@@ -111,20 +111,29 @@ class SurveyJobTemplateMixin(models.Model):
                     vars.append(survey_element['variable'])
         return vars
 
-    def _update_unified_job_kwargs(self, **kwargs):
+    def _update_unified_job_kwargs(self, create_kwargs, kwargs):
         '''
         Combine extra_vars with variable precedence order:
           JT extra_vars -> JT survey defaults -> runtime extra_vars
+
+        :param create_kwargs: key-worded arguments to be updated and later used for creating unified job.
+        :type create_kwargs: dict
+        :param kwargs: request parameters used to override unified job template fields with runtime values.
+        :type kwargs: dict
+        :return: modified create_kwargs.
+        :rtype: dict
         '''
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
+        survey_defaults = {}
+
         # transform to dict
         if 'extra_vars' in kwargs:
-            kwargs_extra_vars = kwargs['extra_vars']
-            kwargs_extra_vars = parse_yaml_or_json(kwargs_extra_vars)
+            runtime_extra_vars = kwargs['extra_vars']
+            runtime_extra_vars = parse_yaml_or_json(runtime_extra_vars)
         else:
-            kwargs_extra_vars = {}
+            runtime_extra_vars = {}
 
         # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
@@ -133,22 +142,23 @@ class SurveyJobTemplateMixin(models.Model):
                 variable_key = survey_element.get('variable')
 
                 if survey_element.get('type') == 'password':
-                    if variable_key in kwargs_extra_vars and default:
-                        kw_value = kwargs_extra_vars[variable_key]
+                    if variable_key in runtime_extra_vars and default:
+                        kw_value = runtime_extra_vars[variable_key]
                         if kw_value.startswith('$encrypted$') and kw_value != default:
-                            kwargs_extra_vars[variable_key] = default
+                            runtime_extra_vars[variable_key] = default
 
                 if default is not None:
                     data = {variable_key: default}
                     errors = self._survey_element_validation(survey_element, data)
                     if not errors:
-                        extra_vars[variable_key] = default
+                        survey_defaults[variable_key] = default
+        extra_vars.update(survey_defaults)
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars
-        extra_vars.update(kwargs_extra_vars)
-        kwargs['extra_vars'] = json.dumps(extra_vars)
-        return kwargs
+        extra_vars.update(runtime_extra_vars)
+        create_kwargs['extra_vars'] = json.dumps(extra_vars)
+        return create_kwargs
 
     def _survey_element_validation(self, survey_element, data):
         errors = []
@@ -291,5 +301,3 @@ class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
-
-
