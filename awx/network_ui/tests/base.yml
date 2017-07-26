@@ -1,0 +1,4 @@
+{% for python_version in python_versions %}
+{% block test scoped %}
+{% endblock %}
+{% endfor %}

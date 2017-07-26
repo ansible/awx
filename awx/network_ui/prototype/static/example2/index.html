@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" ng-app="triForce">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            .node {
+                stroke: #fff;
+                stroke-width: 1.5px;
+            }
+            .link {
+                stroke: #999;
+                stroke-opacity: .6;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script>
+            app = angular.module("triForce", [])
+
+            app.controller("triCtrl", function($scope, $http) {
+                $scope.width = 500;
+                $scope.height = 500;
+
+                var color = d3.scale.category20()
+
+                var force = d3.layout.force()
+                    .charge(-120)
+                    .linkDistance(30)
+                    .size([$scope.width, $scope.height]);
+
+                $http.get('miserables.json').success(function(graph) {
+                    $scope.nodes = graph.nodes;
+                    $scope.links = graph.links;
+
+                    for(var i=0; i < $scope.links.length ; i++){
+                        $scope.links[i].strokeWidth = Math.round(Math.sqrt($scope.links[i].value))
+                    }
+
+                    for(var i=0; i < $scope.nodes.length ; i++){
+                        $scope.nodes[i].color = color($scope.nodes[i].group)
+                    }
+
+                    force
+                        .nodes($scope.nodes)
+                        .links($scope.links)
+                        .on("tick", function(){$scope.$apply()})
+                        .start();
+                })
+            })
+        </script>
+    </head>
+    <body ng-controller="triCtrl">
+        <div>
+            <svg ng-attr-width="{{width}}"
+                 ng-attr-height="{{height}}">
+                <line   ng-repeat="link in links"
+                        class="link"
+                        ng-attr-stroke-width="{{link.strokeWidth}}"
+                        ng-attr-x1="{{link.source.x}}"
+                        ng-attr-y1="{{link.source.y}}"
+                        ng-attr-x2="{{link.target.x}}"
+                        ng-attr-y2="{{link.target.y}}">
+                </line>
+                <circle ng-repeat="node in nodes"
+                        class="node"
+                        r="5"
+                        ng-attr-fill="{{node.color}}"
+                        ng-attr-cx="{{node.x}}"
+                        ng-attr-cy="{{node.y}}">
+                    <title>{{node.name}}</title>
+                </circle>
+            </svg>
+        </div>
+    </body>
+</html>

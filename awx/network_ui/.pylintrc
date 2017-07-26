@@ -1,0 +1,11 @@
+[MASTER]
+load-plugins=pylint_common, pylint_django, pylint_celery 
+
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=missing-docstring,invalid-name
+
+[DESIGN]
+max-parents=13

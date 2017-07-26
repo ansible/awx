@@ -1,0 +1,21 @@
+# Global settings for your hitch tests
+
+failfast: true
+xvfb: false
+pause_on_success: false
+pause_on_failure: false
+startup_timeout: 45
+shutdown_timeout: 5
+environment_variables:
+  DATABASE_URL: postgres://ansible-network-ui:password@127.0.0.1:15432/ansible-network-ui
+  SECRET_KEY: cj5^uos4tfCdfghjkf5hq$9$(@-79^e9&x$3vyf#igvsfm4d=+
+  CELERY_BROKER_URL: redis://localhost:16379
+  DJANGO_EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+window_size:
+  width: 1024
+  height: 768
+python_version: 2.7.10
+environment:
+  - approved_platforms:
+    - linux
+    - darwin

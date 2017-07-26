@@ -1,0 +1,19 @@
+- name: Sign up and log in
+  scenario:
+    - Load website
+    - Click: djHideToolBarButton
+    - Click: sign-up-link
+    - Fill form:
+        id_username: testuser
+        id_email: testuser@domain.com
+        id_password1: password
+        id_password2: password
+    - Click: sign-up-button
+    - Wait for email:
+        containing: Please Confirm Your E-mail Address
+    - Click on link in last email
+    - Click: confirm-button
+    - Fill form:
+        id_login: testuser
+        id_password: password
+    - Click: sign-in-button

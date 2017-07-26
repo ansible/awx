@@ -1,0 +1,34 @@
+app: button
+panX: 53
+panY: -52
+scaleXY: 1
+states:
+- label: Start
+  size: 100
+  x: 468
+  y: 170
+- label: Ready
+  size: 100
+  x: 471
+  y: 376
+- label: Pressed
+  size: 100
+  x: 606
+  y: 563
+- label: Clicked
+  size: 100
+  x: 331
+  y: 568
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseDown
+  to_state: Pressed
+- from_state: Pressed
+  label: onMouseUp
+  to_state: Clicked
+- from_state: Clicked
+  label: start
+  to_state: Ready

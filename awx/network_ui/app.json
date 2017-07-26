@@ -1,0 +1,34 @@
+{
+  "name": "ansible-network-ui",
+  "description": "A prototype of a UI for networking visualization for Ansible Tower.",
+  "env": {
+    "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-python",
+    "DJANGO_SETTINGS_MODULE": "config.settings.production",
+    "DJANGO_SECRET_KEY": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "generator": "secret"
+    },
+    "DJANGO_ALLOWED_HOSTS": {
+      "description": "Comma-separated list of hosts",
+      "value": ".herokuapp.com"
+    },
+    "DJANGO_ADMIN_URL": {
+      "description": "A secret URL for the Django admin",
+      "generator": "secret"
+    },
+    "DJANGO_AWS_ACCESS_KEY_ID": "",
+    "DJANGO_AWS_SECRET_ACCESS_KEY": "",
+    "DJANGO_AWS_STORAGE_BUCKET_NAME": "",
+    "DJANGO_MAILGUN_SERVER_NAME": "",
+    
+    "DJANGO_MAILGUN_API_KEY": "" 
+  },
+  "scripts": {
+    "postdeploy": "python manage.py migrate"
+  },
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "heroku-redis:hobby-dev",
+    "mailgun"
+  ]
+}

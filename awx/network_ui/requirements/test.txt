@@ -1,0 +1,11 @@
+# Test dependencies go here.
+-r base.txt
+
+
+
+coverage==4.0.3
+django_coverage_plugin==1.1
+flake8==2.5.0
+django-test-plus==1.0.11
+factory_boy==2.6.0
+websocket-client

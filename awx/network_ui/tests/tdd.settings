@@ -1,0 +1,8 @@
+# Test driven development settings
+#
+# Run with : hitch test . --settings tdd.settings
+#
+# Tests stop on first failure, pause and launch into IPython for debugging/interaction.
+
+failfast: true
+pause_on_failure: true
