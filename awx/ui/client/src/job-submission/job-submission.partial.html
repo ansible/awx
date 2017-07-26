@@ -51,7 +51,7 @@
             <div ng-if="ask_credential_on_launch || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
                 <div class="JobSubmission-selectedItemContainer">
                     <div class="JobSubmission-selectedItem">
-                        <div class="JobSubmission-selectedItemInfo" ng-hide="!selected_credentials.machine && selected_credentials.extra.length === 0">
+                        <div class="JobSubmission-selectedItemInfo" ng-hide="!selected_credentials.machine && !selected_credentials.vault && selected_credentials.extra.length === 0">
                             <div class="JobSubmission-selectedItemLabel">
                                 <span translate>SELECTED:</span>
                             </div>
@@ -62,7 +62,8 @@
                                             <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
                                         <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
-                                            <span><span class="JobSubmission-previewTagLabel">MACHINE</span>:&nbsp;{{selected_credentials.machine.name}}</span>
+                                            <span><span class="JobSubmission-previewTagLabel" ng-class="{'JobSubmission-previewTagLabel--deletable': ask_credential_on_launch}">
+                                                MACHINE</span>:&nbsp;{{selected_credentials.machine.name}}</span>
                                         </div>
                                     </div>
                                     <div class="JobSubmission-previewTagContainer" ng-repeat="extraCredential in selected_credentials.extra">
@@ -70,13 +71,14 @@
                                             <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
                                         <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
-                                            <span><span class="JobSubmission-previewTagLabel">{{credential_types[extraCredential.credential_type].name | uppercase}}</span>:&nbsp;{{extraCredential.name}}</span>
+                                            <span><span class="JobSubmission-previewTagLabel" ng-class="{'JobSubmission-previewTagLabel--deletable': ask_credential_on_launch}">
+                                                {{credential_types[extraCredential.credential_type].name | uppercase}}</span>:&nbsp;{{extraCredential.name}}</span>
                                         </div>
                                     </div>
                                     <div class="JobSubmission-previewTagContainer JobSubmission-previewTagContainer--vault" ng-show="selected_credentials.vault">
                                         <div class="JobSubmission-previewTag JobSubmission-previewTag--vault" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
-                                            <span>
-                                                <span class="JobSubmission-previewTagLabel">VAULT</span>:&nbsp;{{selected_credentials.vault.name}}</span>
+                                            <span><span class="JobSubmission-previewTagLabel" ng-class="{'JobSubmission-previewTagLabel--deletable': ask_credential_on_launch}">
+                                                    VAULT</span>:&nbsp;{{selected_credentials.vault.name}}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -340,7 +342,7 @@
                 <div class="JobSubmission-previewItem" ng-show="submitJobType === 'job_template'">
                     <div class="JobSubmission-previewItemTitle" translate>CREDENTIAL</div>
                     <div>
-                        <span ng-show="!selected_credentials.machine && selected_credentials.extra.length === 0" class="JobSubmission-selectedItemNone" translate>None selected</span>
+                        <span ng-show="!selected_credentials.machine && !selected_credentials.vault && selected_credentials.extra.length === 0" class="JobSubmission-selectedItemNone" translate>None selected</span>
                     </div>
                     <div>
                         <span ng-show="selected_credentials.machine" class="JobSubmission-previewItemSubTitle"><span translate>Machine</span>:&nbsp;</span>
