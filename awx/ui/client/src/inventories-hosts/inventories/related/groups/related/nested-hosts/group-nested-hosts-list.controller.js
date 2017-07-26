@@ -34,6 +34,11 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
                         value.can_disassociate = true;
                     }
                 });
+                angular.forEach($scope.hostsSelected, function(selectedHost){
+                    if(selectedHost.id === value.id) {
+                        value.isSelected = true;
+                    }
+                });
                 return value;
             });
             setJobStatus();

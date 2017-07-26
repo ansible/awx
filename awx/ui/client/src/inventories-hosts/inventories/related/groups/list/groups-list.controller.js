@@ -33,7 +33,7 @@
             $scope.inventory_id = $stateParams.inventory_id;
 
             $scope.$watchCollection(list.name, function(){
-                _.forEach($scope[list.name], buildStatusIndicators);
+                _.forEach($scope[list.name], processRow);
             });
 
             $scope.$on('selectedOrDeselected', function(e, value) {
@@ -54,10 +54,16 @@
 
         }
 
-        function buildStatusIndicators(group){
+        function processRow(group){
             if (group === undefined || group === null) {
                 group = {};
             }
+
+            angular.forEach($scope.groupsSelected, function(selectedGroup){
+                if(selectedGroup.id === group.id) {
+                    group.isSelected = true;
+                }
+            });
 
             let hosts_status;
 
