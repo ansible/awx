@@ -60,7 +60,7 @@ class CompleteView(BaseRedirectView):
                 logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
             request.session['auth_token_key'] = token.key
             token_key = urllib.quote('"%s"' % token.key)
-            response.set_cookie('token', token_key)
+            response.set_cookie('token', value=token_key, httponly=True)
             token_expires = token.expires.astimezone(utc).strftime('%Y-%m-%dT%H:%M:%S')
             token_expires = '%s.%03dZ' % (token_expires, token.expires.microsecond / 1000)
             token_expires = urllib.quote('"%s"' % token_expires)
