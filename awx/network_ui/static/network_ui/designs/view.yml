@@ -1,0 +1,47 @@
+app: view
+panX: 1
+panY: -67
+scaleXY: 1
+states:
+- label: Start
+  size: 100
+  x: 498
+  y: 175
+- label: Ready
+  size: 100
+  x: 506
+  y: 395
+- label: Scale
+  size: 100
+  x: 310
+  y: 626
+- label: Pan
+  size: 100
+  x: 741
+  y: 631
+- label: Pressed
+  size: 100
+  x: 739
+  y: 392
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseWheel
+  to_state: Scale
+- from_state: Scale
+  label: onTimeout
+  to_state: Ready
+- from_state: Ready
+  label: onMouseDown
+  to_state: Pressed
+- from_state: Pressed
+  label: onMouseMove
+  to_state: Pan
+- from_state: Pressed
+  label: onMouseUp
+  to_state: Ready
+- from_state: Pan
+  label: onMouseUp
+  to_state: Ready

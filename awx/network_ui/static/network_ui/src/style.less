@@ -1,0 +1,315 @@
+/* Put your css in here */
+
+@selected-red: #c9232c;
+@selected-mango: #ff5850;
+@selected-blue: #5bbddf;
+@light-background: #ffffff;
+@light-widget-detail: #ffffff;
+@dark-widget-detail: #707070;
+@widget-body: #D7D7D7;
+@link: #D7D7D7;
+@debug-copynot: rgb(77,200,242);
+@button-body: #f6f6f6;
+@button-text: #707070;
+@button-outline: #b4b6b4;
+@button-body-hover: #dfdfdf;
+@button-body-pressed: #d5d5d5;
+@green: #5CB85C;
+@red:  #D9534F;
+
+html {
+    overflow: hidden;
+}
+
+body {
+    background-color: yellow;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+svg {
+    background-color: @light-background;
+    cursor: none;
+}
+
+svg text {
+    fill: @button-text;
+}
+
+.debug text {
+    fill: @debug-copynot;
+}
+
+
+line.selected {
+    stroke: @selected-blue;
+    stroke-width: 6;
+}
+
+line.remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 6;
+}
+
+line.selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 6;
+}
+
+svg rect.debug {
+    fill-opacity: 0;
+    stroke: @debug-copynot;
+    stroke-width: 1;
+}
+
+svg line.link {
+    stroke: @link;
+    stroke-width: 2;
+}
+
+svg line.link-pass {
+    stroke: @green;
+    stroke-width: 2;
+}
+
+svg line.link-fail {
+    stroke: @red;
+    stroke-width: 2;
+}
+
+svg line.cursor {
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+svg line.debug {
+    stroke: @debug-copynot;
+    stroke-width: 1;
+}
+
+.debug-cursor line {
+    stroke: @debug-copynot;
+    stroke-width: 4;
+}
+
+.hidden {
+    display: none;
+}
+
+.router circle {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.router circle.selected {
+    stroke: @selected-blue;
+    stroke-width: 4;
+}
+
+.router circle.remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 4;
+}
+
+.router circle.selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 4;
+}
+
+.router line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+.router polygon {
+    fill: @light-widget-detail;
+}
+
+.switch rect {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.switch rect.selected {
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.switch rect.remote-selected {
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.switch rect.selected-conflict {
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.switch line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+.switch polygon {
+    fill: @light-widget-detail;
+}
+
+.rack rect {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.rack rect.background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.rack rect.selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.rack rect.remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.rack rect.selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.rack line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+.rack circle {
+    fill: @light-widget-detail;
+}
+
+.button rect {
+    fill: @button-body;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.button text {
+    fill: @button-text;
+}
+
+.button-pressed rect {
+    fill: @button-body-pressed;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.button-pressed text {
+    fill: @button-text;
+}
+
+.button-hover rect {
+    fill: @button-body-hover;
+    stroke: @button-outline;
+    stroke-width: 1;
+}
+
+.button-hover text {
+    fill: @button-text;
+}
+
+.host rect {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.host rect.background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.host rect.selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.host rect.remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.host rect.selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.host line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+.host circle {
+    fill: @light-widget-detail;
+}
+
+circle.status {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+circle.pass {
+    fill: @green;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+circle.fail {
+    fill: @red;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+path.status {
+    fill: none;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+circle.debug {
+    fill: @debug-copynot;
+}
+
+
+circle.interface {
+    fill: @dark-widget-detail;
+}
+
+circle.selected {
+    fill: @selected-blue;
+}
+
+text.interface {
+    font-size: 8px;
+}
+
+.touch circle {
+    stroke: @debug-copynot;
+    fill: none;
+}
+
