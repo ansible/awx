@@ -147,58 +147,6 @@ _Ready.prototype.onMouseDown.transitions = ['Selected1'];
 _Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
 
 
-_Ready.prototype.onKeyDown = function(controller, msg_type, $event) {
-
-	var scope = controller.scope;
-    var device = null;
-    var id = null;
-
-	if ($event.key === 'r') {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Router" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "router");
-	}
-    else if ($event.key === 's') {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Switch" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "switch");
-	}
-    else if ($event.key === 'a') {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Rack" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "rack");
-	}
-    else if ($event.key === 'h') {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Host" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "host");
-	}
-
-    if (device !== null) {
-        scope.devices.push(device);
-        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                             device.id,
-                                                             device.x,
-                                                             device.y,
-                                                             device.name,
-                                                             device.type));
-    }
-
-	controller.next_controller.handle_message(msg_type, $event);
-};
-
 _Start.prototype.start = function (controller) {
 
     controller.changeState(Ready);
@@ -303,6 +251,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
             }
         }
     }
+
+    controller.next_controller.handle_message(msg_type, $event);
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
 
