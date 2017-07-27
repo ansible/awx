@@ -16,7 +16,7 @@ from django.utils.encoding import smart_text
 # Django REST Framework
 from rest_framework.renderers import JSONRenderer
 
-# Ansible Tower
+# AWX
 from awx.main.models import AuthToken
 from awx.api.serializers import UserSerializer
 

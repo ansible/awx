@@ -161,7 +161,7 @@ class TaskManager():
                     job.save(update_fields=['status', 'job_explanation'])
                     connection.on_commit(lambda: job.websocket_emit_status('failed'))
 
-                # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
+                # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
 
     # See comment in tasks.py::RunWorkflowJob::run()

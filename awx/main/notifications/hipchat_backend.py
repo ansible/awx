@@ -7,12 +7,12 @@ import requests
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
-from awx.main.notifications.base import TowerBaseEmailBackend
+from awx.main.notifications.base import AWXBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.hipchat_backend')
 
 
-class HipChatBackend(TowerBaseEmailBackend):
+class HipChatBackend(AWXBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
                        "rooms": {"label": "Destination Rooms", "type": "list"},

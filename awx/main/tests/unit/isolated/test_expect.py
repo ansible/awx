@@ -193,7 +193,7 @@ def test_run_isolated_job(private_data_dir, rsa_key):
     assert FILENAME in stdout.getvalue()
 
     assert '/path/to/awx/lib' in env['PYTHONPATH']
-    assert env['ANSIBLE_STDOUT_CALLBACK'] == 'tower_display'
+    assert env['ANSIBLE_STDOUT_CALLBACK'] == 'awx_display'
     assert env['ANSIBLE_CALLBACK_PLUGINS'] == '/path/to/awx/lib/isolated_callbacks'
     assert env['AWX_ISOLATED_DATA_DIR'] == private_data_dir
 

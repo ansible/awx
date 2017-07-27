@@ -37,10 +37,10 @@ class BaseJobTestMixin(BaseTestMixin):
         return inventory
 
     def populate(self):
-        # Here's a little story about the Ansible Bread Company, or ABC.  They
+        # Here's a little story about the AWX Bread Company, or ABC.  They
         # make machines that make bread - bakers, slicers, and packagers - and
         # these machines are each controlled by a Linux boxes, which is in turn
-        # managed by Ansible Commander.
+        # managed by AWX.
 
         # Sue is the super user.  You don't mess with Sue or you're toast. Ha.
         self.user_sue = self.make_user('sue', super_user=True)

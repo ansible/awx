@@ -6,12 +6,12 @@ from slackclient import SlackClient
 
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
-from awx.main.notifications.base import TowerBaseEmailBackend
+from awx.main.notifications.base import AWXBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.slack_backend')
 
 
-class SlackBackend(TowerBaseEmailBackend):
+class SlackBackend(AWXBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
                        "channels": {"label": "Destination Channels", "type": "list"}}

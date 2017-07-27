@@ -17,9 +17,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-# Tower Display Callback
+# AWX Display Callback
 from . import cleanup  # noqa (registers control persistent cleanup)
 from . import display  # noqa (wraps ansible.display.Display methods)
-from .module import TowerDefaultCallbackModule, TowerMinimalCallbackModule
+from .module import AWXDefaultCallbackModule, AWXMinimalCallbackModule
 
-__all__ = ['TowerDefaultCallbackModule', 'TowerMinimalCallbackModule']
+__all__ = ['AWXDefaultCallbackModule', 'AWXMinimalCallbackModule']

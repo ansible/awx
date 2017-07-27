@@ -16,7 +16,7 @@ from rest_framework import serializers
 from rest_framework.relations import RelatedField, ManyRelatedField
 from rest_framework.request import clone_request
 
-# Ansible Tower
+# AWX
 from awx.main.models import InventorySource, NotificationTemplate
 
 

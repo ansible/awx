@@ -6,7 +6,7 @@ from django.utils.timezone import now, timedelta
 
 from awx.main.tasks import (
     RunProjectUpdate, RunInventoryUpdate,
-    tower_isolated_heartbeat,
+    awx_isolated_heartbeat,
     isolated_manager
 )
 from awx.main.models import (
@@ -121,7 +121,7 @@ class TestIsolatedManagementTask:
         original_isolated_instance = needs_updating.instances.all().first()
         with mock.patch('awx.main.tasks.settings', MockSettings()):
             with mock.patch.object(isolated_manager.IsolatedManager, 'health_check') as check_mock:
-                tower_isolated_heartbeat()
+                awx_isolated_heartbeat()
         iso_instance = Instance.objects.get(hostname='isolated')
         call_args, _ = check_mock.call_args
         assert call_args[0][0] == iso_instance
@@ -131,7 +131,7 @@ class TestIsolatedManagementTask:
     def test_does_not_take_action(self, control_instance, just_updated):
         with mock.patch('awx.main.tasks.settings', MockSettings()):
             with mock.patch.object(isolated_manager.IsolatedManager, 'health_check') as check_mock:
-                tower_isolated_heartbeat()
+                awx_isolated_heartbeat()
         iso_instance = Instance.objects.get(hostname='isolated')
         check_mock.assert_not_called()
         assert iso_instance.capacity == 103

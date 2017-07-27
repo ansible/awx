@@ -19,7 +19,7 @@ __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
-    """A model representing an Ansible Tower instance running against this database."""
+    """A model representing an AWX instance running against this database."""
     objects = InstanceManager()
 
     uuid = models.CharField(max_length=40)
@@ -51,11 +51,11 @@ class Instance(models.Model):
     @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
-        return "tower"
+        return "awx"
 
 
 class InstanceGroup(models.Model):
-    """A model representing a Queue/Group of Tower Instances."""
+    """A model representing a Queue/Group of AWX Instances."""
     name = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

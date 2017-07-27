@@ -43,7 +43,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
 # AWX
-from awx import __version__ as tower_application_version
+from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
@@ -188,7 +188,7 @@ def cluster_node_heartbeat(self):
     if inst.exists():
         inst = inst[0]
         inst.capacity = get_system_task_capacity()
-        inst.version = tower_application_version
+        inst.version = awx_application_version
         inst.save()
     else:
         raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
@@ -197,7 +197,7 @@ def cluster_node_heartbeat(self):
     for other_inst in recent_inst:
         if other_inst.version == "":
             continue
-        if Version(other_inst.version.split('-', 1)[0]) > Version(tower_application_version) and not settings.DEBUG:
+        if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version) and not settings.DEBUG:
             logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
                                                                                                        other_inst.version,
                                                                                                        inst.hostname,
@@ -213,7 +213,7 @@ def cluster_node_heartbeat(self):
 
 
 @task(bind=True, base=LogErrorsTask)
-def tower_isolated_heartbeat(self):
+def awx_isolated_heartbeat(self):
     local_hostname = settings.CLUSTER_HOST_ID
     logger.debug("Controlling node checking for any isolated management tasks.")
     poll_interval = settings.AWX_ISOLATED_PERIODIC_CHECK
@@ -237,7 +237,7 @@ def tower_isolated_heartbeat(self):
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask)
-def tower_periodic_scheduler(self):
+def awx_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
     last_run = state.schedule_last_run
@@ -478,7 +478,7 @@ class BaseTask(LogErrorsTask):
         '''
         Create a temporary directory for job-related files.
         '''
-        path = tempfile.mkdtemp(prefix='ansible_awx_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
+        path = tempfile.mkdtemp(prefix='awx_%s_' % instance.pk, dir=settings.AWX_PROOT_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         self.cleanup_paths.append(path)
         return path
@@ -541,7 +541,7 @@ class BaseTask(LogErrorsTask):
             '': '',
         }
 
-    def add_ansible_venv(self, env, add_tower_lib=True):
+    def add_ansible_venv(self, env, add_awx_lib=True):
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
@@ -551,11 +551,11 @@ class BaseTask(LogErrorsTask):
                 env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
                 break
         # Add awx/lib to PYTHONPATH.
-        if add_tower_lib:
+        if add_awx_lib:
             env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
         return env
 
-    def add_tower_venv(self, env):
+    def add_awx_venv(self, env):
         env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
         env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
         return env
@@ -576,7 +576,7 @@ class BaseTask(LogErrorsTask):
         # callbacks to work.
         # Update PYTHONPATH to use local site-packages.
         # NOTE:
-        # Derived class should call add_ansible_venv() or add_tower_venv()
+        # Derived class should call add_ansible_venv() or add_awx_venv()
         if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
@@ -612,7 +612,7 @@ class BaseTask(LogErrorsTask):
             # For isolated jobs, we have to interact w/ the REST API from the
             # controlling node and ship the static JSON inventory to the
             # isolated host (because the isolated host itself can't reach the
-            # Tower REST API to fetch the inventory).
+            # REST API to fetch the inventory).
             path = os.path.join(kwargs['private_data_dir'], 'inventory')
             if os.path.exists(path):
                 return path
@@ -932,7 +932,7 @@ class RunJob(BaseTask):
             plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
-        env = self.add_ansible_venv(env, add_tower_lib=kwargs.get('isolated', False))
+        env = self.add_ansible_venv(env, add_awx_lib=kwargs.get('isolated', False))
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -940,7 +940,7 @@ class RunJob(BaseTask):
         if job.use_fact_cache and not kwargs.get('isolated'):
             env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
             env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
-            env['ANSIBLE_CACHE_PLUGIN'] = "tower"
+            env['ANSIBLE_CACHE_PLUGIN'] = "awx"
             env['ANSIBLE_FACT_CACHE_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
             env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if job.project:
@@ -949,10 +949,11 @@ class RunJob(BaseTask):
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
-            env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
+            env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['REST_API_URL'] = settings.INTERNAL_API_URL
             env['REST_API_TOKEN'] = job.task_auth_token or ''
             env['TOWER_HOST'] = settings.TOWER_URL_BASE
+            env['AWX_HOST'] = settings.TOWER_URL_BASE
             env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
             env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
@@ -1073,24 +1074,31 @@ class RunJob(BaseTask):
         if job.start_at_task:
             args.append('--start-at-task=%s' % job.start_at_task)
 
-        # Define special extra_vars for Tower, combine with job.extra_vars.
+        # Define special extra_vars for AWX, combine with job.extra_vars.
         extra_vars = {
             'tower_job_id': job.pk,
             'tower_job_launch_type': job.launch_type,
+            'awx_job_id': job.pk,
+            'awx_job_launch_type': job.launch_type,
         }
         if job.project:
             extra_vars.update({
                 'tower_project_revision': job.project.scm_revision,
+                'awx_project_revision': job.project.scm_revision,
             })
         if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
                 'tower_job_template_name': job.job_template.name,
+                'awx_job_template_id': job.job_template.pk,
+                'awx_job_template_name': job.job_template.name,
             })
         if job.created_by:
             extra_vars.update({
                 'tower_user_id': job.created_by.pk,
                 'tower_user_name': job.created_by.username,
+                'awx_user_id': job.created_by.pk,
+                'awx_user_name': job.created_by.username,
             })
         if job.extra_vars_dict:
             if kwargs.get('display', False) and job.job_template:
@@ -1738,7 +1746,7 @@ class RunInventoryUpdate(BaseTask):
         """
         env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         **kwargs)
-        env = self.add_tower_venv(env)
+        env = self.add_awx_venv(env)
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
@@ -1748,7 +1756,7 @@ class RunInventoryUpdate(BaseTask):
         # These are set here and then read in by the various Ansible inventory
         # modules, which will actually do the inventory sync.
         #
-        # The inventory modules are vendored in Tower in the
+        # The inventory modules are vendored in AWX in the
         # `awx/plugins/inventory` directory; those files should be kept in
         # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
@@ -1820,9 +1828,9 @@ class RunInventoryUpdate(BaseTask):
         src = inventory_update.source
 
         # Add several options to the shell arguments based on the
-        # inventory-source-specific setting in the Tower configuration.
+        # inventory-source-specific setting in the AWX configuration.
         # These settings are "per-source"; it's entirely possible that
-        # they will be different between cloud providers if a Tower user
+        # they will be different between cloud providers if an AWX user
         # actively uses more than one.
         if getattr(settings, '%s_ENABLED_VAR' % src.upper(), False):
             args.extend(['--enabled-var',
@@ -1852,7 +1860,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='ansible_awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
+            runpath = tempfile.mkdtemp(prefix='awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
@@ -2139,7 +2147,7 @@ class RunSystemJob(BaseTask):
     def build_env(self, instance, **kwargs):
         env = super(RunSystemJob, self).build_env(instance,
                                                   **kwargs)
-        env = self.add_tower_venv(env)
+        env = self.add_awx_venv(env)
         return env
 
     def build_cwd(self, instance, **kwargs):
