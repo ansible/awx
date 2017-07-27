@@ -181,6 +181,9 @@ export default
                                 }
                             }
                         }
+                        else {
+                            $state.go('.', null, {reload: true});
+                        }
                     })
                     .error(function(data, status) {
                         let template_id = scope.job_template_id;
