@@ -1615,7 +1615,18 @@ class CredentialTypeActivityStreamList(ActivityStreamEnforcementMixin, SubListAP
     new_in_api_v2 = True
 
 
-class CredentialList(ListCreateAPIView):
+# remove in 3.3
+class CredentialViewMixin(object):
+
+    @property
+    def related_search_fields(self):
+        ret = super(CredentialViewMixin, self).related_search_fields
+        if get_request_version(self.request) == 1 and 'credential_type__search' in ret:
+            ret.remove('credential_type__search')
+        return ret
+
+
+class CredentialList(CredentialViewMixin, ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
@@ -1650,7 +1661,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
         return self.model.objects.filter(pk__in=teams)
 
 
-class UserCredentialsList(SubListCreateAPIView):
+class UserCredentialsList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = UserCredentialSerializerCreate
@@ -1667,7 +1678,7 @@ class UserCredentialsList(SubListCreateAPIView):
         return user_creds & visible_creds
 
 
-class TeamCredentialsList(SubListCreateAPIView):
+class TeamCredentialsList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = TeamCredentialSerializerCreate
@@ -1684,7 +1695,7 @@ class TeamCredentialsList(SubListCreateAPIView):
         return (team_creds & visible_creds).distinct()
 
 
-class OrganizationCredentialList(SubListCreateAPIView):
+class OrganizationCredentialList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = OrganizationCredentialSerializerCreate
