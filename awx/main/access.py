@@ -1392,26 +1392,45 @@ class JobAccess(BaseAccess):
 
         inventory_access = obj.inventory and self.user in obj.inventory.use_role
         credential_access = obj.credential and self.user in obj.credential.use_role
+        job_extra_credentials = set(obj.extra_credentials.all())
+        if job_extra_credentials:
+            credential_access = False
 
         # Check if JT execute access (and related prompts) is sufficient
         if obj.job_template is not None:
             prompts_access = True
             job_fields = {}
+            jt_extra_credentials = set(obj.job_template.extra_credentials.all())
             for fd in obj.job_template._ask_for_vars_dict():
+                if fd == 'extra_credentials':
+                    job_fields[fd] = job_extra_credentials
                 job_fields[fd] = getattr(obj, fd)
             accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
+            # Check if job fields are not allowed by current _on_launch settings
             for fd in ignored_fields:
-                if fd == 'extra_credentials':
-                    if set(job_fields[fd].all()) != set(getattr(obj.job_template, fd).all()):
+                if fd == 'extra_vars':
+                    continue  # we cannot yet validate validity of prompted extra_vars
+                elif fd == 'extra_credentials':
+                    if job_extra_credentials != jt_extra_credentials:
                         # Job has extra_credentials that are not promptable
                         prompts_access = False
-                elif fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
+                        break
+                elif job_fields[fd] != getattr(obj.job_template, fd):
                     # Job has field that is not promptable
                     prompts_access = False
-            if obj.credential != obj.job_template.credential and not credential_access:
-                prompts_access = False
-            if obj.inventory != obj.job_template.inventory and not inventory_access:
-                prompts_access = False
+                    break
+            # For those fields that are allowed by prompting, but differ
+            # from JT, assure that user has explicit access to them
+            if prompts_access:
+                if obj.credential != obj.job_template.credential and not credential_access:
+                    prompts_access = False
+                if obj.inventory != obj.job_template.inventory and not inventory_access:
+                    prompts_access = False
+                if prompts_access and job_extra_credentials != jt_extra_credentials:
+                    for cred in job_extra_credentials:
+                        if self.user not in cred.use_role:
+                            prompts_access = False
+                            break
             if prompts_access and self.user in obj.job_template.execute_role:
                 return True
 
