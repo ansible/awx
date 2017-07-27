@@ -1,3 +1,6 @@
+const DEFAULT_DEBOUNCE = 250;
+const DEFAULT_KEY = 'name';
+
 function atInputLookupLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -9,28 +12,40 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputLookupController (baseInputController, $state, $stateParams) {
+function AtInputLookupController (baseInputController, $q, $state, $stateParams) {
     let vm = this || {};
 
     let scope;
+    let model;
+    let search;
 
     vm.init = (_scope_, element, form) => {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
+        model = scope.state._model;
+        scope.state._debounce = scope.state._debounce || DEFAULT_DEBOUNCE;
+        search = scope.state._search || {
+            key: DEFAULT_KEY,
+            config: {
+                unique: true
+            }
+        };
 
         scope.$watch(scope.state._resource, vm.watchResource);
-        scope.state._validate = vm.checkOnInput;
 
         vm.check();
     };
 
     vm.watchResource = () => {
+        if (!scope[scope.state._resource]) {
+            return;
+        }
+
         if (scope[scope.state._resource] !== scope.state._value) {
-            scope.state._value = scope[scope.state._resource];
             scope.state._displayValue = scope[`${scope.state._resource}_name`];
 
-            vm.check();
+            vm.search();
         }
     };
 
@@ -49,32 +64,54 @@ function AtInputLookupController (baseInputController, $state, $stateParams) {
         scope[scope.state._resource] = undefined;
     };
 
-    vm.checkOnInput = () => {
-        if (!scope.state._touched) {
-            return { isValid: true };
+    vm.searchAfterDebounce = () => {
+        vm.isDebouncing = true;
+
+        vm.debounce = window.setTimeout(() => {
+            vm.isDebouncing = false;
+            vm.search();
+        }, scope.state._debounce);
+    };
+
+    vm.resetDebounce = () => {
+        clearTimeout(vm.debounce);
+        vm.searchAfterDebounce(); 
+    };
+
+    vm.search = () => {
+        return model.search({ [search.key]: scope.state._displayValue }, search.config)
+            .then(found => {
+                if (!found) {
+                    return vm.reset();
+                }
+
+                scope[scope.state._resource] = model.get('id');
+                scope.state._value = model.get('id');
+                scope.state._displayValue = model.get('name');
+            })
+            .catch(() => vm.reset())
+            .finally(() => {
+                let isValid = scope.state._value !== undefined;
+                let message = isValid ? '' : vm.strings.get('lookup.NOT_FOUND');
+
+                vm.check({ isValid, message });
+            });
+    };
+
+    vm.searchOnInput = () => {
+        if (vm.isDebouncing) {
+            return vm.resetDebounce();
         }
 
-        let result = scope.state._model.match('get', 'name', scope.state._displayValue);
+        scope.state._touched = true;
 
-        if (result) {
-            scope[scope.state._resource] = result.id;
-            scope.state._value = result.id;
-            scope.state._displayValue = result.name;
-
-            return { isValid: true };
-        }
-
-        vm.reset();
-
-        return {
-            isValid: false,
-            message: vm.strings.get('lookup.NOT_FOUND')
-        };
+        vm.searchAfterDebounce();
     };
 }
 
 AtInputLookupController.$inject = [
     'BaseInputController',
+    '$q',
     '$state',
     '$stateParams'
 ];

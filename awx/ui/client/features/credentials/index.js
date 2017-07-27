@@ -7,13 +7,13 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
     let id = $stateParams.credential_id;
 
     let promises = {
-        me: new Me('get'),
-        credentialType: new CredentialType('get'),
-        organization: new Organization('get')
+        me: new Me('get')
     };
 
     if (!id) {
         promises.credential = new Credential('options');
+        promises.credentialType =  new CredentialType();
+        promises.organization =  new Organization();
 
         return $q.all(promises)
     }
@@ -22,10 +22,21 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
 
     return $q.all(promises)
         .then(models => {
-            let credentialTypeId = models.credential.get('credential_type');
-            models.selectedCredentialType = models.credentialType.graft(credentialTypeId);
+            let typeId = models.credential.get('credential_type');
+            let orgId = models.credential.get('organization');
 
-            return models;
+            let dependents = {
+                credentialType: new CredentialType('get', typeId),
+                organization: new Organization('get', orgId)
+            };
+
+            return $q.all(dependents)
+                .then(related => {
+                    models.credentialType = related.credentialType;
+                    models.organization = related.organization;
+
+                    return models;
+                });
         });
 }
 

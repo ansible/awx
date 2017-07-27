@@ -5,7 +5,6 @@ function EditCredentialsController (models, $state, $scope, strings) {
     let credential = models.credential;
     let credentialType = models.credentialType;
     let organization = models.organization;
-    let selectedCredentialType = models.selectedCredentialType;
 
     vm.mode = 'edit';
     vm.strings = strings;
@@ -50,21 +49,19 @@ function EditCredentialsController (models, $state, $scope, strings) {
     vm.form.credential_type._resource = 'credential_type';
     vm.form.credential_type._model = credentialType;
     vm.form.credential_type._route = 'credentials.edit.credentialType';
-    vm.form.credential_type._value = selectedCredentialType.get('id');
-    vm.form.credential_type._displayValue = selectedCredentialType.get('name');
+    vm.form.credential_type._value = credentialType.get('id');
+    vm.form.credential_type._displayValue = credentialType.get('name');
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
  
     vm.form.inputs = {
         _get (id) {
-            let type = credentialType.graft(id);
-
-            type.mergeInputProperties();
+            credentialType.mergeInputProperties();
             
-            if (type.get('id') === credential.get('credential_type')) {
-                return credential.assignInputGroupValues(type.get('inputs.fields'));
+            if (credentialType.get('id') === credential.get('credential_type')) {
+                return credential.assignInputGroupValues(credentialType.get('inputs.fields'));
             }
 
-            return type.get('inputs.fields');
+            return credentialType.get('inputs.fields');
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',
@@ -73,8 +70,8 @@ function EditCredentialsController (models, $state, $scope, strings) {
 
     vm.form.save = data => {
         data.user = me.getSelf().id;
-        credential.clearTypeInputs();
-                
+        credential.unset('inputs');
+
         return credential.request('put', data);
     };
 

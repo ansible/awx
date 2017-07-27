@@ -11,16 +11,41 @@ function request (method, resource) {
     return this.http[method](resource);
 }
 
-function httpGet (resource) {
-    this.method = this.method || 'GET';
-
+function search (params, config) {
     let req = {
-        method: this.method,
+        method: 'GET',
+        url: this.path,
+        params
+    };
+
+    return $http(req)
+        .then(res => {
+            if (!res.data.count) {
+                return false;
+            }
+
+            if (config.unique) {
+                if (res.data.count !== 1) {
+                    return false;
+                }
+
+                this.model.GET = res.data.results[0];
+            } else {
+                this.model.GET = res.data;
+            }
+
+            return true;
+        });
+}
+
+function httpGet (resource) {
+    let req = {
+        method: 'GET',
         url: this.path
     };
 
     if (typeof resource === 'object') {
-        this.model[this.method] = resource;
+        this.model.GET = resource;
 
         return $q.resolve();
     } else if (resource) {
@@ -43,9 +68,9 @@ function httpPost (data) {
     };
 
     return $http(req).then(res => {
-      this.model.GET = res.data;
+        this.model.GET = res.data;
 
-      return res;
+        return res;
     });
 }
 
@@ -85,6 +110,28 @@ function options (keys) {
 
 function get (keys) {
     return this.find('get', keys);
+}
+
+function unset (method, keys) {
+    if (!keys) {
+        keys = method;
+        method = 'GET';
+    }
+    
+    method = method.toUpperCase();
+    keys = keys.split('.');
+
+    if (!keys.length) {
+        delete this.model[method];
+    } else if (keys.length === 1) {
+        delete this.model[method][keys[0]];
+    } else {
+        let property = keys.splice(-1);
+        keys = keys.join('.');
+
+        let model = this.find(method, keys)
+        delete model[property];
+    }
 }
 
 function set (method, keys, value) {
@@ -189,6 +236,10 @@ function graft (id) {
 }
 
 function create (method, resource, graft) {
+    if (!method) {
+        return this;
+    }
+
     this.promise = this.request(method, resource);
 
     if (graft) {
@@ -200,21 +251,24 @@ function create (method, resource, graft) {
 }
 
 function BaseModel (path) {
-    this.model = {};
-    this.get = get;
-    this.set = set;
-    this.options = options;
-    this.find = find;
-    this.match = match;
-    this.normalizePath = normalizePath;
-    this.graft = graft;
     this.create = create;
+    this.find = find;
+    this.get = get;
+    this.graft = graft;
+    this.match = match;
+    this.model = {};
+    this.normalizePath = normalizePath;
+    this.options = options;
     this.request = request;
+    this.search = search;
+    this.set = set;
+    this.unset = unset;
+
     this.http = {
         get: httpGet.bind(this),
         options: httpOptions.bind(this),
         post: httpPost.bind(this),
-        put: httpPut.bind(this)
+        put: httpPut.bind(this),
     };
 
     this.path = this.normalizePath(path);

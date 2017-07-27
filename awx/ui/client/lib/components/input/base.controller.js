@@ -67,16 +67,22 @@ function BaseInputController (strings) {
             };
         };
 
-        vm.check = () => {
-            let result = vm.validate();
-
-            if (scope.state._touched || !scope.state._required) {
-                scope.state._rejected = !result.isValid;
-                scope.state._isValid = result.isValid;
-                scope.state._message = result.message;
-
-                form.check();
+        vm.updateValidationState = result => {
+            if (!scope.state._touched && scope.state._required) {
+                return;
             }
+
+            scope.state._rejected = !result.isValid;
+            scope.state._isValid = result.isValid;
+            scope.state._message = result.message;
+
+            form.check();
+        };
+
+        vm.check = result => {
+            result = result || vm.validate();
+
+            vm.updateValidationState(result);
         };
 
         vm.toggleRevertReplace = () => {
