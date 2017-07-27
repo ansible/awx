@@ -31,6 +31,11 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
             $scope[list.name] = _.map($scope.hosts, function(value) {
                 value.inventory_name = value.summary_fields.inventory.name;
                 value.inventory_id = value.summary_fields.inventory.id;
+                angular.forEach($scope.hostsSelected, function(selectedHost){
+                    if(selectedHost.id === value.id) {
+                        value.isSelected = true;
+                    }
+                });
                 return value;
             });
             setJobStatus();
