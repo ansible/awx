@@ -78,15 +78,12 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 I18N_FLAG_FILE = .i18n_built
 
-.PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
+.PHONY: clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_ansible test_coverage coverage_html \
-	test_jenkins dev_build release_build release_clean sdist rpmtar mock-rpm \
-	mock-srpm rpm-sign deb deb-src debian debsign pbuilder \
-	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
-	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
+	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska VERSION
+	ui-test ui-deps ui-test-ci ui-test-saucelabs VERSION
 
 # remove ui build artifacts
 clean-ui:
@@ -129,14 +126,6 @@ guard-%:
 	    echo "The required environment variable '$*' is not set"; \
 	    exit 1; \
 	fi
-
-# Fetch from origin, rebase local commits on top of origin commits.
-rebase:
-	git pull --rebase origin master
-
-# Push changes to origin.
-push:
-	git push origin master
 
 virtualenv: virtualenv_ansible virtualenv_awx
 
@@ -412,10 +401,6 @@ coverage_html:
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
-
-# Run unit tests to produce output for Jenkins.
-# Alias existing make target so old versions run against Jekins the same way
-test_jenkins : test_coverage
 
 # Make fake data
 DATA_GEN_PRESET = ""
