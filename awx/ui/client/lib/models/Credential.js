@@ -3,18 +3,21 @@ const ENCRYPTED_VALUE = '$encrypted$';
 let BaseModel;
 
 function createFormSchema (method, config) {
+    if (!config) {
+        config = method;
+        method = 'GET';
+    }
+
     let schema = Object.assign({}, this.options(`actions.${method.toUpperCase()}`));
 
     if (config && config.omit) {
-        config.omit.forEach(key => {
-            delete schema[key];
-        });
+        config.omit.forEach(key => delete schema[key]);
     }
 
     for (let key in schema) {
         schema[key].id = key;
 
-        if (method === 'put') {
+        if (this.has(key)) {
             schema[key]._value = this.get(key);
         }
     }

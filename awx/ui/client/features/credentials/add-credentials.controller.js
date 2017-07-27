@@ -19,6 +19,8 @@ function AddCredentialsController (models, $state, strings) {
         omit: ['user', 'team', 'inputs']
     });
 
+    vm.form.disabled = !credential.isCreatable();
+
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'credentials.add.organization';
     vm.form.organization._model = organization;

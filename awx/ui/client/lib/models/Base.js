@@ -217,10 +217,53 @@ function find (method, keys) {
     return value;
 }
 
+function has (method, keys) {
+    if (!keys) {
+        keys = method;
+        method = 'GET';
+    }
+
+    method = method.toUpperCase();
+
+    let value;
+    switch (method) {
+        case 'OPTIONS':
+            value = this.options(keys);
+            break;
+        default:
+            value = this.get(keys);
+    }
+
+    return value !== undefined && value !== null;
+}
+
 function normalizePath (resource) {
     let version = '/api/v2/';
     
     return `${version}${resource}/`;
+}
+
+function isEditable () {
+    let canEdit = this.get('summary_fields.user_capabilities.edit');
+
+    if (canEdit) {
+        return true;
+    }
+
+    if (this.has('options', 'actions.PUT')) {
+        return true;
+    }
+
+    return false;
+
+}
+
+function isCreatable () {
+    if (this.has('options', 'actions.POST')) {
+        return true;
+    }
+
+    return false;
 }
 
 function graft (id) {
@@ -255,6 +298,9 @@ function BaseModel (path) {
     this.find = find;
     this.get = get;
     this.graft = graft;
+    this.has = has;
+    this.isEditable = isEditable;
+    this.isCreatable = isCreatable;
     this.match = match;
     this.model = {};
     this.normalizePath = normalizePath;

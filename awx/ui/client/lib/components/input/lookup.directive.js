@@ -79,6 +79,8 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
     };
 
     vm.search = () => {
+        scope.state._touched = true;
+
         return model.search({ [search.key]: scope.state._displayValue }, search.config)
             .then(found => {
                 if (!found) {

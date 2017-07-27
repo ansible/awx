@@ -27,6 +27,8 @@ function AtFormController (eventService, strings) {
         form = _form_;
         modal = scope[scope.ns].modal;
 
+        vm.state.disabled = scope.state.disabled;
+
         vm.setListeners();
     };
 

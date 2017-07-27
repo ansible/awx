@@ -35,9 +35,11 @@ function EditCredentialsController (models, $state, $scope, strings) {
     // Only exists for permissions compatibility
     $scope.credential_obj = credential.get();
 
-    vm.form = credential.createFormSchema('put', {
+    vm.form = credential.createFormSchema({
         omit: ['user', 'team', 'inputs']
     });
+
+    vm.form.disabled = !credential.isEditable();
 
     vm.form.organization._resource = 'organization';
     vm.form.organization._model = organization;
