@@ -70,7 +70,7 @@ export default ['templateUrl', '$compile', 'Wait', '$filter', 'i18n',
                             html += "<tr>";
                             html += "<td><a href=\"\" aw-tool-tip=\"No sync data\" aw-tip-placement=\"top\"><i class=\"fa icon-job-none\"></i></a></td>";
                             html += "<td>NA</td>";
-                            html += "<td><a href=\"\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
+                            html += "<td><span>" + $filter('sanitize')(ellipsis(row.name)) + "</span></td>";
                             html += "</tr>\n";
                         }
                     });
