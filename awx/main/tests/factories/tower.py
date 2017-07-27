@@ -139,7 +139,7 @@ def create_instance_group(name, instances=None):
     return mk_instance_group(name=name, instance=instances)
 
 
-def create_survey_spec(variables=None, default_type='integer', required=True):
+def create_survey_spec(variables=None, default_type='integer', required=True, min=None, max=None):
     '''
     Returns a valid survey spec for a job template, based on the input
     argument specifying variable name(s)
@@ -174,10 +174,14 @@ def create_survey_spec(variables=None, default_type='integer', required=True):
         spec_item.setdefault('question_description', "A question about %s." % var_name)
         if spec_item['type'] == 'integer':
             spec_item.setdefault('default', 0)
-            spec_item.setdefault('max', spec_item['default'] + 100)
-            spec_item.setdefault('min', spec_item['default'] - 100)
+            spec_item.setdefault('max', max or spec_item['default'] + 100)
+            spec_item.setdefault('min', min or spec_item['default'] - 100)
         else:
             spec_item.setdefault('default', '')
+            if min:
+                spec_item.setdefault('min', min)
+            if max:
+                spec_item.setdefault('max', max)
         spec.append(spec_item)
 
     survey_spec = {}
