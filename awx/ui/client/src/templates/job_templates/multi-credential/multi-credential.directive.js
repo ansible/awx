@@ -12,7 +12,8 @@ export default ['templateUrl', '$compile',
                 selectedCredentials: '=',
                 prompt: '=',
                 credentialNotPresent: '=',
-                credentialsToPost: '='
+                credentialsToPost: '=',
+                fieldIsDisabled: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential'),

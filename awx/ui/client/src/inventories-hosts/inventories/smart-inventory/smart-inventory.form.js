@@ -78,7 +78,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     dataTitle: i18n._('Instance Groups'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
                 },
                 smartinventory_variables: {
                     label: i18n._('Variables'),

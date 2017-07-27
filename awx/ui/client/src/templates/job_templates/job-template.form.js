@@ -135,7 +135,8 @@ function(NotificationsList, CompletedJobsList, i18n) {
                             prompt="ask_credential_on_launch"
                             selected-credentials="selectedCredentials"
                             credential-not-present="credentialNotPresent"
-                            credentials-to-post="credentialsToPost">
+                            credentials-to-post="credentialsToPost"
+                            field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)">
                         </multi-credential>`,
                     required: true,
                     awPopOver: "<p>" + i18n._("Select credentials that allow {{BRAND_NAME}} to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
@@ -208,7 +209,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     dataTitle: i18n._('Instance Groups'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
                 },
                 job_tags: {
                     label: i18n._('Job Tags'),
