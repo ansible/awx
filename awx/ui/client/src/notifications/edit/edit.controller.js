@@ -205,10 +205,22 @@ export default ['Rest', 'Wait',
 
         $scope.emailOptionsChange = function () {
             if ($scope.email_options === 'use_ssl') {
+                if ($scope.use_ssl) {
+                    $scope.email_options = null;
+                    $scope.use_ssl = false;
+                    return;
+                }
+
                 $scope.use_ssl = true;
                 $scope.use_tls = false;
             }
             else if ($scope.email_options === 'use_tls') {
+                if ($scope.use_tls) {
+                    $scope.email_options = null;
+                    $scope.use_tls = false;
+                    return;
+                }
+
                 $scope.use_ssl = false;
                 $scope.use_tls = true;
             }
@@ -263,7 +275,7 @@ export default ['Rest', 'Wait',
             Rest.setUrl(url + id + '/');
             Rest.put(params)
                 .success(function() {
-                    $state.go($state.current, null, { reload: true });
+                    $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
                 .error(function(data, status) {
