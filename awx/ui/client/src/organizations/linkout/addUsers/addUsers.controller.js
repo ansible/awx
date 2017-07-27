@@ -54,7 +54,8 @@ function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
                     let html = generateList.build({
                         list: list,
                         mode: 'edit',
-                        title: false
+                        title: false,
+                        hideViewPerPage: true
                     });
 
                     $scope.list = list;
