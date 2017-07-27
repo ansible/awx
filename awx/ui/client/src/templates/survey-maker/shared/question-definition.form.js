@@ -302,7 +302,7 @@ export default
     },
     buttons: {
         question_cancel : {
-            label: 'Cancel',
+            label: 'Clear',
             'class' : 'btn btn-default Form-cancelButton',
             ngClick: 'generateAddQuestionForm()',
             ngDisabled: 'survey_question_form.$pristine'

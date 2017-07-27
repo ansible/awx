@@ -3,7 +3,8 @@ export default ['templateUrl', '$compile',
     function(templateUrl, $compile) {
         return {
             scope: {
-                instanceGroups: '='
+                instanceGroups: '=',
+                fieldIsDisabled: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('shared/instance-groups-multiselect/instance-groups'),

@@ -1,10 +1,12 @@
 <div class="input-group Form-mixedInputGroup">
     <span class="input-group-btn">
-        <button type="button" class="Form-lookupButton btn btn-default" ng-click="openInstanceGroupsModal()">
+        <button type="button" class="Form-lookupButton btn btn-default" ng-click="openInstanceGroupsModal()"
+            ng-disabled="fieldIsDisabled">
             <i class="fa fa-search"></i>
         </button>
     </span>
-    <span id="InstanceGroups" class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup LabelList-lookupTags">
+    <span id="InstanceGroups" class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup LabelList-lookupTags"
+        ng-disabled="fieldIsDisabled">
         <div class="LabelList-tagContainer" ng-repeat="tag in instanceGroupsTags">
             <div class="LabelList-deleteContainer"
                 ng-click="deleteTag(tag)">

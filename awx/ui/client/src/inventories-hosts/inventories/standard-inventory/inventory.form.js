@@ -86,7 +86,7 @@ function(i18n, InventoryCompletedJobsList) {
                 dataTitle: i18n._('Instance Groups'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
+                control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
             },
             inventory_variables: {
                 realName: 'variables',
