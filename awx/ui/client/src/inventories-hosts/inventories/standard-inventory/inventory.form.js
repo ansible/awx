@@ -200,7 +200,7 @@ function(i18n, InventoryCompletedJobsList) {
         },
         relatedButtons: {
             remediate_inventory: {
-                ngClick: 'remediateInventory(id, name, insights_credential)',
+                ngClick: 'remediateInventory(id, insights_credential)',
                 ngShow: 'is_insights && mode !== "add"',
                 label: i18n._('Remediate Inventory'),
                 class: 'Form-primaryButton'
