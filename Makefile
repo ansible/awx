@@ -76,6 +76,8 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
 UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
+I18N_FLAG_FILE = .i18n_built
+
 .DEFAULT_GOAL := build
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
