@@ -197,8 +197,8 @@
             };
 
             if(Inventory){
-                $scope.inventory = Inventory.inventory_id;
-                $scope.inventory_name = Inventory.inventory_name;
+                $scope.inventory = Inventory.id;
+                $scope.inventory_name = Inventory.name;
             }
             if(Project){
                 $scope.project = Project.id;

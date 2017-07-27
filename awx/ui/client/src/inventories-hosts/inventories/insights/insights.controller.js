@@ -42,8 +42,8 @@ function (data, $scope, moment, $state, InventoryData, InsightsService) {
         window.open(`https://access.redhat.com/insights/inventory?machine=${$scope.$parent.host.insights_system_id}`, '_blank');
     };
 
-    $scope.remediateInventory = function(inv_id, inv_name, insights_credential){
-        $state.go('templates.addJobTemplate', {inventory_id: inv_id, inventory_name:inv_name, credential_id: insights_credential});
+    $scope.remediateInventory = function(inv_id, insights_credential){
+        $state.go('templates.addJobTemplate', {inventory_id: inv_id, credential_id: insights_credential});
     };
 
     $scope.formCancel = function(){
