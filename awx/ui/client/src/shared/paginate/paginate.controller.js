@@ -7,6 +7,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         $scope.pageSize = pageSize;
 
         $scope.basePageSize = parseInt(pageSize) === 5 ? 5 : 20;
+        $scope.maxVisiblePages = $scope.maxVisiblePages ? parseInt($scope.maxVisiblePages) : 10;
 
         function init() {
 
@@ -94,7 +95,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
 
         function calcPageRange(current, last) {
             let result = [],
-                maxVisiblePages = $scope.maxVisiblePages ? parseInt($scope.maxVisiblePages) : 10,
+                maxVisiblePages = parseInt($scope.maxVisiblePages),
                 pagesLeft,
                 pagesRight;
             if(maxVisiblePages % 2) {
