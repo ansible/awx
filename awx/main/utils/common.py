@@ -16,6 +16,7 @@ import urlparse
 import threading
 import contextlib
 import tempfile
+import six
 
 # Decorator
 from decorator import decorator
@@ -325,7 +326,10 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
         return '<missing {}>-{}'.format(obj._meta.verbose_name, getattr(obj, '{}_id'.format(field_name)))
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
-    if field_name in password_fields:
+    if field_name in password_fields or (
+        isinstance(field_val, six.string_types) and
+        field_val.startswith('$encrypted$')
+    ):
         return u'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
