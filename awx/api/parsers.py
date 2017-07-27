@@ -57,8 +57,10 @@ class JSONParser(parsers.JSONParser):
 
         try:
             data = stream.read().decode(encoding)
+            if not data:
+                return {}
             obj = json.loads(data, object_pairs_hook=OrderedDict)
-            if not isinstance(obj, dict):
+            if not isinstance(obj, dict) and obj is not None:
                 raise ParseError(_('JSON parse error - not a JSON object'))
             return obj
         except ValueError as exc:
