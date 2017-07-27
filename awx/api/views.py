@@ -74,6 +74,7 @@ from awx.main.utils import (
     decrypt_field,
 )
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.insights import filter_insights_api_response
 
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
@@ -2097,7 +2098,8 @@ class HostInsights(GenericAPIView):
             return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         try:
-            return (dict(insights_content=res.json()), status.HTTP_200_OK)
+            filtered_insights_content = filter_insights_api_response(res.json())
+            return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
         except ValueError:
             return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
