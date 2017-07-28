@@ -667,6 +667,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                     nosort: true
                                 };
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }
@@ -688,6 +689,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                             (InventorySourcesList) => {
                                 let list = _.cloneDeep(InventorySourcesList);
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }

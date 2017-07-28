@@ -127,7 +127,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     includePlaybookNotFoundError: true
                 },
                 credential: {
-                    label: i18n._('Credentials'),
+                    label: i18n._('Credential'),
                     type: 'custom',
                     control: `
                         <multi-credential
@@ -249,6 +249,17 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                labels: {
+                    label: i18n._('Labels'),
+                    type: 'select',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    dataTitle: i18n._('Labels'),
+                    dataPlacement: 'right',
+                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
+                    dataContainer: 'body',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
                 diff_mode: {
                     label: i18n._('Show Changes'),
                     type: 'toggleSwitch',
@@ -265,6 +276,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 checkbox_group: {
                     label: i18n._('Options'),
                     type: 'checkbox_group',
+                    class: 'Form-formGroup--fullWidth',
                     fields: [{
                         name: 'become_enabled',
                         label: i18n._('Enable Privilege Escalation'),
@@ -344,18 +356,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         alwaysShowAsterisk: true
                     }
                 },
-                labels: {
-                    label: i18n._('Labels'),
-                    type: 'select',
-                    class: 'Form-formGroup--fullWidth',
-                    ngOptions: 'label.label for label in labelOptions track by label.value',
-                    multiSelect: true,
-                    dataTitle: i18n._('Labels'),
-                    dataPlacement: 'right',
-                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
-                    dataContainer: 'body',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
                 variables: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',
@@ -397,9 +397,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
             },
 
             related: {
-                "completed_jobs": {
-                    include: "CompletedJobsList"
-                },
                 permissions: {
                     name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions.'),
@@ -448,6 +445,9 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 },
                 "notifications": {
                     include: "NotificationsList"
+                },
+                "completed_jobs": {
+                    include: "CompletedJobsList"
                 }
             },
 
