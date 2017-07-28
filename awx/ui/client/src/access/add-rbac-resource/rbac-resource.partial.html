@@ -33,72 +33,72 @@
 
                 <div class="Form-tabHolder" ng-hide='withoutTeamPermissions'>
                     <div id="users_tab" class="Form-tab"
-                        ng-click="toggleFormTabs('users')"
-                        ng-class="{'is-selected': usersSelected }" translate>
+                        ng-click="selectTab('users')"
+                        ng-class="{'is-selected': tab.users }" translate>
                         Users
                     </div>
                     <div id="teams_tab" class="Form-tab"
-                        ng-click="toggleFormTabs('teams')"
-                        ng-class="{'is-selected': teamsSelected }" translate>
+                        ng-click="selectTab('teams')"
+                        ng-class="{'is-selected': tab.teams }" translate>
                         Teams
                     </div>
                 </div>
 
-                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="usersSelected">
+                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="tab.users">
                     <rbac-multiselect-list view="Users" all-selected="allSelected" dataset="usersDataset"></rbac-multiselect-list>
                 </div>
-                <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="teamsSelected">
+                <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="tab.teams">
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></rbac-multiselect-list>
                 </div>
 
-                <div class="AddPermissions-separator"
-                    ng-show="allSelected && allSelected.length > 0"></div>
-
-                <div class="AddPermissions-directions"
-                    ng-show="allSelected && allSelected.length > 0">
-                    <span class="AddPermissions-directionNumber">
-                        2
-                    </span>
-                    <translate>Please assign roles to the selected users/teams</translate>
-                    <div class="AddPermissions-keyToggle btn"
-                        ng-class="{'is-active': showKeyPane}"
-                        ng-click="toggleKeyPane()" translate>
-                        Key
-                    </div>
-                </div>
-                <div class="AddPermissions-keyPane"
-                    ng-show="showKeyPane">
-                    <div class="AddPermissions-keyRow"
-                        ng-repeat="key in roleKey | filter:{name: '!Read'}">
-                        <div class="AddPermissions-keyName">
-                            {{ key.name }}
-                        </div>
-                        <div class="AddPermissions-keyDescription">
-                            {{ key.description || "No description provided" }}
+                <span ng-show="showSection2Container()">
+                    <div class="AddPermissions-separator"></div>
+                    <div class="AddPermissions-directions">
+                        <span class="AddPermissions-directionNumber">
+                            2
+                        </span>
+                        <translate>Please assign roles to the selected users/teams</translate>
+                        <div class="AddPermissions-keyToggle btn"
+                            ng-class="{'is-active': showKeyPane}"
+                            ng-click="toggleKeyPane()" translate>
+                            Key
                         </div>
                     </div>
-                </div>
-                <form name="userForm" novalidate>
-                    <ng-form name="userRoleForm">
-                    <div class="AddPermissions-roleRow"
-                        ng-repeat="obj in allSelected">
-                        <div class="AddPermissions-roleName">
-                            <span class="AddPermissions-roleNameVal">
-                                {{ obj.name }}
+                    <div class="AddPermissions-keyPane"
+                        ng-show="showKeyPane">
+                        <div class="AddPermissions-keyRow"
+                            ng-repeat="key in roleKey | filter:{name: '!Read'}">
+                            <div class="AddPermissions-keyName">
+                                {{ key.name }}
+                            </div>
+                            <div class="AddPermissions-keyDescription">
+                                {{ key.description || "No description provided" }}
+                            </div>
+                        </div>
+                    </div>
+                    <form name="userForm" novalidate>
+                        <ng-form name="userRoleForm">
+                            <span ng-repeat="(type, collection) in allSelected">
+                                <div class="AddPermissions-roleRow" ng-repeat="obj in collection">
+                                    <div class="AddPermissions-roleName">
+                                        <span class="AddPermissions-roleNameVal">
+                                            {{ obj.name }}
+                                        </span>
+                                        <span class="Form-title--roleType">
+                                            {{ obj.type }}
+                                        </span>
+                                    </div>
+                                    <rbac-multiselect-role class="AddPermissions-roleSelect" roles="roles" model="obj.roles">
+                                    </rbac-multiselect-role>
+                                    <button class="AddPermissions-roleRemove"
+                                        ng-click="removeObject(obj)">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
                             </span>
-                            <span class="Form-title--roleType">
-                                {{ obj.type }}
-                            </span>
-                        </div>
-                        <rbac-multiselect-role class="AddPermissions-roleSelect" roles="roles" model="obj.roles">
-                        </rbac-multiselect-role>
-                        <button class="AddPermissions-roleRemove"
-                            ng-click="removeObject(obj)">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
-                    </ng-form>
-                </form>
+                        </ng-form>
+                    </form>
+                </span>
             </div>
             <div class="AddPermissions-footer">
                 <div class="buttons Form-buttons AddPermissions-buttons">
@@ -110,7 +110,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
-                        ng-disabled="userRoleForm.$invalid || !allSelected || !allSelected.length" translate>
+                        ng-disabled="userRoleForm.$invalid || !allSelected || !showSection2Container()" translate>
                         Save
                     </button>
                 </div>
