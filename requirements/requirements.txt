@@ -98,7 +98,7 @@ jsonpointer==1.10         # via jsonpatch
 jsonschema==2.6.0
 keyring==10.3.3           # via msrestazure
 keystoneauth1==2.21.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
-kombu==3.0.37             # via asgi-amqp, celery
+kombu==3.0.35             # via asgi-amqp, celery
 lxml==3.8.0               # via pyvmomi
 m2crypto==0.25.1
 markdown==2.6.7
