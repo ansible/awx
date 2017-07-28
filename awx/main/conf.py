@@ -175,6 +175,7 @@ register(
 register(
     'AWX_ISOLATED_CHECK_INTERVAL',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Isolated status check interval'),
     help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
     category=_('Jobs'),
@@ -184,6 +185,7 @@ register(
 register(
     'AWX_ISOLATED_LAUNCH_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Isolated launch timeout'),
     help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  '
                 'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
@@ -194,6 +196,7 @@ register(
 register(
     'AWX_ISOLATED_CONNECTION_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     default=10,
     label=_('Isolated connection timeout'),
     help_text=_('Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
