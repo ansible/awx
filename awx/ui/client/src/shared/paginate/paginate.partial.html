@@ -30,8 +30,8 @@
                 </a>
             </li>
         </ul>
-        <span class="Paginate-pager--pageof" translate>Page
-                <span id="current-page">{{current}}</span> of
+        <span class="Paginate-pager--pageof">{{ 'Page' | translate }}
+                <span id="current-page">{{current}}</span> {{ 'of' | translate }}
         <span id="total-pages">{{last}}</span>
         </span>
     </div>
@@ -40,7 +40,7 @@
              so that i18n.sprintf("A of B") can be used but
              it seems $sce.trustAsHtml() does not work with html tag.
          -->
-        <span class="Paginate-itemsOf" translate>ITEMS&nbsp;
+        <span class="Paginate-itemsOf">{{ 'ITEMS' | translate }}&nbsp;
             <span>{{dataRange}}</span>
             <span ng-hide="dataset.count <= basePageSize">of {{dataset.count | number}}</span>
         </span>
