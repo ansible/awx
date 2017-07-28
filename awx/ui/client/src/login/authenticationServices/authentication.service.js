@@ -55,6 +55,10 @@ export default
                     data: {
                         "username": username,
                         "password": password
+                    },
+                    headers: {
+                        'Cache-Control': 'no-store',
+                        'Pragma': 'no-cache'
                     }
                 });
             },
