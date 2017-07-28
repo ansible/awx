@@ -4,13 +4,13 @@ function getSelf () {
     return this.get('results[0]');
 }
 
-function MeModel (method) {
+function MeModel (method, resource, graft) {
     BaseModel.call(this, 'me');
 
+    this.Constructor = MeModel;
     this.getSelf = getSelf.bind(this);
 
-    return this.request(method)
-        .then(() => this);
+    return this.create(method, resource, graft);
 }
 
 function MeModelLoader (_BaseModel_) {

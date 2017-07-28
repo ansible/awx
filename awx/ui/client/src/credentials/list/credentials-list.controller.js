@@ -46,7 +46,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
             }
 
             $scope[list.name].forEach(credential => {
-                credential.kind = credentialType.getById(credential.credential_type).name;
+                credential.kind = credentialType.match('id', credential.credential_type).name;
             });
         }
 

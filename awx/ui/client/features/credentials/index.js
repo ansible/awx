@@ -5,16 +5,15 @@ import CredentialsStrings from './credentials.strings'
 
 function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
     let id = $stateParams.credential_id;
-    let models;
 
     let promises = {
-        me: new Me('get'),
-        credentialType: new CredentialType('get'),
-        organization: new Organization('get')
+        me: new Me('get')
     };
 
     if (!id) {
         promises.credential = new Credential('options');
+        promises.credentialType =  new CredentialType();
+        promises.organization =  new Organization();
 
         return $q.all(promises)
     }
@@ -22,16 +21,22 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
     promises.credential = new Credential(['get', 'options'], [id, id]);
 
     return $q.all(promises)
-        .then(_models_ => {
-            models = _models_;
-            let credentialTypeId = models.credential.get('credential_type');
+        .then(models => {
+            let typeId = models.credential.get('credential_type');
+            let orgId = models.credential.get('organization');
 
-            return models.credentialType.graft(credentialTypeId);
-        })
-        .then(selectedCredentialType => {
-            models.selectedCredentialType = selectedCredentialType;
+            let dependents = {
+                credentialType: new CredentialType('get', typeId),
+                organization: new Organization('get', orgId)
+            };
 
-            return models;
+            return $q.all(dependents)
+                .then(related => {
+                    models.credentialType = related.credentialType;
+                    models.organization = related.organization;
+
+                    return models;
+                });
         });
 }
 

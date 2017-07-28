@@ -5,7 +5,6 @@ function EditCredentialsController (models, $state, $scope, strings) {
     let credential = models.credential;
     let credentialType = models.credentialType;
     let organization = models.organization;
-    let selectedCredentialType = models.selectedCredentialType;
 
     vm.mode = 'edit';
     vm.strings = strings;
@@ -36,9 +35,11 @@ function EditCredentialsController (models, $state, $scope, strings) {
     // Only exists for permissions compatibility
     $scope.credential_obj = credential.get();
 
-    vm.form = credential.createFormSchema('put', {
+    vm.form = credential.createFormSchema({
         omit: ['user', 'team', 'inputs']
     });
+
+    vm.form.disabled = !credential.isEditable();
 
     vm.form.organization._resource = 'organization';
     vm.form.organization._model = organization;
@@ -50,30 +51,34 @@ function EditCredentialsController (models, $state, $scope, strings) {
     vm.form.credential_type._resource = 'credential_type';
     vm.form.credential_type._model = credentialType;
     vm.form.credential_type._route = 'credentials.edit.credentialType';
-    vm.form.credential_type._value = selectedCredentialType.get('id');
-    vm.form.credential_type._displayValue = selectedCredentialType.get('name');
+    vm.form.credential_type._value = credentialType.get('id');
+    vm.form.credential_type._displayValue = credentialType.get('name');
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
  
     vm.form.inputs = {
         _get (id) {
-            let type = credentialType.getById(id);
-            let inputs = credentialType.mergeInputProperties(type);
+            credentialType.mergeInputProperties();
             
-            if (type.id === credential.get('credential_type')) {
-                inputs = credential.assignInputGroupValues(inputs);
+            if (credentialType.get('id') === credential.get('credential_type')) {
+                return credential.assignInputGroupValues(credentialType.get('inputs.fields'));
             }
 
-            return inputs;
+            return credentialType.get('inputs.fields');
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',
         _key: 'inputs'
     };
 
+    /**
+     * If a credential's `credential_type` is changed while editing, the inputs associated with 
+     * the old type need to be cleared before saving the inputs associated with the new type. 
+     * Otherwise inputs are merged together making the request invalid.
+     */
     vm.form.save = data => {
         data.user = me.getSelf().id;
-        credential.clearTypeInputs();
-                
+        credential.unset('inputs');
+
         return credential.request('put', data);
     };
 

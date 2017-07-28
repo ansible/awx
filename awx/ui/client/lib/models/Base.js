@@ -11,16 +11,54 @@ function request (method, resource) {
     return this.http[method](resource);
 }
 
-function httpGet (resource) {
-    this.method = this.method || 'GET';
-
+/**
+ * Intended to be useful in searching and filtering results using params
+ * supported by the API.
+ *
+ * @param {object} params - An object of keys and values to to format and
+ * to the URL as a query string. Refer to the API documentation for the 
+ * resource in use for specifics.
+ * @param {object} config - Configuration specific to the UI to accommodate
+ * common use cases.
+ *
+ * @returns {Promise} - $http
+ * @yields {(Boolean|object)}
+ */
+function search (params, config) {
     let req = {
-        method: this.method,
+        method: 'GET',
+        url: this.path,
+        params
+    };
+
+    return $http(req)
+        .then(({ data }) => {
+            if (!data.count) {
+                return false;
+            }
+
+            if (config.unique) {
+                if (data.count !== 1) {
+                    return false;
+                }
+
+                this.model.GET = data.results[0];
+            } else {
+                this.model.GET = data;
+            }
+
+            return true;
+        });
+}
+
+function httpGet (resource) {
+    let req = {
+        method: 'GET',
         url: this.path
     };
 
     if (typeof resource === 'object') {
-        this.model[this.method] = resource;
+        this.model.GET = resource;
 
         return $q.resolve();
     } else if (resource) {
@@ -43,9 +81,9 @@ function httpPost (data) {
     };
 
     return $http(req).then(res => {
-      this.model.GET = res.data;
+        this.model.GET = res.data;
 
-      return res;
+        return res;
     });
 }
 
@@ -87,7 +125,56 @@ function get (keys) {
     return this.find('get', keys);
 }
 
+function unset (method, keys) {
+    if (!keys) {
+        keys = method;
+        method = 'GET';
+    }
+    
+    method = method.toUpperCase();
+    keys = keys.split('.');
+
+    if (!keys.length) {
+        delete this.model[method];
+    } else if (keys.length === 1) {
+        delete this.model[method][keys[0]];
+    } else {
+        let property = keys.splice(-1);
+        keys = keys.join('.');
+
+        let model = this.find(method, keys)
+        delete model[property];
+    }
+}
+
+function set (method, keys, value) {
+    if (!value) {
+        value = keys;
+        keys = method;
+        method = 'GET';
+    }
+    
+    keys = keys.split('.');
+
+    if (keys.length === 1) {
+        model[keys[0]] = value;
+    } else {
+        let property = keys.splice(-1);
+        keys = keys.join('.');
+
+        let model = this.find(method, keys)
+
+        model[property] = value;
+    }
+}
+
 function match (method, key, value) {
+    if(!value) {
+        value = key;
+        key = method;
+        method = 'GET';
+    }
+
     let model = this.model[method.toUpperCase()];
 
     if (!model) {
@@ -143,32 +230,104 @@ function find (method, keys) {
     return value;
 }
 
+function has (method, keys) {
+    if (!keys) {
+        keys = method;
+        method = 'GET';
+    }
+
+    method = method.toUpperCase();
+
+    let value;
+    switch (method) {
+        case 'OPTIONS':
+            value = this.options(keys);
+            break;
+        default:
+            value = this.get(keys);
+    }
+
+    return value !== undefined && value !== null;
+}
+
 function normalizePath (resource) {
     let version = '/api/v2/';
     
     return `${version}${resource}/`;
 }
 
-function getById (id) {
+function isEditable () {
+    let canEdit = this.get('summary_fields.user_capabilities.edit');
+
+    if (canEdit) {
+        return true;
+    }
+
+    if (this.has('options', 'actions.PUT')) {
+        return true;
+    }
+
+    return false;
+
+}
+
+function isCreatable () {
+    if (this.has('options', 'actions.POST')) {
+        return true;
+    }
+
+    return false;
+}
+
+function graft (id) {
     let item = this.get('results').filter(result => result.id === id);
 
-    return item ? item[0] : undefined;
+    item = item ? item[0] : undefined;
+
+    if (!item) {
+        return undefined;
+    }
+
+    return new this.Constructor('get', item, true);
+}
+
+function create (method, resource, graft) {
+    if (!method) {
+        return this;
+    }
+
+    this.promise = this.request(method, resource);
+
+    if (graft) {
+        return this;
+    }
+
+    return this.promise
+        .then(() => this);
 }
 
 function BaseModel (path) {
-    this.model = {};
-    this.get = get;
-    this.options = options;
+    this.create = create;
     this.find = find;
+    this.get = get;
+    this.graft = graft;
+    this.has = has;
+    this.isEditable = isEditable;
+    this.isCreatable = isCreatable;
     this.match = match;
+    this.model = {};
     this.normalizePath = normalizePath;
-    this.getById = getById;
+    this.options = options;
     this.request = request;
+    this.search = search;
+    this.set = set;
+    this.unset = unset;
+
     this.http = {
         get: httpGet.bind(this),
         options: httpOptions.bind(this),
         post: httpPost.bind(this),
-        put: httpPut.bind(this)
+        put: httpPut.bind(this),
     };
 
     this.path = this.normalizePath(path);
