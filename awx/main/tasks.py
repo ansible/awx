@@ -29,7 +29,7 @@ except:
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_process_init
+from celery.signals import celeryd_init, worker_process_init, worker_shutdown
 
 # Django
 from django.conf import settings
@@ -98,8 +98,25 @@ def celery_startup(conf=None, **kwargs):
 
 @worker_process_init.connect
 def task_set_logger_pre_run(*args, **kwargs):
-    cache.close()
-    configure_external_logger(settings, is_startup=False)
+    try:
+        cache.close()
+        configure_external_logger(settings, is_startup=False)
+    except:
+        # General exception because LogErrorsTask not used with celery signals
+        logger.exception('Encountered error on initial log configuration.')
+
+
+@worker_shutdown.connect
+def inform_cluster_of_shutdown(*args, **kwargs):
+    try:
+        this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
+        this_inst.capacity = 0  # No thank you to new jobs while shut down
+        this_inst.save(update_fields=['capacity', 'modified'])
+        logger.warning('Normal shutdown signal for instance {}, '
+                       'removed self from capacity pool.'.format(this_inst.hostname))
+    except:
+        # General exception because LogErrorsTask not used with celery signals
+        logger.exception('Encountered problem with normal shutdown signal.')
 
 
 @task(queue='tower_broadcast_all', bind=True, base=LogErrorsTask)
@@ -214,10 +231,8 @@ def cluster_node_heartbeat(self):
                                                                                                        other_inst.version,
                                                                                                        this_inst.hostname,
                                                                                                        this_inst.version))
-            # Set the capacity to zero to ensure no Jobs get added to this instance.
+            # Shutdown signal will set the capacity to zero to ensure no Jobs get added to this instance.
             # The heartbeat task will reset the capacity to the system capacity after upgrade.
-            this_inst.capacity = 0
-            this_inst.save(update_fields=['capacity'])
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
             # We wait for the Popen call inside stop_local_services above
             # so the line below will rarely if ever be executed.
