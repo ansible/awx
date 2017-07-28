@@ -679,6 +679,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 delete list.fields.last_updated;
                                 list.fields.name.columnClass = "col-md-11";
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }

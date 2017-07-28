@@ -12,6 +12,7 @@ export default {
     listTitle: 'INVENTORY SOURCES',
     index: false,
     hover: true,
+    searchBarFullWidth: true,
 
     fields: {
         name: {
