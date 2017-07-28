@@ -1287,6 +1287,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "value=\"" + field.options[i].value + "\" ";
                             html += "ng-model=\"" + fld + "\" ";
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                            html += (field.ngClick) ? this.attr(field, 'ngClick') : "";
                             html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}"` : "";
                             html += (field.readonly) ? "disabled " : "";
                             html += (field.required) ? "required " : "";

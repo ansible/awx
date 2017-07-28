@@ -151,7 +151,8 @@ var awApp = angular.module('awApp', [
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({
             animation: 'slide',
-            dismissOnTimeout: true,
+            dismissOnTimeout: false,
+            dismissButton: true,
             timeout: 4000
         });
     }])

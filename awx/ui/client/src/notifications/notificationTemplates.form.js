@@ -398,7 +398,7 @@ export default ['i18n', function(i18n) {
                 type: 'radio_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
-                ngChange: "emailOptionsChange()",
+                ngClick: "emailOptionsChange()",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 options: [{
                     value: 'use_tls',
