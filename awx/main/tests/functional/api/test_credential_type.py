@@ -80,16 +80,15 @@ def test_update_managed_by_tower_xfail(patch, delete, admin):
 
 @pytest.mark.django_db
 def test_update_credential_type_in_use_xfail(patch, delete, admin):
-    ssh = CredentialType.defaults['ssh']()
-    ssh.managed_by_tower = False
-    ssh.save()
-    Credential(credential_type=ssh, name='My SSH Key').save()
+    _type = CredentialType(kind='cloud', inputs={'fields': []})
+    _type.save()
+    Credential(credential_type=_type, name='My Custom Cred').save()
 
-    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    url = reverse('api:credential_type_detail', kwargs={'pk': _type.pk})
     response = patch(url, {'name': 'Some Other Name'}, admin)
     assert response.status_code == 200
 
-    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    url = reverse('api:credential_type_detail', kwargs={'pk': _type.pk})
     response = patch(url, {'inputs': {}}, admin)
     assert response.status_code == 403
 
@@ -98,11 +97,10 @@ def test_update_credential_type_in_use_xfail(patch, delete, admin):
 
 @pytest.mark.django_db
 def test_update_credential_type_success(get, patch, delete, admin):
-    ssh = CredentialType.defaults['ssh']()
-    ssh.managed_by_tower = False
-    ssh.save()
+    _type = CredentialType(kind='cloud')
+    _type.save()
 
-    url = reverse('api:credential_type_detail', kwargs={'pk': ssh.pk})
+    url = reverse('api:credential_type_detail', kwargs={'pk': _type.pk})
     response = patch(url, {'name': 'Some Other Name'}, admin)
     assert response.status_code == 200
 
@@ -161,6 +159,21 @@ def test_create_managed_by_tower_readonly(get, post, admin):
     response = get(reverse('api:credential_type_list'), admin)
     assert response.data['count'] == 1
     assert response.data['results'][0]['managed_by_tower'] is False
+
+
+@pytest.mark.django_db
+def test_create_dependencies_not_supported(get, post, admin):
+    response = post(reverse('api:credential_type_list'), {
+        'kind': 'cloud',
+        'name': 'Custom Credential Type',
+        'inputs': {'dependencies': {'foo': ['bar']}},
+        'injectors': {},
+    }, admin)
+    assert response.status_code == 400
+    assert response.data['inputs'] == ["'dependencies' is not supported for custom credentials."]
+
+    response = get(reverse('api:credential_type_list'), admin)
+    assert response.data['count'] == 0
 
 
 @pytest.mark.django_db

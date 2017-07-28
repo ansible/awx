@@ -4,6 +4,7 @@
 # Python
 import copy
 import json
+import re
 import six
 
 from jinja2 import Environment, StrictUndefined
@@ -467,6 +468,7 @@ class CredentialInputField(JSONSchemaField):
         return {
             'type': 'object',
             'properties': properties,
+            'dependencies': model_instance.credential_type.inputs.get('dependencies', {}),
             'additionalProperties': False,
         }
 
@@ -504,6 +506,28 @@ class CredentialInputField(JSONSchemaField):
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'] % error.instance
+            if error.validator == 'dependencies':
+                # replace the default error messaging w/ a better i18n string
+                # I wish there was a better way to determine the parameters of
+                # this validation failure, but the exception jsonschema raises
+                # doesn't include them as attributes (just a hard-coded error
+                # string)
+                match = re.search(
+                    # 'foo' is a dependency of 'bar'
+                    "'"         # apostrophe
+                    "([^']+)"   # one or more non-apostrophes (first group)
+                    "'[\w ]+'"  # one or more words/spaces
+                    "([^']+)",  # second group
+                    error.message,
+                )
+                if match:
+                    label, extraneous = match.groups()
+                    if error.schema['properties'].get(label):
+                        label = error.schema['properties'][label]['label']
+                    errors[extraneous] = [
+                        _('cannot be set unless "%s" is set') % label
+                    ]
+                    continue
             if 'id' not in error.schema:
                 # If the error is not for a specific field, it's specific to
                 # `inputs` in general
@@ -542,11 +566,12 @@ class CredentialInputField(JSONSchemaField):
 
             if model_instance.has_encrypted_ssh_key_data and not value.get('ssh_key_unlock'):
                 errors['ssh_key_unlock'] = [_('must be set when SSH key is encrypted.')]
-            if value.get('ssh_key_unlock'):
-                if not model_instance.ssh_key_data:
-                    errors['ssh_key_unlock'] = [_('should not be set when SSH key is empty.')]
-                elif not model_instance.has_encrypted_ssh_key_data:
-                    errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
+            if all([
+                model_instance.ssh_key_data,
+                value.get('ssh_key_unlock'),
+                not model_instance.has_encrypted_ssh_key_data
+            ]):
+                errors['ssh_key_unlock'] = [_('should not be set when SSH key is not encrypted.')]
 
         if errors:
             raise serializers.ValidationError({
@@ -601,6 +626,14 @@ class CredentialTypeInputField(JSONSchemaField):
         }
 
     def validate(self, value, model_instance):
+        if isinstance(value, dict) and 'dependencies' in value and \
+                not model_instance.managed_by_tower:
+            raise django_exceptions.ValidationError(
+                _("'dependencies' is not supported for custom credentials."),
+                code='invalid',
+                params={'value': value},
+            )
+
         super(CredentialTypeInputField, self).validate(
             value, model_instance
         )
