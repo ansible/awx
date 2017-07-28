@@ -11,6 +11,19 @@ function request (method, resource) {
     return this.http[method](resource);
 }
 
+/**
+ * Intended to be useful in searching and filtering results using params
+ * supported by the API.
+ *
+ * @param {object} params - An object of keys and values to to format and
+ * to the URL as a query string. Refer to the API documentation for the 
+ * resource in use for specifics.
+ * @param {object} config - Configuration specific to the UI to accommodate
+ * common use cases.
+ *
+ * @returns {Promise} - $http
+ * @yields {(Boolean|object)}
+ */
 function search (params, config) {
     let req = {
         method: 'GET',
@@ -19,19 +32,19 @@ function search (params, config) {
     };
 
     return $http(req)
-        .then(res => {
-            if (!res.data.count) {
+        .then(({ data }) => {
+            if (!data.count) {
                 return false;
             }
 
             if (config.unique) {
-                if (res.data.count !== 1) {
+                if (data.count !== 1) {
                     return false;
                 }
 
-                this.model.GET = res.data.results[0];
+                this.model.GET = data.results[0];
             } else {
-                this.model.GET = res.data;
+                this.model.GET = data;
             }
 
             return true;

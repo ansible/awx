@@ -70,6 +70,11 @@ function EditCredentialsController (models, $state, $scope, strings) {
         _key: 'inputs'
     };
 
+    /**
+     * If a credential's `credential_type` is changed while editing, the inputs associated with 
+     * the old type need to be cleared before saving the inputs associated with the new type. 
+     * Otherwise inputs are merged together making the request invalid.
+     */
     vm.form.save = data => {
         data.user = me.getSelf().id;
         credential.unset('inputs');

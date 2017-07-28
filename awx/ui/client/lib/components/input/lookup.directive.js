@@ -81,6 +81,10 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
     vm.search = () => {
         scope.state._touched = true;
 
+        if (scope.state._displayValue === '' && !scope.state._required) {
+            return vm.check({ isValid: true });
+        }
+
         return model.search({ [search.key]: scope.state._displayValue }, search.config)
             .then(found => {
                 if (!found) {
@@ -104,8 +108,6 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
         if (vm.isDebouncing) {
             return vm.resetDebounce();
         }
-
-        scope.state._touched = true;
 
         vm.searchAfterDebounce();
     };
