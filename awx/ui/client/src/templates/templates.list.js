@@ -63,7 +63,7 @@ export default ['i18n', function(i18n) {
                         ngShow: 'canAddJobTemplate'
                     },
                     {
-                        optionContent: i18n._('Workflow Job Template'),
+                        optionContent: i18n._('Workflow Template'),
                         optionSref: 'templates.addWorkflowJobTemplate',
                         ngShow: 'canAddWorkflowJobTemplate'
                     }

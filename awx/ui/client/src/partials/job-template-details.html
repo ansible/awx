@@ -1,3 +1,3 @@
 <div class="List-infoCell">
-    <a aw-pop-over="<div>INVENTORY: {{(job_template.summary_fields.inventory.name | sanitize) || 'NONE SELECTED'}}</div><div>PROJECT: {{job_template.summary_fields.project.name | sanitize}}</div><div>PLAYBOOK: {{job_template.playbook| sanitize}}</div><div>CREDENTIAL: {{(job_template.summary_fields.credential.name | sanitize) || 'NONE SELECTED'}}</div>" data-popover-title="{{job_template.name| sanitize}}">INFO</a>
+    <span class="List-infoCell--badge" aw-pop-over="<dl><dt>INVENTORY</dt><dd>{{(job_template.summary_fields.inventory.name | sanitize) || 'NONE SELECTED'}}</dd></dl><dl><dt>PROJECT</dt> <dd>{{job_template.summary_fields.project.name | sanitize}}</dd></dl><dl><dt>PLAYBOOK</dt> <dd>{{job_template.playbook| sanitize}}</dd></dl><dl><dt>CREDENTIAL</dt> <dd>{{(job_template.summary_fields.credential.name | sanitize) || 'NONE SELECTED'}}</dd></dl>" data-popover-title="{{job_template.name| sanitize}}">INFO</span>
 </div>
