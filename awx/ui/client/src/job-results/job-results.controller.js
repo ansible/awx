@@ -264,9 +264,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     // button will jump to the bottom of the standard out pane,
     // not follow lines as they come in
     if ($scope.jobFinished) {
-        $scope.followTooltip = "Jump to last line of standard out.";
+        $scope.followTooltip = i18n._("Jump to last line of standard out.");
     } else {
-        $scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
+        $scope.followTooltip = i18n._("Currently following standard out as it comes in.  Click to unfollow.");
     }
 
     $scope.events = {};
@@ -316,7 +316,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 if (change === 'finishedTime'  && !$scope.job.finished) {
                     $scope.job.finished = mungedEvent.finishedTime;
                     $scope.jobFinished = true;
-                    $scope.followTooltip = "Jump to last line of standard out.";
+                    $scope.followTooltip = i18n._("Jump to last line of standard out.");
                     if ($scope.followEngaged) {
                         if (!$scope.followScroll) {
                             $scope.followScroll = function() {

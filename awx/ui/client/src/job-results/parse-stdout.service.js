@@ -4,7 +4,7 @@
 * All Rights Reserved
 *************************************************/
 
-export default ['$log', 'moment', function($log, moment){
+export default ['$log', 'moment', 'i18n', function($log, moment, i18n){
     var val = {
         // parses stdout string from api and formats various codes to the
         // correct dom structure
@@ -77,7 +77,7 @@ export default ['$log', 'moment', function($log, moment){
                 return `"`;
             }
             else{
-                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobResult.host-event.json({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
+                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobResult.host-event.json({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="${i18n._("Event ID")}: ${event.id} <br>${i18n._("Status")}: ${event.event_display} <br>${i18n._("Click for details")}" data-placement="top"`;
             }
 
         },
