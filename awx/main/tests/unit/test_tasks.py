@@ -1348,6 +1348,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.instance.credential.inputs['password'] = encrypt_field(
             self.instance.credential, 'password'
         )
+        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_"}'
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1356,6 +1357,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'url') == 'https://example.org'
             assert config.get('foreman', 'user') == 'bob'
             assert config.get('foreman', 'password') == 'secret'
+            assert config.get('ansible', 'group_patterns') == '[a,b,c]'
+            assert config.get('ansible', 'group_prefix') == 'hey_'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
