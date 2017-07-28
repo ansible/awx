@@ -243,3 +243,19 @@ def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):
             'LOG_AGGREGATOR_PORT': 8080
         }, user=admin, expect=500)
         assert resp.data == {'error': '404: Not Found'}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('setting_name', [
+    'AWX_ISOLATED_CHECK_INTERVAL',
+    'AWX_ISOLATED_LAUNCH_TIMEOUT',
+    'AWX_ISOLATED_CONNECTION_TIMEOUT',
+])
+def test_isolated_job_setting_validation(get, patch, admin, setting_name):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
+    patch(url, user=admin, data={
+        setting_name: -1
+    }, expect=400)
+
+    data = get(url, user=admin).data
+    assert data[setting_name] != -1
