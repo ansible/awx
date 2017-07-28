@@ -88,7 +88,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         scope.showKeyPane = !scope.showKeyPane;
     };
 
-    scope.showSection2Container = function(){
+    scope.hasSelectedRows = function(){
         return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 

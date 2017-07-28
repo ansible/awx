@@ -51,7 +51,7 @@
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></rbac-multiselect-list>
                 </div>
 
-                <span ng-show="showSection2Container()">
+                <span ng-show="hasSelectedRows()">
                     <div class="AddPermissions-separator"></div>
                     <div class="AddPermissions-directions">
                         <span class="AddPermissions-directionNumber">
@@ -110,7 +110,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
-                        ng-disabled="userRoleForm.$invalid || !allSelected || !showSection2Container()" translate>
+                        ng-disabled="userRoleForm.$invalid || !allSelected || !hasSelectedRows()" translate>
                         Save
                     </button>
                 </div>
