@@ -795,7 +795,8 @@ class InventorySourceAccess(BaseAccess):
                 update_on_project_update=True, source='scm').exists())
 
     def can_delete(self, obj):
-        if not (self.user.is_superuser or not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None))):
+        if not self.user.is_superuser and \
+                not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None)):
             return False
         active_jobs_qs = InventoryUpdate.objects.filter(inventory_source=obj, status__in=ACTIVE_STATES)
         if active_jobs_qs.exists():
