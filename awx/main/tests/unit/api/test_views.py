@@ -116,8 +116,8 @@ class TestInventoryInventorySourcesUpdate:
             def exclude(self, **kwargs):
                 return self.all()
                 
-        Inventory = namedtuple('Inventory', ['inventory_sources'])
-        obj = Inventory(inventory_sources=InventorySources())
+        Inventory = namedtuple('Inventory', ['inventory_sources', 'kind'])
+        obj = Inventory(inventory_sources=InventorySources(), kind='')
 
         mock_request = mocker.MagicMock()
         mock_request.user.can_access.return_value = can_access
