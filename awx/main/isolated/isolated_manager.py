@@ -406,15 +406,25 @@ class IsolatedManager(object):
             try:
                 task_result = result['plays'][0]['tasks'][0]['hosts'][instance.hostname]
             except (KeyError, IndexError):
-                logger.exception('Failed to read status from isolated instance {}.'.format(instance.hostname))
-                continue
+                task_result = {}
             if 'capacity' in task_result:
                 instance.version = task_result['version']
+                if instance.capacity == 0 and task_result['capacity']:
+                    logger.warning('Isolated instance {} has re-joined.'.format(instance.hostname))
                 instance.capacity = int(task_result['capacity'])
                 instance.save(update_fields=['capacity', 'version', 'modified'])
+            elif instance.capacity == 0:
+                logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
+                    instance.hostname))
             else:
-                logger.warning('Could not update capacity of {}, msg={}'.format(
-                    instance.hostname, task_result.get('msg', 'unknown failure')))
+                logger.warning('Could not update status of isolated instance {}, msg={}'.format(
+                    instance.hostname, task_result.get('msg', 'unknown failure')
+                ))
+                if instance.is_lost(isolated=True):
+                    instance.capacity = 0
+                    instance.save(update_fields=['capacity'])
+                    logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
+                        instance.hostname, instance.modified))
 
     @staticmethod
     def wrap_stdout_handle(instance, private_data_dir, stdout_handle, event_data_key='job_id'):

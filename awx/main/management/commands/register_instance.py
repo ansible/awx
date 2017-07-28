@@ -30,7 +30,7 @@ class Command(BaseCommand):
         with advisory_lock('instance_registration_%s' % hostname):
             instance = Instance.objects.filter(hostname=hostname)
             if instance.exists():
-                print("Instance already registered {}".format(instance[0]))
+                print("Instance already registered {}".format(instance[0].hostname))
                 return
             instance = Instance(uuid=self.uuid, hostname=hostname)
             instance.save()
