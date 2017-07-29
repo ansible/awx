@@ -20,7 +20,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 $('#prompt-modal').modal('hide');
                 Wait('start');
                 Rest.setUrl(url);
-                Rest.post({ "disassociate": true, "id": userId })
+                Rest.post({ "disassociate": true, "id": Number(userId) })
                     .success(function() {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
