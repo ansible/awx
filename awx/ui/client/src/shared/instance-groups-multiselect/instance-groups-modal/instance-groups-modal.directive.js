@@ -73,6 +73,16 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             $scope.showModal();
                     });
 
+                    $scope.$watch('instance_groups', function(){
+                        angular.forEach($scope.instance_groups, function(instanceGroupRow) {
+                            angular.forEach($scope.igTags, function(selectedInstanceGroup){
+                                if(selectedInstanceGroup.id === instanceGroupRow.id) {
+                                    instanceGroupRow.isSelected = true;
+                                }
+                            });
+                        });
+                    });
+
             }
 
             init();
