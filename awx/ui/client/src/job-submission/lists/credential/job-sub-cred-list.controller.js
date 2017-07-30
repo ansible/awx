@@ -55,6 +55,7 @@ export default
                 };
 
                 $scope.$watch('credentialKind', function(){
+                    $scope.credential_queryset.page = 1;
                     $scope.credential_default_params.credential_type = $scope.credential_queryset.credential_type = parseInt($scope.credentialKind);
 
                     qs.search(GetBasePath('credentials'), $scope.credential_default_params)

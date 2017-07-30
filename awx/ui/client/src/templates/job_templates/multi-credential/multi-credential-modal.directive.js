@@ -135,6 +135,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 };
 
                 $scope.$watch('credentialKind', function(){
+                    $scope.credential_queryset.page = 1;
                     $scope.credential_default_params.credential_type = $scope
                         .credential_queryset.credential_type = parseInt($scope
                             .credentialKind);
