@@ -29,6 +29,7 @@ export default ['i18n', function(i18n) {
                 awTipPlacement: "top",
                 awToolTip: "{{ job.status_tip }}",
                 dataTipWatch: 'job.status_tip',
+                ngClick:"viewjobResults(job)",
             },
             name: {
                 label: i18n._('Name'),
