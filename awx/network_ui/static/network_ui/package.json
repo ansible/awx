@@ -10,18 +10,18 @@
   "license": "ISC",
   "dependencies": {
     "angular": "~1.6.2",
+    "angular-mousewheel": "~1.0.5",
     "angular-ui-router": "",
-    "webpack": "",
+    "angular-xeditable": "~0.8.0",
     "browserify": "",
+    "hamsterjs": "~1.1.2",
     "inherits": "",
-    "require": "",
     "jshint": "",
-    "less": "",
+    "less": "^2.7.2",
     "mathjs": "",
     "reconnectingwebsocket": "^1.0.0",
-    "hamsterjs": "~1.1.2",
-    "angular-mousewheel": "~1.0.5",
-    "angular-xeditable": "~0.8.0"
+    "require": "",
+    "webpack": ""
   },
   "devDependencies": {
     "eslint": "^3.17.1",
