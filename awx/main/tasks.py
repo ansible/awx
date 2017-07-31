@@ -409,8 +409,8 @@ def update_host_smart_inventory_memberships():
         return
 
 
-@task(queue='tower', base=LogErrorsTask)
-def delete_inventory(inventory_id):
+@task(bind=True, queue='tower', base=LogErrorsTask, max_retries=5)
+def delete_inventory(self, inventory_id):
     with ignore_inventory_computed_fields(), \
             ignore_inventory_group_removal():
         try:
@@ -421,6 +421,9 @@ def delete_inventory(inventory_id):
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
             logger.debug('Deleted inventory: %s' % inventory_id)
+        except OperationalError:
+            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
+            self.retry(countdown=10)
         except Inventory.DoesNotExist:
             logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
