@@ -2434,6 +2434,12 @@ class JobTemplateMixin(object):
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         d['recent_jobs'] = self._recent_jobs(obj)
+
+        # TODO: remove in 3.3
+        if self.version == 1 and 'vault_credential' in d:
+            if d['vault_credential'].get('kind','') == 'vault':
+                d['vault_credential']['kind'] = 'ssh'
+
         return d
 
 
