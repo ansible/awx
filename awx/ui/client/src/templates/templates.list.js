@@ -17,7 +17,6 @@ export default ['i18n', function(i18n) {
         selectInstructions: i18n.sprintf(i18n._("Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."), "<i class=\"icon-plus\"></i> "),
         index: false,
         hover: true,
-        searchBarFullWidth: true,
 
         fields: {
             name: {

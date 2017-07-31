@@ -9,14 +9,14 @@ export default ['Rest', 'Wait',
     'GenerateForm',
     'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
-    'NotificationsTypeChange', 'ParseTypeChange',
+    'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
         GenerateForm,
         notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
-        NotificationsTypeChange, ParseTypeChange
+        NotificationsTypeChange, ParseTypeChange, i18n
     ) {
         var generator = GenerateForm,
             id = notification_template.id,
@@ -119,6 +119,12 @@ export default ['Rest', 'Wait',
                     master.notification_type = $scope.notification_type;
                     CreateSelect2({
                         element: '#notification_template_notification_type',
+                        multiple: false
+                    });
+
+                    $scope.hipchatColors = [i18n._('Gray'), i18n._('Green'), i18n._('Purple'), i18n._('Red'), i18n._('Yellow'), i18n._('Random')];
+                    CreateSelect2({
+                        element: '#notification_template_color',
                         multiple: false
                     });
                     NotificationsTypeChange.getDetailFields($scope.notification_type.value).forEach(function(field) {
