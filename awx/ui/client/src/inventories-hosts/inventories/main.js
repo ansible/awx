@@ -128,13 +128,12 @@ angular.module('inventory', [
                                 function(resourceData, $stateParams, Rest, GetBasePath, ProcessErrors){
                                     if(_.has(resourceData, 'data.summary_fields.insights_credential')){
                                         let credential_id = resourceData.data.summary_fields.insights_credential.id,
-                                        path = `${GetBasePath('projects')}?credential__id=${credential_id}`;
+                                        path = `${GetBasePath('projects')}?credential__id=${credential_id}&role_level=use_role`;
                                         Rest.setUrl(path);
                                         return Rest.get()
                                             .then(({data}) => {
-                                                if (data.results.length > 0 &&
-                                                    _.has(data, 'results[0].summary_fields.user_capabilities.edit')) {
-                                                        return data.results[0].summary_fields.user_capabilities.edit;
+                                                if (data.results.length > 0){
+                                                    return true;
                                                 }
                                                 else {
                                                     return false;
