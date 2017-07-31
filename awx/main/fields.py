@@ -370,7 +370,7 @@ class JSONSchemaField(JSONBField):
 
     # If an empty {} is provided, we still want to perform this schema
     # validation
-    empty_values=(None, '')
+    empty_values = (None, '')
 
     def get_default(self):
         return copy.deepcopy(super(JSONBField, self).get_default())
@@ -385,6 +385,9 @@ class JSONSchemaField(JSONBField):
             self.schema(model_instance),
             format_checker=self.format_checker
         ).iter_errors(value):
+            # strip Python unicode markers from jsonschema validation errors
+            error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
+
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = error.schema['error'] % error.instance
             errors.append(error)
