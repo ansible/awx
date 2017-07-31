@@ -11,7 +11,7 @@ clean:
 install:
 	npm i
 
-main:
+main: install
 	webpack
 
 lint:
