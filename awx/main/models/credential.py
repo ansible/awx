@@ -632,7 +632,10 @@ def ssh(cls):
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+            }
         }
     )
 
@@ -665,7 +668,10 @@ def scm(cls):
                 'label': 'Private Key Passphrase',
                 'type': 'string',
                 'secret': True
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+            }
         }
     )
 
@@ -725,7 +731,11 @@ def net(cls):
                 'label': 'Authorize Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+                'authorize_password': ['authorize'],
+            }
         }
     )
 
