@@ -4,7 +4,6 @@
 # Python
 from datetime import datetime, timedelta
 import logging
-import json
 from sets import Set
 
 # Django
@@ -405,7 +404,6 @@ class TaskManager():
         logger.debug("Failing inconsistent running jobs.")
         celery_task_start_time = tz_now()
         active_task_queues, active_tasks = self.get_active_tasks()
-        cache.set("active_celery_tasks", json.dumps(active_task_queues))
         cache.set('last_celery_task_cleanup', tz_now())
 
         if active_tasks is None:
