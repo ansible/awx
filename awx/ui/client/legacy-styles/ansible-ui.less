@@ -2152,9 +2152,11 @@ tr td button i {
 
 .select2-container--default .select2-selection--multiple {
     background-color: @field-secondary-bg;
-    border: 1px solid @d7grey;
     border-radius: 4px;
+    border: 1px solid @d7grey;
     cursor: text;
+    max-height: 135px;
+    overflow: scroll;
 }
 
 body.is-modalOpen {
