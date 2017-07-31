@@ -50,7 +50,7 @@
         <div class="SmartSearch-keyRow">
             <b>{{ 'ADDITIONAL INFORMATION' | translate }}:</b>
             <span>{{ 'For additional information on advanced search search syntax please see the Ansible Tower' | translate }}
-            <a href="http://docs.ansible.com/ansible-tower/3.2.0/html/userguide/search_sort.html" target="_blank"> {{ 'documentation' | translate }}</a>.</span>
+            <a ng-attr-href="{{ documentationLink || undefined }}" target="_blank"> {{ 'documentation' | translate }}</a>.</span>
         </div>
     </div>
 </div>

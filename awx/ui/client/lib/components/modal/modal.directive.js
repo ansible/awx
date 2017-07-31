@@ -10,12 +10,14 @@ function atModalLink (scope, el, attrs, controllers) {
     });
 }
 
-function AtModalController (eventService) {
+function AtModalController (eventService, strings) {
     let vm = this;
 
     let overlay;
     let modal;
     let listeners;
+
+    vm.strings = strings;
 
     vm.init = (scope, el) => {
         overlay = el[0];
@@ -67,7 +69,10 @@ function AtModalController (eventService) {
     };
 }
 
-AtModalController.$inject = ['EventService'];
+AtModalController.$inject = [
+    'EventService',
+    'ComponentsStrings'
+]
 
 function atModal (pathService) {
     return {
