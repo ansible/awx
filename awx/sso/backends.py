@@ -86,6 +86,13 @@ class LDAPBackend(BaseLDAPBackend):
     settings = property(_get_settings, _set_settings)
 
     def authenticate(self, username, password):
+        if self.settings.START_TLS and ldap.OPT_X_TLS_REQUIRE_CERT in self.settings.CONNECTION_OPTIONS:
+            # with python-ldap, if you want to set connection-specific TLS
+            # parameters, you must also specify OPT_X_TLS_NEWCTX = 0
+            # see: https://stackoverflow.com/a/29722445
+            # see: https://stackoverflow.com/a/38136255
+            self.settings.CONNECTION_OPTIONS[ldap.OPT_X_TLS_NEWCTX] = 0
+
         if not self.settings.SERVER_URI:
             return None
         if not feature_enabled('ldap'):
