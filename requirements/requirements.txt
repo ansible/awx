@@ -187,4 +187,4 @@ zope.interface==4.4.2     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==9.0.1
-setuptools==35.0.2
+setuptools==36.0.1

@@ -137,7 +137,7 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
@@ -150,7 +150,7 @@ virtualenv_awx:
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			virtualenv --system-site-packages $(VENV_BASE)/awx && \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
