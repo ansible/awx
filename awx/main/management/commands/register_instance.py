@@ -7,7 +7,7 @@ from django.conf import settings
 
 from optparse import make_option
 from django.db import transaction
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -19,9 +19,6 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--hostname', dest='hostname', type='string',
                     help='Hostname used during provisioning'),
-        make_option('--hostnames', dest='hostnames', type='string',
-                    help='Alternatively hostnames can be provided with '
-                         'this option as a comma-Delimited list'),
     )
 
     def _register_hostname(self, hostname):
@@ -39,14 +36,10 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, **options):
+        if not options.get('hostname'):
+            raise CommandError("Specify `--hostname` to use this command.")
         self.uuid = settings.SYSTEM_UUID
         self.changed = False
         self._register_hostname(options.get('hostname'))
-        hostname_list = []
-        if options.get('hostnames'):
-            hostname_list = options.get('hostnames').split(",")
-        instance_list = [x.strip() for x in hostname_list if x]
-        for inst_name in instance_list:
-            self._register_hostname(inst_name)
         if self.changed:
             print('(changed: True)')
