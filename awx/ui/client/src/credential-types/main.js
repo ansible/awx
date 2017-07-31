@@ -38,7 +38,7 @@ angular.module('credentialTypes', [
                     },
                     data: {
                         activityStream: true,
-                        activityStreamTarget: 'custom_inventory_script' // TODO: change to 'credential_type'...there's probably more work that needs to be done to hook up activity stream
+                        activityStreamTarget: 'credential_type'
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
