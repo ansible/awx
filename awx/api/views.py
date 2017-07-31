@@ -18,8 +18,6 @@ from collections import OrderedDict
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
-from django.core.cache import cache
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction, connection
@@ -228,15 +226,11 @@ class ApiV1PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        active_tasks = cache.get("active_celery_tasks", None)
         response = {
             'ha': is_ha_environment(),
             'version': get_awx_version(),
             'active_node': settings.CLUSTER_HOST_ID,
         }
-
-        if not isinstance(request.user, AnonymousUser):
-            response['celery_active_tasks'] = json.loads(active_tasks) if active_tasks is not None else None
 
         response['instances'] = []
         for instance in Instance.objects.all():

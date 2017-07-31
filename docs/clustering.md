@@ -233,7 +233,6 @@ of the Cluster. This includes:
 
 * The instance servicing the HTTP request
 * The last heartbeat time of all other instances in the cluster
-* The state of the Job Queue
 * The RabbitMQ cluster status
 * Instance Groups and Instance membership in those groups
 
