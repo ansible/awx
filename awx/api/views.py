@@ -28,6 +28,7 @@ from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
@@ -664,6 +665,7 @@ class AuthTokenView(APIView):
             serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
+    @never_cache
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -696,7 +698,8 @@ class AuthTokenView(APIView):
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION),
+                'Pragma': 'no-cache',
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         if 'username' in request.data:
