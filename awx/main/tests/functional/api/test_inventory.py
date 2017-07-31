@@ -88,6 +88,20 @@ def test_async_inventory_duplicate_deletion_prevention(delete, get, inventory, a
     assert resp.data['error'] == 'Inventory is already pending deletion.'
 
 
+@pytest.mark.django_db
+def test_async_inventory_deletion_deletes_related_jt(delete, get, job_template, inventory, alice, admin):
+    job_template.inventory = inventory
+    job_template.save()
+    assert job_template.inventory == inventory
+    inventory.admin_role.members.add(alice)
+    resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 202
+
+    resp = get(reverse('api:job_template_detail', kwargs={'pk': job_template.id}), admin)
+    jdata = json.loads(resp.content)
+    assert jdata['inventory'] is None
+
+
 @pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
 @pytest.mark.django_db
 def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order_by):
@@ -191,8 +205,8 @@ def test_create_inventory_smarthost(post, get, inventory, admin_user, organizati
 
     assert getattr(smart_inventory, 'kind') == 'smart'
     assert jdata['count'] == 0
-    
-    
+
+
 @pytest.mark.django_db
 def test_create_inventory_smartgroup(post, get, inventory, admin_user, organization):
     data = { 'name': 'Group 1', 'description': 'Test Group'}
@@ -204,10 +218,10 @@ def test_create_inventory_smartgroup(post, get, inventory, admin_user, organizat
     post(reverse('api:inventory_groups_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
     resp = get(reverse('api:inventory_groups_list', kwargs={'pk': smart_inventory.id}), admin_user)
     jdata = json.loads(resp.content)
-    
+
     assert getattr(smart_inventory, 'kind') == 'smart'
     assert jdata['count'] == 0
-    
+
 
 @pytest.mark.django_db
 def test_create_inventory_smart_inventory_sources(post, get, inventory, admin_user, organization):
@@ -220,7 +234,7 @@ def test_create_inventory_smart_inventory_sources(post, get, inventory, admin_us
     post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
     resp = get(reverse('api:inventory_inventory_sources_list', kwargs={'pk': smart_inventory.id}), admin_user)
     jdata = json.loads(resp.content)
-    
+
     assert getattr(smart_inventory, 'kind') == 'smart'
     assert jdata['count'] == 0
 

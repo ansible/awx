@@ -382,6 +382,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
             raise RuntimeError("Inventory is already pending deletion.")
         self.pending_deletion = True
         self.save(update_fields=['pending_deletion'])
+        self.jobtemplates.clear()
         self.websocket_emit_status('pending_deletion')
         delete_inventory.delay(self.pk)
 
