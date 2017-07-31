@@ -16,6 +16,9 @@ from awx.main.models import (
 from awx.main.utils import model_to_dict
 from awx.api.serializers import InventorySourceSerializer
 
+# Django-CRUM
+from crum import impersonate
+
 
 model_serializer_mapping = {
     InventorySource: InventorySourceSerializer
@@ -157,3 +160,11 @@ def test_missing_related_on_delete(inventory_source):
     inventory_source.inventory.delete()
     d = model_to_dict(old_is, serializer_mapping=model_serializer_mapping)
     assert d['inventory'] == '<missing inventory source>-{}'.format(old_is.inventory_id)
+
+
+@pytest.mark.django_db
+def test_activity_stream_actor(admin_user):
+    with impersonate(admin_user):
+        o = Organization.objects.create(name='test organization')
+    entry = o.activitystream_set.get(operation='create')
+    assert entry.actor == admin_user

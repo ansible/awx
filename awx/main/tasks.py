@@ -42,6 +42,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
+# Django-CRUM
+from crum import impersonate
+
 # AWX
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
@@ -410,9 +413,16 @@ def update_host_smart_inventory_memberships():
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask, max_retries=5)
-def delete_inventory(self, inventory_id):
-    with ignore_inventory_computed_fields(), \
-            ignore_inventory_group_removal():
+def delete_inventory(self, inventory_id, user_id):
+    # Delete inventory as user
+    if user_id is None:
+        user = None
+    else:
+        try:
+            user = User.objects.get(id=user_id)
+        except:
+            user = None
+    with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
             i = Inventory.objects.get(id=inventory_id)
             i.delete()
@@ -420,7 +430,7 @@ def delete_inventory(self, inventory_id):
                 'inventories-status_changed',
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
-            logger.debug('Deleted inventory: %s' % inventory_id)
+            logger.debug('Deleted inventory %s as user %s.' % (inventory_id, user_id))
         except OperationalError:
             logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
             self.retry(countdown=10)
