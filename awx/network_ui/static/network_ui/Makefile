@@ -32,5 +32,5 @@ simple-server:
 	python -m SimpleHTTPServer
 
 
-deploy:
+deploy: main
 	rsync -av src/ ../../../../awx/ui/client/src/network_ui/
