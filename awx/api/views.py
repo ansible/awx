@@ -2511,7 +2511,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         successes = 0
         failures = 0
         if inventory.kind =='smart':
-            return Response(dict(error=_("Action cannot be completed with Smart Inventory.")), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("Inventory update cannot be completed with Smart Inventory.")), status=status.HTTP_400_BAD_REQUEST)
         for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk, 'status': None}
             can_update = inventory_source.can_update
