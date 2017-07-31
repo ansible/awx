@@ -10,6 +10,7 @@ from awx.main.models import (
     Inventory,
     Credential,
     CredentialType,
+    InventorySource,
 )
 
 
@@ -69,3 +70,41 @@ def test_invalid_kind_clean_insights_credential():
         inv.clean_insights_credential()
 
     assert json.dumps(str(e.value)) == json.dumps(str([u'Assignment not allowed for Smart Inventory']))
+
+
+class TestControlledBySCM(): 
+    @pytest.mark.parametrize('source', [
+        'scm',
+        'ec2',
+        'manual',
+    ])
+    def test_clean_overwrite_vars_valid(self, source):
+        inv_src = InventorySource(overwrite_vars=True,
+                                  source=source)
+
+        inv_src.clean_overwrite_vars()
+
+    def test_clean_overwrite_vars_invalid(self):
+        inv_src = InventorySource(overwrite_vars=False,
+                                  source='scm')
+
+        with pytest.raises(ValidationError):
+            inv_src.clean_overwrite_vars()
+
+    def test_clean_source_path_valid(self):
+        inv_src = InventorySource(source_path='/not_real/',
+                                  source='scm')
+
+        inv_src.clean_source_path()
+
+    @pytest.mark.parametrize('source', [
+        'ec2',
+        'manual',
+    ])
+    def test_clean_source_path_invalid(self, source):
+        inv_src = InventorySource(source_path='/not_real/',
+                                  source=source)
+        
+        with pytest.raises(ValidationError):
+            inv_src.clean_source_path()
+

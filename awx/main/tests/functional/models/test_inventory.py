@@ -1,6 +1,8 @@
 import pytest
 import mock
 
+from django.core.exceptions import ValidationError
+
 # AWX
 from awx.main.models import (
     Host,
@@ -45,6 +47,23 @@ class TestSCMUpdateFeatures:
             scm_inventory_source.description = "I'm testing this!"
             scm_inventory_source.save()
             assert not mck_update.called
+
+
+@pytest.mark.django_db
+class TestSCMClean:
+    def test_clean_update_on_project_update_multiple(self, inventory):
+        inv_src1 = InventorySource(inventory=inventory,
+                                   update_on_project_update=True,
+                                   source='scm')
+        inv_src1.clean_update_on_project_update()
+        inv_src1.save()
+
+        inv_src2 = InventorySource(inventory=inventory,
+                                   update_on_project_update=True,
+                                   source='scm')
+
+        with pytest.raises(ValidationError):
+            inv_src2.clean_update_on_project_update()
 
 
 @pytest.fixture

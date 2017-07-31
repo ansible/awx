@@ -1389,6 +1389,26 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
         return source
 
+    def clean_update_on_project_update(self):
+        if self.update_on_project_update is True and \
+                self.source == 'scm' and \
+                InventorySource.objects.filter(
+                    inventory=self.inventory,
+                    update_on_project_update=True, source='scm').exists():
+            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "
+                                    "Instead, configure the corresponding source project to update on launch."))
+        return self.update_on_project_update
+
+    def clean_overwrite_vars(self):
+        if self.source == 'scm' and not self.overwrite_vars:
+            raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true`."))
+        return self.overwrite_vars
+
+    def clean_source_path(self):
+        if self.source != 'scm' and self.source_path:
+            raise ValidationError(_("Cannot set source_path if not SCM type."))
+        return self.source_path
+
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):
     '''

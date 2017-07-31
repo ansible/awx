@@ -788,11 +788,7 @@ class InventorySourceAccess(BaseAccess):
         if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
         # Checks for admin or change permission on inventory.
-        return (
-            self.check_related('inventory', Inventory, data) and
-            not InventorySource.objects.filter(
-                inventory=data.get('inventory'),
-                update_on_project_update=True, source='scm').exists())
+        return self.check_related('inventory', Inventory, data)
 
     def can_delete(self, obj):
         if not self.user.is_superuser and \

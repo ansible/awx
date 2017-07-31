@@ -1675,30 +1675,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
 
-    def validate(self, attrs):
-        def get_field_from_model_or_attrs(fd):
-            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
-
-        update_on_launch = attrs.get('update_on_launch', self.instance and self.instance.update_on_launch)
-        update_on_project_update = get_field_from_model_or_attrs('update_on_project_update')
-        source = get_field_from_model_or_attrs('source')
-        overwrite_vars = get_field_from_model_or_attrs('overwrite_vars')
-
-        if attrs.get('source_path', None) and source!='scm':
-            raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
-        elif update_on_launch and source=='scm' and update_on_project_update:
-            raise serializers.ValidationError({"detail": _(
-                "Cannot update SCM-based inventory source on launch if set to update on project update. "
-                "Instead, configure the corresponding source project to update on launch.")})
-        elif not self.instance and attrs.get('inventory', None) and InventorySource.objects.filter(
-                inventory=attrs.get('inventory', None), update_on_project_update=True, source='scm').exists():
-            raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
-        elif source=='scm' and not overwrite_vars:
-            raise serializers.ValidationError({"detail": _(
-                "SCM type sources must set `overwrite_vars` to `true`.")})
-
-        return super(InventorySourceSerializer, self).validate(attrs)
-
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
 
