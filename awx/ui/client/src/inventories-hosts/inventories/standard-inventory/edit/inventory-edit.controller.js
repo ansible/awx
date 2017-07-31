@@ -13,7 +13,8 @@
 function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
+    ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData,
+    CreateSelect2, InstanceGroupsService, InstanceGroupsData, CanRemediate) {
 
     // Inject dynamic view
     let defaultUrl = GetBasePath('inventory'),
@@ -37,6 +38,7 @@ function InventoriesEdit($scope, $location,
         $scope.inventory_variables = inventoryData.variables === null || inventoryData.variables === '' ? '---' : ParseVariableString(inventoryData.variables);
         $scope.parseType = 'yaml';
         $scope.instance_groups = InstanceGroupsData;
+        $scope.canRemediate = CanRemediate;
 
         $rootScope.$on('$stateChangeSuccess', function(event, toState) {
             if(toState.name === 'inventories.edit') {

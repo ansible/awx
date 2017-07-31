@@ -123,8 +123,38 @@ angular.module('inventory', [
                                                     'status: ' + status
                                             });
                                     });
+                                }],
+                            CanRemediate: ['resourceData', '$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function(resourceData, $stateParams, Rest, GetBasePath, ProcessErrors){
+                                    if(_.has(resourceData, 'data.summary_fields.insights_credential')){
+                                        let credential_id = resourceData.data.summary_fields.insights_credential.id,
+                                        path = `${GetBasePath('projects')}?credential__id=${credential_id}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get()
+                                            .then(({data}) => {
+                                                if (data.results.length > 0 &&
+                                                    _.has(data, 'results[0].summary_fields.user_capabilities.edit')) {
+                                                        return data.results[0].summary_fields.user_capabilities.edit;
+                                                }
+                                                else {
+                                                    return false;
+                                                }
+                                            })
+                                            .catch(({data, status}) => {
+                                                ProcessErrors(null, data, status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get instance groups. GET returned ' +
+                                                        'status: ' + status
+                                                });
+                                        });
+                                    }
+                                    else {
+                                        return false;
+                                    }
+
                                 }]
-                        }
+                        },
+
                     }
                 });
 
