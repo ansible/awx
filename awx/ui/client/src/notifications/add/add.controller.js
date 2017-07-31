@@ -7,12 +7,12 @@
 export default ['Rest', 'Wait', 'NotificationsFormObject',
     'ProcessErrors', 'GetBasePath', 'Alert',
     'GenerateForm', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-    'NotificationsTypeChange', 'ParseTypeChange',
+    'NotificationsTypeChange', 'ParseTypeChange', 'i18n',
     function(
         Rest, Wait, NotificationsFormObject,
         ProcessErrors, GetBasePath, Alert,
         GenerateForm, $scope, $state, CreateSelect2, GetChoices,
-        NotificationsTypeChange, ParseTypeChange
+        NotificationsTypeChange, ParseTypeChange, i18n
     ) {
 
         var generator = GenerateForm,
@@ -72,6 +72,12 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             }
             CreateSelect2({
                 element: '#notification_template_notification_type',
+                multiple: false
+            });
+
+            $scope.hipchatColors = [i18n._('Gray'), i18n._('Green'), i18n._('Purple'), i18n._('Red'), i18n._('Yellow'), i18n._('Random')];
+            CreateSelect2({
+                element: '#notification_template_color',
                 multiple: false
             });
         });

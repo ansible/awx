@@ -295,7 +295,8 @@ export default ['i18n', function(i18n) {
             color: {
                 label: i18n._('Notification Color'),
                 dataTitle: i18n._('Notification Color'),
-                type: 'text',
+                type: 'select',
+                ngOptions: 'color for color in hipchatColors track by color',
                 awPopOver: '<p>' + i18n.sprintf(i18n._('Color can be one of %s.'), '<code>yellow</code>, <code>green</code>, <code>red</code>, ' +
                            '<code>purple</code>, <code>gray</code>, <code>random</code>') + '\n',
                 awRequiredWhen: {
