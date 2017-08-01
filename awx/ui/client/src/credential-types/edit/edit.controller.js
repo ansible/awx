@@ -43,6 +43,7 @@ export default ['Rest', 'Wait',
         }
         $scope.removeChoicesReady = $scope.$on('choicesReadyCredentialTypes',
             function() {
+
                 if (!resourceData.data.managed_by_tower) {
                     $scope.credential_kind_options = $scope.credential_kind_options
                             .filter(val => val.value === 'net' ||
@@ -51,10 +52,37 @@ export default ['Rest', 'Wait',
 
                 $scope.credential_type = credential_typeData;
 
+                $scope.parseTypeInputs = 'yaml';
+                $scope.parseTypeInjectors = 'yaml';
+
+                var callback = function() {
+                    // Make sure the form controller knows there was a change
+                    $scope[form.name + '_form'].$setDirty();
+                };
+
                 $scope.$watch('credential_type.summary_fields.user_capabilities.edit', function(val) {
                     if (val === false) {
                         $scope.canAdd = false;
                     }
+
+                    let readOnly = !($scope.credential_type.summary_fields.user_capabilities.edit || $scope.canAdd);
+
+                    ParseTypeChange({
+                        scope: $scope,
+                        field_id: 'credential_type_inputs',
+                        variable: 'inputs',
+                        onChange: callback,
+                        parse_variable: 'parseTypeInputs',
+                        readOnly: readOnly
+                    });
+                    ParseTypeChange({
+                        scope: $scope,
+                        field_id: 'credential_type_injectors',
+                        variable: 'injectors',
+                        onChange: callback,
+                        parse_variable: 'parseTypeInjectors',
+                        readOnly: readOnly
+                    });
                 });
 
                 function getVars(str){
@@ -104,6 +132,11 @@ export default ['Rest', 'Wait',
                 $scope.inputs = ParseVariableString(getVars(data.inputs));
                 $scope.injectors = ParseVariableString(getVars(data.injectors));
 
+                CreateSelect2({
+                    element: '#credential_type_kind',
+                    multiple: false,
+                });
+
                 // if ($scope.inputs === "{}") {
                 //     $scope.inputs = "---";
                 // }
@@ -115,32 +148,6 @@ export default ['Rest', 'Wait',
                 // $scope.inputs = JSON.parse($scope.inputs);
                 // $scope.injectors = JSON.parse($scope.injectors);
 
-                var callback = function() {
-                    // Make sure the form controller knows there was a change
-                    $scope[form.name + '_form'].$setDirty();
-                };
-                $scope.parseTypeInputs = 'yaml';
-                $scope.parseTypeInjectors = 'yaml';
-
-                ParseTypeChange({
-                    scope: $scope,
-                    field_id: 'credential_type_inputs',
-                    variable: 'inputs',
-                    onChange: callback,
-                    parse_variable: 'parseTypeInputs'
-                });
-                ParseTypeChange({
-                    scope: $scope,
-                    field_id: 'credential_type_injectors',
-                    variable: 'injectors',
-                    onChange: callback,
-                    parse_variable: 'parseTypeInjectors'
-                });
-
-                CreateSelect2({
-                    element: '#credential_type_kind',
-                    multiple: false,
-                });
             }
         );
 
