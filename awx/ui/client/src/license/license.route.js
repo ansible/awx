@@ -6,6 +6,7 @@
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
+import _ from 'lodash';
 
 export default {
 	name: 'license',
@@ -17,6 +18,12 @@ export default {
 		parent: 'setup',
 		label: N_('LICENSE')
 	},
+    onEnter: ['$state', 'ConfigService', (state, configService) => {
+        return configService.getConfig()
+            .then(config => {
+                return _.get(config, 'license_info.license_type') === 'open' && state.go('setup');
+            });
+    }],
 	resolve: {
 		features: ['CheckLicense', '$rootScope',
 			function(CheckLicense, $rootScope) {

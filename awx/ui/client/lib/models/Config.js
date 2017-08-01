@@ -11,12 +11,17 @@ function getTruncatedVersion () {
 
     return version;
 }
+
+function isOpen () {
+    return this.get('license_info.license_type') === 'open';
+}
   
 function ConfigModel (method, resource, graft) {
     BaseModel.call(this, 'config', { cache: true });
 
     this.Constructor = ConfigModel;
     this.getTruncatedVersion = getTruncatedVersion;
+    this.isOpen = isOpen;
 
     return this.create(method, resource, graft);
 }
