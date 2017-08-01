@@ -1,17 +1,22 @@
-export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigModel',
-    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, ConfigModel) {
+export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigService',
+    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, configService) {
 
         let path,
             defaults,
             queryset,
-            stateChangeSuccessListener,
-            configModel = new ConfigModel();
+            stateChangeSuccessListener;
 
-        configModel.request('get')
-            .then(() => init());
+        configService.getConfig()
+            .then(config => init(config));
 
-        function init() {
-            let version = configModel.getTruncatedVersion() || 'latest';
+        function init(config) {
+            let version;
+
+            try {
+                version = config.version.split('-')[0];
+            } catch (err) {
+                version = 'latest';
+            }
 
             $scope.documentationLink =  `http://docs.ansible.com/ansible-tower/${version}/html/userguide/search_sort.html`;
 
