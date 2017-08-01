@@ -72,6 +72,34 @@ export function PortalModeJobsController($scope, $state, qs, GetBasePath, Portal
     function buildTooltips(job) {
         job.status_tip = `Job ${job.status}. Click for details.`;
     }
+
+    $scope.viewjobResults = function(job) {
+
+        var goTojobResults = function(state) {
+            $state.go(state, { id: job.id }, { reload: true });
+        };
+        switch (job.type) {
+            case 'job':
+                goTojobResults('jobResult');
+                break;
+            case 'ad_hoc_command':
+                goTojobResults('adHocJobStdout');
+                break;
+            case 'system_job':
+                goTojobResults('managementJobStdout');
+                break;
+            case 'project_update':
+                goTojobResults('scmUpdateStdout');
+                break;
+            case 'inventory_update':
+                goTojobResults('inventorySyncStdout');
+                break;
+            case 'workflow_job':
+                goTojobResults('workflowResults');
+                break;
+        }
+
+    };
 }
 
 PortalModeJobsController.$inject = ['$scope', '$state', 'QuerySet', 'GetBasePath', 'PortalJobsList', 'jobsDataset'];
