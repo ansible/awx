@@ -21,7 +21,7 @@ export default ['templateUrl', '$state',
             controller: controller,
             templateUrl: templateUrl('access/add-rbac-resource/rbac-resource'),
             link: function(scope, element, attrs) {
-                scope.toggleFormTabs('users');
+                scope.selectTab('users');
                 $('#add-permissions-modal').modal('show');
 
                 scope.closeModal = function() {
