@@ -29,6 +29,7 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
                 {label: i18n._('Notification Templates'), value: 'notification_template'},
                 {label: i18n._('Organizations'), value: 'organization'},
                 {label: i18n._('Projects'), value: 'project'},
+                {label: i18n._('Credential Types'), value: 'credential_type'},
                 {label: i18n._('Schedules'), value: 'schedule'},
                 {label: i18n._('Teams'), value: 'team'},
                 {label: i18n._('Templates'), value: 'template'},

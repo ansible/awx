@@ -21,6 +21,9 @@ export default function ModelToBasePathKey() {
             case 'project':
                 basePathKey = 'projects';
                 break;
+            case 'credential_type':
+                basePathKey = 'credential_types';
+                break;
             case 'inventory':
                 basePathKey = 'inventory';
                 break;

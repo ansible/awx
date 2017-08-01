@@ -7,6 +7,9 @@ export default function GetTargetTitle(i18n) {
             case 'project':
                 rtnTitle = i18n._('PROJECTS');
                 break;
+            case 'credential_type':
+                rtnTitle = i18n._('CREDENTIAL TYPES');
+                break;
             case 'inventory':
                 rtnTitle = i18n._('INVENTORIES');
                 break;
