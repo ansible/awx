@@ -51,37 +51,37 @@ export default ['$stateParams', '$scope', '$rootScope',
                 val.links = [];
                 val.links.push({
                     href: url + 'users',
-                    name: "USERS",
+                    name: i18n._("USERS"),
                     count: card.summary_fields.related_field_counts.users,
                     activeMode: 'users'
                 });
                 val.links.push({
                     href: url + 'teams',
-                    name: "TEAMS",
+                    name: i18n._("TEAMS"),
                     count: card.summary_fields.related_field_counts.teams,
                     activeMode: 'teams'
                 });
                 val.links.push({
                     href: url + 'inventories',
-                    name: "INVENTORIES",
+                    name: i18n._("INVENTORIES"),
                     count: card.summary_fields.related_field_counts.inventories,
                     activeMode: 'inventories'
                 });
                 val.links.push({
                     href: url + 'projects',
-                    name: "PROJECTS",
+                    name: i18n._("PROJECTS"),
                     count: card.summary_fields.related_field_counts.projects,
                     activeMode: 'projects'
                 });
                 val.links.push({
                     href: url + 'job_templates',
-                    name: "JOB TEMPLATES",
+                    name: i18n._("JOB TEMPLATES"),
                     count: card.summary_fields.related_field_counts.job_templates,
                     activeMode: 'job_templates'
                 });
                 val.links.push({
                     href: url + 'admins',
-                    name: "ADMINS",
+                    name: i18n._("ADMINS"),
                     count: card.summary_fields.related_field_counts.admins,
                     activeMode: 'admins'
                 });
