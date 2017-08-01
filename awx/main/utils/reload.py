@@ -29,7 +29,7 @@ def _reset_celery_thread_pool():
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
 
-def _supervisor_service_command(service_internal_names, command):
+def _supervisor_service_command(service_internal_names, command, communicate=True):
     '''
     Service internal name options:
      - beat - celery - callback - channels - uwsgi - daphne
@@ -38,6 +38,8 @@ def _supervisor_service_command(service_internal_names, command):
     # supervisorctl restart tower-processes:receiver tower-processes:factcacher
     '''
     group_name = 'tower-processes'
+    if settings.DEBUG:
+        group_name = 'awx-processes'
     args = ['supervisorctl']
     if settings.DEBUG:
         args.extend(['-c', '/supervisor.conf'])
@@ -48,16 +50,20 @@ def _supervisor_service_command(service_internal_names, command):
             programs.append('{}:{}'.format(group_name, name_translation_dict[n]))
     args.extend([command])
     args.extend(programs)
-    logger.debug('Issuing command to restart services, args={}'.format(args))
+    logger.debug('Issuing command to {} services, args={}'.format(command, args))
     supervisor_process = subprocess.Popen(args, stdin=subprocess.PIPE,
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    restart_stdout, restart_err = supervisor_process.communicate()
-    restart_code = supervisor_process.returncode
-    if restart_code or restart_err:
-        logger.error('supervisorctl restart errored with exit code `{}`, stdout:\n{}stderr:\n{}'.format(
-            restart_code, restart_stdout.strip(), restart_err.strip()))
+    if communicate:
+        restart_stdout, restart_err = supervisor_process.communicate()
+        restart_code = supervisor_process.returncode
+        if restart_code or restart_err:
+            logger.error('supervisorctl {} errored with exit code `{}`, stdout:\n{}stderr:\n{}'.format(
+                command, restart_code, restart_stdout.strip(), restart_err.strip()))
+        else:
+            logger.info('supervisorctl {} finished, stdout:\n{}'.format(
+                command, restart_stdout.strip()))
     else:
-        logger.info('supervisorctl restart finished, stdout:\n{}'.format(restart_stdout.strip()))
+        logger.info('Submitted supervisorctl {} command, not waiting for result'.format(command))
 
 
 def restart_local_services(service_internal_names):
@@ -75,6 +81,6 @@ def restart_local_services(service_internal_names):
         _reset_celery_thread_pool()
 
 
-def stop_local_services(service_internal_names):
+def stop_local_services(service_internal_names, communicate=True):
     logger.warn('Stopping services {} on this node in response to user action'.format(service_internal_names))
-    _supervisor_service_command(service_internal_names, command='stop')
+    _supervisor_service_command(service_internal_names, command='stop', communicate=communicate)
