@@ -158,9 +158,9 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                     varName = source + '_variables';
                 }
 
-                $scope[varName] = $scope[varName] === (null || undefined) ? '---' : $scope[varName];
+                $scope[varName] = ParseVariableString(inventorySourceData
+                    .source_vars);
 
-                ParseVariableString(inventorySourceData.source_vars);
                 ParseTypeChange({
                     scope: $scope,
                     field_id: varName,
