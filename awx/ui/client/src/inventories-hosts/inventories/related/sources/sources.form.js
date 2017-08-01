@@ -75,7 +75,7 @@ return {
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
-            ngShow: "source && source.value !== ''",
+            ngShow: "source && source.value !== '' && source.value !== 'custom'",
             sourceModel: 'credential',
             sourceField: 'name',
             ngClick: 'lookupCredential()',
@@ -263,6 +263,54 @@ return {
             dataPlacement: 'right',
             awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
                 "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\" target=\"_blank\">" +
+                "view openstack.yml in the Ansible github repo.</a></p>" +
+                "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                "JSON:<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                "YAML:<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
+        cloudforms_variables: {
+            id: 'cloudforms_variables',
+            label: i18n._('Source Variables'),
+            ngShow: "source && source.value == 'cloudforms'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: "Source Variables",
+            dataPlacement: 'right',
+            awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\" target=\"_blank\">" +
+                "view openstack.yml in the Ansible github repo.</a></p>" +
+                "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                "JSON:<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                "YAML:<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
+        satellite6_variables: {
+            id: 'satellite6_variables',
+            label: i18n._('Source Variables'),
+            ngShow: "source && source.value == 'satellite6'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: "Source Variables",
+            dataPlacement: 'right',
+            awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\" target=\"_blank\">" +
                 "view openstack.yml in the Ansible github repo.</a></p>" +
                 "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                 "JSON:<br />\n" +
