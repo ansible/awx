@@ -3673,11 +3673,11 @@ class ActivityStreamSerializer(BaseSerializer):
         for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
-            allm2m = getattr(obj, fk).all()
-            if getattr(obj, fk).exists():
+            m2m_list = self._get_rel(obj, fk)
+            if m2m_list:
                 rel[fk] = []
                 id_list = []
-                for thisItem in allm2m:
+                for thisItem in m2m_list:
                     if getattr(thisItem, 'id', None) in id_list:
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
@@ -3690,16 +3690,26 @@ class ActivityStreamSerializer(BaseSerializer):
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
         return rel
 
+    def _get_rel(self, obj, fk):
+        related_model = ActivityStream._meta.get_field(fk).related_model
+        related_manager = getattr(obj, fk)
+        if issubclass(related_model, PolymorphicModel) and hasattr(obj, '_prefetched_objects_cache'):
+            # HACK: manually fill PolymorphicModel caches to prevent running query multiple times
+            # unnecessary if django-polymorphic issue #68 is solved
+            if related_manager.prefetch_cache_name not in obj._prefetched_objects_cache:
+                obj._prefetched_objects_cache[related_manager.prefetch_cache_name] = list(related_manager.all())
+        return related_manager.all()
+
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
         for fk, related_fields in self._local_summarizable_fk_fields:
             try:
                 if not hasattr(obj, fk):
                     continue
-                allm2m = getattr(obj, fk).all()
-                if getattr(obj, fk).exists():
+                m2m_list = self._get_rel(obj, fk)
+                if m2m_list:
                     summary_fields[fk] = []
-                    for thisItem in allm2m:
+                    for thisItem in m2m_list:
                         if fk == 'job':
                             summary_fields['job_template'] = []
                             job_template_item = {}
@@ -3721,9 +3731,6 @@ class ActivityStreamSerializer(BaseSerializer):
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
-                        if thisItemDict.get('id', None):
-                            if thisItemDict.get('id', None) in [obj_dict.get('id', None) for obj_dict in summary_fields[fk]]:
-                                continue
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
                 pass
