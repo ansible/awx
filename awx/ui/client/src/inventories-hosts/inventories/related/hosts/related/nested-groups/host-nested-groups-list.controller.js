@@ -118,6 +118,10 @@
             $state.go('inventories.edit.groups.edit', {group_id: id});
         };
 
+        $scope.goToGroupGroups = function(id){
+            $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
+        };
+
         $scope.setAdhocPattern = function(){
             var pattern = _($scope.groupsSelected)
                 .map(function(item){
