@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state','moment', '$timeout', '$window', '$filter',
-    function($state, moment, $timeout, $window, $filter) {
+export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'GetBasePath', 'ProcessErrors',
+    function($state, moment, $timeout, $window, $filter, Rest, GetBasePath, ProcessErrors) {
 
     return {
         scope: {
@@ -861,15 +861,38 @@ export default ['$state','moment', '$timeout', '$window', '$filter',
                     d3.select(this).style("text-decoration", null);
                 });
                 this.on("click", function(d) {
-                    if(d.job.id && d.unifiedJobTemplate) {
-                        if(d.unifiedJobTemplate.unified_job_type === 'job') {
+
+                    let goToJobResults = function(job_type) {
+                        if(job_type === 'job') {
                             $state.go('jobResult', {id: d.job.id});
                         }
-                        else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
+                        else if(job_type === 'inventory_update') {
                             $state.go('inventorySyncStdout', {id: d.job.id});
                         }
-                        else if(d.unifiedJobTemplate.unified_job_type === 'project_update') {
+                        else if(job_type === 'project_update') {
                             $state.go('scmUpdateStdout', {id: d.job.id});
+                        }
+                    };
+
+                    if(d.job.id) {
+                        if(d.unifiedJobTemplate) {
+                            goToJobResults(d.unifiedJobTemplate.unified_job_type);
+                        }
+                        else {
+                            // We don't have access to the unified resource and have to make
+                            // a GET request in order to find out what type job this was
+                            // so that we can route the user to the correct stdout view
+
+                            Rest.setUrl(GetBasePath("unified_jobs") + "?id=" + d.job.id);
+                            Rest.get()
+                            .success(function (res) {
+                                if(res.results && res.results.length > 0) {
+                                    goToJobResults(res.results[0].type);
+                                }
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Unable to get job: ' + status });
+                            });
                         }
                     }
                 });
