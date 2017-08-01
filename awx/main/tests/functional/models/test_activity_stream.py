@@ -1,4 +1,5 @@
 import pytest
+import mock
 
 import json
 
@@ -9,12 +10,16 @@ from awx.main.models import (
     JobTemplate,
     Credential,
     CredentialType,
+    Inventory,
     InventorySource
 )
 
 # other AWX
 from awx.main.utils import model_to_dict
 from awx.api.serializers import InventorySourceSerializer
+
+# Django
+from django.contrib.auth.models import AnonymousUser
 
 # Django-CRUM
 from crum import impersonate
@@ -168,3 +173,12 @@ def test_activity_stream_actor(admin_user):
         o = Organization.objects.create(name='test organization')
     entry = o.activitystream_set.get(operation='create')
     assert entry.actor == admin_user
+
+
+@pytest.mark.django_db
+def test_annon_user_action():
+    with mock.patch('awx.main.signals.get_current_user') as u_mock:
+        u_mock.return_value = AnonymousUser()
+        inv = Inventory.objects.create(name='ainventory')
+    entry = inv.activitystream_set.filter(operation='create').first()
+    assert not entry.actor

@@ -34,6 +34,13 @@ logger = logging.getLogger('awx.main.signals')
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
 
 
+def get_current_user_or_none():
+    u = get_current_user()
+    if not isinstance(u, User):
+        return None
+    return u
+
+
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
@@ -386,7 +393,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
             operation='create',
             object1=object1,
             changes=json.dumps(changes),
-            actor=get_current_user())
+            actor=get_current_user_or_none())
         activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
@@ -414,7 +421,7 @@ def activity_stream_update(sender, instance, **kwargs):
         operation='update',
         object1=object1,
         changes=json.dumps(changes),
-        actor=get_current_user())
+        actor=get_current_user_or_none())
     activity_entry.save()
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         getattr(activity_entry, object1).add(instance)
@@ -433,7 +440,7 @@ def activity_stream_delete(sender, instance, **kwargs):
         operation='delete',
         changes=json.dumps(changes),
         object1=object1,
-        actor=get_current_user())
+        actor=get_current_user_or_none())
     activity_entry.save()
 
 
@@ -481,7 +488,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 object1=object1,
                 object2=object2,
                 object_relationship_type=obj_rel,
-                actor=get_current_user())
+                actor=get_current_user_or_none())
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
@@ -519,7 +526,7 @@ def get_current_user_from_drf_request(sender, **kwargs):
 @receiver(pre_delete, sender=Organization)
 def delete_inventory_for_org(sender, instance, **kwargs):
     inventories = Inventory.objects.filter(organization__pk=instance.pk)
-    user = get_current_user()
+    user = get_current_user_or_none()
     for inventory in inventories:
         try:
             inventory.schedule_deletion(user_id=getattr(user, 'id', None))
