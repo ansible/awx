@@ -125,6 +125,7 @@ CLUSTER_HOST_ID = socket.gethostname()
 CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 # Production only runs this schedule on controlling nodes
 # but development will just run it on all nodes
+CELERY_ROUTES['awx.main.tasks.awx_isolated_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 CELERYBEAT_SCHEDULE['isolated_heartbeat'] = {
     'task': 'awx.main.tasks.awx_isolated_heartbeat',
     'schedule': timedelta(seconds = AWX_ISOLATED_PERIODIC_CHECK),
