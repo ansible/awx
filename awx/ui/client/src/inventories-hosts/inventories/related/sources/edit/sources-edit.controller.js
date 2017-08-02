@@ -141,7 +141,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         function initSourceSelect() {
             $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
             var source = $scope.source && $scope.source.value ? $scope.source.value : null;
-
+            $scope.cloudCredentialRequired = source !== '' && source !== 'scm' && source !== 'custom' && source !== 'ec2' ? true : false;
             CreateSelect2({
                 element: '#inventory_source_source',
                 multiple: false
@@ -149,7 +149,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
             if (source === 'ec2' || source === 'custom' ||
                 source === 'vmware' || source === 'openstack' ||
-                source === 'scm') {
+                source === 'scm' || source === 'cloudforms'  ||
+                source === 'satellite6') {
 
                 var varName;
                 if (source === 'scm') {
@@ -369,8 +370,13 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         $scope.sourceChange = function(source) {
             source = (source && source.value) ? source.value : '';
-            $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
-            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm') {
+            if ($scope.source.value === "scm" && $scope.source.value === "custom") {
+                $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
+            }
+            else{
+                $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+            }
+            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm' || source === 'cloudforms' || source === "satellite6") {
                 $scope.envParseType = 'yaml';
 
                 var varName;
