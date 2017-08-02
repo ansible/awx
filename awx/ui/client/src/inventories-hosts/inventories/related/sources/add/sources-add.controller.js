@@ -101,8 +101,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             });
         };
 
-        // $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
-
         $scope.sourceChange = function(source) {
             source = (source && source.value) ? source.value : '';
             if ($scope.source.value === "scm" && $scope.source.value === "custom") {
