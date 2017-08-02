@@ -10,6 +10,7 @@ function LegacyCredentialsService (pathService) {
         name: 'credentials',
         route: '/credentials',
         ncyBreadcrumb: {
+            parent: 'setup',
             label: N_('CREDENTIALS')
         },
         views: {
