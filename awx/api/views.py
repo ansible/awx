@@ -1959,6 +1959,13 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
     parent_key = 'inventory'
     capabilities_prefetch = ['inventory.admin']
 
+    def get_queryset(self):
+        inventory = self.get_parent_object()
+        if inventory.kind == 'smart':
+            filter_qs = SmartFilter.query_from_string(inventory.host_filter)
+            return filter_qs.distinct()
+        return super(InventoryHostsList, self).get_queryset()
+
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
     ''' the list of groups a host is directly a member of '''

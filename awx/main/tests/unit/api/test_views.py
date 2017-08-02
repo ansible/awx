@@ -9,6 +9,7 @@ from awx.api.views import (
     JobTemplateLabelList,
     JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
+    InventoryHostsList,
     HostInsights,
 )
 
@@ -204,3 +205,15 @@ class TestHostInsights():
 
         assert resp.data['error'] == 'The Insights Credential for "inventory_name_here" was not found.'
         assert resp.status_code == 404
+
+
+class TestInventoryHostsList(object):
+
+    def test_host_list_smart_inventory(self, mocker):
+        Inventory = namedtuple('Inventory', ['kind', 'host_filter'])
+        obj = Inventory(kind='smart', host_filter='localhost')
+        with mock.patch.object(InventoryHostsList, 'get_parent_object', return_value=obj):
+            with mock.patch('awx.api.views.SmartFilter.query_from_string') as mock_query:
+                view = InventoryHostsList()
+                view.get_queryset()
+                mock_query.assert_called_once_with('localhost')
