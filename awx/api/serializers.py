@@ -1411,7 +1411,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         if value in ('all', '_meta'):
             raise serializers.ValidationError(_('Invalid group name.'))
         return value
-    
+
     def validate_inventory(self, value):
         if value.kind == 'smart':
             raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
@@ -1674,6 +1674,22 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if value.kind == 'smart':
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
+
+    def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
+        if get_field_from_model_or_attrs('source') != 'scm':
+            redundant_scm_fields = filter(
+                lambda x: attrs.get(x, None),
+                ['source_project', 'source_path', 'update_on_project_update']
+            )
+            if redundant_scm_fields:
+                raise serializers.ValidationError(
+                    {"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))}
+                )
+
+        return super(InventorySourceSerializer, self).validate(attrs)
 
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
