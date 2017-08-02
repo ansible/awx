@@ -68,7 +68,7 @@
           View information about this version of Ansible {{BRAND_NAME}}.
           </p>
         </a>
-        <a ui-sref="license" class="SetupItem">
+        <a ui-sref="license" class="SetupItem" ng-if="!isOpen">
           <h4 class="SetupItem-title" translate>View Your License</h4>
           <p class="SetupItem-description" translate>
           View and edit your license information.

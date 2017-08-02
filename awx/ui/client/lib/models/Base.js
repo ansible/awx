@@ -1,28 +1,55 @@
 let $http;
 let $q;
+let cache;
 
 function request (method, resource) {
-    if (Array.isArray(method) && Array.isArray(resource)) {
-        let promises = method.map((value, i) => this.http[value](resource[i]));
+    if (Array.isArray(method)) {
+        let promises = method.map((_method_, i) => {
+            return this.request(_method_, Array.isArray(resource) ? resource[i] : resource);
+        });
 
         return $q.all(promises);
     }
-    
+
+    if (this.isCacheable(method, resource)) {
+        return this.requestWithCache(method, resource);
+    }
+ 
     return this.http[method](resource);
+}
+
+function requestWithCache (method, resource) {
+    let key = cache.createKey(method, this.path, resource);
+
+    return cache.get(key)
+        .then(data => {
+            if (data) {
+                this.model[method.toUpperCase()] = data;
+
+                return data;
+            }
+
+            return this.http[method](resource)
+                .then(res => {
+                    cache.put(key, res.data);
+
+                    return res;
+                });
+        });
 }
 
 /**
  * Intended to be useful in searching and filtering results using params
  * supported by the API.
  *
- * @param {object} params - An object of keys and values to to format and
+ * @arg {Object} params - An object of keys and values to to format and
  * to the URL as a query string. Refer to the API documentation for the 
  * resource in use for specifics.
- * @param {object} config - Configuration specific to the UI to accommodate
+ * @arg {Object} config - Configuration specific to the UI to accommodate
  * common use cases.
  *
- * @returns {Promise} - $http
- * @yields {(Boolean|object)}
+ * @yields {boolean} - Indicating a match has been found. If so, the results 
+ * are set on the model.
  */
 function search (params, config) {
     let req = {
@@ -279,6 +306,14 @@ function isCreatable () {
     return false;
 }
 
+function isCacheable () {
+    if (this.settings.cache === true) {
+        return true;
+    }
+
+    return false;
+}
+
 function graft (id) {
     let item = this.get('results').filter(result => result.id === id);
 
@@ -291,12 +326,27 @@ function graft (id) {
     return new this.Constructor('get', item, true);
 }
 
-function create (method, resource, graft) {
+/**
+ * `create` is called on instantiation of every model. Models can be
+ * instantiated empty or with `GET` and/or `OPTIONS` requests that yield data.
+ * If model data already exists a new instance can be created (see: `graft`)
+ * with existing data.
+ *
+ * @arg {string=} method - Populate the model with `GET` or `OPTIONS` data.
+ * @arg {(string|Object)=} resource - An `id` reference to a particular
+ * resource or an existing model's data.
+ * @arg {boolean=} graft - Create a new instance from existing model data.
+ *
+ * @returns {(Object|Promise)} - Returns a reference to the model instance
+ * if an empty instance or graft is created. Otherwise, a promise yielding
+ * a model instance is returned.
+ */
+function create (method, resource, graft, config) {
     if (!method) {
         return this;
     }
 
-    this.promise = this.request(method, resource);
+    this.promise = this.request(method, resource, config);
 
     if (graft) {
         return this;
@@ -306,19 +356,30 @@ function create (method, resource, graft) {
         .then(() => this);
 }
 
-function BaseModel (path) {
+/**
+ * Base functionality for API interaction.
+ *
+ * @arg {string} path - The API resource for the model extending BaseModel to
+ * use.
+ * @arg {Object=} settings - Configuration applied to all instances of the
+ * extending model.
+ * @arg {boolean=} settings.cache - Cache the model data.
+ *
+ */
+function BaseModel (path, settings) {
     this.create = create;
     this.find = find;
     this.get = get;
     this.graft = graft;
     this.has = has;
     this.isEditable = isEditable;
+    this.isCacheable = isCacheable;
     this.isCreatable = isCreatable;
     this.match = match;
-    this.model = {};
     this.normalizePath = normalizePath;
     this.options = options;
     this.request = request;
+    this.requestWithCache = requestWithCache;
     this.search = search;
     this.set = set;
     this.unset = unset;
@@ -330,16 +391,19 @@ function BaseModel (path) {
         put: httpPut.bind(this),
     };
 
+    this.model = {};
     this.path = this.normalizePath(path);
+    this.settings = settings || {};
 };
 
-function BaseModelLoader (_$http_, _$q_) {
+function BaseModelLoader (_$http_, _$q_, _cache_) {
     $http = _$http_;
     $q = _$q_;
+    cache = _cache_;
 
     return BaseModel;
 }
 
-BaseModelLoader.$inject = ['$http', '$q'];
+BaseModelLoader.$inject = ['$http', '$q', 'CacheService'];
 
 export default BaseModelLoader;

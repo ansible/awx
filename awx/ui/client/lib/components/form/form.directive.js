@@ -149,7 +149,6 @@ function AtFormController (eventService, strings) {
                     errorMessageSet = true;
 
                     component.state._rejected = true;
-                    component.state._isValid = false;
                     component.state._message = errors[component.state.id].join(' ');
                 });
         }

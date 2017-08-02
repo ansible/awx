@@ -58,6 +58,7 @@ export default function($stateProvider) {
                     controllerAs: state.controllerAs,
                     views: state.views,
                     parent: state.parent,
+                    redirectTo: state.redirectTo,
                     // new in uiRouter 1.0
                     lazyLoad: state.lazyLoad,
                 };
