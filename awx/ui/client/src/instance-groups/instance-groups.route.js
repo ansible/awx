@@ -14,7 +14,8 @@ export default {
             value: {
                 page_size: '20',
                 order_by: 'name'
-            }
+            },
+            dynamic: true
         }
     },
     data: {

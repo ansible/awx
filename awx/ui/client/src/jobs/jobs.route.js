@@ -20,6 +20,7 @@ export default {
                 not__launch_type: 'sync',
                 order_by: '-finished'
             },
+            dynamic: true,
             squash: ''
         }
     },

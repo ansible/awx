@@ -14,7 +14,8 @@ export default {
                 page_size: '20',
                 order_by: '-finished',
                 not__launch_type: 'sync'
-            }
+            },
+            dynamic: true
         },
         instance_group_id: null
     },

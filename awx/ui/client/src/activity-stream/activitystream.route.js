@@ -20,7 +20,8 @@ export default {
                 order_by: '-timestamp',
                 or__object1__in: null,
                 or__object2__in: null
-            }
+            },
+            dynamic: true
         }
     },
     ncyBreadcrumb: {
