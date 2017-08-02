@@ -1778,17 +1778,15 @@ class RoleSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(RoleSerializer, self).to_representation(obj)
 
-        def spacify_type_name(cls):
-            return re.sub(r'([a-z])([A-Z])', '\g<1> \g<2>', cls.__name__)
-
         if obj.object_id:
             content_object = obj.content_object
             if hasattr(content_object, 'username'):
                 ret['summary_fields']['resource_name'] = obj.content_object.username
             if hasattr(content_object, 'name'):
                 ret['summary_fields']['resource_name'] = obj.content_object.name
-            ret['summary_fields']['resource_type'] = obj.content_type.name
-            ret['summary_fields']['resource_type_display_name'] = spacify_type_name(obj.content_type.model_class())
+            content_model = obj.content_type.model_class()
+            ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
+            ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
 
         ret.pop('created')
         ret.pop('modified')
@@ -1841,7 +1839,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
             try:
                 role_dict['resource_name'] = role.content_object.name
-                role_dict['resource_type'] = role.content_type.name
+                role_dict['resource_type'] = get_type_for_model(role.content_type.model_class())
                 role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
             except AttributeError:
                 pass
@@ -1869,7 +1867,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 }
                 if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
-                    role_dict['resource_type'] = role.content_type.name
+                    role_dict['resource_type'] = get_type_for_model(role.content_type.model_class())
                     role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
                     role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                         Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
