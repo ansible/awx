@@ -43,14 +43,7 @@ export default ['i18n', function(i18n) {
                 default: '---',
                 showParseTypeToggle: true,
                 parseTypeName: 'parseTypeInputs',
-                awPopOver: "<p>Enter inputs using either JSON or YAML syntax. Use the " +
-                    "radio button to toggle between the two.</p>" +
-                    "JSON:<br />\n" +
-                    "<blockquote>{<br />&emsp; \"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                    "YAML:<br />\n" +
-                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                awPopOver: i18n._("Enter inputs using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
                 dataTitle: i18n._('Input Configuration'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -64,14 +57,7 @@ export default ['i18n', function(i18n) {
                 default: '---',
                 showParseTypeToggle: true,
                 parseTypeName: 'parseTypeInjectors',
-                awPopOver: "<p>Enter injectors using either JSON or YAML syntax. Use the " +
-                    "radio button to toggle between the two.</p>" +
-                    "JSON:<br />\n" +
-                    "<blockquote>{<br />&emsp; \"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                    "YAML:<br />\n" +
-                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                awPopOver: i18n._("Enter injectors using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax."),
                 dataTitle: i18n._('Injector Configuration'),
                 dataPlacement: 'right',
                 dataContainer: "body",

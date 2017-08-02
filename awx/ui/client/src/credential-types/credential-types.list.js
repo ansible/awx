@@ -14,6 +14,9 @@ export default ['i18n', function(i18n){
         iterator: 'credential_type',
         index: false,
         hover: false,
+        search: {
+            managed_by_tower: 'false'
+        },
 
         fields: {
             name: {
@@ -25,7 +28,7 @@ export default ['i18n', function(i18n){
                 dataPlacement: 'top'
             },
             kind: {
-                label: i18n._('Type'),
+                label: i18n._('Kind'),
                 ngBind: 'credential_type.kind_label',
                 excludeModal: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'
