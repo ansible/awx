@@ -1959,6 +1959,10 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
     parent_key = 'inventory'
     capabilities_prefetch = ['inventory.admin']
 
+    def get_queryset(self):
+        inventory = self.get_parent_object()
+        return getattrd(inventory, self.relationship).all()
+
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
     ''' the list of groups a host is directly a member of '''

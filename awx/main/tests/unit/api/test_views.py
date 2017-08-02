@@ -9,12 +9,15 @@ from awx.api.views import (
     JobTemplateLabelList,
     JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
+    InventoryHostsList,
     HostInsights,
 )
 
 from awx.main.models import (
     Host,
 )
+
+from awx.main.managers import HostManager
 
 
 @pytest.fixture
@@ -112,10 +115,10 @@ class TestInventoryInventorySourcesUpdate:
                 return [InventorySource(pk=1, source=is_source, source_project=Project,
                                         update_on_project_update=is_up_on_proj,
                                         can_update=can_update, update=lambda:InventoryUpdate)]
-                                        
+
             def exclude(self, **kwargs):
                 return self.all()
-                
+
         Inventory = namedtuple('Inventory', ['inventory_sources', 'kind'])
         obj = Inventory(inventory_sources=InventorySources(), kind='')
 
@@ -157,14 +160,14 @@ class TestHostInsights():
 
     def test_get_insights_malformed_json_content(self, patch_parent, mocker):
         view = HostInsights()
-        
+
         class Response():
             status_code = 200
             content = 'booo!'
 
             def json(self):
                 raise ValueError('we do not care what this is')
-        
+
         mocker.patch.object(view, '_get_insights', return_value=Response())
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
@@ -179,11 +182,11 @@ class TestHostInsights():
 
         host = Host()
         host.insights_system_id = None
-        
+
         mocker.patch.object(view, 'get_object', return_value=host)
 
         resp = view.get(None)
-        
+
         assert resp.data['error'] == 'This host is not recognized as an Insights host.'
         assert resp.status_code == 404
 
@@ -204,3 +207,17 @@ class TestHostInsights():
 
         assert resp.data['error'] == 'The Insights Credential for "inventory_name_here" was not found.'
         assert resp.status_code == 404
+
+
+class TestInventoryHostsList(object):
+
+    def test_host_list_smart_inventory(self, mocker):
+        Inventory = namedtuple('Inventory', ['kind', 'host_filter', 'hosts'])
+        obj = Inventory(kind='smart', host_filter='localhost', hosts=HostManager())
+        obj.hosts.instance = obj
+
+        with mock.patch.object(InventoryHostsList, 'get_parent_object', return_value=obj):
+            with mock.patch('awx.main.utils.filters.SmartFilter.query_from_string') as mock_query:
+                view = InventoryHostsList()
+                view.get_queryset()
+                mock_query.assert_called_once_with('localhost')
