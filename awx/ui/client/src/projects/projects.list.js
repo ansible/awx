@@ -120,10 +120,11 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top'
             },
             cancel: {
-                ngClick: "cancelUpdate(project.id, project.name)",
+                ngClick: "cancelUpdate(project)",
                 awToolTip: i18n._('Cancel the SCM update'),
                 ngShow: "(project.status == 'updating' || project.status == 'running' || project.status == 'pending') && project.summary_fields.user_capabilities.start",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngDisabled: "project.pending_cancellation || project.status == 'canceled'"
             }
         }
     };}];
