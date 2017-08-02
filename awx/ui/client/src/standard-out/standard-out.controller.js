@@ -83,6 +83,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     $scope.variables = ParseVariableString(data.extra_vars);
                 }
 
+                $scope.$on('getInventorySource', function(e, d) {
+                    $scope.inv_manage_group_link = '/#/inventories/inventory/' + d.inventory + '/inventory_sources/edit/' + d.id;
+                });
+
                 // If we have a source then we have to go get the source choices from the server
                 if (!Empty(data.source)) {
                     if ($scope.removeChoicesReady) {
@@ -152,7 +156,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     LookUpName({
                         scope: $scope,
                         scope_var: 'inventory_source',
-                        url: GetBasePath('inventory_sources') + data.inventory_source + '/'
+                        url: GetBasePath('inventory_sources') + data.inventory_source + '/',
+                        callback: 'getInventorySource'
                     });
                 }
 
@@ -161,47 +166,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                         scope: $scope,
                         field_id: 'pre-formatted-variables',
                         readOnly: true
-                    });
-                }
-
-                if ($scope.job.type === 'inventory_update' && !$scope.inv_manage_group_link) {
-
-                    var groupWatcher = $scope.$watch('group', function(group){
-                        if(group) {
-                            // The group's been set by the LookUpName call on inventory_source
-                            var ancestorGroupIds = [];
-
-                            // Remove the watcher
-                            groupWatcher();
-
-                            // Function that we'll call recursively to go out and get a groups parent(s)
-                            var getGroupParent = function(groupId) {
-                                Rest.setUrl(GetBasePath('base') + 'groups/?children__id=' + groupId);
-                                Rest.get()
-                                    .success(function(data) {
-                                        if(data.results && data.results.length > 0) {
-                                            ancestorGroupIds.push(data.results[0].id);
-                                            // Go get this groups first parent
-                                            getGroupParent(data.results[0].id);
-                                        }
-                                        else {
-                                            // We've run out of ancestors to traverse - lets build a link (note that $scope.inventory is
-                                            // set in the lookup-name factory just like $scope.group)
-                                            $scope.inv_manage_group_link = '/#/inventories/' + $scope.inventory + '/manage';
-                                            for(var i=ancestorGroupIds.length; i > 0; i--) {
-                                                $scope.inv_manage_group_link += (i === ancestorGroupIds.length ? '?' : '&') + 'group=' + ancestorGroupIds[i-1];
-                                            }
-                                        }
-                                    })
-                                    .error(function(data, status) {
-                                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                            msg: 'Failed to retrieve group parent(s): ' + groupId + '. GET returned: ' + status });
-                                    });
-                            };
-
-                            // Trigger the recursive chain of parent group gathering
-                            getGroupParent(group);
-                        }
                     });
                 }
 
@@ -245,7 +209,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
             $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
         } else if ($scope.stdoutFullScreen === false) {
             $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
-
         }
     };
 
