@@ -5,8 +5,9 @@
  *************************************************/
 
 export default [ 'InsightsData', '$scope', 'moment', '$state', 'InventoryData',
-    'InsightsService',
-function (data, $scope, moment, $state, InventoryData, InsightsService) {
+    'InsightsService', 'CanRemediate',
+function (data, $scope, moment, $state, InventoryData, InsightsService,
+    CanRemediate) {
 
     function init() {
         $scope.reports = (data && data.reports) ? data.reports : [];
@@ -24,7 +25,7 @@ function (data, $scope, moment, $state, InventoryData, InsightsService) {
         $scope.insights_credential = (InventoryData && InventoryData.summary_fields &&
             InventoryData.summary_fields.insights_credential && InventoryData.summary_fields.insights_credential.id) ?
                 InventoryData.summary_fields.insights_credential.id : null;
-
+        $scope.canRemediate = CanRemediate;
     }
 
     function filter(str){

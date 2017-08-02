@@ -61,7 +61,7 @@
 
 <div class="InsightsBody">
     <div class="InsightsBody-missingIssues" ng-show="reports.length===0 && insights_credential" translate>
-        No data is available. Either there are no issues to report or no scan jobs have been run on this host.
+        No data is available. There are no issues to report.
     </div>
     <div class="InsightsBody-missingIssues" ng-show="!insights_credential" translate>
         The Insights Credential for {{inventory.name}} was not found.
@@ -88,6 +88,6 @@
 
 <div class="buttons Form-buttons">
     <button type="button" class="btn btn-sm Form-primaryButton" ng-click="viewDataInInsights()"> <i class="fa fa-sign-out"></i> VIEW DATA IN INSIGHTS</button>
-    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, insights_credential)" ng-hide="reports.length === 0 || !insights_credential"> REMEDIATE INVENTORY</button>
+    <button type="button" class="btn btn-sm Form-primaryButton" ng-click="remediateInventory(inventory.id, insights_credential)" ng-hide="reports.length === 0 || !insights_credential || !canRemediate"> REMEDIATE INVENTORY</button>
     <button type="button" class="btn btn-sm Form-cancelButton Insights-cancelButton" ng-click="formCancel()"> Close</button>
 </div>
