@@ -1,12 +1,9 @@
 .WorkflowMaker-dialog {
     padding: 0px;
     margin-bottom: 20px;
-    position: fixed;
-    top: 0 !important;
-    bottom: 0;
     width: 100vw !important;
+    height: 100vh !important;
     overflow: scroll;
-
     .ui-dialog-buttonpane, .ui-dialog-titlebar {
         display:none;
     }
@@ -273,6 +270,10 @@
 }
 .WorkflowMaker-formTab {
     margin-right: 10px;
+}
+.WorkflowMaker-preventBodyScrolling {
+    height: 100%;
+    overflow: hidden;
 }
 
 .Key-list {
