@@ -113,10 +113,10 @@ class TestInventoryInventorySourcesUpdate:
                 return [InventorySource(pk=1, source=is_source, source_project=Project,
                                         update_on_project_update=is_up_on_proj,
                                         can_update=can_update, update=lambda:InventoryUpdate)]
-                                        
+
             def exclude(self, **kwargs):
                 return self.all()
-                
+
         Inventory = namedtuple('Inventory', ['inventory_sources', 'kind'])
         obj = Inventory(inventory_sources=InventorySources(), kind='')
 
@@ -158,14 +158,14 @@ class TestHostInsights():
 
     def test_get_insights_malformed_json_content(self, patch_parent, mocker):
         view = HostInsights()
-        
+
         class Response():
             status_code = 200
             content = 'booo!'
 
             def json(self):
                 raise ValueError('we do not care what this is')
-        
+
         mocker.patch.object(view, '_get_insights', return_value=Response())
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
@@ -180,11 +180,11 @@ class TestHostInsights():
 
         host = Host()
         host.insights_system_id = None
-        
+
         mocker.patch.object(view, 'get_object', return_value=host)
 
         resp = view.get(None)
-        
+
         assert resp.data['error'] == 'This host is not recognized as an Insights host.'
         assert resp.status_code == 404
 
