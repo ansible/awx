@@ -21,7 +21,9 @@ export default {
     onEnter: ['$state', 'ConfigService', (state, configService) => {
         return configService.getConfig()
             .then(config => {
-                return _.get(config, 'license_info.license_type') === 'open' && state.go('setup');
+                if (_.get(config, 'license_info.license_type') === 'open') {
+                    return state.go('setup');
+                }
             });
     }],
 	resolve: {
