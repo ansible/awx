@@ -2776,10 +2776,10 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         obj = self.get_object()
         ignored_fields = {}
 
-        if 'credential' not in request.data and 'credential_id' in request.data:
-            request.data['credential'] = request.data['credential_id']
-        if 'inventory' not in request.data and 'inventory_id' in request.data:
-            request.data['inventory'] = request.data['inventory_id']
+        for fd in ('credential', 'vault_credential', 'inventory'):
+            id_fd = '{}_id'.format(fd)
+            if fd not in request.data and id_fd in request.data:
+                request.data[fd] = request.data[id_fd]
 
         if get_request_version(self.request) == 1:  # TODO: remove in 3.3
             extra_creds = request.data.pop('extra_credentials', None)
@@ -2795,15 +2795,15 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         prompted_fields = _accepted_or_ignored[0]
         ignored_fields.update(_accepted_or_ignored[1])
 
-        if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
-            new_credential = get_object_or_400(Credential, pk=get_pk_from_dict(prompted_fields, 'credential'))
-            if request.user not in new_credential.use_role:
-                raise PermissionDenied()
-
-        if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
-            new_inventory = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, 'inventory'))
-            if request.user not in new_inventory.use_role:
-                raise PermissionDenied()
+        for fd, model in (
+                ('credential', Credential),
+                ('vault_credential', Credential),
+                ('inventory', Inventory)):
+            if fd in prompted_fields and prompted_fields[fd] != getattrd(obj, '{}.pk'.format(fd), None):
+                new_res = get_object_or_400(model, pk=get_pk_from_dict(prompted_fields, fd))
+                use_role = getattr(new_res, 'use_role')
+                if request.user not in use_role:
+                    raise PermissionDenied()
 
         for cred in prompted_fields.get('extra_credentials', []):
             new_credential = get_object_or_400(Credential, pk=cred)

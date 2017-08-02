@@ -377,6 +377,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
             credential=self.ask_credential_on_launch,
+            vault_credential=self.ask_credential_on_launch,
             extra_credentials=self.ask_credential_on_launch,
         )
 

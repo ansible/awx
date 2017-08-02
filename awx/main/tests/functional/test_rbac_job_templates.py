@@ -97,6 +97,25 @@ def test_job_template_access_org_admin(jt_linked, rando):
 
 
 @pytest.mark.django_db
+def test_job_template_extra_credentials_prompts_access(
+        rando, post, inventory, project, machine_credential, vault_credential):
+    jt = JobTemplate.objects.create(
+        name = 'test-jt',
+        project = project,
+        playbook = 'helloworld.yml',
+        inventory = inventory,
+        credential = machine_credential,
+        ask_credential_on_launch = True
+    )
+    jt.execute_role.members.add(rando)
+    r = post(
+        reverse('api:job_template_launch', kwargs={'version': 'v2', 'pk': jt.id}),
+        {'vault_credential': vault_credential.pk}, rando
+    )
+    assert r.status_code == 403
+
+
+@pytest.mark.django_db
 class TestJobTemplateCredentials:
 
     def test_job_template_cannot_add_extra_credentials(self, job_template, credential, rando):
