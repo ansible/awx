@@ -19,6 +19,18 @@ def scm_inventory(inventory, project):
     return inventory
 
 
+@pytest.fixture
+def factory_scm_inventory(inventory, project):
+    def fn(**kwargs):
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            return inventory.inventory_sources.create(source_project=project, 
+                                                      overwrite_vars=True,
+                                                      source='scm', 
+                                                      scm_last_revision=project.scm_revision, 
+                                                      **kwargs)
+    return fn
+
+
 @pytest.mark.django_db
 def test_inventory_source_notification_on_cloud_only(get, post, inventory_source_factory, user, notification_template):
     u = user('admin', True)
@@ -375,21 +387,31 @@ class TestControlledBySCM:
         delete(inv_src.get_absolute_url(), admin_user, expect=204)
         assert scm_inventory.inventory_sources.count() == 0
 
-    def test_adding_inv_src_prohibited(self, post, scm_inventory, admin_user):
+    def test_adding_inv_src_ok(self, post, scm_inventory, admin_user):
+        post(reverse('api:inventory_inventory_sources_list', kwargs={'version': 'v2', 'pk': scm_inventory.id}),
+             {'name': 'new inv src', 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True}, 
+             admin_user, expect=201)
+
+    def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
         post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-             {'name': 'new inv src'}, admin_user, expect=403)
+             {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': True, 'source': 'scm', 'overwrite_vars': True},
+             admin_user, expect=400)
+
+    def test_two_update_on_project_update_inv_src_prohibited(self, patch, scm_inventory, factory_scm_inventory, project, admin_user):
+        scm_inventory2 = factory_scm_inventory(name="scm_inventory2")
+        res = patch(reverse('api:inventory_source_detail', kwargs={'version': 'v2', 'pk': scm_inventory2.id}),
+                    {'update_on_project_update': True,},
+                    admin_user, expect=400)
+        content = json.loads(res.content)
+        assert content['update_on_project_update'] == ["Cannot update SCM-based inventory source on launch if set to update on "
+                                                       "project update. Instead, configure the corresponding source project to "
+                                                       "update on launch."]
 
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)
-        post(
-            reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
-            {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
-            rando, expect=403)
-
-    def test_no_post_in_options(self, options, scm_inventory, admin_user):
-        r = options(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-                    admin_user, expect=200)
-        assert 'POST' not in r.data['actions']
+        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
+             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
+             rando, expect=403)
 
 
 @pytest.mark.django_db
