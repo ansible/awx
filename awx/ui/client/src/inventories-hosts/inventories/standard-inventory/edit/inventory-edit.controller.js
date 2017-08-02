@@ -117,5 +117,6 @@ export default ['$scope', '$location',
     '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
-    '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', InventoriesEdit,
+    '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2',
+    'InstanceGroupsService', 'InstanceGroupsData', 'CanRemediate', InventoriesEdit,
 ];

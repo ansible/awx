@@ -123,35 +123,51 @@ angular.module('inventory', [
                                                     'status: ' + status
                                             });
                                     });
-                                }],
-                            CanRemediate: ['resourceData', '$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function(resourceData, $stateParams, Rest, GetBasePath, ProcessErrors){
+                            }],
+                            checkProjectPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath',
+                                function(resourceData, $stateParams, Rest, GetBasePath){
                                     if(_.has(resourceData, 'data.summary_fields.insights_credential')){
                                         let credential_id = resourceData.data.summary_fields.insights_credential.id,
-                                        path = `${GetBasePath('projects')}?credential__id=${credential_id}&role_level=use_role`;
-                                        Rest.setUrl(path);
-                                        return Rest.get()
-                                            .then(({data}) => {
-                                                if (data.results.length > 0){
-                                                    return true;
-                                                }
-                                                else {
+                                            path = `${GetBasePath('projects')}?credential__id=${credential_id}&role_level=use_role`;
+                                            Rest.setUrl(path);
+                                            return Rest.get().then(({data}) => {
+                                                    if (data.results.length > 0){
+                                                        return true;
+                                                    }
+                                                    else {
+                                                        return false;
+                                                    }
+                                                }).catch(() => {
                                                     return false;
-                                                }
-                                            })
-                                            .catch(({data, status}) => {
-                                                ProcessErrors(null, data, status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get instance groups. GET returned ' +
-                                                        'status: ' + status
                                                 });
-                                        });
                                     }
                                     else {
                                         return false;
                                     }
-
-                                }]
+                            }],
+                            checkInventoryPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath',
+                                function(resourceData, $stateParams, Rest, GetBasePath){
+                                    if(_.has(resourceData, 'data.summary_fields.insights_credential')){
+                                        let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}/?role_level=use_role`;
+                                            Rest.setUrl(path);
+                                            return Rest.get().then(() => {
+                                              return true;
+                                            }).catch(() => {
+                                              return false;
+                                            });
+                                    }
+                                    else {
+                                        return false;
+                                    }
+                            }],
+                            CanRemediate: ['checkProjectPermission', 'checkInventoryPermission',
+                                function(checkProjectPermission, checkInventoryPermission){
+                                    // the user can remediate an insights
+                                    // inv if the user has "use" permission on
+                                    // an insights project and the inventory
+                                    // being edited:
+                                    return checkProjectPermission === true && checkInventoryPermission === true;
+                            }]
                         },
 
                     }
