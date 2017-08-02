@@ -659,6 +659,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         $(element).on('select2:select', (e) => {
                             scope[model] = e.params.data.text;
                             scope[selectOptions] = _.cloneDeep(original_options);
+                            if (e.params.data.id === "") {
+                                return;
+                            }
                             if (scope[selectOptions].indexOf(e.params.data.text) === -1) {
                                 scope[selectOptions].push(e.params.data.text);
                             }

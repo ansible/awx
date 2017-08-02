@@ -109,6 +109,7 @@ return {
         inventory_file: {
             label: i18n._('Inventory File'),
             type:'select',
+            defaultText: 'Choose an inventory file',
             ngOptions: 'file for file in inventory_files track by file',
             ngShow: "source && source.value === 'scm'",
             ngDisabled: "!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
