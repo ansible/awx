@@ -128,6 +128,10 @@
             $state.go('inventories.edit.groups.edit', {group_id: id});
         };
 
+        $scope.goToGroupGroups = function(id){
+            $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
+        };
+
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
              if (toState.name === "inventories.edit.groups.edit.nested_groups.edit") {
                  $scope.rowBeingEdited = toParams.group_id;
