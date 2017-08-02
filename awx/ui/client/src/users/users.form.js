@@ -190,7 +190,7 @@ export default ['i18n', function(i18n) {
                         name: {
                             label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
-                            linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
+                            ngClick: "redirectToResource(permission)",
                             nosort: true
                         },
                         type: {

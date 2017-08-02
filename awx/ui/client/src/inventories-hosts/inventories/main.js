@@ -106,6 +106,12 @@ angular.module('inventory', [
                     },
                     resolve: {
                         edit: {
+                            smartInventoryRedirect: ['resourceData', '$state', '$stateParams',
+                                function(resourceData, $state, $stateParams){
+                                    if(resourceData.data.kind === "smart"){
+                                        $state.go("inventories.editSmartInventory", {"smartinventory_id": $stateParams.inventory_id}, {reload: true});
+                                    }
+                            }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
                                 function($stateParams, Rest, GetBasePath, ProcessErrors){
                                     let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}/instance_groups/`;

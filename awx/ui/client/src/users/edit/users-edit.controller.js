@@ -125,11 +125,28 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             return;
         }
 
-        $scope.convertApiUrl = function(str) {
-            if (str) {
-                return str.replace(/api\/v\d+/, "#");
-            } else {
-                return null;
+        $scope.redirectToResource = function(resource) {
+            let type = resource.summary_fields.resource_type.replace(/ /g , "_");
+            var id = resource.related[type].split("/")[4];
+            switch (type) {
+                case 'organization':
+                    $state.go('organizations.edit', { "organization_id": id }, { reload: true });
+                    break;
+                case 'credential':
+                    $state.go('credentials.edit', { "credential_id": id }, { reload: true });
+                    break;
+                case 'project':
+                    $state.go('projects.edit', { "project_id": id }, { reload: true });
+                    break;
+                case 'inventory':
+                    $state.go('inventories.edit', { "inventory_id": id }, { reload: true });
+                    break;
+                case 'job_template':
+                    $state.go('templates.editJobTemplate', { "job_template_id": id }, { reload: true });
+                    break;
+                case 'workflow_job_template':
+                    $state.go('templates.editWorkflowJobTemplate', { "workflow_job_template_id": id }, { reload: true });
+                    break;
             }
         };
 
