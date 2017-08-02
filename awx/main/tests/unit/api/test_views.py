@@ -17,6 +17,8 @@ from awx.main.models import (
     Host,
 )
 
+from awx.main.managers import HostManager
+
 
 @pytest.fixture
 def mock_response_new(mocker):
@@ -210,10 +212,12 @@ class TestHostInsights():
 class TestInventoryHostsList(object):
 
     def test_host_list_smart_inventory(self, mocker):
-        Inventory = namedtuple('Inventory', ['kind', 'host_filter'])
-        obj = Inventory(kind='smart', host_filter='localhost')
+        Inventory = namedtuple('Inventory', ['kind', 'host_filter', 'hosts'])
+        obj = Inventory(kind='smart', host_filter='localhost', hosts=HostManager())
+        obj.hosts.instance = obj
+
         with mock.patch.object(InventoryHostsList, 'get_parent_object', return_value=obj):
-            with mock.patch('awx.api.views.SmartFilter.query_from_string') as mock_query:
+            with mock.patch('awx.main.utils.filters.SmartFilter.query_from_string') as mock_query:
                 view = InventoryHostsList()
                 view.get_queryset()
                 mock_query.assert_called_once_with('localhost')

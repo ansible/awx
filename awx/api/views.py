@@ -1961,10 +1961,7 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
 
     def get_queryset(self):
         inventory = self.get_parent_object()
-        if inventory.kind == 'smart':
-            filter_qs = SmartFilter.query_from_string(inventory.host_filter)
-            return filter_qs.distinct()
-        return super(InventoryHostsList, self).get_queryset()
+        return getattrd(inventory, self.relationship).all()
 
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
