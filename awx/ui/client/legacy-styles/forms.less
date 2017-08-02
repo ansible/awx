@@ -201,7 +201,8 @@
        background-color: @f2grey;
        border-color: @b7grey;
        border-radius: 5px;
-       height: 30px;
+       height: auto;
+       min-height: 30px;
        padding: 0 10px;
     }
 }
@@ -443,7 +444,7 @@
 }
 
 .Form-lookupButton {
-    height: 30px;
+    height: auto;
     width: 30px;
     color: @field-lookup-btn-icon!important;
     font-size: 16px;
@@ -521,7 +522,17 @@ input[type='radio']:checked:before {
 }
 
 .Form-mixedInputGroup {
+    display: flex;
     width: 100%;
+
+    .form-control {
+        padding: 0 12px !important;
+    }
+
+    .input-group-btn {
+        display: flex;
+        width: 30px;
+    }
 }
 
 .FormToggle {}
@@ -679,11 +690,9 @@ input[type='radio']:checked:before {
 }
 
 .Form-variableHeightButtonGroup {
-    height: 100%;
-}
-
-.Form-lookupButton--variableHeight {
-    height: 100%;
+    display: flex;
+    height: auto;
+    width: 30px;
 }
 
 @media only screen and (max-width: 650px) {
