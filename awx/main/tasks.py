@@ -135,7 +135,7 @@ def handle_setting_changes(self, setting_keys):
     cache.delete_many(cache_keys)
     for key in cache_keys:
         if key.startswith('LOG_AGGREGATOR_'):
-            restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
+            restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
             break
 
 
@@ -236,9 +236,7 @@ def cluster_node_heartbeat(self):
                                                                                                        this_inst.version))
             # Shutdown signal will set the capacity to zero to ensure no Jobs get added to this instance.
             # The heartbeat task will reset the capacity to the system capacity after upgrade.
-            stop_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
-            # We wait for the Popen call inside stop_local_services above
-            # so the line below will rarely if ever be executed.
+            stop_local_services(['uwsgi', 'celery', 'beat', 'callback'], communicate=False)
             raise RuntimeError("Shutting down.")
     for other_inst in lost_instances:
         if other_inst.capacity == 0:
