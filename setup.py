@@ -16,12 +16,7 @@ etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
-docdir = "/usr/share/doc/ansible-tower"
-
-if os.getenv('OFFICIAL', 'no') == 'yes':
-    build_tag = ''
-else:
-    build_tag = '-' + '0.git' + subprocess.Popen("git describe --long | cut -d - -f 2-2", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+docdir = "/usr/share/doc/ansible-awx"
 
 
 def get_version():
@@ -64,10 +59,6 @@ class sdist_isolated(sdist):
         'include requirements/requirements_isolated.txt',
         'recursive-include awx/lib *.py',
     ]
-
-    def __init__(self, dist):
-        sdist.__init__(self, dist)
-        dist.metadata.version += build_tag
 
     def get_file_list(self):
         self.filelist.process_template_line('include setup.py')
@@ -173,9 +164,6 @@ setup(
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
-        'egg_info': {
-            'tag_build': build_tag,
-        },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',

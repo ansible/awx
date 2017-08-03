@@ -4,5 +4,5 @@ if [ `id -u` -ge 10000 ]; then
     cat /tmp/passwd > /etc/passwd
     rm /tmp/passwd
 fi
-tower-manage collectstatic --noinput --clear
+awx-manage collectstatic --noinput --clear
 supervisord -c /supervisor.conf
