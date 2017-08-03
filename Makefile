@@ -2,7 +2,6 @@ PYTHON ?= python
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
-PACKAGE_BUILD ?= no
 PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 NODE ?= node
@@ -45,27 +44,20 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
+
 ifeq ($(OFFICIAL),yes)
-    RELEASE ?= 1
-	VERSION_TARGET ?= $(RELEASE_VERSION)
-elif ($(PACKAGE_BUILD),yes)
-    RELEASE ?= 0.git$(shell git describe --long | cut -d - -f 2-2)
-	VERSION_TARGET ?= $(RELEASE)
+    VERSION_TARGET ?= $(RELEASE_VERSION)
 else
-	RELEASE ?=
-	VERSION_TARGET ?= $(VERSION3DOT)
+    VERSION_TARGET ?= $(VERSION3DOT)
 endif
 
 # TAR build parameters
 ifeq ($(OFFICIAL),yes)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
     WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
-elif ($(PACKAGE_BUILD),yes)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
-    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)_$(RELEASE)
 else
-	SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
-	WHEEL_NAME=$(NAME)-$(VERSION3DOT)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
+    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
 endif
 
 SDIST_COMMAND ?= sdist
