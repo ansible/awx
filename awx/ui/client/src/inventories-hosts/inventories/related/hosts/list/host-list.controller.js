@@ -160,6 +160,11 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
                 return item.name;
             }).value().join(':');
 
-        $state.go('^.adhoc', {pattern: pattern});
+        if($state.includes('inventories.edit')) {
+            $state.go('inventories.edit.adhoc', {pattern: pattern});
+        }
+        else if($state.includes('inventories.editSmartInventory')) {
+            $state.go('inventories.editSmartInventory.adhoc', {pattern: pattern});
+        }
     };
 }];
