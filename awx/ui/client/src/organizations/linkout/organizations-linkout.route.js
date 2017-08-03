@@ -33,7 +33,8 @@ export default [{
         user_search: {
             value: {
                 order_by: 'username'
-            }
+            },
+            dynamic: true
         }
     },
     ncyBreadcrumb: {
@@ -237,7 +238,8 @@ export default [{
                 or__project__organization: null,
                 or__inventory__organization: null,
                 page_size: 20
-            }
+            },
+            dynamic: true
         }
     },
     data: {
@@ -294,7 +296,8 @@ export default [{
         user_search: {
             value: {
                 order_by: 'username'
-            }
+            },
+            dynamic: true
         },
         add_user_search: {
             value: {

@@ -319,7 +319,8 @@ export default
                         value: {
                             next_run__isnull: 'false',
                             order_by: 'unified_job_template__polymorphic_ctype__model'
-                        }
+                        },
+                        dynamic: true
                     }
                 },
                 data: {
