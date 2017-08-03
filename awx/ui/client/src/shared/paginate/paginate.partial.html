@@ -2,7 +2,7 @@
     <div class="Paginate-wrapper" ng-hide="dataset.count <= pageSize">
         <ul class="Paginate-controls pagination">
             <!-- first -->
-            <li class="Paginate-controls--first Paginate-controls--item" ng-hide="pageRange.length < maxVisiblePages || current === 1">
+            <li class="Paginate-controls--first Paginate-controls--item" ng-hide="pageRange.length < maxVisiblePages || pageRange[0] === 1">
                 <a href ng-click="toPage(1)">
                     <i class="fa fa-angle-double-left"></i>
                 </a>
@@ -24,7 +24,7 @@
                 </a>
             </li>
             <!-- last -->
-            <li class="Paginate-controls--item Paginate-controls--last" ng-hide="(pageRange.length < maxVisiblePages || current === last)">
+            <li class="Paginate-controls--item Paginate-controls--last" ng-hide="(pageRange.length < maxVisiblePages || pageRange[pageRange.length-1] === last)">
                 <a href id="last-page-set" ng-click="toPage(last)">
                     <i class="fa fa-angle-double-right"></i>
                 </a>
