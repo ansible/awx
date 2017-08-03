@@ -329,7 +329,7 @@ def handle_work_success(self, result, task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
     except ObjectDoesNotExist:
-        logger.warning('Missing job `{}` in success callback.'.format(task_actual['id']))
+        logger.warning('Missing {} `{}` in success callback.'.format(task_actual['type'], task_actual['id']))
         return
     if not instance:
         return
@@ -342,13 +342,16 @@ def handle_work_success(self, result, task_actual):
 
 @task(bind=True, queue='tower', base=LogErrorsTask)
 def handle_work_error(self, task_id, subtasks=None):
-    print('Executing error task id %s, subtasks: %s' %
-          (str(self.request.id), str(subtasks)))
+    logger.debug('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
     first_instance = None
     first_instance_type = ''
     if subtasks is not None:
         for each_task in subtasks:
-            instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
+            try:
+                instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
+            except ObjectDoesNotExist:
+                logger.warning('Missing {} `{}` in success callback.'.format(each_task['type'], task_actual['id']))
+                instance = None
             if not instance:
                 # Unknown task type
                 logger.warn("Unknown task type: {}".format(each_task['type']))
