@@ -79,9 +79,6 @@ export default [
             noPanel: true
         });
 
-        // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
-        var dropdownRendered = false;
-
         function initializeCodeInput () {
             let name = 'AWX_TASK_ENV';
 
@@ -95,35 +92,33 @@ export default [
             $scope.parseTypeChange('parseType', name);
         }
 
-        function populateAdhocCommand(flag){
-            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.toString();
-            var ad_hoc_commands = $scope.$parent.AD_HOC_COMMANDS.split(',');
-            $scope.$parent.AD_HOC_COMMANDS = _.map(ad_hoc_commands, function(item){
-                let option = _.find($scope.$parent.AD_HOC_COMMANDS_options, { value: item });
-                if(!option){
-                    option = {
-                        name: item,
-                        value: item,
-                        label: item
-                    };
-                    $scope.$parent.AD_HOC_COMMANDS_options.push(option);
-                }
-                return option;
+        function loadAdHocCommands () {
+            $scope.$parent.AD_HOC_COMMANDS_values = $scope.$parent.AD_HOC_COMMANDS.map(value => value);
+            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.map(value => ({
+                value,
+                name: value,
+                label: value
+            }));
+
+            $scope.$parent.AD_HOC_COMMANDS_options = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag);
+
+            CreateSelect2({
+                element: '#configuration_jobs_template_AD_HOC_COMMANDS',
+                multiple: true,
+                addNew: true,
+                placeholder: i18n._('Select commands')
             });
+        }
 
-            if(flag !== undefined){
-                dropdownRendered = flag;
-            }
+        function revertAdHocCommands (defaults) {
+            $scope.$parent.AD_HOC_COMMANDS = defaults.map(value => ({
+                value,
+                name: value,
+                label: value
+            }));
 
-            if(!dropdownRendered) {
-                dropdownRendered = true;
-                CreateSelect2({
-                    element: '#configuration_jobs_template_AD_HOC_COMMANDS',
-                    multiple: true,
-                    addNew: true,
-                    placeholder: i18n._('Select commands')
-                });
-            }
+            $scope.$parent.AD_HOC_COMMANDS_options = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag);
+            $scope.$parent.AD_HOC_COMMANDS_values = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag.value);
         }
 
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
@@ -132,9 +127,25 @@ export default [
             $scope.$parent.configuration_jobs_template_form.$setPristine();
         }, 1000);
 
-        $scope.$on('AD_HOC_COMMANDS_populated', function(e, data, flag) {
-            populateAdhocCommand(flag);
+
+        // Managing the state of select2's tags since the behavior is unpredictable otherwise.
+        let commandsElement = $('#configuration_jobs_template_AD_HOC_COMMANDS');
+
+        commandsElement.on('select2:select', event => { 
+            let command = event.params.data.text;
+            let commands = $scope.$parent.AD_HOC_COMMANDS_values;
+
+            commands.push(command);
         });
+
+        commandsElement.on('select2:unselect', event => { 
+            let command = event.params.data.text;
+            let commands = $scope.$parent.AD_HOC_COMMANDS_values;
+
+            $scope.$parent.AD_HOC_COMMANDS_values = commands.filter(value => value !== command);
+        });
+
+        $scope.$on('AD_HOC_COMMANDS_reverted', (e, defaults) => revertAdHocCommands(defaults));
 
         /*
          * Controllers for each tab are initialized when configuration is opened. A listener
@@ -174,7 +185,7 @@ export default [
                 codeInputInitialized = true;
             }
 
-            populateAdhocCommand(false);
+            loadAdHocCommands();
         });
     }
 ];

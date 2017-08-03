@@ -86,7 +86,7 @@ export default [
                                 // does a string.split(', ') w/ an extra space
                                 // behind the comma.
                                 if(key === "AD_HOC_COMMANDS"){
-                                    $scope[key] = data[key].toString();
+                                    $scope[key] = data[key];
                                 } else if (key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH") {
                                     $scope[key] = JSON.stringify(data[key]);
                                 } else {
@@ -382,7 +382,7 @@ export default [
                     } else if($scope[key][0] && $scope[key][0].value !== undefined) {
                         if(multiselectDropdowns.indexOf(key) !== -1) {
                             // Handle AD_HOC_COMMANDS
-                            payload[key] = ConfigurationUtils.listToArray(_.map($scope[key], 'value').join(','));
+                            payload[key] = $scope[`${key}_values`];
                         } else {
                             payload[key] = _.map($scope[key], 'value').join(',');
                         }
