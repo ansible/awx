@@ -85,9 +85,9 @@ export default
                 },
                 views: {
                     '@': {
-                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
+                            ScheduleList.listTitle = `${$filter('sanitize')(ParentObject.name)}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'
@@ -178,9 +178,9 @@ export default
                 },
                 views: {
                     '@': {
-                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
+                            ScheduleList.listTitle = `${$filter('sanitize')(ParentObject.name)}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'
@@ -268,9 +268,9 @@ export default
                 },
                 views: {
                     '@': {
-                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
+                            ScheduleList.listTitle = `${$filter('sanitize')(ParentObject.name)}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'
