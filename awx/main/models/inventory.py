@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.db.models import Q
 
 # AWX
 from awx.api.versioning import reverse
@@ -1394,8 +1395,9 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if self.update_on_project_update is True and \
                 self.source == 'scm' and \
                 InventorySource.objects.filter(
-                    inventory=self.inventory,
-                    update_on_project_update=True, source='scm').exists():
+                    Q(inventory=self.inventory,
+                        update_on_project_update=True, source='scm') & 
+                    ~Q(id=self.id)).exists():
             raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "
                                     "Instead, configure the corresponding source project to update on launch."))
         return self.update_on_project_update
