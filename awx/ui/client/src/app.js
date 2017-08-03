@@ -344,11 +344,10 @@ var awApp = angular.module('awApp', [
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
                         if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
-                            if($rootScope.configReady === true){
+                            ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
                                 CheckLicense.test(event);
-                            }
-
+                            });
                         }
                     }
                     activateTab();
