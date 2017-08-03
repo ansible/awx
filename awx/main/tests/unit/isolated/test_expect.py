@@ -236,7 +236,7 @@ def test_check_isolated_job(private_data_dir, rsa_key):
     stdout = cStringIO.StringIO()
     mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '')
     mgr.private_data_dir = private_data_dir
-    mgr.instance = mock.Mock(pk=123, verbosity=5, spec_set=['pk', 'verbosity'])
+    mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
     mgr.started_at = time.time()
     mgr.host = 'isolated-host'
 
@@ -289,7 +289,7 @@ def test_check_isolated_job_timeout(private_data_dir, rsa_key):
                                            job_timeout=1,
                                            extra_update_fields=extra_update_fields)
     mgr.private_data_dir = private_data_dir
-    mgr.instance = mock.Mock(pk=123, verbosity=5, spec_set=['pk', 'verbosity'])
+    mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
     mgr.started_at = time.time()
     mgr.host = 'isolated-host'
 

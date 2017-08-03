@@ -175,7 +175,7 @@ class IsolatedManager(object):
         if self.instance.verbosity:
             args.append('-%s' % ('v' * min(5, self.instance.verbosity)))
         buff = StringIO.StringIO()
-        logger.debug('Starting job on isolated host with `run_isolated.yml` playbook.')
+        logger.debug('Starting job {} on isolated host with `run_isolated.yml` playbook.'.format(self.instance.id))
         status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.management_env, buff,
             idle_timeout=self.idle_timeout,
@@ -183,7 +183,7 @@ class IsolatedManager(object):
             pexpect_timeout=5
         )
         output = buff.getvalue()
-        playbook_logger.info('Job {} management started\n{}'.format(self.instance.id, output))
+        playbook_logger.info('Isolated job {} dispatch:\n{}'.format(self.instance.id, output))
         if status != 'successful':
             self.stdout_handle.write(output)
         return status, rc
@@ -300,7 +300,7 @@ class IsolatedManager(object):
                 continue
 
             buff = cStringIO.StringIO()
-            logger.debug('Checking job on isolated host with `check_isolated.yml` playbook.')
+            logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
             status, rc = IsolatedManager.run_pexpect(
                 args, self.awx_playbook_path(), self.management_env, buff,
                 cancelled_callback=self.cancelled_callback,
@@ -310,7 +310,7 @@ class IsolatedManager(object):
                 proot_cmd=self.proot_cmd
             )
             output = buff.getvalue()
-            playbook_logger.info(output)
+            playbook_logger.info('Isolated job {} check:\n{}'.format(self.instance.id, output))
 
             path = self.path_to('artifacts', 'stdout')
             if os.path.exists(path):
@@ -350,7 +350,7 @@ class IsolatedManager(object):
             ],
         }
         args = self._build_args('clean_isolated.yml', '%s,' % self.host, extra_vars)
-        logger.debug('Cleaning up job on isolated host with `clean_isolated.yml` playbook.')
+        logger.debug('Cleaning up job {} on isolated host with `clean_isolated.yml` playbook.'.format(self.instance.id))
         buff = cStringIO.StringIO()
         timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         status, rc = IsolatedManager.run_pexpect(
@@ -359,11 +359,11 @@ class IsolatedManager(object):
             pexpect_timeout=5
         )
         output = buff.getvalue()
-        playbook_logger.info(output)
+        playbook_logger.info('Isolated job {} cleanup:\n{}'.format(self.instance.id, output))
 
         if status != 'successful':
             # stdout_handle is closed by this point so writing output to logs is our only option
-            logger.warning('Cleanup from isolated job encountered error, output:\n{}'.format(output))
+            logger.warning('Isolated job {} cleanup error, output:\n{}'.format(self.instance.id, output))
 
     @classmethod
     def health_check(cls, instance_qs):
