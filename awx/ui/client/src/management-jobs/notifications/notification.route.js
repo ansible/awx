@@ -16,9 +16,9 @@ export default {
     views: {
         '@managementJobsList': {
             controller: 'managementJobsNotificationsController',
-            templateProvider: function(NotificationsList, generateList, ParentObject) {
+            templateProvider: function(NotificationsList, generateList, ParentObject, $filter) {
                 // include name of parent resource in listTitle
-                NotificationsList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Notifications');
+                NotificationsList.listTitle = `${$filter('sanitize')(ParentObject.name)}<div class='List-titleLockup'></div>` + N_('Notifications');
                 let html = generateList.build({
                     list: NotificationsList,
                     mode: 'edit'
