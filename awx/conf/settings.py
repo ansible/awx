@@ -293,7 +293,12 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if value is empty:
             setting = None
-            if not field.read_only:
+            if not field.read_only or name in (
+                # these two values are read-only - however - we *do* want
+                # to fetch their value from the database
+                'AWX_ISOLATED_PRIVATE_KEY',
+                'AWX_ISOLATED_PUBLIC_KEY',
+            ):
                 setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
             if setting:
                 if getattr(field, 'encrypted', False):
