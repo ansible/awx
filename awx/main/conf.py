@@ -211,6 +211,7 @@ register(
     default='',
     allow_blank=True,
     encrypted=True,
+    read_only=True,
     label=_('The RSA private key for SSH traffic to isolated instances'),
     help_text=_('The RSA private key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
@@ -222,6 +223,7 @@ register(
     field_class=fields.CharField,
     default='',
     allow_blank=True,
+    read_only=True,
     label=_('The RSA public key for SSH traffic to isolated instances'),
     help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
