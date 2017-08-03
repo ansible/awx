@@ -16,7 +16,7 @@ etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
-docdir = "/usr/share/doc/ansible-awx"
+docdir = "/usr/share/doc/awx"
 
 
 def get_version():
