@@ -378,11 +378,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     @transaction.atomic
     def schedule_deletion(self, user_id=None):
         from awx.main.tasks import delete_inventory
+        from awx.main.signals import activity_stream_delete
         if self.pending_deletion is True:
             raise RuntimeError("Inventory is already pending deletion.")
         self.pending_deletion = True
         self.save(update_fields=['pending_deletion'])
         self.jobtemplates.clear()
+        activity_stream_delete(Inventory, self, inventory_delete_flag=True)
         self.websocket_emit_status('pending_deletion')
         delete_inventory.delay(self.pk, user_id)
 
