@@ -206,6 +206,18 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_KEY_GENERATION',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Generate RSA keys for isolated instances'),
+    help_text=_('If set, a random RSA key will be generated and distributed to '
+                'isolated instances.  To disable this behavior and manage authentication '
+                'for isolated instances outside of Tower, disable this setting.'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ISOLATED_PRIVATE_KEY',
     field_class=fields.CharField,
     default='',
