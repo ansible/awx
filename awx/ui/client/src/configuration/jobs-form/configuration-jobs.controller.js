@@ -108,17 +108,33 @@ export default [
                 addNew: true,
                 placeholder: i18n._('Select commands')
             });
+
         }
 
-        function revertAdHocCommands (defaults) {
-            $scope.$parent.AD_HOC_COMMANDS = defaults.map(value => ({
+        function revertAdHocCommands () {
+            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.configDataResolve.AD_HOC_COMMANDS.default.map(value => ({
                 value,
                 name: value,
                 label: value
             }));
 
+            $('.select2-selection__choice').each(function(i, element){
+                if(!_.contains($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, element.title)){
+                    $(`#configuration_jobs_template_AD_HOC_COMMANDS option[value='${element.title}']`).remove();
+                    element.remove();
+                }
+            });
+
             $scope.$parent.AD_HOC_COMMANDS_options = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag);
             $scope.$parent.AD_HOC_COMMANDS_values = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag.value);
+            CreateSelect2({
+                element: '#configuration_jobs_template_AD_HOC_COMMANDS',
+                multiple: true,
+                addNew: true,
+                placeholder: i18n._('Select commands'),
+                options: $scope.$parent.AD_HOC_COMMANDS_options
+            });
+
         }
 
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
@@ -131,21 +147,21 @@ export default [
         // Managing the state of select2's tags since the behavior is unpredictable otherwise.
         let commandsElement = $('#configuration_jobs_template_AD_HOC_COMMANDS');
 
-        commandsElement.on('select2:select', event => { 
+        commandsElement.on('select2:select', event => {
             let command = event.params.data.text;
             let commands = $scope.$parent.AD_HOC_COMMANDS_values;
 
             commands.push(command);
         });
 
-        commandsElement.on('select2:unselect', event => { 
+        commandsElement.on('select2:unselect', event => {
             let command = event.params.data.text;
             let commands = $scope.$parent.AD_HOC_COMMANDS_values;
 
             $scope.$parent.AD_HOC_COMMANDS_values = commands.filter(value => value !== command);
         });
 
-        $scope.$on('AD_HOC_COMMANDS_reverted', (e, defaults) => revertAdHocCommands(defaults));
+        $scope.$on('AD_HOC_COMMANDS_reverted', () => revertAdHocCommands());
 
         /*
          * Controllers for each tab are initialized when configuration is opened. A listener
@@ -174,7 +190,7 @@ export default [
 
         /*
          * This event is fired if the user navigates directly to this tab, where the
-         * $locationChangeStart does not. Watching this and location ensure proper display on 
+         * $locationChangeStart does not. Watching this and location ensure proper display on
          * direct load of this tab or if the user comes from a different tab.
          */
         $scope.$on('populated', () => {

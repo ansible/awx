@@ -321,6 +321,9 @@ export default [
                         // We need to re-instantiate the Select2 element
                         // after resetting the value. Example:
                         $scope.$broadcast(key+'_populated', null, false);
+                        if(key === "AD_HOC_COMMANDS"){
+                            $scope.$broadcast(key+'_reverted', null, false);
+                        }
                     }
                     else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                         $scope.$broadcast(key+'_reverted');
@@ -379,7 +382,7 @@ export default [
                     //Parse dropdowns and dropdowns labeled as lists
                     if($scope[key] === null) {
                         payload[key] = null;
-                    } else if($scope[key][0] && $scope[key][0].value !== undefined) {
+                    } else if(!_.isEmpty($scope[`${key}_values`])) {
                         if(multiselectDropdowns.indexOf(key) !== -1) {
                             // Handle AD_HOC_COMMANDS
                             payload[key] = $scope[`${key}_values`];
@@ -501,6 +504,9 @@ export default [
                             // We need to re-instantiate the Select2 element
                             // after resetting the value. Example:
                             $scope.$broadcast(key+'_populated', null, false);
+                            if(key === "AD_HOC_COMMANDS"){
+                                $scope.$broadcast(key+'_reverted', null, false);
+                            }
                         }
                         else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                             $scope.$broadcast(key+'_reverted');
