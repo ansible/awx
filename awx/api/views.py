@@ -2100,20 +2100,20 @@ class HostInsights(GenericAPIView):
         try:
             res = self._get_insights(url, username, password)
         except requests.exceptions.SSLError:
-            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_502_BAD_GATEWAY)
         except requests.exceptions.Timeout:
             return (dict(error=_('Request to {} timed out.').format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
         except requests.exceptions.RequestException as e:
-            return (dict(error=_('Unkown exception {} while trying to GET {}').format(e, url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Unkown exception {} while trying to GET {}').format(e, url)), status.HTTP_502_BAD_GATEWAY)
 
         if res.status_code != 200:
-            return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_502_BAD_GATEWAY)
 
         try:
             filtered_insights_content = filter_insights_api_response(res.json())
             return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
         except ValueError:
-            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_502_BAD_GATEWAY)
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()

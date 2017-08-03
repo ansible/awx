@@ -138,9 +138,9 @@ class TestHostInsights():
         mocker.patch('awx.api.generics.GenericAPIView')
 
     @pytest.mark.parametrize("status_code, exception, error, message", [
-        (500, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
+        (502, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
         (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
-        (500, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+        (502, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
     ])
     def test_get_insights_request_exception(self, patch_parent, mocker, status_code, exception, error, message):
         view = HostInsights()
@@ -172,7 +172,7 @@ class TestHostInsights():
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
         assert msg['error'] == 'Expected JSON response from Insights but instead got booo!'
-        assert code == 500
+        assert code == 502
 
     #def test_get_not_insights_host(self, patch_parent, mocker, mock_response_new):
     #def test_get_not_insights_host(self, patch_parent, mocker):
