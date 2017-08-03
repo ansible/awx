@@ -814,13 +814,12 @@ function(ConfigurationUtils, i18n, $rootScope) {
 
             container = attrs.container ? attrs.container : 'body';
 
-            var template, custom_class;
-            if (attrs.tooltipInnerClass || attrs.tooltipinnerclass) {
-                custom_class = attrs.tooltipInnerClass || attrs.tooltipinnerclass;
-                template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + custom_class + '"></div></div>';
-            } else {
-                template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
-            }
+            var template;
+
+            let tooltipInnerClass = (attrs.tooltipInnerClass || attrs.tooltipinnerclass) ? (attrs.tooltipInnerClass || attrs.tooltipinnerclass) : '';
+            let tooltipOuterClass = attrs.tooltipOuterClass ? attrs.tooltipOuterClass : '';
+
+            template = '<div class="tooltip Tooltip ' + tooltipOuterClass + '" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + tooltipInnerClass + '"></div></div>';
 
             // This block helps clean up tooltips that may get orphaned by a click event
             $(element).on('mouseenter', function() {
