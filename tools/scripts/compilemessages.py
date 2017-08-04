@@ -137,7 +137,7 @@ if __name__ == "__main__":
             program = 'msgfmt'
             program_options = ['--check-format']
             for i, (dirpath, f) in enumerate(locations):
-                print 'processing file %s in %s\n' % (f, dirpath)
+                print('processing file %s in %s\n' % (f, dirpath))
                 po_path = os.path.join(dirpath, f)
                 if has_bom(po_path):
                     raise Exception("The %s file has a BOM (Byte Order Mark). "
