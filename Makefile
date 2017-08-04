@@ -42,35 +42,28 @@ endif
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
-NAME ?= ansible_awx
+NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
+
 ifeq ($(OFFICIAL),yes)
-    RELEASE ?= 1
-    AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
+    VERSION_TARGET ?= $(RELEASE_VERSION)
 else
-    RELEASE ?= 0.git$(shell git describe --long | cut -d - -f 2-2)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
+    VERSION_TARGET ?= $(VERSION3DOT)
 endif
 
 # TAR build parameters
 ifeq ($(OFFICIAL),yes)
-    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
     WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)-$(RELEASE)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
-    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)_$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
+    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
 endif
 
 SDIST_COMMAND ?= sdist
 WHEEL_COMMAND ?= bdist_wheel
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
-
-SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
-SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
-SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
@@ -609,4 +602,11 @@ psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
-	echo $(RELEASE_VERSION) > $@
+	echo $(VERSION_TARGET) > $@
+
+production-openshift-image: sdist
+	cat installer/openshift/Dockerfile | sed "s/{{ version }}/$(VERSION_TARGET)/g" | sed "s/{{ tar }}/$(SDIST_TAR_FILE)/g" > ./Dockerfile.production
+	cat installer/openshift/Dockerfile.celery | sed "s/{{ version }}/$(VERSION_TARGET)/g" | sed "s/{{ tar }}/$(SDIST_TAR_FILE)/g" > ./Dockerfile.celery.production
+	docker build -t awx_web -f ./Dockerfile.production .
+	docker build -t awx_task -f ./Dockerfile.celery.production .
+
