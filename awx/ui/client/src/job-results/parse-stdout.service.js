@@ -9,7 +9,6 @@ export default ['$log', 'moment', 'i18n', function($log, moment, i18n){
         // parses stdout string from api and formats various codes to the
         // correct dom structure
         prettify: function(line, unstyled){
-
             line = line
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
@@ -27,46 +26,35 @@ export default ['$log', 'moment', 'i18n', function($log, moment, i18n){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
-                line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
-                line = line.replace(/\[0;30m/g, '<span class="ansi30">');
-                line = line.replace(/\[1;30m/g, '<span class="ansi1 ansi30">');
-                line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
-                line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
-                line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
-                line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
-                line = line.replace(/\[0;32m/g, '<span class="ansi32">');
-                line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
-                line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
-                line = line.replace(/\[0;33m/g, '<span class="ansi33">');
-                line = line.replace(/\[0;34m/g, '<span class="ansi34">');
-                line = line.replace(/\[0;35m/g, '<span class="ansi35">');
-                line = line.replace(/\[1;35m/g, '<span class="ansi35">');
-                line = line.replace(/\[0;36m/g, '<span class="ansi36">');
+                /* jshint ignore:start */
+                line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
+                line = line.replace(/\[0;30m/g, '<span class="ansi30">');
+                line = line.replace(/\[1;30m/g, '<span class="ansi1 ansi30">');
+                line = line.replace(/\[[0,1];31m/g, '<span class="ansi1 ansi31">');
+                line = line.replace(/\[0;32m(=|)/g, '<span class="ansi32">');
+                line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
+                line = line.replace(/\[0;33m/g, '<span class="ansi33">');
+                line = line.replace(/\[0;34m/g, '<span class="ansi34">');
+                line = line.replace(/\[[0,1];35m/g, '<span class="ansi35">');
+                line = line.replace(/\[0;36m/g, '<span class="ansi36">');
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
                 //end span
-                line = line.replace(/\[0m/g, '</span>');
+                line = line.replace(/\[0m/g, '</span>');
+                /* jshint ignore:end */
             } else {
                 // For the host event modal in the standard out tab,
                 // the styling isn't necessary
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
-                line = line.replace(/\[0;30m/g, '');
-                line = line.replace(/\[1;30m/g, '');
-                line = line.replace(/\[1;31m/g, '');
-                line = line.replace(/\[0;31m/g, '');
-                line = line.replace(/\[0;32m/g, '');
-                line = line.replace(/\[0;32m=/g, '');
-                line = line.replace(/\[0;32m1/g, '');
-                line = line.replace(/\[0;33m/g, '');
-                line = line.replace(/\[0;34m/g, '');
-                line = line.replace(/\[0;35m/g, '');
-                line = line.replace(/\[0;36m/g, '');
+                /* jshint ignore:start */
+                line = line.replace(/\[[0,1];3[0-9]m(1|=|)/g, '');
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
                 //end span
-                line = line.replace(/\[0m/g, '');
+                line = line.replace(/\[0m/g, '');
+                /* jshint ignore:end */
             }
 
             return line;
