@@ -1847,7 +1847,7 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
-            env['GCE_ZONE'] = inventory_update.source_regions
+            env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'satellite6':
