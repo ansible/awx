@@ -1,4 +1,72 @@
 /**
+ * All base variables used. These should only be referenced by the contextual variables defined 
+ * below. In development, unless you are intentionally making a fundamental change, these variables
+ * should not be modified, removed, or added to.
+ *
+ * These variables should not be used directly in development of components or features. If an
+ * alias doesn't exist for the context you're working within, check with UX to create a new alias
+ * or to define a more applicable alias.
+ *
+ * The goal is for UX to define the contexts for the contextual variables, so it's easy to make 
+ * modifications like, "Change heading text to be smaller" or "Make all warnings a lighter shade  
+ * of orange"
+ *
+ * 1. Colors
+ * 2. Typography
+ * 3. Layout
+ *
+ */
+
+// 1. Colors --------------------------------------------------------------------------------------
+
+@at-gray-light-3x: #fcfcfc;
+@at-gray-light-2x: #f2f2f2;
+@at-gray-light: #ebebeb;
+@at-gray: #e1e1e1;
+@at-gray-dark: #d7d7d7;
+@at-gray-dark-2x: #b7b7b7;
+@at-gray-dark-3x: #A9A9A9;
+@at-gray-dark-4x: #848992;
+@at-gray-dark-5x: #707070;
+@at-gray-dark-6x: #161b1f;
+
+@at-white: #ffffff;
+@at-white-hover: #f2f2f2;
+
+@at-blue: #337ab7;
+@at-blue-hover: #286090;
+
+@at-green: #5cb85c;
+@at-green-hover: #449D44;
+
+@at-orange: #f0ad4e;
+@at-orange-hover: #ec971f;
+
+@at-red: #d9534f;
+@at-red-hover: #c9302c;
+
+@at-red-bright: #ff0000;
+@at-red-bright-hover: #d81f1f;
+
+// 2. Typography ----------------------------------------------------------------------------------
+
+@at-font-size: 12px;
+@at-font-size-2x: 13px;
+@at-font-size-3x: 14px;
+@at-font-size-4x: 16px;
+@at-font-size-5x: 20px;
+
+@at-font-weight: 400;
+@at-font-weight-2x: 700;
+
+// 3. Layout --------------------------------------------------------------------------------------
+
+@at-space: 5px;
+@at-space-2x: 10px;
+@at-space-3x: 15px;
+@at-space-4x: 20px;
+
+/**
  * All variables used in the UI. Use these variables directly during the development of components
  * and features. Be sure the context of the variable name applies to the work that's being done.
  * For example, it wouldn't make sense to use `@at-input-height` to describe the height of a
@@ -47,8 +115,8 @@
 @at-color-button-border-default: @at-gray-dark-2x;
 @at-color-button-text-default: @at-gray-dark-5x;
 
-@at-color-tab-default-active: @at-gray-dark-2x;
-@at-color-tab-border-default-active: @at-gray-dark-2x;
+@at-color-tab-default-active: @at-gray-dark-4x;
+@at-color-tab-border-default-active: @at-gray-dark-4x;
 @at-color-tab-text-default-active: @at-white;
 
 @at-color-tab-default-disabled: @at-white;
@@ -57,19 +125,21 @@
 
 @at-color-form-label: @at-gray-dark-5x;
 
+@at-color-input-background: @at-gray-light-3x;
 @at-color-input-border: @at-gray-dark-2x;
+@at-color-input-button: @at-gray-light-3x;
+@at-color-input-button-hover: @at-gray-light-2x;
+@at-color-input-disabled: @at-gray-light;
 @at-color-input-error: @at-color-error;
 @at-color-input-focus: @at-color-info;
 @at-color-input-hint: @at-gray-dark-4x;
 @at-color-input-icon: @at-gray-dark-2x;
 @at-color-input-placeholder: @at-gray-dark-4x;
 @at-color-input-text: @at-gray-dark-6x;
-@at-color-input-background: @at-gray-light-3x;
-@at-color-input-disabled: @at-gray-light-2x;
 
 @at-color-icon-dismiss: @at-gray-dark;
 @at-color-icon-popover: @at-gray-dark-4x;
-@at-color-icon-hover: @at-gray-dark-5x;
+@at-color-icon-hover: @at-gray-dark-4x;
 
 @at-color-panel-heading: @at-gray-dark-5x;
 @at-color-panel-border: @at-gray-dark-2x;
