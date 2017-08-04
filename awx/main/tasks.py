@@ -992,7 +992,7 @@ class RunJob(BaseTask):
             env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
             env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
             env['ANSIBLE_CACHE_PLUGIN'] = "awx"
-            env['ANSIBLE_FACT_CACHE_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
+            env['ANSIBLE_CACHE_PLUGIN_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
             env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
