@@ -35,6 +35,9 @@ export default ['Rest', 'Wait',
                         options: options,
                         callback: 'choicesReadyCredentialTypes'
                     });
+
+                    $scope.inputs_help_text = options.actions.POST.inputs.help_text;
+                    $scope.injectors_help_text = options.actions.POST.injectors.help_text;
                 });
         }
 

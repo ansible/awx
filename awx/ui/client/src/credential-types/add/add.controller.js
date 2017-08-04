@@ -37,6 +37,9 @@ export default ['Rest', 'Wait',
                         callback: 'loadCredentialKindOptions'
                     });
 
+                    $scope.inputs_help_text = options.actions.POST.inputs.help_text;
+                    $scope.injectors_help_text = options.actions.POST.injectors.help_text;
+
                     if (!options.actions.POST) {
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a credential type.', 'alert-info');
