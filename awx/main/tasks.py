@@ -350,7 +350,7 @@ def handle_work_error(self, task_id, subtasks=None):
             try:
                 instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
             except ObjectDoesNotExist:
-                logger.warning('Missing {} `{}` in success callback.'.format(each_task['type'], task_actual['id']))
+                logger.warning('Missing {} `{}` in success callback.'.format(each_task['type'], each_task['id']))
                 instance = None
             if not instance:
                 # Unknown task type
