@@ -2508,17 +2508,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         failures = 0
         for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk, 'status': None}
-            can_update = inventory_source.can_update
-            project_update = False
-            if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
-                if not request.user or not request.user.can_access(Project, 'start', inventory_source.source_project):
-                    details['status'] = _('You do not have permission to update project `{}`').format(inventory_source.source_project.name)
-                    can_update = False
-                else:
-                    project_update = True
-            if can_update:
-                if project_update:
-                    details['project_update'] = inventory_source.source_project.update().id
+            if inventory_source.can_update:
                 details['status'] = 'started'
                 details['inventory_update'] = inventory_source.update().id
                 successes += 1

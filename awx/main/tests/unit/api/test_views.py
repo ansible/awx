@@ -98,7 +98,7 @@ class TestInventoryInventorySourcesUpdate:
     @pytest.mark.parametrize("can_update, can_access, is_source, is_up_on_proj, expected", [
         (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
         (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
-        (True, False, "scm", True, [{'status': 'You do not have permission to update project `project`', 'inventory_source': 1}]),
+        (True, False, "scm", True, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
     ])
     def test_post(self, mocker, can_update, can_access, is_source, is_up_on_proj, expected):
         class InventoryUpdate:
