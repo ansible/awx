@@ -434,6 +434,12 @@ def activity_stream_delete(sender, instance, **kwargs):
     # Skip recording any inventory source directly associated with a group.
     if isinstance(instance, InventorySource) and instance.deprecated_group:
         return
+    # Inventory delete happens in the task system rather than request-response-cycle.
+    # If we trigger this handler there we may fall into db-integrity-related race conditions.
+    # So we add flag verification to prevent normal signal handling. This funciton will be
+    # explicitly called with flag on in Inventory.schedule_deletion.
+    if isinstance(instance, Inventory) and not kwargs.get('inventory_delete_flag', False):
+        return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(

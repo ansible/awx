@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory
+from awx.main.models import InventorySource, Inventory, ActivityStream
 
 import json
 
@@ -23,10 +23,10 @@ def scm_inventory(inventory, project):
 def factory_scm_inventory(inventory, project):
     def fn(**kwargs):
         with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
-            return inventory.inventory_sources.create(source_project=project, 
+            return inventory.inventory_sources.create(source_project=project,
                                                       overwrite_vars=True,
-                                                      source='scm', 
-                                                      scm_last_revision=project.scm_revision, 
+                                                      source='scm',
+                                                      scm_last_revision=project.scm_revision,
                                                       **kwargs)
     return fn
 
@@ -83,6 +83,7 @@ def test_async_inventory_deletion(delete, get, inventory, alice):
     inventory.admin_role.members.add(alice)
     resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 202
+    assert ActivityStream.objects.filter(operation='delete').exists()
 
     resp = get(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 200
@@ -389,7 +390,7 @@ class TestControlledBySCM:
 
     def test_adding_inv_src_ok(self, post, scm_inventory, admin_user):
         post(reverse('api:inventory_inventory_sources_list', kwargs={'version': 'v2', 'pk': scm_inventory.id}),
-             {'name': 'new inv src', 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True}, 
+             {'name': 'new inv src', 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
              admin_user, expect=201)
 
     def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
