@@ -192,7 +192,10 @@ class IsolatedManager(object):
     def run_pexpect(cls, pexpect_args, *args, **kw):
         isolated_ssh_path = None
         try:
-            if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None):
+            if all([
+                getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,
+                getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', None)
+            ]):
                 isolated_ssh_path = tempfile.mkdtemp(prefix='awx_isolated', dir=settings.AWX_PROOT_BASE_PATH)
                 os.chmod(isolated_ssh_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
                 isolated_key = os.path.join(isolated_ssh_path, '.isolated')
@@ -277,6 +280,7 @@ class IsolatedManager(object):
             args.append('-%s' % ('v' * min(5, self.instance.verbosity)))
 
         status = 'failed'
+        output = ''
         rc = None
         buff = cStringIO.StringIO()
         last_check = time.time()
