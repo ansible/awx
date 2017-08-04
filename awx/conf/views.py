@@ -148,6 +148,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         settings_change_list = []
         for setting in self.get_queryset().exclude(key='LICENSE'):
+            if settings_registry.get_setting_field(setting.key).read_only:
+                continue
             setting.delete()
             settings_change_list.append(setting.key)
         if settings_change_list and 'migrate_to_database_settings' not in sys.argv:

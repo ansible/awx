@@ -5,6 +5,8 @@
 import pytest
 import os
 
+from django.conf import settings
+
 # Mock
 import mock
 
@@ -259,3 +261,28 @@ def test_isolated_job_setting_validation(get, patch, admin, setting_name):
 
     data = get(url, user=admin).data
     assert data[setting_name] != -1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('key, expected', [
+    ['AWX_ISOLATED_PRIVATE_KEY', '$encrypted$'],
+    ['AWX_ISOLATED_PUBLIC_KEY', 'secret'],
+])
+def test_isolated_keys_readonly(get, patch, delete, admin, key, expected):
+    Setting.objects.create(
+        key=key,
+        value='secret'
+    ).save()
+    assert getattr(settings, key) == 'secret'
+
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
+    resp = get(url, user=admin)
+    assert resp.data[key] == expected
+
+    patch(url, user=admin, data={
+        key: 'new-secret'
+    })
+    assert getattr(settings, key) == 'secret'
+
+    delete(url, user=admin)
+    assert getattr(settings, key) == 'secret'
