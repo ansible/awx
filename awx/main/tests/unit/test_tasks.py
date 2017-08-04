@@ -1274,6 +1274,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     def test_gce_source(self):
         gce = CredentialType.defaults['gce']()
         self.instance.source = 'gce'
+        self.instance.source_regions = 'all'
         self.instance.credential = Credential(
             pk=1,
             credential_type=gce,
@@ -1286,16 +1287,22 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.instance.credential.inputs['ssh_key_data'] = encrypt_field(
             self.instance.credential, 'ssh_key_data'
         )
+        expected_gce_zone = ''
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             assert env['GCE_EMAIL'] == 'bob'
             assert env['GCE_PROJECT'] == 'some-project'
+            assert env['GCE_ZONE'] == expected_gce_zone
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+        self.instance.source_regions = 'us-east-4'
+        expected_gce_zone = 'us-east-4'
         self.task.run(self.pk)
 
     def test_openstack_source(self):
