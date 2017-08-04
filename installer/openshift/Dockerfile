@@ -32,13 +32,15 @@ RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
 RUN echo "awxsecret" > /etc/tower/SECRET_KEY
 RUN VENV_BASE=/var/lib/awx/venv make requirements_ansible && VENV_BASE=/var/lib/awx/venv make requirements_awx
-COPY dist/{{ tar }} /tmp/{{ tar }}
-RUN OFFICIAL=yes pip install /tmp/{{ tar }}
+COPY dist/awx-3.2.0.3953.tar.gz /tmp/awx-3.2.0.3953.tar.gz
+RUN OFFICIAL=yes pip install /tmp/awx-3.2.0.3953.tar.gz
 
-RUN echo "{{ version }}" > /var/lib/awx/.tower_version
+RUN echo "3.2.0.3953" > /var/lib/awx/.tower_version
 ADD installer/openshift/nginx.conf /etc/nginx/nginx.conf
 ADD installer/openshift/supervisor.conf /supervisor.conf
+ADD installer/openshift/supervisor_task.conf /supervisor_task.conf
 ADD installer/openshift/launch_awx.sh /usr/bin/launch_awx.sh
+ADD installer/openshift/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD installer/openshift/settings.py /etc/tower/settings.py
 RUN yum -y remove gcc postgresql-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && yum -y clean all
 RUN rm -rf /root/.cache

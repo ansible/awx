@@ -9,7 +9,6 @@ data:
     import os
     import socket
     ADMINS = ()
-    DEBUG = True
 
     # Container environments don't like chroots
     AWX_PROOT_ENABLED = False
