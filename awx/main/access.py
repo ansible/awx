@@ -816,7 +816,7 @@ class InventorySourceAccess(BaseAccess):
 
     def can_start(self, obj, validate_license=True):
         if obj and obj.inventory:
-            return obj.can_update and self.user in obj.inventory.update_role
+            return self.user in obj.inventory.update_role
         return False
 
 

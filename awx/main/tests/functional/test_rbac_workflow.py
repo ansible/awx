@@ -7,6 +7,8 @@ from awx.main.access import (
     # WorkflowJobNodeAccess
 )
 
+from awx.main.models import InventorySource
+
 
 @pytest.fixture
 def wfjt(workflow_job_template_factory, organization):
@@ -102,6 +104,10 @@ class TestWorkflowJobAccess:
         access = WorkflowJobAccess(rando)
         assert access.can_cancel(workflow_job)
 
+
+@pytest.mark.django_db
+class TestWFJTCopyAccess:
+
     def test_copy_permissions_org_admin(self, wfjt, org_admin, org_member):
         admin_access = WorkflowJobTemplateAccess(org_admin)
         assert admin_access.can_copy(wfjt)
@@ -125,6 +131,20 @@ class TestWorkflowJobAccess:
         assert not access.can_copy(wfjt)
         warnings = access.messages
         assert 'inventories_unable_to_copy' in warnings
+
+
+    def test_workflow_copy_no_start(self, wfjt, inventory, admin_user):
+        # Test that un-startable resource doesn't block copy
+        inv_src = InventorySource.objects.create(
+            inventory = inventory,
+            source = 'custom',
+            source_script = None
+        )
+        assert not inv_src.can_update
+        wfjt.workflow_job_template_nodes.create(unified_job_template=inv_src)
+        access = WorkflowJobTemplateAccess(admin_user, save_messages=True)
+        access.can_copy(wfjt)
+        assert not access.messages
 
     def test_workflow_copy_warnings_jt(self, wfjt, rando, job_template):
         wfjt.workflow_job_template_nodes.create(unified_job_template=job_template)
