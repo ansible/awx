@@ -23,7 +23,7 @@ export default ['i18n', function(i18n){
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-8',
+                modalColumnClass: 'col-md-11',
                 awToolTip: '{{credential_type.description | sanitize}}',
                 dataPlacement: 'top'
             },
