@@ -35,6 +35,9 @@ export default ['Rest', 'Wait',
                         options: options,
                         callback: 'choicesReadyCredentialTypes'
                     });
+
+                    $scope.inputs_help_text = _.get(options, 'actions.POST.inputs.help_text', "Specification for credential type inputs");
+                    $scope.injectors_help_text = _.get(options, 'actions.POST.injectors.help_text', "Specification for credential type injector");
                 });
         }
 

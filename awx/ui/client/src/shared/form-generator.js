@@ -658,7 +658,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         } else {
                             html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
-                        html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
+                        html += ((field.awPopOver || field.awPopOverWatch) && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
                         // Variable editing
                         if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars' || field.showParseTypeToggle === true) {
