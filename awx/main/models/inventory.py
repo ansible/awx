@@ -1398,9 +1398,16 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                     Q(inventory=self.inventory,
                         update_on_project_update=True, source='scm') & 
                     ~Q(id=self.id)).exists():
-            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "
-                                    "Instead, configure the corresponding source project to update on launch."))
+            raise ValidationError(_("More than one SCM-based inventory source with update on project update on per-inventory not allowed."))
         return self.update_on_project_update
+
+    def clean_update_on_launch(self):
+        if self.update_on_project_update is True and \
+                self.source == 'scm' and \
+                self.update_on_launch is True:
+            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "        
+                                    "Instead, configure the corresponding source project to update on launch."))
+        return self.update_on_launch
 
     def clean_overwrite_vars(self):
         if self.source == 'scm' and not self.overwrite_vars:
