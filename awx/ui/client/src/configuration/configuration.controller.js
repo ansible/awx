@@ -86,7 +86,7 @@ export default [
                                 // does a string.split(', ') w/ an extra space
                                 // behind the comma.
                                 if(key === "AD_HOC_COMMANDS"){
-                                    $scope[key] = data[key].toString();
+                                    $scope[key] = data[key];
                                 } else if (key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH") {
                                     $scope[key] = JSON.stringify(data[key]);
                                 } else {
@@ -321,6 +321,9 @@ export default [
                         // We need to re-instantiate the Select2 element
                         // after resetting the value. Example:
                         $scope.$broadcast(key+'_populated', null, false);
+                        if(key === "AD_HOC_COMMANDS"){
+                            $scope.$broadcast(key+'_reverted', null, false);
+                        }
                     }
                     else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                         $scope.$broadcast(key+'_reverted');
@@ -379,10 +382,10 @@ export default [
                     //Parse dropdowns and dropdowns labeled as lists
                     if($scope[key] === null) {
                         payload[key] = null;
-                    } else if($scope[key][0] && $scope[key][0].value !== undefined) {
+                    } else if(!_.isEmpty($scope[`${key}_values`])) {
                         if(multiselectDropdowns.indexOf(key) !== -1) {
                             // Handle AD_HOC_COMMANDS
-                            payload[key] = ConfigurationUtils.listToArray(_.map($scope[key], 'value').join(','));
+                            payload[key] = $scope[`${key}_values`];
                         } else {
                             payload[key] = _.map($scope[key], 'value').join(',');
                         }
@@ -501,6 +504,9 @@ export default [
                             // We need to re-instantiate the Select2 element
                             // after resetting the value. Example:
                             $scope.$broadcast(key+'_populated', null, false);
+                            if(key === "AD_HOC_COMMANDS"){
+                                $scope.$broadcast(key+'_reverted', null, false);
+                            }
                         }
                         else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                             $scope.$broadcast(key+'_reverted');
