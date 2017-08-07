@@ -309,7 +309,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             };
 
             if ($scope.source) {
-                params.source_vars = $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'];
+                let source_vars = $scope.source.value === 'scm' ? $scope.custom_variables : $scope[$scope.source.value + '_variables'];
+                params.source_vars = source_vars === '---' || source_vars === '{}' ? null : source_vars;
                 params.source = $scope.source.value;
                 if ($scope.source.value === 'scm') {
                   params.update_on_project_update = $scope.update_on_project_update;
