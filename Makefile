@@ -606,7 +606,7 @@ VERSION:
 
 production-openshift-image: sdist
 	cat installer/openshift/Dockerfile | sed "s/{{ version }}/$(VERSION_TARGET)/g" | sed "s/{{ tar }}/$(SDIST_TAR_FILE)/g" > ./Dockerfile.production
-	cat installer/openshift/Dockerfile.celery | sed "s/{{ version }}/$(VERSION_TARGET)/g" | sed "s/{{ tar }}/$(SDIST_TAR_FILE)/g" > ./Dockerfile.celery.production
+	cp installer/openshift/Dockerfile.celery ./Dockerfile.celery.production
 	docker build -t awx_web -f ./Dockerfile.production .
 	docker build -t awx_task -f ./Dockerfile.celery.production .
 

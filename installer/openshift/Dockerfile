@@ -32,10 +32,10 @@ RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
 RUN echo "awxsecret" > /etc/tower/SECRET_KEY
 RUN VENV_BASE=/var/lib/awx/venv make requirements_ansible && VENV_BASE=/var/lib/awx/venv make requirements_awx
-COPY dist/awx-3.2.0.3953.tar.gz /tmp/awx-3.2.0.3953.tar.gz
-RUN OFFICIAL=yes pip install /tmp/awx-3.2.0.3953.tar.gz
+COPY dist/awx-{{ version }}.tar.gz /tmp/awx-{{ version }}.tar.gz
+RUN OFFICIAL=yes pip install /tmp/awx-{{ version }}.tar.gz
 
-RUN echo "3.2.0.3953" > /var/lib/awx/.tower_version
+RUN echo "{{ version }}" > /var/lib/awx/.tower_version
 ADD installer/openshift/nginx.conf /etc/nginx/nginx.conf
 ADD installer/openshift/supervisor.conf /supervisor.conf
 ADD installer/openshift/supervisor_task.conf /supervisor_task.conf
