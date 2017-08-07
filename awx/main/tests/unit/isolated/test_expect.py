@@ -9,8 +9,9 @@ import tempfile
 import time
 from collections import OrderedDict
 
-from Crypto.PublicKey import RSA
-from Crypto import Random
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 from awx.main.isolated import run, isolated_manager
 
@@ -22,8 +23,19 @@ HERE, FILENAME = os.path.split(__file__)
 @pytest.fixture(scope='function')
 def rsa_key(request):
     passphrase = 'passme'
-    key = RSA.generate(1024, Random.new().read)
-    return (key.exportKey('PEM', passphrase, pkcs=1), passphrase)
+    key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=1024,
+        backend=default_backend()
+    )
+    return (
+        key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.BestAvailableEncryption(passphrase)
+        ),
+        passphrase
+    )
 
 
 @pytest.fixture(scope='function')
