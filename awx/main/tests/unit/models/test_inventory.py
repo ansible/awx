@@ -108,3 +108,11 @@ class TestControlledBySCM():
         with pytest.raises(ValidationError):
             inv_src.clean_source_path()
 
+    def test_clean_update_on_launch_update_on_project_update(self):
+        inv_src = InventorySource(update_on_project_update=True,
+                                  update_on_launch=True,
+                                  source='scm')
+
+        with pytest.raises(ValidationError):
+            inv_src.clean_update_on_launch()
+

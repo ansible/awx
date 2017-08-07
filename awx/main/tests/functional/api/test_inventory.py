@@ -404,9 +404,8 @@ class TestControlledBySCM:
                     {'update_on_project_update': True,},
                     admin_user, expect=400)
         content = json.loads(res.content)
-        assert content['update_on_project_update'] == ["Cannot update SCM-based inventory source on launch if set to update on "
-                                                       "project update. Instead, configure the corresponding source project to "
-                                                       "update on launch."]
+        assert content['update_on_project_update'] == ["More than one SCM-based inventory source with update on project update "
+                                                       "on per-inventory not allowed."]
 
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)

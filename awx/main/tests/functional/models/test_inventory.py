@@ -58,6 +58,9 @@ class TestSCMClean:
         inv_src1.clean_update_on_project_update()
         inv_src1.save()
 
+        inv_src1.source_vars = '---\nhello: world'
+        inv_src1.clean_update_on_project_update()
+
         inv_src2 = InventorySource(inventory=inventory,
                                    update_on_project_update=True,
                                    source='scm')
