@@ -193,7 +193,7 @@ class URLModificationMiddleware(object):
         return '/'.join(url_units)
 
     def process_request(self, request):
-        if 'REQUEST_URI' in request.environ:
+        if hasattr(request, 'environ') and 'REQUEST_URI' in request.environ:
             old_path = six.moves.urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
             old_path = old_path[request.path.find(request.path_info):]
         else:
