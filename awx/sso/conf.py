@@ -1106,8 +1106,8 @@ def tacacs_validate(serializer, attrs):
     secret = serializer.instance.TACACSPLUS_SECRET
     if 'TACACSPLUS_SECRET' in attrs:
         secret = attrs['TACACSPLUS_SECRET']
-    if bool(host) ^ bool(secret):
-        errors.append('TACACSPLUS_HOST and TACACSPLUS_SECRET can only be both empty or both populated.')
+    if host and not secret:
+        errors.append('TACACSPLUS_SECRET is required when TACACSPLUS_HOST is provided.')
     if errors:
         raise serializers.ValidationError(_('\n'.join(errors)))
     return attrs
