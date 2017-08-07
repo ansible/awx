@@ -5,7 +5,7 @@
 ### Environment
 
 <!--
-* Tower version: X.Y.Z
+* AWX version: X.Y.Z
 * Ansible version:  X.Y.Z
 * Operating System:
 * Web Browser:
