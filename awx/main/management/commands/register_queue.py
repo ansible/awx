@@ -6,7 +6,6 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.models import Instance, InstanceGroup
 
 from optparse import make_option
-from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -21,7 +20,6 @@ class Command(BaseCommand):
                     help='The controlling group (makes this an isolated group)'),
     )
 
-    @transaction.atomic
     def handle(self, **options):
         queuename = options.get('queuename')
         if not queuename:
