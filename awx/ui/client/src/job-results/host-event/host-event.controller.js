@@ -64,12 +64,11 @@
                 // do nothing, no stdout/stderr for this module
             }
             if($scope.module_name === "debug" &&
-                hostEvent.event_data.res.hasOwnProperty('result') &&
-                hostEvent.event_data.res.result.hasOwnProperty('stdout')){
+                _.has(hostEvent.event_data, "res.result.stdout")){
                     $scope.stdout = hostEvent.event_data.res.result.stdout;
             }
             if($scope.module_name === "yum" &&
-                hostEvent.event_data.res.hasOwnProperty('results') &&
+                _.has(hostEvent.event_data, "res.results") &&
                 _.isArray(hostEvent.event_data.res.results)){
                     $scope.stdout = hostEvent.event_data.res.results[0];
             }
@@ -77,7 +76,13 @@
             // try/catch pattern prevents the abstract-state controller from complaining about element being null
             if ($state.current.name === 'jobResult.host-event.json'){
                 try{
-                    initCodeMirror('HostEvent-codemirror', JSON.stringify($scope.json, null, 4), {name: "javascript", json: true});
+                    if(_.has(hostEvent.event_data, "res")){
+                        initCodeMirror('HostEvent-codemirror', JSON.stringify($scope.json, null, 4), {name: "javascript", json: true});
+                    }
+                    else{
+                        $scope.no_json = true;
+                    }
+
                 }
                 catch(err){
                     // element with id HostEvent-codemirror is not the view controlled by this instance of HostEventController
@@ -101,7 +106,7 @@
             }
             $('#HostEvent').modal('show');
             $('.modal-content').resizable({
-                minHeight: 450,
+                minHeight: 523,
                 minWidth: 600
             });
             $('.modal-dialog').draggable({
