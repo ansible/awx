@@ -822,7 +822,13 @@ function(ConfigurationUtils, i18n, $rootScope) {
             template = '<div class="tooltip Tooltip ' + tooltipOuterClass + '" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + tooltipInnerClass + '"></div></div>';
 
             // This block helps clean up tooltips that may get orphaned by a click event
-            $(element).on('mouseenter', function() {
+            $(element).on('mouseenter', function(event) {
+
+                var elem = $(event.target).parent();
+                if (elem[0].nodeName === "SOURCE-SUMMARY-POPOVER") {
+                    $('.popover').popover('hide');
+                }
+
                 if (stateChangeWatcher) {
                     // Un-bind - we don't want a bunch of listeners firing
                     stateChangeWatcher();
