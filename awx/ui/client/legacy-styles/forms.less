@@ -198,12 +198,17 @@
 
 .Form-formGroup {
     input.form-control {
-       background-color: @f2grey;
+       background-color: @fcgrey;
        border-color: @b7grey;
        border-radius: 5px;
        height: auto;
        min-height: 30px;
        padding: 0 10px;
+    }
+
+    input.form-control[disabled], input.form-control[readonly], fieldset[disabled] input.form-control {
+        border-color: @b7grey;
+        background-color: @ebgrey;
     }
 }
 
@@ -316,7 +321,7 @@
 
 .ui-spinner {
     height: 30px;
-    background-color: @f2grey !important;
+    background-color: @fcgrey !important;
     border-radius: 5px;
     border:1px solid @field-border !important;
     color: @field-input-text;
@@ -325,7 +330,7 @@
 
 .ui-spinner-input {
     color: @field-input-text;
-    background-color: @f2grey;
+    background-color: @fcgrey;
 }
 
 .ui-spinner-input:focus {
@@ -369,7 +374,7 @@
 }
 
 .select2-container--disabled .select2-selection__arrow {
-    background: @ebgrey !important;
+    background-color: @ebgrey !important;
 }
 
 .select2-results__option {
@@ -762,5 +767,5 @@ input[type='radio']:checked:before {
 
 .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
     border-color: @b7grey;
-    background: @ebgrey;
+    background-color: @ebgrey;
 }
