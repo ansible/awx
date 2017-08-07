@@ -365,12 +365,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             });
 
             // Set the default to success
-            let edgeType = "success";
+            $scope.edgeType = "success";
 
             if (parent && ((betweenTwoNodes && parent.source.isStartNode) || (!betweenTwoNodes && parent.isStartNode))) {
                 // We don't want to give the user the option to select
                 // a type as this node will always be executed
-                edgeType = "always";
+                $scope.edgeType = "always";
                 $scope.edgeFlags.showTypeOptions = false;
             } else {
                 if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
@@ -378,10 +378,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                     $scope.edgeFlags.typeRestriction = null;
                 } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
                     $scope.edgeFlags.typeRestriction = "successFailure";
-                    edgeType = "success";
+                    $scope.edgeType = "success";
                 } else if (_.includes(siblingConnectionTypes, "always")) {
                     $scope.edgeFlags.typeRestriction = "always";
-                    edgeType = "always";
+                    $scope.edgeType = "always";
                 } else {
                     $scope.edgeFlags.typeRestriction = null;
                 }
@@ -392,7 +392,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             // Reset the edgeConflict flag
             resetEdgeConflict();
 
-            $scope.$broadcast("setEdgeType", edgeType);
             $scope.$broadcast("refreshWorkflowChart");
 
         };
@@ -661,7 +660,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                          $scope.edgeFlags.showTypeOptions = true;
                      }
 
-                    $scope.$broadcast('setEdgeType', $scope.nodeBeingEdited.edgeType);
+                    $scope.edgeType = $scope.nodeBeingEdited.edgeType;
 
                     $scope.$broadcast('templateSelected', {
                         presetValues: formValues,
@@ -764,6 +763,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                 if($scope.workflowMakerFormConfig.nodeMode === "add") {
                     if($scope.placeholderNode.isRoot) {
+                        $scope.edgeType = "always";
                         $scope.edgeFlags.showTypeOptions = false;
                     }
                 }
