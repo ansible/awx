@@ -2223,12 +2223,17 @@ class ActivityStreamAccess(BaseAccess):
          - custom inventory scripts
         '''
         qs = self.model.objects.all()
-        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
-                                 'inventory_update', 'credential', 'credential_type', 'team', 'project', 'project_update',
-                                 'job_template', 'job', 'ad_hoc_command',
+        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group',
+                                 'inventory_update', 'credential', 'credential_type', 'team',
+                                 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
                                  'schedule', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template', 'workflow_job', 'workflow_job_template_node')
+                                 'workflow_job_template_node')
+        # FIXME: the following fields will be attached to the wrong object
+        # if they are included in prefetch_related because of
+        # https://github.com/django-polymorphic/django-polymorphic/issues/68
+        # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
+        # 'inventory_source', 'workflow_job_template'
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
