@@ -62,7 +62,7 @@ def could_be_inventory(project_path, dir_path, filename):
     # Decisions based exclusively on filename
     inventory_path = os.path.join(dir_path, filename)
     suspected_ext = os.path.splitext(filename)[-1]
-    if suspected_ext in ['.yml', '.yaml', '.ini']:
+    if suspected_ext in ['.yml', '.yaml', '.ini'] or os.access(inventory_path, os.X_OK):
         # Files with any of these extensions are always included
         return os.path.relpath(inventory_path, smart_str(project_path))
     elif '.' in suspected_ext:
