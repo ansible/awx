@@ -208,10 +208,10 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) register_instance --hostname=$(COMPOSE_HOST); \
+	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
 	if [ "$(EXTRA_GROUP_QUEUES)" == "thepentagon" ]; then \
-		$(MANAGEMENT_COMMAND) register_instance --hostname=isolated; \
+		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
 		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
 	elif [ "$(EXTRA_GROUP_QUEUES)" != "" ]; then \
