@@ -3,7 +3,11 @@ import hashlib
 
 import six
 from django.utils.encoding import smart_str
-from Crypto.Cipher import AES
+
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.ciphers.modes import ECB
 
 from awx.conf import settings_registry
 
@@ -52,8 +56,8 @@ def decrypt_value(encryption_key, value):
     if algo != 'AES':
         raise ValueError('unsupported algorithm: %s' % algo)
     encrypted = base64.b64decode(b64data)
-    cipher = AES.new(encryption_key, AES.MODE_ECB)
-    value = cipher.decrypt(encrypted)
+    decryptor = Cipher(AES(encryption_key), ECB(), default_backend()).decryptor()
+    value = decryptor.update(encrypted) + decryptor.finalize()
     value = value.rstrip('\x00')
     # If the encrypted string contained a UTF8 marker, decode the data
     if utf8:
@@ -90,10 +94,11 @@ def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=Fals
         utf8 = type(value) == six.text_type
     value = smart_str(value)
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
-    cipher = AES.new(key, AES.MODE_ECB)
-    while len(value) % cipher.block_size != 0:
+    encryptor = Cipher(AES(key), ECB(), default_backend()).encryptor()
+    block_size = 16
+    while len(value) % block_size != 0:
         value += '\x00'
-    encrypted = cipher.encrypt(value)
+    encrypted = encryptor.update(value) + encryptor.finalize()
     b64data = base64.b64encode(encrypted)
     tokens = ['$encrypted', 'AES', b64data]
     if utf8:
