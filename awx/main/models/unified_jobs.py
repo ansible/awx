@@ -958,6 +958,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return (True, opts)
 
     def start_celery_task(self, opts, error_callback, success_callback, queue):
+        kwargs = {
+            'link_error': error_callback,
+            'link': success_callback,
+            'queue': None,
+            'task_id': None,
+        }
+        if not self.celery_task_id:
+            raise RuntimeError("Expected celery_task_id to be set on model.")
+        kwargs['task_id'] = self.celery_task_id
         task_class = self._get_task_class()
         from awx.main.models.ha import InstanceGroup
         ig = InstanceGroup.objects.get(name=queue)
@@ -968,7 +977,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 args.append(isolated_instance.hostname)
             else:  # proj & inv updates, system jobs run on controller
                 queue = ig.controller.name
-        task_class().apply_async(args, opts, link_error=error_callback, link=success_callback, queue=queue)
+        kwargs['queue'] = queue
+        task_class().apply_async(args, opts, **kwargs)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''
