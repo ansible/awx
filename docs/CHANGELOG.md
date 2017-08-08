@@ -49,3 +49,7 @@
 [[#5783](https://github.com/ansible/ansible-tower/pull/5783)]
 * Remove Rackspace as a supported inventory source type and credential type.
 [[#6117](https://github.com/ansible/ansible-tower/pull/6117)]
+* Changed names of tower-mange commands `register_instance` -> `provision_instance`,
+  `deprovision_node` -> `deprovision_instance`, and `instance_group_remove` -> `remove_from_queue`,
+  which backward compatibility support for 3.1 use pattern
+  [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]
