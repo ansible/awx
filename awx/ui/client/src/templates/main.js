@@ -326,7 +326,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                     },
                     views: {
                         'modal': {
-                            template: `<workflow-maker ng-if="includeWorkflowMaker" workflow-job-template-obj="workflow_job_template_obj" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
+                            template: `<workflow-maker ng-if="includeWorkflowMaker" workflow-job-template-obj="workflow_job_template_obj" can-add-workflow-job-template="canAddWorkflowJobTemplate" edge-type="edgeType"></workflow-maker>`
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(WorkflowMakerJobTemplateList, generateList) {
@@ -620,9 +620,6 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                         });
                                     });
 
-                                    $scope.$on('setEdgeType', function(e, edgeType) {
-                                        $scope.edgeType = edgeType;
-                                    });
                                 }
                             ]
                         }
