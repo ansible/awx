@@ -13,10 +13,9 @@
  */
 
  export default
-    ['$http', 'ProcessErrors', 'i18n', function($http, ProcessErrors, i18n) {
+    ['$http', '$log', 'i18n', function($http, $log, i18n) {
         return function (params) {
-            var scope = params.scope,
-                url = params.url;
+            var url = params.url;
 
                 return $http({
                     method: 'GET',
@@ -116,8 +115,7 @@
                     return {"options": options, "error": error};
                 })
                 .catch(function (data) {
-                    ProcessErrors(scope, data.data, data.status, null, { hdr: i18n._('Error!'),
-                            msg: i18n._('Failed to get third-party login types.  Returned status: ') + data.status });
+                    $log.error('Failed to get third-party login types.  Returned status: ' + data.status );
                 });
         };
     }];
