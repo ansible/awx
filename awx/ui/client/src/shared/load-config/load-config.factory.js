@@ -2,42 +2,8 @@ export default
     function LoadConfig($log, $rootScope, $http, Store) {
         return function() {
 
-            // These ettings used to be found in config.js, hardcoded now.
-            var configSettings = {
-                //custom_logo: false, // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard console logo
-                // custom_login_info: "example notice", // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
-                "tooltip_delay": {
-                    "show": 500,
-                    "hide": 100
-                },
-                "password_length": 8,
-                "password_hasLowercase": true,
-                "password_hasUppercase": false,
-                "password_hasNumber": true,
-                "password_hasSymbol": false,
-                "variable_edit_modes": {
-                    "yaml": {
-                        "mode": "text/x-yaml",
-                        "matchBrackets": true,
-                        "autoCloseBrackets": true,
-                        "styleActiveLine": true,
-                        "lineNumbers": true,
-                        "gutters": ["CodeMirror-lint-markers"],
-                        "lint": true,
-                        "scrollbarStyle": null
-                    },
-                    "json": {
-                        "mode": "application/json",
-                        "styleActiveLine": true,
-                        "matchBrackets": true,
-                        "autoCloseBrackets": true,
-                        "lineNumbers": true,
-                        "gutters": ["CodeMirror-lint-markers"],
-                        "lint": true,
-                        "scrollbarStyle": null
-                    }
-                },
-            };
+
+            var configSettings = {};
 
             var configInit = function() {
                 // Auto-resolving what used to be found when attempting to load local_setting.json

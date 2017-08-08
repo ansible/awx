@@ -73,7 +73,6 @@ export default ['i18n', function(i18n) {
                     labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
-                    chkPass: true,
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password_confirm: {

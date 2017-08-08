@@ -65,64 +65,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
     };
 })
 
-// chkPass
-//
-// Enables use of js/shared/pwdmeter.js to check strengh of passwords.
-// See controllers/Users.js for example.
-//
-.directive('chkPass', [function() {
-    return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            $(elm).keyup(function() {
-                var validity = true;
-                if (elm.val()) {
-                    if ($AnsibleConfig.password_length) {
-                        validity = (ctrl.$modelValue.length >= $AnsibleConfig.password_length);
-                        ctrl.$setValidity('password_length', validity);
-                    }
-                    if ($AnsibleConfig.password_hasLowercase) {
-                        validity = (/[a-z]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasLowercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasUppercase) {
-                        validity = (/[A-Z]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasUppercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasNumber) {
-                        validity = (/[0-9]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasNumber', validity);
-                    }
-                    if ($AnsibleConfig.password_hasSymbol) {
-                        validity = (/[\\#@$-/:-?{-~!"^_`\[\]]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasSymbol', validity);
-                    }
-                } else {
-                    validity = true;
-                    if ($AnsibleConfig.password_length) {
-                        ctrl.$setValidity('password_length', validity);
-                    }
-                    if ($AnsibleConfig.password_hasLowercase) {
-                        ctrl.$setValidity('hasLowercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasUppercase) {
-                        ctrl.$setValidity('hasUppercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasNumber) {
-                        ctrl.$setValidity('hasNumber', validity);
-                    }
-                    if ($AnsibleConfig.password_hasSymbol) {
-                        ctrl.$setValidity('hasSymbol', validity);
-                    }
-                }
-                if (!scope.$$phase) {
-                    scope.$digest();
-                }
-            });
-        }
-    };
-}])
-
 // imageUpload
 //
 // Accepts image and returns base64 information with basic validation
@@ -1112,42 +1054,6 @@ function(ConfigurationUtils, i18n, $rootScope) {
             $(elm).on("click", function() {
                 $(elm).select();
             });
-        }
-    };
-}])
-
-//
-// awRefresh
-//
-// Creates a timer to call scope.refresh(iterator) ever N seconds, where
-// N is a setting in config.js
-//
-.directive('awRefresh', ['$rootScope', function($rootScope) {
-    return {
-        link: function(scope) {
-            function msg() {
-                var num = '' + scope.refreshCnt;
-                while (num.length < 2) {
-                    num = '0' + num;
-                }
-                return 'Refresh in ' + num + ' sec.';
-            }
-            scope.refreshCnt = $AnsibleConfig.refresh_rate;
-            scope.refreshMsg = msg();
-            if ($rootScope.timer) {
-                clearInterval($rootScope.timer);
-            }
-            $rootScope.timer = setInterval(function() {
-                scope.refreshCnt--;
-                if (scope.refreshCnt <= 0) {
-                    scope.refresh();
-                    scope.refreshCnt = $AnsibleConfig.refresh_rate;
-                }
-                scope.refreshMsg = msg();
-                if (!scope.$$phase) {
-                    scope.$digest();
-                }
-            }, 1000);
         }
     };
 }])

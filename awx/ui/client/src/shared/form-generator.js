@@ -433,23 +433,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         scope[form.name + '_form'][fld].$setPristine();
                         scope[form.name + '_form'][fld].$setValidity('apiError', true);
                     }
-                    if (f.chkPass && scope[form.name + '_form'][fld] && $AnsibleConfig) {
-                        if ($AnsibleConfig.password_length) {
-                            scope[form.name + '_form'][fld].$setValidity('password_length', true);
-                        }
-                        if ($AnsibleConfig.password_hasLowercase) {
-                            scope[form.name + '_form'][fld].$setValidity('hasLowercase', true);
-                        }
-                        if ($AnsibleConfig.password_hasUppercase) {
-                            scope[form.name + '_form'][fld].$setValidity('hasUppercase', true);
-                        }
-                        if ($AnsibleConfig.password_hasNumber) {
-                            scope[form.name + '_form'][fld].$setValidity('hasNumber', true);
-                        }
-                        if ($AnsibleConfig.password_hasSymbol) {
-                            scope[form.name + '_form'][fld].$setValidity('hasSymbol', true);
-                        }
-                    }
                     if (f.awPassMatch && scope[form.name + '_form'][fld]) {
                         scope[form.name + '_form'][fld].$setValidity('awpassmatch', true);
                     }
@@ -920,7 +903,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
                             html += "class='form-control Form-textInput";
                             html += "' ";
-                            html += (field.chkPass) ? "chk-pass " : "";
 
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                             html += (field.required) ? "required " : "";
@@ -965,34 +947,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
                                 `.$error.awvalidurl'>${error_message}</div>`;
-                        }
-                        if (field.chkPass && $AnsibleConfig) {
-                            // password strength
-                            if ($AnsibleConfig.password_length) {
-                                error_message = i18n.sprintf(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.password_length">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasLowercase) {
-                                error_message = i18n._("Your password must contain a lowercase letter.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasLowercase">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasUppercase) {
-                                error_message = i18n._("Your password must contain an uppercase letter.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasUppercase">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasNumber) {
-                                error_message = i18n._("Your password must contain a number.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasNumber">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasSymbol) {
-                                error_message = i18n.sprintf(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasSymbol">${error_message}</div>`;
-                            }
                         }
 
                         html += "<div class='error api-error' id='" + this.form.name + "-" + fld + "-api-error' ng-bind='" + fld + "_api_error'>\n</div>\n";
