@@ -215,7 +215,8 @@ angular.module('inventory', [
                     },
                     data: {
                         activityStream: true,
-                        activityStreamTarget: 'inventory'
+                        activityStreamTarget: 'inventory',
+                        activityStreamId: 'smartinventory_id'
                     },
                     resolve: {
                         edit: {
