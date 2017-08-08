@@ -18,6 +18,7 @@ from awx.main.models import * # noqa
 #from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils import get_type_for_model
 from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -63,22 +64,6 @@ class TaskManager():
         all_tasks = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
                            key=lambda task: task.created)
         return all_tasks
-
-    @classmethod
-    def get_node_type(cls, obj):
-        if type(obj) == Job:
-            return "job"
-        elif type(obj) == AdHocCommand:
-            return "ad_hoc_command"
-        elif type(obj) == InventoryUpdate:
-            return "inventory_update"
-        elif type(obj) == ProjectUpdate:
-            return "project_update"
-        elif type(obj) == SystemJob:
-            return "system_job"
-        elif type(obj) == WorkflowJob:
-            return "workflow_job"
-        return "unknown"
 
     '''
     Tasks that are running and SHOULD have a celery task.
@@ -190,10 +175,10 @@ class TaskManager():
         from awx.main.tasks import handle_work_error, handle_work_success
 
         task_actual = {
-            'type':self.get_node_type(task),
+            'type': get_type_for_model(type(task)),
             'id': task.id,
         }
-        dependencies = [{'type': self.get_node_type(t), 'id': t.id} for t in dependent_tasks]
+        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
         error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
         success_handler = handle_work_success.s(task_actual=task_actual)
