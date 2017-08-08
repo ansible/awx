@@ -806,7 +806,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         try:
             return os.stat(self.result_stdout_file).st_size
         except:
-            return 0
+            return len(self.result_stdout)
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
