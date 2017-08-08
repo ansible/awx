@@ -87,7 +87,8 @@ class TestInstanceGroupOrdering:
         inventory_source.inventory.instance_groups.add(ig_inv)
         assert iu.preferred_instance_groups == [ig_inv, ig_org]
         inventory_source.instance_groups.add(ig_tmp)
-        assert iu.preferred_instance_groups == [ig_tmp, ig_inv, ig_org]
+        # API does not allow setting IGs on inventory source, so ignore those
+        assert iu.preferred_instance_groups == [ig_inv, ig_org]
 
     def test_project_update_instance_groups(self, instance_group_factory, project, default_instance_group):
         pu = ProjectUpdate.objects.create(project=project)
