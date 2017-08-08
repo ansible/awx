@@ -394,7 +394,13 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
         logger.error("Update Inventory Computed Fields failed due to missing inventory: " + str(inventory_id))
         return
     i = i[0]
-    i.update_computed_fields(update_hosts=should_update_hosts)
+    try:
+        i.update_computed_fields(update_hosts=should_update_hosts)
+    except DatabaseError as e:
+        if 'did not affect any rows' in str(e):
+            logger.debug('Exiting duplicate update_inventory_computed_fields task.')
+            return
+        raise
 
 
 @task(queue='tower', base=LogErrorsTask)
