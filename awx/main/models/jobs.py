@@ -705,6 +705,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     JobNotificationMixin
     '''
     def get_notification_templates(self):
+        if not self.job_template:
+            return NotificationTemplate.objects.none()
         return self.job_template.notification_templates
 
     def get_notification_friendly_name(self):
