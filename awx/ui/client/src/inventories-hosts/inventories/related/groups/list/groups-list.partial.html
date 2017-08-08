@@ -21,20 +21,20 @@
                 <div ng-show="toDelete.total_groups > 0 || toDelete.total_hosts > 0">
                     <div>
                         <p class="Prompt-bodyQuery">Deleting group <em>{{ toDelete.name }}</em>.
-                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{strings.deleteModal.group}} <translate>and</translate> {{ toDelete.total_hosts }} {{strings.deleteModal.host}}. </span>
-                        <span ng-show="toDelete.total_groups == 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_hosts }} {{strings.deleteModal.host}}. </span>
-                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts == 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{strings.deleteModal.group}}. </span>
+                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{:: strings.deleteModal.group }} <translate>and</translate> {{ toDelete.total_hosts }} {{:: strings.deleteModal.host }}. </span>
+                        <span ng-show="toDelete.total_groups == 0 && toDelete.total_hosts > 0"> <translate>This group contains</translate> {{ toDelete.total_hosts }} {{:: strings.deleteModal.host }}. </span>
+                        <span ng-show="toDelete.total_groups > 0 && toDelete.total_hosts == 0"> <translate>This group contains</translate> {{ toDelete.total_groups }} {{:: strings.deleteModal.group }}. </span>
                         <translate>Delete or promote the group's children?</translate></p>
                         <div style="margin: 15px auto;">
 
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="deleteOption" value="delete" > {{ strings.deleteModal.deleteGroupsHosts }}
+                                    <input type="radio" ng-model="deleteOption" value="delete" > {{:: strings.deleteModal.deleteGroupsHosts }}
                                 </label>
                             </div>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="deleteOption" value="promote"> {{ strings.deleteModal.promoteGroupsHosts }}
+                                    <input type="radio" ng-model="deleteOption" value="promote"> {{:: strings.deleteModal.promoteGroupsHosts }}
                                 </label>
                             </div>
 

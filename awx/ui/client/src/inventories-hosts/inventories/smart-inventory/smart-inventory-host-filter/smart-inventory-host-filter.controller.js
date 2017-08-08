@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'QuerySet', 'SmartInventoryStrings',
-    function($scope, qs, SmartInventoryStrings) {
+export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
+    function($scope, qs, InventoryHostsStrings) {
         $scope.hostFilterTags = [];
 
-        $scope.filterTooltip = SmartInventoryStrings.get('filter.TOOLTIP');
+        $scope.filterTooltip = InventoryHostsStrings.get('smartinventories.TOOLTIP');
 
         $scope.$watch('hostFilter', function(){
             $scope.hostFilterTags = [];
