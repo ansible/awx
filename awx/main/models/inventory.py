@@ -1400,7 +1400,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                     Q(inventory=self.inventory,
                         update_on_project_update=True, source='scm') & 
                     ~Q(id=self.id)).exists():
-            raise ValidationError(_("More than one SCM-based inventory source with update on project update on per-inventory not allowed."))
+            raise ValidationError(_("More than one SCM-based inventory source with update on project update per-inventory not allowed."))
         return self.update_on_project_update
 
     def clean_update_on_launch(self):
