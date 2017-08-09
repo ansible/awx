@@ -246,8 +246,11 @@ def cluster_node_heartbeat(self):
             other_inst.save(update_fields=['capacity'])
             logger.error("Host {} last checked in at {}, marked as lost.".format(
                 other_inst.hostname, other_inst.modified))
-        except (IntegrityError, OperationalError):
-            pass  # another instance is updating the lost instance
+        except DatabaseError as e:
+            if 'did not affect any rows' in str(e):
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
+            else:
+                logger.exception('Error marking {} as lost'.format(other_inst.hostname))
 
 
 @task(bind=True, base=LogErrorsTask)
