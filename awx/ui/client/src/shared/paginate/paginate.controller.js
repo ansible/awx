@@ -27,17 +27,17 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         }
 
         $scope.filter = function(id){
-            $scope.pageSize = Number(id);
+            let pageSize = Number(id);
             $('#period-dropdown')
                 .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+id+
             "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
 
             if($scope.querySet){
                 let origQuerySet = _.cloneDeep($scope.querySet);
-                queryset = _.merge(origQuerySet, { page_size: $scope.pageSize });
+                queryset = _.merge(origQuerySet, { page_size: pageSize });
             }
             else {
-                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page_size: $scope.pageSize, page: 1 });
+                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page_size: pageSize, page: 1 });
             }
             $scope.toPage();
         };
@@ -76,8 +76,6 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
-            $scope.pageRange = calcPageRange($scope.current, $scope.last);
-            $scope.dataRange = calcDataRange();
         };
 
         function calcLast() {
