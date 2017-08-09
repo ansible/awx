@@ -4,6 +4,7 @@
 # Python
 from datetime import datetime, timedelta
 import logging
+import uuid
 from sets import Set
 
 # Django
@@ -12,6 +13,7 @@ from django.core.cache import cache
 from django.db import transaction, connection
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now, utc
+from django.db.models import Q
 
 # AWX
 from awx.main.models import * # noqa
@@ -68,10 +70,10 @@ class TaskManager():
     '''
     Tasks that are running and SHOULD have a celery task.
     '''
-    def get_running_tasks(self, all_tasks=None):
-        if all_tasks is None:
-            return self.get_tasks(status_list=('running',))
-        return filter(lambda t: t.status == 'running', all_tasks)
+    def get_running_tasks(self):
+        now = tz_now()
+        return list(UnifiedJob.objects.filter(Q(status='running') |
+                                              (Q(status='waiting', modified__lte=now - timedelta(seconds=60)))))
 
     '''
     Tasks that are currently running in celery
@@ -216,6 +218,7 @@ class TaskManager():
                 task.instance_group = rampart_group
                 logger.info('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
             with disable_activity_stream():
+                task.celery_task_id = uuid.uuid4()
                 task.save()
 
             self.consume_capacity(task, rampart_group.name)

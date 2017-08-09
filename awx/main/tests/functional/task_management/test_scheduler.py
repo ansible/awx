@@ -3,8 +3,52 @@ import mock
 from datetime import timedelta, datetime
 
 from django.core.cache import cache
+from django.utils.timezone import now as tz_now
 
 from awx.main.scheduler import TaskManager
+from awx.main.models import (
+    Job,
+)
+
+
+@pytest.fixture
+def all_jobs(mocker):
+    now = tz_now()
+    j1 = Job.objects.create(status='pending')
+    j2 = Job.objects.create(status='waiting', celery_task_id='considered_j2')
+    j3 = Job.objects.create(status='waiting', celery_task_id='considered_j3')
+    j3.modified = now - timedelta(seconds=60)
+    j3.save(update_fields=['modified'])
+    j4 = Job.objects.create(status='running', celery_task_id='considered_j4')
+    j5 = Job.objects.create(status='waiting', celery_task_id='reapable_j5')
+    j5.modified = now - timedelta(seconds=60)
+    j5.save(update_fields=['modified'])
+
+    js = [j1, j2, j3, j4, j5]
+    for j in js:
+        j.save = mocker.Mock(wraps=j.save)
+        j.websocket_emit_status = mocker.Mock()
+    return js
+
+
+@pytest.fixture
+def considered_jobs(all_jobs):
+    return all_jobs[2:4] + [all_jobs[4]]
+
+
+@pytest.fixture
+def reapable_jobs(all_jobs):
+    return [all_jobs[4]]
+
+
+@pytest.fixture
+def unconsidered_jobs(all_jobs):
+    return all_jobs[0:1]
+
+
+@pytest.fixture
+def active_tasks():
+    return ([], ['considered_j2', 'considered_j3', 'considered_j4',])
 
 
 @pytest.mark.django_db
@@ -217,15 +261,38 @@ def test_cleanup_interval():
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks._send_notification_templates')
 @mock.patch.object(TaskManager, 'get_active_tasks', lambda self: [[], []])
-@mock.patch.object(TaskManager, 'get_running_tasks')
-def test_cleanup_inconsistent_task(get_running_tasks, notify):
-    orphaned_task = mock.Mock(job_explanation='')
-    get_running_tasks.return_value = [orphaned_task]
-    TaskManager().cleanup_inconsistent_celery_tasks()
+def test_cleanup_inconsistent_task(notify, active_tasks, considered_jobs, reapable_jobs, mocker):
+    tm = TaskManager()
 
-    notify.assert_called_once_with(orphaned_task, 'failed')
-    orphaned_task.websocket_emit_status.assert_called_once_with('failed')
-    assert orphaned_task.status == 'failed'
-    assert orphaned_task.job_explanation == (
-        'Task was marked as running in Tower but was not present in Celery, so it has been marked as failed.'
-    )
+    tm.get_running_tasks = mocker.Mock(return_value=considered_jobs)
+    tm.get_active_tasks = mocker.Mock(return_value=active_tasks)
+    
+    tm.cleanup_inconsistent_celery_tasks()
+    
+    for j in considered_jobs:
+        if j not in reapable_jobs:
+            j.save.assert_not_called()
+
+    for reaped_job in reapable_jobs:
+        notify.assert_called_once_with(reaped_job, 'failed')
+        reaped_job.websocket_emit_status.assert_called_once_with('failed')
+        assert reaped_job.status == 'failed'
+        assert reaped_job.job_explanation == (
+            'Task was marked as running in Tower but was not present in Celery, so it has been marked as failed.'
+        )
+
+
+@pytest.mark.django_db
+def test_get_running_tasks(considered_jobs, reapable_jobs, unconsidered_jobs):
+    tm = TaskManager()
+
+    # Ensure the query grabs the expected jobs
+    rt = tm.get_running_tasks()
+    for j in considered_jobs:
+        assert j in rt
+    for j in reapable_jobs:
+        assert j in rt
+    for j in unconsidered_jobs:
+        assert j in unconsidered_jobs
+
+

@@ -78,7 +78,8 @@ class TestIsolatedRuns:
         iso_ig.instances.create(hostname='iso1', capacity=50)
         i2 = iso_ig.instances.create(hostname='iso2', capacity=200)
         job = Job.objects.create(
-            instance_group=iso_ig
+            instance_group=iso_ig,
+            celery_task_id='something',
         )
 
         mock_async = mock.MagicMock()
@@ -91,7 +92,11 @@ class TestIsolatedRuns:
         with mock.patch.object(job, '_get_task_class') as task_class:
             task_class.return_value = MockTaskClass
             job.start_celery_task([], error_callback, success_callback, 'thepentagon')
-        mock_async.assert_called_with([job.id, 'iso2'], [], link_error=error_callback, link=success_callback, queue='thepentagon')
+        mock_async.assert_called_with([job.id, 'iso2'], [], 
+                                      link_error=error_callback, 
+                                      link=success_callback, 
+                                      queue='thepentagon',
+                                      task_id='something')
 
         i2.capacity = 20
         i2.save()
@@ -99,4 +104,8 @@ class TestIsolatedRuns:
         with mock.patch.object(job, '_get_task_class') as task_class:
             task_class.return_value = MockTaskClass
             job.start_celery_task([], error_callback, success_callback, 'thepentagon')
-        mock_async.assert_called_with([job.id, 'iso1'], [], link_error=error_callback, link=success_callback, queue='thepentagon')
+        mock_async.assert_called_with([job.id, 'iso1'], [], 
+                                      link_error=error_callback, 
+                                      link=success_callback, 
+                                      queue='thepentagon',
+                                      task_id='something')
