@@ -70,7 +70,7 @@ class CallbackModule(CallbackBase):
         self.hosts = []
 
     def create_ws_connection(self):
-        self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id=144")
+        self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id=6")
 
     def ws_send(self, data):
 
