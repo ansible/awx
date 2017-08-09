@@ -2376,63 +2376,59 @@ class InventoryScriptView(RetrieveAPIView):
             if obj.variables_dict:
                 all_group = data.setdefault('all', OrderedDict())
                 all_group['vars'] = obj.variables_dict
+            if obj.kind == 'smart':
+                if len(obj.hosts.all()) == 0:
+                    return Response({})
+                else:
+                    all_group = data.setdefault('all', OrderedDict())
+                    smart_hosts_qs = obj.hosts.all().order_by('name')
+                    smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
+                    all_group['hosts'] = smart_hosts
+            else:
+                # Add hosts without a group to the all group.
+                groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+                groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
+                if groupless_hosts:
+                    all_group = data.setdefault('all', OrderedDict())
+                    all_group['hosts'] = groupless_hosts
 
-            # Add hosts without a group to the all group.
-            groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
-            groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
-            if groupless_hosts:
-                all_group = data.setdefault('all', OrderedDict())
-                all_group['hosts'] = groupless_hosts
+                # Build in-memory mapping of groups and their hosts.
+                group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
+                if 'enabled' in hosts_q:
+                    group_hosts_kw['host__enabled'] = hosts_q['enabled']
+                group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
+                group_hosts_qs = group_hosts_qs.order_by('host__name')
+                group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
+                group_hosts_map = {}
+                for group_id, host_id, host_name in group_hosts_qs:
+                    group_hostnames = group_hosts_map.setdefault(group_id, [])
+                    group_hostnames.append(host_name)
 
-            # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
-            if 'enabled' in hosts_q:
-                group_hosts_kw['host__enabled'] = hosts_q['enabled']
-            group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-            group_hosts_qs = group_hosts_qs.order_by('host__name')
-            group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
-            group_hosts_map = {}
-            for group_id, host_id, host_name in group_hosts_qs:
-                group_hostnames = group_hosts_map.setdefault(group_id, [])
-                group_hostnames.append(host_name)
+                # Build in-memory mapping of groups and their children.
+                group_parents_qs = Group.parents.through.objects.filter(
+                    from_group__inventory_id=obj.id,
+                    to_group__inventory_id=obj.id,
+                )
+                group_parents_qs = group_parents_qs.order_by('from_group__name')
+                group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
+                group_children_map = {}
+                for from_group_id, from_group_name, to_group_id in group_parents_qs:
+                    group_children = group_children_map.setdefault(to_group_id, [])
+                    group_children.append(from_group_name)
 
-            # Build in-memory mapping of groups and their children.
-            group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=obj.id,
-                to_group__inventory_id=obj.id,
-            )
-            group_parents_qs = group_parents_qs.order_by('from_group__name')
-            group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
-            group_children_map = {}
-            for from_group_id, from_group_name, to_group_id in group_parents_qs:
-                group_children = group_children_map.setdefault(to_group_id, [])
-                group_children.append(from_group_name)
-
-            # Now use in-memory maps to build up group info.
-            for group in obj.groups.all():
-                group_info = OrderedDict()
-                group_info['hosts'] = group_hosts_map.get(group.id, [])
-                group_info['children'] = group_children_map.get(group.id, [])
-                group_info['vars'] = group.variables_dict
-                data[group.name] = group_info
+                # Now use in-memory maps to build up group info.
+                for group in obj.groups.all():
+                    group_info = OrderedDict()
+                    group_info['hosts'] = group_hosts_map.get(group.id, [])
+                    group_info['children'] = group_children_map.get(group.id, [])
+                    group_info['vars'] = group.variables_dict
+                    data[group.name] = group_info
 
             if hostvars:
                 data.setdefault('_meta', OrderedDict())
                 data['_meta'].setdefault('hostvars', OrderedDict())
                 for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
-
-            # workaround for Ansible inventory bug (github #3687), localhost
-            # must be explicitly listed in the all group for dynamic inventory
-            # scripts to pick it up.
-            localhost_names = ('localhost', '127.0.0.1', '::1')
-            localhosts_qs = obj.hosts.filter(name__in=localhost_names, **hosts_q)
-            localhosts = list(localhosts_qs.values_list('name', flat=True))
-            if localhosts:
-                all_group = data.setdefault('all', OrderedDict())
-                all_group_hosts = all_group.get('hosts', [])
-                all_group_hosts.extend(localhosts)
-                all_group['hosts'] = sorted(set(all_group_hosts))
 
         return Response(data)
 
