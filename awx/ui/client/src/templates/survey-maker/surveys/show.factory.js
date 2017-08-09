@@ -9,7 +9,7 @@ export default
                 title = params.title,
                 element,
                 target = (mode==='survey-taker') ? 'password-modal' : "survey-modal-dialog",
-                width = params.scope.can_edit ? 1200 : 600;
+                width = params.scope.can_edit ? 'calc(100vw - 50px)' : 600;
 
 
             CreateDialog({
