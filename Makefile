@@ -9,7 +9,8 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-GCLOUD_AUTH ?=
+IMAGE_REPOSITORY_AUTH ?=
+IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
 VERSION=$(shell git describe --long)
 VERSION3=$(shell git describe --long | sed 's/\-g.*//')
@@ -24,7 +25,7 @@ VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
-DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering/
+DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
@@ -537,13 +538,13 @@ setup-bundle-build:
 	mkdir -p $@
 
 docker-auth:
-	if [ "$(GCLOUD_AUTH)" ]; then \
-		docker login -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io; \
+	if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
+		docker login -u oauth2accesstoken -p "$(IMAGE_REPOSITORY_AUTH)" $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
 # Docker isolated rampart
 docker-isolated:
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
 	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub`" ]; then \
@@ -551,29 +552,31 @@ docker-isolated:
 	else \
 		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && rm -f /root/.ssh/authorized_keys && echo $$(docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
 	fi
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate awx
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml up --no-recreate awx
 
 docker-compose-cluster: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
-	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports awx /bin/bash
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
-docker-compose-build: awx-devel-build awx-isolated-build
+docker-compose-build: awx-devel-build
 
+# Base development image build
 awx-devel-build:
 	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
-	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
+	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
+# For use when developing on "isolated" AWX deployments
 awx-isolated-build:
 	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
-	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
+	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
@@ -585,10 +588,10 @@ docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-cluster-elk: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 clean-elk:
 	docker stop tools_kibana_1

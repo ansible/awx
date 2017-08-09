@@ -26,6 +26,7 @@ ADD tools/docker-compose/awx.egg-info /tmp/awx.egg-info
 RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
 RUN ln -Ffs /awx_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 RUN ln -s /awx_devel/tools/docker-compose/start_development.sh /start_development.sh
+RUN ln -s /awx_devel/tools/docker-compose/bootstrap_development.sh /bootstrap_development.sh
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=AWX Development/CN=awx.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 WORKDIR /tmp
