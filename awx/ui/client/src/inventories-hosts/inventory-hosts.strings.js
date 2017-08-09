@@ -5,30 +5,24 @@ function InventoryHostsStrings (BaseString) {
     let ns = this['inventory-hosts'];
 
     ns.filter = {
-        GROUP: t('group'),
-        GROUPS: t('groups'),
-        HOST: t('host'),
-        HOSTS: t('hosts'),
-        PROMOTE_GROUPS_HOSTS: t('Promote groups and hosts'),
-        PROMOTE_GROUP_HOSTS: t('Promote group and hosts'),
-        PROMOTE_GROUPS_HOST: t('Promote groups and host'),
-        PROMOTE_GROUP_HOST: t('Promote group and host'),
-        DELETE_GROUPS_HOSTS: t('Delete groups and hosts'),
-        DELETE_GROUP_HOSTS: t('Delete group and hosts'),
-        DELETE_GROUPS_HOST: t('Delete groups and host'),
-        DELETE_GROUP_HOST: t('Delete group and host'),
-        PROMOTE_GROUPS: t('Promote groups'),
-        PROMOTE_GROUP: t('Promote group'),
-        DELETE_GROUPS: t('Delete groups'),
-        DELETE_GROUP: t('Delete group'),
-        PROMOTE_HOSTS: t('Promote hosts'),
-        PROMOTE_HOST: t('Promote host'),
-        DELETE_HOSTS: t('Delete hosts'),
-        DELETE_HOST: t('Delete host')
+        GROUP: count => t.p(count, 'group', 'groups'),
+        HOST: count => t.p(count, 'host', 'hosts'),
+        PROMOTE_GROUPS_AND_HOSTS: data => t.s('Promote {{ group }} and {{ host }}', {
+            group: this.get('GROUP', data.groups),
+            host: this.get('HOST', data.hosts)
+        }),
+        DELETE_GROUPS_AND_HOSTS: data => t.s('Delete {{ group }} and {{ host }}', {
+            group: this.get('GROUP', data.groups),
+            host: this.get('HOST', data.hosts)
+        }),
+        PROMOTE_GROUP: count => t.p(count, 'Promote group', 'Promote groups'),
+        DELETE_GROUP: count => t.p(count, 'Delete group', 'Delete groups'),
+        PROMOTE_HOST: count => t.p(count, 'Promote host', 'Promote hosts'),
+        DELETE_HOST: count => t.p(count, 'Delete host', 'Delete hosts'),
     };
 
     ns.smartinventories = {
-        TOOLTIP: t('Please click the icon to edit the host filter.')
+        TOOLTIP: t.s('Please click the icon to edit the host filter.')
     };
 }
 

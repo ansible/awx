@@ -40,6 +40,10 @@ export default
         return {
             _: function (s) { return gettextCatalog.getString (s); },
             N_: N_,
+            translate: (singular, context) => gettextCatalog.getString(singular, context),
+            translatePlural: (count, singular, plural, context) => {
+                return gettextCatalog.getPlural(count, singular, plural, context);
+            },
             sprintf: sprintf,
             hasTranslation: function () {
                 return gettextCatalog.strings[gettextCatalog.currentLanguage] !== undefined;

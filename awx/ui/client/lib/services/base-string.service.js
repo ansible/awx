@@ -3,17 +3,49 @@ import defaults from '../../assets/default.strings.json';
 let i18n;
 
 function BaseStringService (namespace) {
-    let t = i18n._;
-
-    const ERROR_NO_NAMESPACE = t('BaseString cannot be extended without providing a namespace');
-    const ERROR_NO_STRING = t('No string exists with this name');
+    const ERROR_NO_NAMESPACE = 'BaseString cannot be extended without providing a namespace';
+    const ERROR_NO_STRING = 'No string exists with this name';
 
     if (!namespace) {
         throw new Error(ERROR_NO_NAMESPACE);
     }
 
-    this.t = t;
     this[namespace] = {};
+    this.t = {};
+
+    /**
+     * To translate a singular string by itself or a string with context data, use `translate`.
+     * For brevity, this is renamed as `t.s` (as in "translate singular"). `t.s` serves a dual
+     * purpose -- it's to mark strings for translation so they appear in the `.pot` file after
+     * the grunt-angular-gettext task is run AND it's used to fetch the translated string at
+     * runtime.
+     * 
+     * NOTE: View ui/src/i18n.js for where these i18n methods are defined. i18n is a wrapper around
+     * the library angular-gettext.
+     *
+     * @arg {string} string - The string to be translated
+     * @arg {object=} context - A data object used to populate dynamic context data in a string.
+     *
+     * @returns {string} The translated string or the original string in the even the translation
+     * does not exist.
+     */
+    this.t.s = i18n.translate;
+
+    /**
+     * To translate a plural string use `t.p`. The `count` supplied will determine whether the
+     * singular or plural string is returned.
+     *
+     * @arg {number} count - The count of the plural object
+     * @arg {string} singular - The singular version of the string to be translated
+     * @arg {string} plural - The plural version of the string to be translated
+     * @arg {object=} context - A data object used to populate dynamic context data in a string.
+     *
+     * @returns {string} The translated string or the original string in the even the translation
+     * does not exist.
+     */
+    this.t.p = i18n.translatePlural;
+
+    let t = this.t;
 
     /*
      * These strings are globally relevant and configured to give priority to values in
@@ -26,9 +58,9 @@ function BaseStringService (namespace) {
      * Globally relevant strings should be defined here to avoid duplication of content across the
      * the project.
      */
-    this.CANCEL = t('CANCEL');
-    this.SAVE = t('SAVE');
-    this.OK = t('OK');
+    this.CANCEL = t.s('CANCEL');
+    this.SAVE = t.s('SAVE');
+    this.OK = t.s('OK');
 
     /**
      * This getter searches the extending class' namespace first for a match then falls back to
@@ -37,8 +69,16 @@ function BaseStringService (namespace) {
      *
      * If no match is found, an error is thrown to alert the developer immediately instead of
      * failing silently.
+     *
+     * The `t.s` and `t.p` calls should only be used where strings are defined in
+     * <name>.strings.js` files. To use translated strings elsewhere, access them through this
+     * common interface.
+     *
+     * @arg {string} name - The property name of the string (e.g. 'CANCEL')
+     * @arg {number=} count - A count of objects referenced in your plural string
+     * @arg {object=} context - An object containing data to use in the interpolation of the string
      */
-    this.get = name => {
+    this.get = (name, ...args) => {
         let keys = name.split('.');
         let value;
 
@@ -54,7 +94,7 @@ function BaseStringService (namespace) {
             }
         });
 
-        return value;
+        return typeof value === 'string' ? value : value(...args);
     };
 }
 
