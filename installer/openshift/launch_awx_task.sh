@@ -8,6 +8,6 @@ ANSIBLE_REMOTE_TEMP=/tmp ANSIBLE_LOCAL_TEMP=/tmp ansible -i "127.0.0.1," -c loca
 awx-manage migrate --noinput --fake-initial
 echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'root@localhost', 'password')" | awx-manage shell
 awx-manage create_preload_data
-awx-manage register_instance --hostname=$(hostname)
+awx-manage provision_instance --hostname=$(hostname)
 awx-manage register_queue --queuename=tower --hostnames=$(hostname)
 supervisord -c /supervisor_task.conf
