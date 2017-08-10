@@ -28,7 +28,7 @@ from rest_framework.test import (
 )
 
 from awx.main.models.credential import CredentialType, Credential
-from awx.main.models.jobs import JobTemplate
+from awx.main.models.jobs import JobTemplate, SystemJobTemplate
 from awx.main.models.inventory import (
     Group,
     Inventory,
@@ -44,6 +44,8 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     Notification
 )
+from awx.main.models.workflow import WorkflowJobTemplate
+from awx.main.models.ad_hoc_commands import AdHocCommand
 
 
 @pytest.fixture(autouse=True)
@@ -613,6 +615,18 @@ def fact_services_json():
 
 
 @pytest.fixture
+def ad_hoc_command_factory(inventory, machine_credential, admin):
+    def factory(inventory=inventory, credential=machine_credential, initial_state='new', created_by=admin):
+        adhoc = AdHocCommand(
+            name='test-adhoc', inventory=inventory, credential=credential,
+            status=initial_state, created_by=created_by
+        )
+        adhoc.save()
+        return adhoc
+    return factory
+
+
+@pytest.fixture
 def job_template(organization):
     jt = JobTemplate(name='test-job_template')
     jt.save()
@@ -626,6 +640,35 @@ def job_template_labels(organization, job_template):
     job_template.labels.create(name="label-2", organization=organization)
 
     return job_template
+
+
+@pytest.fixture
+def workflow_job_template(organization):
+    wjt = WorkflowJobTemplate(name='test-workflow_job_template')
+    wjt.save()
+
+    return wjt
+
+
+@pytest.fixture
+def workflow_job_factory(workflow_job_template, admin):
+    def factory(workflow_job_template=workflow_job_template, initial_state='new', created_by=admin):
+        return workflow_job_template.create_unified_job(created_by=created_by, status=initial_state)
+    return factory
+
+
+@pytest.fixture
+def system_job_template():
+    sys_jt = SystemJobTemplate(name='test-system_job_template', job_type='cleanup_jobs')
+    sys_jt.save()
+    return sys_jt
+
+
+@pytest.fixture
+def system_job_factory(system_job_template, admin):
+    def factory(system_job_template=system_job_template, initial_state='new', created_by=admin):
+        return system_job_template.create_unified_job(created_by=created_by, status=initial_state)
+    return factory
 
 
 def dumps(value):

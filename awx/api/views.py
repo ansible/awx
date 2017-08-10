@@ -127,6 +127,25 @@ class WorkflowsEnforcementMixin(object):
         return super(WorkflowsEnforcementMixin, self).check_permissions(request)
 
 
+class UnifiedJobDeletionMixin(object):
+    '''
+    Special handling when deleting a running unified job object.
+    '''
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'delete', obj):
+            raise PermissionDenied()
+        try:
+            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        except self.model.unified_job_node.RelatedObjectDoesNotExist:
+            pass
+        if obj.status in ACTIVE_STATES:
+            raise PermissionDenied(detail=_("Cannot delete running job resource."))
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class ApiRootView(APIView):
 
     authentication_classes = []
@@ -1296,20 +1315,11 @@ class ProjectUpdateList(ListAPIView):
     new_in_13 = True
 
 
-class ProjectUpdateDetail(RetrieveDestroyAPIView):
+class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = ProjectUpdate
     serializer_class = ProjectUpdateSerializer
     new_in_13 = True
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except ProjectUpdate.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -2663,20 +2673,11 @@ class InventoryUpdateList(ListAPIView):
     serializer_class = InventoryUpdateListSerializer
 
 
-class InventoryUpdateDetail(RetrieveDestroyAPIView):
+class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = InventoryUpdate
     serializer_class = InventoryUpdateSerializer
     new_in_14 = True
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except InventoryUpdate.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
 class InventoryUpdateCancel(RetrieveAPIView):
@@ -3581,7 +3582,7 @@ class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
     new_in_310 = True
 
 
-class WorkflowJobDetail(WorkflowsEnforcementMixin, RetrieveDestroyAPIView):
+class WorkflowJobDetail(WorkflowsEnforcementMixin, UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobSerializer
@@ -3739,7 +3740,7 @@ class JobList(ListCreateAPIView):
         return methods
 
 
-class JobDetail(RetrieveUpdateDestroyAPIView):
+class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
 
     model = Job
     metadata_class = JobTypeMetadata
@@ -3751,15 +3752,6 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except Job.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 
 class JobExtraCredentialsList(SubListAPIView):
@@ -4075,7 +4067,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     relationship = 'ad_hoc_commands'
 
 
-class AdHocCommandDetail(RetrieveDestroyAPIView):
+class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = AdHocCommand
     serializer_class = AdHocCommandSerializer
@@ -4226,7 +4218,7 @@ class SystemJobList(ListCreateAPIView):
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
-class SystemJobDetail(RetrieveDestroyAPIView):
+class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = SystemJob
     serializer_class = SystemJobSerializer
