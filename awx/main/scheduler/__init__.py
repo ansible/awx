@@ -218,7 +218,7 @@ class TaskManager():
                 task.instance_group = rampart_group
                 logger.info('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
             with disable_activity_stream():
-                task.celery_task_id = uuid.uuid4()
+                task.celery_task_id = str(uuid.uuid4())
                 task.save()
 
             self.consume_capacity(task, rampart_group.name)
