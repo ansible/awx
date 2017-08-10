@@ -13,4 +13,4 @@ Refer to `CONTRIBUTING.md` to get started developing, testing and building AWX.
 
 Refer to `INSTALL.md` to get started deploying AWX.
 
-Refer to `LOCALIZATION.md` for translaction and localization help.
+Refer to `LOCALIZATION.md` for translation and localization help.

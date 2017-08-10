@@ -4,7 +4,7 @@ Ansible AWX
 
 Hi there! We're excited to have you as a contributor.
 
-Questions about this document or anything not covered here? Come chat with us on IRC or the mailing list.
+Have questions about this document or anything not covered here? Come chat with us on IRC (#ansible-awx on freenode) or the mailing list.
 
 Table of contents
 -----------------
@@ -28,6 +28,50 @@ Table of contents
 DCO
 ===
 
+All contributors must use "git commit --signoff" for any
+commit to be merged, and agree that usage of --signoff constitutes
+agreement with the terms of DCO 1.1.  Any contribution that does not
+have such a signoff will not be merged.
+
+```
+Developer Certificate of Origin
+Version 1.1
+
+Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
+1 Letterman Drive
+Suite D4700
+San Francisco, CA, 94129
+
+Everyone is permitted to copy and distribute verbatim copies of this
+license document, but changing it is not allowed.
+
+Developer's Certificate of Origin 1.1
+
+By making a contribution to this project, I certify that:
+
+(a) The contribution was created in whole or in part by me and I
+    have the right to submit it under the open source license
+    indicated in the file; or
+
+(b) The contribution is based upon previous work that, to the best
+    of my knowledge, is covered under an appropriate open source
+    license and I have the right under that license to submit that
+    work with modifications, whether created in whole or in part
+    by me, under the same open source license (unless I am
+    permitted to submit under a different license), as indicated
+    in the file; or
+
+(c) The contribution was provided directly to me by some other
+    person who certified (a), (b) or (c) and I have not modified
+    it.
+
+(d) I understand and agree that this project and the contribution
+    are public and that a record of the contribution (including all
+    personal information I submit with it, including my sign-off) is
+    maintained indefinitely and may be redistributed consistent with
+    this project or the open source license(s) involved.
+```
+
 Code of Conduct
 ===============
 
@@ -42,7 +86,7 @@ Prerequisites
 -------------
 `docker` and `docker-compose` are required for starting the development services, on Linux you can generally find these in your
 distro's packaging, but you may find that Docker themselves maintain a seperate repo that tracks more closely to the latest releases.
-For OSX and Windows we recommend Docker for Mac (https://www.docker.com/docker-mac) and Docker for Windows (https://www.docker.com/docker-windows) 
+For macOS and Windows, we recommend Docker for Mac (https://www.docker.com/docker-mac) and Docker for Windows (https://www.docker.com/docker-windows) 
 respectively. Docker for Mac/Windows automatically comes with `docker-compose`.
 
 > Fedora
@@ -73,7 +117,7 @@ For `docker-compose` you may need/choose to install it seperately:
 Local Settings
 --------------
 
-In development mode (i.e. when running from a source checkout), Ansible Tower
+In development mode (i.e. when running from a source checkout), Ansible AWX
 will import the file `awx/settings/local_settings.py` and combine it with defaults in `awx/settings/defaults.py`. This file
 is required for starting the development environment and startup will fail if it's not provided
 
@@ -95,7 +139,7 @@ on having your local development environment mapped in.
 Building the user interface
 ---------------------------
 
-> AWX requires the 6.x LTS version of Node and NPM
+> AWX requires the 6.x LTS version of Node and 3.x LTS NPM
 
 In order for the AWX user interface to load from the development environment it must be built:
 
@@ -106,7 +150,7 @@ When developing features and fixes for the user interface you can find more deta
 Starting up the development environment
 ----------------------------------------------
 
-There are several ways of starting the development environment depend on your desired workflow. The easiest and most common way is with:
+There are several ways of starting the development environment depending on your desired workflow. The easiest and most common way is with:
 
     (host)$ make docker-compose
     
@@ -152,7 +196,7 @@ Preload AWX with demo data:
     (container)# awx-manage create_preload_data
     
 This information will persist in the database running in the `tools_postgres_1` container, until it is removed. You may periodically need to recreate
-this container and database if a lot of work is being done on migrations.
+this container and database if the database schema changes in an upstream commit.
 
 You should now be able to visit and login to the AWX user interface at https://localhost:8043 or http://localhost:8013 if you have built the UI.
 If not you can visit the API directly in your browser at: https://localhost:8043/api/ or http://localhost:8013/api/
@@ -172,24 +216,23 @@ What should I work on?
 We list our specs in `/docs`. `/docs/current` are things that we are actively working on. `/docs/future` are ideas for future work and the direction we
 want that work to take. Fixing bugs, translations, and updates to documentation are also appreciated.
 
-Be aware that if you are working in a part of the codebase that is going through active development your changes might get stepped on and rejected. A
-good idea before starting work is to have a discussion with us on IRC or the mailing list.
-
-There are some areas of the UI codebase that we consider legacy code and are actively considering replacing. Sometimes this might not be obvious or
-might not be listed in our specs.
+Be aware that if you are working in a part of the codebase that is going through active development your changes may be rejected or you may be asked to
+rebase them. A good idea before starting work is to have a discussion with us on IRC or the mailing list.
 
 Submitting Pull Requests
 ========================
 
 Fixes and Features for AWX will go through the Github PR interface. There are a few things that can be done to help the visibility of your change
-and increase the likelyhood that it will be accepted
+and increase the likelihood that it will be accepted
 
 > Add UI detail to these
 
 * No issues when running linters/code checkers
   * Python: flake8: `(container)/awx_devel$ make flake8`
+  * Javascript: JsHint: `(container)/awx_devel$ make jshint`
 * No issues from unit tests
   * Python: py.test: `(container)/awx_devel$ make test`
+  * JavaScript: Jasmine: `(container)/awx_devel$ make ui-test-ci`
 * Write tests for new functionality, update/add tests for bug fixes
 * Make the smallest change possible
 * Write good commit messages: https://chris.beams.io/posts/git-commit/
@@ -208,26 +251,26 @@ All submitted PRs will have the linter and unit tests run against them and the s
 Reporting Issues
 ================
 
-Use the Github issue tracker for filing bugs. In order to save time and help us respond to issues quickly make sure to fill out as much of the issue template
+Use the Github issue tracker for filing bugs. In order to save time and help us respond to issues quickly, make sure to fill out as much of the issue template
 as possible. Version information and an accurate reproducing scenario are critical to helping us identify the problem.
 
-When reporting issues for the UI we also appreciate having screenshots and any error messages from the javascript console. It's not unsual for browser extensions
-and plugins to cause problems, reporting those to us will also help speed up analyzing and resolving UI bugs.
+When reporting issues for the UI we also appreciate having screenshots and any error messages from the web browser's console. It's not unsual for browser extensions
+and plugins to cause problems. Reporting those will also help speed up analyzing and resolving UI bugs.
 
 For the API and backend services, please capture all of the logs that you can from the time the problem was occuring.
 
-Don't use the issue tracker to get help on how to do something, please use the mailing list and IRC for that.
+Don't use the issue tracker to get help on how to do something - please use the mailing list and IRC for that.
 
 How issues are resolved
 -----------------------
 
 We triage our issues into high, medium, and low and will tag them with the relevant component (api, ui, installer, etc). We will typically focus on high priority
-issues. There aren't hard and fast rules for determining the severity of an issue, but generally high priority issues have an increased likelyhood of breaking
-existing functionality and/or negatively impact a large number of users.
+issues. There aren't hard and fast rules for determining the severity of an issue, but generally high priority issues have an increased likelihood of breaking
+existing functionality and/or negatively impacting a large number of users.
 
 If your issue isn't considered `high` priority then please be patient as it may take some time to get to your report.
 
-Before opening a new issue please use the issue search feature to see if it's already been reported. If you have any extra detail to provide then please comment.
+Before opening a new issue, please use the issue search feature to see if it's already been reported. If you have any extra detail to provide then please comment.
 Rather than posting a "me too" comment you might consider giving it a "thumbs up" on github.
 
 Ansible Issue Bot
