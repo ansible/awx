@@ -11,7 +11,7 @@ module.exports = config => {
         reporters: ['progress'],
         files: [
           './index.js',
-          '../components/**/*.html'
+          '../lib/components/**/*.html'
         ],
         plugins: [
             'karma-webpack',
@@ -20,14 +20,15 @@ module.exports = config => {
             'karma-ng-html2js-preprocessor'
         ],
         preprocessors: {
-            '../components/**/*.html': 'ng-html2js',
-            '../components/index.js': 'webpack',
+            '../lib/components/**/*.html': 'ng-html2js',
             './index.js': 'webpack'
         },
         ngHtml2JsPreprocessor: {
             moduleName: 'at.test.templates',
-            stripPrefix: path.resolve(__dirname, '..'),
-            prependPrefix: 'static/partials'
+            cacheIdFromPath: function (filepath) {
+                filepath = filepath.replace(path.join(__dirname, '../lib'), '');
+                return '/static/partials' + filepath;
+            }
         },
         webpack: {
             module: {
@@ -36,7 +37,12 @@ module.exports = config => {
                         test: /\.js$/,
                         loader: 'babel',
                         exclude: /node_modules/
-                    }
+                    },
+                    {
+                        test: /\.json$/,
+                        loader: 'json',
+                        exclude: /node_modules/
+                    },
                 ]
             }
         },
