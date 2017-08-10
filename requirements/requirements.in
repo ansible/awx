@@ -33,6 +33,7 @@ ordereddict==1.1
 pexpect==4.2.1
 psphere==0.5.2
 psutil==5.2.2
+pycrypto==2.6.1
 pygerduty==0.35.2
 pyOpenSSL==17.0.0
 pyparsing==2.2.0
