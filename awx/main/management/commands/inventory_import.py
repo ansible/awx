@@ -952,7 +952,17 @@ class Command(NoArgsCommand):
                                                    self.host_filter_re,
                                                    self.exclude_empty_groups,
                                                    self.is_custom)
-            self.all_group.debug_tree()
+            if settings.DEBUG:
+                # depending on inventory source, this output can be
+                # *exceedingly* verbose - crawling a deeply nested
+                # inventory/group data structure and printing metadata about
+                # each host and its memberships
+                #
+                # it's easy for this scale of data to overwhelm pexpect,
+                # (and it's likely only useful for purposes of debugging the
+                # actual inventory import code), so only print it if we have to:
+                # https://github.com/ansible/ansible-tower/issues/7414#issuecomment-321615104
+                self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
                 # Ensure that this is managed as an atomic SQL transaction,
