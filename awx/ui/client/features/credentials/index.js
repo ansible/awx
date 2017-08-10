@@ -61,6 +61,10 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         ncyBreadcrumb: {
             label: strings.get('state.ADD_BREADCRUMB_LABEL')
         },
+        data: {
+            activityStream: true,
+            activityStreamTarget: 'credential'
+        },
         views: {
             'add@credentials': {
                 templateUrl: path.getViewPath('credentials/add-edit-credentials'),
@@ -78,6 +82,11 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         route: '/:credential_id',
         ncyBreadcrumb: {
             label: strings.get('state.EDIT_BREADCRUMB_LABEL')
+        },
+        data: {
+            activityStream: true,
+            activityStreamTarget: 'credential',
+            activityStreamId: 'credential_id'
         },
         views: {
             'edit@credentials': {

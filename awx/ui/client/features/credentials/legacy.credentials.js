@@ -13,6 +13,10 @@ function LegacyCredentialsService (pathService) {
             parent: 'setup',
             label: N_('CREDENTIALS')
         },
+        data: {
+            activityStream: true,
+            activityStreamTarget: 'credential'
+        },
         views: {
             '@': {
                 templateUrl: pathService.getViewPath('credentials/index')
@@ -245,7 +249,7 @@ function LegacyCredentialsService (pathService) {
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => {
                     return qs.search(
-                        GetBasePath('organizations'), 
+                        GetBasePath('organizations'),
                         $stateParams[`${list.iterator}_search`]
                     );
                 }
@@ -288,7 +292,7 @@ function LegacyCredentialsService (pathService) {
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => {
                     return qs.search(
-                        GetBasePath('credential_types'), 
+                        GetBasePath('credential_types'),
                         $stateParams[`${list.iterator}_search`]
                     );
                 }
@@ -304,7 +308,7 @@ function LegacyCredentialsService (pathService) {
     };
 
     this.getStateConfiguration = (name) => {
-        switch (name) {      
+        switch (name) {
             case 'list':
                 return this.list;
             case 'edit-permissions':
