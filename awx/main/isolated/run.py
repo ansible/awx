@@ -107,6 +107,7 @@ def run_pexpect(args, cwd, env, logfile,
     child.logfile_read = logfile
     canceled = False
     timed_out = False
+    errored = False
     last_stdout_update = time.time()
 
     job_start = time.time()
@@ -118,17 +119,28 @@ def run_pexpect(args, cwd, env, logfile,
         if logfile_pos != logfile.tell():
             logfile_pos = logfile.tell()
             last_stdout_update = time.time()
-        canceled = cancelled_callback() if cancelled_callback else False
+        if cancelled_callback:
+            try:
+                canceled = cancelled_callback()
+            except:
+                logger.exception('Could not check cancel callback - canceling immediately')
+                if isinstance(extra_update_fields, dict):
+                    extra_update_fields['job_explanation'] = "System error during job execution, check system logs"
+                errored = True
+        else:
+            canceled = False
         if not canceled and job_timeout != 0 and (time.time() - job_start) > job_timeout:
             timed_out = True
             if isinstance(extra_update_fields, dict):
                 extra_update_fields['job_explanation'] = "Job terminated due to timeout"
-        if canceled or timed_out:
+        if canceled or timed_out or errored:
             handle_termination(child.pid, child.args, proot_cmd, is_cancel=canceled)
         if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
             child.close(True)
             canceled = True
-    if canceled:
+    if errored:
+        return 'error', child.exitstatus
+    elif canceled:
         return 'canceled', child.exitstatus
     elif child.exitstatus == 0 and not timed_out:
         return 'successful', child.exitstatus
