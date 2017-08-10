@@ -327,7 +327,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
 }])
 
 .directive('smartFloat', function() {
-    var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+    var FLOAT_REGEXP = /(^\-?\d+)?((\.|\,)\d+)?$/;
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
