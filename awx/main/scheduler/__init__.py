@@ -212,11 +212,11 @@ class TaskManager():
             if not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
-                logger.info('Submitting isolated {} to queue {} via {}.'.format(
-                    task.log_format, task.instance_group_id, rampart_group.controller_id))
+                logger.info('Submitting isolated %s to queue %s via %s.',
+                            task.log_format, task.instance_group_id, rampart_group.controller_id)
             else:
                 task.instance_group = rampart_group
-                logger.info('Submitting {} to instance group {}.'.format(task.log_format, task.instance_group_id))
+                logger.info('Submitting %s to instance group %s.', task.log_format, task.instance_group_id)
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
@@ -342,44 +342,44 @@ class TaskManager():
     def process_dependencies(self, dependent_task, dependency_tasks):
         for task in dependency_tasks:
             if self.is_job_blocked(task):
-                logger.debug("Dependent {} is blocked from running".format(task.log_format))
+                logger.debug("Dependent %s is blocked from running", task.log_format)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
                 if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
+                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting dependent {} in group {}".format(task.log_format, rampart_group.name))
+                    logger.debug("Starting dependent %s in group %s", task.log_format, rampart_group.name)
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     tasks_to_fail = filter(lambda t: t != task, dependency_tasks)
                     tasks_to_fail += [dependent_task]
                     self.start_task(task, rampart_group, tasks_to_fail)
                     found_acceptable_queue = True
             if not found_acceptable_queue:
-                logger.debug("Dependent {} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
+                logger.debug("Dependent %s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
 
     def process_pending_tasks(self, pending_tasks):
         for task in pending_tasks:
             self.process_dependencies(task, self.generate_dependencies(task))
             if self.is_job_blocked(task):
-                logger.debug("{} is blocked from running".format(task.log_format))
+                logger.debug("%s is blocked from running", task.log_format)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
                 if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
+                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting {} in group {}".format(task.log_format, rampart_group.name))
+                    logger.debug("Starting %s in group %s", task.log_format, rampart_group.name)
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain())
                     found_acceptable_queue = True
                     break
             if not found_acceptable_queue:
-                logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
+                logger.debug("%s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
 
     def cleanup_inconsistent_celery_tasks(self):
         '''
@@ -415,7 +415,7 @@ class TaskManager():
                 task.save()
                 awx_tasks._send_notification_templates(task, 'failed')
                 task.websocket_emit_status('failed')
-                logger.error("{} appears orphaned... marking as failed".format(task.log_format))
+                logger.error("%s appears orphaned... marking as failed", task.log_format)
 
 
     def calculate_capacity_used(self, tasks):
