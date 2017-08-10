@@ -103,44 +103,22 @@
                 $scope.deleteOption = "delete";
             }
             else {
-                $scope.strings.deleteModal.group = $scope.toDelete.total_groups === 1 ? InventoryHostsStrings.get('filter.GROUP') : InventoryHostsStrings.get('filter.GROUPS');
-                $scope.strings.deleteModal.host = $scope.toDelete.total_hosts === 1 ? InventoryHostsStrings.get('filter.HOST') : InventoryHostsStrings.get('filter.HOSTS');
+                $scope.strings.deleteModal.group = InventoryHostsStrings.get('deletegroup.GROUP', $scope.toDelete.total_groups);
+                $scope.strings.deleteModal.host = InventoryHostsStrings.get('deletegroup.HOST', $scope.toDelete.total_hosts);
 
-                if($scope.toDelete.total_groups > 1 && $scope.toDelete.total_hosts > 1) {
-                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUPS_HOSTS');
-                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUPS_HOSTS');
-                }
-                else if($scope.toDelete.total_groups > 1 && $scope.toDelete.total_hosts === 1) {
-                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUPS_HOST');
-                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUPS_HOST');
-                }
-                else if($scope.toDelete.total_groups === 1 && $scope.toDelete.total_hosts > 1) {
-                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUP_HOSTS');
-                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUP_HOSTS');
-                }
-                else if($scope.toDelete.total_groups === 1 && $scope.toDelete.total_hosts === 1) {
-                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUP_HOST');
-                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUP_HOST');
-                }
-                else if($scope.toDelete.total_groups === 0) {
-                    if($scope.toDelete.total_hosts > 1) {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_HOSTS');
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_HOSTS');
+                if($scope.toDelete.total_groups === 0 || $scope.toDelete.total_hosts === 0) {
+                    if($scope.toDelete.total_groups === 0) {
+                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_HOST', $scope.toDelete.total_hosts);
+                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_HOST', $scope.toDelete.total_hosts);
                     }
-                    else {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_HOST');
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_HOST');
+                    else if($scope.toDelete.total_hosts === 0) {
+                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUP', $scope.toDelete.total_groups);
+                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUP', $scope.toDelete.total_groups);
                     }
                 }
-                else if($scope.toDelete.total_hosts === 0) {
-                    if($scope.toDelete.total_groups > 1) {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUPS');
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUPS');
-                    }
-                    else {
-                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('filter.DELETE_GROUP');
-                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('filter.PROMOTE_GROUP');
-                    }
+                else {
+                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
+                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
                 }
             }
 

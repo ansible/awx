@@ -19,7 +19,7 @@ function BaseStringService (namespace) {
      * purpose -- it's to mark strings for translation so they appear in the `.pot` file after
      * the grunt-angular-gettext task is run AND it's used to fetch the translated string at
      * runtime.
-     * 
+     *
      * NOTE: View ui/src/i18n.js for where these i18n methods are defined. i18n is a wrapper around
      * the library angular-gettext.
      *
@@ -90,7 +90,7 @@ function BaseStringService (namespace) {
             }
 
             if (!value) {
-                throw new Error(ERROR_NO_STRING);
+                throw new Error(ERROR_NO_STRING + `: ${name}`);
             }
         });
 

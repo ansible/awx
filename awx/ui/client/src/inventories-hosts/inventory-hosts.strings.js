@@ -4,16 +4,16 @@ function InventoryHostsStrings (BaseString) {
     let t = this.t;
     let ns = this['inventory-hosts'];
 
-    ns.filter = {
+    ns.deletegroup = {
         GROUP: count => t.p(count, 'group', 'groups'),
         HOST: count => t.p(count, 'host', 'hosts'),
         PROMOTE_GROUPS_AND_HOSTS: data => t.s('Promote {{ group }} and {{ host }}', {
-            group: this.get('GROUP', data.groups),
-            host: this.get('HOST', data.hosts)
+            group: this.get('deletegroup.GROUP', data.groups),
+            host: this.get('deletegroup.HOST', data.hosts)
         }),
         DELETE_GROUPS_AND_HOSTS: data => t.s('Delete {{ group }} and {{ host }}', {
-            group: this.get('GROUP', data.groups),
-            host: this.get('HOST', data.hosts)
+            group: this.get('deletegroup.GROUP', data.groups),
+            host: this.get('deletegroup.HOST', data.hosts)
         }),
         PROMOTE_GROUP: count => t.p(count, 'Promote group', 'Promote groups'),
         DELETE_GROUP: count => t.p(count, 'Delete group', 'Delete groups'),
