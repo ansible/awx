@@ -5,7 +5,6 @@
     max-width: 1200px;
     padding: 0px;
     transform: translate(-50%, 0%);
-    width: ~"calc(100vw - 50px)" !important;
 
     .ui-dialog-buttonpane, .ui-dialog-titlebar {
         display:none;
@@ -74,12 +73,6 @@
     flex: 0 0 90%;
     max-width: 500px;
 }
-
-.SurveyMaker-previewPanel--viewOnly {
-    flex: 0 0 1155px;
-    max-width: 1155px;
-}
-
 .SurveyMaker-separatorPanel {
     display: flex;
     flex: 0 0 51px;
@@ -245,5 +238,11 @@
             margin: 25px 0;
             height: 1px;
         }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .SurveyMaker-dialog {
+        max-width: 100vw;
     }
 }
