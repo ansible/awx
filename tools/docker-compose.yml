@@ -10,7 +10,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      EXTRA_GROUP_QUEUES: 
+      AWX_GROUP_QUEUES: tower
     ports:
       - "8080:8080"
       - "5555:5555"

@@ -204,18 +204,19 @@ version_file:
 	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version
 
 # Do any one-time init tasks.
+comma := ,
 init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
-	if [ "$(EXTRA_GROUP_QUEUES)" == "thepentagon" ]; then \
+	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
 		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
 		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
-	elif [ "$(EXTRA_GROUP_QUEUES)" != "" ]; then \
-		$(MANAGEMENT_COMMAND) register_queue --queuename=$(EXTRA_GROUP_QUEUES) --hostnames=$(COMPOSE_HOST); \
+	elif [ "$(AWX_GROUP_QUEUES)" != "tower" ]; then \
+		$(MANAGEMENT_COMMAND) register_queue --queuename=$(firstword $(subst $(comma), ,$(AWX_GROUP_QUEUES))) --hostnames=$(COMPOSE_HOST); \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -318,7 +319,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,tower,$(COMPOSE_HOST),$(EXTRA_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,$(COMPOSE_HOST),$(AWX_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver

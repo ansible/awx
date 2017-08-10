@@ -24,7 +24,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      EXTRA_GROUP_QUEUES: alpha
+      AWX_GROUP_QUEUES: alpha,tower
     volumes:
       - "../:/awx_devel"
 
@@ -38,7 +38,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      EXTRA_GROUP_QUEUES: bravo
+      AWX_GROUP_QUEUES: bravo,tower
     volumes:
       - "../:/awx_devel"
   awx_3:
@@ -51,7 +51,7 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       CELERY_RDB_HOST: 0.0.0.0
-      EXTRA_GROUP_QUEUES: charlie
+      AWX_GROUP_QUEUES: charlie,tower
     volumes:
       - "../:/awx_devel"
   rabbitmq_1:
