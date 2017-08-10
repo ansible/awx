@@ -2734,6 +2734,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     model = JobTemplate
+    metadata_class = JobTypeMetadata
     serializer_class = JobLaunchSerializer
     is_job_start = True
     always_allow_superuser = False
