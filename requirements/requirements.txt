@@ -131,6 +131,7 @@ ptyprocess==0.5.1         # via pexpect
 pyasn1-modules==0.0.9     # via service-identity
 pyasn1==0.2.3             # via pyasn1-modules, service-identity
 pycparser==2.17           # via cffi
+pycrypto==2.6.1
 pygerduty==0.35.2
 pyjwt==1.5.0              # via adal, python-social-auth, twilio
 pyopenssl==17.0.0         # via pyvmomi, service-identity, twilio
