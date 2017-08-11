@@ -4,48 +4,48 @@ function ComponentsStrings (BaseString) {
     let t = this.t;
     let ns = this.components;
 
-    ns.REPLACE = t('REPLACE');
-    ns.REVERT = t('REVERT');
-    ns.ENCRYPTED = t('ENCRYPTED');
-    ns.OPTIONS = t('OPTIONS');
-    ns.SHOW = t('SHOW');
-    ns.HIDE = t('HIDE');
+    ns.REPLACE = t.s('REPLACE');
+    ns.REVERT = t.s('REVERT');
+    ns.ENCRYPTED = t.s('ENCRYPTED');
+    ns.OPTIONS = t.s('OPTIONS');
+    ns.SHOW = t.s('SHOW');
+    ns.HIDE = t.s('HIDE');
 
     ns.message = {
-        REQUIRED_INPUT_MISSING: t('Please enter a value.'),
-        INVALID_INPUT: t('Invalid input for this type.')
+        REQUIRED_INPUT_MISSING: t.s('Please enter a value.'),
+        INVALID_INPUT: t.s('Invalid input for this type.')
     };
 
     ns.form = {
-        SUBMISSION_ERROR_TITLE: t('Unable to Submit'),
-        SUBMISSION_ERROR_MESSAGE:t('Unexpected server error. View the console for more information'),
-        SUBMISSION_ERROR_PREFACE: t('Unexpected Error')
+        SUBMISSION_ERROR_TITLE: t.s('Unable to Submit'),
+        SUBMISSION_ERROR_MESSAGE:t.s('Unexpected server error. View the console for more information'),
+        SUBMISSION_ERROR_PREFACE: t.s('Unexpected Error')
     };
 
     ns.group = {
-        UNSUPPORTED_ERROR_PREFACE: t('Unsupported input type')
+        UNSUPPORTED_ERROR_PREFACE: t.s('Unsupported input type')
     };
 
     ns.label = {
-        PROMPT_ON_LAUNCH: t('Prompt on launch')
+        PROMPT_ON_LAUNCH: t.s('Prompt on launch')
     };
 
     ns.select = {
-        UNSUPPORTED_TYPE_ERROR: t('Unsupported display model type'),
-        EMPTY_PLACEHOLDER: t('NO OPTIONS AVAILABLE')
+        UNSUPPORTED_TYPE_ERROR: t.s('Unsupported display model type'),
+        EMPTY_PLACEHOLDER: t.s('NO OPTIONS AVAILABLE')
     };
 
     ns.textarea = {
-        SSH_KEY_HINT: t('HINT: Drag and drop an SSH private key file on the field below.')
+        SSH_KEY_HINT: t.s('HINT: Drag and drop an SSH private key file on the field below.')
     };
 
     ns.lookup = {
-        NOT_FOUND: t('That value was not found. Please enter or select a valid value.')
+        NOT_FOUND: t.s('That value was not found. Please enter or select a valid value.')
     };
 
     ns.truncate = {
-        DEFAULT: t('Copy full revision to clipboard.'),
-        COPIED: t('Copied to clipboard.')
+        DEFAULT: t.s('Copy full revision to clipboard.'),
+        COPIED: t.s('Copied to clipboard.')
     }
 }
 

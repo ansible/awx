@@ -10,7 +10,10 @@ let source = [
 module.exports = {
     all: {
         options: {
-            markerNames: ['_', 'N_', 't']
+            markerNames: ['_', 'N_'],
+            moduleName: 't',
+            moduleMethodString: 's',
+            moduleMethodPlural: 'p'
         },
         files: {
             'po/ansible-tower-ui.pot': source
