@@ -247,6 +247,11 @@ function NewDevice(type) {
 }
 exports.NewDevice = NewDevice;
 
+function NewGroup(type) {
+    this.type = type;
+}
+exports.NewGroup = NewGroup;
+
 function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {
     this.msg_type = "GroupMove";
     this.sender = sender;

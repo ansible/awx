@@ -1,4 +1,5 @@
-<g ng-if="!hide_groups">
+<g ng-if="!hide_groups || group.type == 'site'">
+<g ng-if="current_scale > 0.3 || group.type == 'site'">
 <rect ng-attr-width="{{group.width(scaledX)}}"
       ng-attr-height="{{group.height(scaledY)}}"
       ng-attr-x="{{group.left_extent(scaledX)}}"
@@ -61,10 +62,26 @@
       ng-attr-y="{{group.top_extent(scaledY)}}"
       class="NetworkUI__group"/>
 
+<g ng-attr-transform="translate({{group.left_extent(scaledX)}},{{group.top_extent(scaledY)}})">
+<g ng-if="current_scale > 0.3">
 <text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="left"
-      ng-attr-x="{{group.left_extent(scaledX) + 20}}"
-      ng-attr-y="{{group.top_extent(scaledY) + 32}}"> {{group.name}} </text>
-<text class="NetworkUI__group-text" text-anchor="left" ng-attr-x="{{group.left_extent(scaledX) + 20}}" ng-attr-y="{{group.top_extent(scaledY) + 32}}">{{group.name}}{{group.edit_label?'_':''}}</text>
+      x="20"
+      y="32"> {{group.name}} </text>
+<text class="NetworkUI__group-text" text-anchor="left" x="20" y="32">{{group.name}}{{group.edit_label?'_':''}}</text>
+</g>
+
+<g ng-if="current_scale <= 0.3" ng-attr-transform="scale({{1/current_scale}})">
+
+<text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+      filter="url(#selected)"
+      text-anchor="left"
+      ng-attr-x="20"
+      ng-attr-y="32"> {{group.name}} </text>
+<text class="NetworkUI__group-text"  text-anchor="left" x="20" y="32">{{group.name}}{{group.edit_label?'_':''}}</text>
+</g>
+</g>
+</g>
+
 </g>
