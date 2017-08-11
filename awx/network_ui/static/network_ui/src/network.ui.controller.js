@@ -1,9 +1,8 @@
-
-
 //console.log = function () { };
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
+var mode_fsm = require('./mode.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
@@ -71,7 +70,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
-  $scope.first_controller = $scope.time_controller;
+  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.time_controller);
+  $scope.first_controller = $scope.mode_controller;
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
