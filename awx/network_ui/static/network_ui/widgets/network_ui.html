@@ -24,14 +24,18 @@
 		</filter>
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
+            <g ng-if="current_mode == 'MultiSite'" transform="translate(-300000, -200000) scale(1000)" awx-net-map></g>
             <g ng-if="!hide_links">
+            <g ng-if="current_scale > 0.3 && current_scale < 5">
             <g ng-repeat="link in links">
             <g awx-net-link></g>
+            </g>
             </g>
             </g>
             <g ng-repeat="link in links">
             <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
             </g>
+            <g ng-if="current_scale > 0.3 && current_scale < 5">
             <g ng-repeat="device in devices"
                ng-attr-transform="translate({{device.x}},{{device.y}})"
                ng-attr-class="{{device.type}}"
@@ -59,6 +63,13 @@
                <g awx-net-status-light></g>
                <g awx-net-task-status></g>
             </g> <!-- end devices -->
+            </g>
+            <g ng-if="current_scale >= 5">
+            <g ng-repeat="device in devices"
+               ng-attr-transform="translate({{device.x}},{{device.y}})">
+                <g awx-net-device-detail> </g>
+            </g>
+            </g>
             <g ng-repeat="group in groups">
             <g awx-net-group></g>
             </g>
@@ -97,6 +108,9 @@
         <g awx-net-cursor></g>
         <g ng-repeat="touch in touches">
             <g awx-net-touch></g>
+        </g>
+        <g ng-repeat="l in current_location track by $index">
+        <text x="10" ng-attr-y="{{20 * (1 + $index)}}" text-anchor="left" class="NetworkUI__location-text">{{l}}</text>
         </g>
     </svg>
     </div>

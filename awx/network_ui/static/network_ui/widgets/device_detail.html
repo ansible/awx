@@ -1,0 +1,14 @@
+
+<g ng-attr-transform="scale({{1/5}}) translate(-250,-250)">
+<rect width=500
+      height=500
+      x=0
+      y=0
+      class="NetworkUI__group"/>
+<text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
+      filter="url(#selected)"
+      text-anchor="left"
+      x="20"
+      y="32"> {{device.name}}</text>
+<text class="NetworkUI__router-text" text-anchor="left" x="20" y="32">{{device.name}}{{device.edit_label?'_':''}}</text>
+</g>
