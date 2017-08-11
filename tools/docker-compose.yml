@@ -2,7 +2,7 @@ version: '3'
 services:
   # Primary AWX Development Container
   awx:
-    image: gcr.io/ansible-tower-engineering/awx_devel:${TAG}
+    image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx
     environment:
       RABBITMQ_HOST: rabbitmq

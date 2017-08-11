@@ -8,7 +8,7 @@ services:
       - isolated
   # Isolated Rampart Container
   isolated:
-    image: gcr.io/ansible-tower-engineering/awx_isolated:${TAG}
+    image: ${DEV_DOCKER_TAG_BASE}/awx_isolated:${TAG}
     hostname: isolated
     volumes:
       - "../awx/main/isolated:/awx_devel"

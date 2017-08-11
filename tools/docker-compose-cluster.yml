@@ -16,7 +16,7 @@ services:
       - "15672:15672"
   awx_1:
     privileged: true
-    image: gcr.io/ansible-tower-engineering/awx_devel:${TAG}
+    image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_1
     environment:
       RABBITMQ_HOST: rabbitmq_1
@@ -30,7 +30,7 @@ services:
 
   awx_2:
     privileged: true
-    image: gcr.io/ansible-tower-engineering/awx_devel:${TAG}
+    image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_2
     environment:
       RABBITMQ_HOST: rabbitmq_2
@@ -43,7 +43,7 @@ services:
       - "../:/awx_devel"
   awx_3:
     privileged: true
-    image: gcr.io/ansible-tower-engineering/awx_devel:${TAG}
+    image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_3
     environment:
       RABBITMQ_HOST: rabbitmq_3
@@ -55,16 +55,16 @@ services:
     volumes:
       - "../:/awx_devel"
   rabbitmq_1:
-    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_1
   rabbitmq_2:
-    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_2
     environment: 
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   rabbitmq_3:
-    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_3
     environment: 
       - CLUSTERED=true
