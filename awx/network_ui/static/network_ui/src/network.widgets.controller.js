@@ -1,3 +1,7 @@
+// This is not production code.   It is a development environment for UI widgets.
+// Do not refactor this code with the production code in network.ui.controller.js
+// This code is separate so that it can be broken without breaking the main UI code.
+//console.log = function () { };
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
@@ -17,42 +21,30 @@ var time = require('./time.js');
 var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
-var svg_crowbar = require('../vendor/svg-crowbar.js');
-var ReconnectingWebSocket = require('reconnectingwebsocket');
+var svg_crowbar = require('./svg-crowbar.js');
 
-var NetworkUIController = function($scope, $document, $location, $window) {
+var NetworkWidgetsController = function($scope, $document, $location, $window) {
 
   window.scope = $scope;
   var i = 0;
 
-  $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.topology_id = 0;
 
-  $scope.topology_id = $location.search().topology_id || 0;
-  // Create a web socket to connect to the backend server
-
-  if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
-                                                           null,
-                                                           {debug: false, reconnectInterval: 300});
-  } else {
-      $scope.control_socket = {
-          on_message: util.noop
-      };
-  }
+  $scope.control_socket = {
+      on_message: util.noop
+  };
   $scope.history = [];
-  $scope.client_id = 0;
+  $scope.client_id = 1;
   $scope.onMouseDownResult = "";
   $scope.onMouseUpResult = "";
   $scope.onMouseEnterResult = "";
   $scope.onMouseLeaveResult = "";
   $scope.onMouseMoveResult = "";
-  $scope.onMouseMoveResult = "";
-  $scope.current_scale = 1.0;
+  $scope.current_scale = 1.01;
   $scope.current_mode = null;
-  $scope.current_location = ["Earth", "Site1", "Spine1", "Eth1"];
-  $scope.panX = 0;
-  $scope.panY = 0;
+  $scope.current_location = [];
+  $scope.panX = 100;
+  $scope.panY = 100;
   $scope.mouseX = 0;
   $scope.mouseY = 0;
   $scope.scaledX = 0;
@@ -201,8 +193,77 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
   $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.site_toolbox_controller);
   $scope.first_controller = $scope.mode_controller;
+
+  var dids = $scope.device_id_seq;
+  var mids = $scope.message_id_seq;
+  var gids = $scope.group_id_seq;
+  var lids = $scope.link_id_seq;
+
+
+  $scope.initial_messages = [
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":100,"name":"Router1","type":"router","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":100,"name":"Switch1","type":"switch","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":100,"name":"HostA","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":100,"name":"Host1","type":"host","message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":300,"name":"Router2","type":"router","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":500,"name":"Router3","type":"router","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":5,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":6,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":5,"to_device_id":6,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":300,"name":"Switch2","type":"switch","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":500,"name":"Switch3","type":"switch","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":7,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":8,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":7,"to_device_id":8,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":300,"name":"HostB","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":500,"name":"HostC","type":"host","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":9,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":10,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":9,"to_device_id":10,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":300,"name":"Host2","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":500,"name":"Host3","type":"host","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":11,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":12,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":11,"to_device_id":12,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":700,"name":"Router4","type":"router","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":700,"name":"Switch4","type":"switch","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":700,"name":"HostD","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":700,"name":"Host4","type":"host","message_id":mids()}],
+
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":600,"x2":1000,"y2":800,"name":"Group1",type:"group", "message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":900,"name":"Router5","type":"router","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":900,"name":"Switch5","type":"switch","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":900,"name":"HostE","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":900,"name":"Host5","type":"host","message_id":mids()}],
+
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":-100,"y1":0,"x2":1100,"y2":1100,"name":"Site1",type:"site", "message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":800,"x2":1000,"y2":1000,"name":"Rack1",type:"rack", "message_id":mids()}],
+
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":100,"name":"Device1","type":"device","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":300,"name":"Device2","type":"device","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":500,"name":"Device3","type":"device","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":22,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":23,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":22,"to_device_id":23,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":700,"name":"Device4","type":"device","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":900,"name":"Device5","type":"device","message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":2900,"name":"Router6","type":"router","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":17,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":26,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":17,"to_device_id":26,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":2800,"x2":1000,"y2":3000,"name":"Site2",type:"site", "message_id":mids()}],
+  ];
+
     var getMouseEventResult = function (mouseEvent) {
-      return "(" + mouseEvent.x + ", " + mouseEvent.y + ")";
+      return "(" + mouseEvent.screenX + ", " + mouseEvent.screenX + ")";
     };
 
     $scope.updateScaledXY = function() {
@@ -337,7 +398,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onMouseDown = function ($event) {
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.offsetX, $event.offsetY, $event.type));
       }
       $scope.last_event = $event;
       $scope.first_controller.handle_message('MouseDown', $event);
@@ -347,7 +408,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onMouseUp = function ($event) {
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.offsetX, $event.offsetY, $event.type));
       }
       $scope.last_event = $event;
       $scope.first_controller.handle_message('MouseUp', $event);
@@ -357,7 +418,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onMouseLeave = function ($event) {
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.offsetX, $event.offsetY, $event.type));
       }
       $scope.onMouseLeaveResult = getMouseEventResult($event);
       $scope.cursor.hidden = true;
@@ -366,14 +427,14 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onMouseMove = function ($event) {
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.offsetX, $event.offsetY, $event.type));
       }
       //var coords = getCrossBrowserElementCoords($event);
       $scope.cursor.hidden = false;
-      $scope.cursor.x = $event.x;
-      $scope.cursor.y = $event.y;
-      $scope.mouseX = $event.x;
-      $scope.mouseY = $event.y;
+      $scope.cursor.x = $event.offsetX;
+      $scope.cursor.y = $event.offsetY;
+      $scope.mouseX = $event.offsetX;
+      $scope.mouseY = $event.offsetY;
       $scope.updateScaledXY();
       $scope.first_controller.handle_message('MouseMove', $event);
       $scope.onMouseMoveResult = getMouseEventResult($event);
@@ -382,7 +443,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.onMouseOver = function ($event) {
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.offsetY, $event.type));
       }
       $scope.onMouseOverResult = getMouseEventResult($event);
       $scope.cursor.hidden = false;
@@ -492,19 +553,16 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     //
 
 
-    $scope.onDeployButton = function (button) {
-        console.log(button.name);
+    $scope.onDeployButton = function () {
         $scope.send_control_message(new messages.Deploy($scope.client_id));
     };
 
-    $scope.onDestroyButton = function (button) {
-        console.log(button.name);
+    $scope.onDestroyButton = function () {
         $scope.resetStatus();
         $scope.send_control_message(new messages.Destroy($scope.client_id));
     };
 
-    $scope.onRecordButton = function (button) {
-        console.log(button.name);
+    $scope.onRecordButton = function () {
         $scope.recording = ! $scope.recording;
         if ($scope.recording) {
             $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
@@ -518,8 +576,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         }
     };
 
-    $scope.onExportButton = function (button) {
-        console.log(button.name);
+    $scope.onExportButton = function () {
         $scope.cursor.hidden = true;
         $scope.debug.hidden = true;
         $scope.hide_buttons = true;
@@ -531,13 +588,11 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         }, 1000);
     };
 
-    $scope.onLayoutButton = function (button) {
-        console.log(button.name);
+    $scope.onLayoutButton = function () {
         $scope.send_control_message(new messages.Layout($scope.client_id));
     };
 
-    $scope.onDiscoverButton = function (button) {
-        console.log(button.name);
+    $scope.onDiscoverButton = function () {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/7/launch/", true);
         xhr.onload = function () {
@@ -549,8 +604,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         xhr.send();
     };
 
-    $scope.onConfigureButton = function (button) {
-        console.log(button.name);
+    $scope.onConfigureButton = function () {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/9/launch/", true);
         xhr.onload = function () {
@@ -582,36 +636,15 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     // Buttons
 
     $scope.buttons = [
-      new models.Button("DEPLOY", 10, 10, 70, 30, $scope.onDeployButton),
-      new models.Button("DESTROY", 90, 10, 80, 30, $scope.onDestroyButton),
-      new models.Button("RECORD", 180, 10, 80, 30, $scope.onRecordButton),
-      new models.Button("EXPORT", 270, 10, 70, 30, $scope.onExportButton),
-      new models.Button("DISCOVER", 350, 10, 80, 30, $scope.onDiscoverButton),
-      new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
+      new models.Button("BUTTON1", 10, 10, 90, 30, util.noop),
+      new models.Button("BUTTON1", 110, 10, 90, 30, util.noop),
     ];
-
-    $scope.buttons = [];
 
     var LAYERS_X = 160;
 
     $scope.layers = [
-      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("PHYSICAL",
-                              $scope.graph.width - LAYERS_X, 250, 120, 30,
-                              $scope.onTogglePhysical,
-                              $scope.onUnTogglePhysical,
-                              true),
-      new models.ToggleButton("GROUP",
-                              $scope.graph.width - LAYERS_X, 290, 120, 30,
-                              $scope.onToggleGroup,
-                              $scope.onUnToggleGroup,
-                              true)
+      new models.ToggleButton("TOGGLEBUTTON1", $scope.graph.width - LAYERS_X, 10, 150, 30, util.noop, util.noop, true),
+      new models.ToggleButton("TOGGLEBUTTON2", $scope.graph.width - LAYERS_X, 50, 150, 30, util.noop, util.noop, true),
     ];
 
     var STENCIL_X = 10;
@@ -619,12 +652,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     var STENCIL_SPACING = 40;
 
     $scope.stencils = [
-      new models.Button("Switch", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));}),
-      new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
-      new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
-      new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
-      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));}),
-      new models.Button("Site", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 5, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));}),
+      new models.Button("BUTTON3", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 90, 30, util.noop),
+      new models.Button("BUTTON4", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 90, 30, util.noop),
     ];
 
     $scope.all_buttons = [];
@@ -765,7 +794,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                        data.x,
                                        data.y,
                                        data.type);
-        $scope.device_id_seq = util.natural_numbers(data.id);
         $scope.devices.push(device);
     };
 
@@ -782,7 +810,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                      data.x2,
                                      data.y2,
                                      false);
-        $scope.group_id_seq = util.natural_numbers(data.id);
         $scope.groups.push(group);
     };
 
@@ -847,9 +874,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
     $scope.create_interface = function(data) {
         var i = 0;
-        console.log(data);
         var new_interface = new models.Interface(data.id, data.name);
-        console.log(new_interface);
         for (i = 0; i < $scope.devices.length; i++){
             if ($scope.devices[i].id === data.device_id) {
                 $scope.devices[i].interface_seq = util.natural_numbers(data.id);
@@ -1294,7 +1319,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     };
 
     $scope.send_coverage = function () {
-        console.log("Sending coverage");
         if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
             $scope.send_control_message(new messages.Coverage($scope.client_id, window.__coverage__));
         }
@@ -1324,12 +1348,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                 message.messages[i].message_id = $scope.message_id_seq();
             }
         }
-        var data = messages.serialize(message);
-        if (!$scope.disconnected) {
-            $scope.control_socket.send(data);
-        } else {
-            console.log(data);
-        }
+        //var data = messages.serialize(message);
+        //console.log(data);
     };
 
 
@@ -1355,10 +1375,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.$apply();
     }, 17);
 
-    console.log("Network UI started");
+    console.log("Network Widgets started");
 
     $scope.$on('$destroy', function () {
-        console.log("Network UI stopping");
+        console.log("Network Widgets stopping");
         $document.unbind('keydown', $scope.onKeyDown);
     });
 
@@ -1368,6 +1388,18 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             $scope.layers[i].x = $scope.graph.width - 140;
         }
     };
+
+    for (i =0; i < $scope.initial_messages.length; i++) {
+        console.log(['Inital message',  $scope.initial_messages[i]]);
+        $scope.first_controller.handle_message($scope.initial_messages[i][0], $scope.initial_messages[i][1]);
+    }
+
+    $scope.updateScaledXY();
+    $scope.updatePanAndScale();
+
+    for (i=0; i < $scope.groups.length; i++) {
+        $scope.groups[i].update_membership($scope.devices, $scope.groups);
+    }
 
     $scope.update_offsets = function () {
 
@@ -1390,5 +1422,5 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     };
 };
 
-exports.NetworkUIController = NetworkUIController;
-console.log("Network UI loaded");
+exports.NetworkWidgetsController = NetworkWidgetsController;
+console.log("Network Widgets loaded");

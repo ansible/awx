@@ -1,6 +1,6 @@
 
-<g ng-if="current_scale >= 0.1 && current_scale <= 0.5 && item.type == 'rack'" ng-attr-transform="translate({{item.width()/2}}, {{item.height()/2}})">
-<g ng-attr-transform="scale({{1/0.5}})">
+<g ng-if="current_scale <= 0.1 && item.type == 'site'" ng-attr-transform="translate({{item.width()/2}}, {{item.height()/2}})">
+<g ng-attr-transform="scale({{1/(0.1)}})">
 
                     <g ng-if="item.moving">
                     <line ng-attr-x1="{{-50 - 100}}"
@@ -37,51 +37,54 @@
                         y="-52"
                         ng-attr-width="{{100 + 4}}"
                         ng-attr-height="{{100 + 4}}"
-                        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__rack--selected-conflict' : item.selected ? 'NetworkUI__rack--selected' : 'NetworkUI__rack--remote-selected' : 'NetworkUI--hidden'}}"
+                        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__site--selected-conflict' : item.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
                         rx=10>
                     </rect>
-                    <g class="NetworkUI__rack">
+                    <g class="NetworkUI__site">
                     <rect
                         x="-50"
                         y="-50"
                         ng-attr-width="{{100}}"
                         ng-attr-height="{{100}}"
                         rx=10
-                        class="NetworkUI__rack-background">
+                        class="NetworkUI__site-background">
                     </rect>
+                    <rect class="NetworkUI__site--network" x=-42 y=60 width="80" height="10" rx=5 />
+                    <rect class="NetworkUI__site--network" x=-42 y=30 width="10" height="40" rx=5 />
+                    <rect class="NetworkUI__site--network" x=-5 y=30 width="10" height="40" rx=5 />
+                    <rect class="NetworkUI__site--network" x=32 y=30 width="10" height="40" rx=5 />
                     <rect
                         x="-50"
+                        y="-40"
+                        ng-attr-width="{{25}}"
+                        ng-attr-height="{{80}}"
+                        rx=10>
+                    </rect>
+                    <rect
+                        x="-20"
                         y="-50"
-                        ng-attr-width="{{100}}"
-                        ng-attr-height="{{30}}"
+                        ng-attr-width="{{40}}"
+                        ng-attr-height="{{100}}"
                         rx=10>
                     </rect>
                     <rect
-                        x="-50"
-                        y="-15"
-                        ng-attr-width="{{100}}"
-                        ng-attr-height="{{30}}"
+                        x="25"
+                        y="-40"
+                        ng-attr-width="{{25}}"
+                        ng-attr-height="{{80}}"
                         rx=10>
                     </rect>
-                    <rect
-                        x="-50"
-                        y="20"
-                        ng-attr-width="{{100}}"
-                        ng-attr-height="{{30}}"
-                        rx=10>
-                    </rect>
-                    <circle cx="30" cy="-35" r=7 />
-                    <circle cx="30" cy="0" r=7 />
-                    <circle cx="30" cy="35" r=7 />
-                    </circle>
+                    <circle cy="20" cx="-37" r=7 />
+                    <circle cy="25" cx="0" r=10 />
+                    <circle cy="20" cx="37" r=7 />
                     </g>
 </g>
 <g ng-attr-transform="scale({{1/current_scale}})">
-<text ng-attr-class="{{item.selected && ! item.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
+<text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
-      x="0"
-      ng-attr-y="{{180*current_scale}}"> {{item.name}} </text>
-<text  class="NetworkUI__rack-text" text-anchor="middle" x="0" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
+      ng-attr-x="0"
+      ng-attr-y="{{1200*current_scale}}"> {{item.name}} </text>
+<text class="NetworkUI__group-text"  text-anchor="middle" x="0" ng-attr-y="{{1200*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
 </g>
 </g>
