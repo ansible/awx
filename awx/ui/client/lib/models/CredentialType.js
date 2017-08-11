@@ -15,6 +15,10 @@ function categorizeByKind () {
 }
 
 function mergeInputProperties () {
+    if (!this.has('inputs.fields')) {
+        return;
+    }
+
     let required = this.get('inputs.required');
 
     return this.get('inputs.fields').map((field, i) => {

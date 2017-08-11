@@ -26,6 +26,10 @@ function createFormSchema (method, config) {
 }
 
 function assignInputGroupValues (inputs) {
+    if (!inputs) {
+        return [];
+    }
+
     return inputs.map(input => {
         let value = this.get(`inputs.${input.id}`);
 
