@@ -5,6 +5,7 @@ from awx.main.models import (
     UnifiedJob,
     WorkflowJob,
     WorkflowJobNode,
+    Job
 )
 
 
@@ -49,4 +50,14 @@ def test_cancel_job_explanation(unified_job):
 
     assert unified_job.job_explanation == job_explanation
     unified_job.save.assert_called_with(update_fields=['cancel_flag', 'status', 'job_explanation'])
+
+
+def test_log_representation():
+    '''
+    Common representation used inside of log messages
+    '''
+    uj = UnifiedJob(status='running', id=4)
+    job = Job(status='running', id=4)
+    assert job.log_format == 'job 4 (running)'
+    assert uj.log_format == 'unified_job 4 (running)'
 

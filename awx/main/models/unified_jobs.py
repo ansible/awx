@@ -33,7 +33,8 @@ from awx.main.models.schedules import Schedule
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
-    copy_model_by_class, copy_m2m_relationships
+    copy_model_by_class, copy_m2m_relationships,
+    get_type_for_model
 )
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -621,6 +622,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
+
+    @property
+    def log_format(self):
+        return '{} {} ({})'.format(get_type_for_model(type(self)), self.id, self.status)
 
     def _get_parent_instance(self):
         return getattr(self, self._get_parent_field_name(), None)
