@@ -2,6 +2,7 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
+var titlecase = require('titlecase');
 
 function _State () {
 }
@@ -363,8 +364,9 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
 
 
-_Ready.prototype.onNewGroup = function (controller) {
+_Ready.prototype.onNewGroup = function (controller, msg_type, message) {
     controller.scope.hide_groups = false;
+    controller.scope.new_group_type = message.type;
     controller.changeState(Placing);
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
@@ -502,7 +504,8 @@ _Placing.prototype.onMouseDown = function (controller) {
     var id = scope.group_id_seq();
 
     group = new models.Group(id,
-                             "Group" + id,
+                             titlecase.toTitleCase("" + scope.new_group_type + id),
+                             scope.new_group_type,
                              scope.scaledX,
                              scope.scaledY,
                              scope.scaledX,
@@ -520,6 +523,8 @@ _Placing.prototype.onMouseDown = function (controller) {
     scope.selected_groups.push(group);
     group.selected = true;
     group.selected_corner = models.BOTTOM_RIGHT;
+
+    controller.scope.new_group_type = null;
 
     controller.changeState(Resize);
 };

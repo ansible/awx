@@ -309,9 +309,10 @@ exports.Task = Task;
 Task.prototype.describeArc = util.describeArc;
 
 
-function Group(id, name, x1, y1, x2, y2, selected) {
+function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.id = id;
     this.name = name;
+    this.type = type;
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
@@ -471,6 +472,14 @@ Group.prototype.bottom_extent = function (scaledY) {
 Group.prototype.right_extent = function (scaledX) {
     var x2 = this.x2 !== null ? this.x2 : scaledX;
     return (this.x1 > x2? this.x1 : x2);
+};
+
+Group.prototype.centerX = function (scaledX) {
+    return (this.right_extent(scaledX) + this.left_extent(scaledX)) / 2;
+};
+
+Group.prototype.centerY = function (scaledY) {
+    return (this.bottom_extent(scaledY) + this.top_extent(scaledY)) / 2;
 };
 
 Group.prototype.update_membership = function (devices) {

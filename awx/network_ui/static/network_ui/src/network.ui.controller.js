@@ -1,4 +1,3 @@
-//console.log = function () { };
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
@@ -21,7 +20,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   window.scope = $scope;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -44,6 +43,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.onMouseMoveResult = "";
   $scope.onMouseMoveResult = "";
   $scope.current_scale = 1.0;
+  $scope.current_mode = null;
+  $scope.current_location = ["Earth", "Site1", "Spine1", "Eth1"];
   $scope.panX = 0;
   $scope.panY = 0;
   $scope.mouseX = 0;
@@ -62,6 +63,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.selected_items = [];
   $scope.selected_groups = [];
   $scope.new_link = null;
+  $scope.new_group_type = null;
   $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
   $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
   $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
@@ -99,8 +101,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.stencils = [];
   $scope.links = [];
   $scope.groups = [];
-
-
+  $scope.view_port = {'x': 0,
+                      'y': 0,
+                      'width': 0,
+                      'height': 0};
 
     var getMouseEventResult = function (mouseEvent) {
       return "(" + mouseEvent.x + ", " + mouseEvent.y + ")";
@@ -109,6 +113,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     $scope.updateScaledXY = function() {
         $scope.scaledX = ($scope.mouseX - $scope.panX) / $scope.current_scale;
         $scope.scaledY = ($scope.mouseY - $scope.panY) / $scope.current_scale;
+        $scope.view_port.x = - $scope.panX / $scope.current_scale;
+        $scope.view_port.y = - $scope.panY / $scope.current_scale;
+        $scope.view_port.width = $scope.graph.width / $scope.current_scale;
+        $scope.view_port.height = $scope.graph.height / $scope.current_scale;
     };
 
     $scope.updatePanAndScale = function() {
@@ -488,6 +496,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
       new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
     ];
 
+    $scope.buttons = [];
+
     var LAYERS_X = 160;
 
     $scope.layers = [
@@ -518,7 +528,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
       new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
       new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
       new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
-      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup");}),
+      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));}),
+      new models.Button("Site", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 5, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));}),
     ];
 
     $scope.all_buttons = [];
@@ -1088,6 +1099,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             }
             new_group = new models.Group(group.id,
                                          group.name,
+                                         group.type,
                                          group.x1,
                                          group.y1,
                                          group.x2,

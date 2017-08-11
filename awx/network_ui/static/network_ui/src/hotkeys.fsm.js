@@ -81,6 +81,13 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));
         return;
 	}
+    else if ($event.key === '0') {
+        scope.panX = 0;
+        scope.panY = 0;
+        scope.current_scale = 1.0;
+        scope.updateScaledXY();
+        scope.updatePanAndScale();
+    }
 
 	controller.next_controller.handle_message(msg_type, $event);
 };

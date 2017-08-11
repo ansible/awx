@@ -49,6 +49,9 @@ var Device = new _Device();
 exports.Device = Device;
 
 
+_State.prototype.start = function (controller) {
+    controller.scope.current_mode = controller.state.name;
+};
 
 
 _Start.prototype.start = function (controller) {
@@ -62,22 +65,25 @@ _Start.prototype.start.transitions = ['MultiSite'];
 
 _Interface.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
-    controller.next_controller.handle_message(msg_type, $event);
-
     //controller.changeState(Device);
+
+    controller.next_controller.handle_message(msg_type, $event);
 
 };
 _Interface.prototype.onMouseWheel.transitions = ['Device'];
 
 
-
 _Site.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
+
+    if (controller.scope.current_scale < 0.3) {
+        controller.changeState(MultiSite);
+    } else if (controller.scope.current_scale > 5) {
+        controller.scope.current_location.push(controller.scope.devices[0].name);
+        controller.changeState(Device);
+    }
+
     controller.next_controller.handle_message(msg_type, $event);
-
-    //controller.changeState(MultiSite);
-
-    //controller.changeState(Device);
 
 };
 _Site.prototype.onMouseWheel.transitions = ['MultiSite', 'Device'];
@@ -93,14 +99,20 @@ _Process.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Process.prototype.onMouseWheel.transitions = ['Device'];
 
+_MultiSite.prototype.start = function (controller) {
+    controller.scope.current_mode = controller.state.name;
+    controller.scope.current_location = ['Earth'];
+};
 
 
 _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
+    if (controller.scope.current_scale > 0.3) {
+        controller.scope.current_location.push(controller.scope.groups[0].name);
+        controller.changeState(Site);
+    }
+
     controller.next_controller.handle_message(msg_type, $event);
-
-    //controller.changeState(Site);
-
 };
 _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
 
@@ -108,14 +120,18 @@ _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
 
 _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
-    controller.next_controller.handle_message(msg_type, $event);
-
     //controller.changeState(Process);
 
     //controller.changeState(Interface);
 
     //controller.changeState(Site);
 
+    if (controller.scope.current_scale < 5) {
+        controller.scope.current_location.pop();
+        controller.changeState(Site);
+    }
+
+    controller.next_controller.handle_message(msg_type, $event);
 };
 _Device.prototype.onMouseWheel.transitions = ['Process', 'Interface', 'Site'];
 
