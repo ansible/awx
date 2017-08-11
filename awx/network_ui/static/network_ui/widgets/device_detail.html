@@ -5,10 +5,11 @@
       x=0
       y=0
       class="NetworkUI__group"/>
+
 <g ng-attr-transform="translate(0,0)"
    ng-attr-class="{{device.type}}"
    ng-switch on="device.type">
-<g ng-switch-when="router"><!-- begin router -->
+   <g ng-switch-when="router"><!-- begin router -->
        <g awx-net-router></g>
    </g> <!-- end router -->
 
@@ -18,7 +19,6 @@
 
    <g ng-switch-when="host"> <!-- begin host -->
         <g awx-net-host> </g>
-
    </g> <!-- end host -->
 
    <g ng-switch-when="rack"> <!-- begin rack -->
@@ -30,12 +30,12 @@
    </g> <!-- end default -->
    <g awx-net-status-light></g>
    <g awx-net-task-status></g>
-</g> <!-- end devices -->
+</g> <!-- end transform class switch -->
 
 <g transform="translate(0, 500)">
 <g ng-repeat="interface in device.interfaces track by $index">
 
-<g ng-attr-transform="translate({{$index * 30 + 30}}, -40)">
+<g ng-attr-transform="translate({{$index * 60 + 30}}, -40)">
 
 <line x1="0"
       y1="0"
@@ -70,13 +70,38 @@
         class="NetworkUI__interface" ></circle>
 
 
-<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="120">{{interface.remote_interface().name}}</text>
-<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="130">{{interface.remote_interface().device.name}}</text>
+<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="85">{{interface.remote_interface().name}}</text>
+
+<g ng-repeat="device in [interface.remote_interface().device]">
+<g ng-attr-transform="translate(0,100) scale(0.5) translate(0, {{device.height}})"
+   ng-attr-class="{{device.type}}"
+   ng-switch on="device.type">
+   <g ng-switch-when="router"><!-- begin router -->
+       <g awx-net-router></g>
+   </g> <!-- end router -->
+
+   <g ng-switch-when="switch"> <!-- begin switch -->
+       <g awx-net-switch> </g>
+   </g> <!-- end switch -->
+
+   <g ng-switch-when="host"> <!-- begin host -->
+        <g awx-net-host> </g>
+   </g> <!-- end host -->
+
+   <g ng-switch-when="rack"> <!-- begin rack -->
+        <g awx-net-rack> </g>
+   </g> <!-- end rack -->
+
+   <g ng-switch-default> <!-- begin default -->
+        <g awx-net-default></g>
+   </g> <!-- end default -->
+   <g awx-net-status-light></g>
+   <g awx-net-task-status></g>
+</g> <!-- end transform class switch -->
+</g> <!-- end repeat -->
 
 
-</g>
-</g>
-</g>
-
-</g>
-</g>
+</g> <!-- end transform -->
+</g> <!-- end ng-repeat interface -->
+</g> <!-- end transform translate -->
+</g> <!-- end transform scale translate -->
