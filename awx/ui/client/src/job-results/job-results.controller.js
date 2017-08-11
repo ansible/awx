@@ -373,7 +373,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .after($compile(mungedEvent
                                     .stdout)($scope.events[mungedEvent
                                         .counter]));
-                        } else if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
+                        } else {
                             var putIn;
                             var classList = $("div",
                                 "<div>"+mungedEvent.stdout+"</div>")
@@ -426,8 +426,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
                             classList = null;
                             putIn = null;
-                        } else {
-                            appendToBottom(mungedEvent);
                         }
 
                         // delete ref to the elem because it might leak scope
