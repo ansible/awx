@@ -46,6 +46,7 @@ _Past.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceMove',
          'DeviceLabelEdit',
          'GroupLabelEdit',
+         'GroupCreate',
          'LinkLabelEdit',
          'InterfaceLabelEdit',
          'InterfaceCreate',
@@ -274,6 +275,7 @@ _Present.prototype.onMessage = function(controller, msg_type, message) {
          'DeviceMove',
          'DeviceLabelEdit',
          'GroupLabelEdit',
+         'GroupCreate',
          'InterfaceCreate',
          'InterfaceLabelEdit',
          'LinkCreate',
@@ -312,6 +314,11 @@ _Present.prototype.onFacts = function(controller, msg_type, message) {
 _Present.prototype.onDeviceCreate = function(controller, msg_type, message) {
         if (message.sender !== controller.scope.client_id) {
             controller.scope.onDeviceCreate(message);
+        }
+};
+_Present.prototype.onGroupCreate = function(controller, msg_type, message) {
+        if (message.sender !== controller.scope.client_id) {
+            controller.scope.onGroupCreate(message);
         }
 };
 _Present.prototype.onInterfaceCreate = function(controller, msg_type, message) {

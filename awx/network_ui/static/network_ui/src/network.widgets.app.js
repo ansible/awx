@@ -1,7 +1,7 @@
 
 //console.log = function () { };
 var angular = require('angular');
-var NetworkUIController = require('./network.ui.controller.js');
+var NetworkWidgetsController = require('./network.widgets.controller.js');
 var cursor = require('./cursor.directive.js');
 var touch = require('./touch.directive.js');
 var router = require('./router.directive.js');
@@ -28,13 +28,13 @@ var inventoryToolboxClipPath = require('./inventory.toolbox.clip.path.directive.
 var statusLight = require('./status.light.directive.js');
 var taskStatus = require('./task.status.directive.js');
 var debug = require('./debug.directive.js');
-var awxNetworkUI = require('./network.ui.directive.js');
+var awxNetworkWidgets = require('./network.widgets.directive.js');
 
-var networkUI = angular.module('networkUI', [
+var networkWidgets = angular.module('networkWidgets', [
         'monospaced.mousewheel',
         'ngTouch'
     ])
-    .controller('NetworkUIController', NetworkUIController.NetworkUIController)
+    .controller('NetworkWidgetsController', NetworkWidgetsController.NetworkWidgetsController)
     .directive('awxNetCursor', cursor.cursor)
     .directive('awxNetTouch', touch.touch)
     .directive('awxNetDebug', debug.debug)
@@ -61,6 +61,6 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetInventoryToolboxClipPath', inventoryToolboxClipPath.inventoryToolboxClipPath)
     .directive('awxNetStatusLight', statusLight.statusLight)
     .directive('awxNetTaskStatus', taskStatus.taskStatus)
-    .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
+    .directive('awxNetworkWidgets', awxNetworkWidgets.awxNetworkWidgets);
 
-exports.networkUI = networkUI;
+exports.networkWidgets = networkWidgets;

@@ -247,6 +247,38 @@ function NewDevice(type) {
 }
 exports.NewDevice = NewDevice;
 
+function PasteDevice(device) {
+    this.device = device;
+}
+exports.PasteDevice = PasteDevice;
+
+function PasteProcess(process) {
+    this.process = process;
+}
+exports.PasteProcess = PasteProcess;
+
+
+function NewGroup(type) {
+    this.type = type;
+}
+exports.NewGroup = NewGroup;
+
+function PasteGroup(group) {
+    this.group = group;
+}
+exports.PasteGroup = PasteGroup;
+
+function PasteRack(group) {
+    this.group = group;
+}
+exports.PasteRack = PasteRack;
+
+function PasteSite(group) {
+    this.group = group;
+}
+exports.PasteSite = PasteSite;
+
+
 function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {
     this.msg_type = "GroupMove";
     this.sender = sender;
@@ -262,7 +294,7 @@ function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previou
 }
 exports.GroupMove = GroupMove;
 
-function GroupCreate(sender, id, x1, y1, x2, y2, name) {
+function GroupCreate(sender, id, x1, y1, x2, y2, name, type) {
     this.msg_type = "GroupCreate";
     this.sender = sender;
     this.id = id;
@@ -271,6 +303,7 @@ function GroupCreate(sender, id, x1, y1, x2, y2, name) {
     this.x2 = x2;
     this.y2 = y2;
     this.name = name;
+    this.type = type;
 }
 exports.GroupCreate = GroupCreate;
 
@@ -328,3 +361,46 @@ function TableCellEdit(sender, sheet, col, row, old_value, new_value) {
     this.new_value = new_value;
 }
 exports.TableCellEdit = TableCellEdit;
+
+function StreamCreate(sender, id, from_id, to_id, label) {
+    this.msg_type = "StreamCreate";
+    this.sender = sender;
+    this.id = id;
+    this.from_id = from_id;
+    this.to_id = to_id;
+    this.label = label;
+}
+exports.StreamCreate = StreamCreate;
+
+function StreamDestroy(sender, id, from_id, to_id, label) {
+    this.msg_type = "StreamDestroy";
+    this.sender = sender;
+    this.id = id;
+    this.from_id = from_id;
+    this.to_id = to_id;
+    this.label = label;
+}
+exports.StreamDestroy = StreamDestroy;
+
+function StreamLabelEdit(sender, id, label, previous_label) {
+    this.msg_type = "StreamLabelEdit";
+    this.sender = sender;
+    this.id = id;
+    this.label = label;
+    this.previous_label = previous_label;
+}
+exports.StreamLabelEdit = StreamLabelEdit;
+
+function StreamSelected(sender, id) {
+    this.msg_type = "StreamSelected";
+    this.sender = sender;
+    this.id = id;
+}
+exports.StreamSelected = StreamSelected;
+
+function StreamUnSelected(sender, id) {
+    this.msg_type = "StreamUnSelected";
+    this.sender = sender;
+    this.id = id;
+}
+exports.StreamUnSelected = StreamUnSelected;

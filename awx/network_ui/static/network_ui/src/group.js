@@ -2,6 +2,7 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
+var titlecase = require('titlecase');
 
 function _State () {
 }
@@ -57,6 +58,14 @@ inherits(_Ready, _State);
 var Ready = new _Ready();
 exports.Ready = Ready;
 
+function _Disable () {
+    this.name = 'Disable';
+}
+inherits(_Disable, _State);
+var Disable = new _Disable();
+exports.Disable = Disable;
+
+
 function _EditLabel () {
     this.name = 'EditLabel';
 }
@@ -78,6 +87,11 @@ inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
 
+_State.prototype.onUnselectAll = function (controller, msg_type, $event) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, $event);
+};
 
 _Resize.prototype.onMouseUp = function (controller, msg_type, $event) {
 
@@ -119,7 +133,8 @@ _Resize.prototype.onMouseMove = function (controller) {
             groups[i].y2 = groups[i].y2 + diffY;
         }
 
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices,
+                                                         controller.scope.groups);
         for(j = 0; j < membership_old_new[0].length; j++) {
             membership_old_new[0][j].selected = false;
         }
@@ -145,6 +160,16 @@ _Resize.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledY = controller.scope.scaledY;
 };
 
+_Resize.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = true;
+    }
+};
+
 _Resize.prototype.end = function (controller) {
 
     var groups = controller.scope.selected_groups;
@@ -155,6 +180,10 @@ _Resize.prototype.end = function (controller) {
         for(j = 0; j < groups[i].devices.length; j++) {
             groups[i].devices[j].selected = false;
         }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = false;
     }
 };
 
@@ -242,7 +271,8 @@ _Move.prototype.onMouseMove = function (controller) {
         groups[i].x2 = groups[i].x2 + diffX;
         groups[i].y2 = groups[i].y2 + diffY;
 
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices,
+                                                         controller.scope.groups);
         for(j = 0; j < membership_old_new[0].length; j++) {
             membership_old_new[0][j].selected = false;
         }
@@ -281,6 +311,16 @@ _Move.prototype.onMouseDown = function (controller) {
 };
 _Move.prototype.onMouseDown.transitions = ['Selected1'];
 
+_Move.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = true;
+    }
+};
+
 _Move.prototype.end = function (controller) {
 
     var groups = controller.scope.selected_groups;
@@ -291,6 +331,10 @@ _Move.prototype.end = function (controller) {
         for(j = 0; j < groups[i].devices.length; j++) {
             groups[i].devices[j].selected = false;
         }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = false;
     }
 };
 
@@ -363,11 +407,47 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
 
 
-_Ready.prototype.onNewGroup = function (controller) {
+_Ready.prototype.onNewGroup = function (controller, msg_type, message) {
     controller.scope.hide_groups = false;
+    controller.scope.new_group_type = message.type;
     controller.changeState(Placing);
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
+
+_Ready.prototype.onPasteGroup = function (controller, msg_type, message) {
+
+	var scope = controller.scope;
+    scope.hide_groups = false;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    var group = new models.Group(controller.scope.group_id_seq(),
+                                 message.group.name,
+                                 message.group.type,
+                                 scope.scaledX,
+                                 scope.scaledY,
+                                 scope.scaledX + message.group.x2,
+                                 scope.scaledY + message.group.y2,
+                                 false);
+
+    scope.send_control_message(new messages.GroupCreate(scope.client_id,
+                                                        group.id,
+                                                        group.x1,
+                                                        group.y1,
+                                                        group.x2,
+                                                        group.y2,
+                                                        group.name,
+                                                        group.type));
+
+    scope.groups.push(group);
+    scope.selected_groups.push(group);
+    group.selected = true;
+    controller.changeState(Selected2);
+};
+_Ready.prototype.onPasteGroup.transitions = ['Selected2'];
 
 
 
@@ -482,6 +562,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                                                                             groups[i].y2,
                                                                             groups[i].name));
         }
+    } else {
+        controller.next_controller.handle_message(msg_type, $event);
     }
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
@@ -502,7 +584,8 @@ _Placing.prototype.onMouseDown = function (controller) {
     var id = scope.group_id_seq();
 
     group = new models.Group(id,
-                             "Group" + id,
+                             titlecase.toTitleCase("" + scope.new_group_type + id),
+                             scope.new_group_type,
                              scope.scaledX,
                              scope.scaledY,
                              scope.scaledX,
@@ -514,12 +597,15 @@ _Placing.prototype.onMouseDown = function (controller) {
                                                         group.y1,
                                                         group.x2,
                                                         group.y2,
-                                                        group.name));
+                                                        group.name,
+                                                        group.type));
 
     scope.groups.push(group);
     scope.selected_groups.push(group);
     group.selected = true;
     group.selected_corner = models.BOTTOM_RIGHT;
+
+    controller.scope.new_group_type = null;
 
     controller.changeState(Resize);
 };

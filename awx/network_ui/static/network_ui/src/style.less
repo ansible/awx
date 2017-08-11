@@ -31,6 +31,7 @@
 @button-text-pressed: #ffffff;
 @green: #5CB85C;
 @red:  #D9534F;
+@light-toolbox-background: #f6f6f6;
 
 .NetworkUI {
     background-color: @light-background;
@@ -48,6 +49,12 @@
 }
 
 .NetworkUI--debug {
+    fill-opacity: 0;
+    stroke: @debug-copynot;
+    stroke-width: 1;
+}
+
+.NetworkUI--construction {
     fill-opacity: 0;
     stroke: @debug-copynot;
     stroke-width: 1;
@@ -227,6 +234,72 @@
     stroke: none;
 }
 
+
+.NetworkUI__rack-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__rack-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__site {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__site--network {
+    fill: @dark-widget-detail;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__site-background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.NetworkUI__site--selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.NetworkUI__site--remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.NetworkUI__site--selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.NetworkUI__site line {
+    stroke: @dark-widget-detail;
+    stroke-width: 10;
+}
+
+.NetworkUI__site circle {
+    fill: @light-widget-detail;
+    stroke: none;
+}
+
+
+.NetworkUI__site-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__site-text--selected {
+    font-family: 'Open Sans';
+}
+
 .NetworkUI__button {
     fill: @button-body;
     stroke: @button-outline;
@@ -386,6 +459,52 @@
     font-family: 'Open Sans';
 }
 
+.NetworkUI__device {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__device-background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.NetworkUI__device--selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.NetworkUI__device--remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.NetworkUI__device--selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.NetworkUI__device line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+
+.NetworkUI__device-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__device-text--selected {
+    font-family: 'Open Sans';
+}
+
 .NetworkUI__status {
     fill: @widget-body;
     stroke: @dark-widget-detail;
@@ -485,5 +604,94 @@
 
 
 .NetworkUI__group-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__location-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__toolbox {
+    stroke: none;
+    fill: @light-toolbox-background;
+}
+
+.NetworkUI__toolbox-bezel {
+    stroke: @group;
+    stroke-width: 2;
+    fill: none;
+}
+
+.NetworkUI__process {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__process-background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.NetworkUI__process--selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.NetworkUI__process--remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.NetworkUI__process--selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.NetworkUI__process path {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__process-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__process-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__stream {
+    fill: none;
+    stroke: @dark-widget-detail;
+}
+
+.NetworkUI__stream-arrow {
+    fill: @dark-widget-detail;
+    stroke: @dark-widget-detail;
+}
+
+.NetworkUI__stream--selected {
+    fill: none;
+    stroke: @selected-blue;
+    stroke-width: 6;
+}
+.NetworkUI__stream-arrow--selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+}
+
+.NetworkUI__stream-text {
+    fill: @button-text;
+    font-size: 8px;
     font-family: 'Open Sans';
 }
