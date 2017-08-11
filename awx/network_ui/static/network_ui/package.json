@@ -21,7 +21,8 @@
     "mathjs": "",
     "reconnectingwebsocket": "^1.0.0",
     "require": "",
-    "webpack": ""
+    "webpack": "",
+    "titlecase": ""
   },
   "devDependencies": {
     "eslint": "^3.17.1",
