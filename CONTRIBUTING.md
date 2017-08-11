@@ -1,5 +1,5 @@
 
-Ansible AWX
+AWX
 ===========
 
 Hi there! We're excited to have you as a contributor.
@@ -75,6 +75,8 @@ By making a contribution to this project, I certify that:
 Code of Conduct
 ===============
 
+All contributors are expected to adhere to the Ansible Community Code of Conduct: http://docs.ansible.com/ansible/latest/community/code_of_conduct.html
+
 Setting up the development environment
 ======================================
 
@@ -117,7 +119,7 @@ For `docker-compose` you may need/choose to install it seperately:
 Local Settings
 --------------
 
-In development mode (i.e. when running from a source checkout), Ansible AWX
+In development mode (i.e. when running from a source checkout), AWX
 will import the file `awx/settings/local_settings.py` and combine it with defaults in `awx/settings/defaults.py`. This file
 is required for starting the development environment and startup will fail if it's not provided
 
