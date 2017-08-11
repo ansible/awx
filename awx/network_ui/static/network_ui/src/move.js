@@ -15,6 +15,13 @@ inherits(_Ready, _State);
 var Ready = new _Ready();
 exports.Ready = Ready;
 
+function _Disable () {
+    this.name = 'Disable';
+}
+inherits(_Disable, _State);
+var Disable = new _Disable();
+exports.Disable = Disable;
+
 function _Start () {
     this.name = 'Start';
 }
@@ -66,6 +73,13 @@ function _Placing () {
 inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
+
+
+_State.prototype.onUnselectAll = function (controller, msg_type, $event) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, $event);
+};
 
 _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 
@@ -128,6 +142,47 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 };
 _Ready.prototype.onNewDevice.transitions = ['Placing'];
 
+_Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
+
+	var scope = controller.scope;
+    var device = null;
+    var intf = null;
+    var process = null;
+    var i = 0;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    device = new models.Device(controller.scope.device_id_seq(),
+                               message.device.name,
+                               scope.scaledX,
+                               scope.scaledY,
+                               message.device.type);
+    scope.devices.push(device);
+    scope.send_control_message(new messages.DeviceCreate(scope.client_id,
+                                                         device.id,
+                                                         device.x,
+                                                         device.y,
+                                                         device.name,
+                                                         device.type));
+    for (i=0; i < message.device.interfaces.length; i++) {
+        intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
+        device.interfaces.push(intf);
+    }
+    for (i=0; i < message.device.processes.length; i++) {
+        process = new models.Application(message.device.processes[i].id,
+                                         message.device.processes[i].name,
+                                         message.device.processes[i].type, 0, 0);
+        device.processes.push(process);
+    }
+    scope.selected_devices.push(device);
+    device.selected = true;
+    controller.changeState(Selected2);
+};
+_Ready.prototype.onPasteDevice.transitions = ['Selected2'];
+
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     var last_selected = controller.scope.select_items($event.shiftKey);
@@ -161,6 +216,29 @@ _Selected2.prototype.onNewDevice = function (controller, msg_type, message) {
     controller.handle_message(msg_type, message);
 };
 _Selected2.prototype.onNewDevice.transitions = ['Ready'];
+
+_Selected2.prototype.onCopySelected = function (controller) {
+
+    var devices = controller.scope.selected_devices;
+    var device_copy = null;
+    var process_copy = null;
+    var interface_copy = null;
+    var i = 0;
+    var j = 0;
+    for(i=0; i < devices.length; i++) {
+        device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type);
+        device_copy.icon = true;
+        for(j=0; j < devices[i].processes.length; j++) {
+            process_copy = new models.Application(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
+            device_copy.processes.push(process_copy);
+        }
+        for(j=0; j < devices[i].interfaces.length; j++) {
+            interface_copy = new models.Interface(devices[i].interfaces[j].id, devices[i].interfaces[j].name);
+            device_copy.interfaces.push(interface_copy);
+        }
+        controller.scope.inventory_toolbox.items.push(device_copy);
+    }
+};
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -256,7 +334,6 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
 
-
 _Selected1.prototype.onMouseMove = function (controller) {
 
     controller.changeState(Move);
@@ -276,6 +353,33 @@ _Selected1.prototype.onMouseUp.transitions = ['Selected2'];
 _Selected1.prototype.onTouchEnd = _Selected1.prototype.onMouseUp;
 
 _Selected1.prototype.onMouseDown = util.noop;
+
+_Move.prototype.start = function (controller) {
+
+    var devices = controller.scope.selected_devices;
+    var i = 0;
+    var j = 0;
+    for (i = 0; i < devices.length; i++) {
+        devices[i].moving = true;
+        for (j = 0; j < controller.scope.devices.length; j++) {
+            console.log(Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
+                        Math.pow(devices[i].y - controller.scope.devices[j].y, 2));
+            if ((Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
+                 Math.pow(devices[i].y - controller.scope.devices[j].y, 2)) < 160000) {
+                controller.scope.devices[j].moving = true;
+            }
+        }
+    }
+};
+
+_Move.prototype.end = function (controller) {
+
+    var devices = controller.scope.devices;
+    var i = 0;
+    for (i = 0; i < devices.length; i++) {
+        devices[i].moving = false;
+    }
+};
 
 _Move.prototype.onMouseMove = function (controller) {
 
@@ -313,7 +417,7 @@ _Move.prototype.onMouseMove = function (controller) {
 
     //TODO: Improve the performance of this code from O(n^2) to O(n) or better
     for (i = 0; i < groups.length; i++) {
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices, controller.scope.groups);
         controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
                                                                            groups[i].id,
                                                                            membership_old_new[2]));

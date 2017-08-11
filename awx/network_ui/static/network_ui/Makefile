@@ -28,8 +28,8 @@ istanbul:
 	cp vendor/*.js js/
 
 
-simple-server:
-	python -m SimpleHTTPServer
+simple-server: lint main lessc
+	python -m SimpleHTTPServer 8080
 
 
 deploy: main
