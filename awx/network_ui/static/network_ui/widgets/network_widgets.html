@@ -1,4 +1,4 @@
-    <div ng-controller="NetworkUIController">
+    <div ng-controller="NetworkWidgetsController">
     <svg id="frame" class="NetworkUI"
          ng-attr-height="{{graph.height}}"
          ng-attr-width="{{graph.width}}"
@@ -121,9 +121,6 @@
         <g awx-net-cursor></g>
         <g ng-repeat="touch in touches">
             <g awx-net-touch></g>
-        </g>
-        <g ng-repeat="l in current_location track by $index">
-        <text x="10" ng-attr-y="{{20 * (1 + $index)}}" text-anchor="left" class="NetworkUI__location-text">{{l}}</text>
         </g>
     </svg>
     </div>

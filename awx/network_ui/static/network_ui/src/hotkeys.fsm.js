@@ -43,9 +43,17 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
 
 	var scope = controller.scope;
 
+    if ($event.key === 'c' && ($event.ctrlKey || $event.metaKey)) {
+        scope.first_controller.handle_message("CopySelected", $event);
+    }
+
     if ($event.key === 'l') {
         scope.first_controller.handle_message("NewLink", $event);
         return;
+    }
+
+    if ($event.key === 'm') {
+        scope.first_controller.handle_message("NewStream", $event);
     }
 
     if ($event.key === 'd') {
@@ -74,13 +82,28 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
 	}
     else if ($event.key === 'a') {
-        scope.first_controller.handle_message("NewDevice", new messages.NewDevice("rack"));
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("rack"));
         return;
 	}
     else if ($event.key === 'h') {
         scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));
         return;
 	}
+    else if ($event.key === 'g') {
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));
+        return;
+	}
+    else if ($event.key === 'e') {
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));
+        return;
+	}
+    else if ($event.key === '0') {
+        scope.panX = 0;
+        scope.panY = 0;
+        scope.current_scale = 1.0;
+        scope.updateScaledXY();
+        scope.updatePanAndScale();
+    }
 
 	controller.next_controller.handle_message(msg_type, $event);
 };
