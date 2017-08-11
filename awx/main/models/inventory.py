@@ -1061,16 +1061,18 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_ec2_group_by_choices(cls):
         return [
-            ('availability_zone', _('Availability Zone')),
             ('ami_id', _('Image ID')),
+            ('availability_zone', _('Availability Zone')),
+            ('aws_account', _('Account')),
             ('instance_id', _('Instance ID')),
+            ('instance_state', _('Instance State')),
             ('instance_type', _('Instance Type')),
             ('key_pair', _('Key Name')),
             ('region', _('Region')),
             ('security_group', _('Security Group')),
             ('tag_keys', _('Tags')),
-            ('vpc_id', _('VPC ID')),
             ('tag_none', _('Tag None')),
+            ('vpc_id', _('VPC ID')),
         ]
 
     @classmethod
