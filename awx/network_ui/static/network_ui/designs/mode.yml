@@ -1,0 +1,55 @@
+finite_state_machine_id: 115
+name: fsm
+states:
+- id: 1
+  label: Start
+  x: 568
+  y: 0
+- id: 6
+  label: Interface
+  x: 340
+  y: 1053
+- id: 4
+  label: Site
+  x: 571
+  y: 500
+- id: 7
+  label: Process
+  x: 833
+  y: 1051
+- id: 2
+  label: MultiSite
+  x: 567
+  y: 236
+- id: 5
+  label: Device
+  x: 558
+  y: 821
+transitions:
+- from_state: Device
+  label: onMouseWheel
+  to_state: Process
+- from_state: MultiSite
+  label: onMouseWheel
+  to_state: Site
+- from_state: Device
+  label: onMouseWheel
+  to_state: Interface
+- from_state: Site
+  label: onMouseWheel
+  to_state: MultiSite
+- from_state: Site
+  label: onMouseWheel
+  to_state: Device
+- from_state: Interface
+  label: onMouseWheel
+  to_state: Device
+- from_state: Device
+  label: onMouseWheel
+  to_state: Site
+- from_state: Start
+  label: start
+  to_state: MultiSite
+- from_state: Process
+  label: onMouseWheel
+  to_state: Device
