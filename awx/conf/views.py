@@ -201,6 +201,7 @@ class SettingLoggingTest(GenericAPIView):
             mock_settings = MockSettings()
             for k, v in serializer.validated_data.items():
                 setattr(mock_settings, k, v)
+            mock_settings.LOG_AGGREGATOR_LEVEL = 'DEBUG'
             BaseHTTPSHandler.perform_test(mock_settings)
         except LoggingConnectivityException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
