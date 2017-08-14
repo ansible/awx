@@ -79,7 +79,6 @@ _Site.prototype.onMouseWheel = function (controller, msg_type, $event) {
     if (controller.scope.current_scale < 0.3) {
         controller.changeState(MultiSite);
     } else if (controller.scope.current_scale > 5) {
-        controller.scope.current_location.push(controller.scope.devices[0].name);
         controller.changeState(Device);
     }
 
@@ -101,14 +100,12 @@ _Process.prototype.onMouseWheel.transitions = ['Device'];
 
 _MultiSite.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
-    controller.scope.current_location = ['Earth'];
 };
 
 
 _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
     if (controller.scope.current_scale > 0.3) {
-        controller.scope.current_location.push(controller.scope.groups[0].name);
         controller.changeState(Site);
     }
 
@@ -127,7 +124,6 @@ _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
     //controller.changeState(Site);
 
     if (controller.scope.current_scale < 5) {
-        controller.scope.current_location.pop();
         controller.changeState(Site);
     }
 
