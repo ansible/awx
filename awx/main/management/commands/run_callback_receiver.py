@@ -9,6 +9,7 @@ from multiprocessing import Process
 from multiprocessing import Queue as MPQueue
 from Queue import Empty as QueueEmpty
 from Queue import Full as QueueFull
+import os
 
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
@@ -42,8 +43,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     signal.signal(signum, signal.SIG_DFL)
                     os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
                 except Exception:
-                    # TODO: LOG
-                    pass
+                    logger.exception('Error in shutdown_handler')
             return _handler
 
         if use_workers:
@@ -108,7 +108,7 @@ class CallbackBrokerWorker(ConsumerMixin):
             except QueueEmpty:
                 continue
             except Exception as e:
-                logger.error("Exception on worker thread, restarting: " + str(e))
+                logger.info("Exception on worker thread, restarting: " + str(e))
                 continue
             try:
                 if 'job_id' not in body and 'ad_hoc_command_id' not in body:
