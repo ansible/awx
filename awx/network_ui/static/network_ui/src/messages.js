@@ -267,7 +267,7 @@ function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previou
 }
 exports.GroupMove = GroupMove;
 
-function GroupCreate(sender, id, x1, y1, x2, y2, name) {
+function GroupCreate(sender, id, x1, y1, x2, y2, name, type) {
     this.msg_type = "GroupCreate";
     this.sender = sender;
     this.id = id;
@@ -276,6 +276,7 @@ function GroupCreate(sender, id, x1, y1, x2, y2, name) {
     this.x2 = x2;
     this.y2 = y2;
     this.name = name;
+    this.type = type;
 }
 exports.GroupCreate = GroupCreate;
 
