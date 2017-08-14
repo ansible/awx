@@ -914,6 +914,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _websocket_emit_status(self, status):
         try:
             status_data = dict(unified_job_id=self.id, status=status)
+            if status == 'waiting':
+                if self.instance_group:
+                    status_data['instance_group_name'] = self.instance_group.name
+                else:
+                    status_data['instance_group_name'] = None
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
             emit_channel_notification('jobs-status_changed', status_data)
