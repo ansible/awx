@@ -3,7 +3,7 @@ services:
   # Primary Tower Development Container link
   awx:
     environment:
-      EXTRA_GROUP_QUEUES: thepentagon
+      AWX_GROUP_QUEUES: tower,thepentagon
     links:
       - isolated
   # Isolated Rampart Container
