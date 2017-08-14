@@ -27,6 +27,17 @@ from awx.main.models import * # noqa
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
+class WorkerSignalHandler:
+
+    def __init__(self):
+        self.kill_now = False
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, *args, **kwargs):
+        self.kill_now = True
+
+
 class CallbackBrokerWorker(ConsumerMixin):
     def __init__(self, connection, use_workers=True):
         self.connection = connection
@@ -102,13 +113,14 @@ class CallbackBrokerWorker(ConsumerMixin):
         return None
 
     def callback_worker(self, queue_actual, idx):
-        while True:
+        signal_handler = WorkerSignalHandler()
+        while not signal_handler.kill_now:
             try:
                 body = queue_actual.get(block=True, timeout=1)
             except QueueEmpty:
                 continue
             except Exception as e:
-                logger.info("Exception on worker thread, restarting: " + str(e))
+                logger.error("Exception on worker thread, restarting: " + str(e))
                 continue
             try:
                 if 'job_id' not in body and 'ad_hoc_command_id' not in body:
