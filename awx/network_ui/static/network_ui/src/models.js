@@ -77,6 +77,9 @@ Interface.prototype.dot = function () {
     if (this.link === null || this.device === null) {
         return;
     }
+    if (this.link.to_device === null || this.link.from_device === null) {
+        return;
+    }
     var p;
     if (this.device.shape === "circular") {
 
@@ -334,6 +337,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.fsm = null;
     this.selected_corner = null;
     this.devices = [];
+    this.links = [];
 }
 exports.Group = Group;
 
