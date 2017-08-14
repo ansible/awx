@@ -674,6 +674,23 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.devices.push(device);
     };
 
+    $scope.onGroupCreate = function(data) {
+        $scope.create_group(data);
+    };
+
+    $scope.create_group = function(data) {
+        var group = new models.Group(data.id,
+                                     data.name,
+                                     data.type,
+                                     data.x1,
+                                     data.y1,
+                                     data.x2,
+                                     data.y2,
+                                     false);
+        $scope.group_id_seq = util.natural_numbers(data.id);
+        $scope.groups.push(group);
+    };
+
     $scope.forDevice = function(device_id, data, fn) {
         var i = 0;
         for (i = 0; i < $scope.devices.length; i++) {
