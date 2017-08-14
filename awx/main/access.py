@@ -613,6 +613,8 @@ class InventoryAccess(BaseAccess):
                            for o in Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="ad_hoc_command", id=o.id)
+                            for o in AdHocCommand.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
             raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})

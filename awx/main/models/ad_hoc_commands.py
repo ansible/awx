@@ -218,6 +218,8 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
             organization_groups = []
         if self.inventory is not None:
             inventory_groups = [x for x in self.inventory.instance_groups.all()]
+        else:
+            inventory_groups = []
         selected_groups = inventory_groups + organization_groups
         if not selected_groups:
             return self.global_instance_groups
