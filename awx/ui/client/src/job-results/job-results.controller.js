@@ -694,6 +694,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
+            if(_.has(data, 'instance_group_name')){
+                $scope.job.instance_group = true;
+                $scope.job.summary_fields.instance_group = {
+                    "name": data.instance_group_name
+                };
+            }
             if (data.status === "running") {
                 if (!runTimeElapsedTimer) {
                     runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
