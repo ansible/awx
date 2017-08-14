@@ -145,8 +145,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":900,"name":"Rack5","type":"rack","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":900,"name":"Host5","type":"host","message_id":mids()}],
 
-      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":800,"x2":1000,"y2":1000,"name":"Site1",type:"site", "message_id":mids()}],
-      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":-2800,"x2":1000,"y2":-3000,"name":"Site2",type:"site", "message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":-100,"y1":0,"x2":1100,"y2":1000,"name":"Site1",type:"site", "message_id":mids()}],
+
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":100,"name":"Device1","type":"device","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":300,"name":"Device2","type":"device","message_id":mids()}],
@@ -156,6 +156,12 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
       ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":22,"to_device_id":23,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":700,"name":"Device4","type":"device","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":900,"name":"Device5","type":"device","message_id":mids()}],
+
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":2900,"name":"Router6","type":"router","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":17,"id":1,"name":"eth1","message_id":mids()}],
+      ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":26,"id":1,"name":"eth1","message_id":mids()}],
+      ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":17,"to_device_id":26,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":2800,"x2":1000,"y2":3000,"name":"Site2",type:"site", "message_id":mids()}],
   ];
 
     var getMouseEventResult = function (mouseEvent) {
@@ -698,7 +704,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                                        data.x,
                                        data.y,
                                        data.type);
-        $scope.device_id_seq = util.natural_numbers(data.id);
         $scope.devices.push(device);
     };
 
@@ -715,7 +720,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                                      data.x2,
                                      data.y2,
                                      false);
-        $scope.group_id_seq = util.natural_numbers(data.id);
         $scope.groups.push(group);
     };
 
@@ -1306,6 +1310,10 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
 
     $scope.updateScaledXY();
     $scope.updatePanAndScale();
+
+    for (i=0; i < $scope.groups.length; i++) {
+        $scope.groups[i].update_membership($scope.devices);
+    }
 };
 
 exports.NetworkWidgetsController = NetworkWidgetsController;
