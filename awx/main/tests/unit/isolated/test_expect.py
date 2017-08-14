@@ -82,6 +82,26 @@ def test_error_rc():
     assert rc > 0
 
 
+def test_cancel_callback_error():
+    stdout = cStringIO.StringIO()
+
+    def bad_callback():
+        raise Exception('unique exception')
+
+    extra_fields = {}
+    status, rc = run.run_pexpect(
+        ['ls', '-la'],
+        HERE,
+        {},
+        stdout,
+        cancelled_callback=bad_callback,
+        extra_update_fields=extra_fields
+    )
+    assert status == 'error'
+    assert rc == 0
+    assert extra_fields['job_explanation'] == "System error during job execution, check system logs"
+
+
 def test_env_vars():
     stdout = cStringIO.StringIO()
     status, rc = run.run_pexpect(
