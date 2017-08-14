@@ -11,6 +11,7 @@ def filter_insights_api_response(json):
     'reports.[].rule.category',
     'reports.[].rule.summary',
     'reports.[].rule.ansible_fix',
+    'reports.[].rule.ansible',
     'reports.[].maintenance_actions.[].maintenance_plan.name',
     'reports.[].maintenance_actions.[].maintenance_plan.maintenance_id',
     '''
@@ -25,7 +26,7 @@ def filter_insights_api_response(json):
                 'maintenance_actions': []
             }
             if 'rule' in rep:
-                for k in ['severity', 'description', 'category', 'summary', 'ansible_fix',]:
+                for k in ['severity', 'description', 'category', 'summary', 'ansible_fix', 'ansible',]:
                     if k in rep['rule']:
                         new_report['rule'][k] = rep['rule'][k]
 
