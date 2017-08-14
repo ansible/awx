@@ -81,6 +81,14 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));
         return;
 	}
+    else if ($event.key === 'g') {
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));
+        return;
+	}
+    else if ($event.key === 'e') {
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));
+        return;
+	}
     else if ($event.key === '0') {
         scope.panX = 0;
         scope.panY = 0;

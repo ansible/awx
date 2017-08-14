@@ -227,6 +227,16 @@
     stroke: none;
 }
 
+
+.NetworkUI__rack-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__rack-text--selected {
+    font-family: 'Open Sans';
+}
+
 .NetworkUI__button {
     fill: @button-body;
     stroke: @button-outline;
@@ -383,6 +393,52 @@
 
 
 .NetworkUI__host-text--selected {
+    font-family: 'Open Sans';
+}
+
+.NetworkUI__device {
+    fill: @widget-body;
+    stroke: @dark-widget-detail;
+    stroke-width: 2;
+}
+
+.NetworkUI__device-background {
+    fill: @light-background;
+    stroke: @light-background;
+    stroke-width: 2;
+}
+
+.NetworkUI__device--selected {
+    fill: @selected-blue;
+    stroke: @selected-blue;
+    stroke-width: 10;
+}
+
+.NetworkUI__device--remote-selected {
+    fill: @selected-mango;
+    stroke: @selected-mango;
+    stroke-width: 10;
+}
+
+.NetworkUI__device--selected-conflict {
+    fill: @selected-red;
+    stroke: @selected-red;
+    stroke-width: 10;
+}
+
+.NetworkUI__device line {
+    stroke: @light-widget-detail;
+    stroke-width: 20;
+}
+
+
+.NetworkUI__device-text {
+    fill: @button-text;
+    font-family: 'Open Sans';
+}
+
+
+.NetworkUI__device-text--selected {
     font-family: 'Open Sans';
 }
 

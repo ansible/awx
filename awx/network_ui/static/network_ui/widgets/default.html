@@ -1,36 +1,40 @@
 
-            
+
+                    <g ng-if="!debug.hidden">
                      <line ng-attr-x1="{{-50 - 10}}"
                            ng-attr-y1="0"
                            ng-attr-x2="{{50 + 10}}"
                            ng-attr-y2="0"
-                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                           class="NetworkUI--debug"></rect>
                      <line ng-attr-x1="0"
                            ng-attr-y1="{{-50 - 10}}"
                            ng-attr-x2="0"
                            ng-attr-y2="{{50 + 10}}"
-                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                           class="NetworkUI--debug"></rect>
                      <rect ng-attr-x="{{-50}}"
                            ng-attr-y="{{-50}}"
                            ng-attr-width="{{50 * 2}}"
                            ng-attr-height="{{50 * 2}}"
-                           ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug" />
+                           class="NetworkUI--debug"></rect>
+                    </g>
+                    <g class="NetworkUI__device">
                     <circle
                         cx="0"
                         cy="0"
                         ng-attr-r="{{50 + 2}}"
-                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'selected-conflict' : device.selected ? 'selected' : 'remote-selected' : 'hidden'}}">
+                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'NetworkUI__device--selected-conflict' : device.selected ? 'NetworkUI__device--selected' : 'NetworkUI__device--remote-selected' : 'NetworkUI--hidden'}}">
                     </circle>
                     <circle
                         cx="0"
                         cy="0"
                         ng-attr-r="{{50}}">
                     </circle>
+                    </g>
                     <g ng-show="current_scale > 0.5">
-                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'selected' : 'hidden'}}"
+                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__device-text--selected' : 'NetworkUI--hidden'}}"
 						  filter="url(#selected)"
                           text-anchor="middle"
 						  x="0"
-						  y="75"> {{device.name}} </text>
-                    <text text-anchor="middle" x="0" y="75">{{device.name}}{{device.edit_label?'_':''}}</text>
+						  y="0"> {{device.name}} </text>
+                    <text class="NetworkUI__device-text" text-anchor="middle" x="0" y="0">{{device.name}}{{device.edit_label?'_':''}}</text>
                     </g>
