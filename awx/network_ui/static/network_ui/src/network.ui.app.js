@@ -10,6 +10,7 @@ var host = require('./host.directive.js');
 var link = require('./link.directive.js');
 var rack = require('./rack.directive.js');
 var group = require('./group.directive.js');
+var site = require('./site.directive.js');
 var map = require('./map.directive.js');
 var deviceDetail = require('./device.detail.directive.js');
 var defaultd = require('./default.directive.js');
@@ -36,6 +37,7 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetLink', link.link)
     .directive('awxNetRack', rack.rack)
     .directive('awxNetGroup', group.group)
+    .directive('awxNetSite', site.site)
     .directive('awxNetMap', map.map)
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
     .directive('awxNetDefault', defaultd.defaultd)

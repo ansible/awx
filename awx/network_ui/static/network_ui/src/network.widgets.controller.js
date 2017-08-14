@@ -146,6 +146,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":900,"name":"Host5","type":"host","message_id":mids()}],
 
       ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":800,"x2":1000,"y2":1000,"name":"Site1",type:"site", "message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":-2800,"x2":1000,"y2":-3000,"name":"Site2",type:"site", "message_id":mids()}],
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":100,"name":"Device1","type":"device","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":300,"name":"Device2","type":"device","message_id":mids()}],
