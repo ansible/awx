@@ -185,17 +185,6 @@ class TaskManager():
         error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
         success_handler = handle_work_success.s(task_actual=task_actual)
 
-        '''
-        This is to account for when there isn't enough capacity to execute all
-        dependent jobs (i.e. proj or inv update) within the same schedule() 
-        call.
-        
-        Proceeding calls to schedule() need to recontruct the proj or inv
-        update -> job fail logic dependency. The below call recontructs that
-        failure dependency.
-        '''
-        if len(dependencies) == 0:
-            dependencies = self.get_dependent_jobs_for_inv_and_proj_update(task)
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
