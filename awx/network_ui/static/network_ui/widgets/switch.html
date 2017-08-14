@@ -54,7 +54,7 @@
                           ng-attr-y2="-14"/>
                     <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate(28, -6) scale(2.0)"/>
                     </g>
-                    <g ng-show="current_scale > 0.5">
+                    <g ng-show="device.icon || current_scale > 0.5">
                     <text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__switch-text--selected' : 'NetworkUI--hidden'}}"
                           filter="url(#selected)"
                           text-anchor="middle"

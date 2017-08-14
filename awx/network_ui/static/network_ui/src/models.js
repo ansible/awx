@@ -17,6 +17,7 @@ function Device(id, name, x, y, type) {
     this.edit_label = false;
     this.status = null;
     this.working = false;
+    this.icon = false;
     this.tasks = [];
     this.shape = type === "router" ? "circular" : "rectangular";
     this.interface_seq = util.natural_numbers(0);
@@ -518,3 +519,19 @@ Group.prototype.update_membership = function (devices) {
     }
     return [old_devices, this.devices, device_ids];
 };
+
+
+function ToolBox(id, name, type, x, y, width, height) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.items = [];
+    this.spacing = 200;
+    this.scroll_offset = 0;
+    this.selected_item = null;
+}
+exports.ToolBox = ToolBox;

@@ -22,6 +22,13 @@
 		  <feFlood flood-color="#ffffff"/>
 		  <feComposite in="SourceGraphic" operator="xor"/>
 		</filter>
+		<clipPath id="inventory-toolbox-clip-path">
+        <rect ng-attr-x="{{toolbox.x}}"
+              ng-attr-y="{{toolbox.y}}"
+              ng-attr-width="{{toolbox.width}}"
+              ng-attr-height="{{toolbox.height}}"
+              rx=5></rect>
+		</clipPath>
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
             <g ng-if="!hide_links">
@@ -81,6 +88,7 @@
             <g awx-net-quadrants>
             </g>
         </g>
+        <g awx-net-inventory-toolbox></g>
         <g ng-if="!hide_buttons">
             <g> <!-- buttons -->
                 <g ng-repeat="button in buttons"

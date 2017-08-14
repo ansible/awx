@@ -7,6 +7,7 @@ var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
 var mode_fsm = require('./mode.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
+var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
 var link = require('./link.js');
@@ -21,6 +22,7 @@ var svg_crowbar = require('./svg-crowbar.js');
 var NetworkWidgetsController = function($scope, $document, $location, $window) {
 
   window.scope = $scope;
+  var i = 0;
 
   $scope.topology_id = 0;
 
@@ -64,7 +66,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
-  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.time_controller);
+  $scope.toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
+  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.toolbox_controller);
   $scope.first_controller = $scope.mode_controller;
   $scope.last_key = "";
   $scope.last_key_code = null;
@@ -97,6 +100,28 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                       'y': 0,
                       'width': 0,
                       'height': 0};
+  $scope.toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
+
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Switch', 0, 0, 'switch'));
+  $scope.toolbox.items.push(new models.Device(0, 'Rack', 0, 0, 'rack'));
+  $scope.toolbox.items.push(new models.Device(0, 'Host', 0, 0, 'host'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
+  $scope.toolbox.spacing = 150;
+  $scope.toolbox_controller.toolbox = $scope.toolbox;
+
+  for(i = 0; i < $scope.toolbox.items.length; i++) {
+      $scope.toolbox.items[i].icon = true;
+  }
 
   var dids = $scope.device_id_seq;
   var mids = $scope.message_id_seq;
@@ -1302,7 +1327,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
         }
     };
 
-    var i = 0;
     for (i =0; i < $scope.initial_messages.length; i++) {
         console.log(['Inital message',  $scope.initial_messages[i]]);
         $scope.first_controller.handle_message($scope.initial_messages[i][0], $scope.initial_messages[i][1]);
