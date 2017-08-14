@@ -8,6 +8,7 @@ from django.utils.timezone import now as tz_now
 from awx.main.scheduler import TaskManager
 from awx.main.models import (
     Job,
+    Instance,
 )
 
 
@@ -223,21 +224,33 @@ class TestReaper():
     def all_jobs(self, mocker):
         now = tz_now()
 
+        Instance.objects.create(hostname='host1', capacity=100)
+        Instance.objects.create(hostname='host2', capacity=100)
+        Instance.objects.create(hostname='host3_split', capacity=100)
+        Instance.objects.create(hostname='host4_offline', capacity=0)
+
         j1 = Job.objects.create(status='pending', execution_node='host1')
         j2 = Job.objects.create(status='waiting', celery_task_id='considered_j2', execution_node='host1')
         j3 = Job.objects.create(status='waiting', celery_task_id='considered_j3', execution_node='host1')
         j3.modified = now - timedelta(seconds=60)
         j3.save(update_fields=['modified'])
         j4 = Job.objects.create(status='running', celery_task_id='considered_j4', execution_node='host1')
-        j5 = Job.objects.create(status='waiting', celery_task_id='reapable_j5', execution_node='host2')
+        j5 = Job.objects.create(status='waiting', celery_task_id='reapable_j5', execution_node='host1')
         j5.modified = now - timedelta(seconds=60)
         j5.save(update_fields=['modified'])
-        j6 = Job.objects.create(status='waiting', celery_task_id='host2_j6', execution_node='host2_split')
+        j6 = Job.objects.create(status='waiting', celery_task_id='considered_j6', execution_node='host2')
         j6.modified = now - timedelta(seconds=60)
         j6.save(update_fields=['modified'])
-        j7 = Job.objects.create(status='running', celery_task_id='host2_j6', execution_node='host2_split')
+        j7 = Job.objects.create(status='running', celery_task_id='considered_j7', execution_node='host2')
+        j8 = Job.objects.create(status='running', celery_task_id='reapable_j7', execution_node='host2')
+        j9 = Job.objects.create(status='waiting', celery_task_id='host3_j8', execution_node='host3_split')
+        j9.modified = now - timedelta(seconds=60)
+        j9.save(update_fields=['modified'])
+        j10 = Job.objects.create(status='running', execution_node='host3_split')
 
-        js = [j1, j2, j3, j4, j5, j6, j7]
+        j11 = Job.objects.create(status='running', celery_task_id='host4_j11', execution_node='host4_offline')
+
+        js = [j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11]
         for j in js:
             j.save = mocker.Mock(wraps=j.save)
             j.websocket_emit_status = mocker.Mock()
@@ -245,11 +258,20 @@ class TestReaper():
 
     @pytest.fixture
     def considered_jobs(self, all_jobs):
-        return all_jobs[2:4] + [all_jobs[4]]
+        return all_jobs[2:7] + [all_jobs[10]]
+
+    @pytest.fixture
+    def running_tasks(self, all_jobs):
+        return {
+            'host1': all_jobs[2:5],
+            'host2': all_jobs[5:8],
+            'host3_split': all_jobs[8:10],
+            'host4_offline': [all_jobs[10]],
+        }
 
     @pytest.fixture
     def reapable_jobs(self, all_jobs):
-        return [all_jobs[4]]
+        return [all_jobs[4], all_jobs[7], all_jobs[10]]
 
     @pytest.fixture
     def unconsidered_jobs(self, all_jobs):
@@ -259,16 +281,16 @@ class TestReaper():
     def active_tasks(self):
         return ([], {
             'host1': ['considered_j2', 'considered_j3', 'considered_j4',],
-            'host2_split': ['host2_j6', 'host2_j7'],
+            'host2': ['considered_j6', 'considered_j7'],
         })
 
     @pytest.mark.django_db
     @mock.patch('awx.main.tasks._send_notification_templates')
     @mock.patch.object(TaskManager, 'get_active_tasks', lambda self: ([], []))
-    def test_cleanup_inconsistent_task(self, notify, active_tasks, considered_jobs, reapable_jobs, mocker):
+    def test_cleanup_inconsistent_task(self, notify, active_tasks, considered_jobs, reapable_jobs, running_tasks, mocker):
         tm = TaskManager()
 
-        #tm.get_running_tasks = mocker.Mock(return_value=considered_jobs)
+        tm.get_running_tasks = mocker.Mock(return_value=running_tasks)
         tm.get_active_tasks = mocker.Mock(return_value=active_tasks)
         
         tm.cleanup_inconsistent_celery_tasks()
@@ -277,14 +299,15 @@ class TestReaper():
             if j not in reapable_jobs:
                 j.save.assert_not_called()
 
-        for reaped_job in reapable_jobs:
-            notify.assert_called_once_with(reaped_job, 'failed')
-            reaped_job.websocket_emit_status.assert_called_once_with('failed')
-            assert reaped_job.status == 'failed'
-            assert reaped_job.job_explanation == (
+        assert notify.call_count == 3
+        notify.assert_has_calls([mock.call(j, 'failed') for j in reapable_jobs], any_order=True)
+
+        for j in reapable_jobs:
+            j.websocket_emit_status.assert_called_once_with('failed')
+            assert j.status == 'failed'
+            assert j.job_explanation == (
                 'Task was marked as running in Tower but was not present in Celery, so it has been marked as failed.'
             )
-
 
     @pytest.mark.django_db
     def test_get_running_tasks(self, all_jobs):
@@ -293,13 +316,18 @@ class TestReaper():
         # Ensure the query grabs the expected jobs
         execution_nodes_jobs = tm.get_running_tasks()
         assert 'host1' in execution_nodes_jobs
-        assert 'host2_split' in execution_nodes_jobs
+        assert 'host2' in execution_nodes_jobs
+        assert 'host3_split' in execution_nodes_jobs
 
-
-        assert all_jobs[1] in execution_nodes_jobs['host1']
         assert all_jobs[2] in execution_nodes_jobs['host1']
         assert all_jobs[3] in execution_nodes_jobs['host1']
         assert all_jobs[4] in execution_nodes_jobs['host1']
-        assert all_jobs[5] in execution_nodes_jobs['host2_split']
-        assert all_jobs[6] in execution_nodes_jobs['host2_split']
 
+        assert all_jobs[5] in execution_nodes_jobs['host2']
+        assert all_jobs[6] in execution_nodes_jobs['host2']
+        assert all_jobs[7] in execution_nodes_jobs['host2']
+        
+        assert all_jobs[8] in execution_nodes_jobs['host3_split']
+        assert all_jobs[9] in execution_nodes_jobs['host3_split']
+
+        assert all_jobs[10] in execution_nodes_jobs['host4_offline']
