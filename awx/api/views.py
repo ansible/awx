@@ -2773,7 +2773,9 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             if fd not in request.data and id_fd in request.data:
                 request.data[fd] = request.data[id_fd]
 
-        if get_request_version(self.request) == 1:  # TODO: remove in 3.3
+        if get_request_version(self.request) == 1 and 'extra_credentials' in request.data:  # TODO: remove in 3.3
+            if hasattr(request.data, '_mutable') and not request.data._mutable:
+                request.data._mutable = True
             extra_creds = request.data.pop('extra_credentials', None)
             if extra_creds is not None:
                 ignored_fields['extra_credentials'] = extra_creds
