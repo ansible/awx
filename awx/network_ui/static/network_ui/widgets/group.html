@@ -72,15 +72,7 @@
 <text class="NetworkUI__group-text" text-anchor="left" x="20" y="32">{{group.name}}{{group.edit_label?'_':''}}</text>
 </g>
 
-<g ng-if="current_scale <= 0.3" ng-attr-transform="scale({{1/current_scale}})">
-
-<text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
-      text-anchor="left"
-      ng-attr-x="20"
-      ng-attr-y="32"> {{group.name}} </text>
-<text class="NetworkUI__group-text"  text-anchor="left" x="20" y="32">{{group.name}}{{group.edit_label?'_':''}}</text>
-</g>
+<g awx-net-site></g>
 </g>
 </g>
 

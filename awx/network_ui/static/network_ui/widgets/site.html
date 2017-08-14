@@ -1,0 +1,77 @@
+
+<g ng-if="current_scale <= 0.3 && group.type == 'site'" ng-attr-transform="translate({{group.width()/2}}, {{group.height()/2}})">
+<g ng-attr-transform="scale({{1/(current_scale*2)}})">
+
+                     <g ng-if="!debug.hidden">
+                    <line ng-attr-x1="{{-50 - 10}}"
+                           ng-attr-y1="0"
+                           ng-attr-x2="{{50 + 10}}"
+                           ng-attr-y2="0"
+                           class="NetworkUI--debug"></line>
+                     <line ng-attr-x1="0"
+                           ng-attr-y1="{{-50 - 10}}"
+                           ng-attr-x2="0"
+                           ng-attr-y2="{{50 + 10}}"
+                           class="NetworkUI--debug"></line>
+                     <rect ng-attr-x="{{-50}}"
+                           ng-attr-y="{{-50}}"
+                           ng-attr-width="{{50 * 2}}"
+                           ng-attr-height="{{50 * 2}}"
+                           class="NetworkUI--debug"></rect>
+                     </g>
+                    <rect
+                        x="-52"
+                        y="-52"
+                        ng-attr-width="{{100 + 4}}"
+                        ng-attr-height="{{100 + 4}}"
+                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'NetworkUI__site--selected-conflict' : device.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
+                        rx=10>
+                    </rect>
+                    <g class="NetworkUI__site">
+                    <rect
+                        x="-50"
+                        y="-50"
+                        ng-attr-width="{{100}}"
+                        ng-attr-height="{{100}}"
+                        rx=10
+                        class="NetworkUI__site-background">
+                    </rect>
+                    <rect class="NetworkUI__site--network" x=-42 y=60 width="80" height="10" rx=5 />
+                    <rect class="NetworkUI__site--network" x=-42 y=30 width="10" height="40" rx=5 />
+                    <rect class="NetworkUI__site--network" x=-5 y=30 width="10" height="40" rx=5 />
+                    <rect class="NetworkUI__site--network" x=32 y=30 width="10" height="40" rx=5 />
+                    <rect
+                        x="-50"
+                        y="-40"
+                        ng-attr-width="{{25}}"
+                        ng-attr-height="{{80}}"
+                        rx=10>
+                    </rect>
+                    <rect
+                        x="-20"
+                        y="-50"
+                        ng-attr-width="{{40}}"
+                        ng-attr-height="{{100}}"
+                        rx=10>
+                    </rect>
+                    <rect
+                        x="25"
+                        y="-40"
+                        ng-attr-width="{{25}}"
+                        ng-attr-height="{{80}}"
+                        rx=10>
+                    </rect>
+                    <circle cy="20" cx="-37" r=7 />
+                    <circle cy="25" cx="0" r=10 />
+                    <circle cy="20" cx="37" r=7 />
+                    </g>
+</g>
+<g ng-attr-transform="scale({{1/current_scale}})">
+<text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+      filter="url(#selected)"
+      text-anchor="middle"
+      ng-attr-x="0"
+      ng-attr-y="50"> {{group.name}} </text>
+<text class="NetworkUI__group-text"  text-anchor="middle" x="0" y="50">{{group.name}}{{group.edit_label?'_':''}}</text>
+</g>
+</g>
