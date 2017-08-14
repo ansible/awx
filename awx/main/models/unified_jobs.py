@@ -912,14 +912,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return websocket_data
 
     def _websocket_emit_status(self, status):
-        status_data = dict(unified_job_id=self.id, status=status)
-        status_data.update(self.websocket_emit_data())
-        status_data['group_name'] = 'jobs'
-        emit_channel_notification('jobs-status_changed', status_data)
+        try:
+            status_data = dict(unified_job_id=self.id, status=status)
+            status_data.update(self.websocket_emit_data())
+            status_data['group_name'] = 'jobs'
+            emit_channel_notification('jobs-status_changed', status_data)
 
-        if self.spawned_by_workflow:
-            status_data['group_name'] = "workflow_events"
-            emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+            if self.spawned_by_workflow:
+                status_data['group_name'] = "workflow_events"
+                emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+        except IOError:  # includes socket errors
+            logger.exception('%s failed to emit channel msg about status change', self.log_format)
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: self._websocket_emit_status(status))
