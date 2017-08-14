@@ -517,7 +517,8 @@ _Placing.prototype.onMouseDown = function (controller) {
                                                         group.y1,
                                                         group.x2,
                                                         group.y2,
-                                                        group.name));
+                                                        group.name,
+                                                        group.type));
 
     scope.groups.push(group);
     scope.selected_groups.push(group);
