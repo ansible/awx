@@ -1,0 +1,70 @@
+
+<rect class="NetworkUI__toolbox"
+      ng-attr-x="{{toolbox.x}}"
+      ng-attr-y="{{toolbox.y}}"
+      ng-attr-width="{{toolbox.width}}"
+      ng-attr-height="{{toolbox.height}}"
+      rx=5></rect>
+<g clip-path="url(#inventory-toolbox-clip-path)">
+<g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y}})">
+<g ng-repeat="device in toolbox.items track by $index"
+   ng-attr-transform="translate({{toolbox.width/2}},{{$index * toolbox.spacing + toolbox.spacing/2 + toolbox.scroll_offset}})"
+   ng-attr-class="{{device.type}}"
+   ng-switch on="device.type">
+   <g ng-switch-when="router"><!-- begin router -->
+       <g awx-net-router></g>
+   </g> <!-- end router -->
+
+   <g ng-switch-when="switch"> <!-- begin switch -->
+       <g awx-net-switch> </g>
+   </g> <!-- end switch -->
+
+   <g ng-switch-when="host"> <!-- begin host -->
+        <g awx-net-host> </g>
+
+   </g> <!-- end host -->
+
+   <g ng-switch-when="rack"> <!-- begin rack -->
+        <g awx-net-rack> </g>
+   </g> <!-- end rack -->
+
+   <g ng-switch-default> <!-- begin default -->
+        <g awx-net-default></g>
+   </g> <!-- end default -->
+</g> <!-- end devices -->
+</g> <!-- end transform -->
+</g> <!-- end clip path -->
+<rect class="NetworkUI__toolbox-bezel"
+      ng-attr-x="{{toolbox.x}}"
+      ng-attr-y="{{toolbox.y}}"
+      ng-attr-width="{{toolbox.width}}"
+      ng-attr-height="{{toolbox.height}}"
+      rx=5></rect>
+<!-- selected item-->
+<g ng-if="toolbox.selected_item != null">
+<g ng-repeat="device in [toolbox.selected_item]"
+   ng-attr-transform="translate({{device.x}}, {{device.y}})"
+   ng-attr-class="{{device.type}}"
+   ng-switch on="device.type">
+   <g ng-switch-when="router"><!-- begin router -->
+       <g awx-net-router></g>
+   </g> <!-- end router -->
+
+   <g ng-switch-when="switch"> <!-- begin switch -->
+       <g awx-net-switch> </g>
+   </g> <!-- end switch -->
+
+   <g ng-switch-when="host"> <!-- begin host -->
+        <g awx-net-host> </g>
+
+   </g> <!-- end host -->
+
+   <g ng-switch-when="rack"> <!-- begin rack -->
+        <g awx-net-rack> </g>
+   </g> <!-- end rack -->
+
+   <g ng-switch-default> <!-- begin default -->
+        <g awx-net-default></g>
+   </g> <!-- end default -->
+</g> <!-- end selected item -->
+</g> <!-- ng-if -->

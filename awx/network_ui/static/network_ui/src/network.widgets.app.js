@@ -18,6 +18,8 @@ var quadrants = require('./quadrants.directive.js');
 var stencil = require('./stencil.directive.js');
 var layer = require('./layer.directive.js');
 var button = require('./button.directive.js');
+var inventoryToolbox = require('./inventory.toolbox.directive.js');
+var inventoryToolboxClipPath = require('./inventory.toolbox.clip.path.directive.js');
 var statusLight = require('./status.light.directive.js');
 var taskStatus = require('./task.status.directive.js');
 var debug = require('./debug.directive.js');
@@ -45,6 +47,8 @@ var networkWidgets = angular.module('networkWidgets', [
     .directive('awxNetStencil', stencil.stencil)
     .directive('awxNetLayer', layer.layer)
     .directive('awxNetButton', button.button)
+    .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
+    .directive('awxNetInventoryToolboxClipPath', inventoryToolboxClipPath.inventoryToolboxClipPath)
     .directive('awxNetStatusLight', statusLight.statusLight)
     .directive('awxNetTaskStatus', taskStatus.taskStatus)
     .directive('awxNetworkWidgets', awxNetworkWidgets.awxNetworkWidgets);

@@ -31,6 +31,7 @@
 @button-text-pressed: #ffffff;
 @green: #5CB85C;
 @red:  #D9534F;
+@light-toolbox-background: #f6f6f6;
 
 .NetworkUI {
     background-color: @light-background;
@@ -603,4 +604,16 @@
 .NetworkUI__location-text {
     fill: @button-text;
     font-family: 'Open Sans';
+}
+
+
+.NetworkUI__toolbox {
+    stroke: none;
+    fill: @light-toolbox-background;
+}
+
+.NetworkUI__toolbox-bezel {
+    stroke: @group;
+    stroke-width: 2;
+    fill: none;
 }

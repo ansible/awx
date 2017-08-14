@@ -36,7 +36,7 @@
                     <circle cx="30" cy="0" r=7 />
                     </circle>
                     </g>
-                    <g ng-show="current_scale > 0.5">
+                    <g ng-show="device.icon || current_scale > 0.5">
                     <text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__host-text--selected' : 'NetworkUI--hidden'}}"
 						  filter="url(#selected)"
                           text-anchor="middle"
