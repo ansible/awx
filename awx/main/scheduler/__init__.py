@@ -10,7 +10,7 @@ from sets import Set
 # Django
 from django.conf import settings
 from django.core.cache import cache
-from django.db import transaction, connection
+from django.db import transaction, connection, DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now, utc
 from django.db.models import Q
@@ -69,14 +69,43 @@ class TaskManager():
 
     '''
     Tasks that are running and SHOULD have a celery task.
+    {
+        'execution_node': [j1, j2,...],
+        'execution_node': [j3],
+        ...
+    }
     '''
     def get_running_tasks(self):
+        execution_nodes = {}
         now = tz_now()
-        return list(UnifiedJob.objects.filter(Q(status='running') |
-                                              (Q(status='waiting', modified__lte=now - timedelta(seconds=60)))))
+        jobs = UnifiedJob.objects.filter(Q(status='running') |
+                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60)))
+        [execution_nodes.setdefault(j.execution_node, [j]).append(j) for j in jobs]
+        return execution_nodes
 
     '''
     Tasks that are currently running in celery
+
+    Transform:
+    {
+        "celery@ec2-54-204-222-62.compute-1.amazonaws.com": [],
+        "celery@ec2-54-163-144-168.compute-1.amazonaws.com": [{
+            ...
+            "id": "5238466a-f8c7-43b3-9180-5b78e9da8304",
+            ...
+        }, {
+            ...,
+        }, ...]
+    }
+
+    to:
+    {
+        "ec2-54-204-222-62.compute-1.amazonaws.com": [
+            "5238466a-f8c7-43b3-9180-5b78e9da8304",
+            "5238466a-f8c7-43b3-9180-5b78e9da8306",
+            ...
+        ]
+    }
     '''
     def get_active_tasks(self):
         inspector = inspect()
@@ -86,15 +115,23 @@ class TaskManager():
             logger.warn("Ignoring celery task inspector")
             active_task_queues = None
 
-        active_tasks = set()
+        queues = None
+
         if active_task_queues is not None:
+            queues = {}
             for queue in active_task_queues:
+                active_tasks = set()
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
+
+            # celery worker name is of the form celery@myhost.com
+            queue_name = queue.split('@')
+            queue_name = queue_name[1 if len(queue_name) > 1 else 0]
+            queues[queue_name] = active_tasks
         else:
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return (None, None)
 
-        return (active_task_queues, active_tasks)
+        return (active_task_queues, queues)
 
     def get_latest_project_update_tasks(self, all_sorted_tasks):
         project_ids = Set()
@@ -380,32 +417,55 @@ class TaskManager():
 
         logger.debug("Failing inconsistent running jobs.")
         celery_task_start_time = tz_now()
-        active_task_queues, active_tasks = self.get_active_tasks()
+        active_task_queues, active_queues = self.get_active_tasks()
         cache.set('last_celery_task_cleanup', tz_now())
 
-        if active_tasks is None:
+        if active_queues is None:
             logger.error('Failed to retrieve active tasks from celery')
             return None
 
-        all_running_sorted_tasks = self.get_running_tasks()
-        for task in all_running_sorted_tasks:
-
-            if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-                # TODO: try catch the getting of the job. The job COULD have been deleted
-                if isinstance(task, WorkflowJob):
-                    continue
-                if task.modified > celery_task_start_time:
-                    continue
-                task.status = 'failed'
-                task.job_explanation += ' '.join((
-                    'Task was marked as running in Tower but was not present in',
-                    'Celery, so it has been marked as failed.',
-                ))
-                task.save()
-                awx_tasks._send_notification_templates(task, 'failed')
-                task.websocket_emit_status('failed')
-                logger.error("%s appears orphaned... marking as failed", task.log_format)
-
+        '''
+        Only consider failing tasks on instances for which we obtained a task 
+        list from celery for.
+        '''
+        running_tasks = self.get_running_tasks()
+        for node, node_jobs in running_tasks.iteritems():
+            if node in active_queues:
+                active_tasks = active_queues[node]
+            else:
+                '''
+                Node task list not found in celery. If tower thinks the node is down
+                then fail all the jobs on the node.
+                '''
+                try:
+                    instance = Instance.objects.get(hostname=node)
+                    if instance.capacity == 0:
+                        active_tasks = []
+                    else:
+                        continue
+                except Instance.DoesNotExist:
+                    logger.error("Execution node Instance {} not found in database. "
+                                 "The node is currently executing jobs {}".format(node, [str(j) for j in node_jobs]))
+                    active_tasks = []
+            for task in node_jobs:
+                if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
+                    if isinstance(task, WorkflowJob):
+                        continue
+                    if task.modified > celery_task_start_time:
+                        continue
+                    task.status = 'failed'
+                    task.job_explanation += ' '.join((
+                        'Task was marked as running in Tower but was not present in',
+                        'Celery, so it has been marked as failed.',
+                    ))
+                    try:
+                        task.save(update_fields=['status', 'job_explanation'])
+                    except DatabaseError:
+                        logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
+                        continue
+                    awx_tasks._send_notification_templates(task, 'failed')
+                    task.websocket_emit_status('failed')
+                    logger.error("Task {} has no record in celery. Marking as failed".format(task.log_format))
 
     def calculate_capacity_used(self, tasks):
         for rampart_group in self.graph:
