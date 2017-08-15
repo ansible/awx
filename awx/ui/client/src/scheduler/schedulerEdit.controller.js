@@ -93,15 +93,24 @@ function($filter, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, 
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
         $scope.$on('ScheduleFound', function(){
-            let readOnly = !$scope.schedule_obj.summary_fields.user_capabilities
-                .edit;
-            ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
-                parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars',
-                readOnly: readOnly
-            });
+            if ($state.current.name === 'projectSchedules.edit'){
+                $scope.noVars = true;
+            }
+            else if ($state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit'){
+                $scope.noVars = true;
+            }
+            else {
+                let readOnly = !$scope.schedule_obj.summary_fields.user_capabilities
+                    .edit;
+                ParseTypeChange({
+                    scope: $scope,
+                    variable: 'extraVars',
+                    parse_variable: 'parseType',
+                    field_id: 'SchedulerForm-extraVars',
+                    readOnly: readOnly
+                });
+            }
+
         });
     }
 
