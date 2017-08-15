@@ -164,7 +164,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                 },
                 hosts: {
                     name: 'hosts',
-                    awToolTip: i18n._('Please save before creating hosts.'),
+                    awToolTip: i18n._('Please save before viewing hosts.'),
                     dataPlacement: 'top',
                     include: "RelatedHostsListDefinition",
                     title: i18n._('Hosts'),
