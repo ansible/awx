@@ -72,7 +72,7 @@ export default
                             $scope.playbook_options = [$scope.playbook];
                         }
 
-                        if (!Empty($scope.project)) {
+                        if (!Empty($scope.project) && $scope.job_template_obj.summary_fields.user_capabilities.edit) {
                             let promises = [];
                             url = GetBasePath('projects') + $scope.project + '/playbooks/';
                             Wait('start');
