@@ -304,7 +304,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 }).each(wrap);
 
                             thisNode.append("foreignObject")
-                                 .attr("x", 43)
+                                 .attr("x", 54)
                                  .attr("y", 45)
                                  .style("font-size","0.7em")
                                  .attr("class", "WorkflowChart-conflictText")
