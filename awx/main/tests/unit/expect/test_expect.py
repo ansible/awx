@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from awx.main.isolated import run, isolated_manager
+from awx.main.expect import run, isolated_manager
 
 from django.conf import settings
 
@@ -273,7 +273,7 @@ def test_check_isolated_job(private_data_dir, rsa_key):
     mgr.host = 'isolated-host'
 
     os.mkdir(os.path.join(private_data_dir, 'artifacts'))
-    with mock.patch('awx.main.isolated.run.run_pexpect') as run_pexpect:
+    with mock.patch('awx.main.expect.run.run_pexpect') as run_pexpect:
 
         def _synchronize_job_artifacts(args, cwd, env, buff, **kw):
             buff.write('checking job status...')
@@ -325,7 +325,7 @@ def test_check_isolated_job_timeout(private_data_dir, rsa_key):
     mgr.started_at = time.time()
     mgr.host = 'isolated-host'
 
-    with mock.patch('awx.main.isolated.run.run_pexpect') as run_pexpect:
+    with mock.patch('awx.main.expect.run.run_pexpect') as run_pexpect:
 
         def _synchronize_job_artifacts(args, cwd, env, buff, **kw):
             buff.write('checking job status...')
