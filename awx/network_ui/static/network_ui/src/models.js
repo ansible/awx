@@ -533,5 +533,6 @@ function ToolBox(id, name, type, x, y, width, height) {
     this.spacing = 200;
     this.scroll_offset = 0;
     this.selected_item = null;
+    this.enabled = true;
 }
 exports.ToolBox = ToolBox;

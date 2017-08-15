@@ -11,6 +11,7 @@ var link = require('./link.directive.js');
 var rack = require('./rack.directive.js');
 var group = require('./group.directive.js');
 var site = require('./site.directive.js');
+var siteIcon = require('./site.icon.directive.js');
 var map = require('./map.directive.js');
 var deviceDetail = require('./device.detail.directive.js');
 var defaultd = require('./default.directive.js');
@@ -40,6 +41,7 @@ var networkWidgets = angular.module('networkWidgets', [
     .directive('awxNetRack', rack.rack)
     .directive('awxNetGroup', group.group)
     .directive('awxNetSite', site.site)
+    .directive('awxNetSiteIcon', siteIcon.siteIcon)
     .directive('awxNetMap', map.map)
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
     .directive('awxNetDefault', defaultd.defaultd)

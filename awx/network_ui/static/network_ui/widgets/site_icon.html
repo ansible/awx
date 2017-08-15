@@ -1,7 +1,4 @@
 
-<g ng-if="current_scale <= 0.3 && group.type == 'site'" ng-attr-transform="translate({{group.width()/2}}, {{group.height()/2}})">
-<g ng-attr-transform="scale({{1/(current_scale*2)}})">
-
                      <g ng-if="!debug.hidden">
                     <line ng-attr-x1="{{-50 - 10}}"
                            ng-attr-y1="0"
@@ -24,7 +21,7 @@
                         y="-52"
                         ng-attr-width="{{100 + 4}}"
                         ng-attr-height="{{100 + 4}}"
-                        ng-attr-class="{{group.selected || group.remote_selected ? group.selected && group.remote_selected ? 'NetworkUI__site--selected-conflict' : group.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
+                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'NetworkUI__site--selected-conflict' : device.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
                         rx=10>
                     </rect>
                     <g class="NetworkUI__site">
@@ -66,12 +63,9 @@
                     <circle cy="20" cx="37" r=7 />
                     </g>
 </g>
-<g ng-attr-transform="scale({{1/current_scale}})">
-<text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+<text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       ng-attr-x="0"
-      ng-attr-y="50"> {{group.name}} </text>
-<text class="NetworkUI__group-text"  text-anchor="middle" x="0" y="50">{{group.name}}{{group.edit_label?'_':''}}</text>
-</g>
-</g>
+      ng-attr-y="100"> {{device.name}} </text>
+<text class="NetworkUI__group-text"  text-anchor="middle" x="0" y="100">{{device.name}}{{device.edit_label?'_':''}}</text>

@@ -1,4 +1,5 @@
 
+<g ng-if="toolbox.enabled">
 <rect class="NetworkUI__toolbox"
       ng-attr-x="{{toolbox.x}}"
       ng-attr-y="{{toolbox.y}}"
@@ -27,6 +28,10 @@
    <g ng-switch-when="rack"> <!-- begin rack -->
         <g awx-net-rack> </g>
    </g> <!-- end rack -->
+
+   <g ng-switch-when="site"> <!-- begin site -->
+        <g awx-net-site-icon> </g>
+   </g> <!-- end site -->
 
    <g ng-switch-default> <!-- begin default -->
         <g awx-net-default></g>
@@ -63,8 +68,13 @@
         <g awx-net-rack> </g>
    </g> <!-- end rack -->
 
+   <g ng-switch-when="site"> <!-- begin site -->
+        <g awx-net-site-icon> </g>
+   </g> <!-- end site -->
+
    <g ng-switch-default> <!-- begin default -->
         <g awx-net-default></g>
    </g> <!-- end default -->
 </g> <!-- end selected item -->
 </g> <!-- ng-if -->
+</g> <!-- ng-if toolbox.enabled -->

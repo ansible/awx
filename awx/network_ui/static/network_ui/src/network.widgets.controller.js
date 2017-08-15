@@ -58,17 +58,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.selected_groups = [];
   $scope.new_link = null;
   $scope.new_group_type = null;
-  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
-  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
-  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
-  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
-  $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
-  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
-  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
-  $scope.toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
-  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.toolbox_controller);
-  $scope.first_controller = $scope.mode_controller;
+
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
@@ -100,33 +90,74 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                       'y': 0,
                       'width': 0,
                       'height': 0};
-  $scope.toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
 
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Switch', 0, 0, 'switch'));
-  $scope.toolbox.items.push(new models.Device(0, 'Rack', 0, 0, 'rack'));
-  $scope.toolbox.items.push(new models.Device(0, 'Host', 0, 0, 'host'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.items.push(new models.Device(0, 'Router', 0, 0, 'router'));
-  $scope.toolbox.spacing = 150;
-  $scope.toolbox_controller.toolbox = $scope.toolbox;
 
-  for(i = 0; i < $scope.toolbox.items.length; i++) {
-      $scope.toolbox.items[i].icon = true;
+  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
+  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
+  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
+  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
+  $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
+  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
+  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
+  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
+
+  //Inventory Toolbox Setup
+  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router6', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Switch6', 0, 0, 'switch'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Rack6', 0, 0, 'rack'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Host6', 0, 0, 'host'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router7', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router8', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router9', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router10', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router11', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router12', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router13', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router14', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router15', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router16', 0, 0, 'router'));
+  $scope.inventory_toolbox.spacing = 150;
+  $scope.inventory_toolbox.enabled = true;
+  $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
+  $scope.inventory_toolbox_controller.remove_on_drop = true;
+  $scope.inventory_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("CopyDevice", new messages.CopyDevice(selected_item));
+  };
+
+  for(i = 0; i < $scope.inventory_toolbox.items.length; i++) {
+      $scope.inventory_toolbox.items[i].icon = true;
   }
+  //End Inventory Toolbox Setup
+  $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller);
+  //Site Toolbox Setup
+  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.site_toolbox.items.push(new models.Group(0, 'Site3', 'site', 0, 0, 1000, 1000, 'false'));
+  $scope.site_toolbox.items.push(new models.Group(0, 'Site4', 'site', 0, 0, 1000, 1000, 'false'));
+  $scope.site_toolbox.items.push(new models.Group(0, 'Site5', 'site', 0, 0, 1000, 1000, 'false'));
+  $scope.site_toolbox.items.push(new models.Group(0, 'Site6', 'site', 0, 0, 1000, 1000, 'false'));
+  $scope.site_toolbox.spacing = 200;
+  $scope.site_toolbox.enabled = false;
+  $scope.site_toolbox_controller.remove_on_drop = false;
+  $scope.site_toolbox_controller.toolbox = $scope.site_toolbox;
+  $scope.site_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("CopyGroup", new messages.CopyGroup(selected_item));
+  };
+  for(i = 0; i < $scope.site_toolbox.items.length; i++) {
+      $scope.site_toolbox.items[i].icon = true;
+      $scope.site_toolbox.items[i].selected = false;
+  }
+  //End Site Toolbox Setup
+
+  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.site_toolbox_controller);
+  $scope.first_controller = $scope.mode_controller;
 
   var dids = $scope.device_id_seq;
   var mids = $scope.message_id_seq;
   var gids = $scope.group_id_seq;
   var lids = $scope.link_id_seq;
+
 
   $scope.initial_messages = [
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":100,"name":"Router1","type":"router","message_id":mids()}],
