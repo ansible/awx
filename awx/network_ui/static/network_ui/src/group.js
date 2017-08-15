@@ -79,6 +79,11 @@ inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
 
+_State.prototype.onUnselectAll = function (controller, msg_type, $event) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, $event);
+};
 
 _Resize.prototype.onMouseUp = function (controller, msg_type, $event) {
 
@@ -370,6 +375,41 @@ _Ready.prototype.onNewGroup = function (controller, msg_type, message) {
     controller.changeState(Placing);
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
+
+_Ready.prototype.onCopyGroup = function (controller, msg_type, message) {
+
+	var scope = controller.scope;
+    scope.hide_groups = false;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    var group = new models.Group(controller.scope.group_id_seq(),
+                                 message.group.name,
+                                 message.group.type,
+                                 scope.scaledX,
+                                 scope.scaledY,
+                                 scope.scaledX + message.group.x2,
+                                 scope.scaledY + message.group.y2,
+                                 false);
+
+    scope.send_control_message(new messages.GroupCreate(scope.client_id,
+                                                        group.id,
+                                                        group.x1,
+                                                        group.y1,
+                                                        group.x2,
+                                                        group.y2,
+                                                        group.name,
+                                                        group.type));
+
+    scope.groups.push(group);
+    scope.selected_groups.push(group);
+    group.selected = true;
+    controller.changeState(Selected2);
+};
+_Ready.prototype.onCopyGroup.transitions = ['Selected2'];
 
 
 

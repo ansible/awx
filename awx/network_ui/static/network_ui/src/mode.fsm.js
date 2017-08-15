@@ -72,6 +72,16 @@ _Interface.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Interface.prototype.onMouseWheel.transitions = ['Device'];
 
+_Site.prototype.start = function (controller) {
+    controller.scope.current_mode = controller.state.name;
+    controller.scope.inventory_toolbox.enabled = true;
+};
+
+_Site.prototype.end = function (controller) {
+
+    controller.scope.inventory_toolbox.enabled = false;
+};
+
 
 _Site.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
@@ -100,6 +110,12 @@ _Process.prototype.onMouseWheel.transitions = ['Device'];
 
 _MultiSite.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
+    controller.scope.site_toolbox.enabled = true;
+};
+
+_MultiSite.prototype.end = function (controller) {
+
+    controller.scope.site_toolbox.enabled = false;
 };
 
 
@@ -112,7 +128,6 @@ _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.next_controller.handle_message(msg_type, $event);
 };
 _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
-
 
 
 _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {

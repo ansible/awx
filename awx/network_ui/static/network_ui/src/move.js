@@ -67,6 +67,13 @@ inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
 
+
+_State.prototype.onUnselectAll = function (controller, msg_type, $event) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, $event);
+};
+
 _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
@@ -127,6 +134,35 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
     }
 };
 _Ready.prototype.onNewDevice.transitions = ['Placing'];
+
+_Ready.prototype.onCopyDevice = function (controller, msg_type, message) {
+
+	var scope = controller.scope;
+    var device = null;
+
+    scope.pressedX = scope.mouseX;
+    scope.pressedY = scope.mouseY;
+    scope.pressedScaledX = scope.scaledX;
+    scope.pressedScaledY = scope.scaledY;
+
+    device = new models.Device(controller.scope.device_id_seq(),
+                               message.device.name,
+                               scope.scaledX,
+                               scope.scaledY,
+                               message.device.type);
+    console.log(device);
+    scope.devices.push(device);
+    scope.send_control_message(new messages.DeviceCreate(scope.client_id,
+                                                         device.id,
+                                                         device.x,
+                                                         device.y,
+                                                         device.name,
+                                                         device.type));
+    scope.selected_devices.push(device);
+    device.selected = true;
+    controller.changeState(Selected2);
+};
+_Ready.prototype.onCopyDevice.transitions = ['Selected2'];
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -255,7 +291,6 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
     controller.next_controller.handle_message(msg_type, $event);
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
-
 
 _Selected1.prototype.onMouseMove = function (controller) {
 
