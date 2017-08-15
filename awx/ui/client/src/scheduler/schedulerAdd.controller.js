@@ -134,24 +134,10 @@ export default ['$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
         });
     }
     else if ($state.current.name === 'projectSchedules.add'){
-        $scope.extraVars = '---';
-        $scope.parseType = 'yaml';
-        ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
-                parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars'
-            });
+        $scope.noVars = true;
     }
-    else if ($state.current.name === 'inventoryManage.editGroup.schedules.add'){
-        $scope.extraVars = '---';
-        $scope.parseType = 'yaml';
-        ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
-                parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars'
-            });
+    else if ($state.current.name === 'inventories.edit.inventory_sources.edit.schedules.add'){
+        $scope.noVars = true;
     }
     AddSchedule({
         scope: $scope,
