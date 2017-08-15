@@ -283,7 +283,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 })
                                 .attr('stroke-width', "2px")
                                 .attr("class", function(d) {
-                                    return d.placeholder ? "rect placeholder" : "rect";
+                                    let classString = d.placeholder ? "rect placeholder" : "rect";
+                                    classString += !d.unifiedJobTemplate ? " WorkflowChart-dashedNode" : "";
+                                    return classString;
                                 });
 
                             thisNode.append("path")
@@ -312,13 +314,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                  .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
                             thisNode.append("foreignObject")
-                                .attr("x", 17)
+                                .attr("x", 62)
                                 .attr("y", 22)
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
-                                .attr("class", "WorkflowChart-defaultText WorkflowChart-incompleteText")
+                                .attr("class", "WorkflowChart-defaultText WorkflowChart-deletedText")
                                 .html(function () {
-                                    return "<span class=\"WorkflowChart-incompleteIcon\">\uf06a</span><span> INCOMPLETE</span>";
+                                    return "<span>DELETED</span>";
                                 })
                                 .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
@@ -709,9 +711,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 return "#D7D7D7";
                             }
                          })
-                        .attr("class", function(d) {
-                            return d.placeholder ? "rect placeholder" : "rect";
-                        });
+                         .attr("class", function(d) {
+                             let classString = d.placeholder ? "rect placeholder" : "rect";
+                             classString += !d.unifiedJobTemplate ? " WorkflowChart-dashedNode" : "";
+                             return classString;
+                         });
 
                     t.selectAll(".node")
                         .attr("parent", function(d){return d.parent ? d.parent.id : null;})
@@ -788,7 +792,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     t.selectAll(".WorkflowChart-detailsLink")
                         .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
 
-                    t.selectAll(".WorkflowChart-incompleteText")
+                    t.selectAll(".WorkflowChart-deletedText")
                         .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
                     t.selectAll(".WorkflowChart-conflictText")
