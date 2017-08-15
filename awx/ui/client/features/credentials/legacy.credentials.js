@@ -174,7 +174,8 @@ function LegacyCredentialsService (pathService) {
             user_search: {
                 value: {
                     order_by: 'username',
-                    page_size: 5
+                    page_size: 5,
+                    is_superuser: false
                 },
                 dynamic: true
             },
