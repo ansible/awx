@@ -60,11 +60,23 @@ exports.Move = Move;
 
 _Dropping.prototype.start = function (controller) {
 
+
     var i = 0;
     var toolbox = controller.toolbox;
+    console.log(["Dropping", toolbox.selected_item]);
     for(i = 0; i < toolbox.items.length; i++) {
         toolbox.items[i].selected = false;
     }
+
+    controller.dropped_action(toolbox.selected_item);
+
+    if (controller.remove_on_drop) {
+        var dindex = toolbox.items.indexOf(toolbox.selected_item);
+        if (dindex !== -1) {
+            toolbox.items.splice(dindex, 1);
+        }
+    }
+
     toolbox.selected_item = null;
     controller.changeState(Ready);
 };
@@ -112,6 +124,8 @@ _Selecting.prototype.onMouseDown = function (controller) {
         scope.pressedScaledY = scope.scaledY;
         toolbox.selected_item.x = toolbox.x + toolbox.width/2;
         toolbox.selected_item.y = selected_item * toolbox.spacing + toolbox.y + toolbox.scroll_offset + toolbox.spacing/2;
+        controller.scope.clear_selections();
+        controller.scope.first_controller.handle_message("UnselectAll", {});
         controller.changeState(Selected);
     } else {
         toolbox.selected_item = null;
@@ -123,7 +137,8 @@ _Selecting.prototype.onMouseDown.transitions = ['Selected'];
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
-    if(controller.scope.mouseX > controller.toolbox.x &&
+    if(controller.toolbox.enabled &&
+       controller.scope.mouseX > controller.toolbox.x &&
        controller.scope.mouseY > controller.toolbox.y &&
        controller.scope.mouseX < controller.toolbox.x + controller.toolbox.width &&
        controller.scope.mouseY < controller.toolbox.y + controller.toolbox.height) {
@@ -139,7 +154,8 @@ _Ready.prototype.onMouseDown.transitions = ['Selecting'];
 
 _Ready.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
-    if(controller.scope.mouseX > controller.toolbox.x &&
+    if(controller.toolbox.enabled &&
+       controller.scope.mouseX > controller.toolbox.x &&
        controller.scope.mouseY > controller.toolbox.y &&
        controller.scope.mouseX < controller.toolbox.x + controller.toolbox.width &&
        controller.scope.mouseY < controller.toolbox.y + controller.toolbox.height) {
