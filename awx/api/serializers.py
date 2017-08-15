@@ -3403,7 +3403,7 @@ class NotificationTemplateSerializer(BaseSerializer):
                                                                                                     type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
-        return attrs
+        return super(NotificationTemplateSerializer, self).validate(attrs)
 
 
 class NotificationSerializer(BaseSerializer):
