@@ -11,8 +11,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
         return {
             scope: {
                 workflowJobTemplateObj: '=',
-                canAddWorkflowJobTemplate: '=',
-                edgeType: '='
+                canAddWorkflowJobTemplate: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('templates/workflows/workflow-maker/workflow-maker'),
