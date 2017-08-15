@@ -13,7 +13,7 @@ import logging
 from django.conf import settings
 
 import awx
-from awx.main.isolated import run
+from awx.main.expect import run
 from awx.main.utils import OutputEventFilter
 from awx.main.queue import CallbackQueueDispatcher
 

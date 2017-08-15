@@ -54,7 +54,7 @@ class sdist_isolated(sdist):
     includes = [
         'include Makefile',
         'include awx/__init__.py',
-        'include awx/main/isolated/run.py',
+        'include awx/main/expect/run.py',
         'include tools/scripts/awx-expect',
         'include requirements/requirements_isolated.txt',
         'recursive-include awx/lib *.py',

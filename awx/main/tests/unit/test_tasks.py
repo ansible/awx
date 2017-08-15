@@ -195,7 +195,7 @@ class TestJobExecution:
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
             mock.patch.object(Job, 'inventory', mock.Mock(pk=1, spec_set=['pk'])),
-            mock.patch('awx.main.isolated.run.run_pexpect', self.run_pexpect)
+            mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect)
         ]
         for p in self.patches:
             p.start()

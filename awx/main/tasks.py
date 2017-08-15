@@ -51,7 +51,7 @@ from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.queue import CallbackQueueDispatcher
-from awx.main.isolated import run, isolated_manager
+from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
