@@ -351,7 +351,7 @@ function($injector, $stateExtender, $log, i18n) {
                     url: '/add-permissions',
                     params: {
                         user_search: {
-                            value: { order_by: 'username', page_size: '5' },
+                            value: { order_by: 'username', page_size: '5', is_superuser: false },
                             dynamic: true,
                         },
                         team_search: {
