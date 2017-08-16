@@ -357,6 +357,9 @@ function($injector, $stateExtender, $log, i18n) {
                                             $stateParams[`${list.iterator}_search`].or__organization__in = orgIds.join();
 
                                         }
+                                        else {
+                                            $stateParams[`${list.iterator}_search`].organization = 'null';
+                                        }
 
                                         return qs.search(path, $stateParams[`${list.iterator}_search`]);
                                     });
