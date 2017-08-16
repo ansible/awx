@@ -9,6 +9,7 @@ from awx.main.scheduler import TaskManager
 from awx.main.models import (
     Job,
     Instance,
+    WorkflowJob,
 )
 
 
@@ -250,7 +251,9 @@ class TestReaper():
 
         j11 = Job.objects.create(status='running', celery_task_id='host4_j11', execution_node='host4_offline')
 
-        js = [j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11]
+        j12 = WorkflowJob.objects.create(status='running', celery_task_id='workflow_job', execution_node='host1')
+
+        js = [j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11, j12]
         for j in js:
             j.save = mocker.Mock(wraps=j.save)
             j.websocket_emit_status = mocker.Mock()
@@ -263,7 +266,7 @@ class TestReaper():
     @pytest.fixture
     def running_tasks(self, all_jobs):
         return {
-            'host1': all_jobs[2:5],
+            'host1': all_jobs[2:5] + [all_jobs[11]],
             'host2': all_jobs[5:8],
             'host3_split': all_jobs[8:10],
             'host4_offline': [all_jobs[10]],
@@ -331,3 +334,5 @@ class TestReaper():
         assert all_jobs[9] in execution_nodes_jobs['host3_split']
 
         assert all_jobs[10] in execution_nodes_jobs['host4_offline']
+
+        assert all_jobs[11] not in execution_nodes_jobs['host1']

@@ -31,8 +31,8 @@ class TestCleanupInconsistentCeleryTasks():
 
         assert "mocked" in str(excinfo.value)
         logger_mock.error.assert_called_once_with("Execution node Instance host1 not found in database. "
-                                                  "The node is currently executing jobs ['None-2-new', "
-                                                  "'None-3-new']")
+                                                  "The node is currently executing jobs ['job 2 (new)', "
+                                                  "'job 3 (new)']")
 
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {'host1': []}))
