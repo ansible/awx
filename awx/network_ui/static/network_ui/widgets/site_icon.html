@@ -21,7 +21,7 @@
                         y="-52"
                         ng-attr-width="{{100 + 4}}"
                         ng-attr-height="{{100 + 4}}"
-                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'NetworkUI__site--selected-conflict' : device.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
+                        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__site--selected-conflict' : item.selected ? 'NetworkUI__site--selected' : 'NetworkUI__site--remote-selected' : 'NetworkUI--hidden'}}"
                         rx=10>
                     </rect>
                     <g class="NetworkUI__site">
@@ -63,9 +63,9 @@
                     <circle cy="20" cx="37" r=7 />
                     </g>
 </g>
-<text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+<text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="middle"
       ng-attr-x="0"
-      ng-attr-y="100"> {{device.name}} </text>
-<text class="NetworkUI__group-text"  text-anchor="middle" x="0" y="100">{{device.name}}{{device.edit_label?'_':''}}</text>
+      ng-attr-y="100"> {{item.name}} </text>
+<text class="NetworkUI__group-text"  text-anchor="middle" x="0" y="100">{{item.name}}{{item.edit_label?'_':''}}</text>

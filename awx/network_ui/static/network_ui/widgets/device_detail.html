@@ -7,8 +7,8 @@
       class="NetworkUI__group"/>
 
 <g ng-attr-transform="translate(0,0)"
-   ng-attr-class="{{device.type}}"
-   ng-switch on="device.type">
+   ng-attr-class="{{item.type}}"
+   ng-switch on="item.type">
    <g ng-switch-when="router"><!-- begin router -->
        <g awx-net-router></g>
    </g> <!-- end router -->
@@ -33,7 +33,7 @@
 </g> <!-- end transform class switch -->
 
 <g transform="translate(0, 500)">
-<g ng-repeat="interface in device.interfaces track by $index">
+<g ng-repeat="interface in item.interfaces track by $index">
 
 <g ng-attr-transform="translate({{$index * 60 + 30}}, -40)">
 
@@ -72,10 +72,10 @@
 
 <text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="85">{{interface.remote_interface().name}}</text>
 
-<g ng-repeat="device in [interface.remote_interface().device]">
-<g ng-attr-transform="translate(0,100) scale(0.5) translate(0, {{device.height}})"
-   ng-attr-class="{{device.type}}"
-   ng-switch on="device.type">
+<g ng-repeat="item in [interface.remote_interface().device]">
+<g ng-attr-transform="translate(0,100) scale(0.5) translate(0, {{item.height}})"
+   ng-attr-class="{{item.type}}"
+   ng-switch on="item.type">
    <g ng-switch-when="router"><!-- begin router -->
        <g awx-net-router></g>
    </g> <!-- end router -->
