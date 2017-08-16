@@ -1,7 +1,4 @@
 
-<g ng-if="current_scale >= 0.1 && current_scale <= 0.5 && item.type == 'rack'" ng-attr-transform="translate({{item.width()/2}}, {{item.height()/2}})">
-<g ng-attr-transform="scale({{1/0.5}})">
-
                      <g ng-if="!debug.hidden">
                     <line ng-attr-x1="{{-50 - 10}}"
                            ng-attr-y1="0"
@@ -62,13 +59,12 @@
                     <circle cx="30" cy="35" r=7 />
                     </circle>
                     </g>
-</g>
-<g ng-attr-transform="scale({{1/current_scale}})">
-<text ng-attr-class="{{item.selected && ! item.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
-      text-anchor="middle"
-      x="0"
-      ng-attr-y="{{180*current_scale}}"> {{item.name}} </text>
-<text  class="NetworkUI__rack-text" text-anchor="middle" x="0" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
-</g>
-</g>
+                    <g ng-show="item.icon || current_scale > 0.5">
+                    <text ng-attr-class="{{item.selected && ! item.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
+						  filter="url(#selected)"
+                          text-anchor="middle"
+						  x="0"
+						  y="6"> {{item.name}} </text>
+                    <text  class="NetworkUI__rack-text" text-anchor="middle" x="0" y="6">{{item.name}}{{item.edit_label?'_':''}}</text>
+                    </g>
+                    

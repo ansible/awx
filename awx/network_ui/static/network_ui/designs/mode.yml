@@ -1,44 +1,51 @@
-finite_state_machine_id: 115
-name: fsm
+finite_state_machine_id: 130
+name: mode
 states:
 - id: 1
   label: Start
   x: 568
-  y: 0
-- id: 6
+  y: -379
+- id: 2
   label: Interface
   x: 340
   y: 1053
-- id: 4
-  label: Site
+- id: 3
+  label: Rack
   x: 571
-  y: 500
-- id: 7
+  y: 486
+- id: 4
   label: Process
   x: 833
   y: 1051
-- id: 2
-  label: MultiSite
-  x: 567
-  y: 236
 - id: 5
+  label: MultiSite
+  x: 569
+  y: -88
+- id: 6
   label: Device
   x: 558
   y: 821
+- id: 7
+  label: Site
+  x: 564
+  y: 201
 transitions:
-- from_state: Device
+- from_state: Rack
   label: onMouseWheel
-  to_state: Process
+  to_state: Site
 - from_state: MultiSite
   label: onMouseWheel
   to_state: Site
 - from_state: Device
   label: onMouseWheel
-  to_state: Interface
+  to_state: Process
 - from_state: Site
   label: onMouseWheel
-  to_state: MultiSite
-- from_state: Site
+  to_state: Rack
+- from_state: Device
+  label: onMouseWheel
+  to_state: Interface
+- from_state: Rack
   label: onMouseWheel
   to_state: Device
 - from_state: Interface
@@ -46,10 +53,13 @@ transitions:
   to_state: Device
 - from_state: Device
   label: onMouseWheel
-  to_state: Site
+  to_state: Rack
 - from_state: Start
   label: start
   to_state: MultiSite
 - from_state: Process
   label: onMouseWheel
   to_state: Device
+- from_state: Site
+  label: onMouseWheel
+  to_state: MultiSite
