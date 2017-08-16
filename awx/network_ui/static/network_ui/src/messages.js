@@ -252,6 +252,12 @@ function CopyDevice(device) {
 }
 exports.CopyDevice = CopyDevice;
 
+function CopyProcess(process) {
+    this.process = process;
+}
+exports.CopyProcess = CopyProcess;
+
+
 function NewGroup(type) {
     this.type = type;
 }
