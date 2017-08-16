@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tower-config
-  namespace: tower
+  name: awx-config
+  namespace: {{ awx_openshift_project }}
 data:
-  secret_key: AAABBBCCC
-  tower_settings: |
+  secret_key: {{ awx_secret_key }}
+  awx_settings: |
     import os
     import socket
     ADMINS = ()
@@ -59,19 +59,19 @@ data:
         'default': {
             'ATOMIC_REQUESTS': True,
             'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
-            'NAME': "tower",
-            'USER': "tower",
-            'PASSWORD': "password123",
-            'HOST': "postgresql",
-            'PORT': "5432",
+            'NAME': "{{ pg_database }}",
+            'USER': "{{ pg_username }}",
+            'PASSWORD': "{{ pg_password }}",
+            'HOST': "{{ pg_hostname|default('postgresql') }}",
+            'PORT': "{{ pg_port }}",
         }
     }
     BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
-        "tower",
+        "awx",
         "abcdefg",
         "localhost",
         "5672",
-        "tower")
+        "awx")
     CHANNEL_LAYERS = {
         'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
                     'ROUTING': 'awx.main.routing.channel_routing',

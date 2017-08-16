@@ -1,0 +1,138 @@
+---
+
+- name: Get Version from checkout if not provided
+  shell: "git describe --long | sed 's/\\-g.*//' | sed 's/\\-/\\./'"
+  delegate_to: localhost
+  register: awx_version_command
+  when: awx_version is not defined
+
+- name: Set global version if not provided
+  set_fact:
+    awx_version: "{{ awx_version_command.stdout }}"
+    use_local_awx: true
+  when: awx_version is not defined
+
+- name: Set sdist file name
+  set_fact:
+    awx_sdist_file: "awx-{{ awx_version }}.tar.gz"
+
+- name: AWX Distribution
+  debug:
+    msg: "{{ awx_sdist_file }}"
+
+- name: Build AWX distribution
+  shell: make sdist
+  args:
+    chdir: ..
+    creates: "../dist/{{ awx_sdist_file }}"
+  delegate_to: localhost
+  when: use_local_awx is not defined
+
+- name: Set docker build base path
+  set_fact:
+    docker_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/docker-image"
+
+- name: Set awx_web image name
+  set_fact:
+    awx_web_image: "{{ awx_web_image|default('awx_web') }}"
+
+- name: Set awx_task image name
+  set_fact:
+    awx_task_image: "{{ awx_task_image|default('awx_task') }}"
+
+- name: Ensure directory exists
+  file:
+    path: "{{ docker_base_path }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Stage sdist
+  copy:
+    src: "../dist/{{ awx_sdist_file }}"
+    dest: "{{ docker_base_path }}/{{ awx_sdist_file }}"
+  delegate_to: localhost
+
+- name: Template web Dockerfile
+  template:
+    src: Dockerfile.j2
+    dest: "{{ docker_base_path }}/Dockerfile"
+  delegate_to: localhost
+
+- name: Template task Dockerfile
+  template:
+    src: Dockerfile.task.j2
+    dest: "{{ docker_base_path }}/Dockerfile.task"
+  delegate_to: localhost
+
+- name: Stage launch_awx
+  copy:
+    src: launch_awx.sh
+    dest: "{{ docker_base_path }}/launch_awx.sh"
+    mode: '0700'
+  delegate_to: localhost
+
+- name: Stage launch_awx_task
+  copy:
+    src: launch_awx_task.sh
+    dest: "{{ docker_base_path }}/launch_awx_task.sh"
+    mode: '0700'
+  delegate_to: localhost
+
+- name: Stage nginx.conf
+  copy:
+    src: nginx.conf
+    dest: "{{ docker_base_path }}/nginx.conf"
+  delegate_to: localhost
+
+- name: Stage supervisor.conf
+  copy:
+    src: supervisor.conf
+    dest: "{{ docker_base_path }}/supervisor.conf"
+  delegate_to: localhost
+
+- name: Stage supervisor_task.conf
+  copy:
+    src: supervisor_task.conf
+    dest: "{{ docker_base_path }}/supervisor_task.conf"
+  delegate_to: localhost
+
+- name: Stage settings.py
+  copy:
+    src: settings.py
+    dest: "{{ docker_base_path }}/settings.py"
+  delegate_to: localhost
+
+- name: Stage requirements
+  copy:
+    src: ../requirements/
+    dest: "{{ docker_base_path }}/requirements"
+  delegate_to: localhost
+
+- name: Stage Makefile
+  copy:
+    src: ../Makefile
+    dest: "{{ docker_base_path }}/Makefile"
+  delegate_to: localhost
+
+- name: Build base web image
+  docker_image:
+    path: "{{ docker_base_path }}"
+    dockerfile: Dockerfile
+    name: "{{ awx_web_image }}"
+    tag: "{{ awx_version }}"
+  delegate_to: localhost
+
+- name: Build base task image
+  docker_image:
+    path: "{{ docker_base_path }}"
+    dockerfile: Dockerfile.task
+    name: "{{ awx_task_image }}"
+    tag: "{{ awx_version }}"
+    pull: no
+  delegate_to: localhost
+    
+- name: Clean docker base directory
+  file:
+    path: "{{ docker_base_path }}"
+    state: absent
+  when: cleanup_docker_base|default(True)

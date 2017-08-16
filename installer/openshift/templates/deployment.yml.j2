@@ -2,59 +2,59 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: tower
-  namespace: tower
+  name: awx
+  namespace: {{ awx_openshift_project }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        name: tower-web-deploy
+        name: awx-web-deploy
         service: django
     spec:
       containers:
-        - name: tower-web
-          image: 172.30.1.1:5000/tower/tower_web:latest
+        - name: awx-web
+          image: {{ awx_web_openshift_image }}
           ports:
             - containerPort: 8052
           volumeMounts:
             - mountPath: /etc/tower
-              name: tower-application-config
-        - name: tower-celery
-          image: 172.30.1.1:5000/tower/tower_task:latest
+              name: awx-application-config
+        - name: awx-celery
+          image: {{ awx_task_openshift_image }}
           volumeMounts:
             - mountPath: /etc/tower
-              name: tower-application-config
+              name: awx-application-config
           env:
             - name: DATABASE_USER
-              value: tower
+              value: {{ pg_username }}
             - name: DATABASE_NAME
-              value: tower
+              value: {{ pg_database }}
             - name: DATABASE_HOST
-              value: postgresql
+              value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PASSWORD
-              value: password123
-        - name: tower-rabbit
+              value: {{ pg_password }}
+        - name: awx-rabbit
           image: rabbitmq:3
           env:
             - name: RABBITMQ_ERLANG_COOKIE
-              value: secret
+              value: secretb
             - name: RABBITMQ_NODENAME
               value: rabbitmq
             - name: RABBITMQ_DEFAULT_USER
-              value: tower
+              value: awx
             - name: RABBITMQ_DEFAULT_PASS
               value: abcdefg
             - name: RABBITMQ_DEFAULT_VHOST
-              value: tower
-        - name: tower-memcached
+              value: awx
+        - name: awx-memcached
           image: memcached
       volumes:
-        - name: tower-application-config
+        - name: awx-application-config
           configMap:
-            name: tower-config
+            name: awx-config
             items:
-              - key: tower_settings
+              - key: awx_settings
                 path: settings.py
               - key: secret_key
                 path: SECRET_KEY
@@ -62,15 +62,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tower-web-svc
-  namespace: tower
+  name: awx-web-svc
+  namespace: {{ awx_openshift_project }}
   labels:
-    name: tower-web-svc
+    name: awx-web-svc
 spec:
   type: "NodePort"
   ports:
     - name: http
       port: 8052
-      nodePort: 30083
+      nodePort: {{ awx_node_port }}
   selector:
-    name: tower-web-deploy
+    name: awx-web-deploy

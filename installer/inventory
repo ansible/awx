@@ -1,0 +1,24 @@
+localhost ansible_connection=local
+
+[all:vars]
+# Local Openshift
+# Will need to set -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t)
+#
+# openshift_host=127.0.0.1:8443
+# awx_openshift_project=awx
+# openshift_user=developer
+# docker_registry=172.30.1.1:5000
+# docker_registry_repository=awx
+# docker_registry_username=developer
+# awx_node_port=30083
+
+# Set this if you have an external postgres you are pointing at
+# otherwise a new ephemeral awx postgres service will be created
+# pg_hostname=postgresql
+pg_username=awx
+pg_password=awxpass
+pg_database=awx
+pg_port=5432
+
+# AWX Tunables
+awx_secret_key=aabbcc
