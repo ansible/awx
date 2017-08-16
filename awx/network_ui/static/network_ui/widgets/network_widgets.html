@@ -32,7 +32,7 @@
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
             <g ng-if="!hide_links">
-            <g ng-if="current_scale > 0.3 && current_scale < 5">
+            <g ng-if="current_scale > 0.5 && current_scale < 5">
             <g ng-repeat="link in links">
             <g awx-net-link></g>
             </g> <!-- end ng-repeat link in links-->
@@ -41,7 +41,7 @@
             <g ng-repeat="link in links">
             <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
             </g>
-            <g ng-if="current_scale > 0.3 && current_scale < 5">
+            <g ng-if="current_scale > 0.5 && current_scale < 5">
 
             <g ng-repeat="item in devices"
                ng-attr-transform="translate({{item.x}},{{item.y}})"
@@ -60,10 +60,6 @@
 
                </g> <!-- end host -->
 
-               <g ng-switch-when="rack"> <!-- begin rack -->
-                    <g awx-net-rack> </g>
-               </g> <!-- end rack -->
-
                <g ng-switch-default> <!-- begin default -->
                     <g awx-net-default></g>
                </g> <!-- end default -->
@@ -78,7 +74,7 @@
                 <g awx-net-device-detail> </g>
             </g>
             </g>
-            <g ng-repeat="group in groups">
+            <g ng-repeat="item in groups">
             <g awx-net-group></g>
             </g>
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
@@ -88,7 +84,7 @@
             <g awx-net-quadrants>
             </g>
         </g>
-        <g ng-repeat="toolbox in [site_toolbox, inventory_toolbox]">
+        <g ng-repeat="toolbox in [site_toolbox, rack_toolbox, inventory_toolbox, app_toolbox]">
         <g awx-net-inventory-toolbox></g>
         </g>
         <g ng-if="!hide_buttons">

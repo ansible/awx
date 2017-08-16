@@ -104,8 +104,12 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   //App Toolbox Setup
   $scope.app_toolbox = new models.ToolBox(0, 'Application', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.app_toolbox.spacing = 150;
-  $scope.app_toolbox.enabled = true;
+  $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
+  $scope.app_toolbox_controller.dropped_action = util.noop;
+  $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
 
   $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
 
@@ -113,7 +117,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.inventory_toolbox.items.push(new models.Device(0, 'Router6', 0, 0, 'router'));
   $scope.inventory_toolbox.items.push(new models.Device(0, 'Switch6', 0, 0, 'switch'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Rack6', 0, 0, 'rack'));
   $scope.inventory_toolbox.items.push(new models.Device(0, 'Host6', 0, 0, 'host'));
   $scope.inventory_toolbox.items.push(new models.Device(0, 'Router7', 0, 0, 'router'));
   $scope.inventory_toolbox.items.push(new models.Device(0, 'Router8', 0, 0, 'router'));
@@ -137,7 +140,26 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
       $scope.inventory_toolbox.items[i].icon = true;
   }
   //End Inventory Toolbox Setup
-  $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller);
+  $scope.rack_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller);
+  //Rack Toolbox Setup
+  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack3', 'rack', 0, 0, 200, 1000, 'false'));
+  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack4', 'rack', 0, 0, 200, 1000, 'false'));
+  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack5', 'rack', 0, 0, 200, 1000, 'false'));
+  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack6', 'rack', 0, 0, 200, 1000, 'false'));
+  $scope.rack_toolbox.spacing = 200;
+  $scope.rack_toolbox.enabled = false;
+  $scope.rack_toolbox_controller.remove_on_drop = false;
+  $scope.rack_toolbox_controller.toolbox = $scope.rack_toolbox;
+  $scope.rack_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("CopyGroup", new messages.CopyGroup(selected_item));
+  };
+  for(i = 0; i < $scope.rack_toolbox.items.length; i++) {
+      $scope.rack_toolbox.items[i].icon = true;
+      $scope.rack_toolbox.items[i].selected = false;
+  }
+  //End Rack Toolbox Setup
+  $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.rack_toolbox_controller);
   //Site Toolbox Setup
   $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.site_toolbox.items.push(new models.Group(0, 'Site3', 'site', 0, 0, 1000, 1000, 'false'));
@@ -169,7 +191,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.initial_messages = [
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":100,"name":"Router1","type":"router","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":100,"name":"Switch1","type":"switch","message_id":mids()}],
-      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":100,"name":"Rack1","type":"rack","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":100,"name":"HostA","type":"host","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":100,"name":"Host1","type":"host","message_id":mids()}],
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":300,"name":"Router2","type":"router","message_id":mids()}],
@@ -184,8 +206,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
       ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":8,"id":1,"name":"eth1","message_id":mids()}],
       ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":7,"to_device_id":8,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
 
-      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":300,"name":"Rack2","type":"rack","message_id":mids()}],
-      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":500,"name":"Rack3","type":"rack","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":300,"name":"HostB","type":"host","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":500,"name":"HostC","type":"host","message_id":mids()}],
       ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":9,"id":1,"name":"eth1","message_id":mids()}],
       ["InterfaceCreate", {"msg_type":"InterfaceCreate","sender":0,"device_id":10,"id":1,"name":"eth1","message_id":mids()}],
       ["LinkCreate", {"msg_type":"LinkCreate","id":lids(),"sender":0,"name":"","from_device_id":9,"to_device_id":10,"from_interface_id":1,"to_interface_id":1,"message_id":mids()}],
@@ -198,17 +220,18 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":700,"name":"Router4","type":"router","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":700,"name":"Switch4","type":"switch","message_id":mids()}],
-      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":700,"name":"Rack4","type":"rack","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":700,"name":"HostD","type":"host","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":700,"name":"Host4","type":"host","message_id":mids()}],
 
       ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":600,"x2":1000,"y2":800,"name":"Group1",type:"group", "message_id":mids()}],
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":100,"y":900,"name":"Router5","type":"router","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":300,"y":900,"name":"Switch5","type":"switch","message_id":mids()}],
-      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":900,"name":"Rack5","type":"rack","message_id":mids()}],
+      ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":500,"y":900,"name":"HostE","type":"host","message_id":mids()}],
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":700,"y":900,"name":"Host5","type":"host","message_id":mids()}],
 
-      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":-100,"y1":0,"x2":1100,"y2":1000,"name":"Site1",type:"site", "message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":-100,"y1":0,"x2":1100,"y2":1100,"name":"Site1",type:"site", "message_id":mids()}],
+      ["GroupCreate",{"msg_type":"GroupCreate","sender":0,"ids":gids(),"x1":0,"y1":800,"x2":1000,"y2":1000,"name":"Rack1",type:"rack", "message_id":mids()}],
 
 
       ["DeviceCreate",{"msg_type":"DeviceCreate","sender":0,"id":dids(),"x":900,"y":100,"name":"Device1","type":"device","message_id":mids()}],
