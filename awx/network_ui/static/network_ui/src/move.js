@@ -15,6 +15,13 @@ inherits(_Ready, _State);
 var Ready = new _Ready();
 exports.Ready = Ready;
 
+function _Disable () {
+    this.name = 'Disable';
+}
+inherits(_Disable, _State);
+var Disable = new _Disable();
+exports.Disable = Disable;
+
 function _Start () {
     this.name = 'Start';
 }
