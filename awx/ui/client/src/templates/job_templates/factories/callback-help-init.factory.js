@@ -160,7 +160,7 @@ export default
                                     scope.selectedCredentials = selectedCredentials;
                                     scope.credential_types = credTypes;
                                     scope.credentialTypeOptions = credTypeOptions;
-                                    scope.credentialsToPost = credTags;console.log(credTags);
+                                    scope.credentialsToPost = credTags;
                                     scope.$emit('jobTemplateLoaded', master);
                                 });
                     }
