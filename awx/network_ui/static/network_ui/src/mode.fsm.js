@@ -1,5 +1,6 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
+var move = require('./move.js');
 
 function _State () {
 }
@@ -75,11 +76,13 @@ _Interface.prototype.onMouseWheel.transitions = ['Device'];
 _Site.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
     controller.scope.inventory_toolbox.enabled = true;
+    controller.scope.move_controller.changeState(move.Ready);
 };
 
 _Site.prototype.end = function (controller) {
 
     controller.scope.inventory_toolbox.enabled = false;
+    controller.scope.move_controller.changeState(move.Disable);
 };
 
 
@@ -128,7 +131,6 @@ _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.next_controller.handle_message(msg_type, $event);
 };
 _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
-
 
 _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
