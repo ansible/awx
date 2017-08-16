@@ -14,6 +14,7 @@ from django.db import transaction, connection, DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now, utc
 from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
 
 # AWX
 from awx.main.models import * # noqa
@@ -78,8 +79,10 @@ class TaskManager():
     def get_running_tasks(self):
         execution_nodes = {}
         now = tz_now()
-        jobs = UnifiedJob.objects.filter(Q(status='running') |
-                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60)))
+        workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+        jobs = UnifiedJob.objects.filter((Q(status='running') |
+                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60))) &
+                                         ~Q(polymorphic_ctype_id=workflow_ctype_id))
         [execution_nodes.setdefault(j.execution_node, [j]).append(j) for j in jobs]
         return execution_nodes
 
@@ -445,7 +448,8 @@ class TaskManager():
                         continue
                 except Instance.DoesNotExist:
                     logger.error("Execution node Instance {} not found in database. "
-                                 "The node is currently executing jobs {}".format(node, [str(j) for j in node_jobs]))
+                                 "The node is currently executing jobs {}".format(node, 
+                                                                                  [j.log_format for j in node_jobs]))
                     active_tasks = []
             for task in node_jobs:
                 if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
