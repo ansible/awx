@@ -22,6 +22,8 @@ function Device(id, name, x, y, type) {
     this.shape = type === "router" ? "circular" : "rectangular";
     this.interface_seq = util.natural_numbers(0);
     this.interfaces = [];
+    this.process_id_seq = util.natural_numbers(0);
+    this.processes = [];
 }
 exports.Device = Device;
 

@@ -157,7 +157,6 @@ _Ready.prototype.onCopyDevice = function (controller, msg_type, message) {
                                scope.scaledX,
                                scope.scaledY,
                                message.device.type);
-    console.log(device);
     scope.devices.push(device);
     scope.send_control_message(new messages.DeviceCreate(scope.client_id,
                                                          device.id,

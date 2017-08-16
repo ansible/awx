@@ -6,6 +6,7 @@ var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
 var mode_fsm = require('./mode.fsm.js');
+var device_detail_fsm = require('./device.detail.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.js');
@@ -86,6 +87,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.stencils = [];
   $scope.links = [];
   $scope.groups = [];
+  $scope.processes = [];
+  $scope.configurations = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
@@ -95,7 +98,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
   $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
   $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
-  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
+  $scope.device_detail_controller = new fsm.FSMController($scope, device_detail_fsm.Start, $scope.view_controller);
+  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.device_detail_controller);
   $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
@@ -106,10 +110,16 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
-  $scope.app_toolbox_controller.dropped_action = util.noop;
+  $scope.app_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("CopyProcess", new messages.CopyProcess(selected_item));
+  };
   $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
   $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
   $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
+
+  for(i = 0; i < $scope.app_toolbox.items.length; i++) {
+      $scope.app_toolbox.items[i].icon = true;
+  }
 
   $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
 
