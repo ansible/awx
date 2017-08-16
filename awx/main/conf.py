@@ -311,7 +311,7 @@ register(
     min_value=0,
     default=0,
     label=_('Default Inventory Update Timeout'),
-    help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
+    help_text=_('Maximum time in seconds to allow inventory updates to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
@@ -323,7 +323,7 @@ register(
     min_value=0,
     default=0,
     label=_('Default Project Update Timeout'),
-    help_text=_('Maximum time to allow project updates to run. Use value of 0 to indicate that no '
+    help_text=_('Maximum time in seconds to allow project updates to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual project will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
