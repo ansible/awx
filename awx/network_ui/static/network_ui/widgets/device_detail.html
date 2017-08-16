@@ -96,4 +96,13 @@
 </g> <!-- end transform -->
 </g> <!-- end ng-repeat interface -->
 </g> <!-- end transform translate -->
+
+<g transform="translate(0, 100)">
+<g ng-repeat="item in item.processes track by $index">
+<g ng-attr-transform="translate({{$index * 75 + 50}}, 0) scale(0.5)">
+<g awx-net-process></g>
+</g> <!-- end translate -->
+</g> <!-- end ng-repeat process -->
+</g> <!-- end translate -->
+
 </g> <!-- end transform scale translate -->
