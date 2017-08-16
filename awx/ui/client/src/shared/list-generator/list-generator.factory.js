@@ -135,9 +135,9 @@ export default ['$compile', 'Attr', 'Icon',
                     // Don't display an empty <div> if there is no listTitle
                     if ((options.title !== false && list.title !== false) && list.listTitle !== undefined) {
                         html += "<div class=\"List-header\" >";
-                        html += "<div class=\"List-title\">";
+                        html += "<div class=\"List-title\" translate>";
                         if (list.listTitle && options.listTitle !== false) {
-                            html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
+                            html += "<div class=\"List-titleText\" translate>" + list.listTitle + "</div>";
                             // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
                             list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge === false) ? false : true;
                             if (list.listTitleBadge) {
@@ -506,13 +506,13 @@ export default ['$compile', 'Attr', 'Icon',
                 html = "<thead>\n";
                 html += "<tr class=\"List-tableHeaderRow\">\n";
                 if (list.index) {
-                    html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs List-tableHeader\">#</th>\n";
+                    html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs List-tableHeader\" translate>#</th>\n";
                 }
 
                 if (list.multiSelect) {
                     html += buildSelectAll().prop('outerHTML');
                 } else if (options.mode === 'lookup') {
-                    html += "<th class=\"List-tableHeader select-column List-staticColumn--smallStatus\"></th>";
+                    html += "<th class=\"List-tableHeader select-column List-staticColumn--smallStatus\" translate></th>";
                 }
 
                 if (options.mode !== 'lookup'){
@@ -565,11 +565,11 @@ export default ['$compile', 'Attr', 'Icon',
                     }
                 }
                 if (options.mode === 'select') {
-                    html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";
+                    html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\" translate>Select</th>";
                 } else if (options.mode === 'edit' && list.fieldActions) {
                     html += "<th class=\"List-tableHeader List-tableHeader--actions actions-column";
                     html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
-                    html += "\">";
+                    html += "\" translate>";
                     html += (list.fieldActions.label === undefined || list.fieldActions.label) ? i18n._("Actions") : "";
                     html += "</th>\n";
                 }

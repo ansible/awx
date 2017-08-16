@@ -637,9 +637,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
-                            html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" translate>\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
                         html += ((field.awPopOver || field.awPopOverWatch) && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
@@ -1203,9 +1203,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += buildCheckbox(this.form, field, fld, undefined, false);
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
-                            html += "<span class=\"Form-inputLabel\">" + field.label + "</span>";
+                            html += "<span class=\"Form-inputLabel\" translate>" + field.label + "</span>";
                         }
 
                         html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
@@ -1476,7 +1476,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `<div id="${this.form.name}_tab" class="Form-tab" `;
                         html += this.form.detailsClick ? `ng-click="` + this.form.detailsClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit')" `;
                         let detailsTabSelected = this.form.activeEditState ? `$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState` : `$state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState`;
-                        html += `ng-class="{'is-selected': ${detailsTabSelected} }">` +
+                        html += `ng-class="{'is-selected': ${detailsTabSelected} }" translate>` +
                             `${details}</div>`;
 
                         for (itm in this.form.related) {
@@ -1495,7 +1495,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }
-                            html +=  `}">${(collection.title || collection.editTitle)}</div>`;
+                            html +=  `}" translate>${(collection.title || collection.editTitle)}</div>`;
                         }
 
                         for (itm in this.form.relatedButtons) {
