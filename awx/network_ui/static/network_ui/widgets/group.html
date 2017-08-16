@@ -1,77 +1,78 @@
-<g ng-if="!hide_groups || group.type == 'site'">
-<g ng-if="current_scale > 0.3 || group.type == 'site'">
-<rect ng-attr-width="{{group.width(scaledX)}}"
-      ng-attr-height="{{group.height(scaledY)}}"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
-      ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
+<g ng-if="!hide_groups || item.type == 'site'">
+<g ng-if="current_scale > 0.5 || item.type == 'site' || (item.type == 'rack' && current_scale > 0.1)" >
+<rect ng-attr-width="{{item.width(scaledX)}}"
+      ng-attr-height="{{item.height(scaledY)}}"
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
+      ng-attr-class="{{item.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
-      ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
+      ng-attr-class="{{item.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.right_extent(scaledX) - 10}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
-      ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
+      ng-attr-x="{{item.right_extent(scaledX) - 10}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
+      ng-attr-class="{{item.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.right_extent(scaledX) - 10}}"
-      ng-attr-y="{{group.bottom_extent(scaledY) - 10}}"
-      ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
+      ng-attr-x="{{item.right_extent(scaledX) - 10}}"
+      ng-attr-y="{{item.bottom_extent(scaledY) - 10}}"
+      ng-attr-class="{{item.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.bottom_extent(scaledY) - 10}}"
-      ng-attr-class="{{group.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.bottom_extent(scaledY) - 10}}"
+      ng-attr-class="{{item.selected && 'NetworkUI__group--selected' || 'NetworkUI--hidden'}}"/>
 
-<g ng-if="group.highlighted || group.selected">
+<g ng-if="item.highlighted || item.selected">
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
       class="NetworkUI__group"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.right_extent(scaledX) - 10}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
+      ng-attr-x="{{item.right_extent(scaledX) - 10}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
       class="NetworkUI__group"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.right_extent(scaledX) - 10}}"
-      ng-attr-y="{{group.bottom_extent(scaledY) - 10}}"
+      ng-attr-x="{{item.right_extent(scaledX) - 10}}"
+      ng-attr-y="{{item.bottom_extent(scaledY) - 10}}"
       class="NetworkUI__group"/>
 
 <rect ng-attr-width="10"
       ng-attr-height="10"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.bottom_extent(scaledY) - 10}}"
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.bottom_extent(scaledY) - 10}}"
       class="NetworkUI__group"/>
 </g>
 
-<rect ng-attr-width="{{group.width(scaledX)}}"
-      ng-attr-height="{{group.height(scaledY)}}"
-      ng-attr-x="{{group.left_extent(scaledX)}}"
-      ng-attr-y="{{group.top_extent(scaledY)}}"
+<rect ng-attr-width="{{item.width(scaledX)}}"
+      ng-attr-height="{{item.height(scaledY)}}"
+      ng-attr-x="{{item.left_extent(scaledX)}}"
+      ng-attr-y="{{item.top_extent(scaledY)}}"
       class="NetworkUI__group"/>
 
-<g ng-attr-transform="translate({{group.left_extent(scaledX)}},{{group.top_extent(scaledY)}})">
-<g ng-if="current_scale > 0.3">
-<text ng-attr-class="{{group.selected && ! group.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+<g ng-attr-transform="translate({{item.left_extent(scaledX)}},{{item.top_extent(scaledY)}})">
+<g ng-if="current_scale > 0.5 || item.type == 'site' || item.type == 'rack'">
+<text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
       filter="url(#selected)"
       text-anchor="left"
       x="20"
-      y="32"> {{group.name}} </text>
-<text class="NetworkUI__group-text" text-anchor="left" x="20" y="32">{{group.name}}{{group.edit_label?'_':''}}</text>
+      y="32"> {{item.name}} </text>
+<text class="NetworkUI__group-text" text-anchor="left" x="20" y="32">{{item.name}}{{item.edit_label?'_':''}}</text>
 </g>
 
+<g awx-net-rack></g>
 <g awx-net-site></g>
 </g>
 </g>

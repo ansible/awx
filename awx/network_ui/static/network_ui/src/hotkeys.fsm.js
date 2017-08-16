@@ -74,7 +74,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
 	}
     else if ($event.key === 'a') {
-        scope.first_controller.handle_message("NewDevice", new messages.NewDevice("rack"));
+        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("rack"));
         return;
 	}
     else if ($event.key === 'h') {
