@@ -22,7 +22,7 @@
                         y="-52"
                         ng-attr-width="{{100 + 4}}"
                         ng-attr-height="{{100 + 4}}"
-                        ng-attr-class="{{device.selected || device.remote_selected ? device.selected && device.remote_selected ? 'NetworkUI__switch--selected-conflict' : device.selected ? 'NetworkUI__switch--selected' : 'NetworkUI__switch--remote-selected' : 'NetworkUI--hidden'}}"
+                        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__switch--selected-conflict' : item.selected ? 'NetworkUI__switch--selected' : 'NetworkUI__switch--remote-selected' : 'NetworkUI--hidden'}}"
                         rx=10>
                     </rect>
                     <g class="NetworkUI__switch">
@@ -54,11 +54,11 @@
                           ng-attr-y2="-14"/>
                     <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate(28, -6) scale(2.0)"/>
                     </g>
-                    <g ng-show="device.icon || current_scale > 0.5">
-                    <text ng-attr-class="{{device.selected && ! device.edit_label ? 'NetworkUI__switch-text--selected' : 'NetworkUI--hidden'}}"
+                    <g ng-show="item.icon || current_scale > 0.5">
+                    <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__switch-text--selected' : 'NetworkUI--hidden'}}"
                           filter="url(#selected)"
                           text-anchor="middle"
 						  x="0"
-						  y="0"> {{device.name}} </text>
-                    <text class="NetworkUI__switch-text" text-anchor="middle" x="0" y="0">{{device.name}}{{device.edit_label?'_':''}}</text>
+						  y="0"> {{item.name}} </text>
+                    <text class="NetworkUI__switch-text" text-anchor="middle" x="0" y="0">{{item.name}}{{item.edit_label?'_':''}}</text>
                     </g>

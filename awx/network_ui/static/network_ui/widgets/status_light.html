@@ -1,10 +1,10 @@
-<g ng-if="device.working">
-    <path ng-attr-transform="translate({{-device.width}}, {{-device.height}}) rotate({{frame/3}})" class="NetworkUI__status-path" ng-attr-d="{{device.describeArc(0, 0, 10, 0, 270)}}"/>
+<g ng-if="item.working">
+    <path ng-attr-transform="translate({{-item.width}}, {{-item.height}}) rotate({{frame/3}})" class="NetworkUI__status-path" ng-attr-d="{{item.describeArc(0, 0, 10, 0, 270)}}"/>
 </g>
-<g ng-if="!device.working">
-<circle ng-attr-cx="{{-device.width}}"
-        ng-attr-cy="{{-device.height}}"
+<g ng-if="!item.working">
+<circle ng-attr-cx="{{-item.width}}"
+        ng-attr-cy="{{-item.height}}"
         r=10
-        ng-attr-class="{{device.status === null ? 'NetworkUI--hidden' : device.status ? 'NetworkUI__status--pass': 'NetworkUI__status--fail'}}">
+        ng-attr-class="{{item.status === null ? 'NetworkUI--hidden' : item.status ? 'NetworkUI__status--pass': 'NetworkUI__status--fail'}}">
 </circle>
 </g>
