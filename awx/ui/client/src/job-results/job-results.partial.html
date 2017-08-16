@@ -75,6 +75,22 @@
                          </div>
                      </div>
 
+                     <!-- EXPLANATION DETAIL -->
+                     <div class="JobResults-resultRow"
+                         ng-show="job.job_explanation">
+                         <label class="JobResults-resultRowLabel" translate>
+                             Explanation
+                         </label>
+                         <div class="JobResults-resultRowText">
+                             {{task_detail | limitTo:explanationLimit}}
+                             <span ng-show="explanationLimit && task_detail.length > explanationLimit">
+                                 <span>... </span>
+                                 <span class="JobResults-seeMoreLess" ng-click="explanationLimit=undefined">Show More</span>
+                             </span>
+                             <span ng-show="explanationLimit === undefined" class="JobResults-seeMoreLess" ng-click="explanationLimit=150">Show Less</span>
+                         </div>
+                     </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.started">
@@ -95,33 +111,6 @@
                         <div class="JobResults-resultRowText">
                             {{ (job.finished |
                                 longDate) || "Not Finished" }}
-                        </div>
-                    </div>
-
-                    <!-- EXPLANATION DETAIL -->
-                    <div class="JobResults-resultRow"
-                        ng-show="job.job_explanation">
-                        <label class="JobResults-resultRowLabel" translate>
-                            Explanation
-                        </label>
-                        <div class="JobResults-resultRowText"
-                            ng-show="!previousTaskFailed">
-                                {{job.job_explanation}}
-                        </div>
-                        <div class="jobResult-resultRowText "
-                        ng-show="previousTaskFailed">{{ 'Previous Task Failed' | translate }}
-                            <a
-                                href=""
-                                id="explanation_help"
-                                aw-pop-over="{{ task_detail }}"
-                                aw-pop-over-watch="task_detail"
-                                data-placement="bottom"
-                                data-container="body" class="help-link" over-title="Failure Detail"
-                                title=""
-                                tabindex="-1">
-                                    <i class="fa fa-question-circle">
-                                    </i>
-                            </a>
                         </div>
                     </div>
 

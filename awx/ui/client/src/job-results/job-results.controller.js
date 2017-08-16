@@ -22,6 +22,8 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var currentContext = 1;
     $scope.firstCounterFromSocket = -1;
 
+    $scope.explanationLimit = 150;
+
     // if the user enters the page mid-run, reset the search to include a param
     // to only grab events less than the first counter from the websocket events
     toDestroy.push($scope.$watch('firstCounterFromSocket', function(counter) {
