@@ -1,10 +1,11 @@
 let BaseModel;
 
-function OrganizationModel (method) {
+function OrganizationModel (method, resource, graft) {
     BaseModel.call(this, 'organizations');
 
-    return this.request(method)
-        .then(() => this);
+    this.Constructor = OrganizationModel;
+
+    return this.create(method, resource, graft);
 }
 
 function OrganizationModelLoader (_BaseModel_) {

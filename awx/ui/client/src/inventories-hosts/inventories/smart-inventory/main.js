@@ -9,7 +9,6 @@ import smartInventoryEdit from './edit/main';
 import smartInventoryForm from './smart-inventory.form';
 import smartInventoryHostFilter from './smart-inventory-host-filter/smart-inventory-host-filter.directive';
 import hostFilterModal from './smart-inventory-host-filter/host-filter-modal/host-filter-modal.directive';
-import SmartInventoryStrings from './smart-inventory.strings';
 
 export default
 angular.module('smartInventory', [
@@ -18,5 +17,4 @@ angular.module('smartInventory', [
     ])
     .factory('smartInventoryForm', smartInventoryForm)
     .directive('smartInventoryHostFilter', smartInventoryHostFilter)
-    .directive('hostFilterModal', hostFilterModal)
-    .service('SmartInventoryStrings', SmartInventoryStrings);
+    .directive('hostFilterModal', hostFilterModal);

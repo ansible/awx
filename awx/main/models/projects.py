@@ -23,7 +23,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin
 from awx.main.utils import update_scm_url
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
@@ -377,10 +377,18 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def _can_update(self):
         return bool(self.scm_type)
 
-    def _update_unified_job_kwargs(self, **kwargs):
+    def _update_unified_job_kwargs(self, create_kwargs, kwargs):
+        '''
+        :param create_kwargs: key-worded arguments to be updated and later used for creating unified job.
+        :type create_kwargs: dict
+        :param kwargs: request parameters used to override unified job template fields with runtime values.
+        :type kwargs: dict
+        :return: modified create_kwargs.
+        :rtype: dict
+        '''
         if self.scm_delete_on_next_update:
-            kwargs['scm_delete_on_update'] = True
-        return kwargs
+            create_kwargs['scm_delete_on_update'] = True
+        return create_kwargs
 
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
@@ -430,7 +438,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
 
-class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -512,8 +520,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
                         update_fields.append('scm_delete_on_next_update')
             parent_instance.save(update_fields=update_fields)
 
-    def cancel(self, job_explanation=None):
-        res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation)
+    def cancel(self, job_explanation=None, is_chain=False):
+        res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res and self.launch_type != 'sync':
             for inv_src in self.scm_inventory_updates.filter(status='running'):
                 inv_src.cancel(job_explanation='Source project update `{}` was canceled.'.format(self.name))

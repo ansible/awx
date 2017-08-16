@@ -13,29 +13,71 @@
 
 export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', function(rootScope, scope, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
-    scope.allSelected = [];
+    init();
 
-    // the object permissions are being added to
-    scope.object = scope.resourceData.data;
-    // array for all possible roles for the object
-    scope.roles = _.omit(scope.object.summary_fields.object_roles, (key) => {
-        return key.name === 'Read';
-    });
+    function init(){
 
-    // TODO: get working with api
-    // array w roles and descriptions for key
-    scope.roleKey = Object
-        .keys(scope.object.summary_fields.object_roles)
-        .map(function(key) {
-            return {
-                name: scope.object.summary_fields
-                    .object_roles[key].name,
-                description: scope.object.summary_fields
-                    .object_roles[key].description
-            };
+        let resources = ['users', 'teams'];
+
+        scope.allSelected = {};
+        _.each(resources, (type) => scope.allSelected[type] = {});
+
+        // the object permissions are being added to
+        scope.object = scope.resourceData.data;
+        // array for all possible roles for the object
+        scope.roles = _.omit(scope.object.summary_fields.object_roles, (key) => {
+            return key.name === 'Read';
         });
 
-    scope.showKeyPane = false;
+        // TODO: get working with api
+        // array w roles and descriptions for key
+        scope.roleKey = Object
+            .keys(scope.object.summary_fields.object_roles)
+            .map(function(key) {
+                return {
+                    name: scope.object.summary_fields
+                        .object_roles[key].name,
+                    description: scope.object.summary_fields
+                        .object_roles[key].description
+                };
+            });
+
+        scope.showKeyPane = false;
+
+        scope.tab = {
+            users: true,
+            teams: false,
+        };
+
+        // pop/push into unified collection of selected users & teams
+        scope.$on("selectedOrDeselected", function(e, value) {
+            let resourceType = scope.currentTab(),
+                item = value.value;
+
+            function buildName(user) {
+                return (user.first_name &&
+                    user.last_name) ?
+                    user.first_name + " " +
+                    user.last_name :
+                    user.username;
+            }
+
+            if (value.isSelected) {
+                if (item.type === 'user') {
+                    item.name = buildName(item);
+                }
+                scope.allSelected[resourceType][item.id] = item;
+                scope.allSelected[resourceType][item.id].roles = [];
+            } else {
+                delete scope.allSelected[resourceType][item.id];
+            }
+        });
+
+    }
+
+    scope.currentTab = function(){
+        return _.findKey(scope.tab, (tab) => tab);
+    };
 
     scope.removeObject = function(obj){
         _.remove(scope.allSelected, {id: obj.id});
@@ -46,61 +88,34 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         scope.showKeyPane = !scope.showKeyPane;
     };
 
-    // handle form tab changes
-    scope.toggleFormTabs = function(list) {
-        scope.usersSelected = (list === 'users');
-        scope.teamsSelected = !scope.usersSelected;
+    scope.hasSelectedRows = function(){
+        return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 
-    // pop/push into unified collection of selected users & teams
-    scope.$on("selectedOrDeselected", function(e, value) {
-        let item = value.value;
-
-        function buildName(user) {
-            return (user.first_name &&
-                user.last_name) ?
-                user.first_name + " " +
-                user.last_name :
-                user.username;
-        }
-
-        if (value.isSelected) {
-            if (item.type === 'user') {
-                item.name = buildName(item);
-            }
-            scope.allSelected.push(item);
-        } else {
-            _.remove(scope.allSelected, { id: item.id });
-        }
-    });
-
-    // update post url list
-    scope.$watch("allSelected", function(val) {
-        scope.posts = _
-            .flatten((val || [])
-                .map(function(owner) {
-                    var url = GetBasePath(owner.type + "s") + owner.id +
-                        "/roles/";
-
-                    return (owner.roles || [])
-                        .map(function(role) {
-                            return {
-                                url: url,
-                                id: role.value || role.id
-                            };
-                        });
-                }));
-    }, true);
+    scope.selectTab = function(selected){
+        _.each(scope.tab, (value, key, collection) => {
+           collection[key] = (selected === key);
+        });
+    };
 
     // post roles to api
     scope.updatePermissions = function() {
         Wait('start');
 
-        var requests = scope.posts
-            .map(function(post) {
-                Rest.setUrl(post.url);
-                return Rest.post({ "id": post.id });
+        let requests = [];
+
+        _.forEach(scope.allSelected, (selectedValues) => {
+            _.forEach(selectedValues, (selectedValue) => {
+                var url = GetBasePath(selectedValue.type + "s") + selectedValue.id +
+                    "/roles/";
+
+                 (selectedValue.roles || [])
+                    .map(function(role) {
+                        Rest.setUrl(url);
+                        requests.push(Rest.post({ "id": role.value || role.id }));
+                    });
             });
+        });
 
         $q.all(requests)
             .then(function() {

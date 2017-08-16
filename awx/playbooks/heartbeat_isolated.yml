@@ -6,7 +6,7 @@
   tasks:
 
     - name: Get capacity of the instance
-      tower_capacity:
+      awx_capacity:
 
     - name: Remove any stale temporary files
-      tower_isolated_cleanup:
+      awx_isolated_cleanup:

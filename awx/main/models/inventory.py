@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.db.models import Q
 
 # AWX
 from awx.api.versioning import reverse
@@ -29,8 +30,7 @@ from awx.main.fields import (
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.jobs import Job
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerInventoryUpdateMixin
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -335,7 +335,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         failed_hosts = active_hosts.filter(has_active_failures=True)
         active_groups = self.groups
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter( source__in=CLOUD_INVENTORY_SOURCES)
+        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
@@ -370,21 +370,24 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
     def clean_insights_credential(self):
-        if self.kind == 'smart':
+        if self.kind == 'smart' and self.insights_credential:
             raise ValidationError(_("Assignment not allowed for Smart Inventory"))
         if self.insights_credential and self.insights_credential.credential_type.kind != 'insights':
             raise ValidationError(_("Credential kind must be 'insights'."))
         return self.insights_credential
 
     @transaction.atomic
-    def schedule_deletion(self):
+    def schedule_deletion(self, user_id=None):
         from awx.main.tasks import delete_inventory
+        from awx.main.signals import activity_stream_delete
         if self.pending_deletion is True:
             raise RuntimeError("Inventory is already pending deletion.")
         self.pending_deletion = True
         self.save(update_fields=['pending_deletion'])
+        self.jobtemplates.clear()
+        activity_stream_delete(Inventory, self, inventory_delete_flag=True)
         self.websocket_emit_status('pending_deletion')
-        delete_inventory.delay(self.pk)
+        delete_inventory.delay(self.pk, user_id)
 
     def _update_host_smart_inventory_memeberships(self):
         if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:
@@ -1058,16 +1061,18 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_ec2_group_by_choices(cls):
         return [
-            ('availability_zone', _('Availability Zone')),
             ('ami_id', _('Image ID')),
+            ('availability_zone', _('Availability Zone')),
+            ('aws_account', _('Account')),
             ('instance_id', _('Instance ID')),
+            ('instance_state', _('Instance State')),
             ('instance_type', _('Instance Type')),
             ('key_pair', _('Key Name')),
             ('region', _('Region')),
             ('security_group', _('Security Group')),
             ('tag_keys', _('Tags')),
-            ('vpc_id', _('VPC ID')),
             ('tag_none', _('Tag None')),
+            ('vpc_id', _('VPC ID')),
         ]
 
     @classmethod
@@ -1312,7 +1317,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             # Schedule a new Project update if one is not already queued
             if self.source_project and not self.source_project.project_updates.filter(
                     status__in=['new', 'pending', 'waiting']).exists():
-                self.source_project.update()
+                self.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
@@ -1390,8 +1395,36 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
         return source
 
+    def clean_update_on_project_update(self):
+        if self.update_on_project_update is True and \
+                self.source == 'scm' and \
+                InventorySource.objects.filter(
+                    Q(inventory=self.inventory,
+                        update_on_project_update=True, source='scm') & 
+                    ~Q(id=self.id)).exists():
+            raise ValidationError(_("More than one SCM-based inventory source with update on project update per-inventory not allowed."))
+        return self.update_on_project_update
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
+    def clean_update_on_launch(self):
+        if self.update_on_project_update is True and \
+                self.source == 'scm' and \
+                self.update_on_launch is True:
+            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "        
+                                    "Instead, configure the corresponding source project to update on launch."))
+        return self.update_on_launch
+
+    def clean_overwrite_vars(self):
+        if self.source == 'scm' and not self.overwrite_vars:
+            raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true`."))
+        return self.overwrite_vars
+
+    def clean_source_path(self):
+        if self.source != 'scm' and self.source_path:
+            raise ValidationError(_("Cannot set source_path if not SCM type."))
+        return self.source_path
+
+
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -1502,26 +1535,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
             organization_groups = []
         if self.inventory_source.inventory is not None:
             inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
-        template_groups = [x for x in super(InventoryUpdate, self).preferred_instance_groups]
-        selected_groups = template_groups + inventory_groups + organization_groups
+        selected_groups = inventory_groups + organization_groups
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
 
-    def _build_job_explanation(self):
-        if not self.job_explanation:
-            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                   (self.model_to_str(), self.name, self.id)
-        return None
-
-    def get_dependent_jobs(self):
-        return Job.objects.filter(dependent_jobs__in=[self.id])
-
-    def cancel(self, job_explanation=None):
-
-        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation)
+    def cancel(self, job_explanation=None, is_chain=False):
+        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res:
-            map(lambda x: x.cancel(job_explanation=self._build_job_explanation()), self.get_dependent_jobs())
             if self.launch_type != 'scm' and self.source_project_update:
                 self.source_project_update.cancel(job_explanation=job_explanation)
         return res

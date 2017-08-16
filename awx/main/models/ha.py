@@ -5,6 +5,8 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+from django.utils.timezone import now, timedelta
 
 from solo.models import SingletonModel
 
@@ -19,7 +21,7 @@ __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
-    """A model representing an Ansible Tower instance running against this database."""
+    """A model representing an AWX instance running against this database."""
     objects = InstanceManager()
 
     uuid = models.CharField(max_length=40)
@@ -51,11 +53,19 @@ class Instance(models.Model):
     @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
-        return "tower"
+        return "awx"
+
+    def is_lost(self, ref_time=None, isolated=False):
+        if ref_time is None:
+            ref_time = now()
+        grace_period = 120
+        if isolated:
+            grace_period = settings.AWX_ISOLATED_PERIODIC_CHECK * 2
+        return self.modified < ref_time - timedelta(seconds=grace_period)
 
 
 class InstanceGroup(models.Model):
-    """A model representing a Queue/Group of Tower Instances."""
+    """A model representing a Queue/Group of AWX Instances."""
     name = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

@@ -535,6 +535,7 @@ register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('Google OAuth2 Key'),
     help_text=_('The OAuth2 key from your web application at https://console.developers.google.com/.'),
     category=_('Google OAuth2'),
@@ -546,6 +547,7 @@ register(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('Google OAuth2 Secret'),
     help_text=_('The OAuth2 secret from your web application at https://console.developers.google.com/.'),
     category=_('Google OAuth2'),
@@ -627,6 +629,7 @@ register(
     'SOCIAL_AUTH_GITHUB_KEY',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub OAuth2 Key'),
     help_text=_('The OAuth2 key (Client ID) from your GitHub developer application.'),
     category=_('GitHub OAuth2'),
@@ -637,6 +640,7 @@ register(
     'SOCIAL_AUTH_GITHUB_SECRET',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub OAuth2 Secret'),
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub developer application.'),
     category=_('GitHub OAuth2'),
@@ -691,6 +695,7 @@ register(
     'SOCIAL_AUTH_GITHUB_ORG_KEY',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Organization OAuth2 Key'),
     help_text=_('The OAuth2 key (Client ID) from your GitHub organization application.'),
     category=_('GitHub Organization OAuth2'),
@@ -701,6 +706,7 @@ register(
     'SOCIAL_AUTH_GITHUB_ORG_SECRET',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Organization OAuth2 Secret'),
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub organization application.'),
     category=_('GitHub Organization OAuth2'),
@@ -712,6 +718,7 @@ register(
     'SOCIAL_AUTH_GITHUB_ORG_NAME',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Organization Name'),
     help_text=_('The name of your GitHub organization, as used in your '
                 'organization\'s URL: https://github.com/<yourorg>/.'),
@@ -766,6 +773,7 @@ register(
     'SOCIAL_AUTH_GITHUB_TEAM_KEY',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Team OAuth2 Key'),
     help_text=_('The OAuth2 key (Client ID) from your GitHub organization application.'),
     category=_('GitHub Team OAuth2'),
@@ -776,6 +784,7 @@ register(
     'SOCIAL_AUTH_GITHUB_TEAM_SECRET',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Team OAuth2 Secret'),
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub organization application.'),
     category=_('GitHub Team OAuth2'),
@@ -787,6 +796,7 @@ register(
     'SOCIAL_AUTH_GITHUB_TEAM_ID',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('GitHub Team ID'),
     help_text=_('Find the numeric team ID using the Github API: '
                 'http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
@@ -841,6 +851,7 @@ register(
     'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('Azure AD OAuth2 Key'),
     help_text=_('The OAuth2 key (Client ID) from your Azure AD application.'),
     category=_('Azure AD OAuth2'),
@@ -851,6 +862,7 @@ register(
     'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('Azure AD OAuth2 Secret'),
     help_text=_('The OAuth2 secret (Client Secret) from your Azure AD application.'),
     category=_('Azure AD OAuth2'),
@@ -970,13 +982,7 @@ register(
 register(
     'SOCIAL_AUTH_SAML_ORG_INFO',
     field_class=fields.SAMLOrgInfoField,
-    default=collections.OrderedDict([
-        ('en-US', collections.OrderedDict([
-            ('name', 'example'),
-            ('displayname', 'Example'),
-            ('url', 'http://www.example.com'),
-        ])),
-    ]),
+    required=True,
     label=_('SAML Service Provider Organization Info'),
     help_text=_('Configure this setting with information about your app.'),
     category=_('SAML'),
@@ -995,10 +1001,7 @@ register(
     'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT',
     field_class=fields.SAMLContactField,
     allow_blank=True,
-    default=collections.OrderedDict([
-        ('givenName', 'Technical Contact'),
-        ('emailAddress', 'techsup@example.com'),
-    ]),
+    required=True,
     label=_('SAML Service Provider Technical Contact'),
     help_text=_('Configure this setting with your contact information.'),
     category=_('SAML'),
@@ -1014,10 +1017,7 @@ register(
     'SOCIAL_AUTH_SAML_SUPPORT_CONTACT',
     field_class=fields.SAMLContactField,
     allow_blank=True,
-    default=collections.OrderedDict([
-        ('givenName', 'Support Contact'),
-        ('emailAddress', 'support@example.com'),
-    ]),
+    required=True,
     label=_('SAML Service Provider Support Contact'),
     help_text=_('Configure this setting with your contact information.'),
     category=_('SAML'),
@@ -1106,8 +1106,8 @@ def tacacs_validate(serializer, attrs):
     secret = serializer.instance.TACACSPLUS_SECRET
     if 'TACACSPLUS_SECRET' in attrs:
         secret = attrs['TACACSPLUS_SECRET']
-    if bool(host) ^ bool(secret):
-        errors.append('TACACSPLUS_HOST and TACACSPLUS_SECRET can only be both empty or both populated.')
+    if host and not secret:
+        errors.append('TACACSPLUS_SECRET is required when TACACSPLUS_HOST is provided.')
     if errors:
         raise serializers.ValidationError(_('\n'.join(errors)))
     return attrs

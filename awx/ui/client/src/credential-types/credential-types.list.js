@@ -14,18 +14,21 @@ export default ['i18n', function(i18n){
         iterator: 'credential_type',
         index: false,
         hover: false,
+        search: {
+            managed_by_tower: 'false'
+        },
 
         fields: {
             name: {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-8',
-                awToolTip: '{{credential_type.description}}',
+                modalColumnClass: 'col-md-11',
+                awToolTip: '{{credential_type.description | sanitize}}',
                 dataPlacement: 'top'
             },
             kind: {
-                label: i18n._('Type'),
+                label: i18n._('Kind'),
                 ngBind: 'credential_type.kind_label',
                 excludeModal: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'

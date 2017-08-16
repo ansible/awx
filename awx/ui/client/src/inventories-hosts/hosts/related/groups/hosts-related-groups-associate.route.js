@@ -26,7 +26,6 @@ export default {
     onExit: function($state) {
         if ($state.transition) {
             $('#associate-groups-modal').modal('hide');
-            $('.modal-backdrop').remove();
             $('body').removeClass('modal-open');
         }
     },

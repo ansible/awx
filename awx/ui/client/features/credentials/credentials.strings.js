@@ -5,27 +5,27 @@ function CredentialsStrings (BaseString) {
     let ns = this.credentials;
 
     ns.state = {
-        ADD_BREADCRUMB_LABEL: t('CREATE CREDENTIAL'),
-        EDIT_BREADCRUMB_LABEL: t('EDIT CREDENTIAL')
+        ADD_BREADCRUMB_LABEL: t.s('CREATE CREDENTIAL'),
+        EDIT_BREADCRUMB_LABEL: t.s('EDIT CREDENTIAL')
     };
 
     ns.tab = {
-        DETAILS: t('Details'),
-        PERMISSIONS: t('Permissions')
+        DETAILS: t.s('Details'),
+        PERMISSIONS: t.s('Permissions')
     };
 
     ns.inputs = {
-        GROUP_TITLE: t('Type Details'),
-        ORGANIZATION_PLACEHOLDER: t('SELECT AN ORGANIZATION'),
-        CREDENTIAL_TYPE_PLACEHOLDER: t('SELECT A CREDENTIAL TYPE')
+        GROUP_TITLE: t.s('Type Details'),
+        ORGANIZATION_PLACEHOLDER: t.s('SELECT AN ORGANIZATION'),
+        CREDENTIAL_TYPE_PLACEHOLDER: t.s('SELECT A CREDENTIAL TYPE')
     };
 
     ns.add = {
-        PANEL_TITLE: t('NEW CREDENTIAL')
+        PANEL_TITLE: t.s('NEW CREDENTIAL')
     };
 
     ns.permissions = {
-        TITLE: t('CREDENTIALS PERMISSIONS')
+        TITLE: t.s('CREDENTIALS PERMISSIONS')
     };
 }
 

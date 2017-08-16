@@ -65,8 +65,10 @@ class Setting(CreatedModifiedModel):
         # After saving a new instance for the first time, set the encrypted
         # field and save again.
         if encrypted and new_instance:
-            self.value = self._saved_value
-            self.save(update_fields=['value'])
+            from awx.main.signals import disable_activity_stream
+            with disable_activity_stream():
+                self.value = self._saved_value
+                self.save(update_fields=['value'])
 
     @classmethod
     def get_cache_key(self, key):

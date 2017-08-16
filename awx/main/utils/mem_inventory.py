@@ -95,7 +95,7 @@ class MemHost(MemObject):
         self.instance_id = None
         self.name = name
         if port:
-            # was `ansible_ssh_port` in older Ansible/Tower versions
+            # was `ansible_ssh_port` in older Ansible versions
             self.variables['ansible_port'] = port
         logger.debug('Loaded host: %s', self.name)
 

@@ -1,7 +1,3 @@
-@import '../shared/branding/colors.less';
-@import '../shared/branding/colors.default.less';
-@import '../shared/layouts/one-plus-two.less';
-
 @breakpoint-md: 1200px;
 
 .JobResults {
@@ -16,7 +12,7 @@
 
 .JobResults-leftSide {
     .OnePlusTwo-left--panel(100%, @breakpoint-md);
-    max-width: 33%;
+    max-width: 30%;
     height: ~"calc(100vh - 177px)";
 
     @media screen and (max-width: @breakpoint-md) {
@@ -68,12 +64,16 @@
 
 .JobResults-resultRow--variables {
     flex-direction: column;
+
+    #cm-variables-container {
+        width: 100%;
+    }
 }
 
 .JobResults-resultRowLabel {
     text-transform: uppercase;
     color: @default-interface-txt;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: normal!important;
     width: 30%;
     margin-right: 20px;
@@ -114,14 +114,13 @@
 
 .JobResults-isolatedBadge {
     align-items: center;
-    align-self: center;
     background-color: @default-list-header-bg;
     border-radius: 5px;
     color: @default-stdout-txt;
     display: flex;
     font-size: 10px;
     height: 16px;
-    margin-left: 10px;
+    margin: 3px 0 0 10px;
     padding: 0 10px;
     text-transform: uppercase;
 }

@@ -19,7 +19,7 @@ export default ['i18n', function(i18n) {
         editTitle: i18n._('COMPLETED JOBS'),
         index: false,
         hover: true,
-        well: false,
+        well: true,
         emptyListText: i18n._('No completed jobs'),
 
         fields: {

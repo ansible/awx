@@ -9,7 +9,8 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-GCLOUD_AUTH ?=
+IMAGE_REPOSITORY_AUTH ?=
+IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
 VERSION=$(shell git describe --long)
 VERSION3=$(shell git describe --long | sed 's/\-g.*//')
@@ -24,7 +25,7 @@ VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
-DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering/
+DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
@@ -44,45 +45,39 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
+
 ifeq ($(OFFICIAL),yes)
-    RELEASE ?= 1
-    AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
+    VERSION_TARGET ?= $(RELEASE_VERSION)
 else
-    RELEASE ?= 0.git$(shell git describe --long | cut -d - -f 2-2)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
+    VERSION_TARGET ?= $(VERSION3DOT)
 endif
 
 # TAR build parameters
 ifeq ($(OFFICIAL),yes)
-    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)
     SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
+    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
 else
-    SETUP_TAR_NAME=$(NAME)-setup-$(RELEASE_VERSION)-$(RELEASE)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)-$(RELEASE)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
+    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
 endif
 
 SDIST_COMMAND ?= sdist
+WHEEL_COMMAND ?= bdist_wheel
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
-
-SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
-SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
-SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
+WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
 UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
-.DEFAULT_GOAL := build
+I18N_FLAG_FILE = .i18n_built
 
-.PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
+.PHONY: clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_ansible test_coverage coverage_html \
-	test_jenkins dev_build release_build release_clean sdist rpmtar mock-rpm \
-	mock-srpm rpm-sign deb deb-src debian debsign pbuilder \
-	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
-	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
+	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
+	ui-test ui-deps ui-test-ci ui-test-saucelabs VERSION
 
 # remove ui build artifacts
 clean-ui:
@@ -113,6 +108,7 @@ clean: clean-ui clean-dist
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
+	rm -f VERSION
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -125,14 +121,6 @@ guard-%:
 	    exit 1; \
 	fi
 
-# Fetch from origin, rebase local commits on top of origin commits.
-rebase:
-	git pull --rebase origin master
-
-# Push changes to origin.
-push:
-	git push origin master
-
 virtualenv: virtualenv_ansible virtualenv_awx
 
 virtualenv_ansible:
@@ -143,7 +131,7 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
@@ -156,7 +144,7 @@ virtualenv_awx:
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			virtualenv --system-site-packages $(VENV_BASE)/awx && \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
 		fi; \
 	fi
@@ -217,18 +205,19 @@ version_file:
 	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version
 
 # Do any one-time init tasks.
+comma := ,
 init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) register_instance --hostname=$(COMPOSE_HOST); \
+	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
 	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
-	if [ "$(EXTRA_GROUP_QUEUES)" == "thepentagon" ]; then \
-		$(MANAGEMENT_COMMAND) register_instance --hostname=isolated; \
+	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
+		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
 		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
-	elif [ "$(EXTRA_GROUP_QUEUES)" != "" ]; then \
-		$(MANAGEMENT_COMMAND) register_queue --queuename=$(EXTRA_GROUP_QUEUES) --hostnames=$(COMPOSE_HOST); \
+	elif [ "$(AWX_GROUP_QUEUES)" != "tower" ]; then \
+		$(MANAGEMENT_COMMAND) register_queue --queuename=$(firstword $(subst $(comma), ,$(AWX_GROUP_QUEUES))) --hostnames=$(COMPOSE_HOST); \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -331,7 +320,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,tower,$(COMPOSE_HOST),$(EXTRA_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,$(COMPOSE_HOST),$(AWX_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -407,10 +396,6 @@ coverage_html:
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
-
-# Run unit tests to produce output for Jenkins.
-# Alias existing make target so old versions run against Jekins the same way
-test_jenkins : test_coverage
 
 # Make fake data
 DATA_GEN_PRESET = ""
@@ -531,11 +516,11 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-dist/$(SDIST_TAR_FILE): ui-release
-	BUILD="$(BUILD)" $(PYTHON) setup.py $(SDIST_COMMAND)
+dist/$(SDIST_TAR_FILE): ui-release VERSION
+	$(PYTHON) setup.py $(SDIST_COMMAND)
 
-dist/ansible-tower.tar.gz: ui-release
-	OFFICIAL="yes" $(PYTHON) setup.py sdist
+dist/$(WHEEL_FILE): ui-release
+	$(PYTHON) setup.py $(WHEEL_COMMAND)
 
 sdist: dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
@@ -543,18 +528,24 @@ sdist: dist/$(SDIST_TAR_FILE)
 	@echo dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 
+wheel: dist/$(WHEEL_FILE)
+	@echo "#############################################"
+	@echo "Artifacts:"
+	@echo dist/$(WHEEL_FILE)
+	@echo "#############################################"
+
 # Build setup bundle tarball
 setup-bundle-build:
 	mkdir -p $@
 
 docker-auth:
-	if [ "$(GCLOUD_AUTH)" ]; then \
-		docker login -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io; \
+	if [ "$(IMAGE_REPOSITORY_AUTH)" ]; then \
+		docker login -u oauth2accesstoken -p "$(IMAGE_REPOSITORY_AUTH)" $(IMAGE_REPOSITORY_BASE); \
 	fi;
 
 # Docker isolated rampart
 docker-isolated:
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
 	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub`" ]; then \
@@ -562,29 +553,31 @@ docker-isolated:
 	else \
 		docker exec "tools_isolated_1" bash -c "mkdir -p /root/.ssh && rm -f /root/.ssh/authorized_keys && echo $$(docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"; \
 	fi
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate awx
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml up --no-recreate awx
 
 docker-compose-cluster: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
-	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports awx /bin/bash
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
-docker-compose-build: awx-devel-build awx-isolated-build
+docker-compose-build: awx-devel-build
 
+# Base development image build
 awx-devel-build:
 	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
-	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)awx_devel:$(COMPOSE_TAG)
+	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
+# For use when developing on "isolated" AWX deployments
 awx-isolated-build:
 	docker build -t ansible/awx_isolated -f tools/docker-isolated/Dockerfile .
-	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
-	#docker push $(DEV_DOCKER_TAG_BASE)awx_isolated:$(COMPOSE_TAG)
+	docker tag ansible/awx_isolated $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
+	#docker push $(DEV_DOCKER_TAG_BASE)/awx_isolated:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
@@ -596,10 +589,10 @@ docker-refresh: docker-clean docker-compose
 
 # Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-cluster-elk: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 clean-elk:
 	docker stop tools_kibana_1
@@ -611,3 +604,13 @@ clean-elk:
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
+
+VERSION:
+	echo $(VERSION_TARGET) > $@
+
+production-openshift-image: sdist
+	cat installer/openshift/Dockerfile | sed "s/{{ version }}/$(VERSION_TARGET)/g" | sed "s/{{ tar }}/$(SDIST_TAR_FILE)/g" > ./Dockerfile.production
+	cp installer/openshift/Dockerfile.celery ./Dockerfile.celery.production
+	docker build -t awx_web -f ./Dockerfile.production .
+	docker build -t awx_task -f ./Dockerfile.celery.production .
+

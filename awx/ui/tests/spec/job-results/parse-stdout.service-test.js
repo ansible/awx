@@ -21,14 +21,14 @@ describe('parseStdoutService', () => {
     describe('prettify()', () => {
         it('returns lines of stdout with styling classes', () => {
             let line = "[0;32mok: [host-00][0m",
-            styledLine = '<span class="ansi32">ok: [host-00]</span>';
+            styledLine = '<span class="ansi32">ok: [host-00]</span>';
             expect(parseStdoutService.prettify(line)).toBe(styledLine);
         });
 
         it('can return lines of stdout without styling classes', () => {
-            let line = "[0;32mok: [host-00][0m",
+            let line = "[0;32mok: [host-00][0m",
             unstyled = "unstyled",
-            unstyledLine = 'ok: [host-00]';
+            unstyledLine = 'ok: [host-00]';
             expect(parseStdoutService.prettify(line, unstyled)).toBe(unstyledLine);
         });
 

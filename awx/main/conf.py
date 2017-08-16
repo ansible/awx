@@ -175,6 +175,7 @@ register(
 register(
     'AWX_ISOLATED_CHECK_INTERVAL',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Isolated status check interval'),
     help_text=_('The number of seconds to sleep between status checks for jobs running on isolated instances.'),
     category=_('Jobs'),
@@ -184,6 +185,7 @@ register(
 register(
     'AWX_ISOLATED_LAUNCH_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Isolated launch timeout'),
     help_text=_('The timeout (in seconds) for launching jobs on isolated instances.  '
                 'This includes the time needed to copy source control files (playbooks) to the isolated instance.'),
@@ -194,10 +196,23 @@ register(
 register(
     'AWX_ISOLATED_CONNECTION_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     default=10,
     label=_('Isolated connection timeout'),
     help_text=_('Ansible SSH connection timeout (in seconds) to use when communicating with isolated instances. '
                 'Value should be substantially greater than expected network latency.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'AWX_ISOLATED_KEY_GENERATION',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Generate RSA keys for isolated instances'),
+    help_text=_('If set, a random RSA key will be generated and distributed to '
+                'isolated instances.  To disable this behavior and manage authentication '
+                'for isolated instances outside of Tower, disable this setting.'),  # noqa
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -208,6 +223,7 @@ register(
     default='',
     allow_blank=True,
     encrypted=True,
+    read_only=True,
     label=_('The RSA private key for SSH traffic to isolated instances'),
     help_text=_('The RSA private key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
@@ -219,6 +235,7 @@ register(
     field_class=fields.CharField,
     default='',
     allow_blank=True,
+    read_only=True,
     label=_('The RSA public key for SSH traffic to isolated instances'),
     help_text=_('The RSA public key for SSH traffic to isolated instances'),  # noqa
     category=_('Jobs'),
@@ -329,6 +346,7 @@ register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator'),
     help_text=_('Hostname/IP where external logs will be sent to.'),
     category=_('Logging'),
@@ -338,6 +356,7 @@ register(
     'LOG_AGGREGATOR_PORT',
     field_class=fields.IntegerField,
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator Port'),
     help_text=_('Port on Logging Aggregator to send logs to (if required and not'
                 ' provided in Logging Aggregator).'),
@@ -350,6 +369,7 @@ register(
     field_class=fields.ChoiceField,
     choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
     allow_null=True,
+    default=None,
     label=_('Logging Aggregator Type'),
     help_text=_('Format messages for the chosen log aggregator.'),
     category=_('Logging'),

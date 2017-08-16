@@ -7,33 +7,24 @@ from django.core.exceptions import ValidationError
 from awx.main.models import (
     UnifiedJob,
     InventoryUpdate,
-    Job,
     Inventory,
     Credential,
     CredentialType,
+    InventorySource,
 )
 
 
-@pytest.fixture
-def dependent_job(mocker):
-    j = Job(id=3, name='I_am_a_job')
-    j.cancel = mocker.MagicMock(return_value=True)
-    return [j]
-
-
-def test_cancel(mocker, dependent_job):
+def test_cancel(mocker):
     with mock.patch.object(UnifiedJob, 'cancel', return_value=True) as parent_cancel:
         iu = InventoryUpdate()
 
-        iu.get_dependent_jobs = mocker.MagicMock(return_value=dependent_job)
         iu.save = mocker.MagicMock()
         build_job_explanation_mock = mocker.MagicMock()
         iu._build_job_explanation = mocker.MagicMock(return_value=build_job_explanation_mock)
 
         iu.cancel()
 
-        parent_cancel.assert_called_with(job_explanation=None)
-        dependent_job[0].cancel.assert_called_with(job_explanation=build_job_explanation_mock)
+        parent_cancel.assert_called_with(is_chain=False, job_explanation=None)
         
 
 def test__build_job_explanation():
@@ -64,6 +55,12 @@ def test_invalid_clean_insights_credential():
     assert json.dumps(str(e.value)) == json.dumps(str([u"Credential kind must be 'insights'."]))
 
 
+def test_valid_kind_clean_insights_credential():
+    inv = Inventory(kind='smart')
+
+    inv.clean_insights_credential()
+
+
 def test_invalid_kind_clean_insights_credential():
     cred_type = CredentialType.defaults['insights']()
     insights_cred = Credential(credential_type=cred_type)
@@ -73,3 +70,49 @@ def test_invalid_kind_clean_insights_credential():
         inv.clean_insights_credential()
 
     assert json.dumps(str(e.value)) == json.dumps(str([u'Assignment not allowed for Smart Inventory']))
+
+
+class TestControlledBySCM(): 
+    @pytest.mark.parametrize('source', [
+        'scm',
+        'ec2',
+        'manual',
+    ])
+    def test_clean_overwrite_vars_valid(self, source):
+        inv_src = InventorySource(overwrite_vars=True,
+                                  source=source)
+
+        inv_src.clean_overwrite_vars()
+
+    def test_clean_overwrite_vars_invalid(self):
+        inv_src = InventorySource(overwrite_vars=False,
+                                  source='scm')
+
+        with pytest.raises(ValidationError):
+            inv_src.clean_overwrite_vars()
+
+    def test_clean_source_path_valid(self):
+        inv_src = InventorySource(source_path='/not_real/',
+                                  source='scm')
+
+        inv_src.clean_source_path()
+
+    @pytest.mark.parametrize('source', [
+        'ec2',
+        'manual',
+    ])
+    def test_clean_source_path_invalid(self, source):
+        inv_src = InventorySource(source_path='/not_real/',
+                                  source=source)
+        
+        with pytest.raises(ValidationError):
+            inv_src.clean_source_path()
+
+    def test_clean_update_on_launch_update_on_project_update(self):
+        inv_src = InventorySource(update_on_project_update=True,
+                                  update_on_launch=True,
+                                  source='scm')
+
+        with pytest.raises(ValidationError):
+            inv_src.clean_update_on_launch()
+

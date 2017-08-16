@@ -9,7 +9,8 @@
          return function(params) {
              var url = params.url,
                  scope_var = params.scope_var,
-                 scope = params.scope;
+                 scope = params.scope,
+                 callback = params.callback;
              Rest.setUrl(url);
              Rest.get()
                  .success(function(data) {
@@ -18,6 +19,10 @@
                      }
                      if (!Empty(data.name)) {
                          scope[scope_var + '_name'] = data.name;
+                     }
+
+                     if (callback) {
+                        scope.$emit(callback, data);
                      }
                  })
                  .error(function(data, status) {

@@ -98,7 +98,7 @@ jsonpointer==1.10         # via jsonpatch
 jsonschema==2.6.0
 keyring==10.3.3           # via msrestazure
 keystoneauth1==2.21.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
-kombu==3.0.37             # via asgi-amqp, celery
+kombu==3.0.35             # via asgi-amqp, celery
 lxml==3.8.0               # via pyvmomi
 m2crypto==0.25.1
 markdown==2.6.7
@@ -131,6 +131,7 @@ ptyprocess==0.5.1         # via pexpect
 pyasn1-modules==0.0.9     # via service-identity
 pyasn1==0.2.3             # via pyasn1-modules, service-identity
 pycparser==2.17           # via cffi
+pycrypto==2.6.1
 pygerduty==0.35.2
 pyjwt==1.5.0              # via adal, python-social-auth, twilio
 pyopenssl==17.0.0         # via pyvmomi, service-identity, twilio
@@ -187,4 +188,4 @@ zope.interface==4.4.2     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==9.0.1
-setuptools==35.0.2
+setuptools==36.0.1

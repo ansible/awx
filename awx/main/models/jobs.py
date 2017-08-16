@@ -38,7 +38,7 @@ from awx.main.utils import (
     parse_yaml_or_json,
 )
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
 from awx.main.fields import JSONField
 
@@ -314,7 +314,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             resources_needed_to_start.append('inventory')
             if not self.ask_inventory_on_launch:
                 validation_errors['inventory'] = [_("Job Template must provide 'inventory' or allow prompting for it."),]
-        if self.credential is None:
+        if self.credential is None and self.vault_credential is None:
             resources_needed_to_start.append('credential')
             if not self.ask_credential_on_launch:
                 validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
@@ -377,6 +377,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
             credential=self.ask_credential_on_launch,
+            vault_credential=self.ask_credential_on_launch,
             extra_credentials=self.ask_credential_on_launch,
         )
 
@@ -449,7 +450,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -695,7 +696,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if not super(Job, self).can_start:
             return False
 
-        if not (self.credential):
+        if not (self.credential) and not (self.vault_credential):
             return False
 
         return True
@@ -704,30 +705,22 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     JobNotificationMixin
     '''
     def get_notification_templates(self):
+        if not self.job_template:
+            return NotificationTemplate.objects.none()
         return self.job_template.notification_templates
 
     def get_notification_friendly_name(self):
         return "Job"
-
-    '''
-    Canceling a job also cancels the implicit project update with launch_type
-    run.
-    '''
-    def cancel(self, job_explanation=None):
-        res = super(Job, self).cancel(job_explanation=job_explanation)
-        if self.project_update:
-            self.project_update.cancel(job_explanation=job_explanation)
-        return res
 
     @property
     def memcached_fact_key(self):
         return '{}'.format(self.inventory.id)
 
     def memcached_fact_host_key(self, host_name):
-        return '{}-{}'.format(self.inventory.id, base64.b64encode(host_name))
+        return '{}-{}'.format(self.inventory.id, base64.b64encode(host_name.encode('utf-8')))
 
     def memcached_fact_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self.inventory.id, base64.b64encode(host_name))
+        return '{}-{}-modified'.format(self.inventory.id, base64.b64encode(host_name.encode('utf-8')))
 
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
         return self.inventory.hosts.only(*only)

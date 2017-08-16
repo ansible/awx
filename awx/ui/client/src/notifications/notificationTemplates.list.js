@@ -32,7 +32,7 @@ export default ['i18n', function(i18n){
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 linkTo: '/#/notification_templates/{{notification_template.id}}',
-                awToolTip: '{{notification_template.description}}',
+                awToolTip: '{{notification_template.description | sanitize}}',
                 dataPlacement: 'top'
             },
             notification_type: {

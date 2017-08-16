@@ -15,8 +15,6 @@ export default
                     break;
                     case 'ssh':
                         scope.usernameLabel = i18n._('Username'); //formally 'SSH Username'
-                        scope.becomeUsernameLabel = i18n._('Privilege Escalation Username');
-                        scope.becomePasswordLabel = i18n._('Privilege Escalation Password');
                     break;
                     case 'scm':
                         scope.sshKeyDataLabel = i18n._('SCM Private Key');

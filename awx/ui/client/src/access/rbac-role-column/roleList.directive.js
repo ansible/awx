@@ -75,7 +75,7 @@ export default
                         } else {
                             Prompt({
                                 hdr: `User access removal`,
-                                body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
+                                body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${$filter('sanitize')(user.username)}</span>.</div>`,
                                 action: action,
                                 actionText: 'REMOVE'
                             });

@@ -613,6 +613,8 @@ class InventoryAccess(BaseAccess):
                            for o in Job.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES)])
+        active_jobs.extend([dict(type="ad_hoc_command", id=o.id)
+                            for o in AdHocCommand.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
             raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
@@ -788,14 +790,11 @@ class InventorySourceAccess(BaseAccess):
         if not self.check_related('source_project', Project, data, role_field='use_role'):
             return False
         # Checks for admin or change permission on inventory.
-        return (
-            self.check_related('inventory', Inventory, data) and
-            not InventorySource.objects.filter(
-                inventory=data.get('inventory'),
-                update_on_project_update=True, source='scm').exists())
+        return self.check_related('inventory', Inventory, data)
 
     def can_delete(self, obj):
-        if not (self.user.is_superuser or not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None))):
+        if not self.user.is_superuser and \
+                not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None)):
             return False
         active_jobs_qs = InventoryUpdate.objects.filter(inventory_source=obj, status__in=ACTIVE_STATES)
         if active_jobs_qs.exists():
@@ -819,7 +818,7 @@ class InventorySourceAccess(BaseAccess):
 
     def can_start(self, obj, validate_license=True):
         if obj and obj.inventory:
-            return obj.can_update and self.user in obj.inventory.update_role
+            return self.user in obj.inventory.update_role
         return False
 
 
@@ -1391,26 +1390,45 @@ class JobAccess(BaseAccess):
 
         inventory_access = obj.inventory and self.user in obj.inventory.use_role
         credential_access = obj.credential and self.user in obj.credential.use_role
+        job_extra_credentials = set(obj.extra_credentials.all())
+        if job_extra_credentials:
+            credential_access = False
 
         # Check if JT execute access (and related prompts) is sufficient
         if obj.job_template is not None:
             prompts_access = True
             job_fields = {}
+            jt_extra_credentials = set(obj.job_template.extra_credentials.all())
             for fd in obj.job_template._ask_for_vars_dict():
+                if fd == 'extra_credentials':
+                    job_fields[fd] = job_extra_credentials
                 job_fields[fd] = getattr(obj, fd)
             accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
+            # Check if job fields are not allowed by current _on_launch settings
             for fd in ignored_fields:
-                if fd == 'extra_credentials':
-                    if set(job_fields[fd].all()) != set(getattr(obj.job_template, fd).all()):
+                if fd == 'extra_vars':
+                    continue  # we cannot yet validate validity of prompted extra_vars
+                elif fd == 'extra_credentials':
+                    if job_extra_credentials != jt_extra_credentials:
                         # Job has extra_credentials that are not promptable
                         prompts_access = False
-                elif fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
+                        break
+                elif job_fields[fd] != getattr(obj.job_template, fd):
                     # Job has field that is not promptable
                     prompts_access = False
-            if obj.credential != obj.job_template.credential and not credential_access:
-                prompts_access = False
-            if obj.inventory != obj.job_template.inventory and not inventory_access:
-                prompts_access = False
+                    break
+            # For those fields that are allowed by prompting, but differ
+            # from JT, assure that user has explicit access to them
+            if prompts_access:
+                if obj.credential != obj.job_template.credential and not credential_access:
+                    prompts_access = False
+                if obj.inventory != obj.job_template.inventory and not inventory_access:
+                    prompts_access = False
+                if prompts_access and job_extra_credentials != jt_extra_credentials:
+                    for cred in job_extra_credentials:
+                        if self.user not in cred.use_role:
+                            prompts_access = False
+                            break
             if prompts_access and self.user in obj.job_template.execute_role:
                 return True
 
@@ -2207,12 +2225,17 @@ class ActivityStreamAccess(BaseAccess):
          - custom inventory scripts
         '''
         qs = self.model.objects.all()
-        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
-                                 'inventory_update', 'credential', 'credential_type', 'team', 'project', 'project_update',
-                                 'job_template', 'job', 'ad_hoc_command',
+        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group',
+                                 'inventory_update', 'credential', 'credential_type', 'team',
+                                 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
                                  'schedule', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template', 'workflow_job', 'workflow_job_template_node')
+                                 'workflow_job_template_node')
+        # FIXME: the following fields will be attached to the wrong object
+        # if they are included in prefetch_related because of
+        # https://github.com/django-polymorphic/django-polymorphic/issues/68
+        # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
+        # 'inventory_source', 'workflow_job_template'
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 

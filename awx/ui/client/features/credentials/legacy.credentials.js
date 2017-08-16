@@ -10,7 +10,12 @@ function LegacyCredentialsService (pathService) {
         name: 'credentials',
         route: '/credentials',
         ncyBreadcrumb: {
+            parent: 'setup',
             label: N_('CREDENTIALS')
+        },
+        data: {
+            activityStream: true,
+            activityStreamTarget: 'credential'
         },
         views: {
             '@': {
@@ -169,7 +174,8 @@ function LegacyCredentialsService (pathService) {
             user_search: {
                 value: {
                     order_by: 'username',
-                    page_size: 5
+                    page_size: 5,
+                    is_superuser: false
                 },
                 dynamic: true
             },
@@ -244,7 +250,7 @@ function LegacyCredentialsService (pathService) {
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => {
                     return qs.search(
-                        GetBasePath('organizations'), 
+                        GetBasePath('organizations'),
                         $stateParams[`${list.iterator}_search`]
                     );
                 }
@@ -287,7 +293,7 @@ function LegacyCredentialsService (pathService) {
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => {
                     return qs.search(
-                        GetBasePath('credential_types'), 
+                        GetBasePath('credential_types'),
                         $stateParams[`${list.iterator}_search`]
                     );
                 }
@@ -303,7 +309,7 @@ function LegacyCredentialsService (pathService) {
     };
 
     this.getStateConfiguration = (name) => {
-        switch (name) {      
+        switch (name) {
             case 'list':
                 return this.list;
             case 'edit-permissions':

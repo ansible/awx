@@ -181,7 +181,7 @@ class TestJobExecution:
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
     def setup_method(self, method):
-        self.project_path = tempfile.mkdtemp(prefix='ansible_tower_project_')
+        self.project_path = tempfile.mkdtemp(prefix='awx_project_')
         with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
             f.write('---')
 
@@ -195,7 +195,7 @@ class TestJobExecution:
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
             mock.patch.object(Job, 'inventory', mock.Mock(pk=1, spec_set=['pk'])),
-            mock.patch('awx.main.isolated.run.run_pexpect', self.run_pexpect)
+            mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect)
         ]
         for p in self.patches:
             p.start()
@@ -257,7 +257,7 @@ class TestGenericRun(TestJobExecution):
         with pytest.raises(Exception):
             self.task.run(self.pk)
         for c in [
-            mock.call(self.pk, celery_task_id='', status='running'),
+            mock.call(self.pk, status='running'),
             mock.call(self.pk, output_replacements=[], result_traceback=mock.ANY, status='canceled')
         ]:
             assert c in self.task.update_model.call_args_list
@@ -312,7 +312,7 @@ class TestIsolatedExecution(TestJobExecution):
         credential.inputs['password'] = encrypt_field(credential, 'password')
         self.instance.credential = credential
 
-        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         inventory = json.dumps({"all": {"hosts": ["localhost"]}})
 
@@ -351,7 +351,7 @@ class TestIsolatedExecution(TestJobExecution):
         extra_vars = json.loads(extra_vars)
         assert extra_vars['dest'] == '/tmp'
         assert extra_vars['src'] == private_data
-        assert extra_vars['proot_temp_dir'].startswith('/tmp/ansible_tower_proot_')
+        assert extra_vars['proot_temp_dir'].startswith('/tmp/awx_proot_')
 
     def test_systemctl_failure(self):
         # If systemctl fails, read the contents of `artifacts/systemctl_logs`
@@ -364,7 +364,7 @@ class TestIsolatedExecution(TestJobExecution):
         )
         self.instance.credential = credential
 
-        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         inventory = json.dumps({"all": {"hosts": ["localhost"]}})
 
@@ -464,7 +464,7 @@ class TestJobCredentials(TestJobExecution):
             )
             return ['successful', 0]
 
-        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk, private_data_dir=private_data)
@@ -1145,7 +1145,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
             assert 'bob' in kwargs.get('expect_passwords').values()
             return ['successful', 0]
 
-        private_data = tempfile.mkdtemp(prefix='ansible_tower_')
+        private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
         self.run_pexpect.side_effect = partial(run_pexpect_side_effect, private_data)
         self.task.run(self.pk)
@@ -1274,6 +1274,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
     def test_gce_source(self):
         gce = CredentialType.defaults['gce']()
         self.instance.source = 'gce'
+        self.instance.source_regions = 'all'
         self.instance.credential = Credential(
             pk=1,
             credential_type=gce,
@@ -1286,16 +1287,22 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.instance.credential.inputs['ssh_key_data'] = encrypt_field(
             self.instance.credential, 'ssh_key_data'
         )
+        expected_gce_zone = ''
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             assert env['GCE_EMAIL'] == 'bob'
             assert env['GCE_PROJECT'] == 'some-project'
+            assert env['GCE_ZONE'] == expected_gce_zone
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+        self.instance.source_regions = 'us-east-4'
+        expected_gce_zone = 'us-east-4'
         self.task.run(self.pk)
 
     def test_openstack_source(self):
@@ -1348,6 +1355,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.instance.credential.inputs['password'] = encrypt_field(
             self.instance.credential, 'password'
         )
+        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_"}'
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1356,6 +1364,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'url') == 'https://example.org'
             assert config.get('foreman', 'user') == 'bob'
             assert config.get('foreman', 'password') == 'secret'
+            assert config.get('ansible', 'group_patterns') == '[a,b,c]'
+            assert config.get('ansible', 'group_prefix') == 'hey_'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect

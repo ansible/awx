@@ -153,15 +153,94 @@ export default
 
                     scope.can_edit = data.summary_fields.user_capabilities.edit;
 
-                    MultiCredentialService.loadCredentials(data)
-                        .then(([selectedCredentials, credTypes, credTypeOptions,
-                            credTags]) => {
-                                scope.selectedCredentials = selectedCredentials;
-                                scope.credential_types = credTypes;
-                                scope.credentialTypeOptions = credTypeOptions;
-                                scope.credentialsToPost = credTags;
-                                scope.$emit('jobTemplateLoaded', master);
-                            });
+                    if(scope.job_template_obj.summary_fields.user_capabilities.edit) {
+                        MultiCredentialService.loadCredentials(data)
+                            .then(([selectedCredentials, credTypes, credTypeOptions,
+                                credTags]) => {
+                                    scope.selectedCredentials = selectedCredentials;
+                                    scope.credential_types = credTypes;
+                                    scope.credentialTypeOptions = credTypeOptions;
+                                    scope.credentialsToPost = credTags;console.log(credTags);
+                                    scope.$emit('jobTemplateLoaded', master);
+                                });
+                    }
+                    else {
+
+                        if (data.summary_fields.credential) {
+                            scope.selectedCredentials.machine = data.summary_fields.credential;
+                        }
+
+                        if (data.summary_fields.vault_credential) {
+                            scope.selectedCredentials.vault = data.summary_fields.vault_credential;
+                        }
+
+                        // Extra credentials are not included in summary_fields so we have to go
+                        // out and get them ourselves.
+
+                        let defers = [],
+                            typesArray = [],
+                            credTypeOptions;
+
+                        Rest.setUrl(data.related.extra_credentials);
+                        defers.push(Rest.get()
+                            .then((data) => {
+                                scope.selectedCredentials.extra = data.data.results;
+                            })
+                            .catch(({data, status}) => {
+                                ProcessErrors(null, data, status, null,
+                                    {
+                                        hdr: 'Error!',
+                                        msg: 'Failed to get extra credentials. ' +
+                                        'Get returned status: ' +
+                                        status
+                                    });
+                            }));
+
+                        defers.push(MultiCredentialService.getCredentialTypes()
+                            .then(({credential_types, credentialTypeOptions}) => {
+                                typesArray = Object.keys(credential_types).map(key => credential_types[key]);
+                                credTypeOptions = credentialTypeOptions;
+                            })
+                        );
+
+
+                        return $q.all(defers).then(() => {
+                            let machineAndVaultCreds = [],
+                                extraCreds = [];
+
+                            if(scope.selectedCredentials.machine) {
+                                machineAndVaultCreds.push(scope.selectedCredentials.machine);
+                            }
+                            if(scope.selectedCredentials.vault) {
+                                machineAndVaultCreds.push(scope.selectedCredentials.vault);
+                            }
+
+                            machineAndVaultCreds.map(cred => ({
+                                name: cred.name,
+                                id: cred.id,
+                                postType: cred.postType,
+                                kind: typesArray
+                                    .filter(type => {
+                                        return cred.kind === type.kind || parseInt(cred.credential_type) === type.value;
+                                    })[0].name + ":"
+                            }));
+
+                            extraCreds = extraCreds.concat(scope.selectedCredentials.extra).map(cred => ({
+                                name: cred.name,
+                                id: cred.id,
+                                postType: cred.postType,
+                                kind: credTypeOptions
+                                    .filter(type => {
+                                        return parseInt(cred.credential_type) === type.value;
+                                    })[0].name + ":"
+                            }));
+
+                            scope.credentialsToPost = machineAndVaultCreds.concat(extraCreds);
+
+                            scope.$emit('jobTemplateLoaded', master);
+                        });
+
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, {

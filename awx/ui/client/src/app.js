@@ -151,7 +151,8 @@ var awApp = angular.module('awApp', [
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({
             animation: 'slide',
-            dismissOnTimeout: true,
+            dismissOnTimeout: false,
+            dismissButton: true,
             timeout: 4000
         });
     }])
@@ -206,7 +207,6 @@ var awApp = angular.module('awApp', [
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
             $filter, SocketService, AppStrings) {
-
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;
@@ -344,11 +344,10 @@ var awApp = angular.module('awApp', [
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
                         if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
-                            if($rootScope.configReady === true){
+                            ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
                                 CheckLicense.test(event);
-                            }
-
+                            });
                         }
                     }
                     activateTab();

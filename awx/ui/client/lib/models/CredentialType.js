@@ -14,33 +14,30 @@ function categorizeByKind () {
     }));
 }
 
-function mergeInputProperties (type) {
-    return type.inputs.fields.map(field => {
-        if (!type.inputs.required || type.inputs.required.indexOf(field.id) === -1) {
-            field.required = false;
-        } else {
-            field.required = true;
-        }
+function mergeInputProperties () {
+    if (!this.has('inputs.fields')) {
+        return;
+    }
 
-        return field;
+    let required = this.get('inputs.required');
+
+    return this.get('inputs.fields').map((field, i) => {
+        if (!required || required.indexOf(field.id) === -1) {
+            this.set(`inputs.fields[${i}].required`, false);
+        } else {
+            this.set(`inputs.fields[${i}].required`, true);
+        }
     });
 }
 
-function graft (id) {
-    let data = this.getById(id);
-
-    return new CredentialTypeModel('get', data);
-}
-
-function CredentialTypeModel (method, id) {
+function CredentialTypeModel (method, resource, graft) {
     BaseModel.call(this, 'credential_types');
 
+    this.Constructor = CredentialTypeModel;
     this.categorizeByKind = categorizeByKind.bind(this);
     this.mergeInputProperties = mergeInputProperties.bind(this);
-    this.graft = graft.bind(this);
 
-    return this.request(method, id)
-        .then(() => this);
+    return this.create(method, resource, graft);
 }
 
 function CredentialTypeModelLoader (_BaseModel_) {

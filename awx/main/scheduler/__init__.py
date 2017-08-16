@@ -4,21 +4,23 @@
 # Python
 from datetime import datetime, timedelta
 import logging
-import json
+import uuid
 from sets import Set
 
 # Django
 from django.conf import settings
 from django.core.cache import cache
-from django.db import transaction, connection
+from django.db import transaction, connection, DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now, utc
+from django.db.models import Q
 
 # AWX
 from awx.main.models import * # noqa
 #from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils import get_type_for_model
 from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -47,6 +49,10 @@ class TaskManager():
         for g in self.graph:
             if self.graph[g]['graph'].is_job_blocked(task):
                 return True
+
+        if not task.dependent_jobs_finished():
+            return True
+
         return False
 
     def get_tasks(self, status_list=('pending', 'waiting', 'running')):
@@ -61,32 +67,45 @@ class TaskManager():
                            key=lambda task: task.created)
         return all_tasks
 
-    @classmethod
-    def get_node_type(cls, obj):
-        if type(obj) == Job:
-            return "job"
-        elif type(obj) == AdHocCommand:
-            return "ad_hoc_command"
-        elif type(obj) == InventoryUpdate:
-            return "inventory_update"
-        elif type(obj) == ProjectUpdate:
-            return "project_update"
-        elif type(obj) == SystemJob:
-            return "system_job"
-        elif type(obj) == WorkflowJob:
-            return "workflow_job"
-        return "unknown"
-
     '''
     Tasks that are running and SHOULD have a celery task.
+    {
+        'execution_node': [j1, j2,...],
+        'execution_node': [j3],
+        ...
+    }
     '''
-    def get_running_tasks(self, all_tasks=None):
-        if all_tasks is None:
-            return self.get_tasks(status_list=('running',))
-        return filter(lambda t: t.status == 'running', all_tasks)
+    def get_running_tasks(self):
+        execution_nodes = {}
+        now = tz_now()
+        jobs = UnifiedJob.objects.filter(Q(status='running') |
+                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60)))
+        [execution_nodes.setdefault(j.execution_node, [j]).append(j) for j in jobs]
+        return execution_nodes
 
     '''
     Tasks that are currently running in celery
+
+    Transform:
+    {
+        "celery@ec2-54-204-222-62.compute-1.amazonaws.com": [],
+        "celery@ec2-54-163-144-168.compute-1.amazonaws.com": [{
+            ...
+            "id": "5238466a-f8c7-43b3-9180-5b78e9da8304",
+            ...
+        }, {
+            ...,
+        }, ...]
+    }
+
+    to:
+    {
+        "ec2-54-204-222-62.compute-1.amazonaws.com": [
+            "5238466a-f8c7-43b3-9180-5b78e9da8304",
+            "5238466a-f8c7-43b3-9180-5b78e9da8306",
+            ...
+        ]
+    }
     '''
     def get_active_tasks(self):
         inspector = inspect()
@@ -96,15 +115,23 @@ class TaskManager():
             logger.warn("Ignoring celery task inspector")
             active_task_queues = None
 
-        active_tasks = set()
+        queues = None
+
         if active_task_queues is not None:
+            queues = {}
             for queue in active_task_queues:
+                active_tasks = set()
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
+
+            # celery worker name is of the form celery@myhost.com
+            queue_name = queue.split('@')
+            queue_name = queue_name[1 if len(queue_name) > 1 else 0]
+            queues[queue_name] = active_tasks
         else:
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return (None, None)
 
-        return (active_task_queues, active_tasks)
+        return (active_task_queues, queues)
 
     def get_latest_project_update_tasks(self, all_sorted_tasks):
         project_ids = Set()
@@ -157,7 +184,7 @@ class TaskManager():
                     job.save(update_fields=['status', 'job_explanation'])
                     connection.on_commit(lambda: job.websocket_emit_status('failed'))
 
-                # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
+                # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
 
     # See comment in tasks.py::RunWorkflowJob::run()
@@ -187,25 +214,14 @@ class TaskManager():
         from awx.main.tasks import handle_work_error, handle_work_success
 
         task_actual = {
-            'type':self.get_node_type(task),
+            'type': get_type_for_model(type(task)),
             'id': task.id,
         }
-        dependencies = [{'type': self.get_node_type(t), 'id': t.id} for t in dependent_tasks]
+        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
         error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
         success_handler = handle_work_success.s(task_actual=task_actual)
 
-        '''
-        This is to account for when there isn't enough capacity to execute all
-        dependent jobs (i.e. proj or inv update) within the same schedule() 
-        call.
-        
-        Proceeding calls to schedule() need to recontruct the proj or inv
-        update -> job fail logic dependency. The below call recontructs that
-        failure dependency.
-        '''
-        if len(dependencies) == 0:
-            dependencies = self.get_dependent_jobs_for_inv_and_proj_update(task)
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
@@ -222,12 +238,13 @@ class TaskManager():
             if not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
-                logger.info('Submitting isolated job {} to queue {} via {}.'.format(
-                    task.id, task.instance_group_id, rampart_group.controller_id))
+                logger.info('Submitting isolated %s to queue %s via %s.',
+                            task.log_format, task.instance_group_id, rampart_group.controller_id)
             else:
                 task.instance_group = rampart_group
-                logger.info('Submitting job {} to instance group {}.'.format(task.id, task.instance_group_id))
+                logger.info('Submitting %s to instance group %s.', task.log_format, task.instance_group_id)
             with disable_activity_stream():
+                task.celery_task_id = str(uuid.uuid4())
                 task.save()
 
             self.consume_capacity(task, rampart_group.name)
@@ -262,11 +279,12 @@ class TaskManager():
         return inventory_task
 
     def capture_chain_failure_dependencies(self, task, dependencies):
-        for dep in dependencies:
-            with disable_activity_stream():
-                logger.info('Adding unified job {} to list of dependencies of {}.'.format(task.id, dep.id))
-                dep.dependent_jobs.add(task.id)
-                dep.save()
+        with disable_activity_stream():
+            task.dependent_jobs.add(*dependencies)
+
+            for dep in dependencies:
+                # Add task + all deps except self
+                dep.dependent_jobs.add(*([task] + filter(lambda d: d != dep, dependencies)))
 
     def should_update_inventory_source(self, job, inventory_source):
         now = tz_now()
@@ -342,48 +360,52 @@ class TaskManager():
                     if self.should_update_inventory_source(task, inventory_source):
                         inventory_task = self.create_inventory_update(task, inventory_source)
                         dependencies.append(inventory_task)
-        self.capture_chain_failure_dependencies(task, dependencies)
+
+            if len(dependencies) > 0:
+                self.capture_chain_failure_dependencies(task, dependencies)
         return dependencies
 
     def process_dependencies(self, dependent_task, dependency_tasks):
         for task in dependency_tasks:
             if self.is_job_blocked(task):
-                logger.debug("Dependent task {} is blocked from running".format(task))
+                logger.debug("Dependent %s is blocked from running", task.log_format)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
                 if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
+                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting dependent task {} in group {}".format(task, rampart_group.name))
+                    logger.debug("Starting dependent %s in group %s", task.log_format, rampart_group.name)
                     self.graph[rampart_group.name]['graph'].add_job(task)
-                    self.start_task(task, rampart_group, dependency_tasks)
+                    tasks_to_fail = filter(lambda t: t != task, dependency_tasks)
+                    tasks_to_fail += [dependent_task]
+                    self.start_task(task, rampart_group, tasks_to_fail)
                     found_acceptable_queue = True
             if not found_acceptable_queue:
-                logger.debug("Dependent task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
+                logger.debug("Dependent %s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
 
     def process_pending_tasks(self, pending_tasks):
         for task in pending_tasks:
             self.process_dependencies(task, self.generate_dependencies(task))
             if self.is_job_blocked(task):
-                logger.debug("Task {} is blocked from running".format(task))
+                logger.debug("%s is blocked from running", task.log_format)
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
                 if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
+                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting task {} in group {}".format(task, rampart_group.name))
+                    logger.debug("Starting %s in group %s", task.log_format, rampart_group.name)
                     self.graph[rampart_group.name]['graph'].add_job(task)
-                    self.start_task(task, rampart_group)
+                    self.start_task(task, rampart_group, task.get_jobs_fail_chain())
                     found_acceptable_queue = True
                     break
             if not found_acceptable_queue:
-                logger.debug("Task {} couldn't be scheduled on graph, waiting for next cycle".format(task))
+                logger.debug("%s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
 
     def cleanup_inconsistent_celery_tasks(self):
         '''
@@ -395,33 +417,55 @@ class TaskManager():
 
         logger.debug("Failing inconsistent running jobs.")
         celery_task_start_time = tz_now()
-        active_task_queues, active_tasks = self.get_active_tasks()
-        cache.set("active_celery_tasks", json.dumps(active_task_queues))
+        active_task_queues, active_queues = self.get_active_tasks()
         cache.set('last_celery_task_cleanup', tz_now())
 
-        if active_tasks is None:
+        if active_queues is None:
             logger.error('Failed to retrieve active tasks from celery')
             return None
 
-        all_running_sorted_tasks = self.get_running_tasks()
-        for task in all_running_sorted_tasks:
-
-            if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-                # TODO: try catch the getting of the job. The job COULD have been deleted
-                if isinstance(task, WorkflowJob):
-                    continue
-                if task.modified > celery_task_start_time:
-                    continue
-                task.status = 'failed'
-                task.job_explanation += ' '.join((
-                    'Task was marked as running in Tower but was not present in',
-                    'Celery, so it has been marked as failed.',
-                ))
-                task.save()
-                awx_tasks._send_notification_templates(task, 'failed')
-                task.websocket_emit_status('failed')
-                logger.error("Task %s appears orphaned... marking as failed" % task)
-
+        '''
+        Only consider failing tasks on instances for which we obtained a task 
+        list from celery for.
+        '''
+        running_tasks = self.get_running_tasks()
+        for node, node_jobs in running_tasks.iteritems():
+            if node in active_queues:
+                active_tasks = active_queues[node]
+            else:
+                '''
+                Node task list not found in celery. If tower thinks the node is down
+                then fail all the jobs on the node.
+                '''
+                try:
+                    instance = Instance.objects.get(hostname=node)
+                    if instance.capacity == 0:
+                        active_tasks = []
+                    else:
+                        continue
+                except Instance.DoesNotExist:
+                    logger.error("Execution node Instance {} not found in database. "
+                                 "The node is currently executing jobs {}".format(node, [str(j) for j in node_jobs]))
+                    active_tasks = []
+            for task in node_jobs:
+                if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
+                    if isinstance(task, WorkflowJob):
+                        continue
+                    if task.modified > celery_task_start_time:
+                        continue
+                    task.status = 'failed'
+                    task.job_explanation += ' '.join((
+                        'Task was marked as running in Tower but was not present in',
+                        'Celery, so it has been marked as failed.',
+                    ))
+                    try:
+                        task.save(update_fields=['status', 'job_explanation'])
+                    except DatabaseError:
+                        logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
+                        continue
+                    awx_tasks._send_notification_templates(task, 'failed')
+                    task.websocket_emit_status('failed')
+                    logger.error("Task {} has no record in celery. Marking as failed".format(task.log_format))
 
     def calculate_capacity_used(self, tasks):
         for rampart_group in self.graph:

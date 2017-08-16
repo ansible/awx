@@ -189,7 +189,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     }
                     if (form.fields[field].realName) {
                         if (data[form.fields[field].realName]) {
-                            scope[field + '_api_error'] = data[form.fields[field]][0];
+                            scope[field + '_api_error'] = data[form.fields[field].realName][0];
                             //scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
                             $('[name="' + form.fields[field].realName + '"]').addClass('ng-invalid');
                             $('html, body').animate({scrollTop: $('[name="' + form.fields[field].realName + '"]').offset().top}, 0);
@@ -659,6 +659,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         $(element).on('select2:select', (e) => {
                             scope[model] = e.params.data.text;
                             scope[selectOptions] = _.cloneDeep(original_options);
+                            if (e.params.data.id === "") {
+                                return;
+                            }
                             if (scope[selectOptions].indexOf(e.params.data.text) === -1) {
                                 scope[selectOptions].push(e.params.data.text);
                             }

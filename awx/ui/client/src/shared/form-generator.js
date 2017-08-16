@@ -433,23 +433,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         scope[form.name + '_form'][fld].$setPristine();
                         scope[form.name + '_form'][fld].$setValidity('apiError', true);
                     }
-                    if (f.chkPass && scope[form.name + '_form'][fld] && $AnsibleConfig) {
-                        if ($AnsibleConfig.password_length) {
-                            scope[form.name + '_form'][fld].$setValidity('password_length', true);
-                        }
-                        if ($AnsibleConfig.password_hasLowercase) {
-                            scope[form.name + '_form'][fld].$setValidity('hasLowercase', true);
-                        }
-                        if ($AnsibleConfig.password_hasUppercase) {
-                            scope[form.name + '_form'][fld].$setValidity('hasUppercase', true);
-                        }
-                        if ($AnsibleConfig.password_hasNumber) {
-                            scope[form.name + '_form'][fld].$setValidity('hasNumber', true);
-                        }
-                        if ($AnsibleConfig.password_hasSymbol) {
-                            scope[form.name + '_form'][fld].$setValidity('hasSymbol', true);
-                        }
-                    }
                     if (f.awPassMatch && scope[form.name + '_form'][fld]) {
                         scope[form.name + '_form'][fld].$setValidity('awpassmatch', true);
                     }
@@ -658,7 +641,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         } else {
                             html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
-                        html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
+                        html += ((field.awPopOver || field.awPopOverWatch) && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
                         // Variable editing
                         if (fld === "variables" || fld === "extra_vars" || _.last(fld.split('_')) === 'variables' || fld === 'source_vars' || field.showParseTypeToggle === true) {
@@ -740,17 +723,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>\n";
                 }
 
-                if (field.type === 'hidden') {
-                    if ((options.mode === 'edit' && field.includeOnEdit) ||
-                        (options.mode === 'add' && field.includeOnAdd)) {
-                        html += "<input type=\"hidden\" ng-model=\"" + fld + "\" name=\"" + fld + "\" />";
-                    }
-                }
-
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
                     if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock' && field.type !== 'workflow-chart') {
-
 
                     html += "<div class='form-group Form-formGroup ";
                     html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
@@ -852,7 +827,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         if (field.genMD5) {
-                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
+                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
                                 "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
                         }
@@ -928,7 +903,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
                             html += "class='form-control Form-textInput";
                             html += "' ";
-                            html += (field.chkPass) ? "chk-pass " : "";
 
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                             html += (field.required) ? "required " : "";
@@ -973,34 +947,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
                                 `.$error.awvalidurl'>${error_message}</div>`;
-                        }
-                        if (field.chkPass && $AnsibleConfig) {
-                            // password strength
-                            if ($AnsibleConfig.password_length) {
-                                error_message = i18n.sprintf(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.password_length">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasLowercase) {
-                                error_message = i18n._("Your password must contain a lowercase letter.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasLowercase">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasUppercase) {
-                                error_message = i18n._("Your password must contain an uppercase letter.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasUppercase">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasNumber) {
-                                error_message = i18n._("Your password must contain a number.");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasNumber">${error_message}</div>`;
-                            }
-                            if ($AnsibleConfig.password_hasSymbol) {
-                                error_message = i18n.sprintf(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
-                                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    `.$error.hasSymbol">${error_message}</div>`;
-                            }
                         }
 
                         html += "<div class='error api-error' id='" + this.form.name + "-" + fld + "-api-error' ng-bind='" + fld + "_api_error'>\n</div>\n";
@@ -1295,6 +1241,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "value=\"" + field.options[i].value + "\" ";
                             html += "ng-model=\"" + fld + "\" ";
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                            html += (field.ngClick) ? this.attr(field, 'ngClick') : "";
                             html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}"` : "";
                             html += (field.readonly) ? "disabled " : "";
                             html += (field.required) ? "required " : "";
@@ -1379,7 +1326,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += `<div class="input-group Form-mixedInputGroup">`;
                         html += "<span class=\"input-group-btn\">\n";
-                        html += `<button type="button" class="Form-lookupButton btn btn-default" ng-click="${field.ngClick || defaultLookupNgClick}"
+                        html += `<button type="button" class="Form-lookupButton btn" ng-click="${field.ngClick || defaultLookupNgClick}"
                         ${field.readonly || field.showonly}
                         ${this.attr(field, "ngDisabled")}
                         id="${fld}-lookup-btn"><i class="fa fa-search"></i></button>`;

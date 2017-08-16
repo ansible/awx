@@ -7,5 +7,7 @@ RUN npm set progress=false
 
 WORKDIR "/awx_devel"
 
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["bash"]
+ADD tools/docker-compose/unit-tests/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

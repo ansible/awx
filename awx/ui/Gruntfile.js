@@ -30,20 +30,25 @@ module.exports = function(grunt) {
         'clean:tmp',
         'clean:static',
         'concurrent:dev',
-        'sync',
+        'concat:css',
+        'webpack:dev',
+        'sync'
     ]);
 
     grunt.registerTask('devNoSync', [
         'clean:tmp',
         'clean:static',
         'concurrent:devNoSync',
+        'concat:css'
     ]);
 
     grunt.registerTask('release', [
         'clean:tmp',
         'clean:static',
-        'webpack:prod',
         'concurrent:prod',
+        'webpack:prod',
+        'concat:css',
+        'cssmin:vendor',
+        'cssmin:source'
     ]);
-
 };

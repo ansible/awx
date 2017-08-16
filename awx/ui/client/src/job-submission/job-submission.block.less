@@ -1,6 +1,3 @@
-@import '../shared/branding/colors.less';
-@import '../shared/branding/colors.default.less';
-
 .JobSubmission {
     padding: 20px!important;
     display: none;
@@ -109,7 +106,7 @@
     cursor: default!important;
 }
 .JobSubmission-step--disabled {
-    opacity: 0.4;
+    opacity: 0.65;
     cursor: not-allowed!important;
 }
 .JobSubmission-formContainer {
@@ -246,6 +243,9 @@
     align-items: flex-start;
 }
 .JobSubmission-previewTagLabel {
+    color: @default-interface-txt;
+}
+.JobSubmission-previewTagLabel--deletable{
     color: @default-list-header-bg;
 }
 .JobSubmission-previewTagRevert {

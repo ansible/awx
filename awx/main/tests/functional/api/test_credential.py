@@ -1,4 +1,5 @@
 import itertools
+import re
 
 import mock # noqa
 import pytest
@@ -711,7 +712,7 @@ def test_inputs_cannot_contain_extra_fields(get, post, organization, admin, cred
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('field_name, field_value', itertools.product(
-    ['username', 'password', 'ssh_key_data', 'ssh_key_unlock', 'become_method', 'become_username', 'become_password'],  # noqa
+    ['username', 'password', 'ssh_key_data', 'become_method', 'become_username', 'become_password'],  # noqa
     ['', None]
 ))
 def test_nullish_field_data(get, post, organization, admin, field_name, field_value):
@@ -760,6 +761,33 @@ def test_falsey_field_data(get, post, organization, admin, field_value):
     assert Credential.objects.count() == 1
     cred = Credential.objects.all()[:1].get()
     assert cred.authorize is False
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('kind, extraneous', [
+    ['ssh', 'ssh_key_unlock'],
+    ['scm', 'ssh_key_unlock'],
+    ['net', 'ssh_key_unlock'],
+    ['net', 'authorize_password'],
+])
+def test_field_dependencies(get, post, organization, admin, kind, extraneous):
+    _type = CredentialType.defaults[kind]()
+    _type.save()
+    params = {
+        'name': 'Best credential ever',
+        'credential_type': _type.pk,
+        'organization': organization.id,
+        'inputs': {extraneous: 'not needed'}
+    }
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        params,
+        admin
+    )
+    assert response.status_code == 400
+    assert re.search('cannot be set unless .+ is set.', response.content)
+
+    assert Credential.objects.count() == 0
 
 
 #

@@ -5,6 +5,8 @@
 import pytest
 import os
 
+from django.conf import settings
+
 # Mock
 import mock
 
@@ -146,6 +148,21 @@ def test_radius_settings(get, put, patch, delete, admin, settings):
 
 
 @pytest.mark.django_db
+def test_tacacsplus_settings(get, put, patch, admin):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'tacacsplus'})
+    response = get(url, user=admin, expect=200)
+    put(url, user=admin, data=response.data, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_SECRET': ''}, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost'}, expect=400)
+    patch(url, user=admin, data={'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost'}, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_HOST': '', 'TACACSPLUS_SECRET': ''}, expect=200)
+    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost', 'TACACSPLUS_SECRET': ''}, expect=400)
+    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost', 'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
+
+
+@pytest.mark.django_db
 def test_ui_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'})
     response = get(url, user=admin, expect=200)
@@ -243,3 +260,44 @@ def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):
             'LOG_AGGREGATOR_PORT': 8080
         }, user=admin, expect=500)
         assert resp.data == {'error': '404: Not Found'}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('setting_name', [
+    'AWX_ISOLATED_CHECK_INTERVAL',
+    'AWX_ISOLATED_LAUNCH_TIMEOUT',
+    'AWX_ISOLATED_CONNECTION_TIMEOUT',
+])
+def test_isolated_job_setting_validation(get, patch, admin, setting_name):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
+    patch(url, user=admin, data={
+        setting_name: -1
+    }, expect=400)
+
+    data = get(url, user=admin).data
+    assert data[setting_name] != -1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('key, expected', [
+    ['AWX_ISOLATED_PRIVATE_KEY', '$encrypted$'],
+    ['AWX_ISOLATED_PUBLIC_KEY', 'secret'],
+])
+def test_isolated_keys_readonly(get, patch, delete, admin, key, expected):
+    Setting.objects.create(
+        key=key,
+        value='secret'
+    ).save()
+    assert getattr(settings, key) == 'secret'
+
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
+    resp = get(url, user=admin)
+    assert resp.data[key] == expected
+
+    patch(url, user=admin, data={
+        key: 'new-secret'
+    })
+    assert getattr(settings, key) == 'secret'
+
+    delete(url, user=admin)
+    assert getattr(settings, key) == 'secret'

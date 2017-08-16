@@ -12,7 +12,8 @@ export default ['templateUrl', '$compile',
                 selectedCredentials: '=',
                 prompt: '=',
                 credentialNotPresent: '=',
-                credentialsToPost: '='
+                credentialsToPost: '=',
+                fieldIsDisabled: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential'),
@@ -21,6 +22,7 @@ export default ['templateUrl', '$compile',
                     if (!$scope.selectedCredentials) {
                         $scope.selectedCredentials = {
                             machine: null,
+                            vault: null,
                             extra: []
                         };
                     }
@@ -39,7 +41,8 @@ export default ['templateUrl', '$compile',
                             }
 
                             $scope.credentialNotPresent = !$scope.prompt &&
-                                $scope.selectedCredentials.machine === null;
+                                $scope.selectedCredentials.machine === null &&
+                                $scope.selectedCredentials.vault === null;
                     });
 
                     $scope.removeCredential = function(credToRemove) {

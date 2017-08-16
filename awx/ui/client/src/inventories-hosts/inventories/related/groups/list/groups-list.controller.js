@@ -7,9 +7,11 @@
     ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
     'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd',
+    'InventoryHostsStrings',
     function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd){
+        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd,
+        InventoryHostsStrings){
 
         let list = GroupList;
 
@@ -19,6 +21,10 @@
             $scope.inventory_id = $stateParams.inventory_id;
             $scope.canAdhoc = inventoryData.summary_fields.user_capabilities.adhoc;
             $scope.canAdd = canAdd;
+
+            $scope.strings = {
+                deleteModal: {}
+            };
 
             // Search init
             $scope.list = list;
@@ -33,7 +39,7 @@
             $scope.inventory_id = $stateParams.inventory_id;
 
             $scope.$watchCollection(list.name, function(){
-                _.forEach($scope[list.name], buildStatusIndicators);
+                _.forEach($scope[list.name], processRow);
             });
 
             $scope.$on('selectedOrDeselected', function(e, value) {
@@ -54,10 +60,16 @@
 
         }
 
-        function buildStatusIndicators(group){
+        function processRow(group){
             if (group === undefined || group === null) {
                 group = {};
             }
+
+            angular.forEach($scope.groupsSelected, function(selectedGroup){
+                if(selectedGroup.id === group.id) {
+                    group.isSelected = true;
+                }
+            });
 
             let hosts_status;
 
@@ -78,28 +90,41 @@
         $scope.editGroup = function(id){
             $state.go('inventories.edit.groups.edit', {group_id: id});
         };
+        $scope.goToGroupGroups = function(id){
+            $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
+        };
         $scope.deleteGroup = function(group){
             $scope.toDelete = {};
+            $scope.strings.deleteModal = {};
             angular.extend($scope.toDelete, group);
             if($scope.toDelete.total_groups === 0 && $scope.toDelete.total_hosts === 0) {
                 // This group doesn't have any child groups or hosts - the user is just trying to delete
                 // the group
                 $scope.deleteOption = "delete";
             }
+            else {
+                $scope.strings.deleteModal.group = InventoryHostsStrings.get('deletegroup.GROUP', $scope.toDelete.total_groups);
+                $scope.strings.deleteModal.host = InventoryHostsStrings.get('deletegroup.HOST', $scope.toDelete.total_hosts);
+
+                if($scope.toDelete.total_groups === 0 || $scope.toDelete.total_hosts === 0) {
+                    if($scope.toDelete.total_groups === 0) {
+                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_HOST', $scope.toDelete.total_hosts);
+                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_HOST', $scope.toDelete.total_hosts);
+                    }
+                    else if($scope.toDelete.total_hosts === 0) {
+                        $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUP', $scope.toDelete.total_groups);
+                        $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUP', $scope.toDelete.total_groups);
+                    }
+                }
+                else {
+                    $scope.strings.deleteModal.deleteGroupsHosts = InventoryHostsStrings.get('deletegroup.DELETE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
+                    $scope.strings.deleteModal.promoteGroupsHosts = InventoryHostsStrings.get('deletegroup.PROMOTE_GROUPS_AND_HOSTS', {groups: $scope.toDelete.total_groups, hosts: $scope.toDelete.total_hosts});
+                }
+            }
+
             $('#group-delete-modal').modal('show');
         };
         $scope.confirmDelete = function(){
-
-            // Bind an even listener for the modal closing.  Trying to $state.go() before the modal closes
-            // will mean that these two things are running async and the modal may not finish closing before
-            // the state finishes transitioning.
-            $('#group-delete-modal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                // Remove the event handler so that we don't end up with multiple bindings
-                $('#group-delete-modal').off('hidden.bs.modal');
-                // Reload the inventory manage page and show that the group has been removed
-                $state.go('.', null, {reload: true});
-            });
-
             let reloadListStateParams = null;
 
             if($scope.groups.length === 1 && $state.params.group_search && !_.isEmpty($state.params.group_search.page) && $state.params.group_search.page !== '1') {
@@ -170,7 +195,7 @@
                     return item.name;
                 }).value().join(':');
 
-            $state.go('^.adhoc', {pattern: pattern});
+            $state.go('inventories.edit.adhoc', {pattern: pattern});
         };
 
     }];

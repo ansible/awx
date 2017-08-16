@@ -33,6 +33,7 @@ ordereddict==1.1
 pexpect==4.2.1
 psphere==0.5.2
 psutil==5.2.2
+pycrypto==2.6.1
 pygerduty==0.35.2
 pyOpenSSL==17.0.0
 pyparsing==2.2.0
@@ -53,4 +54,4 @@ twisted==16.6.0
 uWSGI==2.0.14
 xmltodict==0.11.0
 pip==9.0.1
-setuptools==35.0.2
+setuptools==36.0.1

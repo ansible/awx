@@ -21,41 +21,10 @@
     src: url(/static/assets/OpenSans-Bold.ttf);
 }
 
-@import "./client/src/shared/branding/colors.less";
-@import "fonts.less";
-@import "main-layout.less";
-@import "animations.less";
-@import "jquery-ui-overrides.less";
-@import "codemirror.less";
-@import "angular-scheduler.less";
-@import "log-viewer.less";
-@import "event-viewer.less";
-@import "job-details.less";
-@import "jobs.less";
-@import "inventory-edit.less";
-@import "breadcrumbs.less";
-@import "stdout.less";
-@import "lists.less";
-@import "forms.less";
-@import "dashboard.less";
-@import "jPushMenu.less";
-@import "survey-maker.less";
-@import "text-label.less";
-@import "./bootstrap-datepicker.less";
-@import "./client/src/shared/branding/colors.default.less";
-@import "./client/assets/variables.less";
-// Bootstrap default overrides
-@import "./client/src/shared/bootstrap-settings.less";
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
 body.modal-open {
   margin-right: 0;
-}
-
-
-
-.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
-    border-color: @b7grey;
 }
 
 /* Helper Classes */
@@ -495,17 +464,6 @@ textarea.allowresize {
       }
   }
 
-.tooltip {
-  z-index: 2050;
-  opacity: 1.0;
-}
-
-.tooltip-inner {
-  padding: 10px;
-  text-align:left;
-  max-width: 150px;
-}
-
 .alert {
     margin-top: 15px;
     margin-bottom: 15px;
@@ -632,13 +590,13 @@ dd {
 .ui-widget-content a.help-link,
 .ui-widget-content a.help-link:active,
 .ui-widget-content a.help-link:visited {
-  color: @grey;
+  color: @default-icon;
   text-decoration: none;
 }
 
 .help-link:hover,
 .ui-widget-content a.help-link:hover {
-  color: @default-icon;
+  color: @default-interface-txt;
   text-decoration: none;
 }
 
@@ -711,7 +669,7 @@ dd {
   }
 
   .form-control.ng-dirty.ng-pristine {
-      border-color: @d7grey;
+      border-color: @b7grey;
       box-shadow: none;
   }
 
@@ -728,7 +686,6 @@ dd {
 }
 
 .error {
-  margin-top: 5px;
   font-size: 12px;
   line-height: normal;
   color: @red;
@@ -944,6 +901,7 @@ input[type="checkbox"].checkbox-no-label {
 .list-actions {
     text-align: right;
     margin-bottom: -34px;
+    height: 34px;
 
     .fa-lg {
         vertical-align: -8%;
@@ -2063,40 +2021,6 @@ tr td button i {
     padding-bottom: 5px;
 }
 
-.tooltip.bottom .tooltip-arrow {
-    border-bottom-color: @default-interface-txt;
-}
-
-
-.tooltip.top .tooltip-arrow {
-    border-top-color: @default-interface-txt;
-}
-
-.tooltip.left .tooltip-arrow {
-    border-left-color: @default-interface-txt;
-}
-
-.tooltip.right .tooltip-arrow {
-    border-right-color: @default-interface-txt;
-}
-
-.tooltip.Tooltip.fade.bottom.in {
-    opacity: 1;
-    padding-top: 4px;
-}
-
-.tooltip.in {
-    opacity: 1;
-}
-
-.tooltip-inner {
-    background-color: @default-interface-txt;
-}
-
-.tooltip-inner--logOut {
-    margin-left: -15px !important;
-}
-
 .modal {
     transition: all 0.3s ease-out !important;
 }
@@ -2111,8 +2035,8 @@ tr td button i {
 }
 
 .form-control {
-    border-color: @d7grey;
-    background-color: @default-no-items-bord;
+    border-color: @b7grey;
+    background-color: @fcgrey;
     color: @default-data-txt;
     transition: border-color 0.3s;
     box-shadow: none;
@@ -2122,7 +2046,7 @@ tr td button i {
 
 .form-control + .select2 .select2-selection {
     border-color: @b7grey !important;
-    background-color: @default-bg !important;
+    background-color: @fcgrey !important;
     color: @default-data-txt !important;
     transition: border-color 0.3s !important;
     box-shadow: none !important;
@@ -2134,7 +2058,7 @@ tr td button i {
 }
 
 .form-control + .select2-container--disabled .select2-selection {
-  background-color: @egrey !important;
+  background-color: @ebgrey !important;
 }
 
 .form-control:active, .form-control:focus {
@@ -2172,21 +2096,23 @@ tr td button i {
 .select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
     cursor: not-allowed;
     opacity: 100;
-    background: @egrey;
+    background-color: @ebgrey;
     border-radius: 5px;
 }
 
 .select2-container--default .select2-selection--single {
-    background-color: @field-secondary-bg;
+    background-color: @fcgrey;
     border: 1px solid @d7grey;
     border-radius: 4px;
 }
 
 .select2-container--default .select2-selection--multiple {
     background-color: @field-secondary-bg;
-    border: 1px solid @d7grey;
     border-radius: 4px;
+    border: 1px solid @d7grey;
     cursor: text;
+    max-height: 135px;
+    overflow-y: auto;
 }
 
 body.is-modalOpen {
@@ -2246,6 +2172,10 @@ a:hover {
     border-radius: 5px;
     line-height: 21px;
     font-size: 13px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
@@ -2337,7 +2267,7 @@ html input[disabled] {
 
 .select2-container--disabled .select2-selection,
 .select2-container--disabled .select2-arrow {
-    background: @egrey;
+    background-color: @ebgrey;
 }
 
 .btn.disabled,.btn[disabled],fieldset[disabled] .bt {
@@ -2346,11 +2276,11 @@ html input[disabled] {
 
 .ui-state-disabled,.ui-widget-content .ui-state-disabled,.ui-widget-header .ui-state-disabled {
     opacity: 1;
-    background: @egrey;
+    background-color: @ebgrey;
 }
 
 input[disabled].ui-spinner-input {
-  background-color: @egrey;
+  background-color: @ebgrey;
 }
 
 .CodeMirror-scroll {
@@ -2364,4 +2294,18 @@ input[disabled].ui-spinner-input {
 
 .CodeMirror-lines {
     margin-bottom: 20px;
+}
+
+.btn-default {
+    border-color: @b7grey;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+    background-color: @f2grey;
+    border-color: @b7grey;
+    color: @default-interface-txt;
+}
+
+.ui-dialog .ui-dialog-content {
+    background: @default-bg;
 }

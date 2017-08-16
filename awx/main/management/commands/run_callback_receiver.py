@@ -9,6 +9,7 @@ from multiprocessing import Process
 from multiprocessing import Queue as MPQueue
 from Queue import Empty as QueueEmpty
 from Queue import Full as QueueFull
+import os
 
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
@@ -24,6 +25,17 @@ from django.core.cache import cache as django_cache
 from awx.main.models import * # noqa
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+
+
+class WorkerSignalHandler:
+
+    def __init__(self):
+        self.kill_now = False
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, *args, **kwargs):
+        self.kill_now = True
 
 
 class CallbackBrokerWorker(ConsumerMixin):
@@ -42,8 +54,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     signal.signal(signum, signal.SIG_DFL)
                     os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
                 except Exception:
-                    # TODO: LOG
-                    pass
+                    logger.exception('Error in shutdown_handler')
             return _handler
 
         if use_workers:
@@ -102,7 +113,8 @@ class CallbackBrokerWorker(ConsumerMixin):
         return None
 
     def callback_worker(self, queue_actual, idx):
-        while True:
+        signal_handler = WorkerSignalHandler()
+        while not signal_handler.kill_now:
             try:
                 body = queue_actual.get(block=True, timeout=1)
             except QueueEmpty:

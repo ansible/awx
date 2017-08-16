@@ -34,7 +34,7 @@
             $scope.inventory_id = $stateParams.inventory_id;
 
             $scope.$watchCollection(list.name, function(){
-                _.forEach($scope[list.name], buildStatusIndicators);
+                _.forEach($scope[list.name], processRow);
             });
 
             $scope.$on('selectedOrDeselected', function(e, value) {
@@ -55,10 +55,16 @@
 
         }
 
-        function buildStatusIndicators(group){
+        function processRow(group){
             if (group === undefined || group === null) {
                 group = {};
             }
+
+            angular.forEach($scope.groupsSelected, function(selectedGroup){
+                if(selectedGroup.id === group.id) {
+                    group.isSelected = true;
+                }
+            });
 
             let hosts_status;
 
@@ -122,6 +128,10 @@
             $state.go('inventories.edit.groups.edit', {group_id: id});
         };
 
+        $scope.goToGroupGroups = function(id){
+            $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
+        };
+
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
              if (toState.name === "inventories.edit.groups.edit.nested_groups.edit") {
                  $scope.rowBeingEdited = toParams.group_id;
@@ -144,7 +154,7 @@
                     return item.name;
                 }).value().join(':');
 
-            $state.go('^.^.^.adhoc', {pattern: pattern});
+            $state.go('inventories.edit.adhoc', {pattern: pattern});
         };
 
     }];

@@ -1,5 +1,6 @@
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
+import _ from 'lodash';
 
 export default {
     name: 'setup',
@@ -8,10 +9,12 @@ export default {
         label: N_("SETTINGS")
     },
     templateUrl: templateUrl('setup-menu/setup-menu'),
-    controller: function(orgAdmin, $scope){
+    controller: function(config, orgAdmin, $scope){
+        $scope.isOpen = _.get(config, 'license_info.license_type') === 'open';
         $scope.orgAdmin = orgAdmin;
     },
     resolve: {
+        config: ['ConfigService', config => config.getConfig()],
         orgAdmin:
             ['$rootScope', 'ProcessErrors', 'Rest', 'GetBasePath',
             function($rootScope, ProcessErrors, Rest, GetBasePath){

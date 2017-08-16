@@ -414,6 +414,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 djcelery.setup_loader()
 
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_EVENT_QUEUE_TTL = 5
 CELERY_DEFAULT_QUEUE = 'tower'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -445,7 +446,7 @@ CELERY_ROUTES = {'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
 
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
-        'task': 'awx.main.tasks.tower_periodic_scheduler',
+        'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
         'options': {'expires': 20,}
     },

@@ -1,0 +1,3 @@
+#!/bin/bash
+. /venv/awx/bin/activate
+exec env AWX_LIB_DIRECTORY=/awx_lib /awx_devel/run.py "$@"

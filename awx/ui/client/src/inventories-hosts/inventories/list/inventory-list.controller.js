@@ -106,7 +106,7 @@ function InventoriesList($scope,
 
     $scope.$on(`ws-inventories`, function(e, data){
         let inventory = $scope.inventories.find((inventory) => inventory.id === data.inventory_id);
-        if (data.status === 'pending_deletion') {
+        if (data.status === 'pending_deletion' && inventory !== undefined) {
             inventory.pending_deletion = true;
         }
         if (data.status === 'deleted') {

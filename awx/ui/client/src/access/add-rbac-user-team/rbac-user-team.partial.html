@@ -173,11 +173,11 @@
 
                     <!-- lists of selected resources -->
                     <!-- (type, collection) => ('resource', {id: {}, ... }) -->
-                    <div ng-repeat="(type, collection) in selected">
+                    <div ng-repeat="(type, collection) in allSelected">
                         <rbac-selected-list
                             resource-type="type"
                             collection="collection"
-                            selected="selected"
+                            selected="allSelected"
                             ng-show="tab[type]">
                         </rbac-selected-list>
                     </div>

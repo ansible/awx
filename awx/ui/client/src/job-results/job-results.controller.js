@@ -65,11 +65,16 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
             }
             else if(key === 'inventory') {
-                if($scope.job.summary_fields.inventory && $scope.job.summary_fields.inventory.kind && $scope.job.summary_fields.inventory.kind === 'smart') {
-                    return '/#/inventories/smart/' + $scope.job.summary_fields.inventory.id;
+                if($scope.job.summary_fields.inventory && $scope.job.summary_fields.inventory.id) {
+                    if($scope.job.summary_fields.inventory.kind && $scope.job.summary_fields.inventory.kind === 'smart') {
+                        return '/#/inventories/smart/' + $scope.job.summary_fields.inventory.id;
+                    }
+                    else {
+                        return '/#/inventories/inventory/' + $scope.job.summary_fields.inventory.id;
+                    }
                 }
                 else {
-                    return '/#/inventories/inventory/' + $scope.job.summary_fields.inventory.id;
+                    return null;
                 }
             }
             else {
@@ -259,9 +264,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     // button will jump to the bottom of the standard out pane,
     // not follow lines as they come in
     if ($scope.jobFinished) {
-        $scope.followTooltip = "Jump to last line of standard out.";
+        $scope.followTooltip = i18n._("Jump to last line of standard out.");
     } else {
-        $scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
+        $scope.followTooltip = i18n._("Currently following standard out as it comes in.  Click to unfollow.");
     }
 
     $scope.events = {};
@@ -311,7 +316,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 if (change === 'finishedTime'  && !$scope.job.finished) {
                     $scope.job.finished = mungedEvent.finishedTime;
                     $scope.jobFinished = true;
-                    $scope.followTooltip = "Jump to last line of standard out.";
+                    $scope.followTooltip = i18n._("Jump to last line of standard out.");
                     if ($scope.followEngaged) {
                         if (!$scope.followScroll) {
                             $scope.followScroll = function() {
@@ -368,7 +373,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .after($compile(mungedEvent
                                     .stdout)($scope.events[mungedEvent
                                         .counter]));
-                        } else if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
+                        } else {
                             var putIn;
                             var classList = $("div",
                                 "<div>"+mungedEvent.stdout+"</div>")
@@ -421,8 +426,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
                             classList = null;
                             putIn = null;
-                        } else {
-                            appendToBottom(mungedEvent);
                         }
 
                         // delete ref to the elem because it might leak scope
@@ -691,6 +694,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
+            if(_.has(data, 'instance_group_name')){
+                $scope.job.instance_group = true;
+                $scope.job.summary_fields.instance_group = {
+                    "name": data.instance_group_name
+                };
+            }
             if (data.status === "running") {
                 if (!runTimeElapsedTimer) {
                     runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);

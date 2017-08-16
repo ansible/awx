@@ -16,7 +16,9 @@ from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 
-__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin']
+__all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
+           'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
+           'TaskManagerInventoryUpdateMixin',]
 
 
 class ResourceMixin(models.Model):
@@ -109,20 +111,29 @@ class SurveyJobTemplateMixin(models.Model):
                     vars.append(survey_element['variable'])
         return vars
 
-    def _update_unified_job_kwargs(self, **kwargs):
+    def _update_unified_job_kwargs(self, create_kwargs, kwargs):
         '''
         Combine extra_vars with variable precedence order:
           JT extra_vars -> JT survey defaults -> runtime extra_vars
+
+        :param create_kwargs: key-worded arguments to be updated and later used for creating unified job.
+        :type create_kwargs: dict
+        :param kwargs: request parameters used to override unified job template fields with runtime values.
+        :type kwargs: dict
+        :return: modified create_kwargs.
+        :rtype: dict
         '''
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
+        survey_defaults = {}
+
         # transform to dict
         if 'extra_vars' in kwargs:
-            kwargs_extra_vars = kwargs['extra_vars']
-            kwargs_extra_vars = parse_yaml_or_json(kwargs_extra_vars)
+            runtime_extra_vars = kwargs['extra_vars']
+            runtime_extra_vars = parse_yaml_or_json(runtime_extra_vars)
         else:
-            kwargs_extra_vars = {}
+            runtime_extra_vars = {}
 
         # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
@@ -131,22 +142,23 @@ class SurveyJobTemplateMixin(models.Model):
                 variable_key = survey_element.get('variable')
 
                 if survey_element.get('type') == 'password':
-                    if variable_key in kwargs_extra_vars and default:
-                        kw_value = kwargs_extra_vars[variable_key]
+                    if variable_key in runtime_extra_vars and default:
+                        kw_value = runtime_extra_vars[variable_key]
                         if kw_value.startswith('$encrypted$') and kw_value != default:
-                            kwargs_extra_vars[variable_key] = default
+                            runtime_extra_vars[variable_key] = default
 
                 if default is not None:
                     data = {variable_key: default}
                     errors = self._survey_element_validation(survey_element, data)
                     if not errors:
-                        extra_vars[variable_key] = default
+                        survey_defaults[variable_key] = default
+        extra_vars.update(survey_defaults)
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars
-        extra_vars.update(kwargs_extra_vars)
-        kwargs['extra_vars'] = json.dumps(extra_vars)
-        return kwargs
+        extra_vars.update(runtime_extra_vars)
+        create_kwargs['extra_vars'] = json.dumps(extra_vars)
+        return create_kwargs
 
     def _survey_element_validation(self, survey_element, data):
         errors = []
@@ -158,13 +170,14 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
-                if not data[survey_element['variable']] == '$encrypted$' and not survey_element['type'] == 'password':
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
-                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
-                        errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+
+                if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                    errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                  (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
+                    errors.append("'%s' value %s is too large (must be no more than %s)." %
+                                  (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+
         elif survey_element['type'] == 'integer':
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) != int:
@@ -249,3 +262,43 @@ class SurveyJobMixin(models.Model):
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
+
+
+class TaskManagerUnifiedJobMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    def get_jobs_fail_chain(self):
+        return []
+
+    def dependent_jobs_finished(self):
+        return True
+
+
+class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
+    class Meta:
+        abstract = True
+
+    def dependent_jobs_finished(self):
+        for j in self.dependent_jobs.all():
+            if j.status in ['pending', 'waiting', 'running']:
+                return False
+        return True
+
+
+class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
+    class Meta:
+        abstract = True
+
+    def get_jobs_fail_chain(self):
+        return list(self.dependent_jobs.all())
+
+
+class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
+    class Meta:
+        abstract = True
+
+
+class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
+    class Meta:
+        abstract = True

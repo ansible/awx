@@ -24,6 +24,13 @@
               Add passwords, SSH keys, and other credentials to use when launching jobs against machines, or when syncing inventories or projects.
             </p>
         </a>
+        <a ui-sref="credentialTypes" class="SetupItem"
+            ng-if="user_is_system_auditor || user_is_superuser">
+            <h4 class="SetupItem-title" translate>Credential Types</h4>
+            <p class="SetupItem-description" translate>
+                Create custom credential types to be used for authenticating to network hosts and cloud sources
+            </p>
+        </a>
         <a ui-sref="managementJobsList" class="SetupItem" ng-if="user_is_superuser || user_is_system_auditor">
             <h4 class="SetupItem-title" translate>Management Jobs</h4>
             <p class="SetupItem-description" translate>
@@ -43,19 +50,6 @@
             Create templates for sending notifications with Email, HipChat, Slack, and SMS.
             </p>
         </a>
-        <a ui-sref="credentialTypes" class="SetupItem"
-            ng-if="user_is_system_auditor || user_is_superuser">
-            <h4 class="SetupItem-title" translate>Credential Types</h4>
-            <p class="SetupItem-description" translate>
-                Create custom credential types to be used for authenticating to network hosts and cloud sources
-            </p>
-        </a>
-        <a ui-sref="license" class="SetupItem">
-          <h4 class="SetupItem-title" translate>View Your License</h4>
-          <p class="SetupItem-description" translate>
-          View and edit your license information.
-          </p>
-        </a>
         <a ui-sref="instanceGroups" class="SetupItem">
           <h4 class="SetupItem-title" translate>Instance Groups</h4>
           <p class="SetupItem-description" translate>
@@ -73,7 +67,13 @@
           <p class="SetupItem-description" translate>
           View information about this version of Ansible {{BRAND_NAME}}.
           </p>
-      </a>
+        </a>
+        <a ui-sref="license" class="SetupItem" ng-if="!isOpen">
+          <h4 class="SetupItem-title" translate>View Your License</h4>
+          <p class="SetupItem-description" translate>
+          View and edit your license information.
+          </p>
+        </a>
     </div>
     <div ui-view></div>
 </section>

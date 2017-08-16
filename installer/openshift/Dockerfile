@@ -12,8 +12,6 @@ USER root
 ADD https://github.com/krallin/tini/releases/download/v0.14.0/tini /tini
 RUN chmod +x /tini
 
-# Tower Dependencies Install
-# TODO: Probably only need Tower dependencies here
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 ADD requirements/requirements_ansible.txt \
@@ -29,18 +27,20 @@ RUN yum -y install epel-release && yum -y localinstall http://download.postgresq
 RUN pip install virtualenv supervisor
 WORKDIR /tmp
 RUN mkdir -p /var/lib/awx/public/static
-# TODO: Handlers could be stripped of this
+
 RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
-RUN echo "ansibletower" > /etc/tower/SECRET_KEY
-RUN VENV_BASE=/var/lib/awx/venv make requirements_ansible && VENV_BASE=/var/lib/awx/venv make requirements_tower
-COPY dist/ansible-tower-3.2.0.tar.gz /tmp/ansible-tower-3.2.0.tar.gz
-RUN pip install /tmp/ansible-tower-3.2.0.tar.gz
-# TODO: Replace this with the actual version
-RUN echo "3.2.0" > /var/lib/awx/.tower_version
+RUN echo "awxsecret" > /etc/tower/SECRET_KEY
+RUN VENV_BASE=/var/lib/awx/venv make requirements_ansible && VENV_BASE=/var/lib/awx/venv make requirements_awx
+COPY dist/awx-{{ version }}.tar.gz /tmp/awx-{{ version }}.tar.gz
+RUN OFFICIAL=yes pip install /tmp/awx-{{ version }}.tar.gz
+
+RUN echo "{{ version }}" > /var/lib/awx/.tower_version
 ADD installer/openshift/nginx.conf /etc/nginx/nginx.conf
 ADD installer/openshift/supervisor.conf /supervisor.conf
-ADD installer/openshift/launch_tower.sh /usr/bin/launch_tower.sh
+ADD installer/openshift/supervisor_task.conf /supervisor_task.conf
+ADD installer/openshift/launch_awx.sh /usr/bin/launch_awx.sh
+ADD installer/openshift/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD installer/openshift/settings.py /etc/tower/settings.py
 RUN yum -y remove gcc postgresql-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && yum -y clean all
 RUN rm -rf /root/.cache
@@ -51,4 +51,4 @@ USER 1000
 EXPOSE 8052
 WORKDIR /var/lib/awx
 ENTRYPOINT ["/tini", "--"]
-CMD /usr/bin/launch_tower.sh
+CMD /usr/bin/launch_awx.sh

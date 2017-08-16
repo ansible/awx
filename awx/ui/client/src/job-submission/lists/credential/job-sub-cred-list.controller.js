@@ -55,6 +55,7 @@ export default
                 };
 
                 $scope.$watch('credentialKind', function(){
+                    $scope.credential_queryset.page = 1;
                     $scope.credential_default_params.credential_type = $scope.credential_queryset.credential_type = parseInt($scope.credentialKind);
 
                     qs.search(GetBasePath('credentials'), $scope.credential_default_params)
@@ -70,9 +71,9 @@ export default
 
                 $scope.$watchCollection('selectedCredentials.extra', () => {
                     if($scope.credentials && $scope.credentials.length > 0) {
-                        if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0 && parseInt($scope.credentialKind) !== credentialKinds.SSH) {
+                        if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0 && parseInt($scope.credentialKind) !== credentialKinds.Machine) {
                             updateExtraCredentialsList();
-                        } else if (parseInt($scope.credentialKind) !== credentialKinds.SSH) {
+                        } else if (parseInt($scope.credentialKind) !== credentialKinds.Machine) {
                             uncheckAllCredentials();
                         }
                     }
@@ -80,7 +81,7 @@ export default
 
                 $scope.$watch('selectedCredentials.machine', () => {
                     if($scope.credentials && $scope.credentials.length > 0) {
-                        if($scope.selectedCredentials.machine && parseInt($scope.credentialKind) === credentialKinds.SSH) {
+                        if($scope.selectedCredentials.machine && parseInt($scope.credentialKind) === credentialKinds.Machine) {
                             updateMachineCredentialList();
                         }
                         else {
@@ -91,10 +92,10 @@ export default
 
                 $scope.$watchGroup(['credentials', 'selectedCredentials.machine'], () => {
                     if($scope.credentials && $scope.credentials.length > 0) {
-                        if($scope.selectedCredentials.machine && parseInt($scope.credentialKind) === credentialKinds.SSH) {
+                        if($scope.selectedCredentials.machine && parseInt($scope.credentialKind) === credentialKinds.Machine) {
                             updateMachineCredentialList();
                         }
-                        else if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0 && parseInt($scope.credentialKind) !== credentialKinds.SSH) {
+                        else if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0 && parseInt($scope.credentialKind) !== credentialKinds.Machine) {
                             updateExtraCredentialsList();
                         }
                         else {
@@ -105,7 +106,7 @@ export default
             };
 
             $scope.toggle_row = function(selectedRow) {
-                if(parseInt($scope.credentialKind) === credentialKinds.SSH) {
+                if(parseInt($scope.credentialKind) === credentialKinds.Machine) {
                     $scope.selectedCredentials.machine = _.cloneDeep(selectedRow);
                 }
                 else {

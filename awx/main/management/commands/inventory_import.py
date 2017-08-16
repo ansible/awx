@@ -619,7 +619,13 @@ class Command(NoArgsCommand):
             if group_name in existing_group_names:
                 continue
             mem_group = self.all_group.all_groups[group_name]
-            group = self.inventory.groups.update_or_create(name=group_name, defaults={'variables':json.dumps(mem_group.variables), 'description':'imported'})[0]
+            group = self.inventory.groups.update_or_create(
+                name=group_name,
+                defaults={
+                    'variables':json.dumps(mem_group.variables),
+                    'description':'imported'
+                }
+            )[0]
             logger.info('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
@@ -748,8 +754,7 @@ class Command(NoArgsCommand):
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
-            db_host = self.inventory.hosts.update_or_create(name=mem_host_name,
-                                                            defaults={'variables':host_attrs['variables'], 'description':host_attrs['description']})[0]
+            db_host = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)[0]
             if enabled is False:
                 logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
@@ -947,7 +952,17 @@ class Command(NoArgsCommand):
                                                    self.host_filter_re,
                                                    self.exclude_empty_groups,
                                                    self.is_custom)
-            self.all_group.debug_tree()
+            if settings.DEBUG:
+                # depending on inventory source, this output can be
+                # *exceedingly* verbose - crawling a deeply nested
+                # inventory/group data structure and printing metadata about
+                # each host and its memberships
+                #
+                # it's easy for this scale of data to overwhelm pexpect,
+                # (and it's likely only useful for purposes of debugging the
+                # actual inventory import code), so only print it if we have to:
+                # https://github.com/ansible/ansible-tower/issues/7414#issuecomment-321615104
+                self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
                 # Ensure that this is managed as an atomic SQL transaction,

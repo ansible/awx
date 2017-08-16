@@ -55,6 +55,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 label: i18n._('SCM Type'),
                 type: 'select',
                 class: 'Form-dropDown--scmType',
+                defaultText: 'Choose an SCM Type',
                 ngOptions: 'type.label for type in scm_type_options track by type.value',
                 ngChange: 'scmChange()',
                 required: true,

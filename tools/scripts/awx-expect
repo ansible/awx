@@ -1,0 +1,4 @@
+#!/bin/bash
+AWX_LIB=`/var/lib/awx/venv/awx/bin/python -c 'import os, awx; print os.path.dirname(awx.__file__)'`
+. /var/lib/awx/venv/awx/bin/activate
+exec env AWX_LIB_DIRECTORY=$AWX_LIB/lib /var/lib/awx/venv/awx/bin/python $AWX_LIB/main/expect/run.pyc "$@"

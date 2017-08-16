@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessErrors', 'Prompt', '$state',
-    function($scope, list, Dataset, Wait, Rest, ProcessErrors, Prompt, $state) {
+export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter',
+    function($scope, list, Dataset, Wait, Rest, ProcessErrors, Prompt, $state, $filter) {
         init();
 
         function init() {
@@ -15,11 +15,12 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
         }
 
         $scope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
+
             var action = function() {
                 $('#prompt-modal').modal('hide');
                 Wait('start');
                 Rest.setUrl(url);
-                Rest.post({ "disassociate": true, "id": userId })
+                Rest.post({ "disassociate": true, "id": Number(userId) })
                     .success(function() {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
@@ -36,9 +37,9 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 hdr: `Remove role`,
                 body: `
                     <div class="Prompt-bodyQuery">
-                        Confirm  the removal of the ${roleType}
+                        Confirm  the removal of the ${$filter('sanitize')(roleType)}
                             <span class="Prompt-emphasis"> ${roleName} </span>
-                        role associated with ${userName}.
+                        role associated with ${$filter('sanitize')(userName)}.
                     </div>
                 `,
                 action: action,
@@ -47,6 +48,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
         };
 
         $scope.deletePermissionFromTeam = function(teamId, teamName, roleName, roleType, url) {
+
             var action = function() {
                 $('#prompt-modal').modal('hide');
                 Wait('start');
@@ -68,9 +70,9 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 hdr: `Remove role`,
                 body: `
                     <div class="Prompt-bodyQuery">
-                        Confirm  the removal of the ${roleType}
+                        Confirm  the removal of the ${$filter('sanitize')(roleType)}
                             <span class="Prompt-emphasis"> ${roleName} </span>
-                        role associated with the ${teamName} team.
+                        role associated with the ${$filter('sanitize')(teamName)} team.
                     </div>
                 `,
                 action: action,

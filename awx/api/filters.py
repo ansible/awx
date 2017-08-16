@@ -20,7 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError, PermissionDenied
 from rest_framework.filters import BaseFilterBackend
 
-# Ansible Tower
+# AWX
 from awx.main.utils import get_type_for_model, to_python_boolean
 from awx.main.models.credential import CredentialType
 from awx.main.models.rbac import RoleAncestorEntry

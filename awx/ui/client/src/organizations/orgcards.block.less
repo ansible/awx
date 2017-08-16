@@ -1,5 +1,4 @@
 /** @define OrgCards */
-@import '../shared/branding/colors.default.less';
 
 .OrgCards {
     display: flex;
@@ -34,7 +33,7 @@
     padding: 20px;
     padding-bottom: 0px;
     border-radius: 5px;
-    border: 1px solid @default-border;
+    border: 1px solid @b7grey;
     display: flex;
     flex-wrap: wrap;
     margin-top: 20px;
@@ -55,16 +54,21 @@
 }
 
 .OrgCards-label {
+    cursor: pointer;
     margin-top: 0px;
     font-size: 14px;
     height: 17px;
     font-weight: bold;
-    color: @default-interface-txt;
+    color: @default-link;
     margin-bottom: 25px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: baseline;
+
+    &:hover {
+        color: @default-link-hov;
+    }
 }
 
 .OrgCards-actionItems {

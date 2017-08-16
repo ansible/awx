@@ -20,8 +20,8 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
 
                 let availableHeight = $(window).height(),
                     availableWidth = $(window).width(),
-                    minimumWidth = 1300,
-                    minimumHeight = 550;
+                    minimumWidth = 682,
+                    minimumHeight = 400;
 
                 CreateDialog({
                     id: 'workflow-modal-dialog',
@@ -29,19 +29,19 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                     width: availableWidth > minimumWidth ? availableWidth : minimumWidth,
                     height: availableHeight > minimumHeight ? availableHeight : minimumHeight,
                     draggable: false,
-                    dialogClass: 'SurveyMaker-dialog',
+                    dialogClass: 'WorkflowMaker-dialog',
                     position: ['center', 20],
                     onClose: function() {
                         $('#workflow-modal-dialog').empty();
+                        $('body').removeClass('WorkflowMaker-preventBodyScrolling');
                     },
                     onOpen: function() {
                         Wait('stop');
+                        $('body').addClass('WorkflowMaker-preventBodyScrolling');
 
                         // Let the modal height be variable based on the content
                         // and set a uniform padding
                         $('#workflow-modal-dialog').css({ 'padding': '20px' });
-                        $('#workflow-modal-dialog').parent('.ui-dialog').height(availableHeight > minimumHeight ? availableHeight : minimumHeight);
-                        $('#workflow-modal-dialog').parent('.ui-dialog').width(availableWidth > minimumWidth ? availableWidth : minimumWidth);
                         $('#workflow-modal-dialog').outerHeight(availableHeight > minimumHeight ? availableHeight : minimumHeight);
                         $('#workflow-modal-dialog').outerWidth(availableWidth > minimumWidth ? availableWidth : minimumWidth);
 
@@ -62,6 +62,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
 
                 scope.closeDialog = function() {
                     $('#workflow-modal-dialog').dialog('destroy');
+                    $('body').removeClass('WorkflowMaker-preventBodyScrolling');
 
                     $state.go('^');
                 };
@@ -69,8 +70,6 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                 function onResize(){
                     availableHeight = $(window).height();
                     availableWidth = $(window).width();
-                    $('#workflow-modal-dialog').parent('.ui-dialog').height(availableHeight > minimumHeight ? availableHeight : minimumHeight);
-                    $('#workflow-modal-dialog').parent('.ui-dialog').width(availableWidth > minimumWidth ? availableWidth : minimumWidth);
                     $('#workflow-modal-dialog').outerHeight(availableHeight > minimumHeight ? availableHeight : minimumHeight);
                     $('#workflow-modal-dialog').outerWidth(availableWidth > minimumWidth ? availableWidth : minimumWidth);
 

@@ -16,7 +16,7 @@
                ng-model="state._displayValue"
                ng-attr-tabindex="{{ tab || undefined }}"
                ng-attr-placeholder="{{::state._placeholder || undefined }}"
-               ng-change="vm.check()"
+               ng-change="vm.searchOnInput()"
                ng-disabled="state._disabled || form.disabled" />
         </div>
 

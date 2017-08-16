@@ -16,6 +16,7 @@ import urlparse
 import threading
 import contextlib
 import tempfile
+import six
 
 # Decorator
 from decorator import decorator
@@ -152,12 +153,12 @@ def get_ssh_version():
 
 def get_awx_version():
     '''
-    Return Ansible Tower version as reported by setuptools.
+    Return AWX version as reported by setuptools.
     '''
     from awx import __version__
     try:
         import pkg_resources
-        return pkg_resources.require('ansible-awx')[0].version
+        return pkg_resources.require('awx')[0].version
     except:
         return __version__
 
@@ -325,7 +326,10 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
         return '<missing {}>-{}'.format(obj._meta.verbose_name, getattr(obj, '{}_id'.format(field_name)))
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
-    if field_name in password_fields:
+    if field_name in password_fields or (
+        isinstance(field_val, six.string_types) and
+        field_val.startswith('$encrypted$')
+    ):
         return u'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
@@ -424,7 +428,7 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
 
     # Apply class-specific extra processing for origination of unified jobs
     if hasattr(obj1, '_update_unified_job_kwargs') and obj1.__class__ != Class2:
-        new_kwargs = obj1._update_unified_job_kwargs(**create_kwargs)
+        new_kwargs = obj1._update_unified_job_kwargs(create_kwargs, kwargs)
     else:
         new_kwargs = create_kwargs
 
@@ -655,7 +659,7 @@ def build_proot_temp_dir():
     Create a temporary directory for proot to use.
     '''
     from django.conf import settings
-    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
+    path = tempfile.mkdtemp(prefix='awx_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
@@ -695,7 +699,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    show_paths.extend([settings.ANSIBLE_VENV_PATH, settings.TOWER_VENV_PATH])
+    show_paths.extend([settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):

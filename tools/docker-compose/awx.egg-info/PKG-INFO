@@ -1,0 +1,23 @@
+Metadata-Version: 1.1
+Name: awx
+Version: placeholder
+Summary: awx: API, UI and Task Engine for Ansible
+Home-page: http://github.com/ansible/awx
+Author: Ansible, Inc.
+Author-email: info@ansible.com
+License: Proprietary
+Description: AWX provides a web-based user interface, REST API and task engine built on top of Ansible
+Keywords: ansible
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System AdministratorsLicense :: Other/Proprietary License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Classifier: Topic :: System :: Installation/Setup
+Classifier: Topic :: System :: Systems Administration

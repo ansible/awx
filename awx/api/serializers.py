@@ -1203,7 +1203,6 @@ class InventoryScriptSerializer(InventorySerializer):
 
 class HostSerializer(BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
-    insights_system_id = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
     class Meta:
         model = Host
@@ -1287,6 +1286,11 @@ class HostSerializer(BaseSerializerWithVariables):
         name = force_text(value or '')
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
+        return value
+
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
         return value
 
     def validate(self, attrs):
@@ -1405,6 +1409,11 @@ class GroupSerializer(BaseSerializerWithVariables):
     def validate_name(self, value):
         if value in ('all', '_meta'):
             raise serializers.ValidationError(_('Invalid group name.'))
+        return value
+
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
         return value
 
     def to_representation(self, obj):
@@ -1660,27 +1669,24 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError(_("Setting not compatible with existing schedules."))
         return value
 
+    def validate_inventory(self, value):
+        if value.kind == 'smart':
+            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
+        return value
+
     def validate(self, attrs):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        update_on_launch = attrs.get('update_on_launch', self.instance and self.instance.update_on_launch)
-        update_on_project_update = get_field_from_model_or_attrs('update_on_project_update')
-        source = get_field_from_model_or_attrs('source')
-        overwrite_vars = get_field_from_model_or_attrs('overwrite_vars')
-
-        if attrs.get('source_path', None) and source!='scm':
-            raise serializers.ValidationError({"detail": _("Cannot set source_path if not SCM type.")})
-        elif update_on_launch and source=='scm' and update_on_project_update:
-            raise serializers.ValidationError({"detail": _(
-                "Cannot update SCM-based inventory source on launch if set to update on project update. "
-                "Instead, configure the corresponding source project to update on launch.")})
-        elif not self.instance and attrs.get('inventory', None) and InventorySource.objects.filter(
-                inventory=attrs.get('inventory', None), update_on_project_update=True, source='scm').exists():
-            raise serializers.ValidationError({"detail": _("Inventory controlled by project-following SCM.")})
-        elif source=='scm' and not overwrite_vars:
-            raise serializers.ValidationError({"detail": _(
-                "SCM type sources must set `overwrite_vars` to `true`.")})
+        if get_field_from_model_or_attrs('source') != 'scm':
+            redundant_scm_fields = filter(
+                lambda x: attrs.get(x, None),
+                ['source_project', 'source_path', 'update_on_project_update']
+            )
+            if redundant_scm_fields:
+                raise serializers.ValidationError(
+                    {"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))}
+                )
 
         return super(InventorySourceSerializer, self).validate(attrs)
 
@@ -1763,17 +1769,15 @@ class RoleSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(RoleSerializer, self).to_representation(obj)
 
-        def spacify_type_name(cls):
-            return re.sub(r'([a-z])([A-Z])', '\g<1> \g<2>', cls.__name__)
-
         if obj.object_id:
             content_object = obj.content_object
             if hasattr(content_object, 'username'):
                 ret['summary_fields']['resource_name'] = obj.content_object.username
             if hasattr(content_object, 'name'):
                 ret['summary_fields']['resource_name'] = obj.content_object.name
-            ret['summary_fields']['resource_type'] = obj.content_type.name
-            ret['summary_fields']['resource_type_display_name'] = spacify_type_name(obj.content_type.model_class())
+            content_model = obj.content_type.model_class()
+            ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
+            ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
 
         ret.pop('created')
         ret.pop('modified')
@@ -1826,7 +1830,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
             try:
                 role_dict['resource_name'] = role.content_object.name
-                role_dict['resource_type'] = role.content_type.name
+                role_dict['resource_type'] = get_type_for_model(role.content_type.model_class())
                 role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
             except AttributeError:
                 pass
@@ -1854,7 +1858,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 }
                 if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
-                    role_dict['resource_type'] = role.content_type.name
+                    role_dict['resource_type'] = get_type_for_model(role.content_type.model_class())
                     role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
                     role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                         Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
@@ -2419,6 +2423,12 @@ class JobTemplateMixin(object):
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         d['recent_jobs'] = self._recent_jobs(obj)
+
+        # TODO: remove in 3.3
+        if self.version == 1 and 'vault_credential' in d:
+            if d['vault_credential'].get('kind','') == 'vault':
+                d['vault_credential']['kind'] = 'ssh'
+
         return d
 
 
@@ -2460,12 +2470,17 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
         inventory = get_field_from_model_or_attrs('inventory')
         credential = get_field_from_model_or_attrs('credential')
+        vault_credential = get_field_from_model_or_attrs('vault_credential')
         project = get_field_from_model_or_attrs('project')
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
-        elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
+        elif all([
+            credential is None,
+            vault_credential is None,
+            not get_field_from_model_or_attrs('ask_credential_on_launch'),
+        ]):
             raise serializers.ValidationError({'credential': prompting_error_message})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
@@ -3388,7 +3403,7 @@ class NotificationTemplateSerializer(BaseSerializer):
                                                                                                     type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
-        return attrs
+        return super(NotificationTemplateSerializer, self).validate(attrs)
 
 
 class NotificationSerializer(BaseSerializer):
@@ -3647,11 +3662,11 @@ class ActivityStreamSerializer(BaseSerializer):
         for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
-            allm2m = getattr(obj, fk).all()
-            if getattr(obj, fk).exists():
+            m2m_list = self._get_rel(obj, fk)
+            if m2m_list:
                 rel[fk] = []
                 id_list = []
-                for thisItem in allm2m:
+                for thisItem in m2m_list:
                     if getattr(thisItem, 'id', None) in id_list:
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
@@ -3664,16 +3679,26 @@ class ActivityStreamSerializer(BaseSerializer):
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
         return rel
 
+    def _get_rel(self, obj, fk):
+        related_model = ActivityStream._meta.get_field(fk).related_model
+        related_manager = getattr(obj, fk)
+        if issubclass(related_model, PolymorphicModel) and hasattr(obj, '_prefetched_objects_cache'):
+            # HACK: manually fill PolymorphicModel caches to prevent running query multiple times
+            # unnecessary if django-polymorphic issue #68 is solved
+            if related_manager.prefetch_cache_name not in obj._prefetched_objects_cache:
+                obj._prefetched_objects_cache[related_manager.prefetch_cache_name] = list(related_manager.all())
+        return related_manager.all()
+
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
         for fk, related_fields in self._local_summarizable_fk_fields:
             try:
                 if not hasattr(obj, fk):
                     continue
-                allm2m = getattr(obj, fk).all()
-                if getattr(obj, fk).exists():
+                m2m_list = self._get_rel(obj, fk)
+                if m2m_list:
                     summary_fields[fk] = []
-                    for thisItem in allm2m:
+                    for thisItem in m2m_list:
                         if fk == 'job':
                             summary_fields['job_template'] = []
                             job_template_item = {}
@@ -3695,9 +3720,6 @@ class ActivityStreamSerializer(BaseSerializer):
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
-                        if thisItemDict.get('id', None):
-                            if thisItemDict.get('id', None) in [obj_dict.get('id', None) for obj_dict in summary_fields[fk]]:
-                                continue
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
                 pass

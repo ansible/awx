@@ -34,7 +34,7 @@ export default
             document.getElementById('License-form').reset();
         };
 
-        var init = function(){
+        var init = function(config){
             // license/license.partial.html compares fileName
             $scope.fileName = N_("No file selected.");
             $scope.title = $rootScope.licenseMissing ? ($rootScope.BRAND_NAME + i18n._(" License")) : i18n._("License Management");
@@ -47,7 +47,7 @@ export default
             $scope.compliant = $scope.license.license_info.compliant;
         };
 
-        init();
+        init(config);
 
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
@@ -89,7 +89,7 @@ export default
 				.success(function(){
 					reset();
                     ConfigService.delete();
-                    ConfigService.getConfig().then(function(){
+                    ConfigService.getConfig().then(function(config){
                         delete($rootScope.features);
                         FeaturesService.get();
                         pendoService.issuePendoIdentity();
@@ -99,7 +99,7 @@ export default
     						});
     					}
     					else{
-                            init();
+                            init(config);
     						$scope.success = true;
     						$rootScope.licenseMissing = false;
     						// for animation purposes

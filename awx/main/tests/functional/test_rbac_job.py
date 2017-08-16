@@ -149,7 +149,7 @@ class TestJobRelaunchAccess:
         assert not inventory_user.can_access(Job, 'start', job_with_links, validate_license=False)
 
     def test_job_relaunch_extra_credential_access(
-            self, post, inventory, project, credential, net_credential):
+            self, inventory, project, credential, net_credential):
         jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
         jt.extra_credentials.add(credential)
         job = jt.create_unified_job()
@@ -163,6 +163,45 @@ class TestJobRelaunchAccess:
         # Job has prompted extra_credential, launch denied w/ message
         job.extra_credentials.add(net_credential)
         assert not jt_user.can_access(Job, 'start', job, validate_license=False)
+
+    def test_prompted_extra_credential_relaunch_denied(
+            self, inventory, project, net_credential, rando):
+        jt = JobTemplate.objects.create(
+            name='testjt', inventory=inventory, project=project,
+            ask_credential_on_launch=True)
+        job = jt.create_unified_job()
+        jt.execute_role.members.add(rando)
+
+        # Job has prompted extra_credential, rando lacks permission to use it
+        job.extra_credentials.add(net_credential)
+        assert not rando.can_access(Job, 'start', job, validate_license=False)
+
+    def test_prompted_extra_credential_relaunch_allowed(
+            self, inventory, project, net_credential, rando):
+        jt = JobTemplate.objects.create(
+            name='testjt', inventory=inventory, project=project,
+            ask_credential_on_launch=True)
+        job = jt.create_unified_job()
+        jt.execute_role.members.add(rando)
+
+        # Job has prompted extra_credential, but rando can use it
+        net_credential.use_role.members.add(rando)
+        job.extra_credentials.add(net_credential)
+        assert rando.can_access(Job, 'start', job, validate_license=False)
+
+    def test_extra_credential_relaunch_recreation_permission(
+            self, inventory, project, net_credential, credential, rando):
+        jt = JobTemplate.objects.create(
+            name='testjt', inventory=inventory, project=project,
+            credential=credential, ask_credential_on_launch=True)
+        job = jt.create_unified_job()
+        project.admin_role.members.add(rando)
+        inventory.admin_role.members.add(rando)
+        credential.admin_role.members.add(rando)
+
+        # Relaunch blocked by the extra credential
+        job.extra_credentials.add(net_credential)
+        assert not rando.can_access(Job, 'start', job, validate_license=False)
 
 
 @pytest.mark.django_db

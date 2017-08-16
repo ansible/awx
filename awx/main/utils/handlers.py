@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Ansible Tower by Red Hat
+# Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
 # Python
@@ -134,7 +134,7 @@ class BaseHandler(logging.Handler):
         # Don't send handler-related records.
         if logger_name == logger.name:
             return True
-        # Tower log emission is only turned off by enablement setting
+        # AWX log emission is only turned off by enablement setting
         if not logger_name.startswith('awx.analytics'):
             return False
         return self.enabled_loggers is None or logger_name[len('awx.analytics.'):] not in self.enabled_loggers
@@ -216,7 +216,7 @@ class BaseHTTPSHandler(BaseHandler):
         logger = logging.getLogger(__file__)
         fn, lno, func = logger.findCaller()
         record = logger.makeRecord('awx', 10, fn, lno,
-                                   'Ansible Tower Connection Test', tuple(),
+                                   'AWX Connection Test', tuple(),
                                    None, func)
         futures = handler.emit(record)
         for future in futures:

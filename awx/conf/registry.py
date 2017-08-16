@@ -99,7 +99,8 @@ class SettingsRegistry(object):
                 continue
             if kwargs.get('category_slug', None) in slugs_to_ignore:
                 continue
-            if read_only in {True, False} and kwargs.get('read_only', False) != read_only:
+            if (read_only in {True, False} and kwargs.get('read_only', False) != read_only and
+                    setting not in ('AWX_ISOLATED_PRIVATE_KEY', 'AWX_ISOLATED_PUBLIC_KEY')):
                 # Note: Doesn't catch fields that set read_only via __init__;
                 # read-only field kwargs should always include read_only=True.
                 continue
@@ -115,6 +116,9 @@ class SettingsRegistry(object):
 
     def is_setting_encrypted(self, setting):
         return bool(self._registry.get(setting, {}).get('encrypted', False))
+
+    def is_setting_read_only(self, setting):
+        return bool(self._registry.get(setting, {}).get('read_only', False))
 
     def get_setting_field(self, setting, mixin_class=None, for_user=False, **kwargs):
         from rest_framework.fields import empty

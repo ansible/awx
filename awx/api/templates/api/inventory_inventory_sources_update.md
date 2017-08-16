@@ -20,7 +20,8 @@ inventory sources:
 * `project_update`: ID of the project update job that was started if this inventory source is an SCM source.
   (interger, read-only, optional)
 
-> *Note:* All manual inventory sources (source='') will be ignored by the update_inventory_sources endpoint.
+Note: All manual inventory sources (source="") will be ignored by the update_inventory_sources endpoint.  This endpoint will not update inventory sources for Smart Inventories.  
+
 
 Response code from this action will be:
 

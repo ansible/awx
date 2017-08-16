@@ -77,6 +77,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
 
             if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
                 project.statusTip = i18n._('Canceled. Click for details');
+                project.scm_type_class = "btn-disabled";
             }
 
             if (project.status === 'running' || project.status === 'updating') {
@@ -247,8 +248,9 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                 });
         });
 
-        $scope.cancelUpdate = function(id, name) {
-            Rest.setUrl(GetBasePath("projects") + id);
+        $scope.cancelUpdate = function(project) {
+            project.pending_cancellation = true;
+            Rest.setUrl(GetBasePath("projects") + project.id);
             Rest.get()
                 .success(function(data) {
                     if (data.related.current_update) {

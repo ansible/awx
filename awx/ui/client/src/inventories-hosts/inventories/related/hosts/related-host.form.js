@@ -22,6 +22,7 @@ function(i18n) {
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
             iterator: 'host',
+            detailsClick: "$state.go('inventories.edit.hosts.edit', null, {reload:true})",
             stateTree: 'inventories.edit.hosts',
             headerFields:{
                 enabled: {

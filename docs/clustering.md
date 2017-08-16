@@ -189,15 +189,15 @@ Recommendations for system configuration with isolated groups:
    variable - the behavior in this case can not be predicted.
  - Do not put an isolated instance in more than 1 isolated group.
 
-Isolated Node Authentication
-----------------------------
+Isolated Instance Authentication
+--------------------------------
 By default - at installation time - a randomized RSA key is generated and
 distributed as an authorized key to all "isolated" instances.  The private half
 of the key is encrypted and stored within Tower, and is used to authenticate
 from "controller" instances to "isolated" instances when jobs are run.
 
-For users who wish to manage SSH authentication from controlling nodes to
-isolated nodes via some system _outside_ of Tower (such as externally-managed
+For users who wish to manage SSH authentication from controlling instances to
+isolated instances via some system _outside_ of Tower (such as externally-managed
 passwordless SSH keys), this behavior can be disabled by unsetting two Tower
 API settings values:
 
@@ -215,7 +215,7 @@ Tower does not automatically de-provision instances since we can't distinguish b
 Instead the procedure for deprovisioning an instance is to shut it down (or stop the `ansible-tower-service`) and run the Tower deprovision command:
 
 ```
-$ tower-manage deprovision-node <nodename>
+$ awx-manage deprovision_instance --hostname=<hostname>
 ```
 
 * Removing/Deprovisioning Instance Groups
@@ -223,7 +223,7 @@ Tower does not automatically de-provision or remove instance groups, even though
 show up in api endpoints and stats monitoring. These groups can be removed with the following command:
 
 ```
-$ tower-manage unregister_queue --queuename=<name>
+$ awx-manage unregister_queue --queuename=<name>
 ```
 
 ### Status and Monitoring
@@ -233,7 +233,6 @@ of the Cluster. This includes:
 
 * The instance servicing the HTTP request
 * The last heartbeat time of all other instances in the cluster
-* The state of the Job Queue
 * The RabbitMQ cluster status
 * Instance Groups and Instance membership in those groups
 

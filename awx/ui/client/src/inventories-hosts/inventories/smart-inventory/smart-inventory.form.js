@@ -65,7 +65,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     label: i18n._('Smart Host Filter'),
                     type: 'custom',
                     control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
-                    awPopOver: "<p>" + i18n._("Filter that will be applied to the hosts of this inventory.") + "</p>",
+                    awPopOver: "<p>" + i18n._("Populate the hosts for this inventory by using a search filter.") + "</p><p>" + i18n._("Example: ansible_facts.ansible_distribution:\"RHEL\"") + "</p><p>" + i18n._("Refer to the Ansible Tower documentation for further syntax and examples.") + "</p>",
                     dataTitle: i18n._('Smart Host Filter'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
@@ -78,7 +78,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     dataTitle: i18n._('Instance Groups'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    control: '<instance-groups-multiselect instance-groups="instance_groups"></instance-groups-multiselect>',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
                 },
                 smartinventory_variables: {
                     label: i18n._('Variables'),
@@ -164,6 +164,8 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                 },
                 hosts: {
                     name: 'hosts',
+                    awToolTip: i18n._('Please save before viewing hosts.'),
+                    dataPlacement: 'top',
                     include: "RelatedHostsListDefinition",
                     title: i18n._('Hosts'),
                     iterator: 'host',

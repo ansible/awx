@@ -37,28 +37,29 @@
         <div class="JobResultsStdOut-aLineOfStdOut"
             ng-show="tooManyEvents || tooManyPastEvents || showLegacyJobErrorMessage">
             <div class="JobResultsStdOut-lineNumberColumn">
-                <span class="JobResultsStdOut-lineExpander">  </span>
+                 <span class="JobResultsStdOut-lineExpander">  </span>
             </div>
             <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany"
-                ng-show="tooManyEvents">The standard output is too large to display.  Please specify additional filters to narrow the standard out.</div>
+                ng-show="tooManyEvents" translate>The standard output is too large to display.  Please specify additional filters to narrow the standard out.</div>
             <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany"
-                ng-show="tooManyPastEvents">Too much previous output to display.  Showing running standard output.</div>
+                ng-show="tooManyPastEvents" translate>Too much previous output to display.  Showing running standard output.</div>
             <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany"
-                ng-show="showLegacyJobErrorMessage">Job details are not available for this job.  Please download to view standard out.</div>
+                ng-show="showLegacyJobErrorMessage" translate>Job details are not available for this job.  Please download to view standard out.</div>
         </div>
         <!-- next is 1 is a hack to get the first line to be put in the pane in the
         right place -->
         <div class="next_is_1"></div>
         <div id="followAnchor"
             class="JobResultsStdOut-followAnchor">
-            <div class="JobResultsStdOut-toTop"
-                ng-click="toTop()"
-                ng-show="stdoutOverflowed">
-                ^ TOP
-            </div>
         </div>
     </div>
     <div class="JobResultsStdOut-footer">
+        <div class="JobResultsStdOut-toTop"
+            ng-show="stdoutOverflowed">
+            <div class="JobResultsStdOut-toTop--numberColumn">
+            </div>
+            <span ng-click="toTop()">^ <span translate>TOP</span></span>
+        </div>
         <div class="JobResultsStdOut-footerNumberColumn"></div>
     </div>
 </div>

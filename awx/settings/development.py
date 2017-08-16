@@ -59,6 +59,7 @@ AWX_PROOT_ENABLED = True
 
 AWX_ISOLATED_USERNAME = 'root'
 AWX_ISOLATED_CHECK_INTERVAL = 1
+AWX_ISOLATED_LAUNCH_TIMEOUT = 30
 
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
@@ -110,7 +111,7 @@ include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 ANSIBLE_VENV_PATH = "/venv/ansible"
-TOWER_VENV_PATH = "/venv/tower"
+AWX_VENV_PATH = "/venv/awx"
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
@@ -125,8 +126,9 @@ CLUSTER_HOST_ID = socket.gethostname()
 CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 # Production only runs this schedule on controlling nodes
 # but development will just run it on all nodes
+CELERY_ROUTES['awx.main.tasks.awx_isolated_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 CELERYBEAT_SCHEDULE['isolated_heartbeat'] = {
-    'task': 'awx.main.tasks.tower_isolated_heartbeat',
+    'task': 'awx.main.tasks.awx_isolated_heartbeat',
     'schedule': timedelta(seconds = AWX_ISOLATED_PERIODIC_CHECK),
     'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2,}
 }

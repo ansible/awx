@@ -5,16 +5,30 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource
+from awx.main.models import InventorySource, Inventory, ActivityStream
+
+import json
 
 
 @pytest.fixture
 def scm_inventory(inventory, project):
-    with mock.patch.object(project, 'update'):
+    with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inventory.inventory_sources.create(
             name='foobar', update_on_project_update=True, source='scm',
             source_project=project, scm_last_revision=project.scm_revision)
     return inventory
+
+
+@pytest.fixture
+def factory_scm_inventory(inventory, project):
+    def fn(**kwargs):
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            return inventory.inventory_sources.create(source_project=project,
+                                                      overwrite_vars=True,
+                                                      source='scm',
+                                                      scm_last_revision=project.scm_revision,
+                                                      **kwargs)
+    return fn
 
 
 @pytest.mark.django_db
@@ -69,6 +83,7 @@ def test_async_inventory_deletion(delete, get, inventory, alice):
     inventory.admin_role.members.add(alice)
     resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 202
+    assert ActivityStream.objects.filter(operation='delete').exists()
 
     resp = get(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 200
@@ -84,6 +99,20 @@ def test_async_inventory_duplicate_deletion_prevention(delete, get, inventory, a
     resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
     assert resp.status_code == 400
     assert resp.data['error'] == 'Inventory is already pending deletion.'
+
+
+@pytest.mark.django_db
+def test_async_inventory_deletion_deletes_related_jt(delete, get, job_template, inventory, alice, admin):
+    job_template.inventory = inventory
+    job_template.save()
+    assert job_template.inventory == inventory
+    inventory.admin_role.members.add(alice)
+    resp = delete(reverse('api:inventory_detail', kwargs={'pk': inventory.id}), alice)
+    assert resp.status_code == 202
+
+    resp = get(reverse('api:job_template_detail', kwargs={'pk': job_template.id}), admin)
+    jdata = json.loads(resp.content)
+    assert jdata['inventory'] is None
 
 
 @pytest.mark.parametrize('order_by', ('script', '-script', 'script,pk', '-script,pk'))
@@ -173,6 +202,54 @@ def test_delete_inventory_group(delete, group, alice, role_field, expected_statu
     if role_field:
         getattr(group.inventory, role_field).members.add(alice)
     delete(reverse('api:group_detail', kwargs={'pk': group.id}), alice, expect=expected_status_code)
+
+
+@pytest.mark.django_db
+def test_create_inventory_smarthost(post, get, inventory, admin_user, organization):
+    data = { 'name': 'Host 1', 'description': 'Test Host'}
+    smart_inventory = Inventory(name='smart',
+                                kind='smart',
+                                organization=organization,
+                                host_filter='inventory_sources__source=ec2')
+    smart_inventory.save()
+    post(reverse('api:inventory_hosts_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
+    resp = get(reverse('api:inventory_hosts_list', kwargs={'pk': smart_inventory.id}), admin_user)
+    jdata = json.loads(resp.content)
+
+    assert getattr(smart_inventory, 'kind') == 'smart'
+    assert jdata['count'] == 0
+
+
+@pytest.mark.django_db
+def test_create_inventory_smartgroup(post, get, inventory, admin_user, organization):
+    data = { 'name': 'Group 1', 'description': 'Test Group'}
+    smart_inventory = Inventory(name='smart',
+                                kind='smart',
+                                organization=organization,
+                                host_filter='inventory_sources__source=ec2')
+    smart_inventory.save()
+    post(reverse('api:inventory_groups_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
+    resp = get(reverse('api:inventory_groups_list', kwargs={'pk': smart_inventory.id}), admin_user)
+    jdata = json.loads(resp.content)
+
+    assert getattr(smart_inventory, 'kind') == 'smart'
+    assert jdata['count'] == 0
+
+
+@pytest.mark.django_db
+def test_create_inventory_smart_inventory_sources(post, get, inventory, admin_user, organization):
+    data = { 'name': 'Inventory Source 1', 'description': 'Test Inventory Source'}
+    smart_inventory = Inventory(name='smart',
+                                kind='smart',
+                                organization=organization,
+                                host_filter='inventory_sources__source=ec2')
+    smart_inventory.save()
+    post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
+    resp = get(reverse('api:inventory_inventory_sources_list', kwargs={'pk': smart_inventory.id}), admin_user)
+    jdata = json.loads(resp.content)
+
+    assert getattr(smart_inventory, 'kind') == 'smart'
+    assert jdata['count'] == 0
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
@@ -311,21 +388,30 @@ class TestControlledBySCM:
         delete(inv_src.get_absolute_url(), admin_user, expect=204)
         assert scm_inventory.inventory_sources.count() == 0
 
-    def test_adding_inv_src_prohibited(self, post, scm_inventory, admin_user):
+    def test_adding_inv_src_ok(self, post, scm_inventory, admin_user):
+        post(reverse('api:inventory_inventory_sources_list', kwargs={'version': 'v2', 'pk': scm_inventory.id}),
+             {'name': 'new inv src', 'update_on_project_update': False, 'source': 'scm', 'overwrite_vars': True},
+             admin_user, expect=201)
+
+    def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
         post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-             {'name': 'new inv src'}, admin_user, expect=403)
+             {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': True, 'source': 'scm', 'overwrite_vars': True},
+             admin_user, expect=400)
+
+    def test_two_update_on_project_update_inv_src_prohibited(self, patch, scm_inventory, factory_scm_inventory, project, admin_user):
+        scm_inventory2 = factory_scm_inventory(name="scm_inventory2")
+        res = patch(reverse('api:inventory_source_detail', kwargs={'version': 'v2', 'pk': scm_inventory2.id}),
+                    {'update_on_project_update': True,},
+                    admin_user, expect=400)
+        content = json.loads(res.content)
+        assert content['update_on_project_update'] == ["More than one SCM-based inventory source with update on project update "
+                                                       "per-inventory not allowed."]
 
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)
-        post(
-            reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
-            {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
-            rando, expect=403)
-
-    def test_no_post_in_options(self, options, scm_inventory, admin_user):
-        r = options(reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-                    admin_user, expect=200)
-        assert 'POST' not in r.data['actions']
+        post(reverse('api:inventory_inventory_sources_list', kwargs={'pk': inventory.id}),
+             {'name': 'new inv src', 'source_project': project.pk, 'source': 'scm', 'overwrite_vars': True},
+             rando, expect=403)
 
 
 @pytest.mark.django_db

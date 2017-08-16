@@ -44,7 +44,7 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
                 }
 
                 scope.generateTable = function(data, event){
-                    var html, title = "Recent Jobs";
+                    var html, title = (scope.inventory.has_active_failures) ? "Recent Failed Jobs" : "Recent Successful Jobs";
                     Wait('stop');
                     if (data.count > 0) {
                         html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
@@ -60,10 +60,10 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
                         data.results.forEach(function(row) {
                             html += "<tr>\n";
                             html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                                ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
+                                ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
                             html += "<td>" + ($filter('longDate')(row.finished)) + "</td>";
                             html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                                ". Click for details\" aw-tip-placement=\"top\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
+                                ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                             html += "</tr>\n";
                         });
                         html += "</tbody>\n";

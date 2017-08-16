@@ -43,6 +43,9 @@ return {
     activeEditState: 'inventories.edit.inventory_sources.edit',
     detailsClick: "$state.go('inventories.edit.inventory_sources.edit')",
     well: false,
+    subFormTitles: {
+        sourceSubForm: i18n._('Source Details'),
+    },
     fields: {
         name: {
             label: i18n._('Name'),
@@ -64,14 +67,15 @@ return {
             ngOptions: 'source.label for source in source_type_options track by source.value',
             ngChange: 'sourceChange(source)',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-            ngModel: 'source'
+            ngModel: 'source',
+            hasSubForm: true
         },
         credential: {
             label: i18n._('Credential'),
             type: 'lookup',
             list: 'CredentialList',
             basePath: 'credentials',
-            ngShow: "source && source.value !== ''",
+            ngShow: "source && source.value !== '' && source.value !== 'custom'",
             sourceModel: 'credential',
             sourceField: 'name',
             ngClick: 'lookupCredential()',
@@ -79,6 +83,7 @@ return {
                 reqExpression: "cloudCredentialRequired",
                 init: "false"
             },
+            subForm: 'sourceSubForm',
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
             watchBasePath: "credentialBasePath"
         },
@@ -98,11 +103,13 @@ return {
                 init: "false"
             },
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
-            watchBasePath: "projectBasePath"
+            watchBasePath: "projectBasePath",
+            subForm: 'sourceSubForm'
         },
         inventory_file: {
             label: i18n._('Inventory File'),
             type:'select',
+            defaultText: 'Choose an inventory file',
             ngOptions: 'file for file in inventory_files track by file',
             ngShow: "source && source.value === 'scm'",
             ngDisabled: "!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || disableInventoryFileBecausePermissionDenied",
@@ -116,7 +123,8 @@ return {
             dataTitle: i18n._('Inventory File'),
             dataPlacement: 'right',
             dataContainer: "body",
-            includeInventoryFileNotFoundError: true
+            includeInventoryFileNotFoundError: true,
+            subForm: 'sourceSubForm'
         },
         source_regions: {
             label: i18n._('Regions'),
@@ -129,7 +137,8 @@ return {
             awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
                        "<em>" + i18n._("All") + "</em> " + i18n._("to include all regions. Only Hosts associated with the selected regions will be updated.") + "</p>",
             dataContainer: 'body',
-            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+            subForm: 'sourceSubForm'
         },
         instance_filters: {
             label: i18n._('Instance Filters'),
@@ -140,7 +149,8 @@ return {
             awPopOverWatch: 'instanceFilterPopOver',
             awPopOver: '{{ instanceFilterPopOver }}',
             dataContainer: 'body',
-            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+            subForm: 'sourceSubForm'
         },
         group_by: {
             label: i18n._('Only Group By'),
@@ -153,7 +163,8 @@ return {
             awPopOverWatch: 'groupByPopOver',
             awPopOver: '{{ groupByPopOver }}',
             dataContainer: 'body',
-            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
+            ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+            subForm: 'sourceSubForm'
         },
         inventory_script: {
             label :  i18n._("Custom Inventory Script"),
@@ -168,6 +179,7 @@ return {
                 init: "false"
             },
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+            subForm: 'sourceSubForm'
         },
         custom_variables: {
             id: 'custom_variables',
@@ -188,7 +200,8 @@ return {
                 "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                 '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                 '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-            dataContainer: 'body'
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
         },
         ec2_variables: {
             id: 'ec2_variables',
@@ -211,7 +224,8 @@ return {
                 "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                 '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                 '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-            dataContainer: 'body'
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
         },
         vmware_variables: {
             id: 'vmware_variables',
@@ -234,7 +248,8 @@ return {
                 "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                 '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                 '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-            dataContainer: 'body'
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
         },
         openstack_variables: {
             id: 'openstack_variables',
@@ -257,7 +272,56 @@ return {
                 "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                 '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                 '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-            dataContainer: 'body'
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
+        cloudforms_variables: {
+            id: 'cloudforms_variables',
+            label: i18n._('Source Variables'),
+            ngShow: "source && source.value == 'cloudforms'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: "Source Variables",
+            dataPlacement: 'right',
+            awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\" target=\"_blank\">" +
+                "view openstack.yml in the Ansible github repo.</a></p>" +
+                "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                "JSON:<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                "YAML:<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
+        satellite6_variables: {
+            id: 'satellite6_variables',
+            label: i18n._('Source Variables'),
+            ngShow: "source && source.value == 'satellite6'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: "Source Variables",
+            dataPlacement: 'right',
+            awPopOver: "<p>Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration " +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\" target=\"_blank\">" +
+                "view openstack.yml in the Ansible github repo.</a></p>" +
+                "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                "JSON:<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                "YAML:<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
         },
         verbosity: {
             label: i18n._('Verbosity'),
@@ -271,12 +335,14 @@ return {
             dataPlacement: 'right',
             dataContainer: "body",
             ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)',
+            subForm: 'sourceSubForm'
         },
         checkbox_group: {
             label: i18n._('Update Options'),
             type: 'checkbox_group',
             ngShow: "source && (source.value !== '' && source.value !== null)",
             class: 'Form-checkbox--stacked',
+            subForm: 'sourceSubForm',
             fields: [{
                 name: 'overwrite',
                 label: i18n._('Overwrite'),
@@ -345,7 +411,8 @@ return {
                 'and a new inventory sync will be performed.</p>',
             dataTitle: i18n._('Cache Timeout'),
             dataPlacement: 'right',
-            dataContainer: "body"
+            dataContainer: "body",
+            subForm: 'sourceSubForm'
         }
     },
 

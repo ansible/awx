@@ -54,16 +54,18 @@ function AtInputGroupController ($scope, $compile) {
     vm.createComponentConfigs = inputs => {
         let group = [];
 
-        inputs.forEach((input, i) => {
-            input = Object.assign(input, vm.getComponentType(input));
+        if (inputs) {
+            inputs.forEach((input, i) => {
+                input = Object.assign(input, vm.getComponentType(input));
 
-            group.push(Object.assign({
-                _element: vm.createComponent(input, i),
-                _key: 'inputs',
-                _group: true,
-                _groupIndex: i
-            }, input));
-        });
+                group.push(Object.assign({
+                    _element: vm.createComponent(input, i),
+                    _key: 'inputs',
+                    _group: true,
+                    _groupIndex: i
+                }, input));
+            });
+        }
 
         return group;
     };

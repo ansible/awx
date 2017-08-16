@@ -11,7 +11,7 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
@@ -122,16 +122,18 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         user = self.request.user if self.category_slug == 'user' else None
         settings_change_list = []
         for key, value in serializer.validated_data.items():
-            if key == 'LICENSE':
+            if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
                 continue
-            if settings_registry.is_setting_encrypted(key) and isinstance(value, basestring) and value.startswith('$encrypted$'):
+            if settings_registry.is_setting_encrypted(key) and \
+                    isinstance(value, basestring) and \
+                    value.startswith('$encrypted$'):
                 continue
             setattr(serializer.instance, key, value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
                 setting = Setting.objects.create(key=key, user=user, value=value)
                 settings_change_list.append(key)
-            elif setting.value != value or type(setting.value) != type(value):
+            elif setting.value != value:
                 setting.value = value
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
@@ -146,6 +148,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         settings_change_list = []
         for setting in self.get_queryset().exclude(key='LICENSE'):
+            if settings_registry.get_setting_field(setting.key).read_only:
+                continue
             setting.delete()
             settings_change_list.append(setting.key)
         if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
@@ -178,6 +182,13 @@ class SettingLoggingTest(GenericAPIView):
         obj = type('Settings', (object,), defaults)()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
+        # Special validation specific to logging test.
+        errors = {}
+        for key in ['LOG_AGGREGATOR_TYPE', 'LOG_AGGREGATOR_HOST']:
+            if not request.data.get(key, ''):
+                errors[key] = 'This field is required.'
+        if errors:
+            raise ValidationError(errors)
 
         if request.data.get('LOG_AGGREGATOR_PASSWORD', '').startswith('$encrypted$'):
             serializer.validated_data['LOG_AGGREGATOR_PASSWORD'] = getattr(
@@ -190,6 +201,7 @@ class SettingLoggingTest(GenericAPIView):
             mock_settings = MockSettings()
             for k, v in serializer.validated_data.items():
                 setattr(mock_settings, k, v)
+            mock_settings.LOG_AGGREGATOR_LEVEL = 'DEBUG'
             BaseHTTPSHandler.perform_test(mock_settings)
         except LoggingConnectivityException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

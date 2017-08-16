@@ -29,7 +29,7 @@
       command: "mkfifo {{src}}/env"
 
     - name: spawn the playbook
-      command: "tower-expect start {{src}}"
+      command: "awx-expect start {{src}}"
 
     - name: write the secret environment data
       mkfifo:

@@ -101,12 +101,15 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             });
         };
 
-        $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
-
         $scope.sourceChange = function(source) {
             source = (source && source.value) ? source.value : '';
-            $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
-            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm') {
+            if ($scope.source.value === "scm" && $scope.source.value === "custom") {
+                $scope.credentialBasePath = GetBasePath('credentials') + '?credential_type__kind__in=cloud,network';
+            }
+            else{
+                $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+            }
+            if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack' || source === 'scm' || source === 'cloudforms' || source === "satellite6") {
                 $scope.envParseType = 'yaml';
 
                 var varName;
@@ -306,7 +309,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             };
 
             if ($scope.source) {
-                params.source_vars = $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables'];
+                let source_vars = $scope.source.value === 'scm' ? $scope.custom_variables : $scope[$scope.source.value + '_variables'];
+                params.source_vars = source_vars === '---' || source_vars === '{}' ? null : source_vars;
                 params.source = $scope.source.value;
                 if ($scope.source.value === 'scm') {
                   params.update_on_project_update = $scope.update_on_project_update;

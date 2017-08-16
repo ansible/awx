@@ -5,8 +5,9 @@
  *************************************************/
 
 export default [ 'InsightsData', '$scope', 'moment', '$state', 'InventoryData',
-    'InsightsService',
-function (data, $scope, moment, $state, InventoryData, InsightsService) {
+    'InsightsService', 'CanRemediate',
+function (data, $scope, moment, $state, InventoryData, InsightsService,
+    CanRemediate) {
 
     function init() {
         $scope.reports = (data && data.reports) ? data.reports : [];
@@ -24,7 +25,7 @@ function (data, $scope, moment, $state, InventoryData, InsightsService) {
         $scope.insights_credential = (InventoryData && InventoryData.summary_fields &&
             InventoryData.summary_fields.insights_credential && InventoryData.summary_fields.insights_credential.id) ?
                 InventoryData.summary_fields.insights_credential.id : null;
-
+        $scope.canRemediate = CanRemediate;
     }
 
     function filter(str){
@@ -42,8 +43,8 @@ function (data, $scope, moment, $state, InventoryData, InsightsService) {
         window.open(`https://access.redhat.com/insights/inventory?machine=${$scope.$parent.host.insights_system_id}`, '_blank');
     };
 
-    $scope.remediateInventory = function(inv_id, inv_name, insights_credential){
-        $state.go('templates.addJobTemplate', {inventory_id: inv_id, inventory_name:inv_name, credential_id: insights_credential});
+    $scope.remediateInventory = function(inv_id, insights_credential){
+        $state.go('templates.addJobTemplate', {inventory_id: inv_id, credential_id: insights_credential});
     };
 
     $scope.formCancel = function(){

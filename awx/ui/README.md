@@ -1,10 +1,10 @@
-# Ansible Tower UI
+# AWX UI
 
 ## Requirements
 
 ### Node / NPM
 
-Tower currently requires the 6.x LTS version of Node and NPM.
+AWX currently requires the 6.x LTS version of Node and NPM.
 
 macOS installer: [https://nodejs.org/dist/latest-v6.x/node-v6.9.4.pkg](https://nodejs.org/dist/latest-v6.x/node-v6.9.4.pkg)
 
@@ -33,7 +33,7 @@ $ yum install bzip2 gcc-c++ git make
 
 ### Starting the UI
 
-First, the Tower API will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+First, the AWX API will need to be running. See [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 When using Docker for Mac or native Docker on Linux:
 
@@ -84,7 +84,7 @@ Some javascript libraries do not export their contents as a module, or depend on
 1. Shim implicit dependencies using Webpack's [ProvidePlugin](https://github.com/webpack/webpack/blob/006d59500de0493c4096d5d4cecd64eb12db2b95/lib/ProvidePlugin.js). Example:
 
 ```js
-// Tower source code depends on the lodash library being available as _
+// AWX source code depends on the lodash library being available as _
 _.uniq([1,2,3,1]) // will throw error undefined
 ```
 
@@ -128,7 +128,7 @@ Environment variables can accessed in a Javascript via `PROCESS.env`.
 Example usage in `npm run build-docker-machine`:
 
 ```bash
-$ docker-machine ssh $DOCKER_MACHINE_NAME -f -N -L ${npm_package_config_websocket_port}:localhost:${npm_package_config_websocket_port}; ip=$(docker-machine ip $DOCKER_MACHINE_NAME); echo npm set ansible-tower:django_host ${ip}; $ grunt dev
+$ docker-machine ssh $DOCKER_MACHINE_NAME -f -N -L ${npm_package_config_websocket_port}:localhost:${npm_package_config_websocket_port}; ip=$(docker-machine ip $DOCKER_MACHINE_NAME); echo npm set awx:django_host ${ip}; $ grunt dev
 ```
 
 Example usage in an `npm test` script target:
@@ -139,7 +139,7 @@ npm_package_config_websocket_port=mock_websocket_port npm_package_config_django_
 
 You'll usually want to pipe and set vars prior to running a script target:
 ```
-$ npm set ansible-tower:websocket_host ${mock_host}; npm run script-name
+$ npm set awx:websocket_host ${mock_host}; npm run script-name
 ```
 
 ### NPM Scripts

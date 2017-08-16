@@ -19,6 +19,7 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
@@ -135,15 +136,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=[
-                ('', _('None')),
-                ('sudo', _('Sudo')),
-                ('su', _('Su')),
-                ('pbrun', _('Pbrun')),
-                ('pfexec', _('Pfexec')),
-                ('dzdo', _('DZDO')),
-                ('pmrun', _('Pmrun')),
-            ],
+            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
@@ -391,7 +384,7 @@ class CredentialType(CommonModelNameNotUnique):
         'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
         'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
         'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'TOWER_HOST',
-        'MAX_EVENT_RES', 'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
+        'AWX_HOST', 'MAX_EVENT_RES', 'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
         'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
     ))
 
@@ -639,7 +632,10 @@ def ssh(cls):
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+            }
         }
     )
 
@@ -672,7 +668,10 @@ def scm(cls):
                 'label': 'Private Key Passphrase',
                 'type': 'string',
                 'secret': True
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+            }
         }
     )
 
@@ -732,7 +731,11 @@ def net(cls):
                 'label': 'Authorize Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'dependencies': {
+                'ssh_key_unlock': ['ssh_key_data'],
+                'authorize_password': ['authorize'],
+            }
         }
     )
 

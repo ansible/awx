@@ -1,5 +1,3 @@
-@import "./client/src/shared/branding/colors.default.less";
-
 .NotificationsForm-typeSelect{
     flex: none;
 }
@@ -26,4 +24,30 @@
 
 .NotificationsForm-radioButtons{
     display:block!important;
+}
+
+#notification_templates_table .name-column {
+    padding-left: 10px;
+}
+
+.notificationsList {
+    margin-top: 0;
+}
+
+.ng-toast {
+    .alert {
+        margin: 0;
+    }
+    .alert span:first-of-type {
+            margin-right: 10px;
+    }
+
+    .close {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        color: white;
+        opacity: 1;
+        text-shadow: none;
+    }
 }

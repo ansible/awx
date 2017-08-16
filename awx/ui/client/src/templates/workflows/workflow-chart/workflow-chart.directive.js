@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state','moment', '$timeout', '$window',
-    function($state, moment, $timeout, $window) {
+export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'GetBasePath', 'ProcessErrors',
+    function($state, moment, $timeout, $window, $filter, Rest, GetBasePath, ProcessErrors) {
 
     return {
         scope: {
@@ -283,7 +283,9 @@ export default ['$state','moment', '$timeout', '$window',
                                 })
                                 .attr('stroke-width', "2px")
                                 .attr("class", function(d) {
-                                    return d.placeholder ? "rect placeholder" : "rect";
+                                    let classString = d.placeholder ? "rect placeholder" : "rect";
+                                    classString += !d.unifiedJobTemplate ? " WorkflowChart-dashedNode" : "";
+                                    return classString;
                                 });
 
                             thisNode.append("path")
@@ -302,7 +304,7 @@ export default ['$state','moment', '$timeout', '$window',
                                 }).each(wrap);
 
                             thisNode.append("foreignObject")
-                                 .attr("x", 43)
+                                 .attr("x", 54)
                                  .attr("y", 45)
                                  .style("font-size","0.7em")
                                  .attr("class", "WorkflowChart-conflictText")
@@ -312,13 +314,13 @@ export default ['$state','moment', '$timeout', '$window',
                                  .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
                             thisNode.append("foreignObject")
-                                .attr("x", 17)
+                                .attr("x", 62)
                                 .attr("y", 22)
                                 .attr("dy", ".35em")
                                 .attr("text-anchor", "middle")
-                                .attr("class", "WorkflowChart-defaultText WorkflowChart-incompleteText")
+                                .attr("class", "WorkflowChart-defaultText WorkflowChart-deletedText")
                                 .html(function () {
-                                    return "<span class=\"WorkflowChart-incompleteIcon\">\uf06a</span><span> INCOMPLETE</span>";
+                                    return "<span>DELETED</span>";
                                 })
                                 .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
@@ -363,7 +365,7 @@ export default ['$state','moment', '$timeout', '$window',
                                             });
                                             // Render the tooltip quickly in the dom and then remove.  This lets us know how big the tooltip is so that we can place
                                             // it properly on the workflow
-                                            let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div>");
+                                            let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div>");
                                             $('body').append(tooltipDimensionChecker);
                                             let tipWidth = $(tooltipDimensionChecker).outerWidth();
                                             let tipHeight = $(tooltipDimensionChecker).outerHeight();
@@ -376,7 +378,7 @@ export default ['$state','moment', '$timeout', '$window',
                                                 .attr("height", tipHeight+20)
                                                 .attr("class", "WorkflowChart-tooltip")
                                                 .html(function(){
-                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
+                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
                                                 });
                                         }
                                         d3.select("#node-" + d.id)
@@ -709,9 +711,11 @@ export default ['$state','moment', '$timeout', '$window',
                                 return "#D7D7D7";
                             }
                          })
-                        .attr("class", function(d) {
-                            return d.placeholder ? "rect placeholder" : "rect";
-                        });
+                         .attr("class", function(d) {
+                             let classString = d.placeholder ? "rect placeholder" : "rect";
+                             classString += !d.unifiedJobTemplate ? " WorkflowChart-dashedNode" : "";
+                             return classString;
+                         });
 
                     t.selectAll(".node")
                         .attr("parent", function(d){return d.parent ? d.parent.id : null;})
@@ -788,7 +792,7 @@ export default ['$state','moment', '$timeout', '$window',
                     t.selectAll(".WorkflowChart-detailsLink")
                         .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
 
-                    t.selectAll(".WorkflowChart-incompleteText")
+                    t.selectAll(".WorkflowChart-deletedText")
                         .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
                     t.selectAll(".WorkflowChart-conflictText")
@@ -861,15 +865,38 @@ export default ['$state','moment', '$timeout', '$window',
                     d3.select(this).style("text-decoration", null);
                 });
                 this.on("click", function(d) {
-                    if(d.job.id && d.unifiedJobTemplate) {
-                        if(d.unifiedJobTemplate.unified_job_type === 'job') {
+
+                    let goToJobResults = function(job_type) {
+                        if(job_type === 'job') {
                             $state.go('jobResult', {id: d.job.id});
                         }
-                        else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
+                        else if(job_type === 'inventory_update') {
                             $state.go('inventorySyncStdout', {id: d.job.id});
                         }
-                        else if(d.unifiedJobTemplate.unified_job_type === 'project_update') {
+                        else if(job_type === 'project_update') {
                             $state.go('scmUpdateStdout', {id: d.job.id});
+                        }
+                    };
+
+                    if(d.job.id) {
+                        if(d.unifiedJobTemplate) {
+                            goToJobResults(d.unifiedJobTemplate.unified_job_type);
+                        }
+                        else {
+                            // We don't have access to the unified resource and have to make
+                            // a GET request in order to find out what type job this was
+                            // so that we can route the user to the correct stdout view
+
+                            Rest.setUrl(GetBasePath("unified_jobs") + "?id=" + d.job.id);
+                            Rest.get()
+                            .success(function (res) {
+                                if(res.results && res.results.length > 0) {
+                                    goToJobResults(res.results[0].type);
+                                }
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Unable to get job: ' + status });
+                            });
                         }
                     }
                 });

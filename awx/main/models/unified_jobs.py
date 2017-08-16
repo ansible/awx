@@ -30,10 +30,11 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
-    copy_model_by_class, copy_m2m_relationships
+    copy_model_by_class, copy_m2m_relationships,
+    get_type_for_model
 )
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -359,7 +360,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_job.save()
 
         # Labels and extra credentials copied here
-        copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
+        from awx.main.signals import disable_activity_stream
+        with disable_activity_stream():
+            copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
         return unified_job
 
     @classmethod
@@ -414,7 +417,7 @@ class UnifiedJobTypeStringMixin(object):
         return UnifiedJobTypeStringMixin._camel_to_underscore(self.__class__.__name__)
 
 
-class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -620,6 +623,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
+    @property
+    def log_format(self):
+        return '{} {} ({})'.format(get_type_for_model(type(self)), self.id, self.status)
+
     def _get_parent_instance(self):
         return getattr(self, self._get_parent_field_name(), None)
 
@@ -804,7 +811,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         try:
             return os.stat(self.result_stdout_file).st_size
         except:
-            return 0
+            return len(self.result_stdout)
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
@@ -905,14 +912,22 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return websocket_data
 
     def _websocket_emit_status(self, status):
-        status_data = dict(unified_job_id=self.id, status=status)
-        status_data.update(self.websocket_emit_data())
-        status_data['group_name'] = 'jobs'
-        emit_channel_notification('jobs-status_changed', status_data)
+        try:
+            status_data = dict(unified_job_id=self.id, status=status)
+            if status == 'waiting':
+                if self.instance_group:
+                    status_data['instance_group_name'] = self.instance_group.name
+                else:
+                    status_data['instance_group_name'] = None
+            status_data.update(self.websocket_emit_data())
+            status_data['group_name'] = 'jobs'
+            emit_channel_notification('jobs-status_changed', status_data)
 
-        if self.spawned_by_workflow:
-            status_data['group_name'] = "workflow_events"
-            emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+            if self.spawned_by_workflow:
+                status_data['group_name'] = "workflow_events"
+                emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+        except IOError:  # includes socket errors
+            logger.exception('%s failed to emit channel msg about status change', self.log_format)
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: self._websocket_emit_status(status))
@@ -956,6 +971,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return (True, opts)
 
     def start_celery_task(self, opts, error_callback, success_callback, queue):
+        kwargs = {
+            'link_error': error_callback,
+            'link': success_callback,
+            'queue': None,
+            'task_id': None,
+        }
+        if not self.celery_task_id:
+            raise RuntimeError("Expected celery_task_id to be set on model.")
+        kwargs['task_id'] = self.celery_task_id
         task_class = self._get_task_class()
         from awx.main.models.ha import InstanceGroup
         ig = InstanceGroup.objects.get(name=queue)
@@ -966,7 +990,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 args.append(isolated_instance.hostname)
             else:  # proj & inv updates, system jobs run on controller
                 queue = ig.controller.name
-        task_class().apply_async(args, opts, link_error=error_callback, link=success_callback, queue=queue)
+        kwargs['queue'] = queue
+        task_class().apply_async(args, opts, **kwargs)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''
@@ -1058,8 +1083,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.DEBUG:
                 raise
 
-    def cancel(self, job_explanation=None):
+    def _build_job_explanation(self):
+        if not self.job_explanation:
+            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                   (self.model_to_str(), self.name, self.id)
+        return None
+
+    def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
+            if not is_chain:
+                map(lambda x: x.cancel(job_explanation=self._build_job_explanation(), is_chain=True), self.get_jobs_fail_chain())
+
             if not self.cancel_flag:
                 self.cancel_flag = True
                 cancel_fields = ['cancel_flag']

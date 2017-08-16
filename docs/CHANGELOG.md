@@ -42,3 +42,14 @@
   [[#3508](https://github.com/ansible/ansible-tower/issues/3508)]
 * Added --diff mode to Job Templates and Ad-Hoc Commands.  The diff can be found in the
   standard out when diff mode is enabled.  [[#4525](https://github.com/ansible/ansible-tower/issues/4325)]
+* Support accessing some Tower resources via their name-related unique identifiers apart from primary keys.
+(named URL) [[#3362](https://github.com/ansible/ansible-tower/issues/3362)]
+* Support TACACS+ authentication. [[#3400](https://github.com/ansible/ansible-tower/issues/3400)]
+* Support sending system logs to external log aggregators via direct TCP/UDP connection.
+[[#5783](https://github.com/ansible/ansible-tower/pull/5783)]
+* Remove Rackspace as a supported inventory source type and credential type.
+[[#6117](https://github.com/ansible/ansible-tower/pull/6117)]
+* Changed names of tower-mange commands `register_instance` -> `provision_instance`,
+  `deprovision_node` -> `deprovision_instance`, and `instance_group_remove` -> `remove_from_queue`,
+  which backward compatibility support for 3.1 use pattern
+  [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]

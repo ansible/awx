@@ -109,26 +109,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             // params.parentId
             // params.node
 
-            let generatePostUrl = function(){
-
-                let base = (params.parentId) ? GetBasePath('workflow_job_template_nodes') + params.parentId : $scope.treeData.workflow_job_template_obj.related.workflow_nodes;
-
-                if(params.parentId) {
-                    if(params.node.edgeType === 'success') {
-                        base += "/success_nodes";
-                    }
-                    else if(params.node.edgeType === 'failure') {
-                        base += "/failure_nodes";
-                    }
-                    else if(params.node.edgeType === 'always') {
-                        base += "/always_nodes";
-                    }
-                }
-
-                return base;
-
-            };
-
             let buildSendableNodeData = function() {
                 // Create the node
                 let sendableNodeData = {
@@ -198,10 +178,17 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             if(params.node.isNew) {
 
                 TemplatesService.addWorkflowNode({
-                    url: generatePostUrl(),
+                    url: $scope.treeData.workflow_job_template_obj.related.workflow_nodes,
                     data: buildSendableNodeData()
                 })
                 .then(function(data) {
+
+                    $scope.associateRequests.push({
+                        parentId: params.parentId,
+                        nodeId: data.data.id,
+                        edge: params.node.edgeType
+                    });
+
                     params.node.isNew = false;
                     continueRecursing(data.data.id);
                 }, function(error) {
@@ -227,11 +214,21 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     if((params.node.originalParentId && params.parentId !== params.node.originalParentId) || params.node.originalEdge !== params.node.edgeType) {//beep
 
-                        $scope.disassociateRequests.push({
-                            parentId: params.node.originalParentId,
-                            nodeId: params.node.nodeId,
-                            edge: params.node.originalEdge
+                        let parentIsDeleted = false;
+
+                        _.forEach($scope.treeData.data.deletedNodes, function(deletedNode) {
+                            if(deletedNode === params.node.originalParentId) {
+                                parentIsDeleted = true;
+                            }
                         });
+
+                        if(!parentIsDeleted) {
+                            $scope.disassociateRequests.push({
+                                parentId: params.node.originalParentId,
+                                nodeId: params.node.nodeId,
+                                edge: params.node.originalEdge
+                            });
+                        }
 
                         // Can only associate if we have a parent.
                         // If we don't have a parent then this is a root node

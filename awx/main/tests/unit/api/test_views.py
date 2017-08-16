@@ -9,12 +9,15 @@ from awx.api.views import (
     JobTemplateLabelList,
     JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
+    InventoryHostsList,
     HostInsights,
 )
 
 from awx.main.models import (
     Host,
 )
+
+from awx.main.managers import HostManager
 
 
 @pytest.fixture
@@ -95,7 +98,7 @@ class TestInventoryInventorySourcesUpdate:
     @pytest.mark.parametrize("can_update, can_access, is_source, is_up_on_proj, expected", [
         (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
         (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
-        (True, False, "scm", True, [{'status': 'You do not have permission to update project `project`', 'inventory_source': 1}]),
+        (True, False, "scm", True, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
     ])
     def test_post(self, mocker, can_update, can_access, is_source, is_up_on_proj, expected):
         class InventoryUpdate:
@@ -112,12 +115,12 @@ class TestInventoryInventorySourcesUpdate:
                 return [InventorySource(pk=1, source=is_source, source_project=Project,
                                         update_on_project_update=is_up_on_proj,
                                         can_update=can_update, update=lambda:InventoryUpdate)]
-                                        
+
             def exclude(self, **kwargs):
                 return self.all()
-                
-        Inventory = namedtuple('Inventory', ['inventory_sources'])
-        obj = Inventory(inventory_sources=InventorySources())
+
+        Inventory = namedtuple('Inventory', ['inventory_sources', 'kind'])
+        obj = Inventory(inventory_sources=InventorySources(), kind='')
 
         mock_request = mocker.MagicMock()
         mock_request.user.can_access.return_value = can_access
@@ -135,9 +138,9 @@ class TestHostInsights():
         mocker.patch('awx.api.generics.GenericAPIView')
 
     @pytest.mark.parametrize("status_code, exception, error, message", [
-        (500, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
+        (502, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
         (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
-        (500, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+        (502, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
     ])
     def test_get_insights_request_exception(self, patch_parent, mocker, status_code, exception, error, message):
         view = HostInsights()
@@ -155,21 +158,29 @@ class TestHostInsights():
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
         assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API at URL https://myexample.com/whocares/me/. Server responded with 500 status code and message mock 500 err msg'
 
+    def test_get_insights_401(self, patch_parent, mocker):
+        view = HostInsights()
+        Response = namedtuple('Response', 'status_code content')
+        mocker.patch.object(view, '_get_insights', return_value=Response(401, ''))
+
+        (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
+        assert msg['error'] == 'Unauthorized access. Please check your Insights Credential username and password.'
+
     def test_get_insights_malformed_json_content(self, patch_parent, mocker):
         view = HostInsights()
-        
+
         class Response():
             status_code = 200
             content = 'booo!'
 
             def json(self):
                 raise ValueError('we do not care what this is')
-        
+
         mocker.patch.object(view, '_get_insights', return_value=Response())
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
         assert msg['error'] == 'Expected JSON response from Insights but instead got booo!'
-        assert code == 500
+        assert code == 502
 
     #def test_get_not_insights_host(self, patch_parent, mocker, mock_response_new):
     #def test_get_not_insights_host(self, patch_parent, mocker):
@@ -179,11 +190,11 @@ class TestHostInsights():
 
         host = Host()
         host.insights_system_id = None
-        
+
         mocker.patch.object(view, 'get_object', return_value=host)
 
         resp = view.get(None)
-        
+
         assert resp.data['error'] == 'This host is not recognized as an Insights host.'
         assert resp.status_code == 404
 
@@ -204,3 +215,17 @@ class TestHostInsights():
 
         assert resp.data['error'] == 'The Insights Credential for "inventory_name_here" was not found.'
         assert resp.status_code == 404
+
+
+class TestInventoryHostsList(object):
+
+    def test_host_list_smart_inventory(self, mocker):
+        Inventory = namedtuple('Inventory', ['kind', 'host_filter', 'hosts'])
+        obj = Inventory(kind='smart', host_filter='localhost', hosts=HostManager())
+        obj.hosts.instance = obj
+
+        with mock.patch.object(InventoryHostsList, 'get_parent_object', return_value=obj):
+            with mock.patch('awx.main.utils.filters.SmartFilter.query_from_string') as mock_query:
+                view = InventoryHostsList()
+                view.get_queryset()
+                mock_query.assert_called_once_with('localhost')

@@ -23,7 +23,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8',
                 linkTo: '/#/templates/job_template/{{job_template.id}}',
-                awToolTip: '{{job_template.description}}',
+                awToolTip: '{{job_template.description | sanitize}}',
                 dataPlacement: 'top'
             }
         },

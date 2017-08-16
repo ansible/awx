@@ -19,6 +19,8 @@ function AddCredentialsController (models, $state, strings) {
         omit: ['user', 'team', 'inputs']
     });
 
+    vm.form.disabled = !credential.isCreatable();
+
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'credentials.add.organization';
     vm.form.organization._model = organization;
@@ -31,9 +33,9 @@ function AddCredentialsController (models, $state, strings) {
 
     vm.form.inputs = {
         _get: id => {
-            let type = credentialType.getById(id);
+            credentialType.mergeInputProperties();
 
-            return credentialType.mergeInputProperties(type);
+            return credentialType.get('inputs.fields');
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',

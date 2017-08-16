@@ -7,7 +7,6 @@ import os
 import glob
 import sys
 import subprocess
-import re
 from setuptools import setup
 from distutils.command.sdist import sdist
 
@@ -17,16 +16,18 @@ etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 bindir = "/usr/bin"
 sharedir = "/usr/share/awx"
-docdir = "/usr/share/doc/ansible-tower"
+docdir = "/usr/share/doc/awx"
 
-if os.getenv('OFFICIAL', 'no') == 'yes':
-    build_tag = ''
-else:
-    build_tag = '-' + '0.git' + subprocess.Popen("git describe --long | cut -d - -f 2-2", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
 
 def get_version():
-    ver = subprocess.Popen("git describe --long | cut -f1-1 -d -", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-    return re.sub(r'-([0-9]+)-.*', r'.\1', ver)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    version_file = os.path.join(current_dir, 'VERSION')
+    if os.path.isfile(version_file):
+        with open(version_file, 'r') as file:
+            version = file.read().strip()
+    else:
+        version = subprocess.Popen("git describe --long | cut -d - -f 1-1", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+    return version
 
 
 if os.path.exists("/etc/debian_version"):
@@ -53,15 +54,11 @@ class sdist_isolated(sdist):
     includes = [
         'include Makefile',
         'include awx/__init__.py',
-        'include awx/main/isolated/run.py',
-        'include tools/scripts/tower-expect',
+        'include awx/main/expect/run.py',
+        'include tools/scripts/awx-expect',
         'include requirements/requirements_isolated.txt',
         'recursive-include awx/lib *.py',
     ]
-
-    def __init__(self, dist):
-        sdist.__init__(self, dist)
-        dist.metadata.version += build_tag
 
     def get_file_list(self):
         self.filelist.process_template_line('include setup.py')
@@ -117,12 +114,12 @@ def proc_data_files(data_files):
 
 
 setup(
-    name=os.getenv('NAME', 'ansible-awx'),
+    name=os.getenv('NAME', 'awx'),
     version=get_version(),
     author='Ansible, Inc.',
     author_email='info@ansible.com',
-    description='ansible-awx: API, UI and Task Engine for Ansible',
-    long_description='Ansible AWX provides a web-based user interface, REST API and '
+    description='awx: API, UI and Task Engine for Ansible',
+    long_description='AWX provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
     license='MIT',
     keywords='ansible',
@@ -162,21 +159,18 @@ setup(
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
                          "tools/scripts/failure-event-handler",
-                         "tools/scripts/tower-python",
+                         "tools/scripts/awx-python",
                          "tools/scripts/ansible-tower-setup"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     cmdclass = {'sdist_isolated': sdist_isolated},
     options = {
-        'egg_info': {
-            'tag_build': build_tag,
-        },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',
             'isolated_build': 'clean --all egg_info -b "" sdist_isolated',
         },
         'build_scripts': {
-            'executable': '/usr/bin/tower-python',
+            'executable': '/usr/bin/awx-python',
         },
     },
 )

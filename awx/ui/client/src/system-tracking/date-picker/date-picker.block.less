@@ -1,6 +1,3 @@
-/** @define DatePicker */
-@import "./client/src/shared/branding/colors.default.less";
-
 .DatePicker {
     flex: 1 0 auto;
     display: flex;
@@ -10,25 +7,26 @@
         padding: 6px 12px;
         font-size: 14px;
         border-radius: 4px 0 0 4px;
-        border: 1px solid #ccc;
+        border: 1px solid @b7grey;
         border-right: 0;
         background-color: @default-bg;
     }
 
     &-icon:hover {
-        background-color: @default-border;
+        background-color: @f6grey;
     }
 
     &-icon:focus,
     &-icon:active {
-        background-color: #ccc;
+        background-color: @f6grey;
     }
 
     &-input {
         flex: 1 0 auto;
         border-radius: 0 4px 4px 0;
-        border: 1px solid #ccc;
+        border: 1px solid @b7grey;
         padding: 6px 12px;
+        background-color: @fcgrey;
     }
 
     &-input:focus,

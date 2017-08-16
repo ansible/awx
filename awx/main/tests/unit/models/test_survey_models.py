@@ -86,36 +86,41 @@ def test_update_kwargs_survey_invalid_default(survey_spec_factory):
     spec['spec'][0]['min'] = 3
     spec['spec'][0]['default'] = 1
     jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True, extra_vars="var2: 2")
-    defaulted_extra_vars = jt._update_unified_job_kwargs()
+    defaulted_extra_vars = jt._update_unified_job_kwargs({}, {})
     assert 'extra_vars' in defaulted_extra_vars
     # Make sure we did not set the invalid default of 1
     assert json.loads(defaulted_extra_vars['extra_vars'])['var2'] == 2
 
 
 @pytest.mark.survey
-@pytest.mark.parametrize("question_type,default,expect_use,expect_value", [
-    ("multiplechoice", "",       False, 'N/A'),  # historical bug
-    ("multiplechoice", "zeb",    False, 'N/A'),  # zeb not in choices
-    ("multiplechoice", "coffee", True,  'coffee'),
-    ("multiselect",    None,     False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
-    ("multiselect",    "",       False, 'N/A'),
-    ("multiselect",    ["zeb"],  False, 'N/A'),
-    ("multiselect",    ["milk"], True,  ["milk"]),
-    ("multiselect",    ["orange\nmilk"], False,  'N/A'),  # historical bug
+@pytest.mark.parametrize("question_type,default,min,max,expect_use,expect_value", [
+    ("text",           "",       0, 0,  True, ''),      # default used
+    ("text",           "",       1, 0,  False, 'N/A'),  # value less than min length
+    ("password",       "",       1, 0,  False, 'N/A'),  # passwords behave the same as text
+    ("multiplechoice", "",       0, 0,  False, 'N/A'),  # historical bug
+    ("multiplechoice", "zeb",    0, 0,  False, 'N/A'),  # zeb not in choices
+    ("multiplechoice", "coffee", 0, 0,  True,  'coffee'),
+    ("multiselect",    None,     0, 0,  False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
+    ("multiselect",    "",       0, 0,  False, 'N/A'),
+    ("multiselect",    ["zeb"],  0, 0,  False, 'N/A'),
+    ("multiselect",    ["milk"], 0, 0,  True,  ["milk"]),
+    ("multiselect",    ["orange\nmilk"], 0, 0, False,  'N/A'),  # historical bug
 ])
 def test_optional_survey_question_defaults(
-        survey_spec_factory, question_type, default, expect_use, expect_value):
+        survey_spec_factory, question_type, default, min, max, expect_use, expect_value):
     spec = survey_spec_factory([
         {
             "required": False,
             "default": default,
             "choices": "orange\nmilk\nchocolate\ncoffee",
             "variable": "c",
+            "min": min,
+            "max": max,
             "type": question_type
         },
     ])
     jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
-    defaulted_extra_vars = jt._update_unified_job_kwargs()
+    defaulted_extra_vars = jt._update_unified_job_kwargs({}, {})
     element = spec['spec'][0]
     if expect_use:
         assert jt._survey_element_validation(element, {element['variable']: element['default']}) == []
@@ -140,7 +145,7 @@ class TestWorkflowSurveys:
             survey_enabled=True,
             extra_vars="var1: 5"
         )
-        updated_extra_vars = wfjt._update_unified_job_kwargs()
+        updated_extra_vars = wfjt._update_unified_job_kwargs({}, {})
         assert 'extra_vars' in updated_extra_vars
         assert json.loads(updated_extra_vars['extra_vars'])['var1'] == 3
         assert wfjt.can_start_without_user_input()

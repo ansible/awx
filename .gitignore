@@ -12,10 +12,7 @@ awx/job_output
 awx/public/media
 awx/public/static
 awx/ui/tests/test-results.xml
-awx/ui/static/js/awx.min.js
-awx/ui/static/js/local_settings.json
 awx/ui/client/src/local_settings.json
-awx/ui/static/css/awx.min.css
 awx/main/fixtures
 awx/*.log
 tower/tower_warnings.log
@@ -110,6 +107,7 @@ local/
 *.mo
 requirements/vendor
 .i18n_built
+VERSION
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

@@ -26,8 +26,8 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
         // selected[type][id] === { roles: [ ... ], ... }
 
         // collection of resources selected in section 1
-        scope.selected = {};
-        _.each(resources, (type) => scope.selected[type] = {});
+        scope.allSelected = {};
+        _.each(resources, (type) => scope.allSelected[type] = {});
 
         // collection of assignable roles per type of resource
         scope.keys = {};
@@ -94,17 +94,17 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
     };
 
     scope.showSection2Container = function(){
-        return _.any(scope.selected, (type) => Object.keys(type).length > 0);
+        return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 
     scope.showSection2Tab = function(tab){
-        return Object.keys(scope.selected[tab]).length > 0;
+        return Object.keys(scope.allSelected[tab]).length > 0;
     };
 
     scope.saveEnabled = function(){
         let missingRole = false;
         let resourceSelected = false;
-        _.forOwn(scope.selected, function(value, key) {
+        _.forOwn(scope.allSelected, function(value, key) {
             if(Object.keys(value).length > 0) {
                 // A resource from this tab has been selected
                 resourceSelected = true;
@@ -129,11 +129,11 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
             item = value.value;
 
         if (value.isSelected) {
-            scope.selected[resourceType][item.id] = item;
-            scope.selected[resourceType][item.id].roles = [];
+            scope.allSelected[resourceType][item.id] = item;
+            scope.allSelected[resourceType][item.id].roles = [];
             aggregateKey(item, resourceType);
         } else {
-            delete scope.selected[resourceType][item.id];
+            delete scope.allSelected[resourceType][item.id];
         }
     });
 
@@ -142,7 +142,7 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
         //Wait('start');
 
         // builds an array of role entities to apply to current user or team
-        let roles = _(scope.selected).map( (resources, type) => {
+        let roles = _(scope.allSelected).map( (resources, type) => {
             return _.map(resources, (resource) => {
                 return resource.summary_fields.object_roles[scope.roleSelection[type]];
             });

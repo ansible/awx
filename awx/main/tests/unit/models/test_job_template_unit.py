@@ -97,7 +97,7 @@ def test_job_template_survey_mixin(job_template_factory):
     obj = objects.job_template
     obj.survey_enabled = True
     obj.survey_spec = {'spec': [{'default':'my_default', 'type':'password', 'variable':'my_variable'}]}
-    kwargs = obj._update_unified_job_kwargs(extra_vars={'my_variable':'$encrypted$'})
+    kwargs = obj._update_unified_job_kwargs({}, {'extra_vars': {'my_variable':'$encrypted$'}})
     assert kwargs['extra_vars'] == '{"my_variable": "my_default"}'
 
 
@@ -113,8 +113,23 @@ def test_job_template_survey_mixin_length(job_template_factory):
     obj.survey_enabled = True
     obj.survey_spec = {'spec': [{'default':'my_default', 'type':'password', 'variable':'my_variable'},
                                 {'type':'password', 'variable':'my_other_variable'}]}
-    kwargs = obj._update_unified_job_kwargs(extra_vars={'my_variable':'$encrypted$'})
+    kwargs = obj._update_unified_job_kwargs({}, {'extra_vars': {'my_variable':'$encrypted$'}})
     assert kwargs['extra_vars'] == '{"my_variable": "my_default"}'
+
+
+def test_job_template_survey_mixin_survey_runtime_has_highest_priority(job_template_factory):
+    objects = job_template_factory(
+        'survey_mixin_test',
+        organization='org1',
+        inventory='inventory1',
+        credential='cred1',
+        persisted=False,
+    )
+    obj = objects.job_template
+    obj.survey_enabled = True
+    obj.survey_spec = {'spec': [{'default':'foo', 'type':'password', 'variable':'my_variable'}]}
+    kwargs = obj._update_unified_job_kwargs({}, {'extra_vars': {'my_variable': 'bar'}})
+    assert kwargs['extra_vars'] == '{"my_variable": "bar"}'
 
 
 def test_job_template_can_start_with_callback_extra_vars_provided(job_template_factory):

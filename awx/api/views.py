@@ -18,8 +18,6 @@ from collections import OrderedDict
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
-from django.core.cache import cache
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction, connection
@@ -28,6 +26,7 @@ from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
@@ -74,6 +73,7 @@ from awx.main.utils import (
     decrypt_field,
 )
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.insights import filter_insights_api_response
 
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
@@ -127,6 +127,25 @@ class WorkflowsEnforcementMixin(object):
         return super(WorkflowsEnforcementMixin, self).check_permissions(request)
 
 
+class UnifiedJobDeletionMixin(object):
+    '''
+    Special handling when deleting a running unified job object.
+    '''
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'delete', obj):
+            raise PermissionDenied()
+        try:
+            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        except self.model.unified_job_node.RelatedObjectDoesNotExist:
+            pass
+        if obj.status in ACTIVE_STATES:
+            raise PermissionDenied(detail=_("Cannot delete running job resource."))
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class ApiRootView(APIView):
 
     authentication_classes = []
@@ -140,7 +159,7 @@ class ApiRootView(APIView):
         v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
         data = dict(
-            description = _('Ansible Tower REST API'),
+            description = _('AWX REST API'),
             current_version = v2,
             available_versions = dict(v1 = v1, v2 = v2),
         )
@@ -226,15 +245,11 @@ class ApiV1PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        active_tasks = cache.get("active_celery_tasks", None)
         response = {
             'ha': is_ha_environment(),
             'version': get_awx_version(),
             'active_node': settings.CLUSTER_HOST_ID,
         }
-
-        if not isinstance(request.user, AnonymousUser):
-            response['celery_active_tasks'] = json.loads(active_tasks) if active_tasks is not None else None
 
         response['instances'] = []
         for instance in Instance.objects.all():
@@ -663,6 +678,7 @@ class AuthTokenView(APIView):
             serializer._data = self.update_raw_data(serializer.data)
         return serializer
 
+    @never_cache
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -695,7 +711,8 @@ class AuthTokenView(APIView):
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION),
+                'Pragma': 'no-cache',
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         if 'username' in request.data:
@@ -1298,20 +1315,11 @@ class ProjectUpdateList(ListAPIView):
     new_in_13 = True
 
 
-class ProjectUpdateDetail(RetrieveDestroyAPIView):
+class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = ProjectUpdate
     serializer_class = ProjectUpdateSerializer
     new_in_13 = True
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except ProjectUpdate.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -1614,7 +1622,18 @@ class CredentialTypeActivityStreamList(ActivityStreamEnforcementMixin, SubListAP
     new_in_api_v2 = True
 
 
-class CredentialList(ListCreateAPIView):
+# remove in 3.3
+class CredentialViewMixin(object):
+
+    @property
+    def related_search_fields(self):
+        ret = super(CredentialViewMixin, self).related_search_fields
+        if get_request_version(self.request) == 1 and 'credential_type__search' in ret:
+            ret.remove('credential_type__search')
+        return ret
+
+
+class CredentialList(CredentialViewMixin, ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
@@ -1649,7 +1668,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
         return self.model.objects.filter(pk__in=teams)
 
 
-class UserCredentialsList(SubListCreateAPIView):
+class UserCredentialsList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = UserCredentialSerializerCreate
@@ -1666,7 +1685,7 @@ class UserCredentialsList(SubListCreateAPIView):
         return user_creds & visible_creds
 
 
-class TeamCredentialsList(SubListCreateAPIView):
+class TeamCredentialsList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = TeamCredentialSerializerCreate
@@ -1683,7 +1702,7 @@ class TeamCredentialsList(SubListCreateAPIView):
         return (team_creds & visible_creds).distinct()
 
 
-class OrganizationCredentialList(SubListCreateAPIView):
+class OrganizationCredentialList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
     serializer_class = OrganizationCredentialSerializerCreate
@@ -1839,7 +1858,7 @@ class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
         try:
-            obj.schedule_deletion()
+            obj.schedule_deletion(getattr(request.user, 'id', None))
             return Response(status=status.HTTP_202_ACCEPTED)
         except RuntimeError, e:
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
@@ -1949,6 +1968,10 @@ class InventoryHostsList(SubListCreateAttachDetachAPIView):
     relationship = 'hosts'
     parent_key = 'inventory'
     capabilities_prefetch = ['inventory.admin']
+
+    def get_queryset(self):
+        inventory = self.get_parent_object()
+        return getattrd(inventory, self.relationship).all()
 
 
 class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
@@ -2087,19 +2110,22 @@ class HostInsights(GenericAPIView):
         try:
             res = self._get_insights(url, username, password)
         except requests.exceptions.SSLError:
-            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('SSLError while trying to connect to {}').format(url)), status.HTTP_502_BAD_GATEWAY)
         except requests.exceptions.Timeout:
             return (dict(error=_('Request to {} timed out.').format(url)), status.HTTP_504_GATEWAY_TIMEOUT)
         except requests.exceptions.RequestException as e:
-            return (dict(error=_('Unkown exception {} while trying to GET {}').format(e, url)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Unkown exception {} while trying to GET {}').format(e, url)), status.HTTP_502_BAD_GATEWAY)
 
-        if res.status_code != 200:
-            return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if res.status_code == 401:
+            return (dict(error=_('Unauthorized access. Please check your Insights Credential username and password.')), status.HTTP_502_BAD_GATEWAY)
+        elif res.status_code != 200:
+            return (dict(error=_('Failed to gather reports and maintenance plans from Insights API at URL {}. Server responded with {} status code and message {}').format(url, res.status_code, res.content)), status.HTTP_502_BAD_GATEWAY)
 
         try:
-            return (dict(insights_content=res.json()), status.HTTP_200_OK)
+            filtered_insights_content = filter_insights_api_response(res.json())
+            return (dict(insights_content=filtered_insights_content), status.HTTP_200_OK)
         except ValueError:
-            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return (dict(error=_('Expected JSON response from Insights but instead got {}').format(res.content)), status.HTTP_502_BAD_GATEWAY)
 
     def get(self, request, *args, **kwargs):
         host = self.get_object()
@@ -2362,63 +2388,59 @@ class InventoryScriptView(RetrieveAPIView):
             if obj.variables_dict:
                 all_group = data.setdefault('all', OrderedDict())
                 all_group['vars'] = obj.variables_dict
+            if obj.kind == 'smart':
+                if len(obj.hosts.all()) == 0:
+                    return Response({})
+                else:
+                    all_group = data.setdefault('all', OrderedDict())
+                    smart_hosts_qs = obj.hosts.all().order_by('name')
+                    smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
+                    all_group['hosts'] = smart_hosts
+            else:
+                # Add hosts without a group to the all group.
+                groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+                groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
+                if groupless_hosts:
+                    all_group = data.setdefault('all', OrderedDict())
+                    all_group['hosts'] = groupless_hosts
 
-            # Add hosts without a group to the all group.
-            groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
-            groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
-            if groupless_hosts:
-                all_group = data.setdefault('all', OrderedDict())
-                all_group['hosts'] = groupless_hosts
+                # Build in-memory mapping of groups and their hosts.
+                group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
+                if 'enabled' in hosts_q:
+                    group_hosts_kw['host__enabled'] = hosts_q['enabled']
+                group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
+                group_hosts_qs = group_hosts_qs.order_by('host__name')
+                group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
+                group_hosts_map = {}
+                for group_id, host_id, host_name in group_hosts_qs:
+                    group_hostnames = group_hosts_map.setdefault(group_id, [])
+                    group_hostnames.append(host_name)
 
-            # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
-            if 'enabled' in hosts_q:
-                group_hosts_kw['host__enabled'] = hosts_q['enabled']
-            group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-            group_hosts_qs = group_hosts_qs.order_by('host__name')
-            group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
-            group_hosts_map = {}
-            for group_id, host_id, host_name in group_hosts_qs:
-                group_hostnames = group_hosts_map.setdefault(group_id, [])
-                group_hostnames.append(host_name)
+                # Build in-memory mapping of groups and their children.
+                group_parents_qs = Group.parents.through.objects.filter(
+                    from_group__inventory_id=obj.id,
+                    to_group__inventory_id=obj.id,
+                )
+                group_parents_qs = group_parents_qs.order_by('from_group__name')
+                group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
+                group_children_map = {}
+                for from_group_id, from_group_name, to_group_id in group_parents_qs:
+                    group_children = group_children_map.setdefault(to_group_id, [])
+                    group_children.append(from_group_name)
 
-            # Build in-memory mapping of groups and their children.
-            group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=obj.id,
-                to_group__inventory_id=obj.id,
-            )
-            group_parents_qs = group_parents_qs.order_by('from_group__name')
-            group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
-            group_children_map = {}
-            for from_group_id, from_group_name, to_group_id in group_parents_qs:
-                group_children = group_children_map.setdefault(to_group_id, [])
-                group_children.append(from_group_name)
-
-            # Now use in-memory maps to build up group info.
-            for group in obj.groups.all():
-                group_info = OrderedDict()
-                group_info['hosts'] = group_hosts_map.get(group.id, [])
-                group_info['children'] = group_children_map.get(group.id, [])
-                group_info['vars'] = group.variables_dict
-                data[group.name] = group_info
+                # Now use in-memory maps to build up group info.
+                for group in obj.groups.all():
+                    group_info = OrderedDict()
+                    group_info['hosts'] = group_hosts_map.get(group.id, [])
+                    group_info['children'] = group_children_map.get(group.id, [])
+                    group_info['vars'] = group.variables_dict
+                    data[group.name] = group_info
 
             if hostvars:
                 data.setdefault('_meta', OrderedDict())
                 data['_meta'].setdefault('hostvars', OrderedDict())
                 for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
-
-            # workaround for Ansible inventory bug (github #3687), localhost
-            # must be explicitly listed in the all group for dynamic inventory
-            # scripts to pick it up.
-            localhost_names = ('localhost', '127.0.0.1', '::1')
-            localhosts_qs = obj.hosts.filter(name__in=localhost_names, **hosts_q)
-            localhosts = list(localhosts_qs.values_list('name', flat=True))
-            if localhosts:
-                all_group = data.setdefault('all', OrderedDict())
-                all_group_hosts = all_group.get('hosts', [])
-                all_group_hosts.extend(localhosts)
-                all_group['hosts'] = sorted(set(all_group_hosts))
 
         return Response(data)
 
@@ -2494,17 +2516,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         failures = 0
         for inventory_source in inventory.inventory_sources.exclude(source=''):
             details = {'inventory_source': inventory_source.pk, 'status': None}
-            can_update = inventory_source.can_update
-            project_update = False
-            if inventory_source.source == 'scm' and inventory_source.update_on_project_update:
-                if not request.user or not request.user.can_access(Project, 'start', inventory_source.source_project):
-                    details['status'] = _('You do not have permission to update project `{}`').format(inventory_source.source_project.name)
-                    can_update = False
-                else:
-                    project_update = True
-            if can_update:
-                if project_update:
-                    details['project_update'] = inventory_source.source_project.update().id
+            if inventory_source.can_update:
                 details['status'] = 'started'
                 details['inventory_update'] = inventory_source.update().id
                 successes += 1
@@ -2531,6 +2543,13 @@ class InventorySourceList(ListCreateAPIView):
     serializer_class = InventorySourceSerializer
     always_allow_superuser = False
     new_in_320 = True
+
+    @property
+    def allowed_methods(self):
+        methods = super(InventorySourceList, self).allowed_methods
+        if get_request_version(self.request) == 1:
+            methods.remove('POST')
+        return methods
 
 
 class InventorySourceDetail(RetrieveUpdateDestroyAPIView):
@@ -2652,20 +2671,11 @@ class InventoryUpdateList(ListAPIView):
     serializer_class = InventoryUpdateListSerializer
 
 
-class InventoryUpdateDetail(RetrieveDestroyAPIView):
+class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = InventoryUpdate
     serializer_class = InventoryUpdateSerializer
     new_in_14 = True
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except InventoryUpdate.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
 class InventoryUpdateCancel(RetrieveAPIView):
@@ -2723,6 +2733,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     model = JobTemplate
+    metadata_class = JobTypeMetadata
     serializer_class = JobLaunchSerializer
     is_job_start = True
     always_allow_superuser = False
@@ -2759,12 +2770,14 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         obj = self.get_object()
         ignored_fields = {}
 
-        if 'credential' not in request.data and 'credential_id' in request.data:
-            request.data['credential'] = request.data['credential_id']
-        if 'inventory' not in request.data and 'inventory_id' in request.data:
-            request.data['inventory'] = request.data['inventory_id']
+        for fd in ('credential', 'vault_credential', 'inventory'):
+            id_fd = '{}_id'.format(fd)
+            if fd not in request.data and id_fd in request.data:
+                request.data[fd] = request.data[id_fd]
 
-        if get_request_version(self.request) == 1:  # TODO: remove in 3.3
+        if get_request_version(self.request) == 1 and 'extra_credentials' in request.data:  # TODO: remove in 3.3
+            if hasattr(request.data, '_mutable') and not request.data._mutable:
+                request.data._mutable = True
             extra_creds = request.data.pop('extra_credentials', None)
             if extra_creds is not None:
                 ignored_fields['extra_credentials'] = extra_creds
@@ -2778,15 +2791,15 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         prompted_fields = _accepted_or_ignored[0]
         ignored_fields.update(_accepted_or_ignored[1])
 
-        if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
-            new_credential = get_object_or_400(Credential, pk=get_pk_from_dict(prompted_fields, 'credential'))
-            if request.user not in new_credential.use_role:
-                raise PermissionDenied()
-
-        if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
-            new_inventory = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, 'inventory'))
-            if request.user not in new_inventory.use_role:
-                raise PermissionDenied()
+        for fd, model in (
+                ('credential', Credential),
+                ('vault_credential', Credential),
+                ('inventory', Inventory)):
+            if fd in prompted_fields and prompted_fields[fd] != getattrd(obj, '{}.pk'.format(fd), None):
+                new_res = get_object_or_400(model, pk=get_pk_from_dict(prompted_fields, fd))
+                use_role = getattr(new_res, 'use_role')
+                if request.user not in use_role:
+                    raise PermissionDenied()
 
         for cred in prompted_fields.get('extra_credentials', []):
             new_credential = get_object_or_400(Credential, pk=cred)
@@ -3569,7 +3582,7 @@ class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
     new_in_310 = True
 
 
-class WorkflowJobDetail(WorkflowsEnforcementMixin, RetrieveDestroyAPIView):
+class WorkflowJobDetail(WorkflowsEnforcementMixin, UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobSerializer
@@ -3719,8 +3732,15 @@ class JobList(ListCreateAPIView):
     metadata_class = JobTypeMetadata
     serializer_class = JobListSerializer
 
+    @property
+    def allowed_methods(self):
+        methods = super(JobList, self).allowed_methods
+        if get_request_version(self.request) > 1:
+            methods.remove('POST')
+        return methods
 
-class JobDetail(RetrieveUpdateDestroyAPIView):
+
+class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
 
     model = Job
     metadata_class = JobTypeMetadata
@@ -3732,15 +3752,6 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        try:
-            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
-        except Job.unified_job_node.RelatedObjectDoesNotExist:
-            pass
-        return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 
 class JobExtraCredentialsList(SubListAPIView):
@@ -4056,7 +4067,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     relationship = 'ad_hoc_commands'
 
 
-class AdHocCommandDetail(RetrieveDestroyAPIView):
+class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = AdHocCommand
     serializer_class = AdHocCommandSerializer
@@ -4207,7 +4218,7 @@ class SystemJobList(ListCreateAPIView):
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
-class SystemJobDetail(RetrieveDestroyAPIView):
+class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = SystemJob
     serializer_class = SystemJobSerializer
@@ -4352,18 +4363,25 @@ class UnifiedJobStdout(RetrieveAPIView):
                         tablename, related_name = {
                             Job: ('main_jobevent', 'job_id'),
                             AdHocCommand: ('main_adhoccommandevent', 'ad_hoc_command_id'),
-                        }[unified_job.__class__]
-                        cursor.copy_expert(
-                            "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
-                                tablename,
-                                related_name,
-                                unified_job.id
-                            ),
-                            write_fd
-                        )
-                        write_fd.close()
-                        subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
-                                         shell=True).wait()
+                        }.get(unified_job.__class__, (None, None))
+                        if tablename is None:
+                            # stdout job event reconstruction isn't supported
+                            # for certain job types (such as inventory syncs),
+                            # so just grab the raw stdout from the DB
+                            write_fd.write(unified_job.result_stdout_text)
+                            write_fd.close()
+                        else:
+                            cursor.copy_expert(
+                                "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
+                                    tablename,
+                                    related_name,
+                                    unified_job.id
+                                ),
+                                write_fd
+                            )
+                            write_fd.close()
+                            subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
+                                             shell=True).wait()
                     except Exception as e:
                         return Response({"error": _("Error generating stdout download file: {}".format(e))})
             try:

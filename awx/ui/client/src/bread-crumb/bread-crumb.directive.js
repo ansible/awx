@@ -111,8 +111,10 @@ export default
                                 stateGoParams.id = $state.params[streamConfig.activityStreamId];
                             }
                             if(stateGoParams.target === "custom_inventory_script"){
-                                stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params.inventory_script_id;
-                                stateGoParams.id = $state.params.inventory_script_id;
+                                if ($state.params.inventory_script_id !== undefined) {
+                                    stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params.inventory_script_id;
+                                    stateGoParams.id = $state.params.inventory_script_id;
+                                }
                             }
 
                         }

@@ -45,7 +45,7 @@ class ActionModule(ActionBase):
         session.auth = requests.auth.HTTPBasicAuth(username, password)
         headers = {'Content-Type': 'application/json'}
         
-        url = '{}/r/insights/v1/maintenance?ansible=true'.format(insights_url)
+        url = '{}/r/insights/v3/maintenance?ansible=true'.format(insights_url)
 
         res = session.get(url, headers=headers, timeout=120)
 

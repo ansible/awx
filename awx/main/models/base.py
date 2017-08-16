@@ -20,7 +20,7 @@ from taggit.managers import TaggableManager
 # Django-CRUM
 from crum import get_current_user
 
-# Ansible Tower
+# AWX
 from awx.main.utils import encrypt_field
 
 __all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
@@ -52,7 +52,7 @@ PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms', 'scm',]
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),
@@ -225,7 +225,13 @@ class PasswordFieldsModel(BaseModel):
                 saved_value = getattr(self, '_saved_%s' % field, '')
                 setattr(self, field, saved_value)
                 self.mark_field_for_save(update_fields, field)
-            self.save(update_fields=update_fields)
+
+            from awx.main.signals import disable_activity_stream
+            with disable_activity_stream():
+                # We've already got an activity stream record for the object
+                # creation, there's no need to have an extra one for the
+                # secondary save for secrets
+                self.save(update_fields=update_fields)
 
     def encrypt_field(self, field, ask):
         encrypted = encrypt_field(self, field, ask)

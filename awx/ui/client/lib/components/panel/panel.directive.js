@@ -16,7 +16,7 @@ function AtPanelController ($state) {
     };
 
     vm.dismiss = () => {
-        $state.go('^');
+        $state.go(scope.onDismiss || '^');
     };
 
     vm.use = child => {
@@ -38,7 +38,7 @@ function atPanel (pathService, _$animate_) {
         link: atPanelLink,
         scope: {
             state: '=',
-            animate: '@'
+            onDismiss: '@'
         }
     };
 }

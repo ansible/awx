@@ -65,64 +65,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
     };
 })
 
-// chkPass
-//
-// Enables use of js/shared/pwdmeter.js to check strengh of passwords.
-// See controllers/Users.js for example.
-//
-.directive('chkPass', [function() {
-    return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            $(elm).keyup(function() {
-                var validity = true;
-                if (elm.val()) {
-                    if ($AnsibleConfig.password_length) {
-                        validity = (ctrl.$modelValue.length >= $AnsibleConfig.password_length);
-                        ctrl.$setValidity('password_length', validity);
-                    }
-                    if ($AnsibleConfig.password_hasLowercase) {
-                        validity = (/[a-z]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasLowercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasUppercase) {
-                        validity = (/[A-Z]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasUppercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasNumber) {
-                        validity = (/[0-9]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasNumber', validity);
-                    }
-                    if ($AnsibleConfig.password_hasSymbol) {
-                        validity = (/[\\#@$-/:-?{-~!"^_`\[\]]/.test(ctrl.$modelValue));
-                        ctrl.$setValidity('hasSymbol', validity);
-                    }
-                } else {
-                    validity = true;
-                    if ($AnsibleConfig.password_length) {
-                        ctrl.$setValidity('password_length', validity);
-                    }
-                    if ($AnsibleConfig.password_hasLowercase) {
-                        ctrl.$setValidity('hasLowercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasUppercase) {
-                        ctrl.$setValidity('hasUppercase', validity);
-                    }
-                    if ($AnsibleConfig.password_hasNumber) {
-                        ctrl.$setValidity('hasNumber', validity);
-                    }
-                    if ($AnsibleConfig.password_hasSymbol) {
-                        ctrl.$setValidity('hasSymbol', validity);
-                    }
-                }
-                if (!scope.$$phase) {
-                    scope.$digest();
-                }
-            });
-        }
-    };
-}])
-
 // imageUpload
 //
 // Accepts image and returns base64 information with basic validation
@@ -278,7 +220,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
         restrict: 'A',
         link: function(scope, element, attrs) {
             element.bind('click', function(event) {
-                if (attrs.disableRow) {
+                if (scope.$eval(attrs.disableRow)) {
                     event.preventDefault();
                 }
                 return;
@@ -385,7 +327,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
 }])
 
 .directive('smartFloat', function() {
-    var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+    var FLOAT_REGEXP = /(^\-?\d+)?((\.|\,)\d+)?$/;
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
@@ -804,6 +746,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
         link: function(scope, element, attrs) {
             var delay = { show: 200, hide: 0 },
                 placement,
+                container,
                 stateChangeWatcher;
             if (attrs.awTipPlacement) {
                 placement = attrs.awTipPlacement;
@@ -811,16 +754,23 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
             }
 
-            var template, custom_class;
-            if (attrs.tooltipInnerClass || attrs.tooltipinnerclass) {
-                custom_class = attrs.tooltipInnerClass || attrs.tooltipinnerclass;
-                template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + custom_class + '"></div></div>';
-            } else {
-                template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
-            }
+            container = attrs.container ? attrs.container : 'body';
+
+            var template;
+
+            let tooltipInnerClass = (attrs.tooltipInnerClass || attrs.tooltipinnerclass) ? (attrs.tooltipInnerClass || attrs.tooltipinnerclass) : '';
+            let tooltipOuterClass = attrs.tooltipOuterClass ? attrs.tooltipOuterClass : '';
+
+            template = '<div class="tooltip Tooltip ' + tooltipOuterClass + '" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + tooltipInnerClass + '"></div></div>';
 
             // This block helps clean up tooltips that may get orphaned by a click event
-            $(element).on('mouseenter', function() {
+            $(element).on('mouseenter', function(event) {
+
+                var elem = $(event.target).parent();
+                if (elem[0].nodeName === "SOURCE-SUMMARY-POPOVER") {
+                    $('.popover').popover('hide');
+                }
+
                 if (stateChangeWatcher) {
                     // Un-bind - we don't want a bunch of listeners firing
                     stateChangeWatcher();
@@ -849,7 +799,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 delay: delay,
                 html: true,
                 title: attrs.awToolTip,
-                container: 'body',
+                container: container,
                 trigger: 'hover',
                 template: template
             });
@@ -1104,42 +1054,6 @@ function(ConfigurationUtils, i18n, $rootScope) {
             $(elm).on("click", function() {
                 $(elm).select();
             });
-        }
-    };
-}])
-
-//
-// awRefresh
-//
-// Creates a timer to call scope.refresh(iterator) ever N seconds, where
-// N is a setting in config.js
-//
-.directive('awRefresh', ['$rootScope', function($rootScope) {
-    return {
-        link: function(scope) {
-            function msg() {
-                var num = '' + scope.refreshCnt;
-                while (num.length < 2) {
-                    num = '0' + num;
-                }
-                return 'Refresh in ' + num + ' sec.';
-            }
-            scope.refreshCnt = $AnsibleConfig.refresh_rate;
-            scope.refreshMsg = msg();
-            if ($rootScope.timer) {
-                clearInterval($rootScope.timer);
-            }
-            $rootScope.timer = setInterval(function() {
-                scope.refreshCnt--;
-                if (scope.refreshCnt <= 0) {
-                    scope.refresh();
-                    scope.refreshCnt = $AnsibleConfig.refresh_rate;
-                }
-                scope.refreshMsg = msg();
-                if (!scope.$$phase) {
-                    scope.$digest();
-                }
-            }, 1000);
         }
     };
 }])

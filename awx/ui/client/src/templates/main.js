@@ -44,7 +44,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
 
                 addJobTemplate = stateDefinitions.generateTree({
                     name: 'templates.addJobTemplate',
-                    url: '/add_job_template?inventory_id&inventory_name&credential_id',
+                    url: '/add_job_template?inventory_id&credential_id',
                     modes: ['add'],
                     form: 'JobTemplateForm',
                     controllers: {
@@ -52,13 +52,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                     },
                     resolve: {
                         add: {
-                            Inventory: ['$stateParams',
-                                function($stateParams){
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
                                     if($stateParams.inventory_id){
-                                        let obj = {};
-                                        obj.inventory_id = Number($stateParams.inventory_id);
-                                        obj.inventory_name = $stateParams.inventory_name;
-                                        return obj;
+                                        let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get().
+                                            then(function(data){
+                                                return data.data;
+                                            }).catch(function(response) {
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
                                     }
                             }],
                             Project: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
@@ -659,6 +667,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                     nosort: true
                                 };
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }
@@ -671,6 +680,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 delete list.fields.last_updated;
                                 list.fields.name.columnClass = "col-md-11";
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }
@@ -679,6 +689,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                             (InventorySourcesList) => {
                                 let list = _.cloneDeep(InventorySourcesList);
                                 list.maxVisiblePages = 5;
+                                list.searchBarFullWidth = true;
 
                                 return list;
                             }

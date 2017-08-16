@@ -22,6 +22,7 @@ function(i18n) {
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
             iterator: 'host',
+            detailsClick: "$state.go('hosts.edit', null, {reload:true})",
             activeEditState: 'hosts.edit',
             stateTree: 'hosts',
             headerFields:{
@@ -79,11 +80,6 @@ function(i18n) {
                     dataTitle: i18n._('Host Variables'),
                     dataPlacement: 'right',
                     dataContainer: 'body'
-                },
-                inventory: {
-                    type: 'hidden',
-                    includeOnEdit: true,
-                    includeOnAdd: true
                 }
             },
 

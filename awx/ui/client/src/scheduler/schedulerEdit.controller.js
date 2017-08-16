@@ -18,7 +18,7 @@ function($filter, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, 
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
-     * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars 
+     * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars
      * in that case.
      *
      * Because this same problem exists in the edit mode and because there's no inheritence, this
@@ -91,17 +91,26 @@ function($filter, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, 
     };
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
-    if ($state.current.name !== 'managementJobSchedules.add' && $state.current.name !== 'managementJobSchedules.edit'){
+    if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
         $scope.$on('ScheduleFound', function(){
-            let readOnly = !$scope.schedule_obj.summary_fields.user_capabilities
-                .edit;
-            ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
-                parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars',
-                readOnly: readOnly
-            });
+            if ($state.current.name === 'projectSchedules.edit'){
+                $scope.noVars = true;
+            }
+            else if ($state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit'){
+                $scope.noVars = true;
+            }
+            else {
+                let readOnly = !$scope.schedule_obj.summary_fields.user_capabilities
+                    .edit;
+                ParseTypeChange({
+                    scope: $scope,
+                    variable: 'extraVars',
+                    parse_variable: 'parseType',
+                    field_id: 'SchedulerForm-extraVars',
+                    readOnly: readOnly
+                });
+            }
+
         });
     }
 

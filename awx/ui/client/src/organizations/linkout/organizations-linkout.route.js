@@ -33,7 +33,8 @@ export default [{
         user_search: {
             value: {
                 order_by: 'username'
-            }
+            },
+            dynamic: true
         }
     },
     ncyBreadcrumb: {
@@ -104,6 +105,7 @@ export default [{
             delete list.actions.add;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
+            list.listTitle = N_('Teams') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/teams`;
             list.emptyListText = "This list is populated by teams added from the&nbsp;<a ui-sref='teams.add'>Teams</a>&nbsp;section";
             return list;
@@ -149,6 +151,8 @@ export default [{
             delete list.actions.add;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
+            list.title = true;
+            list.listTitle = N_('Inventories') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/inventories`;
             list.emptyListText = "This list is populated by inventories added from the&nbsp;<a ui-sref='inventories.add'>Inventories</a>&nbsp;section";
             return list;
@@ -199,6 +203,7 @@ export default [{
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
+            list.listTitle = N_('Projects') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/projects`;
             list.emptyListText = "This list is populated by projects added from the&nbsp;<a ui-sref='projects.add'>Projects</a>&nbsp;section";
             return list;
@@ -233,7 +238,8 @@ export default [{
                 or__project__organization: null,
                 or__inventory__organization: null,
                 page_size: 20
-            }
+            },
+            dynamic: true
         }
     },
     data: {
@@ -259,7 +265,7 @@ export default [{
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
             delete list.fields.type;
-            list.listTitle = N_('Job Templates');
+            list.listTitle = N_('Job Templates') + ` | {{ name }}`;
             list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='templates.addJobTemplate'>Job Templates</a>&nbsp;section";
             list.iterator = 'template';
             list.name = 'job_templates';
@@ -290,7 +296,8 @@ export default [{
         user_search: {
             value: {
                 order_by: 'username'
-            }
+            },
+            dynamic: true
         },
         add_user_search: {
             value: {
@@ -344,7 +351,7 @@ export default [{
                     ngClick: 'addUsers()'
                 }
             };
-            list.listTitle = 'Admins';
+            list.listTitle = N_('Admins') + ` | {{ name }}`;
             return list;
         }]
     }
