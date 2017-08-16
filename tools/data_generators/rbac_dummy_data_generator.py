@@ -185,19 +185,22 @@ def mock_save(self, *args, **kwargs):
     return super(PrimordialModel, self).save(*args, **kwargs)
 
 
+def mock_update(self):
+    return
+
+
 def mock_computed_fields(self, **kwargs):
     pass
 
 
 PrimordialModel.save = mock_save
-
+Project.update = mock_update
 
 startTime = datetime.now()
 
 
-try:
-
-    with transaction.atomic():
+def make_the_data():
+    with disable_activity_stream():
         with batch_role_ancestor_rebuilding(), disable_computed_fields():
             admin, created      = User.objects.get_or_create(username = 'admin', is_superuser=True)
             if created:
@@ -479,10 +482,6 @@ try:
                     if org_inv_count > 0:
                         inventory = project.organization.inventories.all()[inv_idx % org_inv_count]
                     extra_kwargs = {}
-                    if ids['job_template'] % 5 == 0:
-                        extra_kwargs['cloud_credential'] = next(credential_gen)
-                    if ids['job_template'] % 7 == 0:
-                        extra_kwargs['network_credential'] = next(credential_gen)
 
                     job_template, _ = JobTemplate.objects.get_or_create(
                         name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
@@ -495,6 +494,10 @@ try:
                             playbook="debug.yml",
                             **extra_kwargs)
                     )
+                    if ids['job_template'] % 7 == 0:
+                        job_template.extra_credentials.add(next(credential_gen))
+                    if ids['job_template'] % 5 == 0:  # formerly cloud credential
+                        job_template.extra_credentials.add(next(credential_gen))
                     job_template._is_new = _
                     job_templates.append(job_template)
                     inv_idx += 1
@@ -646,9 +649,9 @@ try:
                         status=job_stat, name="%s-%d" % (job_template.name, job_i),
                         project=job_template.project, inventory=job_template.inventory,
                         credential=job_template.credential,
-                        cloud_credential=job_template.cloud_credential,
-                        network_credential=job_template.network_credential
                     )
+                    for ec in job_template.extra_credentials.all():
+                        job.extra_credentials.add(ec)
                     job._is_new = _
                     jobs.append(job)
                     job_i += 1
@@ -707,11 +710,18 @@ try:
                 if n:
                     print('')
 
-        if options['pretend']:
-            raise Rollback()
-except Rollback:
-    print('Rolled back changes')
-    pass
+    if options['pretend']:
+        with transaction.atomic():
+            try:
+                make_the_data()
+                raise Rollback()
+            except Rollback:
+                print('Rolled back changes')
+                pass
+
+    else:
+        make_the_data()
+
 
 print('')
 print('script execution time: {}'.format(datetime.now() - startTime))
