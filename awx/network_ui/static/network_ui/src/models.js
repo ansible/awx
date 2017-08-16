@@ -536,3 +536,35 @@ function ToolBox(id, name, type, x, y, width, height) {
     this.enabled = true;
 }
 exports.ToolBox = ToolBox;
+
+
+function Configuration(id, name, type, x, y, content) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.height = 50;
+    this.width = 50;
+    this.size = 50;
+    this.content = content;
+    this.selected = null;
+    this.enabled = true;
+    this.icon = false;
+}
+exports.Configuration = Configuration;
+
+function Application(id, name, type, x, y) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.height = 50;
+    this.width = 50;
+    this.size = 50;
+    this.selected = null;
+    this.enabled = true;
+    this.icon = false;
+}
+exports.Application = Application;

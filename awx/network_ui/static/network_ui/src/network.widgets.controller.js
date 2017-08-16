@@ -100,7 +100,14 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
-  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
+  $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
+  //App Toolbox Setup
+  $scope.app_toolbox = new models.ToolBox(0, 'Application', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.app_toolbox.spacing = 150;
+  $scope.app_toolbox.enabled = true;
+  $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
+
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
