@@ -8,10 +8,10 @@
       rx=5></rect>
 <g clip-path="url(#inventory-toolbox-clip-path)">
 <g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y}})">
-<g ng-repeat="device in toolbox.items track by $index"
+<g ng-repeat="item in toolbox.items track by $index"
    ng-attr-transform="translate({{toolbox.width/2}},{{$index * toolbox.spacing + toolbox.spacing/2 + toolbox.scroll_offset}})"
-   ng-attr-class="{{device.type}}"
-   ng-switch on="device.type">
+   ng-attr-class="{{item.type}}"
+   ng-switch on="item.type">
    <g ng-switch-when="router"><!-- begin router -->
        <g awx-net-router></g>
    </g> <!-- end router -->
@@ -47,10 +47,10 @@
       rx=5></rect>
 <!-- selected item-->
 <g ng-if="toolbox.selected_item != null">
-<g ng-repeat="device in [toolbox.selected_item]"
-   ng-attr-transform="translate({{device.x}}, {{device.y}})"
-   ng-attr-class="{{device.type}}"
-   ng-switch on="device.type">
+<g ng-repeat="item in [toolbox.selected_item]"
+   ng-attr-transform="translate({{item.x}}, {{item.y}})"
+   ng-attr-class="{{item.type}}"
+   ng-switch on="item.type">
    <g ng-switch-when="router"><!-- begin router -->
        <g awx-net-router></g>
    </g> <!-- end router -->
