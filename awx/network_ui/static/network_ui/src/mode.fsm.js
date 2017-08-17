@@ -2,6 +2,8 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var move = require('./move.js');
 var group = require('./group.js');
+var rack_fsm = require('./rack.fsm.js');
+var site_fsm = require('./site.fsm.js');
 
 function _State () {
 }
@@ -84,11 +86,13 @@ _Interface.prototype.onMouseWheel.transitions = ['Device'];
 _Site.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
     controller.scope.rack_toolbox.enabled = true;
+    controller.scope.rack_controller.changeState(rack_fsm.Ready);
 };
 
 _Site.prototype.end = function (controller) {
 
     controller.scope.rack_toolbox.enabled = false;
+    controller.scope.rack_controller.changeState(rack_fsm.Disable);
 };
 
 
@@ -120,11 +124,13 @@ _Process.prototype.onMouseWheel.transitions = ['Device'];
 _MultiSite.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
     controller.scope.site_toolbox.enabled = true;
+    controller.scope.site_controller.changeState(site_fsm.Ready);
 };
 
 _MultiSite.prototype.end = function (controller) {
 
     controller.scope.site_toolbox.enabled = false;
+    controller.scope.site_controller.changeState(site_fsm.Disable);
 };
 
 

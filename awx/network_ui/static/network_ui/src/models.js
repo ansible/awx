@@ -358,6 +358,19 @@ Group.prototype.is_highlighted = function (x, y) {
 
 };
 
+Group.prototype.is_icon_selected = function (x, y) {
+
+    return ((x > this.left_extent() &&
+             x < this.right_extent() &&
+             y > this.top_extent() &&
+             y < this.bottom_extent()) ||
+            (x > this.centerX() - 500 &&
+             x < this.centerX() + 500 &&
+             y > this.centerY() - 500 &&
+             y < this.centerY() + 500));
+
+};
+
 var TOP_LEFT = 0;
 exports.TOP_LEFT = TOP_LEFT;
 var TOP_RIGHT = 1;
