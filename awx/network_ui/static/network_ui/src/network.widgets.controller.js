@@ -158,9 +158,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   //Rack Toolbox Setup
   $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.rack_toolbox.items.push(new models.Group(0, 'Rack3', 'rack', 0, 0, 200, 1000, 'false'));
-  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack4', 'rack', 0, 0, 200, 1000, 'false'));
-  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack5', 'rack', 0, 0, 200, 1000, 'false'));
-  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack6', 'rack', 0, 0, 200, 1000, 'false'));
   $scope.rack_toolbox.spacing = 200;
   $scope.rack_toolbox.enabled = false;
   $scope.rack_toolbox_controller.remove_on_drop = false;
@@ -177,9 +174,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   //Site Toolbox Setup
   $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.site_toolbox.items.push(new models.Group(0, 'Site3', 'site', 0, 0, 1000, 1000, 'false'));
-  $scope.site_toolbox.items.push(new models.Group(0, 'Site4', 'site', 0, 0, 1000, 1000, 'false'));
-  $scope.site_toolbox.items.push(new models.Group(0, 'Site5', 'site', 0, 0, 1000, 1000, 'false'));
-  $scope.site_toolbox.items.push(new models.Group(0, 'Site6', 'site', 0, 0, 1000, 1000, 'false'));
   $scope.site_toolbox.spacing = 200;
   $scope.site_toolbox.enabled = false;
   $scope.site_toolbox_controller.remove_on_drop = false;
