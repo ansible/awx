@@ -19,7 +19,7 @@ from django.core.cache import cache
 class TestCleanupInconsistentCeleryTasks():
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {}))
-    @mock.patch.object(TaskManager, 'get_running_tasks', return_value={'host1': [Job(id=2), Job(id=3),]})
+    @mock.patch.object(TaskManager, 'get_running_tasks', return_value=({'host1': [Job(id=2), Job(id=3),]}, []))
     @mock.patch.object(InstanceGroup.objects, 'all', return_value=[])
     @mock.patch.object(Instance.objects, 'get', side_effect=Instance.DoesNotExist)
     @mock.patch('awx.main.scheduler.logger')
@@ -43,7 +43,7 @@ class TestCleanupInconsistentCeleryTasks():
         logger_mock.error = mock.MagicMock()
         job = Job(id=2, modified=tz_now(), status='running', celery_task_id='blah', execution_node='host1')
         job.websocket_emit_status = mock.MagicMock()
-        get_running_tasks.return_value = {'host1': [job]}
+        get_running_tasks.return_value = ({'host1': [job]}, [])
         tm = TaskManager()
 
         with mock.patch.object(job, 'save', side_effect=DatabaseError):
