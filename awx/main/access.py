@@ -2170,10 +2170,13 @@ class LabelAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
-        return self.model.objects.all().filter(
-            organization__in=Organization.accessible_objects(self.user, 'read_role')
-        )
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.all().filter(
+                organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
+            )
+        qs = qs.prefetch_related('modified_by', 'created_by', 'organization')
+        return qs
 
     @check_superuser
     def can_read(self, obj):
