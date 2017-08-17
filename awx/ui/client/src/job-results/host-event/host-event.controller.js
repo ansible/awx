@@ -24,10 +24,6 @@
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
-            $('.modal-dialog').on('resize', function(){
-                let height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
-                editor.setSize("100%", height);
-            });
         };
         /*ignore jslint end*/
         $scope.isActiveState = function(name){
@@ -53,11 +49,15 @@
             $scope.event = _.cloneDeep(hostEvent);
 
             // grab standard out & standard error if present from the host
-            // event's "res" object, for things like Ansible modules
+            // event's "res" object, for things like Ansible modules. Small
+            // wrinkle in this implementation is that the stdout/stderr tabs
+            // should be shown if the `res` object has stdout/stderr keys, even
+            // if they're a blank string. The presence of these keys is
+            // potentially significant to a user.
             try{
                 $scope.module_name = hostEvent.event_data.task_action ||  "No result found";
-                $scope.stdout = (hostEvent.event_data.res.stdout === "" || " ") ? undefined : hostEvent.event_data.res.stdout;
-                $scope.stderr = (hostEvent.event_data.res.stderr === "" || " ") ? undefined : hostEvent.event_data.res.stderr;
+                $scope.stdout = hostEvent.event_data.res.stdout ? hostEvent.event_data.res.stdout : hostEvent.event_data.res.stdout === "" ? " " : undefined;
+                $scope.stderr = hostEvent.event_data.res.stderr ? hostEvent.event_data.res.stderr : hostEvent.event_data.res.stderr === "" ? " " : undefined;
                 $scope.json = hostEvent.event_data.res;
             }
             catch(err){
@@ -78,6 +78,7 @@
                 try{
                     if(_.has(hostEvent.event_data, "res")){
                         initCodeMirror('HostEvent-codemirror', JSON.stringify($scope.json, null, 4), {name: "javascript", json: true});
+                        resize();
                     }
                     else{
                         $scope.no_json = true;
@@ -90,7 +91,7 @@
             }
             else if ($state.current.name === 'jobResult.host-event.stdout'){
                 try{
-                    initCodeMirror('HostEvent-codemirror', $scope.stdout, 'shell');
+                    resize();
                 }
                 catch(err){
                     // element with id HostEvent-codemirror is not the view controlled by this instance of HostEventController
@@ -98,7 +99,7 @@
             }
             else if ($state.current.name === 'jobResult.host-event.stderr'){
                 try{
-                    initCodeMirror('HostEvent-codemirror', $scope.stderr, 'shell');
+                    resize();
                 }
                 catch(err){
                     // element with id HostEvent-codemirror is not the view controlled by this instance of HostEventController
@@ -111,6 +112,26 @@
             });
             $('.modal-dialog').draggable({
                 cancel: '.CodeMirror'
+            });
+
+            function resize(){
+                if ($state.current.name === 'jobResult.host-event.json'){
+                    let editor = $('.CodeMirror')[0].CodeMirror;
+                    let height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
+                    editor.setSize("100%", height);
+                }
+                else if($state.current.name === 'jobResult.host-event.stdout' || $state.current.name === 'jobResult.host-event.stderr'){
+                    let height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
+                    $(".HostEvent-stdout").width("100%");
+                    $(".HostEvent-stdout").height(height);
+                    $(".HostEvent-stdoutContainer").height(height);
+                    $(".HostEvent-numberColumnPreload").height(height);
+                }
+
+            }
+
+            $('.modal-dialog').on('resize', function(){
+                resize();
             });
 
             $('#HostEvent').on('hidden.bs.modal', function () {
