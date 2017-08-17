@@ -1,6 +1,7 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var move = require('./move.js');
+var group = require('./group.js');
 
 function _State () {
 }
@@ -168,12 +169,14 @@ _Rack.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
     controller.scope.inventory_toolbox.enabled = true;
     controller.scope.move_controller.changeState(move.Ready);
+    controller.scope.group_controller.changeState(group.Ready);
 };
 
 _Rack.prototype.end = function (controller) {
 
     controller.scope.inventory_toolbox.enabled = false;
     controller.scope.move_controller.changeState(move.Disable);
+    controller.scope.group_controller.changeState(group.Disable);
 };
 
 _Rack.prototype.onMouseWheel = function (controller, msg_type, $event) {
