@@ -247,15 +247,15 @@ function NewDevice(type) {
 }
 exports.NewDevice = NewDevice;
 
-function CopyDevice(device) {
+function PasteDevice(device) {
     this.device = device;
 }
-exports.CopyDevice = CopyDevice;
+exports.PasteDevice = PasteDevice;
 
-function CopyProcess(process) {
+function PasteProcess(process) {
     this.process = process;
 }
-exports.CopyProcess = CopyProcess;
+exports.PasteProcess = PasteProcess;
 
 
 function NewGroup(type) {
@@ -263,10 +263,10 @@ function NewGroup(type) {
 }
 exports.NewGroup = NewGroup;
 
-function CopyGroup(group) {
+function PasteGroup(group) {
     this.group = group;
 }
-exports.CopyGroup = CopyGroup;
+exports.PasteGroup = PasteGroup;
 
 
 function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {

@@ -58,6 +58,14 @@ inherits(_Ready, _State);
 var Ready = new _Ready();
 exports.Ready = Ready;
 
+function _Disable () {
+    this.name = 'Disable';
+}
+inherits(_Disable, _State);
+var Disable = new _Disable();
+exports.Disable = Disable;
+
+
 function _EditLabel () {
     this.name = 'EditLabel';
 }
@@ -376,7 +384,7 @@ _Ready.prototype.onNewGroup = function (controller, msg_type, message) {
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
 
-_Ready.prototype.onCopyGroup = function (controller, msg_type, message) {
+_Ready.prototype.onPasteGroup = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     scope.hide_groups = false;
@@ -409,7 +417,7 @@ _Ready.prototype.onCopyGroup = function (controller, msg_type, message) {
     group.selected = true;
     controller.changeState(Selected2);
 };
-_Ready.prototype.onCopyGroup.transitions = ['Selected2'];
+_Ready.prototype.onPasteGroup.transitions = ['Selected2'];
 
 
 

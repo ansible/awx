@@ -111,7 +111,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
   $scope.app_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("CopyProcess", new messages.CopyProcess(selected_item));
+    $scope.first_controller.handle_message("PasteProcess", new messages.PasteProcess(selected_item));
   };
   $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
   $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
@@ -143,7 +143,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
   $scope.inventory_toolbox_controller.remove_on_drop = true;
   $scope.inventory_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("CopyDevice", new messages.CopyDevice(selected_item));
+    $scope.first_controller.handle_message("PasteDevice", new messages.PasteDevice(selected_item));
   };
 
   for(i = 0; i < $scope.inventory_toolbox.items.length; i++) {
@@ -162,7 +162,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.rack_toolbox_controller.remove_on_drop = false;
   $scope.rack_toolbox_controller.toolbox = $scope.rack_toolbox;
   $scope.rack_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("CopyGroup", new messages.CopyGroup(selected_item));
+    $scope.first_controller.handle_message("PasteGroup", new messages.PasteGroup(selected_item));
   };
   for(i = 0; i < $scope.rack_toolbox.items.length; i++) {
       $scope.rack_toolbox.items[i].icon = true;
@@ -181,7 +181,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.site_toolbox_controller.remove_on_drop = false;
   $scope.site_toolbox_controller.toolbox = $scope.site_toolbox;
   $scope.site_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("CopyGroup", new messages.CopyGroup(selected_item));
+    $scope.first_controller.handle_message("PasteGroup", new messages.PasteGroup(selected_item));
   };
   for(i = 0; i < $scope.site_toolbox.items.length; i++) {
       $scope.site_toolbox.items[i].icon = true;
