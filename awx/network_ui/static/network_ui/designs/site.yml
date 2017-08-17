@@ -1,19 +1,59 @@
 finite_state_machine_id: 131
 name: fsm
 states:
+- id: 5
+  label: Selected2
+  x: 220
+  y: 810
+- id: 7
+  label: EditLabel
+  x: 600
+  y: 934
 - id: 2
   label: Ready
-  x: 517
-  y: 588
+  x: 532
+  y: 560
 - id: 3
   label: Disable
-  x: 770
-  y: 455
+  x: 760
+  y: 468
+- id: 6
+  label: Selected3
+  x: 249
+  y: 1047
+- id: 4
+  label: Selected1
+  x: 214
+  y: 566
 - id: 1
   label: Start
-  x: 507
-  y: 336
+  x: 582
+  y: 334
 transitions:
 - from_state: Start
   label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseDown
+  to_state: Selected1
+- from_state: Selected1
+  label: onMouseUp
+  to_state: Selected2
+- from_state: Selected2
+  label: onMouseDown
+  to_state: Selected3
+- from_state: EditLabel
+  label: onKeyDown
+  to_state: Selected2
+- from_state: Selected3
+  label: onMouseUp
+  to_state: EditLabel
+- from_state: EditLabel
+  label: onMouseDown
+  to_state: Ready
+- from_state: Selected2
+  label: onMouseDown
+  to_state: Ready
+- from_state: Selected2
+  label: onKeyDown
   to_state: Ready
