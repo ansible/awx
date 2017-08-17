@@ -7,6 +7,8 @@ var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
 var mode_fsm = require('./mode.fsm.js');
 var device_detail_fsm = require('./device.detail.fsm.js');
+var rack_fsm = require('./rack.fsm.js');
+var site_fsm = require('./site.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.js');
@@ -102,7 +104,9 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.device_detail_controller);
   $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
+  $scope.rack_controller = new fsm.FSMController($scope, rack_fsm.Start, $scope.group_controller);
+  $scope.site_controller = new fsm.FSMController($scope, site_fsm.Start, $scope.rack_controller);
+  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_controller);
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
   $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
   //App Toolbox Setup
@@ -162,7 +166,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.rack_toolbox_controller.remove_on_drop = false;
   $scope.rack_toolbox_controller.toolbox = $scope.rack_toolbox;
   $scope.rack_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteGroup", new messages.PasteGroup(selected_item));
+    $scope.first_controller.handle_message("PasteRack", new messages.PasteRack(selected_item));
   };
   for(i = 0; i < $scope.rack_toolbox.items.length; i++) {
       $scope.rack_toolbox.items[i].icon = true;
@@ -181,7 +185,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.site_toolbox_controller.remove_on_drop = false;
   $scope.site_toolbox_controller.toolbox = $scope.site_toolbox;
   $scope.site_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteGroup", new messages.PasteGroup(selected_item));
+    $scope.first_controller.handle_message("PasteSite", new messages.PasteSite(selected_item));
   };
   for(i = 0; i < $scope.site_toolbox.items.length; i++) {
       $scope.site_toolbox.items[i].icon = true;

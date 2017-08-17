@@ -268,6 +268,16 @@ function PasteGroup(group) {
 }
 exports.PasteGroup = PasteGroup;
 
+function PasteRack(group) {
+    this.group = group;
+}
+exports.PasteRack = PasteRack;
+
+function PasteSite(group) {
+    this.group = group;
+}
+exports.PasteSite = PasteSite;
+
 
 function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {
     this.msg_type = "GroupMove";
