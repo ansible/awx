@@ -41,7 +41,7 @@ _Start.prototype.start = function (controller) {
 _Start.prototype.start.transitions = ['Ready'];
 
 
-_Ready.prototype.onCopyProcess = function (controller, msg_type, message) {
+_Ready.prototype.onPasteProcess = function (controller, msg_type, message) {
 
     console.log([msg_type, message]);
 

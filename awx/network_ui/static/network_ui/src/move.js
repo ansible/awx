@@ -142,7 +142,7 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
 };
 _Ready.prototype.onNewDevice.transitions = ['Placing'];
 
-_Ready.prototype.onCopyDevice = function (controller, msg_type, message) {
+_Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     var device = null;
@@ -168,7 +168,7 @@ _Ready.prototype.onCopyDevice = function (controller, msg_type, message) {
     device.selected = true;
     controller.changeState(Selected2);
 };
-_Ready.prototype.onCopyDevice.transitions = ['Selected2'];
+_Ready.prototype.onPasteDevice.transitions = ['Selected2'];
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
