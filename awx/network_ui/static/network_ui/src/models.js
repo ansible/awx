@@ -341,6 +341,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.selected_corner = null;
     this.devices = [];
     this.links = [];
+    this.icon_size = type === 'site' ? 500 : 100;
 }
 exports.Group = Group;
 
@@ -364,10 +365,10 @@ Group.prototype.is_icon_selected = function (x, y) {
              x < this.right_extent() &&
              y > this.top_extent() &&
              y < this.bottom_extent()) ||
-            (x > this.centerX() - 500 &&
-             x < this.centerX() + 500 &&
-             y > this.centerY() - 500 &&
-             y < this.centerY() + 500));
+            (x > this.centerX() - this.icon_size &&
+             x < this.centerX() + this.icon_size &&
+             y > this.centerY() - this.icon_size &&
+             y < this.centerY() + this.icon_size));
 
 };
 

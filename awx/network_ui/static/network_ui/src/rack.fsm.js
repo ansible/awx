@@ -74,6 +74,11 @@ _Start.prototype.start.transitions = ['Ready'];
 _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
+    var device = null;
+    var intf = null;
+    var process = null;
+    var i = 0;
+    var j = 0;
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -100,6 +105,33 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                                         group.type));
 
     scope.groups.push(group);
+
+    for(i=0; i<message.group.devices.length;i++) {
+
+        device = new models.Device(controller.scope.device_id_seq(),
+                                   message.group.devices[i].name,
+                                   scope.scaledX + message.group.devices[i].x,
+                                   scope.scaledY + message.group.devices[i].y,
+                                   message.group.devices[i].type);
+        scope.devices.push(device);
+        group.devices.push(device);
+        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
+                                                             device.id,
+                                                             device.x,
+                                                             device.y,
+                                                             device.name,
+                                                             device.type));
+        for (j=0; j < message.group.devices[i].interfaces.length; j++) {
+            intf = new models.Interface(message.group.devices[i].interfaces[j].id, message.group.devices[i].interfaces[j].name);
+            device.interfaces.push(intf);
+        }
+        for (j=0; j < message.group.devices[i].processes.length; j++) {
+            process = new models.Application(message.group.devices[i].processes[j].id,
+                                             message.group.devices[i].processes[j].name,
+                                             message.group.devices[i].processes[j].type, 0, 0);
+            device.processes.push(process);
+        }
+    }
 };
 
 
@@ -111,13 +143,24 @@ _Selected1.prototype.onMouseUp = function (controller) {
 _Selected1.prototype.onMouseUp.transitions = ['Selected2'];
 
 
+_Selected2.prototype.onPasteRack = function (controller, msg_type, message) {
+
+        controller.changeState(Ready);
+        controller.handle_message(msg_type, message);
+};
 
 _Selected2.prototype.onCopySelected = function (controller) {
 
     var groups = controller.scope.selected_groups;
     var group_copy = null;
     var group = null;
+    var devices = null;
+    var device_copy = null;
+    var process_copy = null;
+    var interface_copy = null;
     var i = 0;
+    var j = 0;
+    var k = 0;
     for(i=0; i < groups.length; i++) {
         group = groups[i];
         group_copy = new models.Group(0,
@@ -129,6 +172,27 @@ _Selected2.prototype.onCopySelected = function (controller) {
                                       group.bottom_extent() - group.top_extent(),
                                       false);
         group_copy.icon = true;
+
+        devices = group.devices;
+
+        for(j=0; j < devices.length; j++) {
+            device_copy = new models.Device(devices[j].id,
+                                            devices[j].name,
+                                            devices[j].x - group.left_extent(),
+                                            devices[j].y - group.top_extent(),
+                                            devices[j].type);
+            device_copy.icon = true;
+            for(k=0; k < devices[j].processes.length; k++) {
+                process_copy = new models.Application(0, devices[j].processes[k].name, devices[j].processes[k].name, 0, 0);
+                device_copy.processes.push(process_copy);
+            }
+            for(k=0; k < devices[j].interfaces.length; k++) {
+                interface_copy = new models.Interface(devices[j].interfaces[k].id, devices[j].interfaces[k].name);
+                device_copy.interfaces.push(interface_copy);
+            }
+            group_copy.devices.push(device_copy);
+        }
+
         controller.scope.rack_toolbox.items.push(group_copy);
     }
 };
