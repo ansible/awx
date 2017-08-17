@@ -204,6 +204,18 @@ _Selected2.prototype.onNewDevice = function (controller, msg_type, message) {
 };
 _Selected2.prototype.onNewDevice.transitions = ['Ready'];
 
+_Selected2.prototype.onCopySelected = function (controller) {
+
+    var devices = controller.scope.selected_devices;
+    var device_copy = null;
+    var i = 0;
+    for(i=0; i < devices.length; i++) {
+        device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type);
+        device_copy.icon = true;
+        controller.scope.inventory_toolbox.items.push(device_copy);
+    }
+};
+
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
 	var last_selected = null;
