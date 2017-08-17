@@ -1185,30 +1185,48 @@ class JobEvent(CreatedModifiedModel):
                 parent = parent[0]
                 parent._update_hosts(qs.values_list('id', flat=True))
 
-    def _update_host_summary_from_stats(self):
-        from awx.main.models.inventory import Host
+    def _hostnames(self):
         hostnames = set()
         try:
             for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                 hostnames.update(self.event_data.get(stat, {}).keys())
-        except AttributeError: # In case event_data or v isn't a dict.
+        except AttributeError:  # In case event_data or v isn't a dict.
             pass
+        return hostnames
+
+    def _update_smart_inventory_hosts(self, hostnames):
+        '''If the job the job_event is for was run using a Smart Inventory
+           update the hosts fields related to job history and summary.
+        '''
         with ignore_inventory_computed_fields():
-            qs = Host.objects.filter(inventory__jobs__id=self.job_id,
-                                     name__in=hostnames)
+            if hasattr(self.job, 'inventory') and self.job.inventory.kind == 'smart':
+                logger.debug(self.job.inventory)
+                smart_hosts = self.job.inventory.hosts.filter(name__in=hostnames)
+                for smart_host in smart_hosts:
+                    host_summary = self.job.job_host_summaries.get(host_name=smart_host.name)
+                    smart_host.inventory.jobs.add(self.job)
+                    smart_host.last_job_id = self.job_id
+                    smart_host.last_job_host_summary_id = host_summary.pk
+                    smart_host.save()
+
+    def _update_host_summary_from_stats(self, hostnames):
+        with ignore_inventory_computed_fields():
+            from awx.main.models.inventory import Host
+            qs = Host.objects.filter(inventory__jobs__id=self.job_id, name__in=hostnames)
             job = self.job
             for host in hostnames:
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
-                    except AttributeError: # in case event_data[stat] isn't a dict.
+                    except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
                 if qs.filter(name=host).exists():
                     host_actual = qs.get(name=host)
                     host_summary, created = job.job_host_summaries.get_or_create(host=host_actual, host_name=host_actual.name, defaults=host_stats)
                 else:
                     host_summary, created = job.job_host_summaries.get_or_create(host_name=host, defaults=host_stats)
+
                 if not created:
                     update_fields = []
                     for stat, value in host_stats.items():
@@ -1217,8 +1235,6 @@ class JobEvent(CreatedModifiedModel):
                             update_fields.append(stat)
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
-            job.inventory.update_computed_fields()
-            emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job.id))
 
     def save(self, *args, **kwargs):
         from awx.main.models.inventory import Host
@@ -1249,7 +1265,13 @@ class JobEvent(CreatedModifiedModel):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
                 self._update_parents_failed_and_changed()
-                self._update_host_summary_from_stats()
+
+                hostnames = self._hostnames()
+                self._update_host_summary_from_stats(hostnames)
+                self._update_smart_inventory_hosts(hostnames)
+                self.job.inventory.update_computed_fields()
+
+                emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
 
     @classmethod
     def create_from_data(self, **kwargs):
