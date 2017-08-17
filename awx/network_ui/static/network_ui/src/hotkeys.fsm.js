@@ -43,6 +43,10 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
 
 	var scope = controller.scope;
 
+    if ($event.key === 'c' && ($event.ctrlKey || $event.metaKey)) {
+        scope.first_controller.handle_message("CopySelected", $event);
+    }
+
     if ($event.key === 'l') {
         scope.first_controller.handle_message("NewLink", $event);
         return;
