@@ -77,8 +77,10 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     var device = null;
     var intf = null;
     var process = null;
+    var link = null;
     var i = 0;
     var j = 0;
+    var device_map = {};
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -113,6 +115,8 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                    scope.scaledX + message.group.devices[i].x,
                                    scope.scaledY + message.group.devices[i].y,
                                    message.group.devices[i].type);
+        device_map[message.group.devices[i].id] = device;
+        device.interface_map = {};
         scope.devices.push(device);
         group.devices.push(device);
         scope.send_control_message(new messages.DeviceCreate(scope.client_id,
@@ -123,7 +127,9 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                                              device.type));
         for (j=0; j < message.group.devices[i].interfaces.length; j++) {
             intf = new models.Interface(message.group.devices[i].interfaces[j].id, message.group.devices[i].interfaces[j].name);
+            intf.device = device;
             device.interfaces.push(intf);
+            device.interface_map[intf.id] = intf;
         }
         for (j=0; j < message.group.devices[i].processes.length; j++) {
             process = new models.Application(message.group.devices[i].processes[j].id,
@@ -131,6 +137,20 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                              message.group.devices[i].processes[j].type, 0, 0);
             device.processes.push(process);
         }
+    }
+
+    for(i=0; i<message.group.links.length;i++) {
+        link = new models.Link(controller.scope.link_id_seq(),
+                               device_map[message.group.links[i].from_device.id],
+                               device_map[message.group.links[i].to_device.id],
+                               device_map[message.group.links[i].from_device.id].interface_map[message.group.links[i].from_interface.id],
+                               device_map[message.group.links[i].to_device.id].interface_map[message.group.links[i].to_interface.id]);
+        link.name = message.group.links[i].name;
+        device_map[message.group.links[i].from_device.id].interface_map[message.group.links[i].from_interface.id].link = link;
+        device_map[message.group.links[i].to_device.id].interface_map[message.group.links[i].to_interface.id].link = link;
+        device_map[message.group.links[i].from_device.id].interface_map[message.group.links[i].from_interface.id].dot();
+        device_map[message.group.links[i].to_device.id].interface_map[message.group.links[i].to_interface.id].dot();
+        scope.links.push(link);
     }
 };
 
@@ -158,6 +178,8 @@ _Selected2.prototype.onCopySelected = function (controller) {
     var device_copy = null;
     var process_copy = null;
     var interface_copy = null;
+    var link_copy = null;
+    var device_map = {};
     var i = 0;
     var j = 0;
     var k = 0;
@@ -181,7 +203,9 @@ _Selected2.prototype.onCopySelected = function (controller) {
                                             devices[j].x - group.left_extent(),
                                             devices[j].y - group.top_extent(),
                                             devices[j].type);
+            device_map[device_copy.id] = device_copy;
             device_copy.icon = true;
+            device_copy.interface_map = {};
             for(k=0; k < devices[j].processes.length; k++) {
                 process_copy = new models.Application(0, devices[j].processes[k].name, devices[j].processes[k].name, 0, 0);
                 device_copy.processes.push(process_copy);
@@ -189,8 +213,30 @@ _Selected2.prototype.onCopySelected = function (controller) {
             for(k=0; k < devices[j].interfaces.length; k++) {
                 interface_copy = new models.Interface(devices[j].interfaces[k].id, devices[j].interfaces[k].name);
                 device_copy.interfaces.push(interface_copy);
+                device_copy.interface_map[interface_copy.id] = interface_copy;
             }
             group_copy.devices.push(device_copy);
+        }
+
+        group_copy.link_ids = [];
+
+        for(j=0; j < devices.length; j++) {
+            for(k=0; k < devices[j].interfaces.length; k++) {
+                if (devices[j].interfaces[k].link !== null) {
+                    if ((devices.indexOf(devices[j].interfaces[k].remote_interface().device) !== -1) &&
+                        (group_copy.link_ids.indexOf(devices[j].interfaces[k].link.id) === -1)) {
+                        link_copy = new models.Link(devices[j].interfaces[k].link.id,
+                                                    device_map[devices[j].interfaces[k].link.from_device.id],
+                                                    device_map[devices[j].interfaces[k].link.to_device.id],
+                                                    device_map[devices[j].interfaces[k].link.from_device.id].interface_map[devices[j].interfaces[k].link.from_interface.id],
+                                                    device_map[devices[j].interfaces[k].link.to_device.id].interface_map[devices[j].interfaces[k].link.to_interface.id]);
+                        link_copy.name = devices[j].interfaces[k].link.name;
+
+                        group_copy.links.push(link_copy);
+                        group_copy.link_ids.push(link_copy.id);
+                    }
+                }
+            }
         }
 
         controller.scope.rack_toolbox.items.push(group_copy);
