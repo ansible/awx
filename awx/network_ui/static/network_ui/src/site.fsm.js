@@ -81,6 +81,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     var i = 0;
     var j = 0;
     var device_map = {};
+    var inner_group = null;
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -152,6 +153,22 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
         device_map[message.group.links[i].to_device.id].interface_map[message.group.links[i].to_interface.id].dot();
         scope.links.push(link);
     }
+
+    for(i=0; i<message.group.groups.length;i++) {
+        inner_group = new models.Group(controller.scope.group_id_seq(),
+                                       message.group.groups[i].name,
+                                       message.group.groups[i].type,
+                                       scope.scaledX + message.group.groups[i].x1,
+                                       scope.scaledY + message.group.groups[i].y1,
+                                       scope.scaledX + message.group.groups[i].x2,
+                                       scope.scaledY + message.group.groups[i].y2,
+                                       false);
+        scope.groups.push(inner_group);
+        group.groups.push(inner_group);
+    }
+    for(i=0; i< group.groups.length; i++) {
+        group.groups[i].update_membership(scope.devices, scope.groups);
+    }
 };
 
 
@@ -174,6 +191,7 @@ _Selected2.prototype.onCopySelected = function (controller) {
     var groups = controller.scope.selected_groups;
     var group_copy = null;
     var group = null;
+    var inner_group = null;
     var devices = null;
     var device_copy = null;
     var process_copy = null;
@@ -237,6 +255,18 @@ _Selected2.prototype.onCopySelected = function (controller) {
                     }
                 }
             }
+        }
+
+        for (j=0; j<group.groups.length;j++) {
+            inner_group = new models.Group(0,
+                                           group.groups[j].name,
+                                           group.groups[j].type,
+                                           group.groups[j].left_extent() - group.left_extent(),
+                                           group.groups[j].top_extent() - group.top_extent(),
+                                           group.groups[j].right_extent() - group.left_extent(),
+                                           group.groups[j].bottom_extent() - group.top_extent(),
+                                           false);
+            group_copy.groups.push(inner_group);
         }
 
         controller.scope.site_toolbox.items.push(group_copy);

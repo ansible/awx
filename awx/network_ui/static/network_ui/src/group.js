@@ -133,7 +133,8 @@ _Resize.prototype.onMouseMove = function (controller) {
             groups[i].y2 = groups[i].y2 + diffY;
         }
 
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices,
+                                                         controller.scope.groups);
         for(j = 0; j < membership_old_new[0].length; j++) {
             membership_old_new[0][j].selected = false;
         }
@@ -256,7 +257,8 @@ _Move.prototype.onMouseMove = function (controller) {
         groups[i].x2 = groups[i].x2 + diffX;
         groups[i].y2 = groups[i].y2 + diffY;
 
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices,
+                                                         controller.scope.groups);
         for(j = 0; j < membership_old_new[0].length; j++) {
             membership_old_new[0][j].selected = false;
         }

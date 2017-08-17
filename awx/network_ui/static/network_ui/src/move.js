@@ -390,7 +390,7 @@ _Move.prototype.onMouseMove = function (controller) {
 
     //TODO: Improve the performance of this code from O(n^2) to O(n) or better
     for (i = 0; i < groups.length; i++) {
-        membership_old_new = groups[i].update_membership(controller.scope.devices);
+        membership_old_new = groups[i].update_membership(controller.scope.devices, controller.scope.groups);
         controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
                                                                            groups[i].id,
                                                                            membership_old_new[2]));

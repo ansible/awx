@@ -341,6 +341,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.selected_corner = null;
     this.devices = [];
     this.links = [];
+    this.groups = [];
     this.icon_size = type === 'site' ? 500 : 100;
 }
 exports.Group = Group;
@@ -515,7 +516,7 @@ Group.prototype.centerY = function (scaledY) {
     return (this.bottom_extent(scaledY) + this.top_extent(scaledY)) / 2;
 };
 
-Group.prototype.update_membership = function (devices) {
+Group.prototype.update_membership = function (devices, groups) {
     var i = 0;
     var y1 = this.top_extent();
     var x1 = this.left_extent();
@@ -533,7 +534,19 @@ Group.prototype.update_membership = function (devices) {
             device_ids.push(devices[i].id);
         }
     }
-    return [old_devices, this.devices, device_ids];
+    var old_groups = this.groups;
+    this.groups = [];
+    var group_ids = [];
+    for (i = 0; i < groups.length; i++) {
+        if (groups[i].left_extent() > x1 &&
+            groups[i].top_extent() > y1 &&
+            groups[i].right_extent() < x2 &&
+            groups[i].bottom_extent() < y2) {
+            this.groups.push(groups[i]);
+            group_ids.push(groups[i].id);
+        }
+    }
+    return [old_devices, this.devices, device_ids, old_groups, this.groups, group_ids];
 };
 
 

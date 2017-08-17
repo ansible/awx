@@ -1405,7 +1405,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
     $scope.updatePanAndScale();
 
     for (i=0; i < $scope.groups.length; i++) {
-        $scope.groups[i].update_membership($scope.devices);
+        $scope.groups[i].update_membership($scope.devices, $scope.groups);
     }
 };
 
