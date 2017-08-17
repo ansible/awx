@@ -146,6 +146,9 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     var device = null;
+    var intf = null;
+    var process = null;
+    var i = 0;
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -164,6 +167,16 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                                          device.y,
                                                          device.name,
                                                          device.type));
+    for (i=0; i < message.device.interfaces.length; i++) {
+        intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
+        device.interfaces.push(intf);
+    }
+    for (i=0; i < message.device.processes.length; i++) {
+        process = new models.Application(message.device.processes[i].id,
+                                         message.device.processes[i].name,
+                                         message.device.processes[i].type, 0, 0);
+        device.processes.push(process);
+    }
     scope.selected_devices.push(device);
     device.selected = true;
     controller.changeState(Selected2);
@@ -208,10 +221,21 @@ _Selected2.prototype.onCopySelected = function (controller) {
 
     var devices = controller.scope.selected_devices;
     var device_copy = null;
+    var process_copy = null;
+    var interface_copy = null;
     var i = 0;
+    var j = 0;
     for(i=0; i < devices.length; i++) {
         device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type);
         device_copy.icon = true;
+        for(j=0; j < devices[i].processes.length; j++) {
+            process_copy = new models.Application(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
+            device_copy.processes.push(process_copy);
+        }
+        for(j=0; j < devices[i].interfaces.length; j++) {
+            interface_copy = new models.Interface(devices[i].interfaces[j].id, devices[i].interfaces[j].name);
+            device_copy.interfaces.push(interface_copy);
+        }
         controller.scope.inventory_toolbox.items.push(device_copy);
     }
 };
