@@ -830,8 +830,9 @@ class JobHostSummary(CreatedModifiedModel):
     failed = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
+        hostname = self.host.name if self.host else 'N/A'
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
-            (self.host.name, self.changed, self.dark, self.failures, self.ok,
+            (hostname, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
     def get_absolute_url(self, request=None):
