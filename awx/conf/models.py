@@ -74,6 +74,10 @@ class Setting(CreatedModifiedModel):
     def get_cache_key(self, key):
         return key
 
+    @classmethod
+    def get_cache_id_key(self, key):
+        return '{}_ID'.format(key)
+
 
 import awx.conf.signals  # noqa
 
