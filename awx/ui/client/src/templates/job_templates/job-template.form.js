@@ -51,11 +51,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     "default": 0,
                     required: true,
                     column: 1,
-                    awPopOver: "<p>" + i18n.sprintf(i18n._("When this template is submitted as a job, setting the type to %s will execute the playbook, running tasks " +
-                        " on the selected hosts."), "<em>run</em>") + "</p> <p>" +
-                        i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook."), "<em>check</em>") + " " +
-                        i18n.sprintf(i18n._("Instead, %s will check playbook " +
-                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p>",
+                    awPopOver: i18n._('For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.'),
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -139,7 +135,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                             field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)">
                         </multi-credential>`,
                     required: true,
-                    awPopOver: "<p>" + i18n._("Select credentials that allow {{BRAND_NAME}} to access the nodes this job will be ran against. You can only select one credential of each type.<br /><br />You must select either a machine (SSH) credential or \"Prompt on launch\".  \"Prompt on launch\" requires you to select a machine credential at run time.<br /><br />If you select credentials AND check the \"Prompt on launch\" box, you make the selected credentials the defaults that can be updated at run time.") + "</p>",
+                    awPopOver: i18n._('Select credentials that allow Tower to access the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking  "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.'),
                     dataTitle: i18n._('Credentials'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -158,10 +154,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     spinner: true,
                     'class': "input-small",
                     column: 1,
-                    awPopOver: '<p>' + i18n.sprintf(i18n._('The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use ' +
-                        'the default value from the %sansible configuration file%s.'), '' +
-                        '<a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
-                        ' target=\"_blank\">', '</a>') +'</p>',
+                    awPopOver: i18n._('The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.'),
                     placeholder: 'DEFAULT',
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
@@ -172,10 +165,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     label: i18n._('Limit'),
                     type: 'text',
                     column: 1,
-                    awPopOver: "<p>" + i18n.sprintf(i18n._("Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
-                        "Multiple patterns can be separated by %s %s or %s"), "&#59;", "&#58;", "&#44;") + "</p><p>" +
-                        i18n.sprintf(i18n._("For more information and examples see " +
-                        "%sthe Patterns topic at docs.ansible.com%s."), "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">", "</a>") + "</p>",
+                    awPopOver: i18n._('Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. Multiple patterns are allowed. Refer to Ansible documentation for more information and examples on patterns.'),
                     dataTitle: i18n._('Limit'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -218,9 +208,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     'elementClass': 'Form-textInput',
                     ngOptions: 'tag.label for tag in job_tag_options track by tag.value',
                     column: 2,
-                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
-                        "<p>" + i18n._("Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.") + "</p>" +
-                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
+                    awPopOver: i18n._('Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.'),
                     dataTitle: i18n._("Job Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
@@ -237,9 +225,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     'elementClass': 'Form-textInput',
                     ngOptions: 'tag.label for tag in skip_tag_options track by tag.value',
                     column: 2,
-                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
-                        "<p>" + i18n._("Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.") + "</p>" +
-                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
+                    awPopOver: i18n._('Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to Ansible Tower documentation for details on the usage of tags.'),
                     dataTitle: i18n._("Skip Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
@@ -282,9 +268,9 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         label: i18n._('Enable Privilege Escalation'),
                         type: 'checkbox',
                         column: 2,
-                        awPopOver: "<p>" + i18n.sprintf(i18n._("If enabled, run this playbook as an administrator. This is the equivalent of passing the %s option to the %s command."), '<code>--become</code>', '<code>ansible-playbook</code>') + " </p>",
+                        awPopOver: i18n._('If enabled, run this playbook as an administrator.'),
                         dataPlacement: 'right',
-                        dataTitle: i18n._('Become Privilege Escalation'),
+                        dataTitle: i18n._('Enable Privilege Escalation'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
@@ -363,12 +349,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     rows: 6,
                     "default": "---",
                     column: 2,
-                    awPopOver: "<p>" + i18n.sprintf(i18n._("Pass extra command line variables to the playbook. This is the %s or %s command line parameter " +
-                        "for %s. Provide key/value pairs using either YAML or JSON."), '<code>-e</code>', '<code>--extra-vars</code>', '<code>ansible-playbook</code>') + "</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    awPopOver: i18n._('Pass extra command line variables to the playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax.'),
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
