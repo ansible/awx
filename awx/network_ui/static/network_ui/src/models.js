@@ -17,6 +17,7 @@ function Device(id, name, x, y, type) {
     this.edit_label = false;
     this.status = null;
     this.working = false;
+    this.moving = false;
     this.icon = false;
     this.tasks = [];
     this.shape = type === "router" ? "circular" : "rectangular";
@@ -336,6 +337,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.x2 = x2;
     this.y2 = y2;
     this.selected = selected;
+    this.moving = false;
     this.highlighted = false;
     this.fsm = null;
     this.selected_corner = null;
@@ -412,14 +414,24 @@ Group.prototype.has_corner_selected = function (x, y) {
     return false;
 };
 
+Group.prototype.corners = function () {
+
+    return [{x: this.left_extent(),
+             y: this.top_extent()},
+            {x: this.right_extent(),
+             y: this.top_extent()},
+            {x: this.left_extent(),
+             y: this.bottom_extent()},
+            {x: this.left_extent(),
+             y: this.bottom_extent()}];
+};
+
 Group.prototype.select_corner = function (x, y) {
 
     var corners = [[util.distance(this.x1, this.y1, x, y), TOP_LEFT],
                    [util.distance(this.x2, this.y2, x, y), BOTTOM_RIGHT],
                    [util.distance(this.x1, this.y2, x, y), BOTTOM_LEFT],
                    [util.distance(this.x2, this.y1, x, y), TOP_RIGHT]];
-
-    console.log(corners);
 
     corners.sort(function(a, b) {
         return a[0] - b[0];

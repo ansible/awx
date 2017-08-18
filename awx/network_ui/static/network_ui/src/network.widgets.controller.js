@@ -120,6 +120,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
   $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
   $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'Zero Pipeline', 'process', 0, 0));
 
   for(i = 0; i < $scope.app_toolbox.items.length; i++) {
       $scope.app_toolbox.items[i].icon = true;
@@ -549,20 +550,16 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
     //
 
 
-    $scope.onDeployButton = function (button) {
-        console.log(button.name);
+    $scope.onDeployButton = function () {
         $scope.send_control_message(new messages.Deploy($scope.client_id));
     };
 
-    $scope.onDestroyButton = function (button) {
-        console.log("onDestroyButton");
-        console.log(button.name);
+    $scope.onDestroyButton = function () {
         $scope.resetStatus();
         $scope.send_control_message(new messages.Destroy($scope.client_id));
     };
 
-    $scope.onRecordButton = function (button) {
-        console.log(button.name);
+    $scope.onRecordButton = function () {
         $scope.recording = ! $scope.recording;
         if ($scope.recording) {
             $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
@@ -576,8 +573,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
         }
     };
 
-    $scope.onExportButton = function (button) {
-        console.log(button.name);
+    $scope.onExportButton = function () {
         $scope.cursor.hidden = true;
         $scope.debug.hidden = true;
         $scope.hide_buttons = true;
@@ -589,13 +585,11 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
         }, 1000);
     };
 
-    $scope.onLayoutButton = function (button) {
-        console.log(button.name);
+    $scope.onLayoutButton = function () {
         $scope.send_control_message(new messages.Layout($scope.client_id));
     };
 
-    $scope.onDiscoverButton = function (button) {
-        console.log(button.name);
+    $scope.onDiscoverButton = function () {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/7/launch/", true);
         xhr.onload = function () {
@@ -607,8 +601,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
         xhr.send();
     };
 
-    $scope.onConfigureButton = function (button) {
-        console.log(button.name);
+    $scope.onConfigureButton = function () {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/9/launch/", true);
         xhr.onload = function () {
@@ -878,9 +871,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
 
     $scope.create_interface = function(data) {
         var i = 0;
-        console.log(data);
         var new_interface = new models.Interface(data.id, data.name);
-        console.log(new_interface);
         for (i = 0; i < $scope.devices.length; i++){
             if ($scope.devices[i].id === data.device_id) {
                 $scope.devices[i].interface_seq = util.natural_numbers(data.id);
@@ -1325,7 +1316,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
     };
 
     $scope.send_coverage = function () {
-        console.log("Sending coverage");
         if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
             $scope.send_control_message(new messages.Coverage($scope.client_id, window.__coverage__));
         }
@@ -1355,8 +1345,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                 message.messages[i].message_id = $scope.message_id_seq();
             }
         }
-        var data = messages.serialize(message);
-        console.log(data);
+        //var data = messages.serialize(message);
+        //console.log(data);
     };
 
 

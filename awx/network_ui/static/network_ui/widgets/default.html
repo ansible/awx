@@ -1,5 +1,18 @@
 
 
+                    <g ng-if="item.moving">
+                    <line ng-attr-x1="{{-50 - 100}}"
+                           ng-attr-y1="0"
+                           ng-attr-x2="{{50 + 100}}"
+                           ng-attr-y2="0"
+                           class="NetworkUI--construction"></line>
+                     <line ng-attr-x1="0"
+                           ng-attr-y1="{{-50 - 100}}"
+                           ng-attr-x2="0"
+                           ng-attr-y2="{{50 + 100}}"
+                           class="NetworkUI--construction"></line>
+                    </g>
+
                     <g ng-if="!debug.hidden">
                      <line ng-attr-x1="{{-50 - 10}}"
                            ng-attr-y1="0"
