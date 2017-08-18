@@ -822,7 +822,7 @@ def vmware(cls):
                 'id': 'host',
                 'label': 'VCenter Host',
                 'type': 'string',
-                'help_text': ('Enter the hostname or IP address which corresponds '
+                'help_text': ('Enter the hostname or IP address that corresponds '
                               'to your VMware vCenter.')
             }, {
                 'id': 'username',
@@ -850,7 +850,7 @@ def satellite6(cls):
                 'id': 'host',
                 'label': 'Satellite 6 URL',
                 'type': 'string',
-                'help_text': ('Enter the URL which corresponds to your Red Hat '
+                'help_text': ('Enter the URL that corresponds to your Red Hat '
                               'Satellite 6 server. For example, https://satellite.example.org')
             }, {
                 'id': 'username',
@@ -877,7 +877,7 @@ def cloudforms(cls):
                 'id': 'host',
                 'label': 'CloudForms URL',
                 'type': 'string',
-                'help_text': ('Enter the URL for the virtual machine which '
+                'help_text': ('Enter the URL for the virtual machine that '
                               'corresponds to your CloudForm instance. '
                               'For example, https://cloudforms.example.org')
             }, {
@@ -912,8 +912,9 @@ def gce(cls):
                 'label': 'Project',
                 'type': 'string',
                 'help_text': ('The Project ID is the GCE assigned identification. '
-                              'It is constructed as two words followed by a three '
-                              'digit number. Example: adjective-noun-000')
+                              'It is often constructed as three words or two words '
+                              'followed by a three-digit number. Examples: project-id-000 '
+                              'and another-project-id')
             }, {
                 'id': 'ssh_key_data',
                 'label': 'RSA Private Key',
