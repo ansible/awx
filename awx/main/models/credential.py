@@ -954,7 +954,8 @@ def azure(cls):
                 'help_text': ('Paste the contents of the PEM file that corresponds '
                               'to the certificate you uploaded in the Microsoft '
                               'Azure console.')
-            }]
+            }],
+            'required': ['username', 'ssh_key_data'],
         }
     )
 
