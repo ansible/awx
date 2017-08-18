@@ -183,11 +183,13 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 })
                 .then(function(data) {
 
-                    $scope.associateRequests.push({
-                        parentId: params.parentId,
-                        nodeId: data.data.id,
-                        edge: params.node.edgeType
-                    });
+                    if(!params.node.isRoot) {
+                        $scope.associateRequests.push({
+                            parentId: params.parentId,
+                            nodeId: data.data.id,
+                            edge: params.node.edgeType
+                        });
+                    }
 
                     params.node.isNew = false;
                     continueRecursing(data.data.id);
@@ -370,7 +372,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 edgeType = "always";
                 $scope.edgeFlags.showTypeOptions = false;
             } else {
-                if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
+                if ($scope.placeholderNode.edgeConflict) {
                     // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
                     $scope.edgeFlags.typeRestriction = null;
                 } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
@@ -644,12 +646,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                          // a type as this node will always be executed
                          $scope.edgeFlags.showTypeOptions = false;
                      } else {
-                         if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
+                         if (nodeToEdit.edgeConflict) {
                              // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
                              $scope.edgeFlags.typeRestriction = null;
-                         } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure") && (nodeToEdit.edgeType === "success" || nodeToEdit.edgeType === "failure")) {
+                         } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
                              $scope.edgeFlags.typeRestriction = "successFailure";
-                         } else if (_.includes(siblingConnectionTypes, "always") && nodeToEdit.edgeType === "always") {
+                         } else if (_.includes(siblingConnectionTypes, "always")) {
                              $scope.edgeFlags.typeRestriction = "always";
                          } else {
                              $scope.edgeFlags.typeRestriction = null;
@@ -759,12 +761,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                     nodeToBeDeleted: $scope.nodeToBeDeleted
                 });
 
-                if($scope.workflowMakerFormConfig.nodeMode === "add") {
-                    if($scope.placeholderNode.isRoot) {
-                        $scope.edgeFlags.showTypeOptions = false;
-                    }
-                }
-
                 if ($scope.nodeToBeDeleted.isNew !== true) {
                     $scope.treeData.data.deletedNodes.push($scope.nodeToBeDeleted.nodeId);
                 }
@@ -779,6 +775,65 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 resetDeleteNode();
 
                 $scope.$broadcast("refreshWorkflowChart");
+
+                if($scope.placeholderNode) {
+                    let edgeType = "success";
+                    if($scope.placeholderNode.isRoot) {
+                        $scope.edgeFlags.showTypeOptions = false;
+                        edgeType = "always";
+                    }
+                    else {
+                        // we need to update the possible edges based on any new siblings
+                        let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
+                            tree: $scope.treeData.data,
+                            parentId: $scope.placeholderNode.parent.id,
+                            childId: $scope.placeholderNode.id
+                        });
+
+                        if ($scope.placeholderNode.edgeConflict) {
+                            // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
+                            $scope.edgeFlags.typeRestriction = null;
+                        } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
+                            $scope.edgeFlags.typeRestriction = "successFailure";
+                        } else if (_.includes(siblingConnectionTypes, "always")) {
+                            $scope.edgeFlags.typeRestriction = "always";
+                            edgeType = "always";
+                        } else {
+                            $scope.edgeFlags.typeRestriction = null;
+                        }
+
+                        $scope.edgeFlags.showTypeOptions = true;
+
+                    }
+                    $scope.$broadcast("setEdgeType", edgeType);
+                }
+                else if($scope.nodeBeingEdited) {
+                    if($scope.nodeBeingEdited.isRoot) {
+                        $scope.edgeFlags.showTypeOptions = false;
+                    }
+                    else {
+                        let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
+                            tree: $scope.treeData.data,
+                            parentId: $scope.nodeBeingEdited.parent.id,
+                            childId: $scope.nodeBeingEdited.id
+                        });
+
+                        if ($scope.nodeBeingEdited.edgeConflict) {
+                            // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
+                            $scope.edgeFlags.typeRestriction = null;
+                        } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
+                            $scope.edgeFlags.typeRestriction = "successFailure";
+                        } else if (_.includes(siblingConnectionTypes, "always") && $scope.nodeBeingEdited.edgeType === "always") {
+                            $scope.edgeFlags.typeRestriction = "always";
+                        } else {
+                            $scope.edgeFlags.typeRestriction = null;
+                        }
+
+                        $scope.edgeFlags.showTypeOptions = true;
+
+                    }
+                    $scope.$broadcast("setEdgeType", $scope.nodeBeingEdited.edgeType);
+                }
 
                 $scope.treeData.data.totalNodes--;
             }

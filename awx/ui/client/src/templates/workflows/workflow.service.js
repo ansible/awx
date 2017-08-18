@@ -45,9 +45,7 @@ export default ['$q', function($q){
                         child.isRoot = true;
                         child.edgeType = "always";
                     }
-
                     child.parent = parentNode;
-
                     parentNode.children.push(child);
                 });
             }
