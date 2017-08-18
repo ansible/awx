@@ -1,5 +1,56 @@
 <g ng-if="!hide_groups || item.type == 'site'">
 <g ng-if="current_scale > 0.5 || item.type == 'site' || (item.type == 'rack' && current_scale > 0.1)" >
+
+<g ng-if="item.moving">
+    <g ng-attr-transform="translate({{item.left_extent(scaledX)}}, {{item.top_extent(scaledY)}})">
+    <line x1="-100"
+          y1="0"
+          x2="+100"
+          y2="0"
+           class="NetworkUI--construction"></line>
+     <line x1="0"
+           y1="-100"
+           x2="0"
+           y2="+100"
+           class="NetworkUI--construction"></line>
+    </g>
+    <g ng-attr-transform="translate({{item.right_extent(scaledX)}}, {{item.top_extent(scaledY)}})">
+    <line x1="-100"
+          y1="0"
+          x2="+100"
+          y2="0"
+           class="NetworkUI--construction"></line>
+     <line x1="0"
+           y1="-100"
+           x2="0"
+           y2="+100"
+           class="NetworkUI--construction"></line>
+    </g>
+    <g ng-attr-transform="translate({{item.left_extent(scaledX)}}, {{item.bottom_extent(scaledY)}})">
+    <line x1="-100"
+          y1="0"
+          x2="+100"
+          y2="0"
+           class="NetworkUI--construction"></line>
+     <line x1="0"
+           y1="-100"
+           x2="0"
+           y2="+100"
+           class="NetworkUI--construction"></line>
+    </g>
+    <g ng-attr-transform="translate({{item.right_extent(scaledX)}}, {{item.bottom_extent(scaledY)}})">
+    <line x1="-100"
+          y1="0"
+          x2="+100"
+          y2="0"
+           class="NetworkUI--construction"></line>
+     <line x1="0"
+           y1="-100"
+           x2="0"
+           y2="+100"
+           class="NetworkUI--construction"></line>
+    </g>
+</g>
 <rect ng-attr-width="{{item.width(scaledX)}}"
       ng-attr-height="{{item.height(scaledY)}}"
       ng-attr-x="{{item.left_extent(scaledX)}}"
