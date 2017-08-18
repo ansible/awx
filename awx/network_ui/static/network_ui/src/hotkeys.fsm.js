@@ -52,6 +52,10 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
     }
 
+    if ($event.key === 'm') {
+        scope.first_controller.handle_message("NewStream", $event);
+    }
+
     if ($event.key === 'd') {
         scope.debug.hidden = !scope.debug.hidden;
         return;
