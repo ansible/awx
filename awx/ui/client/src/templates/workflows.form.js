@@ -77,12 +77,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     rows: 6,
                     "default": "---",
                     column: 2,
-                    awPopOver: "<p>" + i18n.sprintf(i18n._("Pass extra command line variables to the playbook. This is the %s or %s command line parameter " +
-                        "for %s. Provide key/value pairs using either YAML or JSON."), "<code>-e</code>", "<code>--extra-vars</code>", "<code>ansible-playbook</code>") + "</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    awPopOver:i18n._('Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentaton for example syntax.'),
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
