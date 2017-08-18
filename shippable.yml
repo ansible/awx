@@ -8,14 +8,19 @@ env:
   - AWX_BUILD_TARGET=ui-test-ci
   - AWX_BUILD_TARGET="flake8 jshint"
 
+branches:
+  only:
+    - devel
+    - release_*
+
 build:
   pre_ci:
     - docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
-    - docker tag ansible/awx_devel gcr.io/ansible-tower-engineering/awx_devel:${BASE_BRANCH:-latest}
+    - docker tag ansible/awx_devel gcr.io/ansible-tower-engineering/awx_devel:latest
   pre_ci_boot:
     options: "-v /awx_devel:/awx_devel"
   ci:
     - cp -R . /awx_devel
     - pip install -U docker-compose
-    - docker-compose -f tools/docker-compose/unit-tests/docker-compose.yml build --build-arg TAG=${BASE_BRANCH:-latest} unit-tests
-    - docker-compose -f tools/docker-compose/unit-tests/docker-compose.yml run -v /awx_devel:/awx_devel unit-tests "make ${AWX_BUILD_TARGET}"
+    - docker-compose -f tools/docker-compose/unit-tests/docker-compose-shippable.yml build --build-arg TAG=latest unit-tests
+    - docker-compose -f tools/docker-compose/unit-tests/docker-compose-shippable.yml run unit-tests "make ${AWX_BUILD_TARGET}" 

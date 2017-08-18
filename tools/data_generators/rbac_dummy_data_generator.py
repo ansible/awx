@@ -249,7 +249,6 @@ def make_the_data():
                     org.member_role.members.add(jt_admin)
                     org.member_role.members.add(inv_admin)
 
-            organization_gen = yield_choice(organizations)
             print('')
 
             print('# Creating %d users' % n_users)
@@ -542,7 +541,6 @@ def make_the_data():
                 wfjt_nodes = []
                 for i in range(n):
                     ids['nodes'] += 1
-                    node_id = ids['nodes']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, wfjt.name, i+ 1))
                     sys.stdout.flush()
                     kwargs = dict(
@@ -710,17 +708,18 @@ def make_the_data():
                 if n:
                     print('')
 
-    if options['pretend']:
-        with transaction.atomic():
-            try:
-                make_the_data()
-                raise Rollback()
-            except Rollback:
-                print('Rolled back changes')
-                pass
 
-    else:
-        make_the_data()
+if options['pretend']:
+    with transaction.atomic():
+        try:
+            make_the_data()
+            raise Rollback()
+        except Rollback:
+            print('Rolled back changes')
+            pass
+
+else:
+    make_the_data()
 
 
 print('')
