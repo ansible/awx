@@ -994,7 +994,8 @@ def azure_rm(cls):
                 'id': 'tenant',
                 'label': 'Tenant ID',
                 'type': 'string'
-            }]
+            }],
+            'required': ['subscription'],
         }
     )
 
