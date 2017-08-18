@@ -922,6 +922,25 @@ def test_vault_create_ok(post, organization, admin, version, params):
     assert decrypt_field(cred, 'vault_password') == 'some_password'
 
 
+@pytest.mark.django_db
+def test_vault_password_required(post, organization, admin):
+    vault = CredentialType.defaults['vault']()
+    vault.save()
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        {
+            'credential_type': vault.pk,
+            'organization': organization.id,
+            'name': 'Best credential ever',
+            'inputs': {}
+        },
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs'] == {'vault_password': ['required for Vault']}
+    assert Credential.objects.count() == 0
+
+
 #
 # Net Credentials
 #

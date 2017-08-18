@@ -690,6 +690,7 @@ def vault(cls):
                 'secret': True,
                 'ask_at_runtime': True
             }],
+            'required': ['vault_password'],
         }
     )
 
