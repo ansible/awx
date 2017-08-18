@@ -14,6 +14,7 @@ var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
 var link = require('./link.js');
+var stream_fsm = require('./stream.fsm.js');
 var group = require('./group.js');
 var buttons = require('./buttons.js');
 var time = require('./time.js');
@@ -60,6 +61,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.selected_items = [];
   $scope.selected_groups = [];
   $scope.new_link = null;
+  $scope.new_stream = null;
   $scope.new_group_type = null;
 
   $scope.last_key = "";
@@ -79,6 +81,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.link_id_seq = util.natural_numbers(0);
   $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
+  $scope.stream_id_seq = util.natural_numbers(0);
   $scope.time_pointer = -1;
   $scope.frame = 0;
   $scope.recording = false;
@@ -91,6 +94,7 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.groups = [];
   $scope.processes = [];
   $scope.configurations = [];
+  $scope.streams = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
@@ -103,7 +107,8 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.device_detail_controller = new fsm.FSMController($scope, device_detail_fsm.Start, $scope.view_controller);
   $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.device_detail_controller);
   $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
-  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
+  $scope.stream_controller = new fsm.FSMController($scope, stream_fsm.Start, $scope.link_controller);
+  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.stream_controller);
   $scope.rack_controller = new fsm.FSMController($scope, rack_fsm.Disable, $scope.group_controller);
   $scope.site_controller = new fsm.FSMController($scope, site_fsm.Disable, $scope.rack_controller);
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_controller);
@@ -1397,6 +1402,26 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
     for (i=0; i < $scope.groups.length; i++) {
         $scope.groups[i].update_membership($scope.devices, $scope.groups);
     }
+
+    $scope.update_offsets = function () {
+
+        var i = 0;
+        var streams = $scope.streams;
+        var map = new Map();
+        var stream = null;
+        var key = null;
+        for (i = 0; i < streams.length; i++) {
+            stream = streams[i];
+            key = "" + stream.from_device.id + "_" + stream.to_device.id;
+            map.set(key, 0);
+        }
+        for (i = 0; i < streams.length; i++) {
+            stream = streams[i];
+            key = "" + stream.from_device.id + "_" + stream.to_device.id;
+            stream.offset = map.get(key);
+            map.set(key, stream.offset + 1);
+        }
+    };
 };
 
 exports.NetworkWidgetsController = NetworkWidgetsController;
