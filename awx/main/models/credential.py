@@ -891,7 +891,8 @@ def cloudforms(cls):
                 'label': 'Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'required': ['host', 'username', 'password'],
         }
     )
 
