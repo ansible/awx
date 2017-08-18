@@ -8,6 +8,7 @@ var router = require('./router.directive.js');
 var switchd = require('./switch.directive.js');
 var host = require('./host.directive.js');
 var link = require('./link.directive.js');
+var stream = require('./stream.directive.js');
 var rack = require('./rack.directive.js');
 var rackIcon = require('./rack.icon.directive.js');
 var group = require('./group.directive.js');
@@ -41,6 +42,7 @@ var networkWidgets = angular.module('networkWidgets', [
     .directive('awxNetSwitch', switchd.switchd)
     .directive('awxNetHost', host.host)
     .directive('awxNetLink', link.link)
+    .directive('awxNetStream', stream.stream)
     .directive('awxNetRack', rack.rack)
     .directive('awxNetGroup', group.group)
     .directive('awxNetSite', site.site)
