@@ -29,9 +29,9 @@ class SocialAuthCallbackURL(object):
 
 SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _('''\
 Mapping to organization admins/users from social auth accounts. This setting
-controls which users are placed into which Tower organizations based on
-their username and email address. Configuration details are available in
-Tower documentation.\
+controls which users are placed into which Tower organizations based on their
+username and email address. Configuration details are available in the Ansible
+Tower documentation.'\
 ''')
 
 # FIXME: /regex/gim (flags)
@@ -152,11 +152,9 @@ register(
     default='',
     validators=[validate_ldap_bind_dn],
     label=_('LDAP Bind DN'),
-    help_text=_('DN (Distinguished Name) of user to bind for all search queries. '
-                'Normally in the format "CN=Some User,OU=Users,DC=example,DC=com" '
-                'but may also be specified as "DOMAIN\username" for Active Directory. '
-                'This is the system user account we will use to login to query LDAP '
-                'for other user information.'),
+    help_text=_('DN (Distinguished Name) of user to bind for all search queries. This'
+                ' is the system user account we will use to login to query LDAP for other'
+                ' user information. Refer to the Ansible Tower documentation for example syntax.'),
     category=_('LDAP'),
     category_slug='ldap',
     feature_required='ldap',
@@ -213,7 +211,7 @@ register(
     label=_('LDAP User Search'),
     help_text=_('LDAP search query to find users.  Any user that matches the given '
                 'pattern will be able to login to Tower.  The user should also be '
-                'mapped into an Tower organization (as defined in the '
+                'mapped into a Tower organization (as defined in the '
                 'AUTH_LDAP_ORGANIZATION_MAP setting).  If multiple search queries '
                 'need to be supported use of "LDAPUnion" is possible. See '
                 'Tower documentation for details.'),
@@ -235,7 +233,7 @@ register(
     default=None,
     label=_('LDAP User DN Template'),
     help_text=_('Alternative to user search, if user DNs are all of the same '
-                'format. This approach will be more efficient for user lookups than '
+                'format. This approach is more efficient for user lookups than '
                 'searching if it is usable in your organizational environment. If '
                 'this setting has a value it will be used instead of '
                 'AUTH_LDAP_USER_SEARCH.'),
@@ -250,11 +248,10 @@ register(
     field_class=fields.LDAPUserAttrMapField,
     default={},
     label=_('LDAP User Attribute Map'),
-    help_text=_('Mapping of LDAP user schema to Tower API user attributes (key is '
-                'user attribute name, value is LDAP attribute name).  The default '
-                'setting is valid for ActiveDirectory but users with other LDAP '
-                'configurations may need to change the values (not the keys) of '
-                'the dictionary/hash-table.'),
+    help_text=_('Mapping of LDAP user schema to Tower API user attributes. The default'
+                ' setting is valid for ActiveDirectory but users with other LDAP'
+                ' configurations may need to change the values. Refer to the Ansible'
+                ' Tower documentation for additonal details.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
@@ -270,10 +267,9 @@ register(
     field_class=fields.LDAPSearchField,
     default=[],
     label=_('LDAP Group Search'),
-    help_text=_('Users are mapped to organizations based on their '
-                'membership in LDAP groups. This setting defines the LDAP search '
-                'query to find groups. Note that this, unlike the user search '
-                'above, does not support LDAPSearchUnion.'),
+    help_text=_('Users are mapped to organizations based on their membership in LDAP'
+                ' groups. This setting defines the LDAP search query to find groups. '
+                'Unlike the user search, group search does not support LDAPSearchUnion.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=(
@@ -335,12 +331,9 @@ register(
     field_class=fields.LDAPUserFlagsField,
     default={},
     label=_('LDAP User Flags By Group'),
-    help_text=_('User profile flags updated from group membership (key is user '
-                'attribute name, value is group DN).  These are boolean fields '
-                'that are matched based on whether the user is a member of the '
-                'given group.  So far only is_superuser and is_system_auditor '
-                'are settable via this method.  This flag is set both true and '
-                'false at login time based on current LDAP settings.'),
+    help_text=_('Retrieve users from a given group. At this time, superuser and system'
+                ' auditors are the only groups supported. Refer to the Ansible Tower'
+                ' documentation for more detail.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
@@ -355,9 +348,9 @@ register(
     default={},
     label=_('LDAP Organization Map'),
     help_text=_('Mapping between organization admins/users and LDAP groups. This '
-                'controls what users are placed into what Tower organizations '
+                'controls which users are placed into which Tower organizations '
                 'relative to their LDAP group memberships. Configuration details '
-                'are available in Tower documentation.'),
+                'are available in the Ansible Tower documentation.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
@@ -382,8 +375,8 @@ register(
     field_class=fields.LDAPTeamMapField,
     default={},
     label=_('LDAP Team Map'),
-    help_text=_('Mapping between team members (users) and LDAP groups.'
-                'Configuration details are available in Tower documentation.'),
+    help_text=_('Mapping between team members (users) and LDAP groups. Configuration'
+                ' details are available in the Ansible Tower documentation.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder=collections.OrderedDict([
@@ -411,7 +404,7 @@ register(
     allow_blank=True,
     default='',
     label=_('RADIUS Server'),
-    help_text=_('Hostname/IP of RADIUS server. RADIUS authentication will be '
+    help_text=_('Hostname/IP of RADIUS server. RADIUS authentication is '
                 'disabled if this setting is empty.'),
     category=_('RADIUS'),
     category_slug='radius',
@@ -522,10 +515,9 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('google-oauth2'),
     label=_('Google OAuth2 Callback URL'),
-    help_text=_('Create a project at https://console.developers.google.com/ to '
-                'obtain an OAuth2 key and secret for a web application. Ensure '
-                'that the Google+ API is enabled. Provide this URL as the '
-                'callback URL for your application.'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     depends_on=['TOWER_URL_BASE'],
@@ -537,7 +529,7 @@ register(
     allow_blank=True,
     default='',
     label=_('Google OAuth2 Key'),
-    help_text=_('The OAuth2 key from your web application at https://console.developers.google.com/.'),
+    help_text=_('The OAuth2 key from your web application.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     placeholder='528620852399-gm2dt4hrl2tsj67fqamk09k1e0ad6gd8.apps.googleusercontent.com',
@@ -549,7 +541,7 @@ register(
     allow_blank=True,
     default='',
     label=_('Google OAuth2 Secret'),
-    help_text=_('The OAuth2 secret from your web application at https://console.developers.google.com/.'),
+    help_text=_('The OAuth2 secret from your web application.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     placeholder='q2fMVCmEregbg-drvebPp8OW',
@@ -573,10 +565,10 @@ register(
     field_class=fields.DictField,
     default={},
     label=_('Google OAuth2 Extra Arguments'),
-    help_text=_('Extra arguments for Google OAuth2 login. When only allowing a '
-                'single domain to authenticate, set to `{"hd": "yourdomain.com"}` '
-                'and Google will not display any other accounts even if the user '
-                'is logged in with multiple Google accounts.'),
+    help_text=_('Extra arguments for Google OAuth2 login. You can restrict it to'
+                ' only allow a single domain to authenticate, even if the user is'
+                ' logged in with multple Google accounts. Refer to the Ansible Tower'
+                ' documentation for more detail.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     placeholder={'hd': 'example.com'},
@@ -616,10 +608,9 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github'),
     label=_('GitHub OAuth2 Callback URL'),
-    help_text=_('Create a developer application at '
-                'https://github.com/settings/developers to obtain an OAuth2 '
-                'key (Client ID) and secret (Client Secret). Provide this URL '
-                'as the callback URL for your application.'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
     category=_('GitHub OAuth2'),
     category_slug='github',
     depends_on=['TOWER_URL_BASE'],
@@ -682,10 +673,9 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github-org'),
     label=_('GitHub Organization OAuth2 Callback URL'),
-    help_text=_('Create an organization-owned application at '
-                'https://github.com/organizations/<yourorg>/settings/applications '
-                'and obtain an OAuth2 key (Client ID) and secret (Client Secret). '
-                'Provide this URL as the callback URL for your application.'),
+    help_text=_('Provide this URL as the callback URL for your application as part '
+                'of your registration process. Refer to the Ansible Tower '
+                'documentation for more detail.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
     depends_on=['TOWER_URL_BASE'],
@@ -838,10 +828,9 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('azuread-oauth2'),
     label=_('Azure AD OAuth2 Callback URL'),
-    help_text=_('Register an Azure AD application as described by '
-                'https://msdn.microsoft.com/en-us/library/azure/dn132599.aspx '
-                'and obtain an OAuth2 key (Client ID) and secret (Client Secret). '
-                'Provide this URL as the callback URL for your application.'),
+    help_text=_('Provide this URL as the callback URL for your application as part'
+                ' of your registration process. Refer to the Ansible Tower'
+                ' documentation for more detail. '),
     category=_('Azure AD OAuth2'),
     category_slug='azuread-oauth2',
     depends_on=['TOWER_URL_BASE'],
@@ -984,7 +973,8 @@ register(
     field_class=fields.SAMLOrgInfoField,
     required=True,
     label=_('SAML Service Provider Organization Info'),
-    help_text=_('Configure this setting with information about your app.'),
+    help_text=_('Provide the URL, display name, and the name of your app. Refer to'
+                ' the Ansible Tower documentation for example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
@@ -1003,7 +993,9 @@ register(
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Technical Contact'),
-    help_text=_('Configure this setting with your contact information.'),
+    help_text=_('Provide the name and email address of the technical contact for'
+                ' your service provider. Refer to the Ansible Tower documentation'
+                ' for example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
@@ -1019,7 +1011,9 @@ register(
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Support Contact'),
-    help_text=_('Configure this setting with your contact information.'),
+    help_text=_('Provide the name and email address of the support contact for your'
+                ' service provider. Refer to the Ansible Tower documentation for'
+                ' example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
@@ -1034,12 +1028,11 @@ register(
     field_class=fields.SAMLEnabledIdPsField,
     default={},
     label=_('SAML Enabled Identity Providers'),
-    help_text=_('Configure the Entity ID, SSO URL and certificate for each '
-                'identity provider (IdP) in use. Multiple SAML IdPs are supported. '
-                'Some IdPs may provide user data using attribute names that differ '
-                'from the default OIDs '
-                '(https://github.com/omab/python-social-auth/blob/master/social/backends/saml.py#L16). '
-                'Attribute names may be overridden for each IdP.'),
+    help_text=_('Configure the Entity ID, SSO URL and certificate for each identity'
+                ' provider (IdP) in use. Multiple SAML IdPs are supported. Some IdPs'
+                ' may provide user data using attribute names that differ from the'
+                ' default OIDs. Attribute names may be overridden for each IdP. Refer'
+                ' to the Ansible documentation for additional details and syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
