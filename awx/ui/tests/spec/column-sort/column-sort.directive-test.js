@@ -40,6 +40,10 @@ describe('Directive: column-sort', () =>{
 
         this.$stateParams = {};
 
+        var mockFilter = function (value) {
+             return value;
+        };
+
         angular.mock.module('ColumnSortModule', ($provide) =>{
 
             QuerySet = jasmine.createSpyObj('qs', ['search']);
@@ -49,6 +53,7 @@ describe('Directive: column-sort', () =>{
             $provide.value('GetBasePath', GetBasePath);
             $provide.value('$state', this.$state);
             $provide.value('$stateParams', this.$stateParams);
+            $provide.value("translateFilter", mockFilter);
 
         });
     });

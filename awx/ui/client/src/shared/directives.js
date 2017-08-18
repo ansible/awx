@@ -835,7 +835,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
             id_to_close = "";
 
         if (element[0].id) {
-            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title"></h3><div id="' + element[0].id + '_popover_content" class="popover-content"></div></div>';
+            template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title" translate></h3><div id="' + element[0].id + '_popover_content" class="popover-content" translate></div></div>';
         }
 
         scope.triggerPopover = function(e) {
