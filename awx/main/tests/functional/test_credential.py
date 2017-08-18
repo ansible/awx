@@ -226,7 +226,7 @@ def test_credential_creation_validation_failure(organization_factory, inputs):
     [EXAMPLE_PRIVATE_KEY.replace('=', '\u003d'), None, True],  # automatically fix JSON-encoded GCE keys
 ])
 def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unlock, valid):
-    inputs = {}
+    inputs = {'username': 'joe-user'}
     if ssh_key_data:
         inputs['ssh_key_data'] = ssh_key_data
     if ssh_key_unlock:

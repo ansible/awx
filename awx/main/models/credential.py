@@ -735,7 +735,8 @@ def net(cls):
             'dependencies': {
                 'ssh_key_unlock': ['ssh_key_data'],
                 'authorize_password': ['authorize'],
-            }
+            },
+            'required': ['username'],
         }
     )
 
