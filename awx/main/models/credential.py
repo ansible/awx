@@ -736,7 +736,8 @@ def net(cls):
             'dependencies': {
                 'ssh_key_unlock': ['ssh_key_data'],
                 'authorize_password': ['authorize'],
-            }
+            },
+            'required': ['username'],
         }
     )
 
@@ -862,7 +863,8 @@ def satellite6(cls):
                 'label': 'Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'required': ['host', 'username', 'password'],
         }
     )
 
@@ -890,7 +892,8 @@ def cloudforms(cls):
                 'label': 'Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'required': ['host', 'username', 'password'],
         }
     )
 
@@ -925,7 +928,8 @@ def gce(cls):
                 'multiline': True,
                 'help_text': ('Paste the contents of the PEM file associated '
                               'with the service account email.')
-            }]
+            }],
+            'required': ['username', 'ssh_key_data'],
         }
     )
 
@@ -953,7 +957,8 @@ def azure(cls):
                 'help_text': ('Paste the contents of the PEM file that corresponds '
                               'to the certificate you uploaded in the Microsoft '
                               'Azure console.')
-            }]
+            }],
+            'required': ['username', 'ssh_key_data'],
         }
     )
 
@@ -993,7 +998,8 @@ def azure_rm(cls):
                 'id': 'tenant',
                 'label': 'Tenant ID',
                 'type': 'string'
-            }]
+            }],
+            'required': ['subscription'],
         }
     )
 

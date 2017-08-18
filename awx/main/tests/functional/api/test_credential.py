@@ -748,6 +748,7 @@ def test_falsey_field_data(get, post, organization, admin, field_value):
         'credential_type': net.pk,
         'organization': organization.id,
         'inputs': {
+            'username': 'joe-user',  # username is required
             'authorize': field_value
         }
     }
