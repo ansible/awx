@@ -861,7 +861,8 @@ def satellite6(cls):
                 'label': 'Password',
                 'type': 'string',
                 'secret': True,
-            }]
+            }],
+            'required': ['host', 'username', 'password'],
         }
     )
 
