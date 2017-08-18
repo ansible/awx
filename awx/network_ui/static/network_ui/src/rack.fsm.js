@@ -59,6 +59,12 @@ var EditLabel = new _EditLabel();
 exports.EditLabel = EditLabel;
 
 
+function _Move () {
+    this.name = 'Move';
+}
+inherits(_Move, _State);
+var Move = new _Move();
+exports.Move = Move;
 
 
 
@@ -162,6 +168,13 @@ _Selected1.prototype.onMouseUp = function (controller) {
 };
 _Selected1.prototype.onMouseUp.transitions = ['Selected2'];
 
+_Selected1.prototype.onMouseMove = function (controller) {
+
+    controller.changeState(Move);
+
+};
+_Selected1.prototype.onMouseMove.transitions = ['Move'];
+
 
 _Selected2.prototype.onPasteRack = function (controller, msg_type, message) {
 
@@ -253,6 +266,9 @@ _Selected2.prototype.onKeyDown.transitions = ['Ready'];
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+
     var groups = controller.scope.selected_groups;
     var i = 0;
     var selected = false;
@@ -290,6 +306,13 @@ _Selected3.prototype.onMouseUp = function (controller) {
 };
 _Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
 
+
+_Selected3.prototype.onMouseMove = function (controller) {
+
+    controller.changeState(Move);
+
+};
+_Selected3.prototype.onMouseMove.transitions = ['Move'];
 
 
 _EditLabel.prototype.start = function (controller) {
@@ -337,6 +360,9 @@ _EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+
     var groups = controller.scope.groups;
     var i = 0;
     var selected = false;
@@ -360,3 +386,99 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
     }
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1'];
+
+_Move.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = true;
+    }
+};
+
+_Move.prototype.end = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    var j = 0;
+    for (i = 0; i < groups.length; i++) {
+        for(j = 0; j < groups[i].devices.length; j++) {
+            groups[i].devices[j].selected = false;
+        }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = false;
+    }
+};
+
+_Move.prototype.onMouseUp = function (controller) {
+
+    controller.changeState(Selected2);
+
+};
+_Move.prototype.onMouseUp.transitions = ['Selected2'];
+
+
+_Move.prototype.onMouseMove = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+    var devices = null;
+
+    var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
+    var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
+    var i = 0;
+    var j = 0;
+    var k = 0;
+    var previous_x1, previous_y1, previous_x2, previous_y2, previous_x, previous_y;
+    for (i = 0; i < groups.length; i++) {
+        previous_x1 = groups[i].x1;
+        previous_y1 = groups[i].y1;
+        previous_x2 = groups[i].x2;
+        previous_y2 = groups[i].y2;
+        groups[i].x1 = groups[i].x1 + diffX;
+        groups[i].y1 = groups[i].y1 + diffY;
+        groups[i].x2 = groups[i].x2 + diffX;
+        groups[i].y2 = groups[i].y2 + diffY;
+
+        controller.scope.send_control_message(new messages.GroupMove(controller.scope.client_id,
+                                                                      groups[i].id,
+                                                                      groups[i].x1,
+                                                                      groups[i].y1,
+                                                                      groups[i].x2,
+                                                                      groups[i].y2,
+                                                                      previous_x1,
+                                                                      previous_y1,
+                                                                      previous_x2,
+                                                                      previous_y2));
+
+
+        devices = groups[i].devices;
+        for (j = 0; j < devices.length; j++) {
+            previous_x = devices[j].x;
+            previous_y = devices[j].y;
+            devices[j].x = devices[j].x + diffX;
+            devices[j].y = devices[j].y + diffY;
+            for (k = 0; k < devices[j].interfaces.length; k++) {
+                 devices[j].interfaces[k].dot();
+                 if (devices[j].interfaces[k].link !== null) {
+                     devices[j].interfaces[k].link.to_interface.dot();
+                     devices[j].interfaces[k].link.from_interface.dot();
+                 }
+            }
+            controller.scope.send_control_message(new messages.DeviceMove(controller.scope.client_id,
+                                                                          devices[j].id,
+                                                                          devices[j].x,
+                                                                          devices[j].y,
+                                                                          previous_x,
+                                                                          previous_y));
+        }
+    }
+    controller.scope.pressedScaledX = controller.scope.scaledX;
+    controller.scope.pressedScaledY = controller.scope.scaledY;
+
+};
+
+_Move.prototype.onTouchMove = _Move.prototype.onMouseMove;

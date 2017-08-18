@@ -29,7 +29,20 @@ states:
   label: Start
   x: 582
   y: 334
+- id: 8
+  label: Move
+  x: -69
+  y: 861
 transitions:
+- from_state: Selected1
+  label: onMouseMove
+  to_state: Move
+- from_state: Selected3
+  label: onMouseMove
+  to_state: Move
+- from_state: Move
+  label: onMouseUp
+  to_state: Selected2
 - from_state: Start
   label: start
   to_state: Ready
