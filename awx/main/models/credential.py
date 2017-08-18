@@ -926,7 +926,8 @@ def gce(cls):
                 'multiline': True,
                 'help_text': ('Paste the contents of the PEM file associated '
                               'with the service account email.')
-            }]
+            }],
+            'required': ['username', 'ssh_key_data'],
         }
     )
 
