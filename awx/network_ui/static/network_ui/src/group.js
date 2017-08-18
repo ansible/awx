@@ -160,6 +160,16 @@ _Resize.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledY = controller.scope.scaledY;
 };
 
+_Resize.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = true;
+    }
+};
+
 _Resize.prototype.end = function (controller) {
 
     var groups = controller.scope.selected_groups;
@@ -170,6 +180,10 @@ _Resize.prototype.end = function (controller) {
         for(j = 0; j < groups[i].devices.length; j++) {
             groups[i].devices[j].selected = false;
         }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = false;
     }
 };
 
@@ -297,6 +311,16 @@ _Move.prototype.onMouseDown = function (controller) {
 };
 _Move.prototype.onMouseDown.transitions = ['Selected1'];
 
+_Move.prototype.start = function (controller) {
+
+    var groups = controller.scope.selected_groups;
+
+    var i = 0;
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = true;
+    }
+};
+
 _Move.prototype.end = function (controller) {
 
     var groups = controller.scope.selected_groups;
@@ -307,6 +331,10 @@ _Move.prototype.end = function (controller) {
         for(j = 0; j < groups[i].devices.length; j++) {
             groups[i].devices[j].selected = false;
         }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+        groups[i].moving = false;
     }
 };
 
