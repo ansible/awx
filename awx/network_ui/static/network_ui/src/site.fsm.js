@@ -86,6 +86,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     var link = null;
     var i = 0;
     var j = 0;
+    var top_left_x, top_left_y;
     var device_map = {};
     var inner_group = null;
     scope.hide_groups = false;
@@ -94,14 +95,16 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     scope.pressedY = scope.mouseY;
     scope.pressedScaledX = scope.scaledX;
     scope.pressedScaledY = scope.scaledY;
+    top_left_x = scope.scaledX - message.group.x2/2;
+    top_left_y = scope.scaledY - message.group.y2/2;
 
     var group = new models.Group(controller.scope.group_id_seq(),
                                  message.group.name,
                                  message.group.type,
-                                 scope.scaledX,
-                                 scope.scaledY,
-                                 scope.scaledX + message.group.x2,
-                                 scope.scaledY + message.group.y2,
+                                 top_left_x,
+                                 top_left_y,
+                                 top_left_x + message.group.x2,
+                                 top_left_y + message.group.y2,
                                  false);
 
     scope.send_control_message(new messages.GroupCreate(scope.client_id,
@@ -119,8 +122,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
 
         device = new models.Device(controller.scope.device_id_seq(),
                                    message.group.devices[i].name,
-                                   scope.scaledX + message.group.devices[i].x,
-                                   scope.scaledY + message.group.devices[i].y,
+                                   top_left_x + message.group.devices[i].x,
+                                   top_left_y + message.group.devices[i].y,
                                    message.group.devices[i].type);
         device_map[message.group.devices[i].id] = device;
         device.interface_map = {};
@@ -164,10 +167,10 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
         inner_group = new models.Group(controller.scope.group_id_seq(),
                                        message.group.groups[i].name,
                                        message.group.groups[i].type,
-                                       scope.scaledX + message.group.groups[i].x1,
-                                       scope.scaledY + message.group.groups[i].y1,
-                                       scope.scaledX + message.group.groups[i].x2,
-                                       scope.scaledY + message.group.groups[i].y2,
+                                       top_left_x + message.group.groups[i].x1,
+                                       top_left_y + message.group.groups[i].y1,
+                                       top_left_x + message.group.groups[i].x2,
+                                       top_left_y + message.group.groups[i].y2,
                                        false);
         scope.groups.push(inner_group);
         group.groups.push(inner_group);
