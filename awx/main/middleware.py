@@ -5,6 +5,10 @@ import logging
 import threading
 import uuid
 import six
+import time
+import cProfile
+import pstats
+import os
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -23,6 +27,38 @@ from awx.conf import fields, register
 
 logger = logging.getLogger('awx.main.middleware')
 analytics_logger = logging.getLogger('awx.analytics.activity_stream')
+perf_logger = logging.getLogger('awx.analytics.performance')
+
+
+class TimingMiddleware(threading.local):
+
+    dest = '/var/lib/awx/profile'
+
+    def process_request(self, request):
+        self.start_time = time.time()
+        if settings.AWX_REQUEST_PROFILE:
+            self.prof = cProfile.Profile()
+            self.prof.enable()
+
+    def process_response(self, request, response):
+        total_time = time.time() - self.start_time
+        response['X-API-Total-Time'] = '%0.3fs' % total_time
+        if settings.AWX_REQUEST_PROFILE:
+            self.prof.disable()
+            cprofile_file = self.save_profile_file(request)
+            response['cprofile_file'] = cprofile_file
+        perf_logger.info('api response times', extra=dict(python_objects=dict(request=request, response=response)))
+        return response
+
+    def save_profile_file(self, request):
+        if not os.path.isdir(self.dest):
+            os.makedirs(self.dest)
+        filename = '%.3fs-%s' % (pstats.Stats(self.prof).total_tt, uuid.uuid4())
+        filepath = os.path.join(self.dest, filename)
+        with open(filepath, 'w') as f:
+            f.write('%s %s\n' % (request.method, request.get_full_path()))
+            pstats.Stats(self.prof, stream=f).sort_stats('cumulative').print_stats()
+        return filepath
 
 
 class ActivityStreamMiddleware(threading.local):
