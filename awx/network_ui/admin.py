@@ -30,7 +30,7 @@ from awx.network_ui.models import Process
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
+    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq',)
     raw_id_fields = ('topology',)
 
 
@@ -127,7 +127,7 @@ admin.site.register(DataSheet, DataSheetAdmin)
 
 class StreamAdmin(admin.ModelAdmin):
     fields = ('from_device', 'to_device', 'label', 'id',)
-    raw_id_fields = ('stream_id', 'from_device', 'to_device', 'label',)
+    raw_id_fields = ('stream_id', 'from_device', 'to_device',)
 
 
 admin.site.register(Stream, StreamAdmin)

@@ -26,7 +26,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   var i = 0;
 
   $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -50,7 +50,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.onMouseMoveResult = "";
   $scope.current_scale = 1.0;
   $scope.current_mode = null;
-  $scope.current_location = ["Earth", "Site1", "Spine1", "Eth1"];
   $scope.panX = 0;
   $scope.panY = 0;
   $scope.mouseX = 0;
@@ -96,7 +95,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.touch_data = {};
   $scope.touches = [];
   $scope.devices = [];
-  $scope.stencils = [];
   $scope.links = [];
   $scope.groups = [];
   $scope.processes = [];
@@ -121,17 +119,17 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
   $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
   //App Toolbox Setup
-  $scope.app_toolbox = new models.ToolBox(0, 'Application', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
   $scope.app_toolbox_controller.dropped_action = function (selected_item) {
     $scope.first_controller.handle_message("PasteProcess", new messages.PasteProcess(selected_item));
   };
-  $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'Zero Pipeline', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'BGP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'OSPF', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'STP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'Zero Pipeline', 'process', 0, 0));
 
   for(i = 0; i < $scope.app_toolbox.items.length; i++) {
       $scope.app_toolbox.items[i].icon = true;
@@ -614,23 +612,9 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                               true)
     ];
 
-    var STENCIL_X = 10;
-    var STENCIL_Y = 100;
-    var STENCIL_SPACING = 40;
-
-    $scope.stencils = [
-      new models.Button("Switch", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));}),
-      new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
-      new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
-      new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
-      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));}),
-      new models.Button("Site", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 5, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));}),
-    ];
-
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.buttons);
     $scope.all_buttons.extend($scope.layers);
-    $scope.all_buttons.extend($scope.stencils);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
@@ -1140,12 +1124,16 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var max_device_id = null;
         var max_link_id = null;
         var max_group_id = null;
+        var max_stream_id = null;
         var min_x = null;
         var min_y = null;
         var max_x = null;
         var max_y = null;
         var new_link = null;
         var new_group = null;
+        var process = null;
+        var new_process = null;
+        var new_stream = null;
 
         //Build the devices
         for (i = 0; i < data.devices.length; i++) {
@@ -1171,9 +1159,20 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                            device.y,
                                            device.type);
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
+            new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);
             device_map[device.id] = new_device;
             device_interface_map[device.id] = {};
+            for (j = 0; j < device.processes.length; j++) {
+                process = device.processes[j];
+                new_process = (new models.Process(process.id,
+                                                  process.name,
+                                                  process.type,
+                                                  0,
+                                                  0));
+				new_process.device = new_device;
+                new_device.processes.push(new_process);
+            }
             for (j = 0; j < device.interfaces.length; j++) {
                 intf = device.interfaces[j];
                 new_intf = (new models.Interface(intf.id,
@@ -1202,6 +1201,20 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             device_interface_map[link.to_device_id][link.to_interface_id].link = new_link;
         }
 
+        //Build the streams
+        var stream = null;
+        for (i = 0; i < data.streams.length; i++) {
+            stream = data.streams[i];
+            if (max_stream_id === null || stream.id > max_stream_id) {
+                max_stream_id = stream.id;
+            }
+            new_stream = new models.Stream(stream.id,
+                                           device_map[stream.from_id],
+                                           device_map[stream.to_id],
+                                           stream.label);
+            $scope.streams.push(new_stream);
+        }
+
         //Build the groups
         var group = null;
         for (i = 0; i < data.groups.length; i++) {
@@ -1223,6 +1236,12 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                 }
             }
             $scope.groups.push(new_group);
+        }
+
+        //Update group membership
+
+        for (i = 0; i < $scope.groups.length; i++) {
+            $scope.groups[i].update_membership($scope.devices, $scope.groups);
         }
 
         var diff_x;
@@ -1255,6 +1274,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         //Update the link_id_seq to be greater than all link ids to prevent duplicate ids.
         if (max_link_id !== null) {
             $scope.link_id_seq = util.natural_numbers(max_link_id);
+        }
+        //Update the stream_id_seq to be greater than all stream ids to prevent duplicate ids.
+        if (max_stream_id !== null) {
+            $scope.stream_id_seq = util.natural_numbers(max_stream_id);
         }
         //Update the group_id_seq to be greater than all group ids to prevent duplicate ids.
         if (max_group_id !== null) {
