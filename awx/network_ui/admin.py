@@ -24,6 +24,10 @@ from awx.network_ui.models import DataType
 
 from awx.network_ui.models import DataSheet
 
+from awx.network_ui.models import Stream
+
+from awx.network_ui.models import Process
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
@@ -42,8 +46,8 @@ admin.site.register(Link, LinkAdmin)
 
 
 class TopologyAdmin(admin.ModelAdmin):
-    fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq',)
-    raw_id_fields = ()
+    fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq', 'stream_id_seq',)
+    raw_id_fields = ('group_id_seq',)
 
 
 admin.site.register(Topology, TopologyAdmin)
@@ -82,7 +86,7 @@ admin.site.register(Interface, InterfaceAdmin)
 
 
 class GroupAdmin(admin.ModelAdmin):
-    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology',)
+    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology', 'type',)
     raw_id_fields = ('topology',)
 
 
@@ -119,3 +123,19 @@ class DataSheetAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DataSheet, DataSheetAdmin)
+
+
+class StreamAdmin(admin.ModelAdmin):
+    fields = ('from_device', 'to_device', 'label', 'id',)
+    raw_id_fields = ('stream_id', 'from_device', 'to_device', 'label',)
+
+
+admin.site.register(Stream, StreamAdmin)
+
+
+class ProcessAdmin(admin.ModelAdmin):
+    fields = ('device', 'name', 'type', 'id',)
+    raw_id_fields = ('device',)
+
+
+admin.site.register(Process, ProcessAdmin)
