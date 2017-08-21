@@ -149,6 +149,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     var intf = null;
     var process = null;
     var i = 0;
+    var c_messages = [];
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -161,24 +162,37 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type);
     scope.devices.push(device);
-    scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                         device.id,
-                                                         device.x,
-                                                         device.y,
-                                                         device.name,
-                                                         device.type));
+    c_messages.push(new messages.DeviceCreate(scope.client_id,
+                                              device.id,
+                                              device.x,
+                                              device.y,
+                                              device.name,
+                                              device.type));
     for (i=0; i < message.device.interfaces.length; i++) {
         intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
         device.interfaces.push(intf);
+        c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
+                                                     device.id,
+                                                     intf.id,
+                                                     intf.name));
     }
     for (i=0; i < message.device.processes.length; i++) {
-        process = new models.Application(message.device.processes[i].id,
-                                         message.device.processes[i].name,
-                                         message.device.processes[i].type, 0, 0);
+        process = new models.Process(message.device.processes[i].id,
+                                     message.device.processes[i].name,
+                                     message.device.processes[i].type, 0, 0);
+        process.device = device;
+        c_messages.push(new messages.ProcessCreate(controller.scope.client_id,
+                                                   process.id,
+                                                   process.name,
+                                                   process.type,
+                                                   process.device.id,
+                                                   process.x,
+                                                   process.y));
         device.processes.push(process);
     }
     scope.selected_devices.push(device);
     device.selected = true;
+    scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
     controller.changeState(Selected2);
 };
 _Ready.prototype.onPasteDevice.transitions = ['Selected2'];
@@ -229,7 +243,7 @@ _Selected2.prototype.onCopySelected = function (controller) {
         device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type);
         device_copy.icon = true;
         for(j=0; j < devices[i].processes.length; j++) {
-            process_copy = new models.Application(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
+            process_copy = new models.Process(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
             device_copy.processes.push(process_copy);
         }
         for(j=0; j < devices[i].interfaces.length; j++) {

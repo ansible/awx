@@ -25,6 +25,9 @@ models:
   - default: 0
     name: interface_id_seq
     type: IntegerField
+  - default: 0
+    name: process_id_seq
+    type: IntegerField
   name: Device
   x: 348
   y: 124
@@ -256,19 +259,17 @@ models:
     ref_field: stream_id
     type: AutoField
   - name: from_device
-    ref: Stream
-    ref_field: from_device
+    ref: Device
+    ref_field: device_id
     related_name: from_stream
     type: ForeignKey
   - name: to_device
-    ref: Stream
-    ref_field: to_device
+    ref: Device
+    ref_field: device_id
     related_name: to_stream
     type: ForeignKey
   - len: 200
     name: label
-    ref: Stream
-    ref_field: label
     type: CharField
   - default: 0
     name: id

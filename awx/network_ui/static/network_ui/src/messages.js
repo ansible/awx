@@ -362,6 +362,17 @@ function TableCellEdit(sender, sheet, col, row, old_value, new_value) {
 }
 exports.TableCellEdit = TableCellEdit;
 
+function ProcessCreate(sender, id, name, type, device_id, x, y) {
+    this.msg_type = "ProcessCreate";
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.device_id = device_id;
+    this.x = x;
+    this.y = y;
+}
+exports.ProcessCreate = ProcessCreate;
+
 function StreamCreate(sender, id, from_id, to_id, label) {
     this.msg_type = "StreamCreate";
     this.sender = sender;

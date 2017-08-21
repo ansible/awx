@@ -596,7 +596,7 @@ function Configuration(id, name, type, x, y, content) {
 }
 exports.Configuration = Configuration;
 
-function Application(id, name, type, x, y) {
+function Process(id, name, type, x, y) {
     this.id = id;
     this.name = name;
     this.type = type;
@@ -608,8 +608,9 @@ function Application(id, name, type, x, y) {
     this.selected = null;
     this.enabled = true;
     this.icon = false;
+    this.device = null;
 }
-exports.Application = Application;
+exports.Process = Process;
 
 function Stream(id, from_device, to_device, label) {
     this.id = id;
