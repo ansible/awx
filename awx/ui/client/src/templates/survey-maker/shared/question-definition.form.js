@@ -42,8 +42,7 @@ export default ['i18n', function(i18n){
             realName: 'variable',
             type: 'custom',
             control:'<label class="prepend-asterisk" for="variable"><span class="Form-inputLabel" translate> ANSWER VARIABLE NAME</span>'+
-                '<a id="awp-variable" href="" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-separated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
-                'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
+                '<a id="awp-variable" href="" aw-pop-over="The suggested format for variable names is lowercase and underscore-separated (for example, foo_bar, user_id, host_name, etc.). Variable names with spaces are not allowed." '+
                 'data-placement="right" data-container="body" popover-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
                 '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control Form-textInput ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
                 '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.required" translate>Please enter an answer variable name.</div>'+
@@ -62,7 +61,10 @@ export default ['i18n', function(i18n){
             defaultText: i18n._('Choose an answer type'),
             ngOptions: 'answer_types.name for answer_types in answer_types track by answer_types.type',
             required: true,
-
+            awPopOver: i18n._('Choose an answer type or format you want as the prompt for the user. Refer to the Ansible Tower Documentation for more additional information about each option.'),
+            dataTitle: i18n._('Answer Type'),
+            dataPlacement: 'right',
+            dataContainer: "body",
             column: 2,
             ngChange: 'typeChange()',
             class: 'Form-formGroup--singleColumn'
@@ -76,12 +78,6 @@ export default ['i18n', function(i18n){
 
             ngRequired: "type.type=== 'multiselect' || type.type=== 'multiplechoice' " ,
             ngShow: 'type.type=== "multiselect" || type.type=== "multiplechoice" ',
-            awPopOver: '<p>Type an option on each line.</p>'+
-                        '<p>For example the following input:<br><br>Apple<br>\n Banana<br>\n Cherry<br><br>would be displayed as:</p>\n'+
-                        '<ol><li>Apple</li><li>Banana</li><li>Cherry</li></ol>',
-            dataTitle: i18n._('Multiple Choice Options'),
-            dataPlacement: 'right',
-            dataContainer: "body",
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },

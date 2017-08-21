@@ -263,16 +263,9 @@ return {
             parseTypeName: 'envParseType',
             dataTitle: i18n._("Source Variables"),
             dataPlacement: 'right',
-            awPopOver: "<p>" + i18n._("Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration ") +
-                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\" target=\"_blank\">" +
-                i18n._("view openstack.yml in the Ansible github repo.") + "</a></p>" +
-                "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
-                i18n._("JSON:") + "<br />\n" +
-                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                i18n._("YAML:") + "<br />\n" +
-                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            awPopOver: i18n._(`Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration
+                <a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.yml\" target=\"_blank\">
+                view openstack.yml in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
             dataContainer: 'body',
             subForm: 'sourceSubForm'
         },
@@ -287,16 +280,9 @@ return {
             parseTypeName: 'envParseType',
             dataTitle: i18n._("Source Variables"),
             dataPlacement: 'right',
-            awPopOver: "<p>" + i18n._("Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration ") +
-                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\" target=\"_blank\">" +
-                i18n._("view openstack.yml in the Ansible github repo.") + "</a></p>" +
-                "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
-                i18n._("JSON:") + "<br />\n" +
-                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                i18n._("YAML:") + "<br />\n" +
-                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            awPopOver: i18n._(`Override variables found in cloudforms.ini and used by the inventory update script. For an example variable configuration
+                <a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/cloudforms.ini\" target=\"_blank\">
+                view cloudforms.ini in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
             dataContainer: 'body',
             subForm: 'sourceSubForm'
         },
@@ -311,16 +297,9 @@ return {
             parseTypeName: 'envParseType',
             dataTitle: i18n._("Source Variables"),
             dataPlacement: 'right',
-            awPopOver: "<p>" + i18n._("Override variables found in openstack.yml and used by the inventory update script. For an example variable configuration ") +
-                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\" target=\"_blank\">" +
-                i18n._("view openstack.yml in the Ansible github repo.") + "</a></p>" +
-                "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
-                i18n._("JSON:") + "<br />\n" +
-                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                i18n._("YAML:") + "<br />\n" +
-                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            awPopOver: i18n._(`Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration
+                <a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\" target=\"_blank\">
+                view foreman.ini in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
             dataContainer: 'body',
             subForm: 'sourceSubForm'
         },
