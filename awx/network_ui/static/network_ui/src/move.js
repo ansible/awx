@@ -149,6 +149,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     var intf = null;
     var process = null;
     var i = 0;
+    var c_messages = [];
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -161,15 +162,19 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type);
     scope.devices.push(device);
-    scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                         device.id,
-                                                         device.x,
-                                                         device.y,
-                                                         device.name,
-                                                         device.type));
+    c_messages.push(new messages.DeviceCreate(scope.client_id,
+                                              device.id,
+                                              device.x,
+                                              device.y,
+                                              device.name,
+                                              device.type));
     for (i=0; i < message.device.interfaces.length; i++) {
         intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
         device.interfaces.push(intf);
+        c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
+                                                     device.id,
+                                                     intf.id,
+                                                     intf.name));
     }
     for (i=0; i < message.device.processes.length; i++) {
         process = new models.Application(message.device.processes[i].id,
@@ -179,6 +184,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     }
     scope.selected_devices.push(device);
     device.selected = true;
+    scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
     controller.changeState(Selected2);
 };
 _Ready.prototype.onPasteDevice.transitions = ['Selected2'];
