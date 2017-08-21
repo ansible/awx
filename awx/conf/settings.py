@@ -69,6 +69,12 @@ def _log_database_error():
         pass
 
 
+def filter_sensitive(registry, key, value):
+    if registry.is_setting_encrypted(key):
+        return '$encrypted$'
+    return value
+
+
 class EncryptedCacheProxy(object):
 
     def __init__(self, cache, registry, encrypter=None, decrypter=None):
@@ -105,9 +111,13 @@ class EncryptedCacheProxy(object):
                 six.text_type(value)
             except UnicodeDecodeError:
                 value = value.decode('utf-8')
+        logger.debug('cache get(%r, %r) -> %r', key, empty, filter_sensitive(self.registry, key, value))
         return value
 
-    def set(self, key, value, **kwargs):
+    def set(self, key, value, log=True, **kwargs):
+        if log is True:
+            logger.debug('cache set(%r, %r, %r)', key, filter_sensitive(self.registry, key, value),
+                         SETTING_CACHE_TIMEOUT)
         self.cache.set(
             key,
             self._handle_encryption(self.encrypter, key, value),
@@ -115,8 +125,13 @@ class EncryptedCacheProxy(object):
         )
 
     def set_many(self, data, **kwargs):
+        filtered_data = dict(
+            (key, filter_sensitive(self.registry, key, value))
+            for key, value in data.items()
+        )
+        logger.debug('cache set_many(%r, %r)', filtered_data, SETTING_CACHE_TIMEOUT)
         for key, value in data.items():
-            self.set(key, value, **kwargs)
+            self.set(key, value, log=False, **kwargs)
 
     def _handle_encryption(self, method, key, value):
         TransientSetting = namedtuple('TransientSetting', ['pk', 'value'])
@@ -277,7 +292,6 @@ class SettingsWrapper(UserSettingsHolder):
             logger.debug('Saving id in cache for encrypted setting %s', k)
             self.cache.set(Setting.get_cache_id_key(k), id_val)
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
-        logger.debug('cache set_many(%r, %r)', settings_to_cache, SETTING_CACHE_TIMEOUT)
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name):
@@ -287,7 +301,6 @@ class SettingsWrapper(UserSettingsHolder):
             cache_value = self.cache.get(cache_key, default=empty)
         except ValueError:
             cache_value = empty
-        logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
         if cache_value == SETTING_CACHE_NOTSET:
             value = empty
         elif cache_value == SETTING_CACHE_NONE:
@@ -326,9 +339,6 @@ class SettingsWrapper(UserSettingsHolder):
             if value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
                 value = SETTING_CACHE_NOTSET
             if cache_value != value:
-                logger.debug('cache set(%r, %r, %r)', cache_key,
-                             get_cache_value(value),
-                             SETTING_CACHE_TIMEOUT)
                 if setting_id:
                     logger.debug('Saving id in cache for encrypted setting %s', cache_key)
                     self.cache.set(Setting.get_cache_id_key(cache_key), setting_id)
