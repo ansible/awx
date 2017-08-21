@@ -441,12 +441,14 @@ class _Persistence(object):
                                     x2='x2',
                                     y2='y2',
                                     name='name',
-                                    id='id'), group)
+                                    id='id',
+                                    type='type'), group)
         d, _ = DeviceGroup.objects.get_or_create(topology_id=topology_id, id=group['id'], defaults=group)
         d.x1 = group['x1']
         d.y1 = group['y1']
         d.x2 = group['x2']
         d.y2 = group['y2']
+        d.type = group['type']
         d.save()
         (Topology.objects
                  .filter(topology_id=topology_id, group_id_seq__lt=group['id'])
