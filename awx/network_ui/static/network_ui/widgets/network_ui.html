@@ -101,14 +101,6 @@
                 </g>
             </g> <!-- end buttons -->
 
-            <g> <!-- stencils -->
-                <g ng-repeat="stencil in stencils"
-                   ng-attr-transform="translate({{stencil.x}},{{stencil.y}})"
-                   class="button">
-                    <g awx-net-stencil></g>
-                </g>
-            </g> <!-- end stencils -->
-
             <g> <!-- layers -->
                 <g ng-repeat="layer in layers"
                    ng-attr-transform="translate({{layer.x}},{{layer.y}})"
@@ -121,9 +113,6 @@
         <g awx-net-cursor></g>
         <g ng-repeat="touch in touches">
             <g awx-net-touch></g>
-        </g>
-        <g ng-repeat="l in current_location track by $index">
-        <text x="10" ng-attr-y="{{20 * (1 + $index)}}" text-anchor="left" class="NetworkUI__location-text">{{l}}</text>
         </g>
     </svg>
     </div>
