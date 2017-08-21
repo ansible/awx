@@ -82,6 +82,11 @@ models:
     type: IntegerField
   - default: 0
     name: group_id_seq
+    ref: Topology
+    ref_field: group_id_seq
+    type: IntegerField
+  - default: 0
+    name: stream_id_seq
     type: IntegerField
   name: Topology
   x: 111
@@ -168,6 +173,9 @@ models:
     ref: Topology
     ref_field: topology_id
     type: ForeignKey
+  - len: 200
+    name: type
+    type: CharField
   name: Group
   x: 407
   y: -379
@@ -241,6 +249,51 @@ models:
   name: DataSheet
   x: -207
   y: -282
+- fields:
+  - name: stream_id
+    pk: true
+    ref: Stream
+    ref_field: stream_id
+    type: AutoField
+  - name: from_device
+    ref: Stream
+    ref_field: from_device
+    type: ForeignKey
+  - name: to_device
+    ref: Stream
+    ref_field: to_device
+    type: ForeignKey
+  - len: 200
+    name: label
+    ref: Stream
+    ref_field: label
+    type: CharField
+  - default: 0
+    name: id
+    type: IntegerField
+  name: Stream
+  x: 709
+  y: 527
+- fields:
+  - name: process_id
+    pk: true
+    type: AutoField
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - len: 200
+    name: type
+    type: CharField
+  - default: 0
+    name: id
+    type: IntegerField
+  name: Process
+  x: 654
+  y: 778
 modules: []
 view:
   panX: 213.72955551921206
