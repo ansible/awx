@@ -53,7 +53,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
                 if not auth_token and request.user and request.user.is_authenticated():
                     logout(request)
-                elif auth_token and request.user != auth_token.user:
+                elif auth_token and request.user.is_anonymous is False and request.user != auth_token.user:
                     logout(request)
                     auth_token.user.backend = ''
                     login(request, auth_token.user)
