@@ -1195,25 +1195,9 @@ class JobEvent(CreatedModifiedModel):
             pass
         return hostnames
 
-    def _update_smart_inventory_hosts(self, hostnames):
-        '''If the job the job_event is for was run using a Smart Inventory
-           update the hosts fields related to job history and summary.
-        '''
-        with ignore_inventory_computed_fields():
-            if hasattr(self.job, 'inventory') and self.job.inventory.kind == 'smart':
-                logger.debug(self.job.inventory)
-                smart_hosts = self.job.inventory.hosts.filter(name__in=hostnames)
-                for smart_host in smart_hosts:
-                    host_summary = self.job.job_host_summaries.get(host_name=smart_host.name)
-                    smart_host.inventory.jobs.add(self.job)
-                    smart_host.last_job_id = self.job_id
-                    smart_host.last_job_host_summary_id = host_summary.pk
-                    smart_host.save()
-
     def _update_host_summary_from_stats(self, hostnames):
         with ignore_inventory_computed_fields():
-            from awx.main.models.inventory import Host
-            qs = Host.objects.filter(inventory__jobs__id=self.job_id, name__in=hostnames)
+            qs = self.job.inventory.hosts.filter(name__in=hostnames)
             job = self.job
             for host in hostnames:
                 host_stats = {}
@@ -1269,7 +1253,6 @@ class JobEvent(CreatedModifiedModel):
 
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
-                self._update_smart_inventory_hosts(hostnames)
                 self.job.inventory.update_computed_fields()
 
                 emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
