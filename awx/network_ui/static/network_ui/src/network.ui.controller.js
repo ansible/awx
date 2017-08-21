@@ -26,7 +26,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   var i = 0;
 
   $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
