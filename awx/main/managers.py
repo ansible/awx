@@ -42,7 +42,7 @@ class HostManager(models.Manager):
                     # injected by the related object mapper.
                     self.core_filters = {}
                     qs = qs & q
-                    return qs.distinct()
+                    return qs.order_by('pk').distinct('name')
         return qs
 
 

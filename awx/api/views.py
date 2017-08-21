@@ -1936,7 +1936,7 @@ class HostList(ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct()
+        return qs.order_by('pk').distinct()
 
     def list(self, *args, **kwargs):
         try:
