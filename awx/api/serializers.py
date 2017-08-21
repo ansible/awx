@@ -779,10 +779,10 @@ class UserSerializer(BaseSerializer):
                   'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
-    def to_representation(self, obj):
+    def to_representation(self, obj):  # TODO: Remove in 3.3
         ret = super(UserSerializer, self).to_representation(obj)
         ret.pop('password', None)
-        if obj:
+        if obj and type(self) is UserSerializer or self.version == 1:
             ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
 
