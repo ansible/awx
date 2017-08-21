@@ -84,6 +84,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     var intf = null;
     var process = null;
     var link = null;
+    var stream = null;
     var i = 0;
     var j = 0;
     var top_left_x, top_left_y;
@@ -163,6 +164,15 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
         scope.links.push(link);
     }
 
+    for(i=0; i<message.group.streams.length;i++) {
+        stream = new models.Stream(controller.scope.stream_id_seq(),
+                               device_map[message.group.streams[i].from_device.id],
+                               device_map[message.group.streams[i].to_device.id],
+                               message.group.streams[i].label);
+        stream.name = message.group.streams[i].name;
+        scope.streams.push(stream);
+    }
+
     for(i=0; i<message.group.groups.length;i++) {
         inner_group = new models.Group(controller.scope.group_id_seq(),
                                        message.group.groups[i].name,
@@ -215,6 +225,9 @@ _Selected2.prototype.onCopySelected = function (controller) {
     var interface_copy = null;
     var link_copy = null;
     var device_map = {};
+    var streams = controller.scope.streams;
+    var stream;
+    var stream_copy;
     var i = 0;
     var j = 0;
     var k = 0;
@@ -273,6 +286,21 @@ _Selected2.prototype.onCopySelected = function (controller) {
                 }
             }
         }
+
+        group_copy.stream_ids = [];
+
+
+        for (j=0; j<streams.length;j++) {
+
+            stream = streams[j];
+
+            if ((devices.indexOf(stream.to_device) !== -1) &&
+                (devices.indexOf(stream.from_device) !== -1)) {
+                stream_copy = new models.Stream(0, device_map[stream.from_device.id], device_map[stream.to_device.id], stream.label);
+                group_copy.streams.push(stream_copy);
+            }
+        }
+
 
         for (j=0; j<group.groups.length;j++) {
             inner_group = new models.Group(0,
