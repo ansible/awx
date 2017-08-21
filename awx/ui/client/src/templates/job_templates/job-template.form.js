@@ -258,6 +258,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         variable: 'ask_diff_mode_on_launch',
                         text: i18n._('Prompt on launch')
                     },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 checkbox_group: {
                     label: i18n._('Options'),

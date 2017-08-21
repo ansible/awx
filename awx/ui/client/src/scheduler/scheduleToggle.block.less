@@ -1,5 +1,14 @@
 /** @define ScheduleToggle */
 
+.Form-formGroup--disabled .ScheduleToggle {
+    cursor: not-allowed;
+    border-color: @default-link !important;
+    .ScheduleToggle-switch  {
+        background-color: @d7grey !important;
+        cursor: not-allowed;
+    }
+}
+
 .ScheduleToggle {
     border-radius: 5px;
     border: 1px solid @default-link;
