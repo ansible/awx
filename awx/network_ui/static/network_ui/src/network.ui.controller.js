@@ -2,10 +2,15 @@ var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
 var mode_fsm = require('./mode.fsm.js');
+var device_detail_fsm = require('./device.detail.fsm.js');
+var rack_fsm = require('./rack.fsm.js');
+var site_fsm = require('./site.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
+var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.js');
 var move = require('./move.js');
 var link = require('./link.js');
+var stream_fsm = require('./stream.fsm.js');
 var group = require('./group.js');
 var buttons = require('./buttons.js');
 var time = require('./time.js');
@@ -18,6 +23,7 @@ var ReconnectingWebSocket = require('reconnectingwebsocket');
 var NetworkUIController = function($scope, $document, $location, $window) {
 
   window.scope = $scope;
+  var i = 0;
 
   $scope.api_token = '';
   $scope.disconnected = true;
@@ -63,17 +69,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.selected_items = [];
   $scope.selected_groups = [];
   $scope.new_link = null;
+  $scope.new_stream = null;
   $scope.new_group_type = null;
-  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
-  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
-  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
-  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.view_controller);
-  $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
-  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.link_controller);
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.group_controller);
-  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
-  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.time_controller);
-  $scope.first_controller = $scope.mode_controller;
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
@@ -91,6 +88,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.link_id_seq = util.natural_numbers(0);
   $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
+  $scope.stream_id_seq = util.natural_numbers(0);
   $scope.time_pointer = -1;
   $scope.frame = 0;
   $scope.recording = false;
@@ -101,11 +99,108 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.stencils = [];
   $scope.links = [];
   $scope.groups = [];
+  $scope.processes = [];
+  $scope.configurations = [];
+  $scope.streams = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
                       'height': 0};
 
+  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
+  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
+  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller);
+  $scope.device_detail_controller = new fsm.FSMController($scope, device_detail_fsm.Start, $scope.view_controller);
+  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.device_detail_controller);
+  $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller);
+  $scope.stream_controller = new fsm.FSMController($scope, stream_fsm.Start, $scope.link_controller);
+  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.stream_controller);
+  $scope.rack_controller = new fsm.FSMController($scope, rack_fsm.Disable, $scope.group_controller);
+  $scope.site_controller = new fsm.FSMController($scope, site_fsm.Disable, $scope.rack_controller);
+  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_controller);
+  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
+  $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
+  //App Toolbox Setup
+  $scope.app_toolbox = new models.ToolBox(0, 'Application', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.app_toolbox.spacing = 150;
+  $scope.app_toolbox.enabled = false;
+  $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
+  $scope.app_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("PasteProcess", new messages.PasteProcess(selected_item));
+  };
+  $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Application(0, 'Zero Pipeline', 'process', 0, 0));
+
+  for(i = 0; i < $scope.app_toolbox.items.length; i++) {
+      $scope.app_toolbox.items[i].icon = true;
+  }
+
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
+
+  //Inventory Toolbox Setup
+  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router6', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Switch6', 0, 0, 'switch'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Host6', 0, 0, 'host'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router7', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router8', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router9', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router10', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router11', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router12', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router13', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router14', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router15', 0, 0, 'router'));
+  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router16', 0, 0, 'router'));
+  $scope.inventory_toolbox.spacing = 150;
+  $scope.inventory_toolbox.enabled = true;
+  $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
+  $scope.inventory_toolbox_controller.remove_on_drop = true;
+  $scope.inventory_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("PasteDevice", new messages.PasteDevice(selected_item));
+  };
+
+  for(i = 0; i < $scope.inventory_toolbox.items.length; i++) {
+      $scope.inventory_toolbox.items[i].icon = true;
+  }
+  //End Inventory Toolbox Setup
+  $scope.rack_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller);
+  //Rack Toolbox Setup
+  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.rack_toolbox.items.push(new models.Group(0, 'Rack3', 'rack', 0, 0, 200, 1000, 'false'));
+  $scope.rack_toolbox.spacing = 200;
+  $scope.rack_toolbox.enabled = false;
+  $scope.rack_toolbox_controller.remove_on_drop = false;
+  $scope.rack_toolbox_controller.toolbox = $scope.rack_toolbox;
+  $scope.rack_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("PasteRack", new messages.PasteRack(selected_item));
+  };
+  for(i = 0; i < $scope.rack_toolbox.items.length; i++) {
+      $scope.rack_toolbox.items[i].icon = true;
+      $scope.rack_toolbox.items[i].selected = false;
+  }
+  //End Rack Toolbox Setup
+  $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.rack_toolbox_controller);
+  //Site Toolbox Setup
+  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.site_toolbox.items.push(new models.Group(0, 'Site3', 'site', 0, 0, 1000, 1000, 'false'));
+  $scope.site_toolbox.spacing = 200;
+  $scope.site_toolbox.enabled = false;
+  $scope.site_toolbox_controller.remove_on_drop = false;
+  $scope.site_toolbox_controller.toolbox = $scope.site_toolbox;
+  $scope.site_toolbox_controller.dropped_action = function (selected_item) {
+    $scope.first_controller.handle_message("PasteSite", new messages.PasteSite(selected_item));
+  };
+  for(i = 0; i < $scope.site_toolbox.items.length; i++) {
+      $scope.site_toolbox.items[i].icon = true;
+      $scope.site_toolbox.items[i].selected = false;
+  }
+  //End Site Toolbox Setup
+
+  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.site_toolbox_controller);
+  $scope.first_controller = $scope.mode_controller;
     var getMouseEventResult = function (mouseEvent) {
       return "(" + mouseEvent.x + ", " + mouseEvent.y + ")";
     };
@@ -1271,6 +1366,26 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var i = 0;
         for (i = 0; i < $scope.layers.length; i++) {
             $scope.layers[i].x = $scope.graph.width - 140;
+        }
+    };
+
+    $scope.update_offsets = function () {
+
+        var i = 0;
+        var streams = $scope.streams;
+        var map = new Map();
+        var stream = null;
+        var key = null;
+        for (i = 0; i < streams.length; i++) {
+            stream = streams[i];
+            key = "" + stream.from_device.id + "_" + stream.to_device.id;
+            map.set(key, 0);
+        }
+        for (i = 0; i < streams.length; i++) {
+            stream = streams[i];
+            key = "" + stream.from_device.id + "_" + stream.to_device.id;
+            stream.offset = map.get(key);
+            map.set(key, stream.offset + 1);
         }
     };
 };
