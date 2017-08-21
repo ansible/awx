@@ -640,10 +640,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     // Don't toggle the dropdown when a multiselect option is
                     // being removed
                     if (multiple) {
-                        if (params.disabledOptions) {
-                            $(element).on('select2:selecting', e => e.preventDefault());
-                        }
-
                         $(element).on('select2:opening', (e) => {
                             var unselecting = $(e.target).data('select2-unselecting');
                             if (unselecting === true) {
