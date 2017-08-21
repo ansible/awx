@@ -36,7 +36,8 @@ class Topology(models.Model):
     panY = models.FloatField()
     device_id_seq = models.IntegerField(default=0)
     link_id_seq = models.IntegerField(default=0)
-    group_id_seq = models.IntegerField(default=0)
+    group_id_seq = models.IntegerField('Topology', default=0)
+    stream_id_seq = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -88,6 +89,7 @@ class Group(models.Model):
     x2 = models.IntegerField()
     y2 = models.IntegerField()
     topology = models.ForeignKey('Topology',)
+    type = models.CharField(max_length=200,)
 
 
 class GroupDevice(models.Model):
@@ -121,3 +123,21 @@ class DataSheet(models.Model):
     name = models.CharField(max_length=200,)
     topology = models.ForeignKey('Topology',)
     client = models.ForeignKey('Client',)
+
+
+class Stream(models.Model):
+
+    stream_id = models.AutoField('Stream', primary_key=True,)
+    from_device = models.ForeignKey('Stream', related_name='from_stream',)
+    to_device = models.ForeignKey('Stream', related_name='to_stream',)
+    label = models.CharField('Stream', max_length=200,)
+    id = models.IntegerField(default=0)
+
+
+class Process(models.Model):
+
+    process_id = models.AutoField(primary_key=True,)
+    device = models.ForeignKey('Device',)
+    name = models.CharField(max_length=200,)
+    type = models.CharField(max_length=200,)
+    id = models.IntegerField(default=0)
