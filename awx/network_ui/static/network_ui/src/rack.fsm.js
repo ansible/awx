@@ -88,6 +88,7 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     var j = 0;
     var top_left_x, top_left_y;
     var device_map = {};
+    var c_messages = [];
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -106,14 +107,14 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                  top_left_y + message.group.y2,
                                  false);
 
-    scope.send_control_message(new messages.GroupCreate(scope.client_id,
-                                                        group.id,
-                                                        group.x1,
-                                                        group.y1,
-                                                        group.x2,
-                                                        group.y2,
-                                                        group.name,
-                                                        group.type));
+    c_messages.push(new messages.GroupCreate(scope.client_id,
+                                             group.id,
+                                             group.x1,
+                                             group.y1,
+                                             group.x2,
+                                             group.y2,
+                                             group.name,
+                                             group.type));
 
     scope.groups.push(group);
 
@@ -128,17 +129,21 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
         device.interface_map = {};
         scope.devices.push(device);
         group.devices.push(device);
-        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                             device.id,
-                                                             device.x,
-                                                             device.y,
-                                                             device.name,
-                                                             device.type));
+        c_messages.push(new messages.DeviceCreate(scope.client_id,
+                                                  device.id,
+                                                  device.x,
+                                                  device.y,
+                                                  device.name,
+                                                  device.type));
         for (j=0; j < message.group.devices[i].interfaces.length; j++) {
             intf = new models.Interface(message.group.devices[i].interfaces[j].id, message.group.devices[i].interfaces[j].name);
             intf.device = device;
             device.interfaces.push(intf);
             device.interface_map[intf.id] = intf;
+            c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
+                                                         device.id,
+                                                         intf.id,
+                                                         intf.name));
         }
         for (j=0; j < message.group.devices[i].processes.length; j++) {
             process = new models.Application(message.group.devices[i].processes[j].id,
@@ -160,7 +165,15 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
         device_map[message.group.links[i].from_device.id].interface_map[message.group.links[i].from_interface.id].dot();
         device_map[message.group.links[i].to_device.id].interface_map[message.group.links[i].to_interface.id].dot();
         scope.links.push(link);
+        c_messages.push(new messages.LinkCreate(controller.scope.client_id,
+                                                link.id,
+                                                link.from_device.id,
+                                                link.to_device.id,
+                                                link.from_interface.id,
+                                                link.to_interface.id));
     }
+
+    scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
 };
 
 
@@ -436,7 +449,9 @@ _Move.prototype.onMouseMove = function (controller) {
     var j = 0;
     var k = 0;
     var previous_x1, previous_y1, previous_x2, previous_y2, previous_x, previous_y;
+    var c_messages = [];
     for (i = 0; i < groups.length; i++) {
+        c_messages = [];
         previous_x1 = groups[i].x1;
         previous_y1 = groups[i].y1;
         previous_x2 = groups[i].x2;
@@ -446,16 +461,16 @@ _Move.prototype.onMouseMove = function (controller) {
         groups[i].x2 = groups[i].x2 + diffX;
         groups[i].y2 = groups[i].y2 + diffY;
 
-        controller.scope.send_control_message(new messages.GroupMove(controller.scope.client_id,
-                                                                      groups[i].id,
-                                                                      groups[i].x1,
-                                                                      groups[i].y1,
-                                                                      groups[i].x2,
-                                                                      groups[i].y2,
-                                                                      previous_x1,
-                                                                      previous_y1,
-                                                                      previous_x2,
-                                                                      previous_y2));
+        c_messages.push(new messages.GroupMove(controller.scope.client_id,
+                                               groups[i].id,
+                                               groups[i].x1,
+                                               groups[i].y1,
+                                               groups[i].x2,
+                                               groups[i].y2,
+                                               previous_x1,
+                                               previous_y1,
+                                               previous_x2,
+                                               previous_y2));
 
 
         devices = groups[i].devices;
@@ -471,13 +486,15 @@ _Move.prototype.onMouseMove = function (controller) {
                      devices[j].interfaces[k].link.from_interface.dot();
                  }
             }
-            controller.scope.send_control_message(new messages.DeviceMove(controller.scope.client_id,
-                                                                          devices[j].id,
-                                                                          devices[j].x,
-                                                                          devices[j].y,
-                                                                          previous_x,
-                                                                          previous_y));
+            c_messages.push(new messages.DeviceMove(controller.scope.client_id,
+                                                    devices[j].id,
+                                                    devices[j].x,
+                                                    devices[j].y,
+                                                    previous_x,
+                                                    previous_y));
         }
+
+        controller.scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
