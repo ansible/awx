@@ -63,7 +63,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.new_link = null;
   $scope.new_stream = null;
   $scope.new_group_type = null;
-
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
@@ -99,7 +98,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
                       'y': 0,
                       'width': 0,
                       'height': 0};
-
 
   $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null);
   $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller);
