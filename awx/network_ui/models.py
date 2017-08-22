@@ -11,6 +11,7 @@ class Device(models.Model):
     id = models.IntegerField()
     type = models.CharField(max_length=200,)
     interface_id_seq = models.IntegerField(default=0)
+    process_id_seq = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
