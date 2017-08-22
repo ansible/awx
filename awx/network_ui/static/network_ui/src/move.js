@@ -180,6 +180,14 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
         process = new models.Process(message.device.processes[i].id,
                                      message.device.processes[i].name,
                                      message.device.processes[i].type, 0, 0);
+        process.device = device;
+        c_messages.push(new messages.ProcessCreate(controller.scope.client_id,
+                                                   process.id,
+                                                   process.name,
+                                                   process.type,
+                                                   process.device.id,
+                                                   process.x,
+                                                   process.y));
         device.processes.push(process);
     }
     scope.selected_devices.push(device);
