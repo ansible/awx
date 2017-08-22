@@ -104,40 +104,8 @@ def setup_inventory_groups(inventory, group_factory):
 
 @pytest.mark.django_db
 class TestHostManager:
-    def test_host_filter_change(self, setup_ec2_gce, organization):
-        smart_inventory = Inventory(name='smart',
-                                    kind='smart',
-                                    organization=organization,
-                                    host_filter='inventory_sources__source=ec2')
-        smart_inventory.save()
-        assert len(smart_inventory.hosts.all()) == 2
-
-        smart_inventory.host_filter = 'inventory_sources__source=gce'
-        smart_inventory.save()
-        assert len(smart_inventory.hosts.all()) == 1
-
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart',
                                     organization=organization,
                                     host_filter='inventory_sources__source=ec2')
         assert len(smart_inventory.hosts.all()) == 0
-
-    def test_host_objects_manager(self, setup_ec2_gce, organization):
-        smart_inventory = Inventory(kind='smart',
-                                    name='smart',
-                                    organization=organization,
-                                    host_filter='inventory_sources__source=ec2')
-        smart_inventory.save()
-
-        hosts = smart_inventory.hosts.all()
-        assert len(hosts) == 2
-        assert hosts[0].inventory_sources.first().source == 'ec2'
-        assert hosts[1].inventory_sources.first().source == 'ec2'
-
-    def test_host_objects_no_dupes(self, setup_inventory_groups, organization):
-        smart_inventory = Inventory(name='smart',
-                                    kind='smart',
-                                    organization=organization,
-                                    host_filter='groups__name=test_groupA or groups__name=test_groupB')
-        smart_inventory.save()
-        assert len(smart_inventory.hosts.all()) == 1
