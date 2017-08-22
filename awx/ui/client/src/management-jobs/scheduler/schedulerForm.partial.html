@@ -75,7 +75,7 @@
                         placeholder="HH24"
                         aw-min="0" min="0" aw-max="23"
                         max="23" data-zero-pad="2" required
-                        ng-change="scheduleTimeChange()" >
+                        ng-change="timeChange()" >
                     <span
                         class="SchedulerTime-separator">
                         :
@@ -91,7 +91,7 @@
                         placeholder="MM"
                         min="0" max="59" data-zero-pad="2"
                         required
-                        ng-change="scheduleTimeChange()" >
+                        ng-change="timeChange()" >
                     <span
                         class="SchedulerTime-separator">
                         :
@@ -107,7 +107,7 @@
                         placeholder="SS"
                         min="0" max="59" data-zero-pad="2"
                         required
-                        ng-change="scheduleTimeChange()" >
+                        ng-change="timeChange()" >
                     <!-- <div class="form-group
                         SchedulerTime-utc"
                         ng-show="schedulerShowUTCStartTime">
