@@ -34,6 +34,7 @@ export default {
             let list = _.cloneDeep(RelatedHostsListDefinition);
             list.basePath = GetBasePath('inventory') + $stateParams.smartinventory_id + '/hosts';
             delete list.actions.create;
+            delete list.fields.groups;
             return list;
         }],
         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
