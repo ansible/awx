@@ -28,7 +28,7 @@ Table of contents
 DCO
 ===
 
-All contributors must use "git commit --signoff" for any
+All contributors must use `git commit --signoff` for any
 commit to be merged, and agree that usage of --signoff constitutes
 agreement with the terms of DCO 1.1.  Any contribution that does not
 have such a signoff will not be merged.
@@ -273,7 +273,7 @@ existing functionality and/or negatively impacting a large number of users.
 If your issue isn't considered `high` priority then please be patient as it may take some time to get to your report.
 
 Before opening a new issue, please use the issue search feature to see if it's already been reported. If you have any extra detail to provide then please comment.
-Rather than posting a "me too" comment you might consider giving it a [https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments]("thumbs up") on github.
+Rather than posting a "me too" comment you might consider giving it a ["thumbs up"](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comment) on github.
 
 Ansible Issue Bot
 -----------------
