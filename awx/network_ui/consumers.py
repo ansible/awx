@@ -5,6 +5,7 @@ from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistor
 from awx.network_ui.models import Group as DeviceGroup
 from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.models import DataSheet, DataBinding, DataType
+from awx.network_ui.models import Process, Stream
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
@@ -365,6 +366,29 @@ class _Persistence(object):
                                                                     id=link['from_interface_id']).pk,
                             to_interface_id=Interface.objects.get(device_id=device_map[link['to_device_id']],
                                                                   id=link['to_interface_id']).pk).delete()
+
+    def onProcessCreate(self, process, topology_id, client_id):
+        Process.objects.get_or_create(device_id=Device.objects.get(id=process['device_id'],
+                                                                   topology_id=topology_id).pk,
+                                      id=process['id'],
+                                      defaults=dict(name=process['name'], type=process['type']))
+        (Device.objects
+               .filter(id=process['device_id'],
+                       topology_id=topology_id,
+                       interface_id_seq__lt=process['id'])
+               .update(interface_id_seq=process['id']))
+
+    def onStreamCreate(self, stream, topology_id, client_id):
+        device_map = dict(Device.objects
+                                .filter(topology_id=topology_id, id__in=[stream['from_id'], stream['to_id']])
+                                .values_list('id', 'pk'))
+        Stream.objects.get_or_create(id=stream['id'],
+                                     label=stream['label'],
+                                     from_device_id=device_map[stream['from_id']],
+                                     to_device_id=device_map[stream['to_id']])
+        (Topology.objects
+                 .filter(topology_id=topology_id, stream_id_seq__lt=stream['id'])
+                 .update(stream_id_seq=stream['id']))
 
     def onDeviceSelected(self, message_value, topology_id, client_id):
         'Ignore DeviceSelected messages'
