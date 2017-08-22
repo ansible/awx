@@ -6,6 +6,7 @@ from awx.network_ui.models import Group as DeviceGroup
 from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
+from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
@@ -382,13 +383,18 @@ class _Persistence(object):
         device_map = dict(Device.objects
                                 .filter(topology_id=topology_id, id__in=[stream['from_id'], stream['to_id']])
                                 .values_list('id', 'pk'))
+        logger.info("onStreamCreate %s", stream)
         Stream.objects.get_or_create(id=stream['id'],
-                                     label=stream['label'],
+                                     label='',
                                      from_device_id=device_map[stream['from_id']],
                                      to_device_id=device_map[stream['to_id']])
         (Topology.objects
                  .filter(topology_id=topology_id, stream_id_seq__lt=stream['id'])
                  .update(stream_id_seq=stream['id']))
+
+    def onCopySite(self, site, topology_id, client_id):
+        site_toolbox, _ = Toolbox.objects.get_or_create(name="Site")
+        ToolboxItem(toolbox=site_toolbox, data=json.dumps(site['site'])).save()
 
     def onDeviceSelected(self, message_value, topology_id, client_id):
         'Ignore DeviceSelected messages'
@@ -460,6 +466,7 @@ class _Persistence(object):
     onKeyEvent = write_event
 
     def onGroupCreate(self, group, topology_id, client_id):
+        logger.info("GroupCreate %s %s %s", group['id'], group['name'], group['type'])
         group = transform_dict(dict(x1='x1',
                                     y1='y1',
                                     x2='x2',
@@ -775,6 +782,14 @@ def ws_connect(message):
     message.reply_channel.send({"text": json.dumps(["Topology", topology_data])})
     send_snapshot(message.reply_channel, topology_id)
     send_history(message.reply_channel, topology_id)
+    send_toolboxes(message.reply_channel)
+
+
+def send_toolboxes(channel):
+    for toolbox_item in ToolboxItem.objects.filter(toolbox__name__in=['Process', 'Device', 'Rack', 'Site']).values('toolbox__name', 'data'):
+        item = dict(toolbox_name=toolbox_item['toolbox__name'],
+                    data=toolbox_item['data'])
+        channel.send({"text": json.dumps(["ToolboxItem", item])})
 
 
 def send_snapshot(channel, topology_id):
@@ -921,7 +936,10 @@ def make_sheet(data, column_headers=[]):
 
     sheet = []
 
-    n_columns = max([len(x) for x in data]) - 1
+    if len(data):
+        n_columns = max([len(x) for x in data]) - 1
+    else:
+        n_columns = 0
 
     row_i = 0
     sheet.append([dict(value=x, editable=False) for x in list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")[0:n_columns]])

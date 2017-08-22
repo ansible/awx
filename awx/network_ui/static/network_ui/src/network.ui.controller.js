@@ -20,7 +20,7 @@ var messages = require('./messages.js');
 var svg_crowbar = require('../vendor/svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window) {
+var NetworkUIController = function($scope, $document, $location, $window, $http) {
 
   window.scope = $scope;
   var i = 0;
@@ -30,6 +30,8 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
+  //
+  $scope.inventory_id = $location.search().inventory_id || 0;
 
   if (!$scope.disconnected) {
   $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
@@ -139,19 +141,26 @@ var NetworkUIController = function($scope, $document, $location, $window) {
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router6', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Switch6', 0, 0, 'switch'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Host6', 0, 0, 'host'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router7', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router8', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router9', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router10', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router11', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router12', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router13', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router14', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router15', 0, 0, 'router'));
-  $scope.inventory_toolbox.items.push(new models.Device(0, 'Router16', 0, 0, 'router'));
+  if (!$scope.disconnected) {
+      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
+           .then(function(response) {
+               console.log(response);
+
+               var host = null;
+               var i = 0;
+               function add_host (response) {
+                   console.log(response);
+                   var device = new models.Device(0, response.data.name, 0, 0, response.data.type);
+                   device.icon = true;
+                   $scope.inventory_toolbox.items.push(device);
+               }
+               for (i=0; i<response.data.results.length;i++) {
+                   host = response.data.results[i];
+                   $http.get('/api/v2/hosts/'+ host.id + '/variable_data?format=json')
+                        .then(add_host);
+               }
+           });
+  }
   $scope.inventory_toolbox.spacing = 150;
   $scope.inventory_toolbox.enabled = true;
   $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
@@ -160,9 +169,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
     $scope.first_controller.handle_message("PasteDevice", new messages.PasteDevice(selected_item));
   };
 
-  for(i = 0; i < $scope.inventory_toolbox.items.length; i++) {
-      $scope.inventory_toolbox.items[i].icon = true;
-  }
   //End Inventory Toolbox Setup
   $scope.rack_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller);
   //Rack Toolbox Setup
@@ -1077,7 +1083,7 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
-        $location.search({topology_id: data.topology_id});
+        $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
     };
 
     $scope.onDeviceSelected = function(data) {
@@ -1104,6 +1110,94 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var i = 0;
         for (i = 0; i < data.length; i++) {
             $scope.history.push(data[i]);
+        }
+    };
+
+    $scope.onToolboxItem = function (data) {
+        if (data.toolbox_name === "Site") {
+            var site = JSON.parse(data.data);
+            console.log(site);
+            var i = 0;
+            var j = 0;
+            var site_copy = new models.Group(site.id,
+                                             site.name,
+                                             site.type,
+                                             site.x1,
+                                             site.y1,
+                                             site.x2,
+                                             site.y2,
+                                             false);
+            var device, device_copy;
+            var process, process_copy;
+            var intf, intf_copy;
+            var device_map = {};
+            for (i = 0; i < site.devices.length; i++) {
+                device = site.devices[i];
+                device_copy = new models.Device(device.id,
+                                                device.name,
+                                                device.x,
+                                                device.y,
+                                                device.type);
+                device_map[device.id] = device_copy;
+                device_copy.interface_map = {};
+                site_copy.devices.push(device_copy);
+                for(j=0; j < device.interfaces.length; j++) {
+                    intf = device.interfaces[j];
+                    intf_copy = new models.Interface(intf.id, intf.name);
+                    intf_copy.device = device_copy;
+                    device_copy.interfaces.push(intf_copy);
+                    device_copy.interface_map[intf.id] = intf_copy;
+                }
+                for(j=0; j < device.processes.length; j++) {
+                    process = device.processes[j];
+                    process_copy = new models.Process(process.id,
+                                                      process.name,
+                                                      process.type,
+                                                      process.x,
+                                                      process.y);
+                    process_copy.device = device;
+                    device_copy.processes.push(process_copy);
+                }
+            }
+            console.log(device_map);
+            var group, group_copy;
+            for (i = 0; i < site.groups.length; i++) {
+                group = site.groups[i];
+                group_copy = new models.Group(group.id,
+                                              group.name,
+                                              group.type,
+                                              group.x1,
+                                              group.y1,
+                                              group.x2,
+                                              group.y2,
+                                              false);
+                site_copy.groups.push(group_copy);
+            }
+            var link, link_copy;
+            for (i = 0; i < site.links.length; i++) {
+                link = site.links[i];
+                link_copy = new models.Link(link.id,
+                                            device_map[link.from_device_id],
+                                            device_map[link.to_device_id],
+                                            device_map[link.from_device_id].interface_map[link.from_interface_id],
+                                            device_map[link.to_device_id].interface_map[link.to_interface_id]);
+                link_copy.name = link.name;
+                device_map[link.from_device_id].interface_map[link.from_interface_id].link = link_copy;
+                device_map[link.to_device_id].interface_map[link.to_interface_id].link = link_copy;
+                site_copy.links.push(link_copy);
+            }
+
+            var stream, stream_copy;
+
+            for(i = 0; i < site.streams.length;i++) {
+                stream = site.streams[i];
+                stream_copy = new models.Stream(stream.id,
+                                                device_map[stream.from_device],
+                                                device_map[stream.to_device],
+                                                stream.label);
+                site_copy.streams.push(stream_copy);
+            }
+            $scope.site_toolbox.items.push(site_copy);
         }
     };
 
