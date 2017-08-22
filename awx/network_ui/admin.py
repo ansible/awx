@@ -30,7 +30,7 @@ from awx.network_ui.models import Process
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq',)
+    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq',)
     raw_id_fields = ('topology',)
 
 
