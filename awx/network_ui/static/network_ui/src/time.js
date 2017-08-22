@@ -389,6 +389,11 @@ _Present.prototype.onSnapshot = function(controller, msg_type, message) {
             controller.scope.onSnapshot(message);
         }
 };
+_Present.prototype.onToolboxItem = function(controller, msg_type, message) {
+        if (message.sender !== controller.scope.client_id) {
+            controller.scope.onToolboxItem(message);
+        }
+};
 _Present.prototype.onid = function(controller, msg_type, message) {
         controller.scope.onClientId(message);
 };

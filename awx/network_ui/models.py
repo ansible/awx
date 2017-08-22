@@ -142,3 +142,16 @@ class Process(models.Model):
     name = models.CharField(max_length=200,)
     type = models.CharField(max_length=200,)
     id = models.IntegerField(default=0)
+
+
+class Toolbox(models.Model):
+
+    toolbox_id = models.AutoField(primary_key=True,)
+    name = models.CharField(max_length=200,)
+
+
+class ToolboxItem(models.Model):
+
+    toolbox_item_id = models.AutoField(primary_key=True,)
+    toolbox = models.ForeignKey('Toolbox',)
+    data = models.TextField()
