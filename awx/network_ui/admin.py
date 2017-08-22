@@ -28,6 +28,10 @@ from awx.network_ui.models import Stream
 
 from awx.network_ui.models import Process
 
+from awx.network_ui.models import Toolbox
+
+from awx.network_ui.models import ToolboxItem
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq',)
@@ -139,3 +143,19 @@ class ProcessAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Process, ProcessAdmin)
+
+
+class ToolboxAdmin(admin.ModelAdmin):
+    fields = ('name',)
+    raw_id_fields = ()
+
+
+admin.site.register(Toolbox, ToolboxAdmin)
+
+
+class ToolboxItemAdmin(admin.ModelAdmin):
+    fields = ('toolbox', 'data',)
+    raw_id_fields = ('toolbox',)
+
+
+admin.site.register(ToolboxItem, ToolboxItemAdmin)

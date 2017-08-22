@@ -278,6 +278,12 @@ function PasteSite(group) {
 }
 exports.PasteSite = PasteSite;
 
+function CopySite(site) {
+    this.msg_type = "CopySite";
+    this.site = site;
+}
+exports.CopySite = CopySite;
+
 
 function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2) {
     this.msg_type = "GroupMove";
