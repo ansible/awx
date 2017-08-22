@@ -18,6 +18,7 @@ export default [
     'Rest',
     'ProcessErrors',
     'ngToast',
+    '$filter',
     function(
         $rootScope, $scope, $state, $stateParams, $timeout,
         AngularCodeMirror,
@@ -31,7 +32,8 @@ export default [
         i18n,
         Rest,
         ProcessErrors,
-        ngToast
+        ngToast,
+        $filter
     ) {
         var systemVm = this;
 
@@ -215,10 +217,9 @@ export default [
                 .catch(({data, status}) => {
                     if (status === 500) {
                         ngToast.danger({
-                            content: `<i class="fa fa-exclamation-triangle
-                                Toast-successIcon"></i>` +
-                                    i18n._('Log aggregator test failed.<br />Detail: ') +
-                                        data.error
+                            content: '<i class="fa fa-exclamation-triangle Toast-successIcon"></i>' +
+                                i18n._('Log aggregator test failed. <br> Detail: ') + $filter('sanitize')(data.error),
+                            additionalClasses: "LogAggregator-failedNotification"
                         });
                     } else {
                         ProcessErrors($scope, data, status, null,
