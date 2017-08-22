@@ -266,14 +266,14 @@ Don't use the issue tracker to get help on how to do something - please use the 
 How issues are resolved
 -----------------------
 
-We triage our issues into high, medium, and low and will tag them with the relevant component (api, ui, installer, etc). We will typically focus on high priority
-issues. There aren't hard and fast rules for determining the severity of an issue, but generally high priority issues have an increased likelihood of breaking
+We triage our issues into high, medium, and low and will tag them with the relevant component (api, ui, installer, etc). We will typically focus on higher priority
+issues first. There aren't hard and fast rules for determining the severity of an issue, but generally high priority issues have an increased likelihood of breaking
 existing functionality and/or negatively impacting a large number of users.
 
 If your issue isn't considered `high` priority then please be patient as it may take some time to get to your report.
 
 Before opening a new issue, please use the issue search feature to see if it's already been reported. If you have any extra detail to provide then please comment.
-Rather than posting a "me too" comment you might consider giving it a "thumbs up" on github.
+Rather than posting a "me too" comment you might consider giving it a [https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments]("thumbs up") on github.
 
 Ansible Issue Bot
 -----------------
