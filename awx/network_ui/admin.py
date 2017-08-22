@@ -127,7 +127,7 @@ admin.site.register(DataSheet, DataSheetAdmin)
 
 class StreamAdmin(admin.ModelAdmin):
     fields = ('from_device', 'to_device', 'label', 'id',)
-    raw_id_fields = ('stream_id', 'from_device', 'to_device', 'label',)
+    raw_id_fields = ('stream_id', 'from_device', 'to_device',)
 
 
 admin.site.register(Stream, StreamAdmin)
