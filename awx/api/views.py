@@ -3739,6 +3739,13 @@ class JobList(ListCreateAPIView):
             methods.remove('POST')
         return methods
 
+    # NOTE: Remove in 3.3, switch ListCreateAPIView to ListAPIView
+    def post(self, request, *args, **kwargs):
+        if get_request_version(self.request) > 1:
+            return Response({"error": _("POST not allowed for Job launching in version 2 of the api")},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(JobList, self).post(request, *args, **kwargs)
+
 
 class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
 
