@@ -80,10 +80,10 @@ _Connecting.prototype.onMouseUp = function (controller) {
     if (selected.last_selected_device !== null) {
         controller.scope.new_stream.to_device = selected.last_selected_device;
         controller.scope.send_control_message(new messages.StreamCreate(controller.scope.client_id,
-            controller.scope.new_stream.id,
-                                                                            controller.scope.new_stream.from_device.id,
-                                                                            controller.scope.new_stream.to_device.id),
-                '');
+                                                                        controller.scope.new_stream.id,
+                                                                        controller.scope.new_stream.from_device.id,
+                                                                        controller.scope.new_stream.to_device.id,
+                                                                        ''));
         controller.scope.new_stream = null;
         controller.scope.update_offsets();
         controller.changeState(Connected);
