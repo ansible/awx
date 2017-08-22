@@ -149,6 +149,14 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
             process = new models.Process(message.group.devices[i].processes[j].id,
                                          message.group.devices[i].processes[j].name,
                                          message.group.devices[i].processes[j].type, 0, 0);
+            process.device = device;
+            c_messages.push(new messages.ProcessCreate(controller.scope.client_id,
+                                                       process.id,
+                                                       process.name,
+                                                       process.type,
+                                                       process.device.id,
+                                                       process.x,
+                                                       process.y));
             device.processes.push(process);
         }
     }

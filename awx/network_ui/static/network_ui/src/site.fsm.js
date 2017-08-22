@@ -151,6 +151,14 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
             process = new models.Process(message.group.devices[i].processes[j].id,
                                          message.group.devices[i].processes[j].name,
                                          message.group.devices[i].processes[j].type, 0, 0);
+            process.device = device;
+            c_messages.push(new messages.ProcessCreate(controller.scope.client_id,
+                                                       process.id,
+                                                       process.name,
+                                                       process.type,
+                                                       process.device.id,
+                                                       process.x,
+                                                       process.y));
             device.processes.push(process);
         }
     }
@@ -177,10 +185,15 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
 
     for(i=0; i<message.group.streams.length;i++) {
         stream = new models.Stream(controller.scope.stream_id_seq(),
-                               device_map[message.group.streams[i].from_device.id],
-                               device_map[message.group.streams[i].to_device.id],
-                               message.group.streams[i].label);
+                                   device_map[message.group.streams[i].from_device.id],
+                                   device_map[message.group.streams[i].to_device.id],
+                                   message.group.streams[i].label);
         stream.name = message.group.streams[i].name;
+        c_messages.push(new messages.StreamCreate(controller.scope.client_id,
+                                                  stream.id,
+                                                  stream.from_device.id,
+                                                  stream.to_device.id,
+                                                  stream.name));
         scope.streams.push(stream);
     }
 

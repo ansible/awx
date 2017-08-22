@@ -608,6 +608,7 @@ function Process(id, name, type, x, y) {
     this.selected = null;
     this.enabled = true;
     this.icon = false;
+    this.device = null;
 }
 exports.Process = Process;
 
