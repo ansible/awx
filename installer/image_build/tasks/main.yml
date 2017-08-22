@@ -9,7 +9,6 @@
 - name: Set global version if not provided
   set_fact:
     awx_version: "{{ awx_version_command.stdout }}"
-    use_local_awx: true
   when: awx_version is not defined
 
 - name: Set sdist file name
@@ -26,7 +25,6 @@
     chdir: ..
     creates: "../dist/{{ awx_sdist_file }}"
   delegate_to: localhost
-  when: use_local_awx is not defined
 
 - name: Set docker build base path
   set_fact:
