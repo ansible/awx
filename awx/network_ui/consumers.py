@@ -779,15 +779,21 @@ def ws_connect(message):
 
 def send_snapshot(channel, topology_id):
     interfaces = defaultdict(list)
+    processes = defaultdict(list)
 
     for i in (Interface.objects
               .filter(device__topology_id=topology_id)
               .values()):
         interfaces[i['device_id']].append(i)
+    for i in (Process.objects
+              .filter(device__topology_id=topology_id)
+              .values()):
+        processes[i['device_id']].append(i)
     devices = list(Device.objects
                          .filter(topology_id=topology_id).values())
     for device in devices:
         device['interfaces'] = interfaces[device['device_id']]
+        device['processes'] = processes[device['device_id']]
 
     links = [dict(id=x['id'],
                   name=x['name'],
@@ -813,10 +819,22 @@ def send_snapshot(channel, topology_id):
         else:
             group_map[group_id]['members'].append(device_id)
 
+    streams = [dict(id=x['id'],
+                    label=x['label'],
+                    from_id=x['from_device__id'],
+                    to_id=x['to_device__id'])
+               for x in list(Stream.objects
+                                   .filter(Q(from_device__topology_id=topology_id) |
+                                           Q(to_device__topology_id=topology_id)).values('id',
+                                                                                         'label',
+                                                                                         'from_device__id',
+                                                                                         'to_device__id'))]
+
     snapshot = dict(sender=0,
                     devices=devices,
                     links=links,
-                    groups=groups)
+                    groups=groups,
+                    streams=streams)
     channel.send({"text": json.dumps(["Snapshot", snapshot])})
 
 
