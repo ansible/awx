@@ -121,17 +121,17 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller);
   $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller);
   //App Toolbox Setup
-  $scope.app_toolbox = new models.ToolBox(0, 'Application', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
+  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 10, 200, 150, $scope.graph.height - 200 - 100);
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
   $scope.app_toolbox_controller.dropped_action = function (selected_item) {
     $scope.first_controller.handle_message("PasteProcess", new messages.PasteProcess(selected_item));
   };
-  $scope.app_toolbox.items.push(new models.Application(0, 'BGP', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'OSPF', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'STP', 'process', 0, 0));
-  $scope.app_toolbox.items.push(new models.Application(0, 'Zero Pipeline', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'BGP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'OSPF', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'STP', 'process', 0, 0));
+  $scope.app_toolbox.items.push(new models.Process(0, 'Zero Pipeline', 'process', 0, 0));
 
   for(i = 0; i < $scope.app_toolbox.items.length; i++) {
       $scope.app_toolbox.items[i].icon = true;

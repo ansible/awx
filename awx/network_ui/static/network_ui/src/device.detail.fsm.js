@@ -57,7 +57,7 @@ _Ready.prototype.onPasteProcess = function (controller, msg_type, message) {
         if (device.is_selected(x, y)) {
             console.log(device);
 
-            app = new models.Application(device.process_id_seq(),
+            app = new models.Process(device.process_id_seq(),
                                          message.process.name,
                                          message.process.type,
                                          controller.scope.scaledX,
