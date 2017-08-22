@@ -259,19 +259,17 @@ models:
     ref_field: stream_id
     type: AutoField
   - name: from_device
-    ref: Stream
+    ref: Device
     ref_field: from_device
     related_name: from_stream
     type: ForeignKey
   - name: to_device
-    ref: Stream
+    ref: Device
     ref_field: to_device
     related_name: to_stream
     type: ForeignKey
   - len: 200
     name: label
-    ref: Stream
-    ref_field: label
     type: CharField
   - default: 0
     name: id

@@ -128,9 +128,9 @@ class DataSheet(models.Model):
 class Stream(models.Model):
 
     stream_id = models.AutoField('Stream', primary_key=True,)
-    from_device = models.ForeignKey('Stream', related_name='from_stream',)
-    to_device = models.ForeignKey('Stream', related_name='to_stream',)
-    label = models.CharField('Stream', max_length=200,)
+    from_device = models.ForeignKey('Device', related_name='from_stream',)
+    to_device = models.ForeignKey('Device', related_name='to_stream',)
+    label = models.CharField(max_length=200,)
     id = models.IntegerField(default=0)
 
 
