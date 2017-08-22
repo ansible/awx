@@ -35,6 +35,7 @@ export default {
             list.basePath = GetBasePath('inventory') + $stateParams.smartinventory_id + '/hosts';
             delete list.actions.create;
             delete list.fields.groups;
+            list.fields.name.columnClass = 'col-lg-8 col-md-11 col-sm-8 col-xs-7';
             return list;
         }],
         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
