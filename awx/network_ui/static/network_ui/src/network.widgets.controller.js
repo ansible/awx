@@ -42,7 +42,6 @@ var NetworkWidgetsController = function($scope, $document, $location, $window) {
   $scope.onMouseMoveResult = "";
   $scope.current_scale = 1.01;
   $scope.current_mode = null;
-  $scope.current_location = [];
   $scope.panX = 100;
   $scope.panY = 100;
   $scope.mouseX = 0;
