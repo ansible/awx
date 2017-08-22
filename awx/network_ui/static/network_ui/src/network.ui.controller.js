@@ -1124,12 +1124,16 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         var max_device_id = null;
         var max_link_id = null;
         var max_group_id = null;
+        var max_stream_id = null;
         var min_x = null;
         var min_y = null;
         var max_x = null;
         var max_y = null;
         var new_link = null;
         var new_group = null;
+        var process = null;
+        var new_process = null;
+        var new_stream = null;
 
         //Build the devices
         for (i = 0; i < data.devices.length; i++) {
@@ -1155,9 +1159,20 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                                            device.y,
                                            device.type);
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
+            new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);
             device_map[device.id] = new_device;
             device_interface_map[device.id] = {};
+            for (j = 0; j < device.processes.length; j++) {
+                process = device.processes[j];
+                new_process = (new models.Process(process.id,
+                                                  process.name,
+                                                  process.type,
+                                                  0,
+                                                  0));
+				new_process.device = new_device;
+                new_device.processes.push(new_process);
+            }
             for (j = 0; j < device.interfaces.length; j++) {
                 intf = device.interfaces[j];
                 new_intf = (new models.Interface(intf.id,
@@ -1186,6 +1201,20 @@ var NetworkUIController = function($scope, $document, $location, $window) {
             device_interface_map[link.to_device_id][link.to_interface_id].link = new_link;
         }
 
+        //Build the streams
+        var stream = null;
+        for (i = 0; i < data.streams.length; i++) {
+            stream = data.streams[i];
+            if (max_stream_id === null || stream.id > max_stream_id) {
+                max_stream_id = stream.id;
+            }
+            new_stream = new models.Stream(stream.id,
+                                           device_map[stream.from_id],
+                                           device_map[stream.to_id],
+                                           stream.label);
+            $scope.streams.push(new_stream);
+        }
+
         //Build the groups
         var group = null;
         for (i = 0; i < data.groups.length; i++) {
@@ -1207,6 +1236,12 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                 }
             }
             $scope.groups.push(new_group);
+        }
+
+        //Update group membership
+
+        for (i = 0; i < $scope.groups.length; i++) {
+            $scope.groups[i].update_membership($scope.devices, $scope.groups);
         }
 
         var diff_x;
@@ -1239,6 +1274,10 @@ var NetworkUIController = function($scope, $document, $location, $window) {
         //Update the link_id_seq to be greater than all link ids to prevent duplicate ids.
         if (max_link_id !== null) {
             $scope.link_id_seq = util.natural_numbers(max_link_id);
+        }
+        //Update the stream_id_seq to be greater than all stream ids to prevent duplicate ids.
+        if (max_stream_id !== null) {
+            $scope.stream_id_seq = util.natural_numbers(max_stream_id);
         }
         //Update the group_id_seq to be greater than all group ids to prevent duplicate ids.
         if (max_group_id !== null) {
