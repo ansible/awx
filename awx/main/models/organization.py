@@ -9,7 +9,7 @@ import uuid
 
 # Django
 from django.conf import settings
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import User
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
@@ -187,7 +187,7 @@ class AuthToken(BaseModel):
         if not self.pk or not self.is_expired(now=now):
             self.expires = now + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
             if save:
-                self.save()
+                connection.on_commit(lambda: self.save(update_fields=['expires']))
 
     def invalidate(self, reason='timeout_reached', save=True):
         if not AuthToken.reason_long(reason):
