@@ -50,7 +50,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.onMouseMoveResult = "";
   $scope.current_scale = 1.0;
   $scope.current_mode = null;
-  $scope.current_location = ["Earth", "Site1", "Spine1", "Eth1"];
   $scope.panX = 0;
   $scope.panY = 0;
   $scope.mouseX = 0;
@@ -96,7 +95,6 @@ var NetworkUIController = function($scope, $document, $location, $window) {
   $scope.touch_data = {};
   $scope.touches = [];
   $scope.devices = [];
-  $scope.stencils = [];
   $scope.links = [];
   $scope.groups = [];
   $scope.processes = [];
@@ -614,23 +612,9 @@ var NetworkUIController = function($scope, $document, $location, $window) {
                               true)
     ];
 
-    var STENCIL_X = 10;
-    var STENCIL_Y = 100;
-    var STENCIL_SPACING = 40;
-
-    $scope.stencils = [
-      new models.Button("Switch", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 0, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));}),
-      new models.Button("Router", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 1, 70, 30, function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));}),
-      new models.Button("Host", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 2, 70, 30,  function () {$scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));}),
-      new models.Button("Link", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 3, 70, 30, function () { $scope.first_controller.handle_message("NewLink");}),
-      new models.Button("Group", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 4, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));}),
-      new models.Button("Site", STENCIL_X, STENCIL_Y + STENCIL_SPACING * 5, 70, 30, function () { $scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));}),
-    ];
-
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.buttons);
     $scope.all_buttons.extend($scope.layers);
-    $scope.all_buttons.extend($scope.stencils);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
