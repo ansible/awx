@@ -143,7 +143,8 @@ class URLModificationMiddleware(object):
 
     def _convert_named_url(self, url_path):
         url_units = url_path.split('/')
-        if len(url_units) < 6 or url_units[1] != 'api' or url_units[2] not in ['v2']:
+        # If the identifier is an empty string, it is always invalid.
+        if len(url_units) < 6 or url_units[1] != 'api' or url_units[2] not in ['v2'] or not url_units[4]:
             return url_path
         resource = url_units[3]
         if resource in settings.NAMED_URL_MAPPINGS:
