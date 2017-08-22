@@ -25,6 +25,9 @@ models:
   - default: 0
     name: interface_id_seq
     type: IntegerField
+  - default: 0
+    name: process_id_seq
+    type: IntegerField
   name: Device
   x: 348
   y: 124
