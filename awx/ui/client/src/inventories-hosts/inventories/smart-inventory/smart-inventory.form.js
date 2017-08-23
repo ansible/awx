@@ -64,7 +64,7 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                 smart_hosts: {
                     label: i18n._('Smart Host Filter'),
                     type: 'custom',
-                    control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
+                    control: '<smart-inventory-host-filter host-filter="smart_hosts" field-is-disabled="!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)"></smart-inventory-host-filter>',
                     awPopOver: "<p>" + i18n._("Populate the hosts for this inventory by using a search filter.") + "</p><p>" + i18n._("Example: ansible_facts.ansible_distribution:\"RedHat\"") + "</p><p>" + i18n._("Refer to the Ansible Tower documentation for further syntax and examples.") + "</p>",
                     dataTitle: i18n._('Smart Host Filter'),
                     dataPlacement: 'right',

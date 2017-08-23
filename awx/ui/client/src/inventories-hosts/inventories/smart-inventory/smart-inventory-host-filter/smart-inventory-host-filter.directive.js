@@ -10,7 +10,8 @@ export default ['templateUrl', '$compile',
     function(templateUrl, $compile) {
         return {
             scope: {
-                hostFilter: '='
+                hostFilter: '=',
+                fieldIsDisabled: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/smart-inventory-host-filter'),

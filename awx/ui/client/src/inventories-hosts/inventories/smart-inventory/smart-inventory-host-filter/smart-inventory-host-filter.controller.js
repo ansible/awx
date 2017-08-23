@@ -8,7 +8,7 @@ export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
     function($scope, qs, InventoryHostsStrings) {
         $scope.hostFilterTags = [];
 
-        $scope.filterTooltip = InventoryHostsStrings.get('smartinventories.TOOLTIP');
+        $scope.filterTooltip = $scope.fieldIsDisabled ? '' : InventoryHostsStrings.get('smartinventories.TOOLTIP');
 
         $scope.$watch('hostFilter', function(){
             $scope.hostFilterTags = [];
