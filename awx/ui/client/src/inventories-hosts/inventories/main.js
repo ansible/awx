@@ -130,13 +130,15 @@ angular.module('inventory', [
                                             });
                                     });
                             }],
-                            checkProjectPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath',
-                                function(resourceData, $stateParams, Rest, GetBasePath){
+                            checkProjectPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath', 'credentialTypesLookup',
+                                function(resourceData, $stateParams, Rest, GetBasePath, credentialTypesLookup){
                                     if(_.has(resourceData, 'data.summary_fields.insights_credential')){
-                                        let credential_id = resourceData.data.summary_fields.insights_credential.id,
-                                            path = `${GetBasePath('projects')}?credential__id=${credential_id}&role_level=use_role`;
-                                            Rest.setUrl(path);
-                                            return Rest.get().then(({data}) => {
+                                        return credentialTypesLookup()
+                                            .then(kinds => {
+                                                let insightsKind = kinds.Insights;
+                                                let path = `${GetBasePath('projects')}?credential__credential_type=${insightsKind}&role_level=use_role`;
+                                                Rest.setUrl(path);
+                                                return Rest.get().then(({data}) => {
                                                     if (data.results.length > 0){
                                                         return true;
                                                     }
@@ -146,6 +148,7 @@ angular.module('inventory', [
                                                 }).catch(() => {
                                                     return false;
                                                 });
+                                            });
                                     }
                                     else {
                                         return false;
