@@ -30,6 +30,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
+  //
+  $scope.inventory_id = $location.search().inventory_id || 0;
 
   if (!$scope.disconnected) {
   $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
@@ -139,7 +141,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
-  $http.get('/api/v2/inventories/2/hosts/?format=json')
+  $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
        .then(function(response) {
            console.log(response);
 
@@ -1079,7 +1081,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
-        $location.search({topology_id: data.topology_id});
+        $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
     };
 
     $scope.onDeviceSelected = function(data) {
