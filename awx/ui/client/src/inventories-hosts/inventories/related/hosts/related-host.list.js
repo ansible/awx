@@ -20,7 +20,7 @@ export default ['i18n', function(i18n) {
 
         fields: {
             toggleHost: {
-                ngDisabled: 'host.has_inventory_sources',
+                ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources',
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",
