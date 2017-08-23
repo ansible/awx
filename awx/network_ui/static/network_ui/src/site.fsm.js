@@ -340,6 +340,8 @@ _Selected2.prototype.onCopySelected = function (controller) {
             group_copy.groups.push(inner_group);
         }
 
+        controller.send_control_message(new messages.CopySite(group_copy));
+
         controller.scope.site_toolbox.items.push(group_copy);
     }
 };

@@ -28,6 +28,16 @@ function Device(id, name, x, y, type) {
 }
 exports.Device = Device;
 
+Device.prototype.toJSON = function () {
+    return {id: this.id,
+            name: this.name,
+            x: this.x,
+            y: this.y,
+            type: this.type,
+            interfaces: this.interfaces,
+            processes: this.processes};
+};
+
 Device.prototype.is_selected = function (x, y) {
 
     return (x > this.x - this.width &&
@@ -50,6 +60,12 @@ function Interface(id, name) {
     this.dot_y = null;
 }
 exports.Interface = Interface;
+
+Interface.prototype.toJSON = function () {
+
+    return {id: this.id,
+            name: this.name};
+};
 
 Interface.prototype.remote_interface = function () {
 
@@ -191,6 +207,15 @@ function Link(id, from_device, to_device, from_interface, to_interface) {
     this.name = "";
 }
 exports.Link = Link;
+
+Link.prototype.toJSON = function () {
+
+    return {from_device_id: this.from_device.id,
+            to_device_id: this.to_device.id,
+            from_interface_id: this.from_interface.id,
+            to_interface_id: this.to_interface.id,
+            name: this.name};
+};
 
 Link.prototype.is_selected = function (x, y) {
     // Is the distance to the mouse location less than 25 if on the label side
@@ -348,6 +373,22 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.icon_size = type === 'site' ? 500 : 100;
 }
 exports.Group = Group;
+
+Group.prototype.toJSON = function () {
+
+    return {id: this.id,
+            name: this.name,
+            type: this.type,
+            x1: this.x1,
+            y1: this.y1,
+            x2: this.x2,
+            y2: this.y2,
+            devices: this.devices,
+            links: this.links,
+            streams: this.streams,
+            groups: this.groups};
+};
+
 
 Group.prototype.update_hightlighted = function (x, y) {
 
