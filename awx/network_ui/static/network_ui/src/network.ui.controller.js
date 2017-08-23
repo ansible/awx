@@ -1113,6 +1113,94 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
         }
     };
 
+    $scope.onToolboxItem = function (data) {
+        if (data.toolbox_name === "Site") {
+            var site = JSON.parse(data.data);
+            console.log(site);
+            var i = 0;
+            var j = 0;
+            var site_copy = new models.Group(site.id,
+                                             site.name,
+                                             site.type,
+                                             site.x1,
+                                             site.y1,
+                                             site.x2,
+                                             site.y2,
+                                             false);
+            var device, device_copy;
+            var process, process_copy;
+            var intf, intf_copy;
+            var device_map = {};
+            for (i = 0; i < site.devices.length; i++) {
+                device = site.devices[i];
+                device_copy = new models.Device(device.id,
+                                                device.name,
+                                                device.x,
+                                                device.y,
+                                                device.type);
+                device_map[device.id] = device_copy;
+                device_copy.interface_map = {};
+                site_copy.devices.push(device_copy);
+                for(j=0; j < device.interfaces.length; j++) {
+                    intf = device.interfaces[j];
+                    intf_copy = new models.Interface(intf.id, intf.name);
+                    intf_copy.device = device_copy;
+                    device_copy.interfaces.push(intf_copy);
+                    device_copy.interface_map[intf.id] = intf_copy;
+                }
+                for(j=0; j < device.processes.length; j++) {
+                    process = device.processes[j];
+                    process_copy = new models.Process(process.id,
+                                                      process.name,
+                                                      process.type,
+                                                      process.x,
+                                                      process.y);
+                    process_copy.device = device;
+                    device_copy.processes.push(process_copy);
+                }
+            }
+            console.log(device_map);
+            var group, group_copy;
+            for (i = 0; i < site.groups.length; i++) {
+                group = site.groups[i];
+                group_copy = new models.Group(group.id,
+                                              group.name,
+                                              group.type,
+                                              group.x1,
+                                              group.y1,
+                                              group.x2,
+                                              group.y2,
+                                              false);
+                site_copy.groups.push(group_copy);
+            }
+            var link, link_copy;
+            for (i = 0; i < site.links.length; i++) {
+                link = site.links[i];
+                link_copy = new models.Link(link.id,
+                                            device_map[link.from_device_id],
+                                            device_map[link.to_device_id],
+                                            device_map[link.from_device_id].interface_map[link.from_interface_id],
+                                            device_map[link.to_device_id].interface_map[link.to_interface_id]);
+                link_copy.name = link.name;
+                device_map[link.from_device_id].interface_map[link.from_interface_id].link = link_copy;
+                device_map[link.to_device_id].interface_map[link.to_interface_id].link = link_copy;
+                site_copy.links.push(link_copy);
+            }
+
+            var stream, stream_copy;
+
+            for(i = 0; i < site.streams.length;i++) {
+                stream = site.streams[i];
+                stream_copy = new models.Stream(stream.id,
+                                                device_map[stream.from_device],
+                                                device_map[stream.to_device],
+                                                stream.label);
+                site_copy.streams.push(stream_copy);
+            }
+            $scope.site_toolbox.items.push(site_copy);
+        }
+    };
+
     $scope.onSnapshot = function (data) {
 
         //Erase the existing state
