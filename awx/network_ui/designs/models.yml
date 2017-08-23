@@ -297,6 +297,29 @@ models:
   name: Process
   x: 654
   y: 778
+- fields:
+  - name: toolbox_id
+    pk: true
+    type: AutoField
+  - default: 200
+    name: name
+    type: Charfield
+  name: Toolbox
+  x: -222
+  y: 627
+- fields:
+  - name: toolbox_item_id
+    pk: true
+    type: AutoField
+  - name: toolbox
+    ref: Toolbox
+    ref_field: toolbox_id
+    type: ForeignKey
+  - name: data
+    type: TextField
+  name: ToolboxItem
+  x: 54
+  y: 664
 modules: []
 view:
   panX: 213.72955551921206
