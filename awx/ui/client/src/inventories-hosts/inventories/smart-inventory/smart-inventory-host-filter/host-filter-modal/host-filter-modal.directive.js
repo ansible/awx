@@ -44,11 +44,12 @@ export default ['templateUrl', function(templateUrl) {
                         let hostList = _.cloneDeep(HostsList);
                         delete hostList.fields.toggleHost;
                         delete hostList.fields.active_failures;
-                        delete hostList.fields.inventory;
                         delete hostList.fields.name.ngClick;
                         hostList.fields.name.class += " HostFilterModal-tableRow";
                         hostList.fields.name.noLink = true;
                         hostList.well = false;
+                        delete hostList.fields.inventory.ngClick;
+                        hostList.fields.inventory.ngBind = 'host.summary_fields.inventory.name';
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'host-filter-modal-body',
@@ -79,7 +80,6 @@ export default ['templateUrl', function(templateUrl) {
 
                 $scope.destroyModal();
             };
-
         }]
     };
 }];
