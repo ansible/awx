@@ -128,20 +128,22 @@ export default ['$scope', '$rootScope',
                                 TemplatesService.deleteWorkflowJobTemplate(template.id)
                                 .then(function () {
                                     handleSuccessfulDelete(true);
-                                }, function (data) {
+                                })
+                                .catch(function (response) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete workflow job template failed. DELETE returned status: ' + status });
+                                    ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                                        msg: 'Call to delete workflow job template failed. DELETE returned status: ' + response.status + '.'});
                                 });
                             }
                             else if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
                                 TemplatesService.deleteJobTemplate(template.id)
                                 .then(function () {
                                     handleSuccessfulDelete();
-                                }, function (data) {
+                                })
+                                .catch(function (response) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete job template failed. DELETE returned status: ' + data.status });
+                                    ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                                        msg: 'Call to delete job template failed. DELETE returned status: ' + response.status + '.'});
                                 });
                             }
                             else {
