@@ -301,9 +301,9 @@ models:
   - name: toolbox_id
     pk: true
     type: AutoField
-  - default: 200
+  - len: 200
     name: name
-    type: Charfield
+    type: CharField
   name: Toolbox
   x: -222
   y: 627
