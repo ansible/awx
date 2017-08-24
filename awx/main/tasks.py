@@ -478,6 +478,7 @@ class BaseTask(LogErrorsTask):
     model = None
     abstract = True
     cleanup_paths = []
+    proot_show_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -793,6 +794,7 @@ class BaseTask(LogErrorsTask):
             # May have to serialize the value
             kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
+            kwargs['proot_show_paths'] = self.proot_show_paths
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
@@ -1288,6 +1290,10 @@ class RunProjectUpdate(BaseTask):
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 
+    @property
+    def proot_show_paths(self):
+        return [settings.PROJECTS_ROOT]
+
     def build_private_data(self, project_update, **kwargs):
         '''
         Return SSH private key data needed for this project update.
@@ -1593,6 +1599,12 @@ class RunProjectUpdate(BaseTask):
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
+
+    def should_use_proot(self, instance, **kwargs):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
 
 class RunInventoryUpdate(BaseTask):

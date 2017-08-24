@@ -1096,6 +1096,26 @@ class TestProjectUpdateCredentials(TestJobExecution):
         ]
     }
 
+    def test_bwrap_exposes_projects_root(self):
+        ssh = CredentialType.defaults['ssh']()
+        self.instance.scm_type = 'git'
+        self.instance.credential = Credential(
+            pk=1,
+            credential_type=ssh,
+        )
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+
+        assert ' '.join(args).startswith('bwrap')
+        ' '.join([
+            '--bind',
+            settings.PROJECTS_ROOT,
+            settings.PROJECTS_ROOT,
+        ]) in ' '.join(args)
+
     def test_username_and_password_auth(self, scm_type):
         ssh = CredentialType.defaults['ssh']()
         self.instance.scm_type = scm_type

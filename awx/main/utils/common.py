@@ -701,6 +701,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd]
     show_paths.extend([settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    show_paths.extend(kwargs.get('proot_show_paths', []))
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue
