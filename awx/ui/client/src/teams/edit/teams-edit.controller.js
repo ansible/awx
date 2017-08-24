@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'OrgAdminLookup',
     function($scope, $rootScope, $stateParams, TeamForm, Rest, ProcessErrors,
-    GetBasePath, Wait, $state) {
+    GetBasePath, Wait, $state, OrgAdminLookup) {
 
         var form = TeamForm,
             id = $stateParams.team_id,
@@ -22,6 +22,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             Rest.get(defaultUrl).success(function(data) {
                 setScopeFields(data);
                 $scope.organization_name = data.summary_fields.organization.name;
+
+                OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+                .then(function(canEditOrg){
+                    $scope.canEditOrg = canEditOrg;
+                });
 
                 $scope.team_obj = data;
                 Wait('stop');
