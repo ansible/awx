@@ -208,6 +208,14 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                        false);
         scope.groups.push(inner_group);
         group.groups.push(inner_group);
+        c_messages.push(new messages.GroupCreate(scope.client_id,
+                                                 inner_group.id,
+                                                 inner_group.x1,
+                                                 inner_group.y1,
+                                                 inner_group.x2,
+                                                 inner_group.y2,
+                                                 inner_group.name,
+                                                 inner_group.type));
     }
     for(i=0; i< group.groups.length; i++) {
         group.groups[i].update_membership(scope.devices, scope.groups);
