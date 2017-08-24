@@ -122,7 +122,7 @@ class WorkflowsEnforcementMixin(object):
     Mixin to check that license supports workflows.
     '''
     def check_permissions(self, request):
-        if not feature_enabled('workflows') and request.method not in ('GET', 'OPTIONS'):
+        if not feature_enabled('workflows') and request.method not in ('GET', 'OPTIONS', 'DELETE'):
             raise LicenseForbids(_('Your license does not allow use of workflows.'))
         return super(WorkflowsEnforcementMixin, self).check_permissions(request)
 
