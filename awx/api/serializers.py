@@ -2141,6 +2141,14 @@ class CredentialSerializer(BaseSerializer):
             return value
         return super(CredentialSerializer, self).to_internal_value(data)
 
+    def validate_credential_type(self, credential_type):
+        if self.instance and credential_type.pk != self.instance.credential_type.pk:
+            raise ValidationError(
+                _('You cannot change the credential type of the credential, as it may break the functionality'
+                  ' of the resources using it.'),
+            )
+        return credential_type
+
 
 class CredentialSerializerCreate(CredentialSerializer):
 

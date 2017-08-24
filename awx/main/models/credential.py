@@ -1030,4 +1030,3 @@ def insights(cls):
             },
         },
     )
-
