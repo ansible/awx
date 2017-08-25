@@ -141,7 +141,11 @@ class EncryptedCacheProxy(object):
             # as part of the AES key when encrypting/decrypting
             obj_id = self.cache.get(Setting.get_cache_id_key(key), default=empty)
             if obj_id is empty:
+                logger.info('Efficiency notice: Corresponding id not stored in cache %s',
+                            Setting.get_cache_id_key(key))
                 obj_id = getattr(self._get_setting_from_db(key), 'pk', None)
+            elif obj_id == SETTING_CACHE_NONE:
+                obj_id = None
             return method(
                 TransientSetting(
                     pk=obj_id,
@@ -284,13 +288,17 @@ class SettingsWrapper(UserSettingsHolder):
                 field = self.registry.get_setting_field(key)
                 try:
                     settings_to_cache[key] = get_cache_value(field.get_default())
+                    if self.registry.is_setting_encrypted(key):
+                        # No database pk, so None will be passed to encryption algorithm
+                        setting_ids[key] = SETTING_CACHE_NOTSET
                 except SkipField:
                     pass
         # Generate a cache key for each setting and store them all at once.
         settings_to_cache = dict([(Setting.get_cache_key(k), v) for k, v in settings_to_cache.items()])
         for k, id_val in setting_ids.items():
-            logger.debug('Saving id in cache for encrypted setting %s', k)
-            self.cache.set(Setting.get_cache_id_key(k), id_val)
+            logger.debug('Saving id in cache for encrypted setting %s, %s',
+                         Setting.get_cache_id_key(k), id_val)
+            self.cache.cache.set(Setting.get_cache_id_key(k), id_val)
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
@@ -333,6 +341,8 @@ class SettingsWrapper(UserSettingsHolder):
                 if SETTING_CACHE_DEFAULTS:
                     try:
                         value = field.get_default()
+                        if getattr(field, 'encrypted', False):
+                            setting_id = SETTING_CACHE_NONE
                     except SkipField:
                         pass
             # If None implies not set, convert when reading the value.
@@ -341,7 +351,7 @@ class SettingsWrapper(UserSettingsHolder):
             if cache_value != value:
                 if setting_id:
                     logger.debug('Saving id in cache for encrypted setting %s', cache_key)
-                    self.cache.set(Setting.get_cache_id_key(cache_key), setting_id)
+                    self.cache.cache.set(Setting.get_cache_id_key(cache_key), setting_id)
                 self.cache.set(cache_key, get_cache_value(value), timeout=SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:
