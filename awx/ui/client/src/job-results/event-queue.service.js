@@ -27,6 +27,7 @@ export default ['jobResultsService', 'parseStdoutService', function(jobResultsSe
             if (event.stdout) {
                 mungedEvent.stdout = parseStdoutService.parseStdout(event);
                 mungedEvent.start_line = event.start_line + 1;
+                mungedEvent.end_line = event.end_line + 1;
                 mungedEvent.changes.push('stdout');
             }
 
