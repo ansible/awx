@@ -2630,7 +2630,7 @@ class JobRelaunchSerializer(JobSerializer):
             raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
         if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
-        if obj.inventory is None:
+        if obj.inventory is None or obj.inventory.pending_deletion:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
