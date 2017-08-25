@@ -64,13 +64,21 @@ class CallbackModule(CallbackBase):
 
     def __init__(self):
         super(CallbackModule, self).__init__()
-        self.create_ws_connection()
         self.task = None
         self.play = None
         self.hosts = []
+        self.topology_id = None
+        self.ws = None
+        self.options = None
+        self.create_ws_connection()
 
     def create_ws_connection(self):
-        self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id=6")
+        if self.options is not None and 'topology_id' in self.options:
+            self.topology_id = self.options['topology_id']
+        if self.topology_id:
+            self.ws = create_connection("ws://127.0.0.1:8013/network_ui/ansible?topology_id={0}".format(self.topology_id))
+        else:
+            self.ws = None
 
     def ws_send(self, data):
 
@@ -148,6 +156,7 @@ class CallbackModule(CallbackBase):
     def v2_playbook_on_play_start(self, play):
         self.play = play
         self.hosts = play.get_variable_manager()._inventory.get_hosts()
+        self.options = play.get_variable_manager().extra_vars
 
         for host in self.hosts:
             self.ws_send(json.dumps(['DeviceStatus', dict(name=host.get_name(),
@@ -167,8 +176,6 @@ class CallbackModule(CallbackBase):
     @catch_exceptions
     @debug
     def v2_playbook_on_stats(self, stats):
-        hosts = sorted(stats.processed.keys())
-        summary = {}
         for host in self.hosts:
             s = stats.summarize(host.get_name())
             status = "pass"
