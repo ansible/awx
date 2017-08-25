@@ -253,7 +253,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     dataTitle: i18n._('Show Changes'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode.") + "</p>",
+                    awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible&#x2019s --diff mode.") + "</p>",
                     subCheckbox: {
                         variable: 'ask_diff_mode_on_launch',
                         text: i18n._('Prompt on launch')
