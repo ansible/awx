@@ -59,6 +59,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         return concated;
                     }
                     else {
+                        if(value && typeof value === 'string') {
+                            value = decodeURIComponent(value).replace(/"|'/g, "");
+                        }
+
                         return `${key}=${value}&`;
                     }
                 }
