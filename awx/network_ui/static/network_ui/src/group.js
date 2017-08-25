@@ -562,6 +562,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                                                                             groups[i].y2,
                                                                             groups[i].name));
         }
+    } else {
+        controller.next_controller.handle_message(msg_type, $event);
     }
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
