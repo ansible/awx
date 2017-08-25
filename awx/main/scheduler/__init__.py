@@ -403,15 +403,21 @@ class TaskManager():
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
-                if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
+                remaining_capacity = self.get_remaining_capacity(rampart_group.name)
+                if remaining_capacity <= 0:
+                    logger.debug("Skipping group %s, remaining_capacity %s <= 0",
+                                 rampart_group.name, remaining_capacity)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting %s in group %s", task.log_format, rampart_group.name)
+                    logger.debug("Starting %s in group %s (remaining_capacity=%s)",
+                                 task.log_format, rampart_group.name, remaining_capacity)
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain())
                     found_acceptable_queue = True
                     break
+                else:
+                    logger.debug("Not enough capacity to run %s on %s (remaining_capacity=%s)",
+                                 task.log_format, rampart_group.name, remaining_capacity)
             if not found_acceptable_queue:
                 logger.debug("%s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
 
@@ -489,11 +495,19 @@ class TaskManager():
     def calculate_capacity_used(self, tasks):
         for rampart_group in self.graph:
             self.graph[rampart_group]['capacity_used'] = 0
+        instance_ig_mapping, ig_ig_mapping = Instance.objects.capacity_mapping()
         for t in tasks:
             # TODO: dock capacity for isolated job management tasks running in queue
-            for group_actual in InstanceGroup.objects.filter(instances__hostname=t.execution_node).values_list('name'):
-                if group_actual[0] in self.graph:
-                    self.graph[group_actual[0]]['capacity_used'] += t.task_impact
+            if t.status == 'waiting':
+                # Subtract capacity from any peer groups that share instances
+                for instance_group_name in ig_ig_mapping[t.instance_group.name]:
+                    self.graph[instance_group_name]['capacity_used'] += t.task_impact
+            elif t.status == 'running':
+                # Subtract capacity from all groups that contain the instance
+                for instance_group_name in instance_ig_mapping[t.execution_node]:
+                    self.graph[instance_group_name]['capacity_used'] += t.task_impact
+            else:
+                logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
 
     def would_exceed_capacity(self, task, instance_group):
         current_capacity = self.graph[instance_group]['capacity_used']
@@ -503,6 +517,9 @@ class TaskManager():
         return (task.task_impact + current_capacity > capacity_total)
 
     def consume_capacity(self, task, instance_group):
+        logger.debug('%s consumed %s capacity units from %s with prior total of %s',
+                     task.log_format, task.task_impact, instance_group,
+                     self.graph[instance_group]['capacity_used'])
         self.graph[instance_group]['capacity_used'] += task.task_impact
 
     def get_remaining_capacity(self, instance_group):
@@ -540,12 +557,13 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
-        logger.debug("Starting Schedule")
         with transaction.atomic():
             # Lock
             with advisory_lock('task_manager_lock', wait=False) as acquired:
                 if acquired is False:
+                    logger.debug("Not running scheduler, another task holds lock")
                     return
+                logger.debug("Starting Scheduler")
 
                 self.cleanup_inconsistent_celery_tasks()
                 finished_wfjs = self._schedule()

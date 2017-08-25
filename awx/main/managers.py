@@ -79,3 +79,33 @@ class InstanceManager(models.Manager):
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
+
+    def capacity_mapping(self):
+        """
+        Returns tuple of two dictionaries that shows mutual connections by name
+        for global accounting of capacity
+
+        instance_ig_mapping: {'instance_name': <set of group names instance is member of>}
+        ig_ig_mapping: {'group_name': <set of group names that share instances>}
+        """
+        qs = self.all().prefetch_related('rampart_groups')
+        instance_ig_mapping = {}
+        ig_instance_mapping = {}
+        # Create simple dictionary of instance IG memberships
+        for instance in qs.all():
+            if instance.capacity == 0:
+                continue
+            instance_ig_mapping[instance.hostname] = set()
+            for group in instance.rampart_groups.all():
+                ig_instance_mapping.setdefault(group.name, set())
+                ig_instance_mapping[group.name].add(instance.hostname)
+                instance_ig_mapping[instance.hostname].add(group.name)
+        # Create IG mapping by union of all groups their instances are members of
+        ig_ig_mapping = {}
+        for group_name in ig_instance_mapping.keys():
+            ig_ig_set = set()
+            for instance_hostname in ig_instance_mapping[group_name]:
+                ig_ig_set |= instance_ig_mapping[instance_hostname]
+            ig_ig_mapping[group_name] = ig_ig_set
+
+        return instance_ig_mapping, ig_ig_mapping
