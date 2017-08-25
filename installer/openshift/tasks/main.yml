@@ -26,6 +26,7 @@
     registry: "{{ docker_registry }}"
     username: "{{ docker_registry_username }}"
     password: "{{ docker_registry_password }}"
+    reauthorize: yes
   when: docker_registry is defined
   delegate_to: localhost
 
