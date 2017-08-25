@@ -41,15 +41,18 @@ export default ['i18n', function(i18n){
         variable: {
             realName: 'variable',
             type: 'custom',
-            control:'<label class="prepend-asterisk" for="variable"><span class="Form-inputLabel" translate> ANSWER VARIABLE NAME</span>'+
-                '<a id="awp-variable" href="" aw-pop-over="The suggested format for variable names is lowercase and underscore-separated (for example, foo_bar, user_id, host_name, etc.). Variable names with spaces are not allowed." '+
-                'data-placement="right" data-container="body" popover-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
+            label: i18n._('Answer Variable Name'),
+            control:
                 '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control Form-textInput ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
                 '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.required" translate>Please enter an answer variable name.</div>'+
                 '<div class="error ng-hide" id="survey_question-variable-variable-error" ng-show="survey_question_form.variable.$dirty && survey_question_form.variable.$error.variable" translate>Please remove the illegal character from the survey question variable name.</div>'+
                 '<div class="error ng-hide" id="survey_question-variable-duplicate-error" ng-show="duplicate" translate>This question variable is already in use.  Please enter a different variable name.</div>' +
                 '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
                 '</div>',
+            awPopOver: i18n._("The suggested format for variable names is lowercase and underscore-separated (for example, foo_bar, user_id, host_name, etc.). Variable names with spaces are not allowed."),
+            dataTitle: i18n._('Answer Variable Name'),
+            dataPlacement: 'right',
+            dataContainer: "body",
             required: true,
             column: 1,
             class: 'Form-formGroup--singleColumn'

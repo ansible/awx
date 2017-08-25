@@ -420,6 +420,10 @@ function(ConfigurationUtils, i18n, $rootScope) {
 .directive('awRequiredWhen', function() {
     return {
         require: 'ngModel',
+        compile: function(tElem) {
+            let label = $(tElem).closest('.form-group').find('label').first();
+            $(label).addClass('prepend-asterisk');
+        },
         link: function(scope, elm, attrs, ctrl) {
 
             function updateRequired() {
