@@ -3795,6 +3795,7 @@ class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     new_in_145 = True
 
 
+# TODO: remove endpoint in 3.3
 class JobStart(GenericAPIView):
 
     model = Job
@@ -3802,7 +3803,13 @@ class JobStart(GenericAPIView):
     is_job_start = True
     deprecated = True
 
+    def v2_not_allowed(self):
+        return Response({'detail': 'Action only possible through v1 API.'},
+                        status=status.HTTP_404_NOT_FOUND)
+
     def get(self, request, *args, **kwargs):
+        if get_request_version(request) > 1:
+            return self.v2_not_allowed()
         obj = self.get_object()
         data = dict(
             can_start=obj.can_start,
@@ -3813,6 +3820,8 @@ class JobStart(GenericAPIView):
         return Response(data)
 
     def post(self, request, *args, **kwargs):
+        if get_request_version(request) > 1:
+            return self.v2_not_allowed()
         obj = self.get_object()
         if obj.can_start:
             result = obj.signal_start(**request.data)
