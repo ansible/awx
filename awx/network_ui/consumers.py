@@ -9,6 +9,7 @@ from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from collections import defaultdict
 from django.conf import settings
@@ -259,7 +260,8 @@ class _Persistence(object):
             print "no sender"
             return
         if isinstance(data[1], dict) and client_id != data[1].get('sender'):
-            print "client_id mismatch expected:", client_id, "actual:", data[1].get('sender')
+            logger.error("client_id mismatch expected:", client_id, "actual:", data[1].get('sender'))
+            logger.error(pformat(data))
             return
         message_type = data[0]
         message_value = data[1]
@@ -633,75 +635,62 @@ class _Discovery(object):
     def onFacts(self, message, topology_id):
         send_updates = False
         logger.info("onFacts message key %s", message['key'])
-        logger.info("onFacts message %s", pformat(message))
-        return
-        name = message['key']
-        device, created = Device.objects.get_or_create(topology_id=topology_id,
-                                                       name=name,
-                                                       defaults=dict(x=0,
-                                                                     y=0,
-                                                                     type="switch",
-                                                                     id=0))
-
-        if created:
-            device.id = device.pk
-            device.save()
-            send_updates = True
-            logger.info("onFacts Created device %s", device)
+        #logger.info("onFacts message %s", pformat(message))
+        device_name = message['key']
+        try:
+            device = Device.objects.get(topology_id=topology_id, name=device_name)
+        except ObjectDoesNotExist:
+            logger.info("onFacts Could not find %s in topology %s", device_name, topology_id)
+            return
 
         try:
-            interfaces = dpath.util.get(message, '/value/ansible_local/lldp/lldp')
+            interfaces = dpath.util.get(message, '/value/ansible_net_neighbors')
+            logger.info(pformat(interfaces))
         except KeyError:
             interfaces = []
-        for interface in interfaces:
-            logger.info("onFacts %s: ", pformat(interface))
-            for inner_interface in interface.get('interface', []):
-                name = inner_interface.get('name')
-                if not name:
-                    continue
-                interface, created = Interface.objects.get_or_create(device_id=device.pk,
-                                                                     name=name,
-                                                                     defaults=dict(id=0))
-                if created:
-                    interface.id = interface.pk
-                    interface.save()
-                    send_updates = True
-                    print "Created interface ", interface
+        logger.info("onFacts %s: ", pformat(interfaces))
+        """
+        ansible_net_neighbors example:
+         {u'eth1': [{u'host': u'Spine1', u'port': u'eth3'}],
+         u'eth2': [{u'host': u'Spine2', u'port': u'eth3'}],
+         u'eth3': [{u'host': u'Host2', u'port': u'eth1'}]}
+            """
+        for interface_name, neighbors in interfaces.iteritems():
+            logger.info("interface_name %s neighbors %s", interface_name, neighbors)
+            interface, created = Interface.objects.get_or_create(device_id=device.pk,
+                                                                 name=interface_name,
+                                                                 defaults=dict(id=0))
+            if created:
+                interface.id = interface.pk
+                interface.save()
+                send_updates = True
+                logger.info("Created interface %s", interface)
 
+
+            for neighbor in neighbors:
+                logger.info("neighbor %s", neighbor)
                 connected_interface = None
                 connected_device = None
+                neighbor_name = neighbor.get('host')
+                if not neighbor_name:
+                    continue
+                try:
+                    connected_device = Device.objects.get(topology_id=topology_id, name=neighbor_name)
+                except ObjectDoesNotExist:
+                    continue
 
-                for chassis in inner_interface.get('chassis', []):
-                    name = chassis.get('name', [{}])[0].get('value')
-                    if not name:
-                        continue
-                    connected_device, created = Device.objects.get_or_create(topology_id=topology_id,
-                                                                             name=name,
-                                                                             defaults=dict(x=0,
-                                                                                           y=0,
-                                                                                           type="switch",
-                                                                                           id=0))
-                    if created:
-                        connected_device.id = connected_device.pk
-                        connected_device.save()
-                        send_updates = True
-                        print "Created device ", connected_device
-                    break
+                logger.info("neighbor %s %s", neighbor_name, connected_device.pk)
 
-                if connected_device:
-                    for port in inner_interface.get('port', []):
-                        for port_id in port.get('id', []):
-                            if port_id['type'] == 'ifname':
-                                name = port_id['value']
-                                break
-                        connected_interface, created = Interface.objects.get_or_create(device_id=connected_device.pk,
-                                                                                       name=name,
-                                                                                       defaults=dict(id=0))
-                        if created:
-                            connected_interface.id = connected_interface.pk
-                            connected_interface.save()
-                            print "Created interface ", connected_interface
-                            send_updates = True
+                remote_interface_name = neighbor.get('port')
+
+                connected_interface, created = Interface.objects.get_or_create(device_id=connected_device.pk,
+                                                                               name=remote_interface_name,
+                                                                               defaults=dict(id=0))
+                if created:
+                    connected_interface.id = connected_interface.pk
+                    connected_interface.save()
+                    logger.info("Created interface %s", connected_interface)
+                    send_updates = True
 
                 if connected_device and connected_interface:
                     exists = Link.objects.filter(Q(from_device_id=device.pk,
@@ -721,11 +710,12 @@ class _Discovery(object):
                         link.save()
                         link.id = link.pk
                         link.save()
-                        print "Created link ", link
+                        logger.info("Created link %s", link)
                         send_updates = True
 
         if send_updates:
-            send_snapshot(Group("topology-%s" % topology_id), topology_id)
+            logger.info("onFacts send_updates")
+        #    send_snapshot(Group("topology-%s" % topology_id), topology_id)
 
 
 discovery = _Discovery()
