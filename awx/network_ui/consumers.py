@@ -8,6 +8,7 @@ from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.serializers import yaml_serialize_topology
+from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
@@ -637,6 +638,7 @@ class _Discovery(object):
         logger.info("onFacts message key %s", message['key'])
         #logger.info("onFacts message %s", pformat(message))
         device_name = message['key']
+        updates = MultipleMessage('MultipleMessage', [])
         try:
             device = Device.objects.get(topology_id=topology_id, name=device_name)
         except ObjectDoesNotExist:
@@ -663,6 +665,11 @@ class _Discovery(object):
             if created:
                 interface.id = interface.pk
                 interface.save()
+                updates.messages.append(InterfaceCreate('InterfaceCreate',
+                                                        0,
+                                                        interface.device.id,
+                                                        interface.id,
+                                                        interface.name))
                 send_updates = True
                 logger.info("Created interface %s", interface)
 
@@ -689,6 +696,11 @@ class _Discovery(object):
                 if created:
                     connected_interface.id = connected_interface.pk
                     connected_interface.save()
+                    updates.messages.append(InterfaceCreate('InterfaceCreate',
+                                                            0,
+                                                            connected_interface.device.id,
+                                                            connected_interface.id,
+                                                            connected_interface.name))
                     logger.info("Created interface %s", connected_interface)
                     send_updates = True
 
@@ -707,15 +719,25 @@ class _Discovery(object):
                                     from_interface_id=interface.pk,
                                     to_interface_id=connected_interface.pk,
                                     id=0)
+
                         link.save()
                         link.id = link.pk
                         link.save()
+                        updates.messages.append(LinkCreate('LinkCreate',
+                                                           0,
+                                                           link.id,
+                                                           link.name,
+                                                           link.from_device.id,
+                                                           link.to_device.id,
+                                                           link.from_interface.id,
+                                                           link.to_interface.id))
                         logger.info("Created link %s", link)
                         send_updates = True
 
         if send_updates:
             logger.info("onFacts send_updates")
-        #    send_snapshot(Group("topology-%s" % topology_id), topology_id)
+            channel = Group("topology-%s" % topology_id)
+            channel.send({"text": json.dumps([updates.msg_type, to_dict(updates)])})
 
 
 discovery = _Discovery()
