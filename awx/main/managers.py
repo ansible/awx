@@ -3,6 +3,7 @@
 
 import sys
 from datetime import timedelta
+import logging
 
 from django.db import models
 from django.utils.timezone import now
@@ -11,7 +12,9 @@ from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
 
-___all__ = ['HostManager', 'InstanceManager']
+___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager']
+
+logger = logging.getLogger('awx.main.managers')
 
 
 class HostManager(models.Manager):
@@ -48,6 +51,17 @@ class HostManager(models.Manager):
         return qs
 
 
+def get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping):
+    # Create IG mapping by union of all groups their instances are members of
+    ig_ig_mapping = {}
+    for group_name in ig_instance_mapping.keys():
+        ig_ig_set = set()
+        for instance_hostname in ig_instance_mapping[group_name]:
+            ig_ig_set |= instance_ig_mapping[instance_hostname]
+        ig_ig_mapping[group_name] = ig_ig_set
+    return ig_ig_mapping
+
+
 class InstanceManager(models.Manager):
     """A custom manager class for the Instance model.
 
@@ -80,7 +94,7 @@ class InstanceManager(models.Manager):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
-    def capacity_mapping(self):
+    def capacity_mapping(self, qs=None):
         """
         Returns tuple of two dictionaries that shows mutual connections by name
         for global accounting of capacity
@@ -88,24 +102,90 @@ class InstanceManager(models.Manager):
         instance_ig_mapping: {'instance_name': <set of group names instance is member of>}
         ig_ig_mapping: {'group_name': <set of group names that share instances>}
         """
-        qs = self.all().prefetch_related('rampart_groups')
+        if qs is None:
+            qs = self.all().prefetch_related('rampart_groups')
         instance_ig_mapping = {}
         ig_instance_mapping = {}
-        # Create simple dictionary of instance IG memberships
-        for instance in qs.all():
+        # Create dictionaries that represent basic m2m memberships
+        for instance in qs:
             if instance.capacity == 0:
                 continue
-            instance_ig_mapping[instance.hostname] = set()
+            instance_ig_mapping[instance.hostname] = set(
+                group.name for group in instance.rampart_groups.all()
+            )
             for group in instance.rampart_groups.all():
                 ig_instance_mapping.setdefault(group.name, set())
                 ig_instance_mapping[group.name].add(instance.hostname)
-                instance_ig_mapping[instance.hostname].add(group.name)
-        # Create IG mapping by union of all groups their instances are members of
-        ig_ig_mapping = {}
-        for group_name in ig_instance_mapping.keys():
-            ig_ig_set = set()
-            for instance_hostname in ig_instance_mapping[group_name]:
-                ig_ig_set |= instance_ig_mapping[instance_hostname]
-            ig_ig_mapping[group_name] = ig_ig_set
+        # Get IG capacity overlap mapping
+        ig_ig_mapping = get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping)
 
         return instance_ig_mapping, ig_ig_mapping
+
+
+class InstanceGroupManager(models.Manager):
+    """A custom manager class for the Instance model.
+
+    Used for global capacity calculations
+    """
+
+    def capacity_mapping(self, qs=None):
+        """
+        Another entry-point to Instance manager method by same name
+        """
+        if qs is None:
+            qs = self.all().prefetch_related('instances')
+        instance_ig_mapping = {}
+        ig_instance_mapping = {}
+        # Create dictionaries that represent basic m2m memberships
+        for group in qs:
+            ig_instance_mapping[group.name] = set(
+                instance.hostname for instance in group.instances.all() if
+                instance.capacity != 0
+            )
+            for inst in group.instances.all():
+                if inst.capacity == 0:
+                    continue
+                instance_ig_mapping.setdefault(inst.hostname, set())
+                instance_ig_mapping[inst.hostname].add(group.name)
+        # Get IG capacity overlap mapping
+        ig_ig_mapping = get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping)
+
+        return instance_ig_mapping, ig_ig_mapping
+
+    def capacity_values(self, qs=None, tasks=None, breakdown=False, graph=None):
+        """
+        Returns a dictionary of capacity values for all IGs
+        """
+        if qs is None:
+            qs = self.all().prefetch_related('instances')
+        instance_ig_mapping, ig_ig_mapping = self.capacity_mapping(qs=qs)
+
+        if tasks is None:
+            tasks = self.model.unifiedjob_set.related.related_model.objects.filter(
+                status__in=('running', 'waiting'))
+
+        if graph is None:
+            graph = {group.name: {} for group in qs}
+        for group_name in graph:
+            graph[group_name]['consumed_capacity'] = 0
+            if breakdown:
+                graph[group_name]['committed_capacity'] = 0
+                graph[group_name]['running_capacity'] = 0
+        for t in tasks:
+            # TODO: dock capacity for isolated job management tasks running in queue
+            impact = t.task_impact
+            if t.status == 'waiting' or not t.execution_node:
+                # Subtract capacity from any peer groups that share instances
+                for group_name in ig_ig_mapping[t.instance_group.name]:
+                    graph[group_name]['consumed_capacity'] += impact
+                    if breakdown:
+                        graph[group_name]['committed_capacity'] += impact
+            elif t.status == 'running':
+                # Subtract capacity from all groups that contain the instance
+                for group_name in instance_ig_mapping[t.execution_node]:
+                    graph[group_name]['consumed_capacity'] += impact
+                    if breakdown:
+                        graph[group_name]['running_capacity'] += impact
+            else:
+                logger.error('Programming error, %s not in ["running", "waiting"]', t.log_format)
+        return graph

@@ -3564,6 +3564,7 @@ class InstanceSerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
@@ -3581,17 +3582,37 @@ class InstanceGroupSerializer(BaseSerializer):
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
 
+    def get_jobs_qs(self):
+        # Store running jobs queryset in context, so it will be shared in ListView
+        if 'running_jobs' not in self.context:
+            self.context['running_jobs'] = UnifiedJob.objects.filter(
+                status__in=('running', 'waiting'))
+        return self.context['running_jobs']
+
+    def get_capacity_dict(self):
+        # Store capacity values (globally computed) in the context
+        if 'capacity_map' not in self.context:
+            ig_qs = None
+            if self.parent:  # Is ListView:
+                ig_qs = self.parent.instance
+            self.context['capacity_map'] = InstanceGroup.objects.capacity_values(
+                qs=ig_qs, tasks=self.get_jobs_qs(), breakdown=True)
+        return self.context['capacity_map']
+
     def get_consumed_capacity(self, obj):
-        return obj.consumed_capacity
+        return self.get_capacity_dict()[obj.name]['consumed_capacity']
 
     def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+        if not obj.capacity:
             return 0.0
         else:
-            return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
+            return float("{0:.2f}".format(
+                ((float(obj.capacity) - float(self.get_consumed_capacity(obj))) / (float(obj.capacity))) * 100)
+            )
 
     def get_jobs_running(self, obj):
-        return UnifiedJob.objects.filter(instance_group=obj, status__in=('running', 'waiting',)).count()
+        jobs_qs = self.get_jobs_qs()
+        return sum(1 for job in jobs_qs if job.instance_group_id == obj.id)
 
     def get_instances(self, obj):
         return obj.instances.count()

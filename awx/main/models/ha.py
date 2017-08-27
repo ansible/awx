@@ -11,7 +11,7 @@ from django.utils.timezone import now, timedelta
 from solo.models import SingletonModel
 
 from awx.api.versioning import reverse
-from awx.main.managers import InstanceManager
+from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
@@ -66,6 +66,8 @@ class Instance(models.Model):
 
 class InstanceGroup(models.Model):
     """A model representing a Queue/Group of AWX Instances."""
+    objects = InstanceGroupManager()
+
     name = models.CharField(max_length=250, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -89,12 +91,7 @@ class InstanceGroup(models.Model):
 
     @property
     def capacity(self):
-        return sum([x[0] for x in self.instances.values_list('capacity')])
-
-    @property
-    def consumed_capacity(self):
-        return sum(x.task_impact for x in UnifiedJob.objects.filter(instance_group=self,
-                                                                    status__in=('running', 'waiting')))
+        return sum([inst.capacity for inst in self.instances.all()])
 
     class Meta:
         app_label = 'main'
