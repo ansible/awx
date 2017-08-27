@@ -91,6 +91,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     var device_map = {};
     var inner_group = null;
     var c_messages = [];
+    var membership_old_new = null;
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -218,8 +219,16 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                  inner_group.type));
     }
     for(i=0; i< group.groups.length; i++) {
-        group.groups[i].update_membership(scope.devices, scope.groups);
+        membership_old_new = group.groups[i].update_membership(scope.devices, scope.groups);
+        c_messages.push(new messages.GroupMembership(controller.scope.client_id,
+                                                     group.groups[i].id,
+                                                     membership_old_new[2]));
     }
+
+    membership_old_new = group.update_membership(scope.devices, scope.groups);
+    c_messages.push(new messages.GroupMembership(controller.scope.client_id,
+                                                 group.id,
+                                                 membership_old_new[2]));
 
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
 };
