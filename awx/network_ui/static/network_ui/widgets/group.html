@@ -1,4 +1,5 @@
 <g ng-if="!hide_groups || item.type == 'site'">
+<g ng-if="current_scale < 5">
 <g ng-if="current_scale > 0.5 || item.type == 'site' || (item.type == 'rack' && current_scale > 0.1)" >
 
 <g ng-if="item.moving">
@@ -128,4 +129,5 @@
 </g>
 </g>
 
+</g>
 </g>
