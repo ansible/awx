@@ -1143,6 +1143,11 @@ class InventorySourceOptions(BaseModel):
         # from the instance metadata instead of those explicitly provided.
         elif self.source in CLOUD_PROVIDERS and self.source != 'ec2':
             raise ValidationError(_('Credential is required for a cloud source.'))
+        elif self.source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
+            raise ValidationError(_(
+                'Credentials of type machine, source control, insights and vault are '
+                'disallowed for custom inventory sources.'
+            ))
         return cred
 
     def clean_source_regions(self):
@@ -1400,7 +1405,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 self.source == 'scm' and \
                 InventorySource.objects.filter(
                     Q(inventory=self.inventory,
-                        update_on_project_update=True, source='scm') & 
+                        update_on_project_update=True, source='scm') &
                     ~Q(id=self.id)).exists():
             raise ValidationError(_("More than one SCM-based inventory source with update on project update per-inventory not allowed."))
         return self.update_on_project_update
@@ -1409,7 +1414,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if self.update_on_project_update is True and \
                 self.source == 'scm' and \
                 self.update_on_launch is True:
-            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "        
+            raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "
                                     "Instead, configure the corresponding source project to update on launch."))
         return self.update_on_launch
 
