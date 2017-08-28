@@ -1550,6 +1550,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
                             html += "<div id=\"" + itm + "_tab\" ";
+                            html += (this.form.related[itm].ngIf) ? ` ng-if="${this.form.related[itm].ngIf}" ` :  "";
                             html += collection.awToolTip ? "aw-tool-tip=\"" + collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " : "";
                             html += "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
