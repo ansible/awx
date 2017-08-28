@@ -834,6 +834,10 @@ class InventoryUpdateAccess(BaseAccess):
     def get_queryset(self):
         qs = InventoryUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory_source__inventory')
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group'
+        )
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
 
@@ -1080,11 +1084,17 @@ class ProjectUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
-        qs = ProjectUpdate.objects.distinct()
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                project__in=Project.accessible_pk_qs(self.user, 'read_role')
+            )
         qs = qs.select_related('created_by', 'modified_by', 'project')
-        project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
-        return qs.filter(project_id__in=project_ids)
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group'
+        )
+        return qs
 
     @check_superuser
     def can_cancel(self, obj):
@@ -1304,7 +1314,11 @@ class JobAccess(BaseAccess):
         qs = self.model.objects
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'job_template')
-        qs = qs.prefetch_related('unified_job_template')
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
+        )
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
