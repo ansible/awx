@@ -20,7 +20,7 @@ class TestCleanupInconsistentCeleryTasks():
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {}))
     @mock.patch.object(TaskManager, 'get_running_tasks', return_value=({'host1': [Job(id=2), Job(id=3),]}, []))
-    @mock.patch.object(InstanceGroup.objects, 'all', return_value=[])
+    @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
     @mock.patch.object(Instance.objects, 'get', side_effect=Instance.DoesNotExist)
     @mock.patch('awx.main.scheduler.logger')
     def test_instance_does_not_exist(self, logger_mock, *args):
@@ -36,7 +36,7 @@ class TestCleanupInconsistentCeleryTasks():
 
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {'host1': []}))
-    @mock.patch.object(InstanceGroup.objects, 'all', return_value=[])
+    @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
     @mock.patch.object(TaskManager, 'get_running_tasks')
     @mock.patch('awx.main.scheduler.logger')
     def test_save_failed(self, logger_mock, get_running_tasks, *args):

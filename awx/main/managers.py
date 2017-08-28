@@ -58,6 +58,8 @@ def get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping):
         ig_ig_set = set()
         for instance_hostname in ig_instance_mapping[group_name]:
             ig_ig_set |= instance_ig_mapping[instance_hostname]
+        else:
+            ig_ig_set.add(group_name)  # Group contains no instances, return self
         ig_ig_mapping[group_name] = ig_ig_set
     return ig_ig_mapping
 
@@ -94,33 +96,6 @@ class InstanceManager(models.Manager):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
-    def capacity_mapping(self, qs=None):
-        """
-        Returns tuple of two dictionaries that shows mutual connections by name
-        for global accounting of capacity
-
-        instance_ig_mapping: {'instance_name': <set of group names instance is member of>}
-        ig_ig_mapping: {'group_name': <set of group names that share instances>}
-        """
-        if qs is None:
-            qs = self.all().prefetch_related('rampart_groups')
-        instance_ig_mapping = {}
-        ig_instance_mapping = {}
-        # Create dictionaries that represent basic m2m memberships
-        for instance in qs:
-            if instance.capacity == 0:
-                continue
-            instance_ig_mapping[instance.hostname] = set(
-                group.name for group in instance.rampart_groups.all()
-            )
-            for group in instance.rampart_groups.all():
-                ig_instance_mapping.setdefault(group.name, set())
-                ig_instance_mapping[group.name].add(instance.hostname)
-        # Get IG capacity overlap mapping
-        ig_ig_mapping = get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping)
-
-        return instance_ig_mapping, ig_ig_mapping
-
 
 class InstanceGroupManager(models.Manager):
     """A custom manager class for the Instance model.
@@ -152,11 +127,20 @@ class InstanceGroupManager(models.Manager):
 
         return instance_ig_mapping, ig_ig_mapping
 
+    @staticmethod
+    def zero_out_group(graph, name, breakdown):
+        if name not in graph:
+            graph[name] = {}
+        graph[name]['consumed_capacity'] = 0
+        if breakdown:
+            graph[name]['committed_capacity'] = 0
+            graph[name]['running_capacity'] = 0
+
     def capacity_values(self, qs=None, tasks=None, breakdown=False, graph=None):
         """
         Returns a dictionary of capacity values for all IGs
         """
-        if qs is None:
+        if qs is None:  # Optionally BYOQS - bring your own queryset
             qs = self.all().prefetch_related('instances')
         instance_ig_mapping, ig_ig_mapping = self.capacity_mapping(qs=qs)
 
@@ -167,22 +151,41 @@ class InstanceGroupManager(models.Manager):
         if graph is None:
             graph = {group.name: {} for group in qs}
         for group_name in graph:
-            graph[group_name]['consumed_capacity'] = 0
-            if breakdown:
-                graph[group_name]['committed_capacity'] = 0
-                graph[group_name]['running_capacity'] = 0
+            self.zero_out_group(graph, group_name, breakdown)
         for t in tasks:
             # TODO: dock capacity for isolated job management tasks running in queue
             impact = t.task_impact
             if t.status == 'waiting' or not t.execution_node:
                 # Subtract capacity from any peer groups that share instances
-                for group_name in ig_ig_mapping[t.instance_group.name]:
+                if not t.instance_group:
+                    logger.warning('Excluded %s from capacity algorithm '
+                                   '(missing instance_group).', t.log_format)
+                    impacted_groups = []
+                elif t.instance_group.name not in ig_ig_mapping:
+                    # Waiting job in group with 0 capacity has no collateral impact
+                    impacted_groups = [t.instance_group.name]
+                else:
+                    impacted_groups = ig_ig_mapping[t.instance_group.name]
+                for group_name in impacted_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
                     if breakdown:
                         graph[group_name]['committed_capacity'] += impact
             elif t.status == 'running':
                 # Subtract capacity from all groups that contain the instance
-                for group_name in instance_ig_mapping[t.execution_node]:
+                if t.execution_node not in instance_ig_mapping:
+                    logger.warning('Detected %s running inside lost instance, '
+                                   'may still be waiting for reaper.', t.log_format)
+                    if t.instance_group:
+                        impacted_groups = [t.instance_group.name]
+                    else:
+                        impacted_groups = []
+                else:
+                    impacted_groups = instance_ig_mapping[t.execution_node]
+                for group_name in impacted_groups:
+                    if group_name not in graph:
+                        self.zero_out_group(graph, group_name, breakdown)
                     graph[group_name]['consumed_capacity'] += impact
                     if breakdown:
                         graph[group_name]['running_capacity'] += impact

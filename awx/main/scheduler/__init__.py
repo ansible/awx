@@ -38,7 +38,7 @@ class TaskManager():
 
     def __init__(self):
         self.graph = dict()
-        for rampart_group in InstanceGroup.objects.all():
+        for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(graph=DependencyGraph(rampart_group.name),
                                                   capacity_total=rampart_group.capacity,
                                                   consumed_capacity=0)
