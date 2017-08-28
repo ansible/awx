@@ -377,9 +377,11 @@ class InstanceAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return Instance.objects.all().distinct()
+            qs = Instance.objects.all().distinct()
         else:
-            return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+            qs = Instance.objects.filter(
+                rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+        return qs.prefetch_related('rampart_groups')
 
     def can_add(self, data):
         return False
@@ -397,9 +399,11 @@ class InstanceGroupAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return InstanceGroup.objects.all()
+            qs = InstanceGroup.objects.all()
         else:
-            return InstanceGroup.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role'))
+            qs = InstanceGroup.objects.filter(
+                organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
+        return qs.prefetch_related('instances')
 
     def can_add(self, data):
         return False
