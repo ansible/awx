@@ -28,6 +28,7 @@ export default ['jobResultsService', 'parseStdoutService', function(jobResultsSe
                 mungedEvent.stdout = parseStdoutService.parseStdout(event);
                 mungedEvent.start_line = event.start_line + 1;
                 mungedEvent.end_line = event.end_line + 1;
+                mungedEvent.actual_end_line = parseStdoutService.actualEndLine(event) + 1;
                 mungedEvent.changes.push('stdout');
             }
 

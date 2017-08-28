@@ -288,7 +288,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var linesInPane = [];
 
     function addToLinesInPane(event) {
-        var arr = _.range(event.start_line, event.end_line);
+        var arr = _.range(event.start_line, event.actual_end_line);
         linesInPane = linesInPane.concat(arr);
         linesInPane = linesInPane.sort(function(a, b) {
             return a - b;
@@ -313,7 +313,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             .append($compile(event
                 .stdout)($scope.events[event
                     .counter]));
-    };
+    }
 
     function putInCorrectPlace(event) {
         if (linesInPane.length) {
