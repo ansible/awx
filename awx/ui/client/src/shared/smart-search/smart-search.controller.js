@@ -236,7 +236,14 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                                     return sourceValue;
                                 }
                                 else {
-                                    return object[key] + "%20and%20" + sourceValue;
+                                    let singleSearchParamKeys = object[key].split("%20and%20");
+
+                                    if(_.includes(singleSearchParamKeys, sourceValue)) {
+                                        return object[key];
+                                    }
+                                    else {
+                                        return object[key] + "%20and%20" + sourceValue;
+                                    }
                                 }
                             }
                             // Start the array of keys
