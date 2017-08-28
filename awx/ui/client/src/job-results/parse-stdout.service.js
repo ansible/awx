@@ -258,6 +258,9 @@ export default ['$log', 'moment', 'i18n', function($log, moment, i18n){
 
             return _.zip(lineNums, lines).slice(0, -1);
         },
+        actualEndLine: function(event) {
+            return event.start_line + this.getLineArr(event).length;
+        },
         // public function that provides the parsed stdout line, given a
         // job_event
         parseStdout: function(event){

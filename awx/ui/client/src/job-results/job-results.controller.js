@@ -285,6 +285,51 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     }
 
     // EVENT STUFF BELOW
+    var linesInPane = [];
+
+    function addToLinesInPane(event) {
+        var arr = _.range(event.start_line, event.actual_end_line);
+        linesInPane = linesInPane.concat(arr);
+        linesInPane = linesInPane.sort(function(a, b) {
+            return a - b;
+        });
+    }
+
+    function appendToBottom (event){
+        // if we get here then the event type was either a
+        // header line, recap line, or one of the additional
+        // event types, so we append it to the bottom.
+        // These are the event types for captured
+        // stdout not directly related to playbook or runner
+        // events:
+        // (0, 'debug', _('Debug'), False),
+        // (0, 'verbose', _('Verbose'), False),
+        // (0, 'deprecated', _('Deprecated'), False),
+        // (0, 'warning', _('Warning'), False),
+        // (0, 'system_warning', _('System Warning'), False),
+        // (0, 'error', _('Error'), True),
+        angular
+            .element(".JobResultsStdOut-stdoutContainer")
+            .append($compile(event
+                .stdout)($scope.events[event
+                    .counter]));
+    }
+
+    function putInCorrectPlace(event) {
+        if (linesInPane.length) {
+            for (var i = linesInPane.length - 1; i >= 0; i--) {
+                if (event.start_line > linesInPane[i]) {
+                    $(`.line_num_${linesInPane[i]}`)
+                        .after($compile(event
+                            .stdout)($scope.events[event
+                                .counter]));
+                    i = -1;
+                }
+            }
+        } else {
+            appendToBottom(event);
+        }
+    }
 
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
@@ -338,26 +383,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
 
                 if(change === 'stdout'){
-                    var appendToBottom = function(mungedEvent){
-                        // if we get here then the event type was either a
-                        // header line, recap line, or one of the additional
-                        // event types, so we append it to the bottom.
-                        // These are the event types for captured
-                        // stdout not directly related to playbook or runner
-                        // events:
-                        // (0, 'debug', _('Debug'), False),
-                        // (0, 'verbose', _('Verbose'), False),
-                        // (0, 'deprecated', _('Deprecated'), False),
-                        // (0, 'warning', _('Warning'), False),
-                        // (0, 'system_warning', _('System Warning'), False),
-                        // (0, 'error', _('Error'), True),
-                        angular
-                            .element(".JobResultsStdOut-stdoutContainer")
-                            .append($compile(mungedEvent
-                                .stdout)($scope.events[mungedEvent
-                                    .counter]));
-                    };
-
                     if (!$scope.events[mungedEvent.counter]) {
                         // line hasn't been put in the pane yet
 
@@ -375,6 +400,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .after($compile(mungedEvent
                                     .stdout)($scope.events[mungedEvent
                                         .counter]));
+                            addToLinesInPane(mungedEvent);
                         } else {
                             var putIn;
                             var classList = $("div",
@@ -396,30 +422,33 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                             var isDup = false;
 
                             if ($(".header_" + putIn + ",." + putIn).length === 0) {
-                                appendToBottom(mungedEvent);
+                                putInCorrectPlace(mungedEvent);
+                                addToLinesInPane(mungedEvent);
                             } else {
                                 $(".header_" + putIn + ",." + putIn)
                                     .each((i, v) => {
                                         if (angular.element(v).scope()
                                             .event.start_line < mungedEvent
                                             .start_line) {
-                                            putAfter = v;
+                                                putAfter = v;
                                         } else if (angular.element(v).scope()
                                             .event.start_line === mungedEvent
                                             .start_line) {
-                                            isDup = true;
-                                            return false;
+                                                isDup = true;
+                                                return false;
                                         } else if (angular.element(v).scope()
                                             .event.start_line > mungedEvent
                                             .start_line) {
-                                            return false;
+                                                return false;
                                         }  else {
                                             appendToBottom(mungedEvent);
+                                            addToLinesInPane(mungedEvent);
                                         }
                                     });
                             }
 
-                            if (!isDup) {
+                            if (!isDup && putAfter) {
+                                addToLinesInPane(mungedEvent);
                                 $(putAfter).after($compile(mungedEvent
                                     .stdout)($scope.events[mungedEvent
                                         .counter]));
