@@ -2525,7 +2525,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         if obj.job_template:
             res['job_template'] = self.reverse('api:job_template_detail',
                                                kwargs={'pk': obj.job_template.pk})
-        if obj.can_start or True:
+        if (obj.can_start or True) and self.version == 1:  # TODO: remove in 3.3
             res['start'] = self.reverse('api:job_start', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:job_cancel', kwargs={'pk': obj.pk})
