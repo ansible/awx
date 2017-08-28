@@ -50,6 +50,7 @@ export default ['templateUrl', function(templateUrl) {
                         hostList.well = false;
                         delete hostList.fields.inventory.ngClick;
                         hostList.fields.inventory.ngBind = 'host.summary_fields.inventory.name';
+                        hostList.emptyListText = 'You must have access to at least one host in order to create a smart inventory host filter';
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'host-filter-modal-body',
