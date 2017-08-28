@@ -37,7 +37,7 @@ function(i18n) {
                                " set by the inventory sync process.") +
                         "</p>",
                     dataTitle: i18n._('Host Enabled'),
-                    ngDisabled: 'host.has_inventory_sources'
+                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources'
                 }
             },
             fields: {
@@ -78,7 +78,8 @@ function(i18n) {
                         '<p>' + i18n.sprintf(i18n._('View YAML examples at %s'), '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a>') + '</p>',
                     dataTitle: i18n._('Host Variables'),
                     dataPlacement: 'right',
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 

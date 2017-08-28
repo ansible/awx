@@ -33,7 +33,8 @@ import inventoryHosts from './related/hosts/related-host.route';
 import smartInventoryHosts from './smart-inventory/smart-inventory-hosts.route';
 import inventoriesList from './inventories.route';
 import inventoryHostsAdd from './related/hosts/add/host-add.route';
-import inventoryHostsEdit from './related/hosts/edit/host-edit.route';
+import inventoryHostsEdit from './related/hosts/edit/standard-host-edit.route';
+import smartInventoryHostsEdit from './related/hosts/edit/smart-host-edit.route';
 import ansibleFactsRoute from '../shared/ansible-facts/ansible-facts.route';
 import insightsRoute from './insights/insights.route';
 import inventorySourcesCredentialRoute from './related/sources/lookup/sources-lookup-credential.route';
@@ -322,6 +323,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(smartInventoryHosts),
                             stateExtender.buildDefinition(inventoryHostsAdd),
                             stateExtender.buildDefinition(inventoryHostsEdit),
+                            stateExtender.buildDefinition(smartInventoryHostsEdit),
                             stateExtender.buildDefinition(hostNestedGroupsRoute),
                             stateExtender.buildDefinition(inventorySourceListRoute),
                             stateExtender.buildDefinition(inventorySourceAddRoute),
