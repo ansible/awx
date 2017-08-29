@@ -168,6 +168,10 @@ export default [
             populateLogAggregator(flag);
         });
 
+        $scope.$on('LOG_AGGREGATOR_PROTOCOL_populated', function(e, data, flag) {
+            populateLogAggregator(flag);
+        });
+
         function populateLogAggregator(flag){
             if($scope.$parent.LOG_AGGREGATOR_TYPE !== null) {
                 $scope.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.LOG_AGGREGATOR_TYPE });
