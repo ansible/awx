@@ -61,10 +61,7 @@ function(i18n, InventoryCompletedJobsList) {
                 list: 'OrganizationList',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                awRequiredWhen: {
-                    reqExpression: "organizationrequired",
-                    init: "true"
-                },
+                required: true,
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },

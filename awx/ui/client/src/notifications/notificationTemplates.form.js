@@ -47,10 +47,7 @@ export default ['i18n', function(i18n) {
                 basePath: 'organizations',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                awRequiredWhen: {
-                    reqExpression: "organizationrequired",
-                    init: "true"
-                },
+                required: true,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notification_type: {
