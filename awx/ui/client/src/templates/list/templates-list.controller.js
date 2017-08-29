@@ -226,10 +226,11 @@ export default ['$scope', '$rootScope',
                                 TemplateCopyService.copyWorkflow(template.id)
                                 .then(function(result) {
                                     $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: result.data.id}, {reload: true});
-                                }, function (data) {
+                                })
+                                .catch(function (response) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Call to copy template failed. POST returned status: ' + status });
+                                    ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                                        msg: 'Call to copy workflow job template failed. Return status: ' + response.status + '.'});
                                 });
                             }
                             else {
