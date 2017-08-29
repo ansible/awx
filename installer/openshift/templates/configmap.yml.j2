@@ -35,6 +35,13 @@ data:
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
     EMAIL_USE_TLS = False
+
+    LOGGING['handlers']['console'] = {
+        '()': 'logging.StreamHandler',
+        'level': 'DEBUG',
+        'formatter': 'simple',
+    }
+
     LOGGING['loggers']['django.request']['handlers'] = ['console']
     LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
     LOGGING['loggers']['awx']['handlers'] = ['console']

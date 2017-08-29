@@ -21,14 +21,28 @@
 - name: Mark Openshift User as Admin
   shell: "oc adm policy add-role-to-user admin {{ openshift_user }} -n {{ awx_openshift_project }}"
 
+- name: Get docker registry password from oc if needed
+  block:
+    - name: Set docker registry password
+      shell: oc whoami -t
+      register: docker_registry_password_shell
+    - name: Set docker registry password
+      set_fact:
+        docker_registry_password: "{{ docker_registry_password_shell.stdout }}"
+  when: docker_registry_password is not defined
+
 - name: Authenticate with Docker registry
   docker_login:
     registry: "{{ docker_registry }}"
     username: "{{ docker_registry_username }}"
     password: "{{ docker_registry_password }}"
     reauthorize: yes
-  when: docker_registry is defined
+  when: docker_registry is defined and docker_registry_password is defined
   delegate_to: localhost
+
+- name: Wait for Openshift
+  pause:
+    seconds: 30
 
 - name: Tag and push web image to registry
   docker_image:
@@ -38,6 +52,10 @@
     push: yes
   when: docker_registry is defined
   delegate_to: localhost
+
+- name: Wait for openshift
+  pause:
+    seconds: 10
 
 - name: Tag and push task image to registry
   docker_image:

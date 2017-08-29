@@ -2,6 +2,13 @@
 
 import os
 
+
+def get_secret():
+    if os.path.exists("/etc/tower/SECRET_KEY"):
+        return file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    return os.getenv("SECRET_KEY", "privateawx"),
+
+
 ADMINS = ()
 
 STATIC_ROOT = '/var/lib/awx/public/static'
@@ -10,13 +17,24 @@ PROJECTS_ROOT = '/var/lib/awx/projects'
 
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
 
-SECRET_KEY = file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+SECRET_KEY = get_secret()
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_API_URL = 'http://127.0.0.1:80'
+INTERNAL_API_URL = 'http://awxweb:8052'
 
 AWX_TASK_ENV['HOME'] = '/var/lib/awx'
+
+# Container environments don't like chroots
+AWX_PROOT_ENABLED = False
+
+
+CLUSTER_HOST_ID = "awx"
+SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+CELERY_QUEUES += (Queue(CLUSTER_HOST_ID, Exchange(CLUSTER_HOST_ID), routing_key=CLUSTER_HOST_ID),)
+CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+CELERY_ROUTES['awx.main.tasks.purge_old_stdout_files'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+
 
 ###############################################################################
 # EMAIL SETTINGS
@@ -32,6 +50,12 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+LOGGING['handlers']['console'] = {
+    '()': 'logging.StreamHandler',
+    'level': 'DEBUG',
+    'formatter': 'simple',
+}
+
 LOGGING['loggers']['django.request']['handlers'] = ['console']
 LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
 LOGGING['loggers']['awx']['handlers'] = ['console']
@@ -39,11 +63,18 @@ LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['co
 LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
 LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
 LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
-LOGGING['loggers']['awx.main.commands.run_fact_cache_receiver']['handlers'] = ['console']
 LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 LOGGING['loggers']['social']['handlers'] = ['console']
 LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
 LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
+LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
+LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['fact_receiver'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 
 DATABASES = {
     'default': {
