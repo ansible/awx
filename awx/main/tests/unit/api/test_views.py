@@ -220,8 +220,8 @@ class TestHostInsights():
 class TestInventoryHostsList(object):
 
     def test_host_list_smart_inventory(self, mocker):
-        Inventory = namedtuple('Inventory', ['kind', 'host_filter', 'hosts'])
-        obj = Inventory(kind='smart', host_filter='localhost', hosts=HostManager())
+        Inventory = namedtuple('Inventory', ['kind', 'host_filter', 'hosts', 'organization_id'])
+        obj = Inventory(kind='smart', host_filter='localhost', hosts=HostManager(), organization_id=None)
         obj.hosts.instance = obj
 
         with mock.patch.object(InventoryHostsList, 'get_parent_object', return_value=obj):

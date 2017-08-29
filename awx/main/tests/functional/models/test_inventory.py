@@ -10,6 +10,7 @@ from awx.main.models import (
     InventorySource,
     InventoryUpdate,
 )
+from awx.main.utils.filters import SmartFilter
 
 
 @pytest.mark.django_db
@@ -109,3 +110,17 @@ class TestHostManager:
                                     organization=organization,
                                     host_filter='inventory_sources__source=ec2')
         assert len(smart_inventory.hosts.all()) == 0
+
+    def test_host_distinctness(self, setup_inventory_groups, organization):
+        """
+        two criteria would both yield the same host, check that we only get 1 copy here
+        """
+        assert (
+            list(SmartFilter.query_from_string('name=single_host or name__startswith=single_')) ==
+            [Host.objects.get(name='single_host')]
+        )
+
+    # Things we can not easily test due to SQLite backend:
+    # 2 organizations with host of same name only has 1 entry in smart inventory
+    # smart inventory in 1 organization does not include host from another
+    # smart inventory correctly returns hosts in filter in same organization
