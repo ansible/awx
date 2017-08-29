@@ -446,7 +446,7 @@ register(
 register(
     'LOG_AGGREGATOR_PROTOCOL',
     field_class=fields.ChoiceField,
-    choices=['https', 'tcp', 'udp'],
+    choices=[('https', 'HTTPS'), ('tcp', 'TCP'), ('udp', 'UDP')],
     default='https',
     label=_('Logging Aggregator Protocol'),
     help_text=_('Protocol used to communicate with log aggregator.'),
