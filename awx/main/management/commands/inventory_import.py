@@ -83,6 +83,7 @@ class AnsibleInventoryLoader(object):
         env = dict(os.environ.items())
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = '1'
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
         for python_ver in ["python2.7", "python2.6"]:
