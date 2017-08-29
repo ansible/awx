@@ -8,7 +8,14 @@ export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
     function($scope, qs, InventoryHostsStrings) {
         $scope.hostFilterTags = [];
 
-        $scope.filterTooltip = $scope.fieldIsDisabled ? '' : InventoryHostsStrings.get('smartinventories.TOOLTIP');
+        $scope.$watch('organization', function(){
+            if($scope.hasEditPermissions) {
+                $scope.filterTooltip = $scope.organization ? InventoryHostsStrings.get('smartinventories.hostfilter.INSTRUCTIONS') : InventoryHostsStrings.get('smartinventories.hostfilter.MISSING_ORG');
+            }
+            else {
+                $scope.filterTooltip = InventoryHostsStrings.get('smartinventories.hostfilter.MISSING_PERMISSIONS');
+            }
+        });
 
         $scope.$watch('hostFilter', function(){
             $scope.hostFilterTags = [];

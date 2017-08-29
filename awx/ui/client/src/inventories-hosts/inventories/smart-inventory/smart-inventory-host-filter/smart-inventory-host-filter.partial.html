@@ -1,10 +1,10 @@
 <div class="input-group Form-mixedInputGroup">
     <span class="input-group-btn Form-variableHeightButtonGroup">
-        <button type="button" class="Form-lookupButton Form-lookupButton--variableHeight btn btn-default" ng-click="openHostFilterModal()" ng-disabled="fieldIsDisabled">
+        <button type="button" class="Form-lookupButton Form-lookupButton--variableHeight btn btn-default" ng-click="openHostFilterModal()" ng-disabled="!hasEditPermissions || !organization">
             <i class="fa fa-search"></i>
         </button>
     </span>
-    <span class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup LabelList-lookupTags LabelList-lookupTags--disabled" aw-tool-tip="{{::filterTooltip}}" data-placement="top">
+    <span class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup LabelList-lookupTags LabelList-lookupTags--disabled" aw-tool-tip="{{filterTooltip}}" data-tip-watch="filterTooltip" data-placement="top">
         <span class="LabelList-tag" ng-repeat="tag in hostFilterTags">
             <span class="LabelList-name">{{tag}}</span>
         </span>
