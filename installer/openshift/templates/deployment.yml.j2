@@ -74,3 +74,20 @@ spec:
       nodePort: {{ awx_node_port }}
   selector:
     name: awx-web-deploy
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_openshift_project }}
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge
+  to:
+    kind: Service
+    name: awx-web-svc
+    weight: 100
+  wildcardPolicy: None
