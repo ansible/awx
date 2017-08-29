@@ -5,6 +5,7 @@ export default ['i18n', function(i18n) {
         iterator: 'instance_group',
         editTitle: i18n._('INSTANCE GROUPS'),
         listTitle: i18n._('INSTANCE GROUPS'),
+        emptyListText: i18n._('THERE ARE CURRENTLY NO INSTANCE GROUPS DEFINED'),
         index: false,
         hover: false,
 
