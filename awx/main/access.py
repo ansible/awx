@@ -510,6 +510,8 @@ class OrganizationAccess(BaseAccess):
     I can change or delete organizations when:
      - I am a superuser.
      - I'm an admin of that organization.
+    I can associate/disassociate instance groups when:
+     - I am a superuser.
     '''
 
     model = Organization
@@ -541,7 +543,7 @@ class OrganizationAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.admin_role:
+            if self.user.is_superuser:
                 return True
             return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
