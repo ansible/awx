@@ -20,7 +20,7 @@ from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
 from dateutil import parser
 from dateutil.tz import tzutc
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, smart_str
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -785,10 +785,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
                     host.insights_system_id = ansible_facts['insights']['system_id']
                 host.save()
-                system_tracking_logger.info('New fact for inventory {} host {}'.format(host.inventory.name, host.name),
-                                            extra=dict(inventory_id=host.inventory.id, host_name=host.name,
-                                                       ansible_facts=host.ansible_facts,
-                                                       ansible_facts_modified=host.ansible_facts_modified.isoformat()))
+                system_tracking_logger.info(
+                    'New fact for inventory {} host {}'.format(
+                        smart_str(host.inventory.name), smart_str(host.name)),
+                    extra=dict(inventory_id=host.inventory.id, host_name=host.name,
+                               ansible_facts=host.ansible_facts,
+                               ansible_facts_modified=host.ansible_facts_modified.isoformat()))
 
 
 class JobHostSummary(CreatedModifiedModel):
