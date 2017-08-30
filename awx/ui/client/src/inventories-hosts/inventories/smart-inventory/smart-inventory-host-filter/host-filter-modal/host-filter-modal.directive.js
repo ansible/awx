@@ -2,7 +2,8 @@ export default ['templateUrl', function(templateUrl) {
     return {
         restrict: 'E',
         scope: {
-            hostFilter: '='
+            hostFilter: '=',
+            organization: '='
         },
         templateUrl: templateUrl('inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal'),
         link: function(scope, element) {
@@ -27,12 +28,14 @@ export default ['templateUrl', function(templateUrl) {
 
                 $scope.host_default_params = {
                     order_by: 'name',
-                    page_size: 5
+                    page_size: 5,
+                    inventory__organization: null
                 };
 
                 $scope.host_queryset = _.merge({
                     order_by: 'name',
-                    page_size: 5
+                    page_size: 5,
+                    inventory__organization: $scope.organization
                 }, $scope.hostFilter ? $scope.hostFilter : {});
 
                 // Fire off the initial search
