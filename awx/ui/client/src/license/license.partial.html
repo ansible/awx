@@ -100,7 +100,7 @@
 
 				<form id="License-form" name="uploadlicense">
 					<div class="License-subTitleText">
-						<span class="foobar">*</span>
+						<span class="Form-requiredAsterisk">*</span>
 						<translate>License File</translate>
 					</div>
 					<div class="input-group License-file--container">
@@ -108,8 +108,8 @@
                         <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
-					<div class="License-subTitleText"> 
-						<span class="foobar">*</span>
+					<div class="License-subTitleText">
+						<span class="Form-requiredAsterisk">*</span>
 						<translate>End User License Agreement</translate>
 					</div>
 					<div id="eula_notice"

@@ -639,7 +639,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
 
-                        html += `${field.required ? '<span class="foobar">*</span>' : ''}`;
+                        html += `${field.required ? '<span class="Form-requiredAsterisk">*</span>' : ''}`;
 
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {

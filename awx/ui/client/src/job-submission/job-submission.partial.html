@@ -100,7 +100,7 @@
                         <form name="forms.credentialpasswords" autocomplete="off" novalidate>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_password_required">
                                 <label for="ssh_password" class="Form-inputLabelContainer">
-                                    <span class="foobar">*</span>
+                                    <span class="Form-requiredAsterisk">*</span>
                                     <span class="Form-inputLabel" translate> Password</span>
                                 </label>
                                 <div class="input-group">
@@ -114,7 +114,7 @@
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ssh_key_unlock_required">
                                 <label for="ssh_key_unlock" class="Form-inputLabelContainer">
-                                    <span class="foobar">*</span>
+                                    <span class="Form-requiredAsterisk">*</span>
                                     <span class="Form-inputLabel" translate> Private Key Passphrase</span>
                                 </label>
                                 <div class="input-group">
@@ -128,7 +128,7 @@
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="become_password_required">
                                 <label for="become_password" class="Form-inputLabelContainer">
-                                    <span class="foobar">*</span>
+                                    <span class="Form-requiredAsterisk">*</span>
                                     <span class="Form-inputLabel" translate> Privilege Escalation Password</span>
                                 </label>
                                 <div class="input-group">
@@ -142,7 +142,7 @@
                             </div>
                             <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="vault_password_required">
                                 <label for="vault_password" class="Form-inputLabelContainer">
-                                    <span class="foobar">*</span>
+                                    <span class="Form-requiredAsterisk">*</span>
                                     <span class="Form-inputLabel" translate> Vault Password</span>
                                 </label>
                                 <div class="input-group">
@@ -179,7 +179,7 @@
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_verbosity_on_launch">
                         <label for="verbosity" class="Form-inputLabelContainer">
-                            <span class="foobar">*</span>
+                            <span class="Form-requiredAsterisk">*</span>
                             <span class="Form-inputLabel" translate> Verbosity</span>
                         </label>
                         <div>
@@ -198,7 +198,7 @@
                     </div>
                     <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_job_type_on_launch">
                         <label for="job_type" class="Form-inputLabelContainer">
-                            <span class="foobar">*</span>
+                            <span class="Form-requiredAsterisk">*</span>
                             <span class="Form-inputLabel" translate> Job Type</span>
                         </label>
                         <div>
@@ -276,7 +276,7 @@
                 <form name="forms.survey" autocomplete="off" novalidate>
                     <div ng-repeat="question in survey_questions" id="taker_'+question.index+'" class="form-group Form-formGroup Form-formGroup--singleColumn">
                         <label ng-attr-for="{{question.variable}}" class="Form-inputLabelContainer">
-                            <span ng-show="question.required===true" class="foobar">*</span>
+                            <span ng-show="question.required===true" class="Form-requiredAsterisk">*</span>
                             <span class="label-text Form-inputLabel"> {{question.question_name}}</span>
                         </label>
 

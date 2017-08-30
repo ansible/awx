@@ -19,7 +19,7 @@ export default
                 scope[fld] = '';
                 html += "<div class=\"form-group\">\n";
                 html += "<label for=\"" + fld + "\">";
-                html += '<span class="foobar">*</span>';
+                html += '<span class="Form-requiredAsterisk">*</span>';
                 html += '<span>' + field.label + '</span>';
                 html += "</label>\n";
                 html += "<input type=\"password\" ";
@@ -42,7 +42,7 @@ export default
                     scope[fld] = '';
                     html += "<div class=\"form-group\">\n";
                     html += "<label for=\"" + fld + "\"> " + field.label + "</label>\n";
-                    html += '<span class="foobar">*</span>';
+                    html += '<span class="Form-requiredAsterisk">*</span>';
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += 'name="' + fld + '" ';

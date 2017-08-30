@@ -417,14 +417,14 @@ function(ConfigurationUtils, i18n, $rootScope) {
 // Make a field required conditionally using an expression. If the expression evaluates to true, the
 // field will be required. Otherwise, the required attribute will be removed.
 //
-.directive('awRequiredWhen', ['$timeout', function($timeout) {
+.directive('awRequiredWhen', function() {
     return {
         require: 'ngModel',
         compile: function(tElem) {
             return {
                 pre: function preLink() {
                     let label = $(tElem).closest('.form-group').find('label').first();
-                    $(label).prepend('<span class="foobar">*</span>');
+                    $(label).prepend('<span class="Form-requiredAsterisk">*</span>');
                 },
                 post: function postLink( scope, elm, attrs, ctrl ) {
                     function updateRequired() {
@@ -436,13 +436,13 @@ function(ConfigurationUtils, i18n, $rootScope) {
 
                         if (isRequired && (elm.attr('required') === null || elm.attr('required') === undefined)) {
                             $(elm).attr('required', 'required');
-                            if(!$(label).find('span.foobar').length){
-                                $(label).prepend('<span class="foobar">*</span>');
+                            if(!$(label).find('span.Form-requiredAsterisk').length){
+                                $(label).prepend('<span class="Form-requiredAsterisk">*</span>');
                             }
                         } else if (!isRequired) {
                             elm.removeAttr('required');
                             if (!attrs.awrequiredAlwaysShowAsterisk) {
-                                $(label).find('span.foobar')[0].remove();
+                                $(label).find('span.Form-requiredAsterisk')[0].remove();
                             }
                         }
                         if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
@@ -464,7 +464,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
             };
         }
     };
-}])
+})
 
 // awPlaceholder: Dynamic placeholder set to a scope variable you want watched.
 //                Value will be place in field placeholder attribute.
