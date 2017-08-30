@@ -7,6 +7,11 @@ This document provides instructions for installing AWX on the following platform
 
 It is intended to be a guide only. The instructions and examples that follow enable you to build a working AWX server. However, this document makes no guarantees regarding the production worthiness of the resulting server.
 
+## Using the AWX branding assets
+
+The opensource branding assets for AWX are available in the [awx-logos repo](https://github.com/ansible/awx-logos). Before using them, please review the [trademark guidelines](https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md).
+
+To use the assets, clone the repo into the root of your local copy of the AWX project so that `awx-logos` is next to the `awx` directory, and set `awx_official=true` in the [inventory](./installer/inventory) file. When you run the image build process, the asset files will be automatically detected and installed. 
 
 ## OpenShift
 

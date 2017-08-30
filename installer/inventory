@@ -2,6 +2,9 @@ localhost ansible_connection=local
 
 [all:vars]
 
+# If you have the awx-logos repo cloned into the root of the project (i.e., next to the 'awx' directory),  and you intend
+# to use the AWX branding, set awx_official=true. For information about awx-logos, and our trademark guidelines, please
+# visit https://github.com/ansible/awx-logos.
 awx_official=false
 
 # Local Openshift
