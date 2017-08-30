@@ -43,7 +43,7 @@ If you do not have access to an OpenShift cluster, you can install [Minishift](h
 Once you have Minishift running, you can optionally use the Docker daemon that runs inside the virtual machine, rather than running a second Docker daemon (or Docker for Mac) on your development host. The following will set your environment to use it:
  
 ```bash
-$ minishift $(docker-env)
+$ eval $(minishift docker-env)
 ``` 
 
 ### Pre-build Steps
