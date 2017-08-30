@@ -18,7 +18,7 @@ export default ['i18n', function(i18n) {
                 uiSref: 'instanceGroups.instances.list({instance_group_id: instance_group.id})',
                 ngClass: "{'isActive' : isActive()}"
             },
-            percent_capacity_remaining: {
+            consumed_capacity: {
                 label: i18n._('Capacity'),
                 nosort: true,
             },

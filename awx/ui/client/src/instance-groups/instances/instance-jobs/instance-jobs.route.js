@@ -12,7 +12,7 @@ export default {
             templateUrl: templateUrl('./instance-groups/instances/instance-jobs/instance-jobs'),
             controller: function($scope, $rootScope, instance) {
                 $scope.instanceName = instance.hostname;
-                $scope.instanceCapacity = instance.percent_capacity_remaining;
+                $scope.instanceCapacity = instance.consumed_capacity;
                 $scope.instanceJobsRunning = instance.jobs_running;
                 $rootScope.breadcrumb.instance_name = instance.hostname;
             }

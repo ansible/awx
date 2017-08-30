@@ -8,7 +8,7 @@ export default ['templateUrl',
             restrict: 'E',
             link: function(scope) {
                 scope.$watch('capacity', function() {
-                    scope.PercentRemainingStyle = {
+                    scope.CapacityStyle = {
                         'flex-grow': scope.capacity * 0.01
                     };
                 }, true);
