@@ -11,6 +11,21 @@
     awx_version: "{{ awx_version_command.stdout }}"
   when: awx_version is not defined
 
+- name: Verify awx-logos directory exists for official install
+  stat:
+    path: "../../awx-logos"
+  delegate_to: localhost
+  register: logosdir
+  failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
+  when: awx_official
+
+- name: Copy logos for inclusion in sdist
+  synchronize:
+    src: "../../awx-logos/awx/ui/client/assets"
+    dest: "../awx/ui/client/"
+  delegate_to: localhost
+  when: awx_official
+
 - name: Set sdist file name
   set_fact:
     awx_sdist_file: "awx-{{ awx_version }}.tar.gz"
@@ -18,6 +33,12 @@
 - name: AWX Distribution
   debug:
     msg: "{{ awx_sdist_file }}"
+
+- name: Clean distribution
+  shell: make clean
+  args:
+    chdir: ..
+  delegate_to: localhost
 
 - name: Build AWX distribution
   shell: make sdist
