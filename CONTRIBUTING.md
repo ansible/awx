@@ -1,233 +1,302 @@
-
-AWX
-===========
+# AWX
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Come chat with us on IRC (#ansible-awx on freenode) or the mailing list.
+Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.freenode.net, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project) .
 
-Table of contents
------------------
+## Table of contents
 
-* [Contributing Agreement](#dco)
-* [Code of Conduct](#code-of-conduct)
-* [Setting up the development environment](#setting-up-the-development-environment)
+* [Things to know prior to submitting code](#things-to-know-before-contributing-code)
+* [Setting up your development environment](#setting-up-your-development-environment)
   * [Prerequisites](#prerequisites)
-  * [Local Settings](#local-settings)
-  * [Building the base image](#building-the-base-image)
-  * [Building the user interface](#building-the-user-interface)
-  * [Starting up the development environment](#starting-up-the-development-environment)
-  * [Starting the development environment at the container shell](#starting-the-container-environment-at-the-container-shell)
-  * [Using the development environment](#using-the-development-environment)
+    * [Docker](#docker)
+    * [Docker compose](#docker-compose)
+    * [Node and npm](#node-and-npm)
+  * [Building the environment](#building-the-environment)
+    * [Clone the AWX repo](#clone-the-awx-repo)
+    * [Create local settings](#create-local-settings)
+    * [Build the base image](#build-the-base-image)
+    * [Build the user interface](#build-the-user-interface)
+  # [Running the environment](#running-the-environment)
+    * [Start the containers](#start-the-containers)
+    * [Start from the container shell](#start-from-the-container-shell)
+  * [Post Build Steps](#post-build-steps)
+     * [Start a shell](#start-the-shell)
+     * [Create a superuser](#create-a-superuser)
+     * [Load the data](#load-the-data)
+  * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
+  * [Purging containers and images](#purging-containers-and-images)
 * [What should I work on?](#what-should-i-work-on)
 * [Submitting Pull Requests](#submitting-pull-requests)
 * [Reporting Issues](#reporting-issues)
-  * [How issues are resolved](#how-issues-are-resolved)
-  * [Ansible Issue Bot](#ansible-issue-bot)
 
-DCO
-===
+## Things to know prior to submitting code
 
-All contributors must use `git commit --signoff` for any
-commit to be merged, and agree that usage of --signoff constitutes
-agreement with the terms of DCO 1.1.  Any contribution that does not
-have such a signoff will not be merged.
+- All code submissions are done through pull requests against the `devel` branch.
+- You must use `git commit --signoff` for any commit to be merged, and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md).  
+- Take care to make sure no merge commits are in the submission, and use `git rebase` vs `git merge` for this reason.
+- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on irc.freenode.net, and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
+- We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community#community-code-of-conduct). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)   
 
+## Setting up your development environment
+
+The AWX development environment workflow and toolchain is based on Docker, and the docker-compose tool, to provide dependencies, services, and databases necessary to run all of the components. It also binds the local source tree into the development container, making it possible to observe and test changes in real time.
+
+### Prerequisites
+
+#### Docker
+
+Prior to starting the development services, you'll need `docker` and `docker-compose`. On Linux, you can generally find these in your distro's packaging, but you may find that Docker themselves maintain a separate repo that tracks more closely to the latest releases.
+
+For macOS and Windows, we recommend [Docker for Mac](https://www.docker.com/docker-mac) and [Docker for Windows](https://www.docker.com/docker-windows) 
+respectively.
+
+For Linux platforms, refer to the following from Docker:
+
+**Fedora**
+
+> https://docs.docker.com/engine/installation/linux/docker-ce/fedora/
+
+**Centos**
+
+> https://docs.docker.com/engine/installation/linux/docker-ce/centos/
+
+**Ubuntu**
+
+> https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
+
+**Debian**
+
+> https://docs.docker.com/engine/installation/linux/docker-ce/debian/
+
+**Arch**
+
+> https://wiki.archlinux.org/index.php/Docker
+
+#### Docker compose
+
+If you're not using Docker for Mac, or Docker for Windows, you may need, or choose to, install the Docker compose Python module separately, in which case you'll need to run the following:
+
+```bash
+(host)$ pip install docker-compose
 ```
-Developer Certificate of Origin
-Version 1.1
 
-Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
-1 Letterman Drive
-Suite D4700
-San Francisco, CA, 94129
+#### Node and npm
 
-Everyone is permitted to copy and distribute verbatim copies of this
-license document, but changing it is not allowed.
+The AWX UI requires the following:
 
-Developer's Certificate of Origin 1.1
+- Node 6.x LTS version
+- NPM 3.x LTS
 
-By making a contribution to this project, I certify that:
+### Build the environment
 
-(a) The contribution was created in whole or in part by me and I
-    have the right to submit it under the open source license
-    indicated in the file; or
+#### Fork and clone the AWX repo
 
-(b) The contribution is based upon previous work that, to the best
-    of my knowledge, is covered under an appropriate open source
-    license and I have the right under that license to submit that
-    work with modifications, whether created in whole or in part
-    by me, under the same open source license (unless I am
-    permitted to submit under a different license), as indicated
-    in the file; or
+If you have not done so already, you'll need to fork the AWX repo on GitHub. For more on how to do this, see [Fork a Repo](https://help.github.com/articles/fork-a-repo/).
 
-(c) The contribution was provided directly to me by some other
-    person who certified (a), (b) or (c) and I have not modified
-    it.
+#### Create local settings
 
-(d) I understand and agree that this project and the contribution
-    are public and that a record of the contribution (including all
-    personal information I submit with it, including my sign-off) is
-    maintained indefinitely and may be redistributed consistent with
-    this project or the open source license(s) involved.
+AWX will import the file `awx/settings/local_settings.py` and combine it with defaults in `awx/settings/defaults.py`. This file is required for starting the development environment and startup will fail if it's not provided.
+
+An example is provided. Make a copy of it, and edit as needed (the defaults are usually fine):
+
+```bash
+(host)$ cp awx/settings/local_settings.py.docker_compose awx/settings/local_settings.py
 ```
 
-Code of Conduct
-===============
+#### Build the base image
 
-All contributors are expected to adhere to the Ansible Community Code of Conduct: http://docs.ansible.com/ansible/latest/community/code_of_conduct.html
+The AWX base container image (defined in `tools/docker-compose/Dockerfile`) contains basic OS dependencies and symbolic links into the development environment that make running the services easy.
 
-Setting up the development environment
-======================================
+Run the following to build the image:
 
-The AWX development environment workflow and toolchain is based on Docker and the docker-compose tool to contain
-the dependencies, services, and databases necessary to run everything. It will bind the local source tree into the container
-making it possible to observe changes while developing.
+```bash
+(host)$ make docker-compose-build
+```
 
-Prerequisites
--------------
-`docker` and `docker-compose` are required for starting the development services, on Linux you can generally find these in your
-distro's packaging, but you may find that Docker themselves maintain a seperate repo that tracks more closely to the latest releases.
-For macOS and Windows, we recommend Docker for Mac (https://www.docker.com/docker-mac) and Docker for Windows (https://www.docker.com/docker-windows) 
-respectively. Docker for Mac/Windows automatically comes with `docker-compose`.
+**NOTE**
 
-> Fedora
+> The image will need to be rebuilt, if the Python requirements or OS dependencies change.
 
-https://docs.docker.com/engine/installation/linux/docker-ce/fedora/
+Once the build completes, you will have a `ansible/awx_devel` image in your local image cache. Use the `docker images` command to view it, as follows:
 
-> Centos
+```bash
+(host)$ docker images
 
-https://docs.docker.com/engine/installation/linux/docker-ce/centos/
+REPOSITORY                                   TAG                 IMAGE ID            CREATED             SIZE
+ansible/awx_devel                            latest              ba9ec3e8df74        26 minutes ago      1.42GB
+```
 
-> Ubuntu
+#### Build the user interface
 
-https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
+Run the following to build the AWX UI:
 
-> Debian
+```bash
+(host) $ make ui-devel
+```
+### Running the environment
 
-https://docs.docker.com/engine/installation/linux/docker-ce/debian/
+#### Start the containers 
 
-> Arch
+Start the development containers by running the following:
 
-https://wiki.archlinux.org/index.php/Docker
-
-For `docker-compose` you may need/choose to install it seperately:
-
-    pip install docker-compose
-
-
-Local Settings
---------------
-
-In development mode (i.e. when running from a source checkout), AWX
-will import the file `awx/settings/local_settings.py` and combine it with defaults in `awx/settings/defaults.py`. This file
-is required for starting the development environment and startup will fail if it's not provided
-
-An example file that works for the `docker-compose` tool is provided. Make a copy of it and edit as needed (the defaults are usually fine):
-
-    (host)$ cp awx/settings/local_settings.py.docker_compose awx/settings/local_settings.py
-
-Building the base image
------------------------
-
-The AWX base container image (found in `tools/docker-compose/Dockerfile`) contains basic OS dependencies and
-symbolic links into the development environment that make running the services easy. You'll first need to build the image:
-
-    (host)$ make docker-compose-build
-
-The image will only need to be rebuilt if the requirements or OS dependencies change. A core concept about this image is that it relies
-on having your local development environment mapped in.
-
-Building the user interface
----------------------------
-
-> AWX requires the 6.x LTS version of Node and 3.x LTS NPM
-
-In order for the AWX user interface to load from the development environment it must be built:
-
-    (host)$ make ui-devel
+```bash
+(host)$ make docker-compose
+```
     
-When developing features and fixes for the user interface you can find more detail here: [UI Developer README](awx/ui/README.md)
+The above utilizes the image built in the previous step, and will automatically start all required services and dependent containers. Once the containers launch, your session will be attached to the *awx* container, and you'll be able to watch log messages and events in real time. You will see messages from Django, celery, and the front end build process.
 
-Starting up the development environment
-----------------------------------------------
+If you start a second terminal session, you can take a look at the running containers using the `docker ps` command. For example:
 
-There are several ways of starting the development environment depending on your desired workflow. The easiest and most common way is with:
+```bash
+# List running containers
+(host)$ docker ps 
 
-    (host)$ make docker-compose
+$ docker ps
+CONTAINER ID        IMAGE                                              COMMAND                  CREATED             STATUS              PORTS                                                                                                                                      NAMES
+aa4a75d6d77b        gcr.io/ansible-tower-engineering/awx_devel:devel   "/tini -- /bin/sh ..."   23 seconds ago      Up 15 seconds       0.0.0.0:5555->5555/tcp, 0.0.0.0:6899-6999->6899-6999/tcp, 0.0.0.0:8013->8013/tcp, 0.0.0.0:8043->8043/tcp, 22/tcp, 0.0.0.0:8080->8080/tcp   tools_awx_1
+e4c0afeb548c        postgres:9.6                                       "docker-entrypoint..."   26 seconds ago      Up 23 seconds       5432/tcp                                                                                                                                   tools_postgres_1
+0089699d5afd        tools_logstash                                     "/docker-entrypoin..."   26 seconds ago      Up 25 seconds                                                                                                                                                  tools_logstash_1
+4d4ff0ced266        memcached:alpine                                   "docker-entrypoint..."   26 seconds ago      Up 25 seconds       0.0.0.0:11211->11211/tcp                                                                                                                   tools_memcached_1
+92842acd64cd        rabbitmq:3-management                              "docker-entrypoint..."   26 seconds ago      Up 24 seconds       4369/tcp, 5671-5672/tcp, 15671/tcp, 25672/tcp, 0.0.0.0:15672->15672/tcp                                                                    tools_rabbitmq_1
+```
+**NOTE**
+
+> The Makefile assumes that the image you built is tagged with your current branch. This allows you to build images for different contexts or branches. When starting the containers, you can choose a specific branch by setting `COMPOSE_TAG=<branch name>` in your environment.
+
+> For example, you might be working in a feature branch, but you want to run the containers using the `devel` image you built previously. To do that, start the containers using the following command: `$ COMPOSE_TAG=devel; make docker-compose`
+
+##### Wait for migrations to complete
+
+The first time you start the environment, database migrations need to run in order to build the PostgreSQL database. It will take few moments, but eventually you will see output in your terminal session that looks like the following:
+
+```bash
+awx_1        | Operations to perform:
+awx_1        |   Synchronize unmigrated apps: solo, api, staticfiles, debug_toolbar, messages, channels, django_extensions, ui, rest_framework, polymorphic
+awx_1        |   Apply all migrations: sso, taggit, sessions, djcelery, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
+awx_1        | Synchronizing apps without migrations:
+awx_1        |   Creating tables...
+awx_1        |     Running deferred SQL...
+awx_1        |   Installing custom SQL...
+awx_1        | Running migrations:
+awx_1        |   Rendering model states... DONE
+awx_1        |   Applying contenttypes.0001_initial... OK
+awx_1        |   Applying contenttypes.0002_remove_content_type_name... OK
+awx_1        |   Applying auth.0001_initial... OK
+awx_1        |   Applying auth.0002_alter_permission_name_max_length... OK
+awx_1        |   Applying auth.0003_alter_user_email_max_length... OK
+awx_1        |   Applying auth.0004_alter_user_username_opts... OK
+awx_1        |   Applying auth.0005_alter_user_last_login_null... OK
+awx_1        |   Applying auth.0006_require_contenttypes_0002... OK
+awx_1        |   Applying taggit.0001_initial... OK
+awx_1        |   Applying taggit.0002_auto_20150616_2121... OK
+awx_1        |   Applying main.0001_initial... OK
+awx_1        |   Applying main.0002_squashed_v300_release... OK
+awx_1        |   Applying main.0003_squashed_v300_v303_updates... OK
+awx_1        |   Applying main.0004_squashed_v310_release... OK
+awx_1        |   Applying conf.0001_initial... OK
+awx_1        |   Applying conf.0002_v310_copy_tower_settings... OK
+...
+```
+
+Once migrations are completed, you can begin using AWX.
+
+#### Start from the container shell
+
+Often times you'll want to start the development environment without immediately starting all of the services in the *awx* container, and instead be taken directly to a shell. You can do this with the following:
+
+```bash
+(host)$ make docker-compose-test
+```
+
+Using `docker exec`, this will create a session in the running *awx* container, and place you at a command prompt, where you can run shell commands inside the container.
+
+If you want to start and use the development environment, you'll first need to bootstrap it by running the following command:
+
+```bash
+(container)# ./bootstrap_development.sh
+```
+
+The above will do all the setup tasks, including running database migratoins, so it amy take a couple minutes.
     
-This utilizes the image you built in the previous step and will automatically start all required services and dependent containers. You'll
-be able to watch log messages and events as they come through.
+Now you can start each service individually, or start all services in a pre-configured tmux session like so:
 
-The Makefile assumes that the image you built is tagged with your current branch. This allows you to pre-build images for different contexts
-but you may want to use a particular branch's image (for instance if you are developing a PR from a branch based on the integration branch):
+```bash
+(container)# cd /awx_devel
+(container)# make server
+```
 
-    (host)$ COMPOSE_TAG=devel make docker-compose
+### Post Build Steps
 
-Starting the development environment at the container shell
------------------------------------------------------------
+Before you can log in and use the system, you will need to create an admin user. Optionally, you may also want to load some demo data.
 
-Often times you'll want to start the development environment without immediately starting all services and instead be taken directly to a shell:
+##### Start a shell
 
-    (host)$ make docker-compose-test
+To create the admin user, and load demo data, you first need to start a shell session on the *awx* container. In a new terminal session, use the `docker exec` command as follows to start the shell session:
 
-From here you'll need to bootstrap the development environment before it will be usable for you. The `docker-compose` make target will
-automatically do this:
+```bash
+(host)$ docker exec -it tools_awx_1 bash
+```
+This creates a session in the *awx* containers, just as if you were using `ssh`, and allows you execute commands within the running container.
 
-    (container)$ /bootstrap_development.sh
+##### Create an admin user
+
+Before you can log into AWX, you need to create an admin user. With this user you will be able to create more users, and begin configuring the server. From within the container shell, run the following command:
+
+```bash
+(container)# awx-manage createsuperuser
+```
+You will be prompted for a username, an email address, and a password, and you will be asked to confirm the password. The email address is not important, so just enter something that looks like an email address. Remember the username and password, as you will use them to log into the web interface for the first time.
     
-From here you can start each service individually, or choose to start all service in a pre-configured tmux session:
+##### Load demo data
+  
+You can optionally load some demo data. This will create a demo project, inventory, and job template. From within the container shell, run the following to load the data:
 
-    (container)# cd /awx_devel
-    (container)# make server
+```bash
+(container)# awx-manage create_preload_data
+```
 
-Using the development environment
----------------------------------
+**NOTE**
 
-With the development environment running there are a few optional steps to pre-populate the environment with data. If you are using the `docker-compose`
-method above you'll first need a shell in the container:
+> This information will persist in the database running in the `tools_postgres_1` container, until the container is removed. You may periodically need to recreate
+this container, and thus the database, if the database schema changes in an upstream commit.
 
-    (host)$ docker exec -it tools_awx_1 bash
+### Accessing the AWX web interface 
 
-Create a superuser account:
+You can now log into the AWX web interface at [https://localhost:8043](https://localhost:8043), and access the API directly at [https://localhost:8043/api/](https://localhost:8043/api/).
 
-    (container)# awx-manage createsuperuser
-    
-Preload AWX with demo data:
+To log in use the admin user and password you created above in [Create an admin user](#create-an-admin-user).
 
-    (container)# awx-manage create_preload_data
-    
-This information will persist in the database running in the `tools_postgres_1` container, until it is removed. You may periodically need to recreate
-this container and database if the database schema changes in an upstream commit.
+### Purging containers and images
 
-You should now be able to visit and login to the AWX user interface at https://localhost:8043 or http://localhost:8013 if you have built the UI.
-If not you can visit the API directly in your browser at: https://localhost:8043/api/ or http://localhost:8013/api/
+When necessary, remove any AWX containers and images by running the following:
 
-When working on the source code for AWX the code will auto-reload for you when changes are made, with the exception of any background tasks that run in
-celery.
+```bash
+(host)$ make docker-clean
+```
+        
+## What should I work on?
 
-Occasionally it may be necessary to purge any containers and images that may have collected:
+For feature work, take a look at the following:
 
-    (host)$ make docker-clean
-    
-There are host of other shortcuts, tools, and container configurations in the Makefile designed for various purposes. Feel free to explore.
-    
-What should I work on?
-======================
+- View active development in [/docs/current](./docs/current) 
+- Under [/docs/future](./docs/future), you'll find ideas for future work, and potential roadmap items.  
 
-We list our specs in `/docs`. `/docs/current` are things that we are actively working on. `/docs/future` are ideas for future work and the direction we
-want that work to take. Fixing bugs, translations, and updates to documentation are also appreciated.
+Fixing bugs, adding translations, and updating the documentation are always appreciated, so reviewing the backlog of issues is always a good place to start.
 
-Be aware that if you are working in a part of the codebase that is going through active development your changes may be rejected or you may be asked to
-rebase them. A good idea before starting work is to have a discussion with us on IRC or the mailing list.
+**NOTE**
 
-Submitting Pull Requests
-========================
+> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
-Fixes and Features for AWX will go through the Github PR interface. There are a few things that can be done to help the visibility of your change
-and increase the likelihood that it will be accepted
+**NOTE**
 
-> Add UI detail to these
+> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](./awx/ui/README.md).
+
+## Submitting Pull Requests
+
+Fixes and Features for AWX will go through the Github pull request process. Submit your pull request (PR) agains the `devel` branch.
+
+Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
 * No issues when running linters/code checkers
   * Python: flake8: `(container)/awx_devel$ make flake8`
@@ -237,44 +306,21 @@ and increase the likelihood that it will be accepted
   * JavaScript: Jasmine: `(container)/awx_devel$ make ui-test-ci`
 * Write tests for new functionality, update/add tests for bug fixes
 * Make the smallest change possible
-* Write good commit messages: https://chris.beams.io/posts/git-commit/
+* Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
 
-It's generally a good idea to discuss features with us first by engaging us in IRC or on the mailing list, especially if you are unsure if it's a good
-fit.
+**TODO**
 
-We like to keep our commit history clean and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase` rather than
-`git pull` and `git rebase` rather than `git merge`.
+> Add UI detail to the above list.
 
-Sometimes it might take us a while to fully review your PR. We try to keep the `devel` branch in pretty good working order so we review requests carefuly.
-Please be patient.
+It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
-All submitted PRs will have the linter and unit tests run against them and the status reported in the PR.
+We like to keep our commit history clean, and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase`, rather than
+`git pull`, and `git rebase`, rather than `git merge`.
 
-Reporting Issues
-================
+Sometimes it might take us a while to fully review your PR. We try to keep the `devel` branch in good working order, and so we review requests carefuly. Please be patient.
 
-Use the Github issue tracker for filing bugs. In order to save time and help us respond to issues quickly, make sure to fill out as much of the issue template
-as possible. Version information and an accurate reproducing scenario are critical to helping us identify the problem.
+All submitted PRs will have the linter and unit tests run against them, and the status reported in the PR.
 
-When reporting issues for the UI we also appreciate having screenshots and any error messages from the web browser's console. It's not unsual for browser extensions
-and plugins to cause problems. Reporting those will also help speed up analyzing and resolving UI bugs.
+## Reporting Issues
 
-For the API and backend services, please capture all of the logs that you can from the time the problem was occuring.
-
-Don't use the issue tracker to get help on how to do something - please use the mailing list and IRC for that.
-
-How issues are resolved
------------------------
-
-We triage our issues into high, medium, and low and will tag them with the relevant component (api, ui, installer, etc). We will typically focus on higher priority
-issues first. There aren't hard and fast rules for determining the severity of an issue, but generally high priority issues have an increased likelihood of breaking
-existing functionality and/or negatively impacting a large number of users.
-
-If your issue isn't considered `high` priority then please be patient as it may take some time to get to your report.
-
-Before opening a new issue, please use the issue search feature to see if it's already been reported. If you have any extra detail to provide then please comment.
-Rather than posting a "me too" comment you might consider giving it a ["thumbs up"](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comment) on github.
-
-Ansible Issue Bot
------------------
-> Fill in
+We welcome your feedback, and encourage you to file an issue when you run into a problem. But before opening a new issues, we ask that you please view our [Issues guide](./ISSUES.md).
