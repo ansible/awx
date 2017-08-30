@@ -528,10 +528,6 @@ class BaseTask(LogErrorsTask):
                 logger.error('Failed to update %s after %d retries.',
                              self.model._meta.object_name, _attempt)
 
-    def signal_finished(self, pk):
-        pass
-        # notify_task_runner(dict(complete=pk))
-
     def get_path_to(self, *args):
         '''
         Return absolute path relative to this file.
@@ -907,8 +903,6 @@ class BaseTask(LogErrorsTask):
                 raise TaskCancel(instance, rc)
             else:
                 raise TaskError(instance, rc)
-        if not hasattr(settings, 'CELERY_UNIT_TEST'):
-            self.signal_finished(pk)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
