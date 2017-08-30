@@ -112,7 +112,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     // And we found the affected project
                     $log.debug('Received event for project: ' + project.name);
                     $log.debug('Status changed to: ' + data.status);
-                    if (data.status === 'successful' || data.status === 'failed') {
+                    if (data.status === 'successful' || data.status === 'failed' || data.status === 'canceled') {
                         $scope.reloadList();
                     } else {
                         project.scm_update_tooltip = "SCM update currently running";
