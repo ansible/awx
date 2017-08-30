@@ -17,7 +17,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
     'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
     function($scope, $rootScope, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, ReturnToCaller, GetBasePath, Wait, CreateSelect2,
-    $state, $location, i18n) {
+    $state, $location, i18n) {console.log($scope);
 
         var defaultUrl = GetBasePath('organizations'),
             form = UserForm;
@@ -28,6 +28,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
+            $scope.isAddForm = true;
             $scope.ldap_user = false;
             $scope.not_ldap_user = !$scope.ldap_user;
             $scope.ldap_dn = null;

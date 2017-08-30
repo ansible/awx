@@ -633,15 +633,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (field.label || field.labelBind) {
                         html += "<label class=\"";
                         html += (field.labelClass) ? field.labelClass : "";
-                        html += `${field.required ? ' prepend-asterisk ' : ''}`;
                         html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
                         html += (field.showParseTypeToggle) ? "Form-inputLabelContainer--codeMirror " : "";
                         html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
+
+                        html += `${field.required ? '<span class="foobar">*</span>' : ''}`;
+
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
                             html += "\t\t<span class=\"Form-inputLabel\" translate>\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
@@ -1349,7 +1351,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
-                        if(field.awRequiredWhen) {
+                        if(field.awRequiredWhen) {console.log(field.awRequiredWhen);
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";

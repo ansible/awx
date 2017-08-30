@@ -48,7 +48,8 @@
                             <dnd-nodrag>
                                 <div>
                                     <label class="SurveyMaker-previewLabel" for="question.variable">
-                                        <span class="label-text" ng-class="{'prepend-asterisk': question.required}"> {{question.question_name}}</span>
+                                        <span ng-show="question.required===true" class="foobar">*</span>
+                                        <span class="label-text"> {{question.question_name}}</span>
                                     </label>
                                 </div>
 

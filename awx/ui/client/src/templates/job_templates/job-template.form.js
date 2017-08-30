@@ -94,10 +94,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     basePath: 'projects',
                     sourceModel: 'project',
                     sourceField: 'name',
-                    awRequiredWhen: {
-                        reqExpression: "projectrequired",
-                        init: "true"
-                    },
+                    required: true,
                     column: 1,
                     awPopOver: "<p>" + i18n._("Select the project containing the playbook you want this job to execute.") + "</p>",
                     dataTitle: i18n._('Project'),
@@ -111,10 +108,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     ngOptions: 'book for book in playbook_options track by book',
                     ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || disablePlaybookBecausePermissionDenied",
                     id: 'playbook-select',
-                    awRequiredWhen: {
-                        reqExpression: "playbookrequired",
-                        init: "true"
-                    },
+                    required: true,
                     column: 1,
                     awPopOver: "<p>" + i18n._("Select the playbook to be executed by this job.") + "</p>",
                     dataTitle: i18n._('Playbook'),
