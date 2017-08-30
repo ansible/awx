@@ -17,7 +17,12 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 
 # AWX
-from awx.main.utils import * # noqa
+from awx.main.utils import (
+    get_object_or_400,
+    get_pk_from_dict,
+    to_python_boolean,
+    get_licenser,
+)
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
@@ -34,6 +39,36 @@ access_registry = {
     # <model_class>: <access_class>,
     # ...
 }
+
+
+def get_object_from_data(field, Model, data, obj=None):
+    """
+    Utility method to obtain related object in data according to fallbacks:
+     - if data contains key with pointer to Django object, return that
+     - if contains integer, get object from database
+     - if this does not work, raise exception
+    """
+    try:
+        raw_value = data[field]
+    except KeyError:
+        # Calling method needs to deal with non-existence of key
+        raise ParseError(_("Required related field %s for permission check." % field))
+
+    if isinstance(raw_value, Model):
+        return raw_value
+    elif raw_value is None:
+        return None
+    else:
+        try:
+            new_pk = int(raw_value)
+            # Avoid database query by comparing pk to model for similarity
+            if obj and new_pk == getattr(obj, '%s_id' % field, None):
+                return getattr(obj, field)
+            else:
+                # Get the new resource from the database
+                return get_object_or_400(Model, pk=new_pk)
+        except (TypeError, ValueError):
+            raise ParseError(_("Bad data found in related field %s." % field))
 
 
 class StateConflict(ValidationError):
@@ -205,24 +240,8 @@ class BaseAccess(object):
             # Use reference object's related fields, if given
             new = getattr(data['reference_obj'], field)
         elif data and field in data:
-            # Obtain the resource specified in `data`
-            raw_value = data[field]
-            if isinstance(raw_value, Model):
-                new = raw_value
-            elif raw_value is None:
-                new = None
-            else:
-                try:
-                    new_pk = int(raw_value)
-                    # Avoid database query by comparing pk to model for similarity
-                    if obj and new_pk == getattr(obj, '%s_id' % field, None):
-                        changed = False
-                    else:
-                        # Get the new resource from the database
-                        new = get_object_or_400(Model, pk=new_pk)
-                except (TypeError, ValueError):
-                    raise ParseError(_("Bad data found in related field %s." % field))
-        elif data is None or field not in data:
+            new = get_object_from_data(field, Model, data, obj=obj)
+        else:
             changed = False
 
         # Obtain existing related resource
@@ -940,17 +959,14 @@ class CredentialAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return True
-        user_pk = get_pk_from_dict(data, 'user')
-        if user_pk:
-            user_obj = get_object_or_400(User, pk=user_pk)
+        if data and data.get('user', None):
+            user_obj = get_object_from_data('user', User, data)
             return check_user_access(self.user, User, 'change', user_obj, None)
-        team_pk = get_pk_from_dict(data, 'team')
-        if team_pk:
-            team_obj = get_object_or_400(Team, pk=team_pk)
+        if data and data.get('team', None):
+            team_obj = get_object_from_data('team', Team, data)
             return check_user_access(self.user, Team, 'change', team_obj, None)
-        organization_pk = get_pk_from_dict(data, 'organization')
-        if organization_pk:
-            organization_obj = get_object_or_400(Organization, pk=organization_pk)
+        if data and data.get('organization', None):
+            organization_obj = get_object_from_data('organization', Organization, data)
             return check_user_access(self.user, Organization, 'change', organization_obj, None)
         return False
 
@@ -1173,9 +1189,8 @@ class JobTemplateAccess(BaseAccess):
             if reference_obj:
                 return getattr(reference_obj, field, None)
             else:
-                pk = get_pk_from_dict(data, field)
-                if pk:
-                    return get_object_or_400(Class, pk=pk)
+                if data and data.get(field, None):
+                    return get_object_from_data(field, Class, data)
                 else:
                     return None
 
@@ -1259,23 +1274,6 @@ class JobTemplateAccess(BaseAccess):
                 if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
                         and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
                     return False
-        return True
-
-    def can_update_sensitive_fields(self, obj, data):
-        project_id = data.get('project', obj.project.id if obj.project else None)
-        inventory_id = data.get('inventory', obj.inventory.id if obj.inventory else None)
-        credential_id = data.get('credential', obj.credential.id if obj.credential else None)
-        vault_credential_id = data.get('credential', obj.vault_credential.id if obj.vault_credential else None)
-
-        if project_id and self.user not in Project.objects.get(pk=project_id).use_role:
-            return False
-        if inventory_id and self.user not in Inventory.objects.get(pk=inventory_id).use_role:
-            return False
-        if credential_id and self.user not in Credential.objects.get(pk=credential_id).use_role:
-            return False
-        if vault_credential_id and self.user not in Credential.objects.get(pk=vault_credential_id).use_role:
-            return False
-
         return True
 
     def can_delete(self, obj):
@@ -1387,9 +1385,8 @@ class JobAccess(BaseAccess):
         add_data = dict(data.items())
 
         # If a job template is provided, the user should have read access to it.
-        job_template_pk = get_pk_from_dict(data, 'job_template')
-        if job_template_pk:
-            job_template = get_object_or_400(JobTemplate, pk=job_template_pk)
+        if data and data.get('job_template', None):
+            job_template = get_object_from_data('job_template', JobTemplate, data)
             add_data.setdefault('inventory', job_template.inventory.pk)
             add_data.setdefault('project', job_template.project.pk)
             add_data.setdefault('job_type', job_template.job_type)

@@ -34,7 +34,7 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_get_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
-            parent_obj = get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
+            parent_obj = view.get_parent_object()
             if not check_user_access(request.user, view.parent_model, 'read',
                                      parent_obj):
                 return False
@@ -44,12 +44,12 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_post_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
-            parent_obj = get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
+            parent_obj = view.get_parent_object()
             if not check_user_access(request.user, view.parent_model, 'read',
                                      parent_obj):
                 return False
             if hasattr(view, 'parent_key'):
-                if not check_user_access(request.user, view.model, 'add', {view.parent_key: parent_obj.pk}):
+                if not check_user_access(request.user, view.model, 'add', {view.parent_key: parent_obj}):
                     return False
             return True
         elif getattr(view, 'is_job_start', False):

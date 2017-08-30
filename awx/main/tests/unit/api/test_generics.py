@@ -242,28 +242,28 @@ class TestResourceAccessList:
             ), method='GET')
 
 
-    def mock_view(self):
+    def mock_view(self, parent=None):
         view = ResourceAccessList()
         view.parent_model = Organization
         view.kwargs = {'pk': 4}
+        if parent:
+            view.get_parent_object = lambda: parent
         return view
 
 
     def test_parent_access_check_failed(self, mocker, mock_organization):
-        with mocker.patch('awx.api.permissions.get_object_or_400', return_value=mock_organization):
-            mock_access = mocker.MagicMock(__name__='for logger', return_value=False)
-            with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
-                with pytest.raises(PermissionDenied):
-                    self.mock_view().check_permissions(self.mock_request())
-                mock_access.assert_called_once_with(mock_organization)
+        mock_access = mocker.MagicMock(__name__='for logger', return_value=False)
+        with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
+            with pytest.raises(PermissionDenied):
+                self.mock_view(parent=mock_organization).check_permissions(self.mock_request())
+            mock_access.assert_called_once_with(mock_organization)
 
 
     def test_parent_access_check_worked(self, mocker, mock_organization):
-        with mocker.patch('awx.api.permissions.get_object_or_400', return_value=mock_organization):
-            mock_access = mocker.MagicMock(__name__='for logger', return_value=True)
-            with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
-                self.mock_view().check_permissions(self.mock_request())
-                mock_access.assert_called_once_with(mock_organization)
+        mock_access = mocker.MagicMock(__name__='for logger', return_value=True)
+        with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
+            self.mock_view(parent=mock_organization).check_permissions(self.mock_request())
+            mock_access.assert_called_once_with(mock_organization)
 
 
 def test_related_search_reverse_FK_field():

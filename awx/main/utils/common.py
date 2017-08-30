@@ -724,7 +724,10 @@ def get_pk_from_dict(_dict, key):
     Helper for obtaining a pk from user data dict or None if not present.
     '''
     try:
-        return int(_dict[key])
+        val = _dict[key]
+        if isinstance(val, object) and hasattr(val, 'id'):
+            return val.id  # return id if given model object
+        return int(val)
     except (TypeError, KeyError, ValueError):
         return None
 
