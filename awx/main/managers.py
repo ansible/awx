@@ -37,6 +37,8 @@ class HostManager(models.Manager):
            hasattr(self.instance, 'kind')):
             if self.instance.kind == 'smart' and self.instance.host_filter is not None:
                     q = SmartFilter.query_from_string(self.instance.host_filter)
+                    if self.instance.organization_id:
+                        q = q.filter(inventory__organization=self.instance.organization_id)
                     # If we are using host_filters, disable the core_filters, this allows
                     # us to access all of the available Host entries, not just the ones associated
                     # with a specific FK/relation.

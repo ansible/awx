@@ -602,9 +602,20 @@ class InventoryAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data):
+        # Host filter may only be modified by org admin level
+        org_admin_mandatory = False
+        new_host_filter = data.get('host_filter', None) if data else None
+        if new_host_filter == '':  # Provision for field 'blank' behavior
+            new_host_filter = None
+        if new_host_filter != obj.host_filter:
+            org_admin_mandatory = True
         # Verify that the user has access to the new organization if moving an
         # inventory to a new organization.  Otherwise, just check for admin permission.
-        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
+        return (
+            self.check_related('organization', Organization, data, obj=obj,
+                               mandatory=org_admin_mandatory) and
+            self.user in obj.admin_role
+        )
 
     @check_superuser
     def can_update(self, obj):
