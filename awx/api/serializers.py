@@ -1551,11 +1551,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                             errors['inventory'] = _("Must provide an inventory.")
                     else:
                         dest_inventory = self.instance.inventory
-                    if source_script.organization != dest_inventory.organization:
+                    if dest_inventory and source_script.organization != dest_inventory.organization:
                         errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
-                except Exception as exc:
+                except Exception:
                     errors['source_script'] = _("'source_script' doesn't exist.")
-                    logger.error(str(exc))
+                    logger.exception('Problem processing source_script validation.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1670,7 +1670,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
+        if value and value.kind == 'smart':
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
 
