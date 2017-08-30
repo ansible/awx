@@ -4,7 +4,6 @@ import Credential from './Credential';
 import CredentialType from './CredentialType';
 import Me from './Me';
 import Organization from './Organization';
-import OrgAdmin from './OrgAdmin';
 
 angular
     .module('at.lib.models', [])
@@ -13,5 +12,4 @@ angular
     .service('CredentialModel', Credential)
     .service('CredentialTypeModel', CredentialType)
     .service('MeModel', Me)
-    .service('OrganizationModel', Organization)
-    .service('OrgAdminModel', OrgAdmin);
+    .service('OrganizationModel', Organization);

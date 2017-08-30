@@ -3,18 +3,19 @@ import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
 import CredentialsStrings from './credentials.strings'
 
-function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization, OrgAdmin) {
+function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
     let id = $stateParams.credential_id;
 
     let promises = {
-        me: new Me('get')
+        me: new Me('get').then((me) => {
+            return me.extend('get', 'admin_of_organizations');
+        })
     };
 
     if (!id) {
         promises.credential = new Credential('options');
         promises.credentialType =  new CredentialType();
         promises.organization =  new Organization();
-        promises.orgAdmin = new OrgAdmin();
 
         return $q.all(promises)
     }
@@ -25,19 +26,16 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
         .then(models => {
             let typeId = models.credential.get('credential_type');
             let orgId = models.credential.get('organization');
-            let userId = models.me.get('results')[0].id;
 
             let dependents = {
                 credentialType: new CredentialType('get', typeId),
-                organization: new Organization('get', orgId),
-                orgAdmin: new OrgAdmin('get', userId)
+                organization: new Organization('get', orgId)
             };
 
             return $q.all(dependents)
                 .then(related => {
                     models.credentialType = related.credentialType;
                     models.organization = related.organization;
-                    models.is_org_admin = related.orgAdmin;
 
                     return models;
                 });
@@ -50,8 +48,7 @@ CredentialsResolve.$inject = [
     'MeModel',
     'CredentialModel',
     'CredentialTypeModel',
-    'OrganizationModel',
-    'OrgAdminModel'
+    'OrganizationModel'
 ];
 
 function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider, stringProvider) {
