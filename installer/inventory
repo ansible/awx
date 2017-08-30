@@ -3,12 +3,12 @@ localhost ansible_connection=local
 [all:vars]
 
 # Build AWX with official logos
-# Agree to acceptance of trademark guidelines
-# Requires awx-logos be checked out in the directory containing the awx repository
+# Requires cloning awx-logos repo into the project root.
+# Review the trademark guidelines at https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md
 awx_official=false
 
-# Local Openshift
-# Will need to set -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t)
+# Openshift Install
+# Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
 #
 # openshift_host=127.0.0.1:8443
 # awx_openshift_project=awx
@@ -26,8 +26,8 @@ host_port=80
 # docker_registry_repository=awx
 # docker_registry_username=developer
 
-# Set this if you have an external postgres you are pointing at
-# otherwise a new ephemeral awx postgres service will be created
+# Set pg_hostname if you have an external postgres server, otherwise 
+# a new ephemeral postgres service will be created
 # pg_hostname=postgresql
 pg_username=awx
 pg_password=awxpass

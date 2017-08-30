@@ -1,11 +1,10 @@
 ---
-
 - name: Export Docker web image if it isnt local and there isnt a registry defined
   docker_image:
     name: "{{ awx_web_image }}"
     tag: "{{ awx_version }}"
     archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_web_image }}_{{ awx_version }}.tar"
-  when: ansible_connection != "local" and docker_registry is not defined
+  when: inventory_hostname != "localhost" and docker_registry is not defined
   delegate_to: localhost
 
 - name: Export Docker task image if it isnt local and there isnt a registry defined
@@ -13,7 +12,7 @@
     name: "{{ awx_task_image }}"
     tag: "{{ awx_version }}"
     archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_task_image }}_{{ awx_version }}.tar"
-  when: ansible_connection != "local" and docker_registry is not defined
+  when: inventory_hostname != "localhost" and docker_registry is not defined
   delegate_to: localhost
 
 - name: Authenticate with Docker registry if registry password given
@@ -53,6 +52,7 @@
     name: "{{ awx_web_image }}"
     tag: "{{ awx_version }}"
     load_path: "{{ docker_deploy_base_path }}/{{ awx_web_image }}_{{ awx_version }}.tar"
+    timeout: 300
   when: ansible_connection != "local" and docker_registry is not defined
 
 - name: Load task image
@@ -60,6 +60,7 @@
     name: "{{ awx_task_image }}"
     tag: "{{ awx_version }}"
     load_path: "{{ docker_deploy_base_path }}/{{ awx_task_image }}_{{ awx_version }}.tar"
+    timeout: 300
   when: ansible_connection != "local" and docker_registry is not defined
 
 - name: Tag and push web image to registry
