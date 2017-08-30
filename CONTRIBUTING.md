@@ -164,7 +164,7 @@ e4c0afeb548c        postgres:9.6                                       "docker-e
 
 > The Makefile assumes that the image you built is tagged with your current branch. This allows you to build images for different contexts or branches. When starting the containers, you can choose a specific branch by setting `COMPOSE_TAG=<branch name>` in your environment.
 
-> For example, you might be working in a feature branch, but you want to run the containers using the `devel` image you built previously. To do that, start the containers using the following command: `$ COMPOSE_TAG=devel; make docker-compose`
+> For example, you might be working in a feature branch, but you want to run the containers using the `devel` image you built previously. To do that, start the containers using the following command: `$ COMPOSE_TAG=devel make docker-compose`
 
 ##### Wait for migrations to complete
 
@@ -214,7 +214,7 @@ Using `docker exec`, this will create a session in the running *awx* container, 
 If you want to start and use the development environment, you'll first need to bootstrap it by running the following command:
 
 ```bash
-(container)# ./bootstrap_development.sh
+(container)# /bootstrap_development.sh
 ```
 
 The above will do all the setup tasks, including running database migratoins, so it amy take a couple minutes.
@@ -307,10 +307,6 @@ Here are a few things you can do to help the visibility of your change, and incr
 * Write tests for new functionality, update/add tests for bug fixes
 * Make the smallest change possible
 * Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
-
-**TODO**
-
-> Add UI detail to the above list.
 
 It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.freenode.net, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
