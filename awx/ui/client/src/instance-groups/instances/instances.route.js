@@ -9,7 +9,7 @@ export default {
             templateUrl: templateUrl('./instance-groups/instance-group'),
             controller: function($scope, $rootScope, instanceGroup) {
                 $scope.instanceGroupName = instanceGroup.name;
-                $scope.instanceGroupCapacity = instanceGroup.percent_capacity_remaining;
+                $scope.instanceGroupCapacity = instanceGroup.consumed_capacity;
                 $scope.instanceGroupJobsRunning = instanceGroup.jobs_running;
                 $rootScope.breadcrumb.instance_group_name = instanceGroup.name;
             }
