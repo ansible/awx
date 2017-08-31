@@ -1447,6 +1447,34 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
 
 
 @pytest.mark.django_db
+def test_credential_type_immutable_in_v2(patch, organization, admin, credentialtype_ssh, credentialtype_aws):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'jim',
+            'password': u'pass'
+        }
+    )
+    cred.save()
+
+    response = patch(
+        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+        {
+            'credential_type': credentialtype_aws.pk,
+            'inputs': {
+                'username': u'jim',
+                'password': u'pass'
+            }
+        },
+        admin
+    )
+    assert response.status_code == 400
+    assert 'credential_type' in response.data
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('version, params', [
     ['v1', {
         'name': 'Best credential ever',
