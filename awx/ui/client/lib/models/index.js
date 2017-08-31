@@ -13,4 +13,3 @@ angular
     .service('CredentialTypeModel', CredentialType)
     .service('MeModel', Me)
     .service('OrganizationModel', Organization);
-

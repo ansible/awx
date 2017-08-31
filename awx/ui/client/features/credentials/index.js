@@ -7,7 +7,9 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
     let id = $stateParams.credential_id;
 
     let promises = {
-        me: new Me('get')
+        me: new Me('get').then((me) => {
+            return me.extend('get', 'admin_of_organizations');
+        })
     };
 
     if (!id) {

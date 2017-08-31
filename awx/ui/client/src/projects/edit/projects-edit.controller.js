@@ -8,11 +8,12 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
     'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt',
     'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
-    'i18n', 'CredentialTypes',
+    'i18n', 'CredentialTypes', 'OrgAdminLookup',
     function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
     ProcessErrors, GenerateForm, Prompt, GetBasePath,
     GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
-    $state, CreateSelect2, ToggleNotification, i18n, CredentialTypes) {
+    $state, CreateSelect2, ToggleNotification, i18n, CredentialTypes,
+    OrgAdminLookup) {
 
         var form = ProjectsForm(),
             defaultUrl = GetBasePath('projects') + $stateParams.project_id + '/',
@@ -140,6 +141,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                         $scope.scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
                         $scope.scm_type_class = "btn-disabled";
                     }
+
+                    OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+                    .then(function(canEditOrg){
+                        $scope.canEditOrg = canEditOrg;
+                    });
 
                     $scope.project_obj = data;
                     $scope.name = data.name;

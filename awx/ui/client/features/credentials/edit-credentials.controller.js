@@ -45,6 +45,14 @@ function EditCredentialsController (models, $state, $scope, strings) {
         vm.form.disabled = !isEditable;
     }
 
+    let isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => {return org.id === organization.get('id');});
+    let isSuperuser = me.get('is_superuser');
+    let isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
+    vm.form.organization._disabled = true;
+    if(isSuperuser || isOrgAdmin || (credential.get('organization') === null && isCurrentAuthor)){
+        vm.form.organization._disabled = false;
+    }
+
     vm.form.organization._resource = 'organization';
     vm.form.organization._model = organization;
     vm.form.organization._route = 'credentials.edit.organization';
@@ -75,12 +83,12 @@ function EditCredentialsController (models, $state, $scope, strings) {
     };
 
     /**
-     * If a credential's `credential_type` is changed while editing, the inputs associated with 
-     * the old type need to be cleared before saving the inputs associated with the new type. 
+     * If a credential's `credential_type` is changed while editing, the inputs associated with
+     * the old type need to be cleared before saving the inputs associated with the new type.
      * Otherwise inputs are merged together making the request invalid.
      */
     vm.form.save = data => {
-        data.user = me.getSelf().id;
+        data.user = me.get('id');
         credential.unset('inputs');
 
         return credential.request('put', data);

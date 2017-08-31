@@ -43,8 +43,8 @@ function AddCredentialsController (models, $state, strings) {
     };
 
     vm.form.save = data => {
-        data.user = me.getSelf().id;
-                
+        data.user = me.get('id');
+
         return credential.request('post', data);
     };
 
