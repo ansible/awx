@@ -74,7 +74,7 @@ def rpm_package_list():
 def deb_package_list():
     import apt
     apt_cache = apt.Cache()
-    installed_packages = []
+    installed_packages = {}
     apt_installed_packages = [pk for pk in apt_cache.keys() if apt_cache[pk].is_installed]
     for package in apt_installed_packages:
         ac_pkg = apt_cache[package].installed
