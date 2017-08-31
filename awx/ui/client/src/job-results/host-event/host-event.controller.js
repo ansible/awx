@@ -20,7 +20,8 @@
             var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
                 lineNumbers: true,
                 mode: mode,
-                readOnly: true
+                readOnly: true,
+                scrollbarStyle: null
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
