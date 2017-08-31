@@ -25,9 +25,9 @@
     "jshint": "grunt clean:jshint jshint:source --no-color",
     "test:ci": "npm run test -- --single-run --reporter junit,dots --browsers=PhantomJS",
     "lint": "./node_modules/.bin/eslint -c .eslintrc.js .",
-    "component-test": "./node_modules/.bin/karma start client/test/karma.conf.js",
+    "component-test": "./node_modules/.bin/karma start client/test/unit/karma.conf.js",
     "lint-dev": "./node_modules/.bin/nodemon --exec \"./node_modules/.bin/eslint -c .eslintrc.js .\" --watch \"client/components/**/*.js\"",
-    "component-dev": "./node_modules/.bin/karma start client/test/karma.conf.js --auto-watch --no-single-run"
+    "component-dev": "./node_modules/.bin/karma start client/test/unit/karma.conf.js --auto-watch --no-single-run"
   },
   "optionalDependencies": {
     "browser-sync": "^2.14.0",
