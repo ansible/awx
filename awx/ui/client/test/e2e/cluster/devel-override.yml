@@ -1,0 +1,13 @@
+---
+version: '2'
+networks:
+  default:
+    external:
+      name: tools_default
+services:
+  chrome:
+    external_links:
+      - 'tools_awx_1:awx'
+  firefox:
+    external_links:
+      - 'tools_awx_1:awx'
