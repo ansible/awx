@@ -17,7 +17,7 @@ describe('Components | panel/body', () => {
     it('Should produce at-Panel-body HTML content', () => {
         let element = $compile('<at-panel-body>yo</at-panel-body>')($rootScope);
         $rootScope.$digest();
-      
+
         expect(element.hasClass('at-Panel-body')).toBe(true);
         expect(element.html()).toContain('yo');
     });
