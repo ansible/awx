@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2017-08-29 04:22+0000\n"
+"PO-Revision-Date: 2017-08-31 02:50+0000\n"
 "Last-Translator: asasaki <asasaki@redhat.com>\n"
 "Language-Team: Japanese\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -960,7 +960,7 @@ msgstr "任意のソースからホストを動的にロードするためのス
 msgid ""
 "Create custom credential types to be used for authenticating to network "
 "hosts and cloud sources"
-msgstr "ネットワークホストおよびクラウドソースに対して認証するために使用されるカスタム認証情報を作成します。"
+msgstr "ネットワークホストおよびクラウドソースに対する認証に使用されるカスタム認証情報タイプを作成します。"
 
 #: client/src/setup-menu/setup-menu.partial.html:49
 msgid ""
@@ -1807,7 +1807,7 @@ msgstr "最終実行"
 msgid ""
 "For additional information on advanced search search syntax please see the "
 "Ansible Tower"
-msgstr "高度な検索の検索構文についての詳細は、Ansible Tower ドキュメントを参照してください。"
+msgstr "詳細検索の検索構文についての詳細は、Ansible Tower ドキュメントを参照してください。"
 
 #: client/src/credentials/factories/become-method-change.factory.js:69
 #: client/src/credentials/factories/kind-change.factory.js:126
