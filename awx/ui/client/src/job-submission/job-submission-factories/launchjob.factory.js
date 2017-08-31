@@ -128,6 +128,9 @@ export default
                             job_launch_data.extra_credentials.push(extraCredential.id);
                         });
                     }
+                    if(scope.ask_diff_mode_on_launch && _.has(scope, 'other_prompt_data.diff_mode')){
+                        job_launch_data.diff_mode = scope.other_prompt_data.diff_mode;
+                    }
 
                     // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
                     if(jQuery.isEmptyObject(job_launch_data.extra_vars)===true && scope.prompt_for_vars===false){
