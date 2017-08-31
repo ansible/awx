@@ -98,11 +98,6 @@
                             2
                         </span>
                         <translate>Please assign roles to the selected resources</translate>
-                        <div class="AddPermissions-keyToggle btn"
-                            ng-class="{'is-active': showKeyPane}"
-                            ng-click="toggleKeyPane()" translate>
-                            Key
-                        </div>
                     </div>
                     <div class="Form-tabHolder">
                         <div class="Form-tab"
@@ -146,10 +141,25 @@
                             Organizations
                         </div>
                     </div>
-                    <div class="AddPermissions-keyPane"
-                        ng-show="showKeyPane">
-                        <div class="AddPermissions-keyRow"
-                            ng-repeat="key in keys[currentTab()]">
+                    <div class="AddPermissions-roleSet">
+                        <!-- role drop-downs -->
+                        <div class="AddPermissions-roleSet-dropdown" ng-repeat="(type, roleSet) in keys"
+                            ng-show="tab[type] && showSection2Tab(type)">
+                            <select id="{{type}}-role-select" class="form-control"
+                            ng-model="roleSelection[type]"
+                            ng-options="key as value.name for (key , value) in roleSet">
+                                <option value="" selected hidden />
+                            </select>
+                        </div>
+                        <div class="AddPermissions-keyToggle btn"
+                            ng-class="{'is-active': showKeyPane}"
+                            ng-click="toggleKeyPane()" translate>
+                            Key
+                        </div>
+                    </div>
+
+                    <div class="AddPermissions-keyPane" ng-show="showKeyPane">
+                        <div class="AddPermissions-keyRow" ng-repeat="key in keys[currentTab()]">
                             <div class="AddPermissions-keyName">
                                 {{ key.name }}
                             </div>
@@ -158,29 +168,17 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- role drop-downs -->
-                    <div ng-repeat="(type, roleSet) in keys"
-                        ng-show="tab[type] && showSection2Tab(type)">
-                        <select
-                            id="{{type}}-role-select" class="form-control"
-                            ng-model="roleSelection[type]"
-                            ng-options="key as value.name for (key , value) in roleSet">
-                            <option value="" selected hidden />
-                        </select>
-                    </div>
-
-                    <!-- lists of selected resources -->
-                    <!-- (type, collection) => ('resource', {id: {}, ... }) -->
-                    <div ng-repeat="(type, collection) in allSelected">
-                        <rbac-selected-list
-                            resource-type="type"
-                            collection="collection"
-                            selected="allSelected"
-                            ng-show="tab[type]">
-                        </rbac-selected-list>
-                    </div>
-
+                <!-- lists of selected resources -->
+                <!-- (type, collection) => ('resource', {id: {}, ... }) -->
+                <div ng-repeat="(type, collection) in allSelected">
+                    <rbac-selected-list
+                        resource-type="type"
+                        collection="collection"
+                        selected="allSelected"
+                        ng-show="tab[type]">
+                    </rbac-selected-list>
                 </div>
                 <!-- end section 2 -->
             </div>
