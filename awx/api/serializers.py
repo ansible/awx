@@ -1183,12 +1183,14 @@ class InventorySerializer(BaseSerializerWithVariables):
         return super(InventorySerializer, self).validate(attrs)
 
 
+# TODO: Remove entire serializer in 3.3, replace with normal serializer
 class InventoryDetailSerializer(InventorySerializer):
 
-    class Meta:
-        fields = ('*', 'can_run_ad_hoc_commands')
-
-    can_run_ad_hoc_commands = serializers.SerializerMethodField()
+    def get_fields(self):
+        fields = super(InventoryDetailSerializer, self).get_fields()
+        if self.version == 1:
+            fields['can_run_ad_hoc_commands'] = serializers.SerializerMethodField()
+        return fields
 
     def get_can_run_ad_hoc_commands(self, obj):
         view = self.context.get('view', None)
