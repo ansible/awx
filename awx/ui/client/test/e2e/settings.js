@@ -7,6 +7,7 @@ const AWX_E2E_TIMEOUT_SHORT  = process.env.AWX_E2E_TIMEOUT_SHORT  || 1000;
 const AWX_E2E_TIMEOUT_MEDIUM = process.env.AWX_E2E_TIMEOUT_MEDIUM || 5000;
 const AWX_E2E_TIMEOUT_LONG   = process.env.AWX_E2E_TIMEOUT_LONG   || 10000;
 const AWX_E2E_TIMEOUT_ASYNC  = process.env.AWX_E2E_TIMEOUT_ASYNC  || 30000;
+const AWX_E2E_WORKERS        = process.env.AWX_E2E_WORKERS        || 2;
 
 
 module.exports = {
@@ -21,6 +22,10 @@ module.exports = {
     selenium_port: AWX_E2E_SELENIUM_PORT,
     shortTimeout: AWX_E2E_TIMEOUT_SHORT,
     waitForConditionTimeout: AWX_E2E_TIMEOUT_MEDIUM,
+    test_workers: {
+        enabled: (AWX_E2E_WORKERS > 0),
+        workers: AWX_E2E_WORKERS
+    },
     before(done) {
         done();
     },

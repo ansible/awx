@@ -1,12 +1,15 @@
+import path from 'path';
+
 import chromedriver from 'chromedriver';
 
 import {
     after,
-    before
+    before,
+    test_workers
 } from './settings.js';
 
 
-const resolve = location => `${__dirname}/${location}`;
+const resolve = location => path.resolve(__dirname, location);
 
 
 module.exports = {
@@ -17,6 +20,7 @@ module.exports = {
     globals_path: resolve('settings.js'),
     test_settings: {
         default: {
+            test_workers,
             skip_testcases_on_fail: false,
             desiredCapabilities: {
                 browserName: 'chrome'
@@ -26,6 +30,7 @@ module.exports = {
             selenium_port: 9515,
             selenium_host: 'localhost',
             default_path_prefix: '',
+            test_workers: { enabled: false },
             globals: {
                 before(done) {
                     chromedriver.start();
