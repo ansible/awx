@@ -74,7 +74,8 @@ function(i18n, InventoryCompletedJobsList) {
                 sourceField: 'name',
                 search: {
                     credential_type: '13' //insights
-                }
+                },
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
             },
             instance_groups: {
                 label: i18n._('Instance Groups'),
