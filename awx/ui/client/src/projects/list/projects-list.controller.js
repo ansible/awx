@@ -220,7 +220,6 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             Rest.post()
                 .success(function () {
                     Alert(i18n._('SCM Update Cancel'), i18n._('Your request to cancel the update was submitted to the task manager.'), 'alert-info');
-                    $scope.refresh();
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST status: '), url) + status });
