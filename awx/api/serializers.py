@@ -89,8 +89,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
-    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
-    'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -2490,6 +2490,22 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
+        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+            extra_creds = []
+            for cred in obj.extra_credentials.all():
+                extra_creds.append({
+                    'id': cred.pk,
+                    'name': cred.name,
+                    'description': cred.description,
+                    'kind': cred.kind,
+                    'credential_type_id': cred.credential_type_id
+                })
+            summary_fields['extra_credentials'] = extra_creds
+        return summary_fields
+
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
@@ -2576,6 +2592,21 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         if 'extra_vars' in ret:
             ret['extra_vars'] = obj.display_extra_vars()
         return ret
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(JobSerializer, self).get_summary_fields(obj)
+        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+            extra_creds = []
+            for cred in obj.extra_credentials.all():
+                extra_creds.append({
+                    'id': cred.pk,
+                    'name': cred.name,
+                    'description': cred.description,
+                    'kind': cred.kind,
+                    'credential_type_id': cred.credential_type_id
+                })
+            summary_fields['extra_credentials'] = extra_creds
+        return summary_fields
 
 
 class JobCancelSerializer(JobSerializer):

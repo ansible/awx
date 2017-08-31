@@ -73,6 +73,7 @@ class TestJobTemplateCopyEdit:
 
         fake_view = FakeView()
         fake_view.request = request
+        fake_view.kwargs = {'pk': '42'}
         context = {}
         context['view'] = fake_view
         context['request'] = request
