@@ -1351,7 +1351,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
-                        if(field.awRequiredWhen) {console.log(field.awRequiredWhen);
+                        if(field.awRequiredWhen) {
                             html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";

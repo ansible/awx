@@ -17,7 +17,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
     'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
     function($scope, $rootScope, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, ReturnToCaller, GetBasePath, Wait, CreateSelect2,
-    $state, $location, i18n) {console.log($scope);
+    $state, $location, i18n) {
 
         var defaultUrl = GetBasePath('organizations'),
             form = UserForm;
