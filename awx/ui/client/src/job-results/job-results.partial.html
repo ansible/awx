@@ -81,9 +81,12 @@
                          <label class="JobResults-resultRowLabel" translate>
                              Explanation
                          </label>
+                        <div class="JobResults-resultRowText" ng-show="!previousTaskFailed">
+                            {{ job.job_explanation }}
+                        </div>
                          <div class="JobResults-resultRowText">
                              {{task_detail | limitTo:explanationLimit}}
-                             <span ng-show="explanationLimit && task_detail.length > explanationLimit">
+                             <span ng-show="previousTaskFailed && explanationLimit && task_detail.length > explanationLimit">
                                  <span>... </span>
                                  <span class="JobResults-seeMoreLess" ng-click="explanationLimit=undefined">Show More</span>
                              </span>
