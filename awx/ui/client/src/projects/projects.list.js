@@ -116,13 +116,13 @@ export default ['i18n', function(i18n) {
             "delete": {
                 ngClick: "deleteProject(project.id, project.name)",
                 awToolTip: i18n._('Delete the project'),
-                ngShow: "(project.status !== 'updating' && project.status !== 'running' && project.status !== 'pending')  && project.summary_fields.user_capabilities.delete",
+                ngShow: "(project.status !== 'updating' && project.status !== 'running' && project.status !== 'pending' && project.status !== 'waiting')  && project.summary_fields.user_capabilities.delete",
                 dataPlacement: 'top'
             },
             cancel: {
                 ngClick: "cancelUpdate(project)",
                 awToolTip: i18n._('Cancel the SCM update'),
-                ngShow: "(project.status == 'updating' || project.status == 'running' || project.status == 'pending') && project.summary_fields.user_capabilities.start",
+                ngShow: "(project.status == 'updating' || project.status == 'running' || project.status == 'pending' || project.status == 'waiting') && project.summary_fields.user_capabilities.start",
                 dataPlacement: 'top',
                 ngDisabled: "project.pending_cancellation || project.status == 'canceled'"
             }
