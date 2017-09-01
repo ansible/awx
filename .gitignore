@@ -108,6 +108,7 @@ local/
 requirements/vendor
 .i18n_built
 VERSION
+.idea/*
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

@@ -1,8 +1,10 @@
 ---
-
-- hosts: all
+- name: Build and deploy AWX
+  hosts: all
   gather_facts: false
   roles:
+    - { role: check_vars }
     - { role: image_build }
     - { role: openshift, when: "openshift_host is defined" }
     - { role: local_docker, when: "openshift_host is not defined" }
+

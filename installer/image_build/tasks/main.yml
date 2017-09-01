@@ -34,17 +34,25 @@
   debug:
     msg: "{{ awx_sdist_file }}"
 
+- name: Stat distribution file
+  stat:
+    path: "../dist/{{ awx_sdist_file }}"
+  delegate_to: localhost
+  register: sdist
+
 - name: Clean distribution
   shell: make clean
   args:
     chdir: ..
+  ignore_errors: yes
+  when: not sdist.stat.exists
   delegate_to: localhost
 
 - name: Build AWX distribution
   shell: make sdist
   args:
     chdir: ..
-    creates: "../dist/{{ awx_sdist_file }}"
+    creates: "./dist/{{ awx_sdist_file }}"
   delegate_to: localhost
 
 - name: Set docker build base path
@@ -155,3 +163,4 @@
     path: "{{ docker_base_path }}"
     state: absent
   when: cleanup_docker_base|default(True)
+  delegate_to: localhost
