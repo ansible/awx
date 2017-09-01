@@ -238,7 +238,10 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                     if (status === 403) {
                         /* User doesn't have read access to the extra credentials, so use summary_fields */
                         selectedCredentials.extra = job_template_obj.summary_fields.extra_credentials;
-                        _.map(selectedCredentials.extra, (cred) => {cred.credential_type = cred.credential_type_id;});
+                        _.map(selectedCredentials.extra, (cred) => {
+                            cred.credential_type = cred.credential_type_id;
+                            return cred;
+                        });
                     } else {
                         ProcessErrors(null, data, status, null,
                             {
