@@ -1166,7 +1166,6 @@ class JobEvent(CreatedModifiedModel):
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
-        from awx.main.models.inventory import Host
         extra_host_pks = set(extra_host_pks or [])
         hostnames = set()
         if self.host_name:
@@ -1177,7 +1176,7 @@ class JobEvent(CreatedModifiedModel):
                     hostnames.update(v.keys())
             except AttributeError: # In case event_data or v isn't a dict.
                 pass
-        qs = Host.objects.filter(inventory__jobs__id=self.job_id)
+        qs = self.job.inventory.hosts.all()
         qs = qs.filter(Q(name__in=hostnames) | Q(pk__in=extra_host_pks))
         qs = qs.exclude(job_events__pk=self.id).only('id')
         for host in qs:
@@ -1224,7 +1223,6 @@ class JobEvent(CreatedModifiedModel):
                         host_summary.save(update_fields=update_fields)
 
     def save(self, *args, **kwargs):
-        from awx.main.models.inventory import Host
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -1239,7 +1237,7 @@ class JobEvent(CreatedModifiedModel):
                     update_fields.append(field)
             # Update host related field from host_name.
             if not self.host_id and self.host_name:
-                host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
+                host_qs = self.job.inventory.hosts.filter(name=self.host_name)
                 host_id = host_qs.only('id').values_list('id', flat=True).first()
                 if host_id != self.host_id:
                     self.host_id = host_id
