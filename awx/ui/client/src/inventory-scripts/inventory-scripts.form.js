@@ -41,10 +41,7 @@ export default ['i18n', function(i18n) {
                 type: 'lookup',
                 list: 'OrganizationList',
                 basePath: 'organizations',
-                awRequiredWhen: {
-                    reqExpression: "orgrequired",
-                    init: true
-                },
+                required: true,
                 sourceModel: 'organization',
                 sourceField: 'name',
                 ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'

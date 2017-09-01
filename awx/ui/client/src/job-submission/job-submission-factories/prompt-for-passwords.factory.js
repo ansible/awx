@@ -17,8 +17,11 @@ export default
                 field = form.fields[password];
                 fld = password;
                 scope[fld] = '';
-                html += "<div class=\"form-group prepend-asterisk\">\n";
-                html += "<label for=\"" + fld + "\">" + field.label + "</label>\n";
+                html += "<div class=\"form-group\">\n";
+                html += "<label for=\"" + fld + "\">";
+                html += '<span class="Form-requiredAsterisk">*</span>';
+                html += '<span>' + field.label + '</span>';
+                html += "</label>\n";
                 html += "<input type=\"password\" ";
                 html += "ng-model=\"" + fld + '" ';
                 html += 'name="' + fld + '" ';
@@ -37,8 +40,9 @@ export default
                     fld = field.associated;
                     field = form.fields[field.associated];
                     scope[fld] = '';
-                    html += "<div class=\"form-group prepend-asterisk\">\n";
+                    html += "<div class=\"form-group\">\n";
                     html += "<label for=\"" + fld + "\"> " + field.label + "</label>\n";
+                    html += '<span class="Form-requiredAsterisk">*</span>';
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += 'name="' + fld + '" ';

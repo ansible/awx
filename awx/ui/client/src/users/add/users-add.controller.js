@@ -28,6 +28,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
+            $scope.isAddForm = true;
             $scope.ldap_user = false;
             $scope.not_ldap_user = !$scope.ldap_user;
             $scope.ldap_dn = null;

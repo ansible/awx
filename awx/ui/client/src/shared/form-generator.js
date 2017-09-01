@@ -633,15 +633,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (field.label || field.labelBind) {
                         html += "<label class=\"";
                         html += (field.labelClass) ? field.labelClass : "";
-                        html += `${field.required ? ' prepend-asterisk ' : ''}`;
                         html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
                         html += (field.showParseTypeToggle) ? "Form-inputLabelContainer--codeMirror " : "";
                         html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
+
+                        html += `${field.required ? '<span class="Form-requiredAsterisk">*</span>' : ''}`;
+
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
                             html += "\t\t<span class=\"Form-inputLabel\" translate>\n\t\t\t" + field.label + "\n\t\t</span>";
                         }

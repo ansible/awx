@@ -421,43 +421,47 @@ function(ConfigurationUtils, i18n, $rootScope) {
     return {
         require: 'ngModel',
         compile: function(tElem) {
-            let label = $(tElem).closest('.form-group').find('label').first();
-            $(label).addClass('prepend-asterisk');
-        },
-        link: function(scope, elm, attrs, ctrl) {
+            return {
+                pre: function preLink() {
+                    let label = $(tElem).closest('.form-group').find('label').first();
+                    $(label).prepend('<span class="Form-requiredAsterisk">*</span>');
+                },
+                post: function postLink( scope, elm, attrs, ctrl ) {
+                    function updateRequired() {
+                        var isRequired = scope.$eval(attrs.awRequiredWhen);
 
-            function updateRequired() {
-                var isRequired = scope.$eval(attrs.awRequiredWhen);
+                        var viewValue = elm.val(),
+                            label, validity = true;
+                        label = $(elm).closest('.form-group').find('label').first();
 
-                var viewValue = elm.val(),
-                    label, validity = true;
-                label = $(elm).closest('.form-group').find('label').first();
+                        if (isRequired && (elm.attr('required') === null || elm.attr('required') === undefined)) {
+                            $(elm).attr('required', 'required');
+                            if(!$(label).find('span.Form-requiredAsterisk').length){
+                                $(label).prepend('<span class="Form-requiredAsterisk">*</span>');
+                            }
+                        } else if (!isRequired) {
+                            elm.removeAttr('required');
+                            if (!attrs.awrequiredAlwaysShowAsterisk) {
+                                $(label).find('span.Form-requiredAsterisk')[0].remove();
+                            }
+                        }
+                        if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
+                            validity = false;
+                        }
+                        ctrl.$setValidity('required', validity);
+                    }
 
-                if (isRequired && (elm.attr('required') === null || elm.attr('required') === undefined)) {
-                    $(elm).attr('required', 'required');
-                    $(label).removeClass('prepend-asterisk').addClass('prepend-asterisk');
-                } else if (!isRequired) {
-                    elm.removeAttr('required');
-                    if (!attrs.awrequiredAlwaysShowAsterisk) {
-                        $(label).removeClass('prepend-asterisk');
+                    scope.$watchGroup([attrs.awRequiredWhen, $(elm).attr('name')], function() {
+                        // watch for the aw-required-when expression to change value
+                        updateRequired();
+                    });
+
+                    if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
+                        // We already set a watcher on the attribute above so no need to call updateRequired() in here
+                        scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
                     }
                 }
-                if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
-                    validity = false;
-                }
-                ctrl.$setValidity('required', validity);
-            }
-
-            scope.$watchGroup([attrs.awRequiredWhen, $(elm).attr('name')], function() {
-                // watch for the aw-required-when expression to change value
-                updateRequired();
-            });
-
-            if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
-                // We already set a watcher on the attribute above so no need to call updateRequired() in here
-                scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
-            }
-
+            };
         }
     };
 })
