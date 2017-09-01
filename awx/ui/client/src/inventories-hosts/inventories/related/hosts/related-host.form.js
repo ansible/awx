@@ -37,7 +37,7 @@ function(i18n) {
                                " set by the inventory sync process.") +
                         "</p>",
                     dataTitle: i18n._('Host Enabled'),
-                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources'
+                    ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources || isSmartInvHost'
                 }
             },
             fields: {
@@ -56,11 +56,11 @@ function(i18n) {
                     dataTitle: i18n._('Host Name'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd) || isSmartInvHost'
                 },
                 description: {
                     label: i18n._('Description'),
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)',
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd) || isSmartInvHost',
                     type: 'text'
                 },
                 host_variables: {
@@ -79,23 +79,23 @@ function(i18n) {
                     dataTitle: i18n._('Host Variables'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd) || isSmartInvHost'
                 }
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd) && !isSmartInvHost'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(host.summary_fields.user_capabilities.edit || canAdd) || isSmartInvHost'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd) && !isSmartInvHost'
                 }
             },
 

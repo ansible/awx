@@ -7,6 +7,7 @@
  export default
  	['$scope', '$state', '$stateParams', 'GenerateForm', 'ParseTypeChange', 'HostsService', 'host', '$rootScope',
  	function($scope, $state, $stateParams, GenerateForm, ParseTypeChange, HostsService, host, $rootScope){
+        $scope.isSmartInvHost = $state.includes('inventories.editSmartInventory.hosts.edit');
  		$scope.parseType = 'yaml';
  		$scope.formCancel = function(){
  			$state.go('^', null, {reload: true});
