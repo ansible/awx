@@ -29,7 +29,7 @@ export default ['templateUrl', function(templateUrl) {
                 $scope.host_default_params = {
                     order_by: 'name',
                     page_size: 5,
-                    inventory__organization: null
+                    inventory__organization: $scope.organization
                 };
 
                 $scope.host_queryset = _.merge({
