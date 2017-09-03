@@ -621,6 +621,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     $scope.all_buttons.extend($scope.layers);
 
     $scope.onTaskStatus = function(data) {
+        console.log(['onTaskStatus', data]);
         var i = 0;
         var j = 0;
         var found = false;
@@ -646,11 +647,18 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
                         }
                     }
                 }
+                if (data.status !== null) {
+                    $scope.devices[i].status = data.status === "pass";
+                }
+                if (data.working !== null) {
+                    $scope.devices[i].working = data.working;
+                }
             }
         }
     };
 
     $scope.onDeviceStatus = function(data) {
+        console.log(['onDeviceStatus', data]);
         var i = 0;
         for (i = 0; i < $scope.devices.length; i++) {
             if ($scope.devices[i].name === data.name) {
