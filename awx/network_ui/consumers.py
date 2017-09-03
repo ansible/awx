@@ -649,7 +649,7 @@ class _Discovery(object):
             interfaces = dpath.util.get(message, '/value/ansible_net_neighbors')
             logger.info(pformat(interfaces))
         except KeyError:
-            interfaces = []
+            interfaces = {}
         logger.info("onFacts %s: ", pformat(interfaces))
         """
         ansible_net_neighbors example:
