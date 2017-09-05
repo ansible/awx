@@ -762,9 +762,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += label(labelOptions);
 
-                        html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}, 'ScheduleToggle--disabled': ${field.ngDisabled}}" aw-tool-tip=""
-                            data-placement="top">
-                            <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
+                        html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}, 'ScheduleToggle--disabled': ${field.ngDisabled}}" aw-tool-tip="" `
+                        html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
+                        html += `data-placement="top">`;
+                        html += `<button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
                                 ng-disabled="${field.ngDisabled}">ON</button>
                             <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')"
                                 ng-disabled="${field.ngDisabled}">OFF</button>

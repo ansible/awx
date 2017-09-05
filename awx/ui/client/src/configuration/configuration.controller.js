@@ -394,7 +394,9 @@ export default [
                             // Default AD_HOC_COMMANDS to an empty list
                             payload[key] = $scope[key].value || [];
                         } else {
-                            payload[key] = $scope[key].value;
+                            if ($scope[key]) {
+                                payload[key] = $scope[key].value;
+                            }
                         }
                     }
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
