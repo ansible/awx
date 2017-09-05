@@ -1171,15 +1171,30 @@ class InventorySerializer(BaseSerializerWithVariables):
             ret['organization'] = None
         return ret
 
+    def validate_host_filter(self, host_filter):
+        if host_filter:
+            try:
+                SmartFilter().query_from_string(host_filter)
+            except RuntimeError, e:
+                raise models.base.ValidationError(e)
+        return host_filter
+
     def validate(self, attrs):
-        kind = attrs.get('kind', 'standard')
-        if kind == 'smart':
-            host_filter = attrs.get('host_filter')
-            if host_filter is not None:
-                try:
-                    SmartFilter().query_from_string(host_filter)
-                except RuntimeError, e:
-                    raise models.base.ValidationError(e)
+        kind = None
+        if 'kind' in attrs:
+            kind = attrs['kind']
+        elif self.instance:
+            kind = self.instance.kind
+
+        host_filter = None
+        if 'host_filter' in attrs:
+            host_filter = attrs['host_filter']
+        elif self.instance:
+            host_filter = self.instance.host_filter
+
+        if kind == 'smart' and not host_filter:
+            raise serializers.ValidationError({'host_filter': _(
+                'Smart inventories must specify host_filter')})
         return super(InventorySerializer, self).validate(attrs)
 
 
