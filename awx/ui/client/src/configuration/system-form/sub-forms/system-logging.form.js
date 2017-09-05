@@ -63,7 +63,7 @@
             },
             LOG_AGGREGATOR_VERIFY_CERT: {
                 type: 'toggleSwitch',
-                ngShow: 'LOG_AGGREGATOR_PROTOCOL.value === "https"'
+                ngShow: "LOG_AGGREGATOR_PROTOCOL.value === 'https'"
             }
          },
 
