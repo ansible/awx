@@ -442,7 +442,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                         } else if (!isRequired) {
                             elm.removeAttr('required');
                             if (!attrs.awrequiredAlwaysShowAsterisk) {
-                                $(label).find('span.Form-requiredAsterisk')[0].remove();
+                                $(label).find('span.Form-requiredAsterisk').remove();
                             }
                         }
                         if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
