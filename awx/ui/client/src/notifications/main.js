@@ -39,7 +39,6 @@ angular.module('notifications', [
                 name: 'notifications',
                 url: '/notification_templates',
                 ncyBreadcrumb: {
-                    parent: 'setup',
                     label: N_("NOTIFICATIONS")
                 },
                 lazyLoad: () => stateDefinitions.generateTree({
@@ -84,10 +83,9 @@ angular.module('notifications', [
                     },
                     data: {
                         activityStream: true,
-                        activityStreamTarget: 'notification_template'		
+                        activityStreamTarget: 'notification_template'
                     },
                     ncyBreadcrumb: {
-                        parent: 'setup',
                         label: N_('NOTIFICATIONS')
                     }
                 })

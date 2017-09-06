@@ -6,7 +6,6 @@ export default {
     url: '/instance_groups',
     searchPrefix: 'instance_group',
     ncyBreadcrumb: {
-        parent: 'setup',
         label: N_('INSTANCE GROUPS')
     },
     params: {

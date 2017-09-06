@@ -51,8 +51,6 @@ import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import about from './about/main';
 import license from './license/main';
-import setupMenu from './setup-menu/main';
-import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import configuration from './configuration/main';
@@ -67,7 +65,6 @@ import users from './users/main';
 import projects from './projects/main';
 import RestServices from './rest/main';
 import access from './access/main';
-import footer from './footer/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
 
@@ -108,13 +105,10 @@ var awApp = angular.module('awApp', [
     credentialTypes.name,
     organizations.name,
     managementJobs.name,
-    setupMenu.name,
-    mainMenu.name,
     breadCrumb.name,
     home.name,
     login.name,
     activityStream.name,
-    footer.name,
     workflowResults.name,
     jobResults.name,
     jobSubmission.name,
@@ -243,18 +237,6 @@ var awApp = angular.module('awApp', [
                     //base.replace(/\_/g, ' ');
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
-
-                $('#ansible-list-title').html('<strong>' + base.replace(/\_/, ' ') + '</strong>');
-
-                $('#ansible-main-menu li').each(function() {
-                    $(this).removeClass('active');
-                });
-                $('#ansible-main-menu #' + base).addClass('active');
-                // Apply to mobile menu as well
-                $('#ansible-mobile-menu a').each(function() {
-                    $(this).removeClass('active');
-                });
-                $('#ansible-mobile-menu a[href="#' + base + '"]').addClass('active');
             }
 
             if ($rootScope.removeConfigReady) {

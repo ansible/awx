@@ -3,7 +3,7 @@ import controller from './about.controller';
 import { N_ } from '../i18n';
 
 export default {
-    name: 'setup.about',
+    name: 'about',
     route: '/about',
     controller: controller,
     ncyBreadcrumb: {

@@ -47,6 +47,31 @@ function ComponentsStrings (BaseString) {
         DEFAULT: t.s('Copy full revision to clipboard.'),
         COPIED: t.s('Copied to clipboard.')
     }
+
+    ns.layout = {
+        CURRENT_USER_LABEL: t.s('Logged in as'),
+        VIEW_DOCS: t.s('View Documentation'),
+        LOGOUT: t.s('Logout'),
+        DASHBOARD: t.s('Dashboard'),
+        JOBS: t.s('Jobs'),
+        SCHEDULES: t.s('Schedules'),
+        PORTAL_MODE: t.s('Portal Mode'),
+        PROJECTS: t.s('Projects'),
+        CREDENTIALS: t.s('Credentials'),
+        CREDENTIAL_TYPES: t.s('Credential Types'),
+        INVENTORIES: t.s('Inventories'),
+        TEMPLATES: t.s('Templates'),
+        ORGANIZATIONS: t.s('Organizations'),
+        USERS: t.s('Users'),
+        TEAMS: t.s('Teams'),
+        INVENTORY_SCRIPTS: t.s('Inventory Scripts'),
+        NOTIFICATIONS: t.s('Notifications'),
+        MANAGEMENT_JOBS: t.s('Management Jobs'),
+        INSTANCE_GROUPS: t.s('Instance Groups'),
+        SETTINGS: t.s('Settings'),
+        FOOTER_ABOUT: t.s('About'),
+        FOOTER_COPYRIGHT: t.s('Copyright © 2017 Red Hat, Inc.')
+    }
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

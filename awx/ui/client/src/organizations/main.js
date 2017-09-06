@@ -48,7 +48,6 @@ angular.module('Organizations', [
                         list: templateUrl('organizations/list/organizations-list')
                     },
                     ncyBreadcrumb: {
-                        parent: 'setup',
                         label: N_('ORGANIZATIONS')
                     },
                     data: {

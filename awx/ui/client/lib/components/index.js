@@ -1,3 +1,7 @@
+import layout from './layout/layout.directive';
+import topNavItem from './layout/top-nav-item.directive';
+import sideNav from './layout/side-nav.directive';
+import sideNavItem from './layout/side-nav-item.directive';
 import actionGroup from './action/action-group.directive';
 import divider from './utility/divider.directive';
 import form from './form/form.directive';
@@ -26,6 +30,10 @@ import ComponentsStrings from './components.strings';
 
 angular
     .module('at.lib.components', [])
+    .directive('atLayout', layout)
+    .directive('atTopNavItem', topNavItem)
+    .directive('atSideNav', sideNav)
+    .directive('atSideNavItem', sideNavItem)
     .directive('atActionGroup', actionGroup)
     .directive('atDivider', divider)
     .directive('atForm', form)
@@ -50,5 +58,3 @@ angular
     .directive('atTruncate', truncate)
     .service('ComponentsStrings', ComponentsStrings)
     .service('BaseInputController', BaseInputController);
-
-
