@@ -1,5 +1,4 @@
-ARG TAG=latest
-FROM gcr.io/ansible-tower-engineering/awx_devel:$TAG
+FROM gcr.io/ansible-tower-engineering/awx_devel:latest
 
 # For UI tests
 RUN yum install -y bzip2 gcc-c++
