@@ -533,9 +533,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
                     html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
-                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
+                    html += "' ";
+                    html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
+                    html += " class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
+                    html += "' ";
+                    html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
+                    html += " class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
                 }
                 return html;
             },
@@ -629,17 +633,19 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (field.label || field.labelBind) {
                         html += "<label class=\"";
                         html += (field.labelClass) ? field.labelClass : "";
-                        html += `${field.required ? ' prepend-asterisk ' : ''}`;
                         html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
                         html += (field.showParseTypeToggle) ? "Form-inputLabelContainer--codeMirror " : "";
                         html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
+
+                        html += `${field.required ? '<span class="Form-requiredAsterisk">*</span>' : ''}`;
+
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
-                            html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" translate>\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
                         html += ((field.awPopOver || field.awPopOverWatch) && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
@@ -758,10 +764,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += label(labelOptions);
 
-                        html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
-                            data-placement="top">
-                            <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</button>
-                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</button>
+                        html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}, 'ScheduleToggle--disabled': ${field.ngDisabled}}" aw-tool-tip="" `;
+                        html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
+                        html += `data-placement="top">`;
+                        html += `<button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
+                                ng-disabled="${field.ngDisabled}">ON</button>
+                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')"
+                                ng-disabled="${field.ngDisabled}">OFF</button>
                         </div>`;
                     }
 
@@ -1203,9 +1212,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += buildCheckbox(this.form, field, fld, undefined, false);
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\" translate>\n\t\t</span>";
                         } else {
-                            html += "<span class=\"Form-inputLabel\">" + field.label + "</span>";
+                            html += "<span class=\"Form-inputLabel\" translate>" + field.label + "</span>";
                         }
 
                         html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
@@ -1476,7 +1485,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `<div id="${this.form.name}_tab" class="Form-tab" `;
                         html += this.form.detailsClick ? `ng-click="` + this.form.detailsClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit')" `;
                         let detailsTabSelected = this.form.activeEditState ? `$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState` : `$state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState`;
-                        html += `ng-class="{'is-selected': ${detailsTabSelected} }">` +
+                        html += `ng-class="{'is-selected': ${detailsTabSelected} }" translate>` +
                             `${details}</div>`;
 
                         for (itm in this.form.related) {
@@ -1495,7 +1504,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }
-                            html +=  `}">${(collection.title || collection.editTitle)}</div>`;
+                            html +=  `}" translate>${(collection.title || collection.editTitle)}</div>`;
                         }
 
                         for (itm in this.form.relatedButtons) {
@@ -1544,6 +1553,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
                             html += "<div id=\"" + itm + "_tab\" ";
+                            html += (this.form.related[itm].ngIf) ? ` ng-if="${this.form.related[itm].ngIf}" ` :  "";
                             html += collection.awToolTip ? "aw-tool-tip=\"" + collection.awToolTip + "\" aw-tip-placement=\"" + collection.dataPlacement + "\" " : "";
                             html += "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +

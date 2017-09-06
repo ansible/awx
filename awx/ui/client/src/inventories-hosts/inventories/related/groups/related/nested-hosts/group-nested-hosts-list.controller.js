@@ -6,10 +6,10 @@
 
 export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData',
+    'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData', 'inventoryData',
     function($scope, NestedHostsListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData) {
+    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData, inventoryData) {
 
     let list = NestedHostsListDefinition;
 
@@ -24,6 +24,8 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
         $scope.list = list;
         $scope[`${list.iterator}_dataset`] = Dataset.data;
         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+        $scope.inventory_obj = inventoryData;
 
         $rootScope.flashMessage = null;
 

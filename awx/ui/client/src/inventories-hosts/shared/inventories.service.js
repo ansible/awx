@@ -69,6 +69,13 @@
                 return Rest.get()
                     .success(this.success.bind(this))
                     .error(this.error.bind(this));
+            },
+            getHost: function(inventoryId, hostId) {
+                this.url = GetBasePath('inventory') + inventoryId + '/hosts?id=' + hostId;
+                Rest.setUrl(this.url);
+                return Rest.get()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this));
             }
         };
     }];

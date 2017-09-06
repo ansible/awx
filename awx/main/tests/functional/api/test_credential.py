@@ -748,6 +748,7 @@ def test_falsey_field_data(get, post, organization, admin, field_value):
         'credential_type': net.pk,
         'organization': organization.id,
         'inputs': {
+            'username': 'joe-user',  # username is required
             'authorize': field_value
         }
     }
@@ -920,6 +921,25 @@ def test_vault_create_ok(post, organization, admin, version, params):
     assert Credential.objects.count() == 1
     cred = Credential.objects.all()[:1].get()
     assert decrypt_field(cred, 'vault_password') == 'some_password'
+
+
+@pytest.mark.django_db
+def test_vault_password_required(post, organization, admin):
+    vault = CredentialType.defaults['vault']()
+    vault.save()
+    response = post(
+        reverse('api:credential_list', kwargs={'version': 'v2'}),
+        {
+            'credential_type': vault.pk,
+            'organization': organization.id,
+            'name': 'Best credential ever',
+            'inputs': {}
+        },
+        admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs'] == {'vault_password': ['required for Vault']}
+    assert Credential.objects.count() == 0
 
 
 #
@@ -1424,6 +1444,34 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['username'] == 'joe'
     assert 'password' not in cred.inputs
+
+
+@pytest.mark.django_db
+def test_credential_type_immutable_in_v2(patch, organization, admin, credentialtype_ssh, credentialtype_aws):
+    cred = Credential(
+        credential_type=credentialtype_ssh,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'jim',
+            'password': u'pass'
+        }
+    )
+    cred.save()
+
+    response = patch(
+        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+        {
+            'credential_type': credentialtype_aws.pk,
+            'inputs': {
+                'username': u'jim',
+                'password': u'pass'
+            }
+        },
+        admin
+    )
+    assert response.status_code == 400
+    assert 'credential_type' in response.data
 
 
 @pytest.mark.django_db

@@ -54,18 +54,15 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    awRequiredWhen: {
-                        reqExpression: "organizationrequired",
-                        init: "true"
-                    },
+                    required: true,
                     ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                     awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
                 },
                 smart_hosts: {
                     label: i18n._('Smart Host Filter'),
                     type: 'custom',
-                    control: '<smart-inventory-host-filter host-filter="smart_hosts"></smart-inventory-host-filter>',
-                    awPopOver: "<p>" + i18n._("Populate the hosts for this inventory by using a search filter.") + "</p><p>" + i18n._("Example: ansible_facts.ansible_distribution:\"RHEL\"") + "</p><p>" + i18n._("Refer to the Ansible Tower documentation for further syntax and examples.") + "</p>",
+                    control: '<smart-inventory-host-filter host-filter="smart_hosts" has-edit-permissions="inventory_obj.summary_fields.user_capabilities.edit || canAdd" organization="organization"></smart-inventory-host-filter>',
+                    awPopOver: "<p>" + i18n._("Populate the hosts for this inventory by using a search filter.") + "</p><p>" + i18n._("Example: ansible_facts.ansible_distribution:\"RedHat\"") + "</p><p>" + i18n._("Refer to the Ansible Tower documentation for further syntax and examples.") + "</p>",
                     dataTitle: i18n._('Smart Host Filter'),
                     dataPlacement: 'right',
                     dataContainer: 'body',

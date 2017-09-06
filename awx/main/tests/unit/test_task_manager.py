@@ -19,8 +19,8 @@ from django.core.cache import cache
 class TestCleanupInconsistentCeleryTasks():
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {}))
-    @mock.patch.object(TaskManager, 'get_running_tasks', return_value={'host1': [Job(id=2), Job(id=3),]})
-    @mock.patch.object(InstanceGroup.objects, 'all', return_value=[])
+    @mock.patch.object(TaskManager, 'get_running_tasks', return_value=({'host1': [Job(id=2), Job(id=3),]}, []))
+    @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
     @mock.patch.object(Instance.objects, 'get', side_effect=Instance.DoesNotExist)
     @mock.patch('awx.main.scheduler.logger')
     def test_instance_does_not_exist(self, logger_mock, *args):
@@ -31,19 +31,19 @@ class TestCleanupInconsistentCeleryTasks():
 
         assert "mocked" in str(excinfo.value)
         logger_mock.error.assert_called_once_with("Execution node Instance host1 not found in database. "
-                                                  "The node is currently executing jobs ['None-2-new', "
-                                                  "'None-3-new']")
+                                                  "The node is currently executing jobs ['job 2 (new)', "
+                                                  "'job 3 (new)']")
 
     @mock.patch.object(cache, 'get', return_value=None)
     @mock.patch.object(TaskManager, 'get_active_tasks', return_value=([], {'host1': []}))
-    @mock.patch.object(InstanceGroup.objects, 'all', return_value=[])
+    @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
     @mock.patch.object(TaskManager, 'get_running_tasks')
     @mock.patch('awx.main.scheduler.logger')
     def test_save_failed(self, logger_mock, get_running_tasks, *args):
         logger_mock.error = mock.MagicMock()
         job = Job(id=2, modified=tz_now(), status='running', celery_task_id='blah', execution_node='host1')
         job.websocket_emit_status = mock.MagicMock()
-        get_running_tasks.return_value = {'host1': [job]}
+        get_running_tasks.return_value = ({'host1': [job]}, [])
         tm = TaskManager()
 
         with mock.patch.object(job, 'save', side_effect=DatabaseError):

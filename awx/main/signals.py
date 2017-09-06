@@ -140,6 +140,9 @@ def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwarg
 
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
+    update_fields = kwargs.get('update_fields', None)
+    if update_fields and 'is_superuser' not in update_fields:
+        return
     if instance.is_superuser:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
     else:
@@ -147,6 +150,8 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
 
 
 def create_user_role(instance, **kwargs):
+    if not kwargs.get('created', True):
+        return
     try:
         Role.objects.get(
             content_type=ContentType.objects.get_for_model(instance),

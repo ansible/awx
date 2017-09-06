@@ -8,7 +8,14 @@ export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
     function($scope, qs, InventoryHostsStrings) {
         $scope.hostFilterTags = [];
 
-        $scope.filterTooltip = InventoryHostsStrings.get('smartinventories.TOOLTIP');
+        $scope.$watch('organization', function(){
+            if($scope.hasEditPermissions) {
+                $scope.filterTooltip = $scope.organization ? InventoryHostsStrings.get('smartinventories.hostfilter.INSTRUCTIONS') : InventoryHostsStrings.get('smartinventories.hostfilter.MISSING_ORG');
+            }
+            else {
+                $scope.filterTooltip = InventoryHostsStrings.get('smartinventories.hostfilter.MISSING_PERMISSIONS');
+            }
+        });
 
         $scope.$watch('hostFilter', function(){
             $scope.hostFilterTags = [];
@@ -21,10 +28,7 @@ export default ['$scope', 'QuerySet', 'InventoryHostsStrings',
 
                 $.each(searchParam, function(index, param) {
                     let paramParts = decodeURIComponent(param).split(/=(.+)/);
-                    paramParts[0] = paramParts[0].replace(/__icontains(_DEFAULT)?/g, "");
-                    paramParts[0] = paramParts[0].replace(/__search(_DEFAULT)?/g, "");
-                    let reconstructedSearchString = qs.decodeParam(paramParts[1], paramParts[0]);
-                    $scope.hostFilterTags.push(reconstructedSearchString);
+                    $scope.hostFilterTags.push(qs.decodeParam(paramParts[1], paramParts[0]));
                 });
 
                 $scope.hostFilterTags = $scope.hostFilterTags.concat(qs.stripDefaultParams(hostFilterCopy));

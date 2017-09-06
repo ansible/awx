@@ -391,7 +391,20 @@ def test_charfield_properly_sets_none(settings, mocker):
     )
 
 
-def test_settings_use_an_encrypted_cache(settings):
+def test_settings_use_cache(settings, mocker):
+    settings.registry.register(
+        'AWX_VAR',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system'
+    )
+    settings.cache.set('AWX_VAR', 'foobar')
+    settings.cache.set('_awx_conf_preload_expires', 100)
+    # Will fail test if database is used
+    getattr(settings, 'AWX_VAR')
+
+
+def test_settings_use_an_encrypted_cache(settings, mocker):
     settings.registry.register(
         'AWX_ENCRYPTED',
         field_class=fields.CharField,
@@ -402,6 +415,11 @@ def test_settings_use_an_encrypted_cache(settings):
     assert isinstance(settings.cache, EncryptedCacheProxy)
     assert settings.cache.__dict__['encrypter'] == encrypt_field
     assert settings.cache.__dict__['decrypter'] == decrypt_field
+    settings.cache.set('AWX_ENCRYPTED_ID', 402)
+    settings.cache.set('AWX_ENCRYPTED', 'foobar')
+    settings.cache.set('_awx_conf_preload_expires', 100)
+    # Will fail test if database is used
+    getattr(settings, 'AWX_ENCRYPTED')
 
 
 def test_sensitive_cache_data_is_encrypted(settings, mocker):

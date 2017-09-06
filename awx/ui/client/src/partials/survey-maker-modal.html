@@ -42,13 +42,14 @@
             <div style="display: flex; flex-direction: column; width: 100%;">
                 <div class="SurveyMaker-panelHeader" translate>PREVIEW</div>
                 <div class="SurveyMaker-panelBody">
-                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions" translate>PLEASE ADD A SURVEY PROMPT ON THE LEFT.</div>
+                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions" translate>PLEASE ADD A SURVEY PROMPT.</div>
                     <ul dnd-list="survey_questions" class="SurveyMaker-previewRows" dnd-drop="surveyQuestionDropped(index, item)">
                         <li ng-repeat="question in survey_questions" dnd-draggable="question" dnd-effect-allowed="move" class="SurveyMaker-previewRow">
                             <dnd-nodrag>
                                 <div>
                                     <label class="SurveyMaker-previewLabel" for="question.variable">
-                                        <span class="label-text" ng-class="{'prepend-asterisk': question.required}"> {{question.question_name}}</span>
+                                        <span ng-show="question.required===true" class="Form-requiredAsterisk">*</span>
+                                        <span class="label-text"> {{question.question_name}}</span>
                                     </label>
                                 </div>
 

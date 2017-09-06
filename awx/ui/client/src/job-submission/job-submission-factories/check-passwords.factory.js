@@ -12,7 +12,7 @@ export default
                 .success(function (data) {
                     credentialTypesLookup()
                         .then(kinds => {
-                            if(data.credential_type === kinds.Machine && data.inputs){console.log(data.inputs);
+                            if(data.credential_type === kinds.Machine && data.inputs){
                                 if(data.inputs.password === "ASK" ){
                                     passwords.push("ssh_password");
                                 }

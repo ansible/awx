@@ -56,7 +56,7 @@
             $state.go('inventories.edit.groups.edit', {inventory_id: $scope.inventory_id, group_id: id});
         };
 
-        $scope.goToGroupGroups = function(id){console.log();
+        $scope.goToGroupGroups = function(id){
             $state.go('inventories.edit.groups.edit.nested_groups', {inventory_id: $scope.inventory_id, group_id: id});
         };
 

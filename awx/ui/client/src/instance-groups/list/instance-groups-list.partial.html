@@ -26,11 +26,11 @@
                     "{{'Name' | translate}}"
                     <i ng-if="columnNoSort !== 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
                 </th>
-                <th id="instance_group-percent_capacity_remaining-header" class="List-tableHeader list-header list-header-noSort" translate>
-                    Capacity
-                </th>
                 <th id="instance_group-jobs_running-header" class="List-tableHeader list-header list-header-noSort" translate>
                     Running Jobs
+                </th>
+                <th id="instance_group-consumed_capacity-header" class="List-tableHeader list-header list-header-noSort" translate>
+                    Used Capacity
                 </th>
             </tr>
         </thead>
@@ -41,13 +41,13 @@
                     <a ui-sref="instanceGroups.instances.list({instance_group_id: instance_group.id})" class="ng-binding" >{{ instance_group.name }}</a>
                     <span class="badge List-titleBadge">{{ instance_group.instances }}</span>
                 </td>
-                <td class="List-tableCell List-tableCell--capacityRemainingColumn ng-binding">
-                    <capacity-bar capacity="instance_group.percent_capacity_remaining"></capacity-bar><span>{{ instance_group.percent_capacity_remaining }}%</span>
-                </td>
                 <td class="List-tableCell jobs_running-column ng-binding">
                     <a ui-sref="instanceGroups.instances.jobs({instance_group_id: instance_group.id})">
                         {{ instance_group.jobs_running }}
                     </a>
+                </td>
+                <td class="List-tableCell List-tableCell--capacityColumn ng-binding">
+                    <capacity-bar capacity="instance_group.consumed_capacity"></capacity-bar><span>{{ instance_group.consumed_capacity }}%</span>
                 </td>
             </tr>
         </tbody>

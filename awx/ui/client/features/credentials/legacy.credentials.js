@@ -149,10 +149,10 @@ function LegacyCredentialsService (pathService) {
                 'QuerySet',
                 '$stateParams',
                 'GetBasePath',
-                (list, qs, $stateParams, GetBasePath) => {
-                    let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                'resourceData',
+                (list, qs, $stateParams, GetBasePath, resourceData) => {
+                    let path = resourceData.data.organization ? GetBasePath('organizations') + `${resourceData.data.organization}/users` : ((list.basePath) || GetBasePath(list.name));
                     return qs.search(path, $stateParams.user_search);
-
                 }
             ],
             teamsDataset: [
@@ -160,9 +160,19 @@ function LegacyCredentialsService (pathService) {
                 'QuerySet',
                 '$stateParams',
                 'GetBasePath',
-                (list, qs, $stateParams, GetBasePath) => {
+                'resourceData',
+                (list, qs, $stateParams, GetBasePath, resourceData) => {
                     let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                    return qs.search(path, $stateParams.team_search);
+
+                    if(!resourceData.data.organization) {
+                        return null;
+                    }
+                    else {
+                        $stateParams[`${list.iterator}_search`].organization = resourceData.data.organization;
+                        return qs.search(path, $stateParams.team_search);
+                    }
+
+
                 }
             ],
             resourceData: ['CredentialModel', '$stateParams', (Credential, $stateParams) => {
@@ -198,7 +208,8 @@ function LegacyCredentialsService (pathService) {
                         teams-dataset='$resolve.teamsDataset'
                         selected='allSelected'
                         resource-data='$resolve.resourceData'
-                        title='Add Users / Teams'>
+                        without-team-permissions='{{$resolve.resourceData.data.organization ? null : true}}'
+                        title='{{$resolve.resourceData.data.organization ? "Add Users / Teams" : "Add Users"}}'>
                     </add-rbac-resource>`
             }
         },

@@ -9,8 +9,8 @@
             <i ng-if="popover.position === 'top'" class="fa fa-caret-down fa-2x"></i>
         </div>
         <div class="at-Popover-content">
-            <h4 ng-if="popover.title" class="at-Popover-title">{{ popover.title }}</h4>
-            <p ng-if="popover.text" class="at-Popover-text">{{ popover.text }}</p>
+            <h4 ng-if="popover.title" class="at-Popover-title">{{ popover.title | translate }}</h4>
+            <p ng-if="popover.text" class="at-Popover-text">{{ popover.text | translate}}</p>
         </div>
     </div>
 </div>

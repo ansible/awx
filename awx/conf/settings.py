@@ -69,6 +69,12 @@ def _log_database_error():
         pass
 
 
+def filter_sensitive(registry, key, value):
+    if registry.is_setting_encrypted(key):
+        return '$encrypted$'
+    return value
+
+
 class EncryptedCacheProxy(object):
 
     def __init__(self, cache, registry, encrypter=None, decrypter=None):
@@ -105,9 +111,13 @@ class EncryptedCacheProxy(object):
                 six.text_type(value)
             except UnicodeDecodeError:
                 value = value.decode('utf-8')
+        logger.debug('cache get(%r, %r) -> %r', key, empty, filter_sensitive(self.registry, key, value))
         return value
 
-    def set(self, key, value, **kwargs):
+    def set(self, key, value, log=True, **kwargs):
+        if log is True:
+            logger.debug('cache set(%r, %r, %r)', key, filter_sensitive(self.registry, key, value),
+                         SETTING_CACHE_TIMEOUT)
         self.cache.set(
             key,
             self._handle_encryption(self.encrypter, key, value),
@@ -115,8 +125,13 @@ class EncryptedCacheProxy(object):
         )
 
     def set_many(self, data, **kwargs):
+        filtered_data = dict(
+            (key, filter_sensitive(self.registry, key, value))
+            for key, value in data.items()
+        )
+        logger.debug('cache set_many(%r, %r)', filtered_data, SETTING_CACHE_TIMEOUT)
         for key, value in data.items():
-            self.set(key, value, **kwargs)
+            self.set(key, value, log=False, **kwargs)
 
     def _handle_encryption(self, method, key, value):
         TransientSetting = namedtuple('TransientSetting', ['pk', 'value'])
@@ -124,9 +139,16 @@ class EncryptedCacheProxy(object):
         if value is not empty and self.registry.is_setting_encrypted(key):
             # If the setting exists in the database, we'll use its primary key
             # as part of the AES key when encrypting/decrypting
+            obj_id = self.cache.get(Setting.get_cache_id_key(key), default=empty)
+            if obj_id is empty:
+                logger.info('Efficiency notice: Corresponding id not stored in cache %s',
+                            Setting.get_cache_id_key(key))
+                obj_id = getattr(self._get_setting_from_db(key), 'pk', None)
+            elif obj_id == SETTING_CACHE_NONE:
+                obj_id = None
             return method(
                 TransientSetting(
-                    pk=getattr(self._get_setting_from_db(key), 'pk', None),
+                    pk=obj_id,
                     value=value
                 ),
                 'value'
@@ -241,11 +263,13 @@ class SettingsWrapper(UserSettingsHolder):
         # to indicate from the cache that the setting is not configured without
         # a database lookup.
         settings_to_cache = get_settings_to_cache(self.registry)
+        setting_ids = {}
         # Load all settings defined in the database.
         for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
             if settings_to_cache[setting.key] != SETTING_CACHE_NOTSET:
                 continue
             if self.registry.is_setting_encrypted(setting.key):
+                setting_ids[setting.key] = setting.id
                 try:
                     value = decrypt_field(setting, 'value')
                 except ValueError, e:
@@ -264,12 +288,18 @@ class SettingsWrapper(UserSettingsHolder):
                 field = self.registry.get_setting_field(key)
                 try:
                     settings_to_cache[key] = get_cache_value(field.get_default())
+                    if self.registry.is_setting_encrypted(key):
+                        # No database pk, so None will be passed to encryption algorithm
+                        setting_ids[key] = SETTING_CACHE_NOTSET
                 except SkipField:
                     pass
         # Generate a cache key for each setting and store them all at once.
         settings_to_cache = dict([(Setting.get_cache_key(k), v) for k, v in settings_to_cache.items()])
+        for k, id_val in setting_ids.items():
+            logger.debug('Saving id in cache for encrypted setting %s, %s',
+                         Setting.get_cache_id_key(k), id_val)
+            self.cache.cache.set(Setting.get_cache_id_key(k), id_val)
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
-        logger.debug('cache set_many(%r, %r)', settings_to_cache, SETTING_CACHE_TIMEOUT)
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name):
@@ -279,7 +309,6 @@ class SettingsWrapper(UserSettingsHolder):
             cache_value = self.cache.get(cache_key, default=empty)
         except ValueError:
             cache_value = empty
-        logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
         if cache_value == SETTING_CACHE_NOTSET:
             value = empty
         elif cache_value == SETTING_CACHE_NONE:
@@ -293,6 +322,7 @@ class SettingsWrapper(UserSettingsHolder):
         field = self.registry.get_setting_field(name)
         if value is empty:
             setting = None
+            setting_id = None
             if not field.read_only or name in (
                 # these two values are read-only - however - we *do* want
                 # to fetch their value from the database
@@ -303,6 +333,7 @@ class SettingsWrapper(UserSettingsHolder):
             if setting:
                 if getattr(field, 'encrypted', False):
                     value = decrypt_field(setting, 'value')
+                    setting_id = setting.id
                 else:
                     value = setting.value
             else:
@@ -310,15 +341,17 @@ class SettingsWrapper(UserSettingsHolder):
                 if SETTING_CACHE_DEFAULTS:
                     try:
                         value = field.get_default()
+                        if getattr(field, 'encrypted', False):
+                            setting_id = SETTING_CACHE_NONE
                     except SkipField:
                         pass
             # If None implies not set, convert when reading the value.
             if value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
                 value = SETTING_CACHE_NOTSET
             if cache_value != value:
-                logger.debug('cache set(%r, %r, %r)', cache_key,
-                             get_cache_value(value),
-                             SETTING_CACHE_TIMEOUT)
+                if setting_id:
+                    logger.debug('Saving id in cache for encrypted setting %s', cache_key)
+                    self.cache.cache.set(Setting.get_cache_id_key(cache_key), setting_id)
                 self.cache.set(cache_key, get_cache_value(value), timeout=SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:

@@ -215,7 +215,7 @@ job_template_urls = patterns('awx.api.views',
 job_urls = patterns('awx.api.views',
     url(r'^$',                                          'job_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'job_detail'),
-    url(r'^(?P<pk>[0-9]+)/start/$',                     'job_start'),
+    url(r'^(?P<pk>[0-9]+)/start/$',                     'job_start'),  # TODO: remove in 3.3
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'job_cancel'),
     url(r'^(?P<pk>[0-9]+)/relaunch/$',                  'job_relaunch'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'job_job_host_summaries_list'),

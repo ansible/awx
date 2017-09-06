@@ -47,10 +47,7 @@ export default ['i18n', function(i18n) {
                 basePath: 'organizations',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                awRequiredWhen: {
-                    reqExpression: "organizationrequired",
-                    init: "true"
-                },
+                required: true,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notification_type: {
@@ -97,8 +94,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Recipient List'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
-                            '<p>' + i18n._('For example:') + '<br>alias1@email.com<br>\n alias2@email.com<br>\n',
+                awPopOver: i18n._('Enter one email address per line to create a recipient list for this type of notification.'),
                 dataTitle: i18n._('Recipient List'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -140,8 +136,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
-                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
+                awPopOver: i18n._('Enter one Slack channel per line. The pound symbol (#) is not required.'),
                 dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -157,8 +152,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
-                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
+                awPopOver: i18n._('Enter one HipChat channel per line. The pound symbol (#) is not required.'),
                 dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -198,8 +192,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Source Phone Number'),
                 dataTitle: i18n._('Source Phone Number'),
                 type: 'text',
-                awPopOver: '<p>' + i18n._('Number associated with the "Messaging Service" in Twilio.') + '</p>'+
-                            '<p>' + i18n.sprintf(i18n._('This must be of the form %s.'), '<code>+18005550199</code>') + '</p>',
+                awPopOver: i18n._('Enter the number associated with the "Messaging Service" in Twilio in the format +18005550199.'),
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
@@ -213,8 +206,7 @@ export default ['i18n', function(i18n) {
                 dataTitle: i18n._('Destination SMS Number'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
-                            '<p>' + i18n._('For example:') + '<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
+                awPopOver: i18n._('Enter one phone number per line to specify where to route SMS messages.'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -297,8 +289,7 @@ export default ['i18n', function(i18n) {
                 dataTitle: i18n._('Notification Color'),
                 type: 'select',
                 ngOptions: 'color for color in hipchatColors track by color',
-                awPopOver: '<p>' + i18n.sprintf(i18n._('Color can be one of %s.'), '<code>yellow</code>, <code>green</code>, <code>red</code>, ' +
-                           '<code>purple</code>, <code>gray</code>, <code>random</code>') + '\n',
+                awPopOver: i18n._('Specify a notification color. Acceptable colors are: yellow, green, red purple, gray or random.'),
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
@@ -336,13 +327,7 @@ export default ['i18n', function(i18n) {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
-                awPopOver: '<p>' + i18n._('Specify HTTP Headers in JSON format') + '</p>' +
-                           '<p>' + i18n._('For example:') + '<br><pre>\n' +
-                           '{\n' +
-                           '  "X-Auth-Token": "828jf0",\n' +
-                           '  "X-Ansible": "Is great!"\n' +
-                           '}\n' +
-                           '</pre></p>',
+                awPopOver: i18n._('Specify HTTP Headers in JSON format. Refer to the Ansible Tower documentation for example syntax.'),
                 dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
@@ -374,9 +359,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels or Users'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
-                            '<p>' + i18n._('For example:') + '<br>' + i18n.sprintf(i18n._('%s or %s'), '#support', 'support') + '<br>\n ' + i18n.sprintf(i18n._('%s or %s'), '@username', 'username') + '<br>\n',
-                dataTitle: i18n._('Destination Channels'),
+                awPopOver: i18n._('Enter one IRC channel or username per line. The pound symbol (#) for channels, and the at (@) symbol for users, are not required.'),
+                dataTitle: i18n._('Destination Channels or Users'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {

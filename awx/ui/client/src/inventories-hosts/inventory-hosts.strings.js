@@ -22,7 +22,11 @@ function InventoryHostsStrings (BaseString) {
     };
 
     ns.smartinventories = {
-        TOOLTIP: t.s('Please click the icon to edit the host filter.')
+        hostfilter: {
+            MISSING_ORG: t.s('Please select an organization before editing the host filter.'),
+            INSTRUCTIONS: t.s('Please click the icon to edit the host filter.'),
+            MISSING_PERMISSIONS: t.s('You do not have sufficient permissions to edit the host filter.')
+        }
     };
 }
 

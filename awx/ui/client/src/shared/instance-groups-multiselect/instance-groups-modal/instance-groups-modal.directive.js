@@ -52,7 +52,7 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             };
                             instanceGroupList.fields.name.ngClick = "linkoutInstanceGroup(instance_group)";
                             instanceGroupList.fields.name.columnClass = 'col-md-11 col-sm-11 col-xs-11';
-                            delete instanceGroupList.fields.percent_capacity_remaining;
+                            delete instanceGroupList.fields.consumed_capacity;
                             delete instanceGroupList.fields.jobs_running;
 
                             let html = `${GenerateList.build({

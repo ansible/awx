@@ -117,7 +117,7 @@ export default ['i18n', function(i18n) {
                 dataTitle: i18n._('Show Changes'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode.") + "</p>",
+                awPopOver: "<p>" + i18n._("If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible&#x2019;s --diff mode.") + "</p>",
             },
             become_enabled: {
                 label: i18n._('Enable Privilege Escalation'),

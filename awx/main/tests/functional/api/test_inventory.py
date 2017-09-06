@@ -205,22 +205,6 @@ def test_delete_inventory_group(delete, group, alice, role_field, expected_statu
 
 
 @pytest.mark.django_db
-def test_create_inventory_smarthost(post, get, inventory, admin_user, organization):
-    data = { 'name': 'Host 1', 'description': 'Test Host'}
-    smart_inventory = Inventory(name='smart',
-                                kind='smart',
-                                organization=organization,
-                                host_filter='inventory_sources__source=ec2')
-    smart_inventory.save()
-    post(reverse('api:inventory_hosts_list', kwargs={'pk': smart_inventory.id}), data, admin_user)
-    resp = get(reverse('api:inventory_hosts_list', kwargs={'pk': smart_inventory.id}), admin_user)
-    jdata = json.loads(resp.content)
-
-    assert getattr(smart_inventory, 'kind') == 'smart'
-    assert jdata['count'] == 0
-
-
-@pytest.mark.django_db
 def test_create_inventory_smartgroup(post, get, inventory, admin_user, organization):
     data = { 'name': 'Group 1', 'description': 'Test Group'}
     smart_inventory = Inventory(name='smart',

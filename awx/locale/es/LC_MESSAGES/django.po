@@ -4,15 +4,17 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # Carlos Munoz <camunoz@redhat.com>, 2017. #zanata
 # Froebel Flores <froebel.flores@welocalize.com>, 2017. #zanata
+# edrh01 <ed.rh01@oceantranslations.com>, 2017. #zanata
 # mkim <mkim@redhat.com>, 2017. #zanata
 # plocatelli <pm.account06@oceantranslations.com>, 2017. #zanata
+# trh01 <tr.rh01@oceantranslations.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-28 18:57+0000\n"
-"PO-Revision-Date: 2017-08-03 04:07+0000\n"
-"Last-Translator: plocatelli <pm.account06@oceantranslations.com>\n"
+"POT-Creation-Date: 2017-08-27 19:27+0000\n"
+"PO-Revision-Date: 2017-09-01 06:52+0000\n"
+"Last-Translator: edrh01 <ed.rh01@oceantranslations.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -167,7 +169,7 @@ msgstr "Ejecutar Playbook"
 msgid "Command"
 msgstr "Comando"
 
-#: awx/api/serializers.py:270 awx/main/models/unified_jobs.py:434
+#: awx/api/serializers.py:270 awx/main/models/unified_jobs.py:435
 msgid "SCM Update"
 msgstr "Actualización SCM"
 
@@ -187,7 +189,7 @@ msgstr "Tarea en flujo de trabajo"
 msgid "Workflow Template"
 msgstr "Plantilla de flujo de trabajo"
 
-#: awx/api/serializers.py:697 awx/api/serializers.py:755 awx/api/views.py:4330
+#: awx/api/serializers.py:697 awx/api/serializers.py:755 awx/api/views.py:4314
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -236,59 +238,67 @@ msgstr ""
 "Colección de archivos de inventario y directorios disponibles dentro de este"
 " proyecto, no global."
 
-#: awx/api/serializers.py:1283
+#: awx/api/serializers.py:1282
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr "Especificación de puerto inválido: %s"
 
-#: awx/api/serializers.py:1311 awx/api/serializers.py:3208
-#: awx/api/serializers.py:3293 awx/main/validators.py:198
+#: awx/api/serializers.py:1293
+msgid "Cannot create Host for Smart Inventory"
+msgstr "No es posible crear un host para el Inventario inteligente"
+
+#: awx/api/serializers.py:1315 awx/api/serializers.py:3218
+#: awx/api/serializers.py:3303 awx/main/validators.py:198
 msgid "Must be valid JSON or YAML."
 msgstr "Debe ser un válido JSON o YAML."
 
-#: awx/api/serializers.py:1407
+#: awx/api/serializers.py:1411
 msgid "Invalid group name."
 msgstr "Nombre de grupo inválido."
 
-#: awx/api/serializers.py:1479
+#: awx/api/serializers.py:1416
+msgid "Cannot create Group for Smart Inventory"
+msgstr "No es posible crear un grupo para el Inventario inteligente"
+
+#: awx/api/serializers.py:1488
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr ""
 "El script debe empezar con una secuencia hashbang, p.e.... #!/usr/bin/env "
 "python"
 
-#: awx/api/serializers.py:1525
+#: awx/api/serializers.py:1534
 msgid "`{}` is a prohibited environment variable"
 msgstr "`{}` es una variable de entorno prohibida"
 
-#: awx/api/serializers.py:1536
+#: awx/api/serializers.py:1545
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr "Si 'source' es 'custom', 'source_script' debe ser especificado."
 
-#: awx/api/serializers.py:1542
+#: awx/api/serializers.py:1551
 msgid "Must provide an inventory."
 msgstr "Debe proporcionar un inventario."
 
-#: awx/api/serializers.py:1546
+#: awx/api/serializers.py:1555
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr ""
 "El 'source_script' no pertenece a la misma organización que el inventario."
 
-#: awx/api/serializers.py:1548
+#: awx/api/serializers.py:1557
 msgid "'source_script' doesn't exist."
 msgstr "'source_script' no existe."
 
-#: awx/api/serializers.py:1572
+#: awx/api/serializers.py:1581
 msgid "Automatic group relationship, will be removed in 3.3"
 msgstr "Relación de grupo automática; se eliminará en 3.3"
 
-#: awx/api/serializers.py:1649
+#: awx/api/serializers.py:1658
 msgid "Cannot use manual project for SCM-based inventory."
 msgstr "No se puede usar el proyecto manual para el inventario basado en SCM."
 
-#: awx/api/serializers.py:1655
+#: awx/api/serializers.py:1664
 msgid ""
 "Manual inventory sources are created automatically when a group is created "
 "in the v1 API."
@@ -296,66 +306,53 @@ msgstr ""
 "Las fuentes de inventario manuales se crean automáticamente cuando se crea "
 "un grupo en la API v1."
 
-#: awx/api/serializers.py:1660
+#: awx/api/serializers.py:1669
 msgid "Setting not compatible with existing schedules."
 msgstr "Configuración no compatible con programaciones existentes."
 
-#: awx/api/serializers.py:1673
-msgid "Cannot set source_path if not SCM type."
-msgstr "No se puede configurar source_path si no es del tipo SCM."
-
-#: awx/api/serializers.py:1676
-msgid ""
-"Cannot update SCM-based inventory source on launch if set to update on "
-"project update. Instead, configure the corresponding source project to "
-"update on launch."
+#: awx/api/serializers.py:1674
+msgid "Cannot create Inventory Source for Smart Inventory"
 msgstr ""
-"No se puede actualizar la fuente de inventario basada en SCM en la ejecución"
-" si está configurada para actualizarse en la actualización del proyecto. En "
-"su lugar, configure el proyecto de fuente correspondiente para actualizar en"
-" la ejecución."
+"No es posible crear una fuente de inventarios para el Inventario inteligente"
 
-#: awx/api/serializers.py:1680
-msgid "Inventory controlled by project-following SCM."
-msgstr "Inventario controlado por SCM del proyecto."
+#: awx/api/serializers.py:1688
+#, python-format
+msgid "Cannot set %s if not SCM type."
+msgstr "No es posible definir %s si no es de tipo SCM."
 
-#: awx/api/serializers.py:1683
-msgid "SCM type sources must set `overwrite_vars` to `true`."
-msgstr "Las fuentes de tipo SCM deben configurar `overwrite_vars` en `true`."
-
-#: awx/api/serializers.py:1925
+#: awx/api/serializers.py:1929
 msgid "Modifications not allowed for managed credential types"
 msgstr ""
 "Modificaciones no permitidas para los tipos de credenciales administradas"
 
-#: awx/api/serializers.py:1930
+#: awx/api/serializers.py:1934
 msgid ""
 "Modifications to inputs are not allowed for credential types that are in use"
 msgstr ""
 "No se permiten las modificaciones a entradas para los tipos de credenciales "
 "que están en uso"
 
-#: awx/api/serializers.py:1936
+#: awx/api/serializers.py:1940
 #, python-format
 msgid "Must be 'cloud' or 'net', not %s"
 msgstr "Debe ser 'cloud' o 'net', no %s"
 
-#: awx/api/serializers.py:1942
+#: awx/api/serializers.py:1946
 msgid "'ask_at_runtime' is not supported for custom credentials."
 msgstr ""
 "'ask_at_runtime' no es compatible con las credenciales personalizadas."
 
-#: awx/api/serializers.py:2115
+#: awx/api/serializers.py:2119
 #, python-format
 msgid "\"%s\" is not a valid choice"
 msgstr "\"%s\" no es una opción válida"
 
-#: awx/api/serializers.py:2134
+#: awx/api/serializers.py:2138
 #, python-format
 msgid "'%s' is not a valid field for %s"
 msgstr "'%s' no es un campo válido para %s"
 
-#: awx/api/serializers.py:2146
+#: awx/api/serializers.py:2150
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
@@ -363,7 +360,7 @@ msgstr ""
 "Campo de sólo escritura utilizado para añadir usuario a rol de propietario. "
 "Si se indica, no otorgar equipo u organización. Sólo válido para creación."
 
-#: awx/api/serializers.py:2151
+#: awx/api/serializers.py:2155
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
@@ -371,7 +368,7 @@ msgstr ""
 "Campo de sólo escritura para añadir equipo a un rol propietario.Si se "
 "indica, no otorgar usuario u organización. Sólo válido para creación."
 
-#: awx/api/serializers.py:2156
+#: awx/api/serializers.py:2160
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not"
 " give either user or team."
@@ -379,125 +376,125 @@ msgstr ""
 "Permisos heredados desde roles de organización. Si se indica, no otorgar "
 "usuario o equipo."
 
-#: awx/api/serializers.py:2172
+#: awx/api/serializers.py:2176
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr "No encontrado 'user', 'team' u 'organization'"
 
-#: awx/api/serializers.py:2212
+#: awx/api/serializers.py:2216
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr ""
 "Credenciales de organización deben ser establecidas y coincidir antes de ser"
 " asignadas a un equipo"
 
-#: awx/api/serializers.py:2374
+#: awx/api/serializers.py:2378
 msgid "You must provide a cloud credential."
 msgstr "Debe proporcionar una credencial de nube."
 
-#: awx/api/serializers.py:2375
+#: awx/api/serializers.py:2379
 msgid "You must provide a network credential."
 msgstr "Debe indicar un credencial de red."
 
-#: awx/api/serializers.py:2391
+#: awx/api/serializers.py:2395
 msgid "This field is required."
 msgstr "Este campo es obligatorio."
 
-#: awx/api/serializers.py:2393 awx/api/serializers.py:2395
+#: awx/api/serializers.py:2397 awx/api/serializers.py:2399
 msgid "Playbook not found for project."
 msgstr "Playbook no encontrado para el proyecto."
 
-#: awx/api/serializers.py:2397
+#: awx/api/serializers.py:2401
 msgid "Must select playbook for project."
 msgstr "Debe seleccionar un playbook para el proyecto."
 
-#: awx/api/serializers.py:2466
+#: awx/api/serializers.py:2476
 msgid "Must either set a default value or ask to prompt on launch."
 msgstr ""
 "Debe establecer un valor por defecto o preguntar por valor al ejecutar."
 
-#: awx/api/serializers.py:2468 awx/main/models/jobs.py:325
+#: awx/api/serializers.py:2478 awx/main/models/jobs.py:325
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr "Tipos de trabajo 'run' y 'check' deben tener asignado un proyecto."
 
-#: awx/api/serializers.py:2539
+#: awx/api/serializers.py:2549
 msgid "Invalid job template."
 msgstr "Plantilla de trabajo inválida"
 
-#: awx/api/serializers.py:2620
+#: awx/api/serializers.py:2630
 msgid "Credential not found or deleted."
 msgstr "Credencial no encontrado o eliminado."
 
-#: awx/api/serializers.py:2622
+#: awx/api/serializers.py:2632
 msgid "Job Template Project is missing or undefined."
 msgstr "Proyecto en la plantilla de trabajo no encontrado o no definido."
 
-#: awx/api/serializers.py:2624
+#: awx/api/serializers.py:2634
 msgid "Job Template Inventory is missing or undefined."
 msgstr "Inventario en la plantilla de trabajo no encontrado o no definido."
 
-#: awx/api/serializers.py:2911
+#: awx/api/serializers.py:2921
 #, python-format
 msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
 msgstr ""
 "j%(job_type)s no es un tipo de trabajo válido. Las opciones son %(choices)s."
 
-#: awx/api/serializers.py:2916
+#: awx/api/serializers.py:2926
 msgid "Workflow job template is missing during creation."
 msgstr ""
 "Plantilla de tarea en el flujo de trabajo no encontrada durante la creación."
 
-#: awx/api/serializers.py:2921
+#: awx/api/serializers.py:2931
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr "No es posible anidar un %s dentro de un WorkflowJobTemplate"
 
-#: awx/api/serializers.py:3178
+#: awx/api/serializers.py:3188
 #, python-format
 msgid "Job Template '%s' is missing or undefined."
 msgstr "Plantilla de trabajo '%s' no encontrada o no definida."
 
-#: awx/api/serializers.py:3181
+#: awx/api/serializers.py:3191
 msgid "The inventory associated with this Job Template is being deleted."
 msgstr ""
 "Se está eliminando el inventario asociado con esta plantilla de trabajo."
 
-#: awx/api/serializers.py:3222 awx/api/views.py:2998
+#: awx/api/serializers.py:3232 awx/api/views.py:2991
 #, python-format
 msgid "Cannot assign multiple %s credentials."
 msgstr "No se pueden asignar múltiples credenciales %s."
 
-#: awx/api/serializers.py:3224 awx/api/views.py:3001
+#: awx/api/serializers.py:3234 awx/api/views.py:2994
 msgid "Extra credentials must be network or cloud."
 msgstr "Las credenciales adicionales deben ser red o nube."
 
-#: awx/api/serializers.py:3361
+#: awx/api/serializers.py:3371
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr ""
 "Campos obligatorios no definidos para la configuración de notificación: "
 "notification_type"
 
-#: awx/api/serializers.py:3384
+#: awx/api/serializers.py:3394
 msgid "No values specified for field '{}'"
 msgstr "Ningún valor especificado para el campo '{}'"
 
-#: awx/api/serializers.py:3389
+#: awx/api/serializers.py:3399
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "Campos no definidos para la configuración de notificación: {}."
 
-#: awx/api/serializers.py:3392
+#: awx/api/serializers.py:3402
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "Tipo incorrecto en la configuración del campo '{} ', esperado {}."
 
-#: awx/api/serializers.py:3445
+#: awx/api/serializers.py:3455
 msgid "Inventory Source must be a cloud resource."
 msgstr "Fuente del inventario debe ser un recurso cloud."
 
-#: awx/api/serializers.py:3447
+#: awx/api/serializers.py:3457
 msgid "Manual Project cannot have a schedule set."
 msgstr "El proyecto manual no puede tener una programación establecida."
 
-#: awx/api/serializers.py:3450
+#: awx/api/serializers.py:3460
 msgid ""
 "Inventory sources with `update_on_project_update` cannot be scheduled. "
 "Schedule its source project `{}` instead."
@@ -505,72 +502,72 @@ msgstr ""
 "No se pueden programar las fuentes de inventario con "
 "`update_on_project_update. En su lugar, programe su proyecto fuente `{}`."
 
-#: awx/api/serializers.py:3469
+#: awx/api/serializers.py:3479
 msgid "Projects and inventory updates cannot accept extra variables."
 msgstr ""
 "Las actualizaciones de inventarios y proyectos no pueden aceptar variables "
 "adicionales."
 
-#: awx/api/serializers.py:3491
+#: awx/api/serializers.py:3501
 msgid ""
 "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr ""
 "DTSTART necesario en 'rrule'. El valor debe coincidir: "
 "DTSTART:YYYYMMDDTHHMMSSZ"
 
-#: awx/api/serializers.py:3493
+#: awx/api/serializers.py:3503
 msgid "Multiple DTSTART is not supported."
 msgstr "Múltiple DTSTART no está soportado."
 
-#: awx/api/serializers.py:3495
+#: awx/api/serializers.py:3505
 msgid "RRULE require in rrule."
 msgstr "RRULE requerido en rrule"
 
-#: awx/api/serializers.py:3497
+#: awx/api/serializers.py:3507
 msgid "Multiple RRULE is not supported."
 msgstr "Múltiple RRULE no está soportado."
 
-#: awx/api/serializers.py:3499
+#: awx/api/serializers.py:3509
 msgid "INTERVAL required in rrule."
 msgstr "INTERVAL requerido en 'rrule'."
 
-#: awx/api/serializers.py:3501
+#: awx/api/serializers.py:3511
 msgid "TZID is not supported."
 msgstr "TZID no está soportado."
 
-#: awx/api/serializers.py:3503
+#: awx/api/serializers.py:3513
 msgid "SECONDLY is not supported."
 msgstr "SECONDLY no está soportado."
 
-#: awx/api/serializers.py:3505
+#: awx/api/serializers.py:3515
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "Multiple BYMONTHDAYs no soportado."
 
-#: awx/api/serializers.py:3507
+#: awx/api/serializers.py:3517
 msgid "Multiple BYMONTHs not supported."
 msgstr "Multiple BYMONTHs no soportado."
 
-#: awx/api/serializers.py:3509
+#: awx/api/serializers.py:3519
 msgid "BYDAY with numeric prefix not supported."
 msgstr "BYDAY con prefijo numérico no soportado."
 
-#: awx/api/serializers.py:3511
+#: awx/api/serializers.py:3521
 msgid "BYYEARDAY not supported."
 msgstr "BYYEARDAY no soportado."
 
-#: awx/api/serializers.py:3513
+#: awx/api/serializers.py:3523
 msgid "BYWEEKNO not supported."
 msgstr "BYWEEKNO no soportado."
 
-#: awx/api/serializers.py:3517
+#: awx/api/serializers.py:3527
 msgid "COUNT > 999 is unsupported."
 msgstr "COUNT > 999  no está soportada."
 
-#: awx/api/serializers.py:3521
+#: awx/api/serializers.py:3531
 msgid "rrule parsing failed validation."
 msgstr "Validación fallida analizando 'rrule'"
 
-#: awx/api/serializers.py:3621
+#: awx/api/serializers.py:3631
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
@@ -578,7 +575,7 @@ msgstr ""
 "Un resumen de los valores nuevos y cambiados cuando un objeto es creado, "
 "actualizado o eliminado."
 
-#: awx/api/serializers.py:3623
+#: awx/api/serializers.py:3633
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
@@ -588,7 +585,7 @@ msgstr ""
 "afectado. Para asociar o desasociar eventos éste es el tipo de objeto "
 "asociado o desasociado con object2."
 
-#: awx/api/serializers.py:3626
+#: awx/api/serializers.py:3636
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated"
@@ -597,153 +594,163 @@ msgstr ""
 "Vacío para crear, actualizar y eliminar eventos. Para asociar y desasociar "
 "eventos éste es el tipo de objetos que object1 con el está asociado."
 
-#: awx/api/serializers.py:3629
+#: awx/api/serializers.py:3639
 msgid "The action taken with respect to the given object(s)."
 msgstr "La acción tomada al respeto al/los especificado(s) objeto(s)."
 
-#: awx/api/serializers.py:3732
+#: awx/api/serializers.py:3749
 msgid "Unable to login with provided credentials."
 msgstr "Incapaz de iniciar sesión con los credenciales indicados."
 
-#: awx/api/serializers.py:3734
+#: awx/api/serializers.py:3751
 msgid "Must include \"username\" and \"password\"."
 msgstr "Debe incluir  \"usuario\" y \"contraseña\"."
 
-#: awx/api/views.py:107
+#: awx/api/views.py:106
 msgid "Your license does not allow use of the activity stream."
 msgstr "Su licencia no permite el uso de flujo de actividad."
 
-#: awx/api/views.py:117
+#: awx/api/views.py:116
 msgid "Your license does not permit use of system tracking."
 msgstr "Su licencia no permite el uso de sistema de rastreo."
 
-#: awx/api/views.py:127
+#: awx/api/views.py:126
 msgid "Your license does not allow use of workflows."
 msgstr "Su licencia no permite el uso de flujos de trabajo."
 
-#: awx/api/views.py:135 awx/templates/rest_framework/api.html:28
+#: awx/api/views.py:140
+msgid "Cannot delete job resource when associated workflow job is running."
+msgstr ""
+"No es posible eliminar un recurso de trabajo cuando la tarea del flujo de "
+"trabajo está en ejecución."
+
+#: awx/api/views.py:144
+msgid "Cannot delete running job resource."
+msgstr "No es posible eliminar el recurso de trabajo en ejecución."
+
+#: awx/api/views.py:153 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: awx/api/views.py:144
-msgid "Ansible Tower REST API"
-msgstr "Ansible Tower REST API"
+#: awx/api/views.py:162 awx/templates/rest_framework/api.html:4
+msgid "AWX REST API"
+msgstr "API REST de AWX"
 
-#: awx/api/views.py:206
+#: awx/api/views.py:224
 msgid "Version 1"
 msgstr "Version 1"
 
-#: awx/api/views.py:210
+#: awx/api/views.py:228
 msgid "Version 2"
 msgstr "Versión 2"
 
-#: awx/api/views.py:221
+#: awx/api/views.py:239
 msgid "Ping"
 msgstr "Ping"
 
-#: awx/api/views.py:256 awx/conf/apps.py:12
+#: awx/api/views.py:270 awx/conf/apps.py:12
 msgid "Configuration"
 msgstr "Configuración"
 
-#: awx/api/views.py:309
+#: awx/api/views.py:323
 msgid "Invalid license data"
 msgstr "Datos de licencia inválidos."
 
-#: awx/api/views.py:311
+#: awx/api/views.py:325
 msgid "Missing 'eula_accepted' property"
 msgstr "Propiedad 'eula_accepted' no encontrada"
 
-#: awx/api/views.py:315
+#: awx/api/views.py:329
 msgid "'eula_accepted' value is invalid"
 msgstr "Valor 'eula_accepted' no es válido"
 
-#: awx/api/views.py:318
+#: awx/api/views.py:332
 msgid "'eula_accepted' must be True"
 msgstr "'eula_accepted' debe ser True"
 
-#: awx/api/views.py:325
+#: awx/api/views.py:339
 msgid "Invalid JSON"
 msgstr "JSON inválido"
 
-#: awx/api/views.py:333
+#: awx/api/views.py:347
 msgid "Invalid License"
 msgstr "Licencia inválida"
 
-#: awx/api/views.py:343
+#: awx/api/views.py:357
 msgid "Invalid license"
 msgstr "Licencia inválida"
 
-#: awx/api/views.py:351
+#: awx/api/views.py:365
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr "Error al eliminar licencia (%s)"
 
-#: awx/api/views.py:356
+#: awx/api/views.py:370
 msgid "Dashboard"
 msgstr "Panel de control"
 
-#: awx/api/views.py:455
+#: awx/api/views.py:469
 msgid "Dashboard Jobs Graphs"
 msgstr "Panel de control de gráficas de trabajo"
 
-#: awx/api/views.py:491
+#: awx/api/views.py:505
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr "Periodo desconocido  \"%s\""
 
-#: awx/api/views.py:505
+#: awx/api/views.py:519
 msgid "Instances"
 msgstr "Instancias"
 
-#: awx/api/views.py:513
+#: awx/api/views.py:527
 msgid "Instance Detail"
 msgstr "Detalle de la instancia"
 
-#: awx/api/views.py:521
+#: awx/api/views.py:535
 msgid "Instance Running Jobs"
 msgstr "Tareas en ejecución de la instancia"
 
-#: awx/api/views.py:536
+#: awx/api/views.py:550
 msgid "Instance's Instance Groups"
 msgstr "Grupos de instancias de la instancia"
 
-#: awx/api/views.py:546
+#: awx/api/views.py:560
 msgid "Instance Groups"
 msgstr "Grupos de instancias"
 
-#: awx/api/views.py:554
+#: awx/api/views.py:568
 msgid "Instance Group Detail"
 msgstr "Detalle del grupo de instancias"
 
-#: awx/api/views.py:562
+#: awx/api/views.py:576
 msgid "Instance Group Running Jobs"
 msgstr "Tareas en ejecución del grupo de instancias"
 
-#: awx/api/views.py:572
+#: awx/api/views.py:586
 msgid "Instance Group's Instances"
 msgstr "Instancias del grupo de instancias"
 
-#: awx/api/views.py:582
+#: awx/api/views.py:596
 msgid "Schedules"
 msgstr "Programaciones"
 
-#: awx/api/views.py:601
+#: awx/api/views.py:615
 msgid "Schedule Jobs List"
 msgstr "Lista de trabajos programados"
 
-#: awx/api/views.py:825
+#: awx/api/views.py:841
 msgid "Your license only permits a single organization to exist."
 msgstr "Su licencia solo permite que exista una organización."
 
-#: awx/api/views.py:1061 awx/api/views.py:4624
+#: awx/api/views.py:1077 awx/api/views.py:4615
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr "No puede asignar un rol de organización como rol hijo para un equipo."
 
-#: awx/api/views.py:1065 awx/api/views.py:4638
+#: awx/api/views.py:1081 awx/api/views.py:4629
 msgid "You cannot grant system-level permissions to a team."
 msgstr "No puede asignar permisos de nivel de sistema a un equipo."
 
-#: awx/api/views.py:1072 awx/api/views.py:4630
+#: awx/api/views.py:1088 awx/api/views.py:4621
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
@@ -751,41 +758,35 @@ msgstr ""
 "No puede asignar credenciales de acceso a un equipo cuando el campo de "
 "organización no está establecido o pertenezca a una organización diferente."
 
-#: awx/api/views.py:1162
+#: awx/api/views.py:1178
 msgid "Cannot delete project."
 msgstr "No se puede eliminar el proyecto."
 
-#: awx/api/views.py:1197
+#: awx/api/views.py:1213
 msgid "Project Schedules"
 msgstr "Programación del proyecto"
 
-#: awx/api/views.py:1209
+#: awx/api/views.py:1225
 msgid "Project SCM Inventory Sources"
 msgstr "Fuentes de inventario SCM del proyecto"
 
-#: awx/api/views.py:1312 awx/api/views.py:2685 awx/api/views.py:3767
-msgid "Cannot delete job resource when associated workflow job is running."
-msgstr ""
-"No es posible eliminar un recurso de trabajo cuando la tarea del flujo de "
-"trabajo está en ejecución."
-
-#: awx/api/views.py:1345
+#: awx/api/views.py:1352
 msgid "Project Update SCM Inventory Updates"
 msgstr "Actualizaciones de inventario SCM de la actualización del proyecto"
 
-#: awx/api/views.py:1400
+#: awx/api/views.py:1407
 msgid "Me"
 msgstr "Yo"
 
-#: awx/api/views.py:1444 awx/api/views.py:4581
+#: awx/api/views.py:1451 awx/api/views.py:4572
 msgid "You may not perform any action with your own admin_role."
 msgstr "No puede realizar ninguna acción con su admin_role."
 
-#: awx/api/views.py:1450 awx/api/views.py:4585
+#: awx/api/views.py:1457 awx/api/views.py:4576
 msgid "You may not change the membership of a users admin_role"
 msgstr "No puede cambiar la pertenencia a usuarios admin_role"
 
-#: awx/api/views.py:1455 awx/api/views.py:4590
+#: awx/api/views.py:1462 awx/api/views.py:4581
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
@@ -793,53 +794,61 @@ msgstr ""
 "No puede conceder credenciales de acceso a un usuario que no está en la "
 "organización del credencial."
 
-#: awx/api/views.py:1459 awx/api/views.py:4594
+#: awx/api/views.py:1466 awx/api/views.py:4585
 msgid "You cannot grant private credential access to another user"
 msgstr "No puede conceder acceso a un credencial privado a otro usuario"
 
-#: awx/api/views.py:1557
+#: awx/api/views.py:1564
 #, python-format
 msgid "Cannot change %s."
 msgstr "No se puede cambiar %s."
 
-#: awx/api/views.py:1563
+#: awx/api/views.py:1570
 msgid "Cannot delete user."
 msgstr "No se puede eliminar usuario."
 
-#: awx/api/views.py:1592
+#: awx/api/views.py:1599
 msgid "Deletion not allowed for managed credential types"
 msgstr ""
 "No se permite la eliminación para los tipos de credenciales administradas"
 
-#: awx/api/views.py:1594
+#: awx/api/views.py:1601
 msgid "Credential types that are in use cannot be deleted"
 msgstr "No se pueden eliminar los tipos de credenciales en uso"
 
-#: awx/api/views.py:1772
+#: awx/api/views.py:1779
 msgid "Cannot delete inventory script."
 msgstr "No se puede eliminar script de inventario."
 
-#: awx/api/views.py:1857
+#: awx/api/views.py:1864
 msgid "{0}"
 msgstr "{0}"
 
-#: awx/api/views.py:2078
+#: awx/api/views.py:2089
 msgid "Fact not found."
 msgstr "Fact no encontrado."
 
-#: awx/api/views.py:2102
+#: awx/api/views.py:2113
 msgid "SSLError while trying to connect to {}"
 msgstr "SSLError al intentar conectarse a {}"
 
-#: awx/api/views.py:2104
+#: awx/api/views.py:2115
 msgid "Request to {} timed out."
 msgstr "El tiempo de solicitud {} caducó."
 
-#: awx/api/views.py:2106
+#: awx/api/views.py:2117
 msgid "Unkown exception {} while trying to GET {}"
 msgstr "Excepción desconocida {} al intentar OBTENER {}"
 
-#: awx/api/views.py:2109
+#: awx/api/views.py:2120
+msgid ""
+"Unauthorized access. Please check your Insights Credential username and "
+"password."
+msgstr ""
+"Acceso no autorizado. Verifique su nombre de usuario y contraseña de "
+"Insights."
+
+#: awx/api/views.py:2122
 msgid ""
 "Failed to gather reports and maintenance plans from Insights API at URL {}. "
 "Server responded with {} status code and message {}"
@@ -848,116 +857,112 @@ msgstr ""
 " de Insights en la dirección URL {}. El servidor respondió con el código de "
 "estado {} y el mensaje {}"
 
-#: awx/api/views.py:2115
+#: awx/api/views.py:2128
 msgid "Expected JSON response from Insights but instead got {}"
 msgstr "Respuesta JSON esperada de Insights; en cambio, se recibió {}"
 
-#: awx/api/views.py:2122
+#: awx/api/views.py:2135
 msgid "This host is not recognized as an Insights host."
 msgstr "Este host no se reconoce como un host de Insights."
 
-#: awx/api/views.py:2127
+#: awx/api/views.py:2140
 msgid "The Insights Credential for \"{}\" was not found."
 msgstr "No se encontró la credencial de Insights para \"{}\"."
 
-#: awx/api/views.py:2196
+#: awx/api/views.py:2209
 msgid "Cyclical Group association."
 msgstr "Asociación de grupos cíclica."
 
-#: awx/api/views.py:2473
+#: awx/api/views.py:2482
 msgid "Inventory Source List"
 msgstr "Listado de fuentes del inventario"
 
-#: awx/api/views.py:2486
+#: awx/api/views.py:2495
 msgid "Inventory Sources Update"
 msgstr "Actualización de fuentes de inventario"
 
-#: awx/api/views.py:2514
-msgid "You do not have permission to update project `{}`"
-msgstr "No tiene permisos para actualizar el proyecto `{}`"
-
-#: awx/api/views.py:2526
+#: awx/api/views.py:2525
 msgid "Could not start because `can_update` returned False"
 msgstr "No se pudo iniciar porque `can_update` devolvió False"
 
-#: awx/api/views.py:2534
+#: awx/api/views.py:2533
 msgid "No inventory sources to update."
 msgstr "No hay fuentes de inventario para actualizar."
 
-#: awx/api/views.py:2566
+#: awx/api/views.py:2565
 msgid "Cannot delete inventory source."
 msgstr "No se puede eliminar la fuente del inventario."
 
-#: awx/api/views.py:2574
+#: awx/api/views.py:2573
 msgid "Inventory Source Schedules"
 msgstr "Programaciones de la fuente del inventario"
 
-#: awx/api/views.py:2604
+#: awx/api/views.py:2603
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr ""
 "Plantillas de notificación pueden ser sólo asignadas cuando la fuente es una"
 " de estas {}."
 
-#: awx/api/views.py:2833
+#: awx/api/views.py:2826
 msgid "Job Template Schedules"
 msgstr "Programación plantilla de trabajo"
 
-#: awx/api/views.py:2853 awx/api/views.py:2869
+#: awx/api/views.py:2846 awx/api/views.py:2862
 msgid "Your license does not allow adding surveys."
 msgstr "Su licencia no permite añadir cuestionarios."
 
-#: awx/api/views.py:2876
+#: awx/api/views.py:2869
 msgid "'name' missing from survey spec."
 msgstr "'name' no encontrado en el especificado cuestionario."
 
-#: awx/api/views.py:2878
+#: awx/api/views.py:2871
 msgid "'description' missing from survey spec."
 msgstr "'description'  no encontrado en el especificado cuestionario."
 
-#: awx/api/views.py:2880
+#: awx/api/views.py:2873
 msgid "'spec' missing from survey spec."
 msgstr "'spec' no encontrado en el especificado cuestionario."
 
-#: awx/api/views.py:2882
+#: awx/api/views.py:2875
 msgid "'spec' must be a list of items."
 msgstr "'spec' debe ser una lista de elementos."
 
-#: awx/api/views.py:2884
+#: awx/api/views.py:2877
 msgid "'spec' doesn't contain any items."
 msgstr "'spec' no contiene ningún elemento."
 
-#: awx/api/views.py:2890
+#: awx/api/views.py:2883
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "Pregunta de cuestionario %s no es un objeto JSON."
 
-#: awx/api/views.py:2892
+#: awx/api/views.py:2885
 #, python-format
 msgid "'type' missing from survey question %s."
 msgstr "'type'  no encontrado en la pregunta de cuestionario %s."
 
-#: awx/api/views.py:2894
+#: awx/api/views.py:2887
 #, python-format
 msgid "'question_name' missing from survey question %s."
 msgstr "'question_name' no aparece en la pregunta de cuestionario %s."
 
-#: awx/api/views.py:2896
+#: awx/api/views.py:2889
 #, python-format
 msgid "'variable' missing from survey question %s."
 msgstr "'variable' no encontrado en la pregunta de cuestionario %s."
 
-#: awx/api/views.py:2898
+#: awx/api/views.py:2891
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr ""
 "'variable' '%(item)s' repetida en la pregunta de cuestionario %(survey)s."
 
-#: awx/api/views.py:2903
+#: awx/api/views.py:2896
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr "'required' no encontrado en la pregunta de cuestionario %s."
 
-#: awx/api/views.py:2908
+#: awx/api/views.py:2901
 msgid ""
 "$encrypted$ is reserved keyword and may not be used as a default for "
 "password {}."
@@ -965,89 +970,89 @@ msgstr ""
 "$encrypted$ es una palabra clave reservada y no puede utilizarse como un "
 "valor predeterminado para la contraseña {}."
 
-#: awx/api/views.py:3024
+#: awx/api/views.py:3017
 msgid "Maximum number of labels for {} reached."
 msgstr "Número máximo de etiquetas para {} alcanzado."
 
-#: awx/api/views.py:3143
+#: awx/api/views.py:3136
 msgid "No matching host could be found!"
 msgstr "¡Ningún servidor indicado pudo ser encontrado!"
 
-#: awx/api/views.py:3146
+#: awx/api/views.py:3139
 msgid "Multiple hosts matched the request!"
 msgstr "¡Varios servidores corresponden a la petición!"
 
-#: awx/api/views.py:3151
+#: awx/api/views.py:3144
 msgid "Cannot start automatically, user input required!"
 msgstr ""
 "No se puede iniciar automáticamente, !Entrada de datos de usuario necesaria!"
 
-#: awx/api/views.py:3158
+#: awx/api/views.py:3151
 msgid "Host callback job already pending."
 msgstr "Trabajo de callback para el servidor ya está pendiente."
 
-#: awx/api/views.py:3171
+#: awx/api/views.py:3164
 msgid "Error starting job!"
 msgstr "¡Error iniciando trabajo!"
 
-#: awx/api/views.py:3278
+#: awx/api/views.py:3271
 msgid "Cannot associate {0} when {1} have been associated."
 msgstr "No se puede asociar {0} cuando se ha asociado {1}."
 
-#: awx/api/views.py:3303
+#: awx/api/views.py:3296
 msgid "Multiple parent relationship not allowed."
 msgstr "No se permiten múltiples relaciones primarias."
 
-#: awx/api/views.py:3308
+#: awx/api/views.py:3301
 msgid "Cycle detected."
 msgstr "Ciclo detectado."
 
-#: awx/api/views.py:3512
+#: awx/api/views.py:3505
 msgid "Workflow Job Template Schedules"
 msgstr "Programaciones de plantilla de tareas de flujo de trabajo"
 
-#: awx/api/views.py:3657 awx/api/views.py:4233
+#: awx/api/views.py:3650 awx/api/views.py:4217
 msgid "Superuser privileges needed."
 msgstr "Privilegios de superusuario necesarios."
 
-#: awx/api/views.py:3689
+#: awx/api/views.py:3682
 msgid "System Job Template Schedules"
 msgstr "Programación de plantilla de trabajos de sistema."
 
-#: awx/api/views.py:3907
+#: awx/api/views.py:3891
 msgid "Job Host Summaries List"
 msgstr "Lista resumida de trabajos de servidor"
 
-#: awx/api/views.py:3954
+#: awx/api/views.py:3938
 msgid "Job Event Children List"
 msgstr "LIsta de hijos de eventos de trabajo"
 
-#: awx/api/views.py:3963
+#: awx/api/views.py:3947
 msgid "Job Event Hosts List"
 msgstr "Lista de eventos de trabajos de servidor."
 
-#: awx/api/views.py:3973
+#: awx/api/views.py:3957
 msgid "Job Events List"
 msgstr "Lista de eventos de trabajo"
 
-#: awx/api/views.py:4187
+#: awx/api/views.py:4171
 msgid "Ad Hoc Command Events List"
 msgstr "Lista de eventos para comando Ad Hoc"
 
-#: awx/api/views.py:4395
+#: awx/api/views.py:4386
 msgid "Error generating stdout download file: {}"
 msgstr "Error generando la descarga del fichero de salida estándar: {}"
 
-#: awx/api/views.py:4408
+#: awx/api/views.py:4399
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr "Error generando la descarga del fichero de salida estándar: %s"
 
-#: awx/api/views.py:4453
+#: awx/api/views.py:4444
 msgid "Delete not allowed while there are pending notifications"
 msgstr "Eliminar no está permitido mientras existan notificaciones pendientes"
 
-#: awx/api/views.py:4460
+#: awx/api/views.py:4451
 msgid "Notification Template Test"
 msgstr "Prueba de plantilla de notificación"
 
@@ -1256,7 +1261,7 @@ msgstr "Cambiado"
 msgid "User-Defaults"
 msgstr "Parámetros de usuario por defecto"
 
-#: awx/conf/registry.py:150
+#: awx/conf/registry.py:151
 msgid "This value has been set manually in a settings file."
 msgstr ""
 "Este valor ha sido establecido manualmente en el fichero de configuración."
@@ -1300,8 +1305,9 @@ msgstr ""
 #: awx/conf/tests/unit/test_settings.py:360
 #: awx/conf/tests/unit/test_settings.py:374
 #: awx/conf/tests/unit/test_settings.py:398
-#: awx/conf/tests/unit/test_settings.py:412
-#: awx/conf/tests/unit/test_settings.py:448 awx/main/conf.py:22
+#: awx/conf/tests/unit/test_settings.py:411
+#: awx/conf/tests/unit/test_settings.py:430
+#: awx/conf/tests/unit/test_settings.py:466 awx/main/conf.py:22
 #: awx/main/conf.py:32 awx/main/conf.py:42 awx/main/conf.py:51
 #: awx/main/conf.py:63 awx/main/conf.py:81 awx/main/conf.py:96
 #: awx/main/conf.py:121
@@ -1324,7 +1330,7 @@ msgstr "Categorías de ajustes"
 msgid "Setting Detail"
 msgstr "Detalles del ajuste"
 
-#: awx/conf/views.py:166
+#: awx/conf/views.py:168
 msgid "Logging Connectivity Test"
 msgstr "Registrando prueba de conectividad"
 
@@ -1364,58 +1370,58 @@ msgstr "Funcionalidad %s no está habilitada en la licencia activa."
 msgid "Features not found in active license."
 msgstr "Funcionalidades no encontradas en la licencia activa."
 
-#: awx/main/access.py:534 awx/main/access.py:617 awx/main/access.py:746
-#: awx/main/access.py:803 awx/main/access.py:1065 awx/main/access.py:1265
-#: awx/main/access.py:1708
+#: awx/main/access.py:534 awx/main/access.py:619 awx/main/access.py:748
+#: awx/main/access.py:801 awx/main/access.py:1063 awx/main/access.py:1263
+#: awx/main/access.py:1725
 msgid "Resource is being used by running jobs"
 msgstr "Recurso está siendo usado por trabajos en ejecución"
 
-#: awx/main/access.py:673
+#: awx/main/access.py:675
 msgid "Unable to change inventory on a host."
 msgstr "Imposible modificar el inventario en un servidor."
 
-#: awx/main/access.py:690 awx/main/access.py:735
+#: awx/main/access.py:692 awx/main/access.py:737
 msgid "Cannot associate two items from different inventories."
 msgstr "No es posible asociar dos elementos de diferentes inventarios."
 
-#: awx/main/access.py:723
+#: awx/main/access.py:725
 msgid "Unable to change inventory on a group."
 msgstr "Imposible cambiar el inventario en un grupo."
 
-#: awx/main/access.py:985
+#: awx/main/access.py:983
 msgid "Unable to change organization on a team."
 msgstr "Imposible cambiar la organización en un equipo."
 
-#: awx/main/access.py:998
+#: awx/main/access.py:996
 msgid "The {} role cannot be assigned to a team"
 msgstr "El rol {} no puede ser asignado a un equipo."
 
-#: awx/main/access.py:1000
+#: awx/main/access.py:998
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr "El admin_role para un usuario no puede ser asignado a un equipo"
 
-#: awx/main/access.py:1426
+#: awx/main/access.py:1443
 msgid "Job has been orphaned from its job template."
 msgstr "Se ha eliminado la plantilla de trabajo de la tarea."
 
-#: awx/main/access.py:1428
+#: awx/main/access.py:1445
 msgid "You do not have execute permission to related job template."
 msgstr ""
 "No tiene permiso de ejecución para la plantilla de trabajo relacionada."
 
-#: awx/main/access.py:1431
+#: awx/main/access.py:1448
 msgid "Job was launched with prompted fields."
 msgstr "La tarea se ejecutó con campos completados."
 
-#: awx/main/access.py:1433
+#: awx/main/access.py:1450
 msgid " Organization level permissions required."
 msgstr "Se requieren permisos de nivel de organización."
 
-#: awx/main/access.py:1435
+#: awx/main/access.py:1452
 msgid " You do not have permission to related resources."
 msgstr "No tiene permisos para los recursos relacionados."
 
-#: awx/main/access.py:1781
+#: awx/main/access.py:1798
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."
@@ -1546,10 +1552,10 @@ msgstr "Lista de módulos permitidos para su uso con trabajos ad-hoc."
 #: awx/main/conf.py:130 awx/main/conf.py:140 awx/main/conf.py:151
 #: awx/main/conf.py:161 awx/main/conf.py:171 awx/main/conf.py:181
 #: awx/main/conf.py:192 awx/main/conf.py:204 awx/main/conf.py:216
-#: awx/main/conf.py:227 awx/main/conf.py:237 awx/main/conf.py:248
-#: awx/main/conf.py:258 awx/main/conf.py:268 awx/main/conf.py:278
-#: awx/main/conf.py:290 awx/main/conf.py:302 awx/main/conf.py:314
-#: awx/main/conf.py:327
+#: awx/main/conf.py:229 awx/main/conf.py:241 awx/main/conf.py:251
+#: awx/main/conf.py:262 awx/main/conf.py:272 awx/main/conf.py:282
+#: awx/main/conf.py:292 awx/main/conf.py:304 awx/main/conf.py:316
+#: awx/main/conf.py:328 awx/main/conf.py:341
 msgid "Jobs"
 msgstr "Trabajos"
 
@@ -1642,19 +1648,34 @@ msgstr ""
 "cuando se comunica con instancias aisladas. El valor debe ser "
 "considerablemente superior a la latencia de red esperada."
 
-#: awx/main/conf.py:214 awx/main/conf.py:215
+#: awx/main/conf.py:212
+msgid "Generate RSA keys for isolated instances"
+msgstr "Genere claves de RSA para instancias aisladas"
+
+#: awx/main/conf.py:213
+msgid ""
+"If set, a random RSA key will be generated and distributed to isolated "
+"instances.  To disable this behavior and manage authentication for isolated "
+"instances outside of Tower, disable this setting."
+msgstr ""
+"En caso de estar definida, se generará una clave de RSA y se distribuirá a "
+"instancias aisladas. Para desactivar este comportamiento y administrar la "
+"autenticación para instancias aisladas fuera de Tower, desactive esta "
+"configuración."
+
+#: awx/main/conf.py:227 awx/main/conf.py:228
 msgid "The RSA private key for SSH traffic to isolated instances"
 msgstr "La clave privada RSA para el tráfico SSH en instancias aisladas"
 
-#: awx/main/conf.py:225 awx/main/conf.py:226
+#: awx/main/conf.py:239 awx/main/conf.py:240
 msgid "The RSA public key for SSH traffic to isolated instances"
 msgstr "La clave pública RSA para el tráfico SSH en instancias aisladas"
 
-#: awx/main/conf.py:235
+#: awx/main/conf.py:249
 msgid "Extra Environment Variables"
 msgstr "Variables de entorno adicionales"
 
-#: awx/main/conf.py:236
+#: awx/main/conf.py:250
 msgid ""
 "Additional environment variables set for playbook runs, inventory updates, "
 "project updates, and notification sending."
@@ -1663,11 +1684,11 @@ msgstr ""
 "playbook, actualizaciones de inventarios, actualizaciones de proyectos y "
 "envío de notificaciones."
 
-#: awx/main/conf.py:246
+#: awx/main/conf.py:260
 msgid "Standard Output Maximum Display Size"
 msgstr "Tamaño máximo a mostrar para la salida estándar."
 
-#: awx/main/conf.py:247
+#: awx/main/conf.py:261
 msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
@@ -1675,12 +1696,12 @@ msgstr ""
 "Tamaño máximo de la salida estándar en bytes para mostrar antes de obligar a"
 " que la salida sea descargada."
 
-#: awx/main/conf.py:256
+#: awx/main/conf.py:270
 msgid "Job Event Standard Output Maximum Display Size"
 msgstr ""
 "Tamaño máximo de la salida estándar para mostrar del evento del trabajo."
 
-#: awx/main/conf.py:257
+#: awx/main/conf.py:271
 msgid ""
 "Maximum Size of Standard Output in bytes to display for a single job or ad "
 "hoc command event. `stdout` will end with `…` when truncated."
@@ -1689,11 +1710,11 @@ msgstr ""
 " o evento del comando ad hoc. `stdout` terminará con `...` cuando sea "
 "truncado."
 
-#: awx/main/conf.py:266
+#: awx/main/conf.py:280
 msgid "Maximum Scheduled Jobs"
 msgstr "Máximo número de trabajos programados"
 
-#: awx/main/conf.py:267
+#: awx/main/conf.py:281
 msgid ""
 "Maximum number of the same job template that can be waiting to run when "
 "launching from a schedule before no more are created."
@@ -1702,11 +1723,11 @@ msgstr ""
 "para ser ejecutado cuando se lanzan desde una programación antes de que no "
 "se creen más."
 
-#: awx/main/conf.py:276
+#: awx/main/conf.py:290
 msgid "Ansible Callback Plugins"
 msgstr "Plugins de Ansible callback"
 
-#: awx/main/conf.py:277
+#: awx/main/conf.py:291
 msgid ""
 "List of paths to search for extra callback plugins to be used when running "
 "jobs. Enter one path per line."
@@ -1714,11 +1735,11 @@ msgstr ""
 "Lista de rutas para buscar complementos adicionales de retorno de llamada "
 "que se utilizan cuando se ejecutan tareas. Ingrese una ruta por línea."
 
-#: awx/main/conf.py:287
+#: awx/main/conf.py:301
 msgid "Default Job Timeout"
 msgstr "Tiempo de espera por defecto para el trabajo"
 
-#: awx/main/conf.py:288
+#: awx/main/conf.py:302
 msgid ""
 "Maximum time in seconds to allow jobs to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual job "
@@ -1729,41 +1750,41 @@ msgstr ""
 "de espera establecido en una plantilla de trabajo individual reemplazará "
 "este."
 
-#: awx/main/conf.py:299
+#: awx/main/conf.py:313
 msgid "Default Inventory Update Timeout"
 msgstr "Tiempo de espera por defecto para la actualización del inventario"
 
-#: awx/main/conf.py:300
+#: awx/main/conf.py:314
 msgid ""
-"Maximum time to allow inventory updates to run. Use value of 0 to indicate "
-"that no timeout should be imposed. A timeout set on an individual inventory "
-"source will override this."
+"Maximum time in seconds to allow inventory updates to run. Use value of 0 to"
+" indicate that no timeout should be imposed. A timeout set on an individual "
+"inventory source will override this."
 msgstr ""
-"Tiempo máximo a permitir la ejecución de una actualización del inventario. "
-"Utilice el valor 0 para indicar que ningún tiempo de espera será impuesto. "
-"Un tiempo de espera establecido en una fuente de inventario individual "
-"reemplazará éste."
+"Tiempo máximo en segundos para permitir la ejecución de actualizaciones de "
+"inventario. Utilice el valor 0 para indicar que no debería señalarse ningún "
+"tipo de tiempo de expiración. El tiempo de expiración definido para una "
+"fuente de inventario individual debería anularlo."
 
-#: awx/main/conf.py:311
+#: awx/main/conf.py:325
 msgid "Default Project Update Timeout"
 msgstr "Tiempo de espera por defecto para la actualización de un proyecto"
 
-#: awx/main/conf.py:312
+#: awx/main/conf.py:326
 msgid ""
-"Maximum time to allow project updates to run. Use value of 0 to indicate "
-"that no timeout should be imposed. A timeout set on an individual project "
-"will override this."
+"Maximum time in seconds to allow project updates to run. Use value of 0 to "
+"indicate that no timeout should be imposed. A timeout set on an individual "
+"project will override this."
 msgstr ""
-"Tiempo máximo a permitir la ejecución de una actualización del proyecto. "
-"Utilice el valor 0 para indicar que ningún tiempo de espera será impuesto. "
-"Un tiempo de espera establecido en una plantilla individual reemplazará "
-"éste."
+"Tiempo máximo en segundos para permitir que se ejecuten las actualizaciones "
+"de los proyectos. Utilice un valor de 0 para indicar que no debería "
+"definirse ningún tipo de tiempo de expiración. El tiempo de expiración "
+"definido para una fuente de inventario individual debería anularlo."
 
-#: awx/main/conf.py:323
+#: awx/main/conf.py:337
 msgid "Per-Host Ansible Fact Cache Timeout"
 msgstr "Tiempo de espera de la caché de eventos Ansible por host"
 
-#: awx/main/conf.py:324
+#: awx/main/conf.py:338
 msgid ""
 "Maximum time, in seconds, that stored Ansible facts are considered valid "
 "since the last time they were modified. Only valid, non-stale, facts will be"
@@ -1776,27 +1797,27 @@ msgstr ""
 "Tenga en cuenta que esto no influye en la eliminación de ansible_facts de la"
 " base de datos."
 
-#: awx/main/conf.py:335
+#: awx/main/conf.py:350
 msgid "Logging Aggregator"
 msgstr "Agregación de registros"
 
-#: awx/main/conf.py:336
+#: awx/main/conf.py:351
 msgid "Hostname/IP where external logs will be sent to."
 msgstr "Hostname/IP donde los logs externos serán enviados."
 
-#: awx/main/conf.py:337 awx/main/conf.py:347 awx/main/conf.py:358
-#: awx/main/conf.py:368 awx/main/conf.py:380 awx/main/conf.py:395
-#: awx/main/conf.py:407 awx/main/conf.py:416 awx/main/conf.py:426
-#: awx/main/conf.py:436 awx/main/conf.py:447 awx/main/conf.py:459
-#: awx/main/conf.py:472
+#: awx/main/conf.py:352 awx/main/conf.py:363 awx/main/conf.py:375
+#: awx/main/conf.py:385 awx/main/conf.py:397 awx/main/conf.py:412
+#: awx/main/conf.py:424 awx/main/conf.py:433 awx/main/conf.py:443
+#: awx/main/conf.py:453 awx/main/conf.py:464 awx/main/conf.py:476
+#: awx/main/conf.py:489
 msgid "Logging"
 msgstr "Registros"
 
-#: awx/main/conf.py:344
+#: awx/main/conf.py:360
 msgid "Logging Aggregator Port"
 msgstr "Puerto de agregación de registros"
 
-#: awx/main/conf.py:345
+#: awx/main/conf.py:361
 msgid ""
 "Port on Logging Aggregator to send logs to (if required and not provided in "
 "Logging Aggregator)."
@@ -1804,39 +1825,39 @@ msgstr ""
 "El puerto del Agregador de Logs al cual enviar logs (si es requerido y no "
 "está definido en el Agregador de Logs)."
 
-#: awx/main/conf.py:356
+#: awx/main/conf.py:373
 msgid "Logging Aggregator Type"
 msgstr "Tipo de agregación de registros."
 
-#: awx/main/conf.py:357
+#: awx/main/conf.py:374
 msgid "Format messages for the chosen log aggregator."
 msgstr "Formato de mensajes para el agregador de registros escogidos."
 
-#: awx/main/conf.py:366
+#: awx/main/conf.py:383
 msgid "Logging Aggregator Username"
 msgstr "Usuario del agregador de registros"
 
-#: awx/main/conf.py:367
+#: awx/main/conf.py:384
 msgid "Username for external log aggregator (if required)."
 msgstr "Usuario para el agregador de registros externo (si es necesario)."
 
-#: awx/main/conf.py:378
+#: awx/main/conf.py:395
 msgid "Logging Aggregator Password/Token"
 msgstr "Contraseña/Token del agregador de registros"
 
-#: awx/main/conf.py:379
+#: awx/main/conf.py:396
 msgid ""
 "Password or authentication token for external log aggregator (if required)."
 msgstr ""
 "Contraseña o token de autentificación para el agregador de registros externo"
 " (si es necesario)."
 
-#: awx/main/conf.py:388
+#: awx/main/conf.py:405
 msgid "Loggers Sending Data to Log Aggregator Form"
 msgstr ""
 "Registradores que envían datos al formulario de agregadores de registros"
 
-#: awx/main/conf.py:389
+#: awx/main/conf.py:406
 msgid ""
 "List of loggers that will send HTTP logs to the collector, these can include any or all of: \n"
 "awx - service logs\n"
@@ -1850,11 +1871,11 @@ msgstr ""
 "job_events - datos de retorno de llamada de eventos de tareas Ansible\n"
 "system_tracking - información obtenida de tareas de análisis"
 
-#: awx/main/conf.py:402
+#: awx/main/conf.py:419
 msgid "Log System Tracking Facts Individually"
 msgstr "Sistema de registros tratará los facts individualmente."
 
-#: awx/main/conf.py:403
+#: awx/main/conf.py:420
 msgid ""
 "If set, system tracking facts will be sent for each package, service, "
 "orother item found in a scan, allowing for greater search query granularity."
@@ -1867,35 +1888,35 @@ msgstr ""
 "serán enviados como un único diccionario, permitiendo mayor eficiencia en el"
 " proceso de facts."
 
-#: awx/main/conf.py:414
+#: awx/main/conf.py:431
 msgid "Enable External Logging"
 msgstr "Habilitar registro externo"
 
-#: awx/main/conf.py:415
+#: awx/main/conf.py:432
 msgid "Enable sending logs to external log aggregator."
 msgstr "Habilitar el envío de registros a un agregador de registros externo."
 
-#: awx/main/conf.py:424
+#: awx/main/conf.py:441
 msgid "Cluster-wide Tower unique identifier."
 msgstr "Indentificador de Torre único a través del cluster."
 
-#: awx/main/conf.py:425
+#: awx/main/conf.py:442
 msgid "Useful to uniquely identify Tower instances."
 msgstr "Útil para identificar  instancias de Torre."
 
-#: awx/main/conf.py:434
+#: awx/main/conf.py:451
 msgid "Logging Aggregator Protocol"
 msgstr "Registrando protocolo de agregador"
 
-#: awx/main/conf.py:435
+#: awx/main/conf.py:452
 msgid "Protocol used to communicate with log aggregator."
 msgstr "Protocolo utilizado para comunicarse con el agregador de registros."
 
-#: awx/main/conf.py:443
+#: awx/main/conf.py:460
 msgid "TCP Connection Timeout"
 msgstr "Tiempo de espera para la conexión TCP"
 
-#: awx/main/conf.py:444
+#: awx/main/conf.py:461
 msgid ""
 "Number of seconds for a TCP connection to external log aggregator to "
 "timeout. Applies to HTTPS and TCP log aggregator protocols."
@@ -1904,11 +1925,11 @@ msgstr ""
 "externo caduque. Aplica a protocolos de agregadores de registros HTTPS y "
 "TCP."
 
-#: awx/main/conf.py:454
+#: awx/main/conf.py:471
 msgid "Enable/disable HTTPS certificate verification"
 msgstr "Habilitar/deshabilitar verificación de certificado HTTPS"
 
-#: awx/main/conf.py:455
+#: awx/main/conf.py:472
 msgid ""
 "Flag to control enable/disable of certificate verification when "
 "LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, Tower's log handler will "
@@ -1921,11 +1942,11 @@ msgstr ""
 " de registros externo haya enviado el certificado antes de establecer la "
 "conexión."
 
-#: awx/main/conf.py:467
+#: awx/main/conf.py:484
 msgid "Logging Aggregator Level Threshold"
 msgstr "Umbral de nivel del agregador de registros"
 
-#: awx/main/conf.py:468
+#: awx/main/conf.py:485
 msgid ""
 "Level threshold used by log handler. Severities from lowest to highest are "
 "DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe than the "
@@ -1937,7 +1958,7 @@ msgstr ""
 "CRITICAL. El controlador de registros ignorará los mensajes menos graves que"
 " el umbral (los mensajes de la categoría awx.anlytics omiten este ajuste)."
 
-#: awx/main/conf.py:491 awx/sso/conf.py:1112
+#: awx/main/conf.py:508 awx/sso/conf.py:1105
 msgid "\n"
 msgstr "\n"
 
@@ -1969,43 +1990,48 @@ msgstr "Pmrun"
 msgid "Runas"
 msgstr "Runas"
 
-#: awx/main/fields.py:55
+#: awx/main/fields.py:56
 #, python-format
 msgid "'%s' is not one of ['%s']"
 msgstr "'%s' no es uno de ['%s']"
 
-#: awx/main/fields.py:520
+#: awx/main/fields.py:531
+#, python-format
+msgid "cannot be set unless \"%s\" is set"
+msgstr "no puede establecerse excepto que se defina \"%s\""
+
+#: awx/main/fields.py:547
 #, python-format
 msgid "required for %s"
 msgstr "requerido para %s"
 
-#: awx/main/fields.py:544
+#: awx/main/fields.py:571
 msgid "must be set when SSH key is encrypted."
 msgstr "se debe establecer cuando la clave SSH está cifrada."
 
-#: awx/main/fields.py:547
-msgid "should not be set when SSH key is empty."
-msgstr "no se debe establecer cuando la clave SSH está vacía."
-
-#: awx/main/fields.py:549
+#: awx/main/fields.py:577
 msgid "should not be set when SSH key is not encrypted."
 msgstr "no se debe establecer cuando la clave SSH no está cifrada."
 
-#: awx/main/fields.py:613
+#: awx/main/fields.py:635
+msgid "'dependencies' is not supported for custom credentials."
+msgstr "'dependencias' no es compatible con las credenciales personalizadas."
+
+#: awx/main/fields.py:649
 msgid "\"tower\" is a reserved field name"
 msgstr "\"tower\" es un nombre de campo reservado"
 
-#: awx/main/fields.py:620
+#: awx/main/fields.py:656
 #, python-format
 msgid "field IDs must be unique (%s)"
 msgstr "los ID de campo deben ser únicos (%s)"
 
-#: awx/main/fields.py:633
+#: awx/main/fields.py:669
 #, python-format
 msgid "%s not allowed for %s type (%s)"
 msgstr "%s no está permitido para el tipo %s (%s)"
 
-#: awx/main/fields.py:717
+#: awx/main/fields.py:753
 #, python-format
 msgid "%s uses an undefined field (%s)"
 msgstr "%s usa un campo indefinido (%s)"
@@ -2109,44 +2135,44 @@ msgstr "Módulo no soportado para comandos ad hoc."
 msgid "No argument passed to %s module."
 msgstr "Ningún argumento pasado al módulo %s."
 
-#: awx/main/models/ad_hoc_commands.py:243 awx/main/models/jobs.py:900
+#: awx/main/models/ad_hoc_commands.py:245 awx/main/models/jobs.py:904
 msgid "Host Failed"
 msgstr "Servidor fallido"
 
-#: awx/main/models/ad_hoc_commands.py:244 awx/main/models/jobs.py:901
+#: awx/main/models/ad_hoc_commands.py:246 awx/main/models/jobs.py:905
 msgid "Host OK"
 msgstr "Servidor OK"
 
-#: awx/main/models/ad_hoc_commands.py:245 awx/main/models/jobs.py:904
+#: awx/main/models/ad_hoc_commands.py:247 awx/main/models/jobs.py:908
 msgid "Host Unreachable"
 msgstr "Servidor no alcanzable"
 
-#: awx/main/models/ad_hoc_commands.py:250 awx/main/models/jobs.py:903
+#: awx/main/models/ad_hoc_commands.py:252 awx/main/models/jobs.py:907
 msgid "Host Skipped"
 msgstr "Servidor omitido"
 
-#: awx/main/models/ad_hoc_commands.py:260 awx/main/models/jobs.py:931
+#: awx/main/models/ad_hoc_commands.py:262 awx/main/models/jobs.py:935
 msgid "Debug"
 msgstr "Debug"
 
-#: awx/main/models/ad_hoc_commands.py:261 awx/main/models/jobs.py:932
+#: awx/main/models/ad_hoc_commands.py:263 awx/main/models/jobs.py:936
 msgid "Verbose"
 msgstr "Nivel de detalle"
 
-#: awx/main/models/ad_hoc_commands.py:262 awx/main/models/jobs.py:933
+#: awx/main/models/ad_hoc_commands.py:264 awx/main/models/jobs.py:937
 msgid "Deprecated"
 msgstr "Obsoleto"
 
-#: awx/main/models/ad_hoc_commands.py:263 awx/main/models/jobs.py:934
+#: awx/main/models/ad_hoc_commands.py:265 awx/main/models/jobs.py:938
 msgid "Warning"
 msgstr "Advertencia"
 
-#: awx/main/models/ad_hoc_commands.py:264 awx/main/models/jobs.py:935
+#: awx/main/models/ad_hoc_commands.py:266 awx/main/models/jobs.py:939
 msgid "System Warning"
 msgstr "Advertencia del sistema"
 
-#: awx/main/models/ad_hoc_commands.py:265 awx/main/models/jobs.py:936
-#: awx/main/models/unified_jobs.py:63
+#: awx/main/models/ad_hoc_commands.py:267 awx/main/models/jobs.py:940
+#: awx/main/models/unified_jobs.py:64
 msgid "Error"
 msgstr "Error"
 
@@ -2358,75 +2384,75 @@ msgstr "Las instancias que son miembros de este grupo de instancias"
 msgid "Instance Group to remotely control this group."
 msgstr "Grupo de instancias para controlar remotamente este grupo."
 
-#: awx/main/models/inventory.py:51
+#: awx/main/models/inventory.py:52
 msgid "Hosts have a direct link to this inventory."
 msgstr "Los hosts tienen un enlace directo a este inventario."
 
-#: awx/main/models/inventory.py:52
+#: awx/main/models/inventory.py:53
 msgid "Hosts for inventory generated using the host_filter property."
 msgstr "Hosts para inventario generado a través de la propiedad host_filter."
 
-#: awx/main/models/inventory.py:57
+#: awx/main/models/inventory.py:58
 msgid "inventories"
 msgstr "inventarios"
 
-#: awx/main/models/inventory.py:64
+#: awx/main/models/inventory.py:65
 msgid "Organization containing this inventory."
 msgstr "Organización que contiene este inventario."
 
-#: awx/main/models/inventory.py:71
+#: awx/main/models/inventory.py:72
 msgid "Inventory variables in JSON or YAML format."
 msgstr "Variables de inventario en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:76
+#: awx/main/models/inventory.py:77
 msgid "Flag indicating whether any hosts in this inventory have failed."
 msgstr ""
 "Indicador que establece si algún servidor en este inventario ha fallado."
 
-#: awx/main/models/inventory.py:81
+#: awx/main/models/inventory.py:82
 msgid "Total number of hosts in this inventory."
 msgstr "Número total de servidores en este inventario."
 
-#: awx/main/models/inventory.py:86
+#: awx/main/models/inventory.py:87
 msgid "Number of hosts in this inventory with active failures."
 msgstr "Número de servidores en este inventario con fallos actuales."
 
-#: awx/main/models/inventory.py:91
+#: awx/main/models/inventory.py:92
 msgid "Total number of groups in this inventory."
 msgstr "Número total de grupos en este inventario."
 
-#: awx/main/models/inventory.py:96
+#: awx/main/models/inventory.py:97
 msgid "Number of groups in this inventory with active failures."
 msgstr "Número de grupos en este inventario con fallos actuales."
 
-#: awx/main/models/inventory.py:101
+#: awx/main/models/inventory.py:102
 msgid ""
 "Flag indicating whether this inventory has any external inventory sources."
 msgstr ""
 "Indicador  que establece si el inventario tiene alguna fuente de externa de "
 "inventario."
 
-#: awx/main/models/inventory.py:106
+#: awx/main/models/inventory.py:107
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr ""
 "Número total de inventarios de origen externo configurado dentro de este "
 "inventario."
 
-#: awx/main/models/inventory.py:111
+#: awx/main/models/inventory.py:112
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr ""
 "Número de inventarios de origen externo  en este inventario con errores."
 
-#: awx/main/models/inventory.py:118
+#: awx/main/models/inventory.py:119
 msgid "Kind of inventory being represented."
 msgstr "Tipo de inventario que se representa."
 
-#: awx/main/models/inventory.py:124
+#: awx/main/models/inventory.py:125
 msgid "Filter that will be applied to the hosts of this inventory."
 msgstr "Filtro que se aplicará a los hosts de este inventario."
 
-#: awx/main/models/inventory.py:151
+#: awx/main/models/inventory.py:152
 msgid ""
 "Credentials to be used by hosts belonging to this inventory when accessing "
 "Red Hat Insights API."
@@ -2434,39 +2460,39 @@ msgstr ""
 "Credenciales que utilizarán los hosts que pertenecen a este inventario "
 "cuando accedan a la API de Red Hat Insights."
 
-#: awx/main/models/inventory.py:160
+#: awx/main/models/inventory.py:161
 msgid "Flag indicating the inventory is being deleted."
 msgstr "Indicador que muestra que el inventario se eliminará."
 
-#: awx/main/models/inventory.py:373
+#: awx/main/models/inventory.py:374
 msgid "Assignment not allowed for Smart Inventory"
 msgstr "Tarea no permitida para el inventario inteligente"
 
-#: awx/main/models/inventory.py:375 awx/main/models/projects.py:148
+#: awx/main/models/inventory.py:376 awx/main/models/projects.py:148
 msgid "Credential kind must be 'insights'."
 msgstr "Tipo de credencial debe ser 'insights'."
 
-#: awx/main/models/inventory.py:439
+#: awx/main/models/inventory.py:443
 msgid "Is this host online and available for running jobs?"
 msgstr "¿Está este servidor funcionando y disponible para ejecutar trabajos?"
 
-#: awx/main/models/inventory.py:445
+#: awx/main/models/inventory.py:449
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr ""
 "El valor usado por el inventario de fuente remota para identificar de forma "
 "única el servidor"
 
-#: awx/main/models/inventory.py:450
+#: awx/main/models/inventory.py:454
 msgid "Host variables in JSON or YAML format."
 msgstr "Variables del servidor en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:472
+#: awx/main/models/inventory.py:476
 msgid "Flag indicating whether the last job failed for this host."
 msgstr ""
 "Indicador que establece si el último trabajo ha fallado para este servidor."
 
-#: awx/main/models/inventory.py:477
+#: awx/main/models/inventory.py:481
 msgid ""
 "Flag indicating whether this host was created/updated from any external "
 "inventory sources."
@@ -2474,55 +2500,55 @@ msgstr ""
 "Indicador que establece si este servidor fue creado/actualizado desde algún "
 "inventario de fuente externa."
 
-#: awx/main/models/inventory.py:483
+#: awx/main/models/inventory.py:487
 msgid "Inventory source(s) that created or modified this host."
 msgstr "Fuente(s) del inventario que crearon o modificaron este servidor."
 
-#: awx/main/models/inventory.py:488
+#: awx/main/models/inventory.py:492
 msgid "Arbitrary JSON structure of most recent ansible_facts, per-host."
 msgstr "Estructura de JSON arbitraria de ansible_facts por host más reciente."
 
-#: awx/main/models/inventory.py:494
+#: awx/main/models/inventory.py:498
 msgid "The date and time ansible_facts was last modified."
 msgstr "La fecha y hora en las que se modificó ansible_facts por última vez."
 
-#: awx/main/models/inventory.py:501
+#: awx/main/models/inventory.py:505
 msgid "Red Hat Insights host unique identifier."
 msgstr "Identificador único de host de Red Hat Insights."
 
-#: awx/main/models/inventory.py:629
+#: awx/main/models/inventory.py:633
 msgid "Group variables in JSON or YAML format."
 msgstr "Grupo de variables en formato JSON o YAML."
 
-#: awx/main/models/inventory.py:635
+#: awx/main/models/inventory.py:639
 msgid "Hosts associated directly with this group."
 msgstr "Hosts associated directly with this group."
 
-#: awx/main/models/inventory.py:640
+#: awx/main/models/inventory.py:644
 msgid "Total number of hosts directly or indirectly in this group."
 msgstr ""
 "Número total de servidores directamente o indirectamente en este grupo."
 
-#: awx/main/models/inventory.py:645
+#: awx/main/models/inventory.py:649
 msgid "Flag indicating whether this group has any hosts with active failures."
 msgstr ""
 "Indicador que establece si este grupo tiene algunos servidores con fallos "
 "actuales."
 
-#: awx/main/models/inventory.py:650
+#: awx/main/models/inventory.py:654
 msgid "Number of hosts in this group with active failures."
 msgstr "Número de servidores en este grupo con fallos actuales."
 
-#: awx/main/models/inventory.py:655
+#: awx/main/models/inventory.py:659
 msgid "Total number of child groups contained within this group."
 msgstr "Número total de grupos hijo dentro de este grupo."
 
-#: awx/main/models/inventory.py:660
+#: awx/main/models/inventory.py:664
 msgid "Number of child groups within this group that have active failures."
 msgstr ""
 "Número de grupos hijo dentro de este grupo que tienen fallos actuales."
 
-#: awx/main/models/inventory.py:665
+#: awx/main/models/inventory.py:669
 msgid ""
 "Flag indicating whether this group was created/updated from any external "
 "inventory sources."
@@ -2530,64 +2556,64 @@ msgstr ""
 "Indicador que establece si este grupo fue creado/actualizado desde un "
 "inventario de fuente externa."
 
-#: awx/main/models/inventory.py:671
+#: awx/main/models/inventory.py:675
 msgid "Inventory source(s) that created or modified this group."
 msgstr "Fuente(s) de inventario que crearon o modificaron este grupo."
 
-#: awx/main/models/inventory.py:861 awx/main/models/projects.py:42
-#: awx/main/models/unified_jobs.py:427
+#: awx/main/models/inventory.py:865 awx/main/models/projects.py:42
+#: awx/main/models/unified_jobs.py:428
 msgid "Manual"
 msgstr "Manual"
 
-#: awx/main/models/inventory.py:862
+#: awx/main/models/inventory.py:866
 msgid "File, Directory or Script"
 msgstr "Archivo, directorio o script"
 
-#: awx/main/models/inventory.py:863
+#: awx/main/models/inventory.py:867
 msgid "Sourced from a Project"
 msgstr "Extraído de un proyecto"
 
-#: awx/main/models/inventory.py:864
+#: awx/main/models/inventory.py:868
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
-#: awx/main/models/inventory.py:865
+#: awx/main/models/inventory.py:869
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: awx/main/models/inventory.py:866
+#: awx/main/models/inventory.py:870
 msgid "Microsoft Azure Classic (deprecated)"
 msgstr "Microsoft Azure Classic (obsoleto)"
 
-#: awx/main/models/inventory.py:867
+#: awx/main/models/inventory.py:871
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: awx/main/models/inventory.py:868
+#: awx/main/models/inventory.py:872
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: awx/main/models/inventory.py:869
+#: awx/main/models/inventory.py:873
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: awx/main/models/inventory.py:870
+#: awx/main/models/inventory.py:874
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: awx/main/models/inventory.py:871
+#: awx/main/models/inventory.py:875
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: awx/main/models/inventory.py:872
+#: awx/main/models/inventory.py:876
 msgid "Custom Script"
 msgstr "Script personalizado"
 
-#: awx/main/models/inventory.py:989
+#: awx/main/models/inventory.py:993
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "Variables para la fuente del inventario en formato YAML o JSON."
 
-#: awx/main/models/inventory.py:1008
+#: awx/main/models/inventory.py:1012
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
@@ -2595,71 +2621,79 @@ msgstr ""
 "Lista de expresiones de filtrado separadas por coma (sólo EC2). Servidores "
 "son importados cuando ALGÚN filtro coincide."
 
-#: awx/main/models/inventory.py:1014
+#: awx/main/models/inventory.py:1018
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr ""
 "Limitar grupos creados automáticamente desde la fuente del inventario (sólo "
 "EC2)"
 
-#: awx/main/models/inventory.py:1018
+#: awx/main/models/inventory.py:1022
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr ""
 "Sobrescribir grupos locales y servidores desde una fuente remota del "
 "inventario."
 
-#: awx/main/models/inventory.py:1022
+#: awx/main/models/inventory.py:1026
 msgid "Overwrite local variables from remote inventory source."
 msgstr ""
 "Sobrescribir las variables locales desde una fuente remota del inventario."
 
-#: awx/main/models/inventory.py:1027 awx/main/models/jobs.py:159
+#: awx/main/models/inventory.py:1031 awx/main/models/jobs.py:159
 #: awx/main/models/projects.py:117
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr ""
 "La cantidad de tiempo (en segundos) para ejecutar antes de que se cancele la"
 " tarea."
 
-#: awx/main/models/inventory.py:1060
-msgid "Availability Zone"
-msgstr "Zona de disponibilidad"
-
-#: awx/main/models/inventory.py:1061
+#: awx/main/models/inventory.py:1064
 msgid "Image ID"
 msgstr "Id de imagen"
 
-#: awx/main/models/inventory.py:1062
+#: awx/main/models/inventory.py:1065
+msgid "Availability Zone"
+msgstr "Zona de disponibilidad"
+
+#: awx/main/models/inventory.py:1066
+msgid "Account"
+msgstr "Cuenta"
+
+#: awx/main/models/inventory.py:1067
 msgid "Instance ID"
 msgstr "ID de instancia"
 
-#: awx/main/models/inventory.py:1063
+#: awx/main/models/inventory.py:1068
+msgid "Instance State"
+msgstr "Estado de la instancia"
+
+#: awx/main/models/inventory.py:1069
 msgid "Instance Type"
 msgstr "Tipo de instancia"
 
-#: awx/main/models/inventory.py:1064
+#: awx/main/models/inventory.py:1070
 msgid "Key Name"
 msgstr "Nombre clave"
 
-#: awx/main/models/inventory.py:1065
+#: awx/main/models/inventory.py:1071
 msgid "Region"
 msgstr "Región"
 
-#: awx/main/models/inventory.py:1066
+#: awx/main/models/inventory.py:1072
 msgid "Security Group"
 msgstr "Grupo de seguridad"
 
-#: awx/main/models/inventory.py:1067
+#: awx/main/models/inventory.py:1073
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: awx/main/models/inventory.py:1068
-msgid "VPC ID"
-msgstr "VPC ID"
-
-#: awx/main/models/inventory.py:1069
+#: awx/main/models/inventory.py:1074
 msgid "Tag None"
 msgstr "Etiqueta ninguna"
 
-#: awx/main/models/inventory.py:1132
+#: awx/main/models/inventory.py:1075
+msgid "VPC ID"
+msgstr "VPC ID"
+
+#: awx/main/models/inventory.py:1138
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
@@ -2668,30 +2702,30 @@ msgstr ""
 "Fuentes de inventario basados en Cloud (como %s) requieren credenciales para"
 " identificar los correspondientes servicios cloud."
 
-#: awx/main/models/inventory.py:1139
+#: awx/main/models/inventory.py:1145
 msgid "Credential is required for a cloud source."
 msgstr "Un credencial es necesario para una fuente cloud."
 
-#: awx/main/models/inventory.py:1161
+#: awx/main/models/inventory.py:1167
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr "Región %(source)s inválida: %(region)s"
 
-#: awx/main/models/inventory.py:1185
+#: awx/main/models/inventory.py:1191
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr "Expresión de filtro inválida:  %(filter)s"
 
-#: awx/main/models/inventory.py:1206
+#: awx/main/models/inventory.py:1212
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr "Grupo escogido inválido: %(choice)s"
 
-#: awx/main/models/inventory.py:1241
+#: awx/main/models/inventory.py:1247
 msgid "Project containing inventory file used as source."
 msgstr "Proyecto que contiene el archivo de inventario usado como fuente."
 
-#: awx/main/models/inventory.py:1389
+#: awx/main/models/inventory.py:1395
 #, python-format
 msgid ""
 "Unable to configure this item for cloud sync. It is already managed by %s."
@@ -2699,18 +2733,45 @@ msgstr ""
 "Imposible configurar este elemento para sincronización cloud. Está "
 "administrado actualmente por %s."
 
-#: awx/main/models/inventory.py:1414
+#: awx/main/models/inventory.py:1405
+msgid ""
+"More than one SCM-based inventory source with update on project update per-"
+"inventory not allowed."
+msgstr ""
+"No se permite más de una fuente de inventario basada en SCM con "
+"actualización en la actualización del proyecto por inventario."
+
+#: awx/main/models/inventory.py:1412
+msgid ""
+"Cannot update SCM-based inventory source on launch if set to update on "
+"project update. Instead, configure the corresponding source project to "
+"update on launch."
+msgstr ""
+"No se puede actualizar la fuente de inventario basada en SCM en la ejecución"
+" si está configurada para actualizarse en la actualización del proyecto. En "
+"su lugar, configure el proyecto de fuente correspondiente para actualizar en"
+" la ejecución."
+
+#: awx/main/models/inventory.py:1418
+msgid "SCM type sources must set `overwrite_vars` to `true`."
+msgstr "Las fuentes de tipo SCM deben configurar `overwrite_vars` en `true`."
+
+#: awx/main/models/inventory.py:1423
+msgid "Cannot set source_path if not SCM type."
+msgstr "No se puede configurar source_path si no es del tipo SCM."
+
+#: awx/main/models/inventory.py:1448
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr ""
 "Los archivos de inventario de esta actualización de proyecto se utilizaron "
 "para la actualización del inventario."
 
-#: awx/main/models/inventory.py:1528
+#: awx/main/models/inventory.py:1561
 msgid "Inventory script contents"
 msgstr "Contenido del script de inventario"
 
-#: awx/main/models/inventory.py:1533
+#: awx/main/models/inventory.py:1566
 msgid "Organization owning this inventory script"
 msgstr "Organización propietario de este script de inventario"
 
@@ -2753,21 +2814,21 @@ msgstr ""
 "La plantilla de trabajo debe proporcionar 'inventory' o permitir "
 "solicitarlo."
 
-#: awx/main/models/jobs.py:421
+#: awx/main/models/jobs.py:422
 msgid "Cannot override job_type to or from a scan job."
 msgstr "No se puede sustituir job_type a o desde un trabajo de escaneo."
 
-#: awx/main/models/jobs.py:487 awx/main/models/projects.py:263
+#: awx/main/models/jobs.py:488 awx/main/models/projects.py:263
 msgid "SCM Revision"
 msgstr "Revisión SCM"
 
-#: awx/main/models/jobs.py:488
+#: awx/main/models/jobs.py:489
 msgid "The SCM Revision from the Project used for this job, if available"
 msgstr ""
 "La revisión SCM desde el proyecto usado para este trabajo, si está "
 "disponible"
 
-#: awx/main/models/jobs.py:496
+#: awx/main/models/jobs.py:497
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
@@ -2775,105 +2836,105 @@ msgstr ""
 "La tarea de actualización de SCM utilizado para asegurarse que los playbooks"
 " estaban disponibles para la ejecución del trabajo"
 
-#: awx/main/models/jobs.py:799
+#: awx/main/models/jobs.py:802
 msgid "job host summaries"
 msgstr "Resumen de trabajos de servidor"
 
-#: awx/main/models/jobs.py:902
+#: awx/main/models/jobs.py:906
 msgid "Host Failure"
 msgstr "Fallo del servidor"
 
-#: awx/main/models/jobs.py:905 awx/main/models/jobs.py:919
+#: awx/main/models/jobs.py:909 awx/main/models/jobs.py:923
 msgid "No Hosts Remaining"
 msgstr "No más servidores"
 
-#: awx/main/models/jobs.py:906
+#: awx/main/models/jobs.py:910
 msgid "Host Polling"
 msgstr "Sondeo al servidor"
 
-#: awx/main/models/jobs.py:907
+#: awx/main/models/jobs.py:911
 msgid "Host Async OK"
 msgstr "Servidor Async OK"
 
-#: awx/main/models/jobs.py:908
+#: awx/main/models/jobs.py:912
 msgid "Host Async Failure"
 msgstr "Servidor Async fallido"
 
-#: awx/main/models/jobs.py:909
+#: awx/main/models/jobs.py:913
 msgid "Item OK"
 msgstr "Elemento OK"
 
-#: awx/main/models/jobs.py:910
+#: awx/main/models/jobs.py:914
 msgid "Item Failed"
 msgstr "Elemento fallido"
 
-#: awx/main/models/jobs.py:911
+#: awx/main/models/jobs.py:915
 msgid "Item Skipped"
 msgstr "Elemento omitido"
 
-#: awx/main/models/jobs.py:912
+#: awx/main/models/jobs.py:916
 msgid "Host Retry"
 msgstr "Reintentar servidor"
 
-#: awx/main/models/jobs.py:914
+#: awx/main/models/jobs.py:918
 msgid "File Difference"
 msgstr "Diferencias del fichero"
 
-#: awx/main/models/jobs.py:915
+#: awx/main/models/jobs.py:919
 msgid "Playbook Started"
 msgstr "Playbook iniciado"
 
-#: awx/main/models/jobs.py:916
+#: awx/main/models/jobs.py:920
 msgid "Running Handlers"
 msgstr "Handlers ejecutándose"
 
-#: awx/main/models/jobs.py:917
+#: awx/main/models/jobs.py:921
 msgid "Including File"
 msgstr "Incluyendo fichero"
 
-#: awx/main/models/jobs.py:918
+#: awx/main/models/jobs.py:922
 msgid "No Hosts Matched"
 msgstr "Ningún servidor corresponde"
 
-#: awx/main/models/jobs.py:920
+#: awx/main/models/jobs.py:924
 msgid "Task Started"
 msgstr "Tarea iniciada"
 
-#: awx/main/models/jobs.py:922
+#: awx/main/models/jobs.py:926
 msgid "Variables Prompted"
 msgstr "Variables solicitadas"
 
-#: awx/main/models/jobs.py:923
+#: awx/main/models/jobs.py:927
 msgid "Gathering Facts"
 msgstr "Obteniendo facts"
 
-#: awx/main/models/jobs.py:924
+#: awx/main/models/jobs.py:928
 msgid "internal: on Import for Host"
 msgstr "internal: en la importación para el servidor"
 
-#: awx/main/models/jobs.py:925
+#: awx/main/models/jobs.py:929
 msgid "internal: on Not Import for Host"
 msgstr "internal: en la no importación para el servidor"
 
-#: awx/main/models/jobs.py:926
+#: awx/main/models/jobs.py:930
 msgid "Play Started"
 msgstr "Jugada iniciada"
 
-#: awx/main/models/jobs.py:927
+#: awx/main/models/jobs.py:931
 msgid "Playbook Complete"
 msgstr "Playbook terminado"
 
-#: awx/main/models/jobs.py:1337
+#: awx/main/models/jobs.py:1363
 msgid "Remove jobs older than a certain number of days"
 msgstr "Eliminar trabajos más antiguos que el ńumero de días especificado"
 
-#: awx/main/models/jobs.py:1338
+#: awx/main/models/jobs.py:1364
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr ""
 "Eliminar entradas del flujo de actividad más antiguos que el número de días "
 "especificado"
 
-#: awx/main/models/jobs.py:1339
+#: awx/main/models/jobs.py:1365
 msgid "Purge and/or reduce the granularity of system tracking data"
 msgstr ""
 "Limpiar y/o reducir la granularidad de los datos del sistema de rastreo"
@@ -2882,15 +2943,15 @@ msgstr ""
 msgid "Organization this label belongs to."
 msgstr "Organización a la que esta etiqueta pertenece."
 
-#: awx/main/models/notifications.py:138 awx/main/models/unified_jobs.py:58
+#: awx/main/models/notifications.py:138 awx/main/models/unified_jobs.py:59
 msgid "Pending"
 msgstr "Pendiente"
 
-#: awx/main/models/notifications.py:139 awx/main/models/unified_jobs.py:61
+#: awx/main/models/notifications.py:139 awx/main/models/unified_jobs.py:62
 msgid "Successful"
 msgstr "Correctamente"
 
-#: awx/main/models/notifications.py:140 awx/main/models/unified_jobs.py:62
+#: awx/main/models/notifications.py:140 awx/main/models/unified_jobs.py:63
 msgid "Failed"
 msgstr "Fallido"
 
@@ -3168,84 +3229,84 @@ msgstr "JSON esperado"
 msgid "days must be a positive integer."
 msgstr "días debe ser un número entero."
 
-#: awx/main/models/unified_jobs.py:57
+#: awx/main/models/unified_jobs.py:58
 msgid "New"
 msgstr "Nuevo"
 
-#: awx/main/models/unified_jobs.py:59
+#: awx/main/models/unified_jobs.py:60
 msgid "Waiting"
 msgstr "Esperando"
 
-#: awx/main/models/unified_jobs.py:60
+#: awx/main/models/unified_jobs.py:61
 msgid "Running"
 msgstr "Ejecutándose"
 
-#: awx/main/models/unified_jobs.py:64
+#: awx/main/models/unified_jobs.py:65
 msgid "Canceled"
 msgstr "Cancelado"
 
-#: awx/main/models/unified_jobs.py:68
+#: awx/main/models/unified_jobs.py:69
 msgid "Never Updated"
 msgstr "Nunca actualizado"
 
-#: awx/main/models/unified_jobs.py:72 awx/ui/templates/ui/index.html:67
+#: awx/main/models/unified_jobs.py:73 awx/ui/templates/ui/index.html:67
 #: awx/ui/templates/ui/index.html.py:86
 msgid "OK"
 msgstr "OK"
 
-#: awx/main/models/unified_jobs.py:73
+#: awx/main/models/unified_jobs.py:74
 msgid "Missing"
 msgstr "No encontrado"
 
-#: awx/main/models/unified_jobs.py:77
+#: awx/main/models/unified_jobs.py:78
 msgid "No External Source"
 msgstr "Sin fuente externa"
 
-#: awx/main/models/unified_jobs.py:84
+#: awx/main/models/unified_jobs.py:85
 msgid "Updating"
 msgstr "Actualizando"
 
-#: awx/main/models/unified_jobs.py:428
+#: awx/main/models/unified_jobs.py:429
 msgid "Relaunch"
 msgstr "Relanzar"
 
-#: awx/main/models/unified_jobs.py:429
+#: awx/main/models/unified_jobs.py:430
 msgid "Callback"
 msgstr "Callback"
 
-#: awx/main/models/unified_jobs.py:430
+#: awx/main/models/unified_jobs.py:431
 msgid "Scheduled"
 msgstr "Programado"
 
-#: awx/main/models/unified_jobs.py:431
+#: awx/main/models/unified_jobs.py:432
 msgid "Dependency"
 msgstr "Dependencia"
 
-#: awx/main/models/unified_jobs.py:432
+#: awx/main/models/unified_jobs.py:433
 msgid "Workflow"
 msgstr "Flujo de trabajo"
 
-#: awx/main/models/unified_jobs.py:433
+#: awx/main/models/unified_jobs.py:434
 msgid "Sync"
 msgstr "Sincronizar"
 
-#: awx/main/models/unified_jobs.py:480
+#: awx/main/models/unified_jobs.py:481
 msgid "The node the job executed on."
 msgstr "El nodo en el que se ejecutó la tarea."
 
-#: awx/main/models/unified_jobs.py:506
+#: awx/main/models/unified_jobs.py:507
 msgid "The date and time the job was queued for starting."
 msgstr "La fecha y hora que el trabajo fue puesto en la cola para iniciarse."
 
-#: awx/main/models/unified_jobs.py:512
+#: awx/main/models/unified_jobs.py:513
 msgid "The date and time the job finished execution."
 msgstr "La fecha y hora en la que el trabajo finalizó su ejecución."
 
-#: awx/main/models/unified_jobs.py:518
+#: awx/main/models/unified_jobs.py:519
 msgid "Elapsed time in seconds that the job ran."
 msgstr "Tiempo transcurrido en segundos que el trabajo se ejecutó. "
 
-#: awx/main/models/unified_jobs.py:540
+#: awx/main/models/unified_jobs.py:541
 msgid ""
 "A status field to indicate the state of the job if it wasn't able to run and"
 " capture stdout"
@@ -3253,24 +3314,17 @@ msgstr ""
 "Un campo de estado que indica el estado del trabajo si éste no fue capaz de "
 "ejecutarse y obtener la salida estándar."
 
-#: awx/main/models/unified_jobs.py:579
+#: awx/main/models/unified_jobs.py:580
 msgid "The Rampart/Instance group the job was run under"
 msgstr "El grupo Rampart/Instancia en el que se ejecutó la tarea"
 
 #: awx/main/notifications/base.py:17
+#: awx/main/notifications/email_backend.py:28
 msgid ""
 "{} #{} had status {}, view details at {}\n"
 "\n"
 msgstr ""
 "{} #{} tenía el estado {}; ver detalles en {}\n"
-"\n"
-
-#: awx/main/notifications/email_backend.py:28
-msgid ""
-"{} #{} had status {} on Ansible Tower, view details at {}\n"
-"\n"
-msgstr ""
-"{} #{} tuvo estado {} en Ansible Tower, ver detalles en {}\n"
 "\n"
 
 #: awx/main/notifications/hipchat_backend.py:47
@@ -3304,7 +3358,7 @@ msgstr "Excepción conectando a Twilio: {}"
 msgid "Error sending notification webhook: {}"
 msgstr "Error enviando notificación weebhook: {}"
 
-#: awx/main/scheduler/__init__.py:153
+#: awx/main/scheduler/__init__.py:184
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
@@ -3312,7 +3366,7 @@ msgstr ""
 "Trabajo generado desde un flujo de trabajo no pudo ser iniciado porque no "
 "tenía el estado correcto o credenciales manuales eran solicitados."
 
-#: awx/main/scheduler/__init__.py:157
+#: awx/main/scheduler/__init__.py:188
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
@@ -3320,19 +3374,19 @@ msgstr ""
 "Trabajo generado desde un flujo de trabajo no pudo ser iniciado porque no se"
 " encontraron los recursos relacionados como un proyecto o un inventario."
 
-#: awx/main/tasks.py:175
+#: awx/main/tasks.py:184
 msgid "Ansible Tower host usage over 90%"
 msgstr "Ansible Tower uso de servidores por encima de 90%"
 
-#: awx/main/tasks.py:180
+#: awx/main/tasks.py:189
 msgid "Ansible Tower license will expire soon"
 msgstr "Licencia de Ansible Tower expirará pronto"
 
-#: awx/main/tasks.py:308
+#: awx/main/tasks.py:318
 msgid "status_str must be either succeeded or failed"
 msgstr "status_str debe ser 'succeeded' o 'failed'"
 
-#: awx/main/tasks.py:1498
+#: awx/main/tasks.py:1531
 msgid "Dependent inventory update {} was canceled."
 msgstr "Se canceló la actualización del inventario dependiente {}."
 
@@ -3496,287 +3550,287 @@ msgstr "Error de servidor"
 msgid "A server error has occurred."
 msgstr "Un error en el servidor ha ocurrido."
 
-#: awx/settings/defaults.py:663
+#: awx/settings/defaults.py:664
 msgid "US East (Northern Virginia)"
 msgstr "Este de EE.UU.  (Virginia del norte)"
 
-#: awx/settings/defaults.py:664
+#: awx/settings/defaults.py:665
 msgid "US East (Ohio)"
 msgstr "Este de EE.UU. (Ohio)"
 
-#: awx/settings/defaults.py:665
+#: awx/settings/defaults.py:666
 msgid "US West (Oregon)"
 msgstr "Oeste de EE.UU. (Oregón)"
 
-#: awx/settings/defaults.py:666
+#: awx/settings/defaults.py:667
 msgid "US West (Northern California)"
 msgstr "Oeste de EE.UU (California del norte)"
 
-#: awx/settings/defaults.py:667
+#: awx/settings/defaults.py:668
 msgid "Canada (Central)"
 msgstr "Canada (Central)"
 
-#: awx/settings/defaults.py:668
+#: awx/settings/defaults.py:669
 msgid "EU (Frankfurt)"
 msgstr "UE (Fráncfort)"
 
-#: awx/settings/defaults.py:669
+#: awx/settings/defaults.py:670
 msgid "EU (Ireland)"
 msgstr "UE (Irlanda)"
 
-#: awx/settings/defaults.py:670
+#: awx/settings/defaults.py:671
 msgid "EU (London)"
 msgstr "UE (Londres)"
 
-#: awx/settings/defaults.py:671
+#: awx/settings/defaults.py:672
 msgid "Asia Pacific (Singapore)"
 msgstr "Asia Pacífico (Singapur)"
 
-#: awx/settings/defaults.py:672
+#: awx/settings/defaults.py:673
 msgid "Asia Pacific (Sydney)"
 msgstr "Asia Pacífico (Sídney)"
 
-#: awx/settings/defaults.py:673
+#: awx/settings/defaults.py:674
 msgid "Asia Pacific (Tokyo)"
 msgstr "Asia Pacífico (Tokio)"
 
-#: awx/settings/defaults.py:674
+#: awx/settings/defaults.py:675
 msgid "Asia Pacific (Seoul)"
 msgstr "Asia Pacífico (Seúl)"
 
-#: awx/settings/defaults.py:675
+#: awx/settings/defaults.py:676
 msgid "Asia Pacific (Mumbai)"
 msgstr "Asia Pacífico (Bombay)"
 
-#: awx/settings/defaults.py:676
+#: awx/settings/defaults.py:677
 msgid "South America (Sao Paulo)"
 msgstr "América del sur (São Paulo)"
 
-#: awx/settings/defaults.py:677
+#: awx/settings/defaults.py:678
 msgid "US West (GovCloud)"
 msgstr "Oeste de EE.UU. (GovCloud)"
 
-#: awx/settings/defaults.py:678
+#: awx/settings/defaults.py:679
 msgid "China (Beijing)"
 msgstr "China (Pekín)"
 
-#: awx/settings/defaults.py:727
+#: awx/settings/defaults.py:728
 msgid "US East 1 (B)"
 msgstr "Este de EE. UU. 1 (B)"
 
-#: awx/settings/defaults.py:728
+#: awx/settings/defaults.py:729
 msgid "US East 1 (C)"
 msgstr "Este de EE. UU. 1 (C)"
 
-#: awx/settings/defaults.py:729
+#: awx/settings/defaults.py:730
 msgid "US East 1 (D)"
 msgstr "Este de EE. UU. 1 (D)"
 
-#: awx/settings/defaults.py:730
+#: awx/settings/defaults.py:731
 msgid "US East 4 (A)"
 msgstr "Este de EE. UU. 4 (A)"
 
-#: awx/settings/defaults.py:731
+#: awx/settings/defaults.py:732
 msgid "US East 4 (B)"
 msgstr "Este de EE. UU. 4 (B)"
 
-#: awx/settings/defaults.py:732
+#: awx/settings/defaults.py:733
 msgid "US East 4 (C)"
 msgstr "Este de EE. UU. 4 (C)"
 
-#: awx/settings/defaults.py:733
+#: awx/settings/defaults.py:734
 msgid "US Central (A)"
 msgstr "EE.UU. Central (A)"
 
-#: awx/settings/defaults.py:734
+#: awx/settings/defaults.py:735
 msgid "US Central (B)"
 msgstr "EE.UU. Central (B)"
 
-#: awx/settings/defaults.py:735
+#: awx/settings/defaults.py:736
 msgid "US Central (C)"
 msgstr "EE.UU. Central (C)"
 
-#: awx/settings/defaults.py:736
+#: awx/settings/defaults.py:737
 msgid "US Central (F)"
 msgstr "EE.UU. Central (F)"
 
-#: awx/settings/defaults.py:737
+#: awx/settings/defaults.py:738
 msgid "US West (A)"
 msgstr "Oeste de EE. UU. (A)"
 
-#: awx/settings/defaults.py:738
+#: awx/settings/defaults.py:739
 msgid "US West (B)"
 msgstr "Oeste de EE. UU. (B)"
 
-#: awx/settings/defaults.py:739
+#: awx/settings/defaults.py:740
 msgid "US West (C)"
 msgstr "Oeste de EE. UU. (C)"
 
-#: awx/settings/defaults.py:740
+#: awx/settings/defaults.py:741
 msgid "Europe West 1 (B)"
 msgstr "Oeste de Europa 1 (B)"
 
-#: awx/settings/defaults.py:741
+#: awx/settings/defaults.py:742
 msgid "Europe West 1 (C)"
 msgstr "Oeste de Europa 1 (C)"
 
-#: awx/settings/defaults.py:742
+#: awx/settings/defaults.py:743
 msgid "Europe West 1 (D)"
 msgstr "Oeste de Europa 1 (D)"
 
-#: awx/settings/defaults.py:743
+#: awx/settings/defaults.py:744
 msgid "Europe West 2 (A)"
 msgstr "Oeste de Europa 2 (A)"
 
-#: awx/settings/defaults.py:744
+#: awx/settings/defaults.py:745
 msgid "Europe West 2 (B)"
 msgstr "Oeste de Europa 2 (B)"
 
-#: awx/settings/defaults.py:745
+#: awx/settings/defaults.py:746
 msgid "Europe West 2 (C)"
 msgstr "Oeste de Europa 2 (C)"
 
-#: awx/settings/defaults.py:746
+#: awx/settings/defaults.py:747
 msgid "Asia East (A)"
 msgstr "Este de Asia (A)"
 
-#: awx/settings/defaults.py:747
+#: awx/settings/defaults.py:748
 msgid "Asia East (B)"
 msgstr "Este de Asia (B)"
 
-#: awx/settings/defaults.py:748
+#: awx/settings/defaults.py:749
 msgid "Asia East (C)"
 msgstr "Este de Asia (C)"
 
-#: awx/settings/defaults.py:749
+#: awx/settings/defaults.py:750
 msgid "Asia Southeast (A)"
 msgstr "Sudeste de Asia (A)"
 
-#: awx/settings/defaults.py:750
+#: awx/settings/defaults.py:751
 msgid "Asia Southeast (B)"
 msgstr "Sudeste de Asia (B)"
 
-#: awx/settings/defaults.py:751
+#: awx/settings/defaults.py:752
 msgid "Asia Northeast (A)"
 msgstr "Noreste de Asia (A)"
 
-#: awx/settings/defaults.py:752
+#: awx/settings/defaults.py:753
 msgid "Asia Northeast (B)"
 msgstr "Noreste de Asia (B)"
 
-#: awx/settings/defaults.py:753
+#: awx/settings/defaults.py:754
 msgid "Asia Northeast (C)"
 msgstr "Noreste de Asia (C)"
 
-#: awx/settings/defaults.py:754
+#: awx/settings/defaults.py:755
 msgid "Australia Southeast (A)"
 msgstr "Sudeste de Australia (A)"
 
-#: awx/settings/defaults.py:755
+#: awx/settings/defaults.py:756
 msgid "Australia Southeast (B)"
 msgstr "Sudeste de Australia (B)"
 
-#: awx/settings/defaults.py:756
+#: awx/settings/defaults.py:757
 msgid "Australia Southeast (C)"
 msgstr "Sudeste de Australia (C)"
 
-#: awx/settings/defaults.py:780
+#: awx/settings/defaults.py:781
 msgid "US East"
 msgstr "Este de EE.UU."
 
-#: awx/settings/defaults.py:781
+#: awx/settings/defaults.py:782
 msgid "US East 2"
 msgstr "Este de EE.UU. 2"
 
-#: awx/settings/defaults.py:782
+#: awx/settings/defaults.py:783
 msgid "US Central"
 msgstr "EE.UU. Central"
 
-#: awx/settings/defaults.py:783
+#: awx/settings/defaults.py:784
 msgid "US North Central"
 msgstr "Norte-centro de EE.UU."
 
-#: awx/settings/defaults.py:784
+#: awx/settings/defaults.py:785
 msgid "US South Central"
 msgstr "Sur-Centro de EE.UU."
 
-#: awx/settings/defaults.py:785
+#: awx/settings/defaults.py:786
 msgid "US West Central"
 msgstr "Oeste central de EE. UU."
 
-#: awx/settings/defaults.py:786
+#: awx/settings/defaults.py:787
 msgid "US West"
 msgstr "Oeste de EE.UU."
 
-#: awx/settings/defaults.py:787
+#: awx/settings/defaults.py:788
 msgid "US West 2"
 msgstr "Oeste de EE. UU. 2"
 
-#: awx/settings/defaults.py:788
+#: awx/settings/defaults.py:789
 msgid "Canada East"
 msgstr "Este de Canadá"
 
-#: awx/settings/defaults.py:789
+#: awx/settings/defaults.py:790
 msgid "Canada Central"
 msgstr "Canadá Central"
 
-#: awx/settings/defaults.py:790
+#: awx/settings/defaults.py:791
 msgid "Brazil South"
 msgstr "Sur de Brasil"
 
-#: awx/settings/defaults.py:791
+#: awx/settings/defaults.py:792
 msgid "Europe North"
 msgstr "Norte de Europa"
 
-#: awx/settings/defaults.py:792
+#: awx/settings/defaults.py:793
 msgid "Europe West"
 msgstr "Oeste de Europa"
 
-#: awx/settings/defaults.py:793
+#: awx/settings/defaults.py:794
 msgid "UK West"
 msgstr "Oeste del Reino Unido"
 
-#: awx/settings/defaults.py:794
+#: awx/settings/defaults.py:795
 msgid "UK South"
 msgstr "Sur del Reino Unido"
 
-#: awx/settings/defaults.py:795
+#: awx/settings/defaults.py:796
 msgid "Asia East"
 msgstr "Este de Asia"
 
-#: awx/settings/defaults.py:796
+#: awx/settings/defaults.py:797
 msgid "Asia Southeast"
 msgstr "Sudeste de Asia"
 
-#: awx/settings/defaults.py:797
+#: awx/settings/defaults.py:798
 msgid "Australia East"
 msgstr "Este de Australia"
 
-#: awx/settings/defaults.py:798
+#: awx/settings/defaults.py:799
 msgid "Australia Southeast"
 msgstr "Sudeste de Australia"
 
-#: awx/settings/defaults.py:799
+#: awx/settings/defaults.py:800
 msgid "India West"
 msgstr "Oeste de India"
 
-#: awx/settings/defaults.py:800
+#: awx/settings/defaults.py:801
 msgid "India South"
 msgstr "Sur de India"
 
-#: awx/settings/defaults.py:801
+#: awx/settings/defaults.py:802
 msgid "Japan East"
 msgstr "Este de Japón"
 
-#: awx/settings/defaults.py:802
+#: awx/settings/defaults.py:803
 msgid "Japan West"
 msgstr "Oeste de Japón"
 
-#: awx/settings/defaults.py:803
+#: awx/settings/defaults.py:804
 msgid "Korea Central"
 msgstr "Corea central"
 
-#: awx/settings/defaults.py:804
+#: awx/settings/defaults.py:805
 msgid "Korea South"
 msgstr "Sur de Corea"
 
@@ -3787,14 +3841,15 @@ msgstr "Inicio de sesión único (SSO)"
 #: awx/sso/conf.py:30
 msgid ""
 "Mapping to organization admins/users from social auth accounts. This setting\n"
-"controls which users are placed into which Tower organizations based on\n"
-"their username and email address. Configuration details are available in\n"
-"Tower documentation."
+"controls which users are placed into which Tower organizations based on their\n"
+"username and email address. Configuration details are available in the Ansible\n"
+"Tower documentation.'"
 msgstr ""
-"Asignación de administradores/usuarios de la organización desde cuentas de autenticación social. Este ajuste\n"
-"controla los usuarios que se colocan en las organizaciones de Tower según\n"
-"su nombre de usuario y dirección de correo electrónico. Los detalles de la configuración están disponibles en\n"
-"la documentación de Tower."
+"Mapeo de administradores o usuarios de la organización desde cuentas de "
+"autorización social. Esta configuración controla qué usuarios se ubican en "
+"qué organizaciones de Tower en función de su nombre de usuario y dirección "
+"de correo electrónico. Detalles de configuración disponibles en la "
+"documentación de Ansible Tower."
 
 #: awx/sso/conf.py:55
 msgid ""
@@ -3856,11 +3911,11 @@ msgstr ""
 "espacios o comandos. La autentificación LDAP está deshabilitado si este "
 "parámetro está vacío."
 
-#: awx/sso/conf.py:142 awx/sso/conf.py:160 awx/sso/conf.py:172
-#: awx/sso/conf.py:184 awx/sso/conf.py:200 awx/sso/conf.py:220
-#: awx/sso/conf.py:242 awx/sso/conf.py:258 awx/sso/conf.py:277
-#: awx/sso/conf.py:294 awx/sso/conf.py:311 awx/sso/conf.py:327
-#: awx/sso/conf.py:344 awx/sso/conf.py:361 awx/sso/conf.py:387
+#: awx/sso/conf.py:142 awx/sso/conf.py:158 awx/sso/conf.py:170
+#: awx/sso/conf.py:182 awx/sso/conf.py:198 awx/sso/conf.py:218
+#: awx/sso/conf.py:240 awx/sso/conf.py:255 awx/sso/conf.py:273
+#: awx/sso/conf.py:290 awx/sso/conf.py:307 awx/sso/conf.py:323
+#: awx/sso/conf.py:337 awx/sso/conf.py:354 awx/sso/conf.py:380
 msgid "LDAP"
 msgstr "LDAP"
 
@@ -3870,39 +3925,37 @@ msgstr "DN para enlazar con LDAP"
 
 #: awx/sso/conf.py:155
 msgid ""
-"DN (Distinguished Name) of user to bind for all search queries. Normally in "
-"the format \"CN=Some User,OU=Users,DC=example,DC=com\" but may also be "
-"specified as \"DOMAIN\\username\" for Active Directory. This is the system "
-"user account we will use to login to query LDAP for other user information."
+"DN (Distinguished Name) of user to bind for all search queries. This is the "
+"system user account we will use to login to query LDAP for other user "
+"information. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
-"DN (Distinguished Name) del usuario a enlazar para todas las consultas de "
-"búsqueda. Normalmente en formato  \"CN=Algun "
-"usuario,OU=Usuarios,DC=ejemplo,DC=com\" pero podría ser también especificado"
-" como \"DOMINIO\\usuario\" para Active Directory. Ésta es la cuenta de "
-"usuario que será utilizada para iniciar sesión para consultar LDAP para la "
-"información de otro usuario."
+"DN (Distinguished Name) del usuario para vincular todas las búsquedas. Esta "
+"es la cuenta de usuario del sistema que utilizaremos para iniciar sesión "
+"para consultar a LDAP y obtener otro tipo de información sobre el usuario. "
+"Consulte la documentación de Ansible Tower para acceder a ejemplos de "
+"sintaxis."
 
-#: awx/sso/conf.py:170
+#: awx/sso/conf.py:168
 msgid "LDAP Bind Password"
 msgstr "Contraseña para enlazar con LDAP"
 
-#: awx/sso/conf.py:171
+#: awx/sso/conf.py:169
 msgid "Password used to bind LDAP user account."
 msgstr "Contraseña usada para enlazar a LDAP con la cuenta de usuario."
 
-#: awx/sso/conf.py:182
+#: awx/sso/conf.py:180
 msgid "LDAP Start TLS"
 msgstr "LDAP - Iniciar TLS"
 
-#: awx/sso/conf.py:183
+#: awx/sso/conf.py:181
 msgid "Whether to enable TLS when the LDAP connection is not using SSL."
 msgstr "Para activar o no TLS cuando la conexión LDAP no utilice SSL"
 
-#: awx/sso/conf.py:193
+#: awx/sso/conf.py:191
 msgid "LDAP Connection Options"
 msgstr "Opciones de conexión a LDAP"
 
-#: awx/sso/conf.py:194
+#: awx/sso/conf.py:192
 msgid ""
 "Additional options to set for the LDAP connection.  LDAP referrals are "
 "disabled by default (to prevent certain LDAP queries from hanging with AD). "
@@ -3917,78 +3970,79 @@ msgstr ""
 "ldap.org/doc/html/ldap.html#options para posibles opciones y valores que "
 "pueden ser establecidos."
 
-#: awx/sso/conf.py:213
+#: awx/sso/conf.py:211
 msgid "LDAP User Search"
 msgstr "Búsqueda de usuarios LDAP"
 
-#: awx/sso/conf.py:214
+#: awx/sso/conf.py:212
 msgid ""
 "LDAP search query to find users.  Any user that matches the given pattern "
-"will be able to login to Tower.  The user should also be mapped into an "
-"Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  "
-"If multiple search queries need to be supported use of \"LDAPUnion\" is "
+"will be able to login to Tower.  The user should also be mapped into a Tower"
+" organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  If "
+"multiple search queries need to be supported use of \"LDAPUnion\" is "
 "possible. See Tower documentation for details."
 msgstr ""
-"Consulta de búsqueda LDAP para la búsqueda de usuarios. Cualquier usuario "
-"que coincida con el patrón dado será capaz de iniciar sesión en Tower. El "
-"usuario también debe ser asignado a una organización Tower (definida en la "
-"opción AUTH_LDAP_ORGANIZATION_MAP). Si se deben admitir varias consultas de "
-"búsqueda, es posible el uso de \"LDAPUnion\". Consulte la documentación de "
-"Tower para obtener más información."
+"Búsqueda en LDAP para encontrar usuarios. Cualquier usuario que se ajuste a "
+"un patrón determinado podrá iniciar sesión en Tower. El usuario también "
+"debería mapearse en una organización de Tower (conforme se define en la "
+"configuración AUTH_LDAP_ORGANIZATION_MAP). Si es necesario respaldar varias "
+"búsquedas, es posible utilizar \"LDAPUnion\". Consulte la documentación de "
+"Tower para acceder a información detallada."
 
-#: awx/sso/conf.py:236
+#: awx/sso/conf.py:234
 msgid "LDAP User DN Template"
 msgstr "Plantilla de DN para el usuario LDAP"
 
-#: awx/sso/conf.py:237
+#: awx/sso/conf.py:235
 msgid ""
 "Alternative to user search, if user DNs are all of the same format. This "
-"approach will be more efficient for user lookups than searching if it is "
-"usable in your organizational environment. If this setting has a value it "
-"will be used instead of AUTH_LDAP_USER_SEARCH."
+"approach is more efficient for user lookups than searching if it is usable "
+"in your organizational environment. If this setting has a value it will be "
+"used instead of AUTH_LDAP_USER_SEARCH."
 msgstr ""
-"Búsqueda alternativa de usuarios, si DNs de usuario están en el mismo "
-"formato. Esta manera será más eficiente para encontrar usuarios que "
-"buscándolos si es utilizable en su entorno organizacional. Si esta "
-"configuración tiene un valor será usado en vez de AUTH_LDAP_USER_SEARCH."
+"Alternativa a la búsqueda de usuarios, en caso de que los DN de los usuarios"
+" tengan todos el mismo formato. Este enfoque es más efectivo para buscar "
+"usuarios que las búsquedas, en caso de poder utilizarse en el entorno de su "
+"organización. Si esta configuración tiene un valor, se utilizará en vez de "
+"AUTH_LDAP_USER_SEARCH."
 
-#: awx/sso/conf.py:252
+#: awx/sso/conf.py:250
 msgid "LDAP User Attribute Map"
 msgstr "Mapa de atributos de usuario LDAP"
 
-#: awx/sso/conf.py:253
+#: awx/sso/conf.py:251
 msgid ""
-"Mapping of LDAP user schema to Tower API user attributes (key is user "
-"attribute name, value is LDAP attribute name).  The default setting is valid"
-" for ActiveDirectory but users with other LDAP configurations may need to "
-"change the values (not the keys) of the dictionary/hash-table."
+"Mapping of LDAP user schema to Tower API user attributes. The default "
+"setting is valid for ActiveDirectory but users with other LDAP "
+"configurations may need to change the values. Refer to the Ansible Tower "
+"documentation for additonal details."
 msgstr ""
-"Relación del esquema de usuarios LDAP a Atributos de usuario Tower API "
-"(clave es el nombre del atributo del usuario, valor es el nombre del "
-"atributo LDAP). La configuración por defecto es válida para ActiveDirectory "
-"pero usuarios con otra configuración LDAP podrían necesitar cambiar los "
-"valores (no las claves del diccionario/tabla-relaciones."
+"Mapeo de esquemas de usuarios de LDAP con los atributos de usuario API de "
+"Tower. La configuración predeterminada es válida para ActiveDirectory. Sin "
+"embargo, los usuarios con otras configuraciones de LDAP tal vez necesiten "
+"modificar los valores. Consulte la documentación de Ansible Tower para "
+"acceder a información detallada."
 
-#: awx/sso/conf.py:272
+#: awx/sso/conf.py:269
 msgid "LDAP Group Search"
 msgstr "Búsqueda de grupos LDAP"
 
-#: awx/sso/conf.py:273
+#: awx/sso/conf.py:270
 msgid ""
 "Users are mapped to organizations based on their membership in LDAP groups. "
-"This setting defines the LDAP search query to find groups. Note that this, "
-"unlike the user search above, does not support LDAPSearchUnion."
+"This setting defines the LDAP search query to find groups. Unlike the user "
+"search, group search does not support LDAPSearchUnion."
 msgstr ""
-"Los usuarios son asignados a organizaciones según su pertenencia a grupos "
-"LDAP. En esta configuración se define la consulta de búsqueda LDAP para "
-"encontrar grupos. Tenga en cuenta que esto, a diferencia de la búsqueda de "
-"usuarios mencionada, no admite LDAPSearchUnion."
+"Se mapea a los usuarios en las organizaciones en función de su membresía en "
+"los grupos LDAP. Esta configuración define la búsqueda de LDAP para "
+"encontrar grupos. A diferencia de la búsqueda de usuarios, la búsqueda de "
+"grupos no es compatible con LDAPSearchUnion."
 
-#: awx/sso/conf.py:290
+#: awx/sso/conf.py:286
 msgid "LDAP Group Type"
 msgstr "Tipo de grupo LDAP"
 
-#: awx/sso/conf.py:291
+#: awx/sso/conf.py:287
 msgid ""
 "The group type may need to be changed based on the type of the LDAP server."
 "  Values are listed at: http://pythonhosted.org/django-auth-ldap/groups.html"
@@ -3998,11 +4052,11 @@ msgstr ""
 " LDAP.  Valores posibles listados en: http://pythonhosted.org/django-auth-"
 "ldap/groups.html#types-of-groups"
 
-#: awx/sso/conf.py:306
+#: awx/sso/conf.py:302
 msgid "LDAP Require Group"
 msgstr "Grupo LDAP requerido"
 
-#: awx/sso/conf.py:307
+#: awx/sso/conf.py:303
 msgid ""
 "Group DN required to login. If specified, user must be a member of this "
 "group to login via LDAP. If not set, everyone in LDAP that matches the user "
@@ -4014,11 +4068,11 @@ msgstr ""
 "será capaz de iniciar sesión en Tower. No es posible especificar varios "
 "grupos."
 
-#: awx/sso/conf.py:323
+#: awx/sso/conf.py:319
 msgid "LDAP Deny Group"
 msgstr "Grupo LDAP no permitido"
 
-#: awx/sso/conf.py:324
+#: awx/sso/conf.py:320
 msgid ""
 "Group DN denied from login. If specified, user will not be allowed to login "
 "if a member of this group.  Only one deny group is supported."
@@ -4027,185 +4081,170 @@ msgstr ""
 "podrá iniciar sesión si es miembro de este grupo. Sólo un grupo no permitido"
 " está soportado."
 
-#: awx/sso/conf.py:337
+#: awx/sso/conf.py:333
 msgid "LDAP User Flags By Group"
 msgstr "Indicadores de usuario LDAP por grupo"
 
-#: awx/sso/conf.py:338
+#: awx/sso/conf.py:334
 msgid ""
-"User profile flags updated from group membership (key is user attribute "
-"name, value is group DN).  These are boolean fields that are matched based "
-"on whether the user is a member of the given group.  So far only "
-"is_superuser and is_system_auditor are settable via this method.  This flag "
-"is set both true and false at login time based on current LDAP settings."
+"Retrieve users from a given group. At this time, superuser and system "
+"auditors are the only groups supported. Refer to the Ansible Tower "
+"documentation for more detail."
 msgstr ""
-"Indicadores del perfil de usuario actualizado desde la pertenencia del grupo"
-" (clave es el nombre de atributo del usuario, valor es el grupo DN). Éstos "
-"son campos booleanos en los que se basa si el usuario es miembro del grupo "
-"especificado. Hasta ahora sólo is_superuser y is_system_auditor son "
-"configurables utilizando este método. El indicador establece a verdadero o "
-"falso en el momento de inicio de sesión basándose en la actual configuración"
-" LDAP."
+"Recuperar usuarios de un grupo determinado. En este momento, el superusuario"
+" y los auditores del sistema son los únicos grupos que se admiten. Consulte "
+"la documentación de Ansible Tower para obtener información detallada."
 
-#: awx/sso/conf.py:356
+#: awx/sso/conf.py:349
 msgid "LDAP Organization Map"
 msgstr "Mapa de organización LDAP"
 
-#: awx/sso/conf.py:357
+#: awx/sso/conf.py:350
 msgid ""
 "Mapping between organization admins/users and LDAP groups. This controls "
-"what users are placed into what Tower organizations relative to their LDAP "
-"group memberships. Configuration details are available in Tower "
-"documentation."
+"which users are placed into which Tower organizations relative to their LDAP"
+" group memberships. Configuration details are available in the Ansible Tower"
+" documentation."
 msgstr ""
-"Asignación entre administradores/usuarios de la organización y grupos LDAP. "
-"Este ajuste controla cuáles usuarios se colocan en cuáles organizaciones de "
-"Tower, según su pertenencia a grupos LDAP. Los detalles de la configuración "
-"están disponibles en la documentación de Tower."
+"Mapear entre administradores/usuarios de las organizaciones y grupos de "
+"LDAP. De esta manera, se controla qué usuarios se ubican en qué "
+"organizaciones de Tower en función de sus membresías en grupos de LDAP. "
+"Detalles de configuración disponibles en la documentación de Ansible Tower."
 
-#: awx/sso/conf.py:384
+#: awx/sso/conf.py:377
 msgid "LDAP Team Map"
 msgstr "Mapa de equipos LDAP"
 
-#: awx/sso/conf.py:385
+#: awx/sso/conf.py:378
 msgid ""
-"Mapping between team members (users) and LDAP groups.Configuration details "
-"are available in Tower documentation."
+"Mapping between team members (users) and LDAP groups. Configuration details "
+"are available in the Ansible Tower documentation."
 msgstr ""
-"Asignación entre miembros del equipo (usuarios) y grupos LDAP. Los detalles "
-"de la configuración están disponibles en la documentación de Tower."
+"Mapear entre los miembros de equipos (usuarios) y grupos de LDAP. Detalles "
+"de configuración disponibles en la documentación de Ansible Tower."
 
-#: awx/sso/conf.py:413
+#: awx/sso/conf.py:406
 msgid "RADIUS Server"
 msgstr "Servidor RADIUS"
 
-#: awx/sso/conf.py:414
+#: awx/sso/conf.py:407
 msgid ""
-"Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this"
-" setting is empty."
+"Hostname/IP of RADIUS server. RADIUS authentication is disabled if this "
+"setting is empty."
 msgstr ""
-"Hostname/IP del servidor RADIUS. La autentificación RADIUS se deshabilitará "
-"si esta configuración está vacía."
+"Hostname/IP del servidor RADIUS. La autenticación de RADIUS se desactiva si "
+"esta configuración está vacía."
 
-#: awx/sso/conf.py:416 awx/sso/conf.py:430 awx/sso/conf.py:442
+#: awx/sso/conf.py:409 awx/sso/conf.py:423 awx/sso/conf.py:435
 #: awx/sso/models.py:14
 msgid "RADIUS"
 msgstr "RADIUS"
 
-#: awx/sso/conf.py:428
+#: awx/sso/conf.py:421
 msgid "RADIUS Port"
 msgstr "Puerto RADIUS"
 
-#: awx/sso/conf.py:429
+#: awx/sso/conf.py:422
 msgid "Port of RADIUS server."
 msgstr "Puerto del servidor RADIUS"
 
-#: awx/sso/conf.py:440
+#: awx/sso/conf.py:433
 msgid "RADIUS Secret"
 msgstr "Clave secreta RADIUS"
 
-#: awx/sso/conf.py:441
+#: awx/sso/conf.py:434
 msgid "Shared secret for authenticating to RADIUS server."
 msgstr "Clave secreta compartida para autentificación a RADIUS."
 
-#: awx/sso/conf.py:457
+#: awx/sso/conf.py:450
 msgid "TACACS+ Server"
 msgstr "Servidor TACACS+"
 
-#: awx/sso/conf.py:458
+#: awx/sso/conf.py:451
 msgid "Hostname of TACACS+ server."
 msgstr "Nombre de host del servidor TACACS+."
 
-#: awx/sso/conf.py:459 awx/sso/conf.py:472 awx/sso/conf.py:485
-#: awx/sso/conf.py:498 awx/sso/conf.py:510 awx/sso/models.py:15
+#: awx/sso/conf.py:452 awx/sso/conf.py:465 awx/sso/conf.py:478
+#: awx/sso/conf.py:491 awx/sso/conf.py:503 awx/sso/models.py:15
 msgid "TACACS+"
 msgstr "TACACS+"
 
-#: awx/sso/conf.py:470
+#: awx/sso/conf.py:463
 msgid "TACACS+ Port"
 msgstr "Puerto TACACS+"
 
-#: awx/sso/conf.py:471
+#: awx/sso/conf.py:464
 msgid "Port number of TACACS+ server."
 msgstr "Número de puerto del servidor TACACS+."
 
-#: awx/sso/conf.py:483
+#: awx/sso/conf.py:476
 msgid "TACACS+ Secret"
 msgstr "Clave secreta TACACS+"
 
-#: awx/sso/conf.py:484
+#: awx/sso/conf.py:477
 msgid "Shared secret for authenticating to TACACS+ server."
 msgstr ""
 "Clave secreta compartida para la autentificación en el servidor TACACS+."
 
-#: awx/sso/conf.py:496
+#: awx/sso/conf.py:489
 msgid "TACACS+ Auth Session Timeout"
 msgstr "Tiempo de espera para la sesión de autenticación de TACACS+"
 
-#: awx/sso/conf.py:497
+#: awx/sso/conf.py:490
 msgid "TACACS+ session timeout value in seconds, 0 disables timeout."
 msgstr ""
 "Valor de tiempo de espera para la sesión TACACS+ en segundos. El valor 0 "
 "deshabilita el tiempo de espera."
 
-#: awx/sso/conf.py:508
+#: awx/sso/conf.py:501
 msgid "TACACS+ Authentication Protocol"
 msgstr "Protocolo de autenticación de TACACS+"
 
-#: awx/sso/conf.py:509
+#: awx/sso/conf.py:502
 msgid "Choose the authentication protocol used by TACACS+ client."
 msgstr "Elija el protocolo de autenticación utilizado por el cliente TACACS+."
 
-#: awx/sso/conf.py:524
+#: awx/sso/conf.py:517
 msgid "Google OAuth2 Callback URL"
 msgstr "Google OAuth2 Callback URL"
 
-#: awx/sso/conf.py:525
+#: awx/sso/conf.py:518 awx/sso/conf.py:611 awx/sso/conf.py:676
 msgid ""
-"Create a project at https://console.developers.google.com/ to obtain an "
-"OAuth2 key and secret for a web application. Ensure that the Google+ API is "
-"enabled. Provide this URL as the callback URL for your application."
+"Provide this URL as the callback URL for your application as part of your "
+"registration process. Refer to the Ansible Tower documentation for more "
+"detail."
 msgstr ""
-"Crear un proyecto en https://console.developers.google.com/ para obtener una"
-" clave OAuth2 y clave secreta para una aplicación web. Asegúrese que la API "
-"de Google+ API está habilitada. Proporcione esta URL como URL callback para "
-"su aplicación."
+"Indique esta URL como URL de callback para su aplicación como parte del "
+"proceso de registro. Consulte la documentación de Ansible Tower para obtener"
+" información detallada."
 
-#: awx/sso/conf.py:529 awx/sso/conf.py:540 awx/sso/conf.py:551
-#: awx/sso/conf.py:564 awx/sso/conf.py:578 awx/sso/conf.py:590
-#: awx/sso/conf.py:602
+#: awx/sso/conf.py:521 awx/sso/conf.py:533 awx/sso/conf.py:545
+#: awx/sso/conf.py:558 awx/sso/conf.py:572 awx/sso/conf.py:584
+#: awx/sso/conf.py:596
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: awx/sso/conf.py:538
+#: awx/sso/conf.py:531
 msgid "Google OAuth2 Key"
 msgstr "Clave Google OAuth2"
 
-#: awx/sso/conf.py:539
-msgid ""
-"The OAuth2 key from your web application at "
-"https://console.developers.google.com/."
-msgstr ""
-"La clave OAuth2 de su dirección web en "
-"https://console.developers.google.com/."
+#: awx/sso/conf.py:532
+msgid "The OAuth2 key from your web application."
+msgstr "Clave OAuth2 de su aplicación web."
 
-#: awx/sso/conf.py:549
+#: awx/sso/conf.py:543
 msgid "Google OAuth2 Secret"
 msgstr "Clave secreta para Google OAuth2"
 
-#: awx/sso/conf.py:550
-msgid ""
-"The OAuth2 secret from your web application at "
-"https://console.developers.google.com/."
-msgstr ""
-"La clave secreta OAuth2 de su dirección web en "
-"https://console.developers.google.com/."
+#: awx/sso/conf.py:544
+msgid "The OAuth2 secret from your web application."
+msgstr "Secreto OAuth2 de su aplicación web."
 
-#: awx/sso/conf.py:561
+#: awx/sso/conf.py:555
 msgid "Google OAuth2 Whitelisted Domains"
 msgstr "Lista blanca de dominios para Google OAuth2"
 
-#: awx/sso/conf.py:562
+#: awx/sso/conf.py:556
 msgid ""
 "Update this setting to restrict the domains who are allowed to login using "
 "Google OAuth2."
@@ -4213,82 +4252,120 @@ msgstr ""
 "Actualizar esta configuración para restringir los dominios que están "
 "permitidos para iniciar sesión utilizando Google OAuth2."
 
-#: awx/sso/conf.py:573
+#: awx/sso/conf.py:567
 msgid "Google OAuth2 Extra Arguments"
 msgstr "Argumentos adicionales para Google OAuth2"
 
-#: awx/sso/conf.py:574
+#: awx/sso/conf.py:568
 msgid ""
-"Extra arguments for Google OAuth2 login. When only allowing a single domain "
-"to authenticate, set to `{\"hd\": \"yourdomain.com\"}` and Google will not "
-"display any other accounts even if the user is logged in with multiple "
-"Google accounts."
+"Extra arguments for Google OAuth2 login. You can restrict it to only allow a"
+" single domain to authenticate, even if the user is logged in with multple "
+"Google accounts. Refer to the Ansible Tower documentation for more detail."
 msgstr ""
-"Argumentos adicionales para iniciar sesión con Google OAuth2. Cuando sólo se"
-" permite un único dominio para autentificar, establecer a `{\"hd\": "
-"\"sudominio.com\"}` y Google no mostrará otras cuentas incluso si el usuario"
-" inició sesión en múltiple cuentas Google."
+"Argumentos adicionales para el inicio de sesión en Google OAuth2. Puede "
+"limitarlo para permitir la autenticación de un solo dominio, incluso si el "
+"usuario ha iniciado sesión con varias cuentas de Google. Consulte la "
+"documentación de Ansible Tower para obtener información detallada."
 
-#: awx/sso/conf.py:588
+#: awx/sso/conf.py:582
 msgid "Google OAuth2 Organization Map"
 msgstr "Mapa de organización para  Google OAuth2"
 
-#: awx/sso/conf.py:600
+#: awx/sso/conf.py:594
 msgid "Google OAuth2 Team Map"
 msgstr "Mapa de equipo para Google OAuth2"
 
-#: awx/sso/conf.py:616
+#: awx/sso/conf.py:610
 msgid "GitHub OAuth2 Callback URL"
 msgstr "GitHub OAuth2 Callback URL"
 
-#: awx/sso/conf.py:617
-msgid ""
-"Create a developer application at https://github.com/settings/developers to "
-"obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this "
-"URL as the callback URL for your application."
-msgstr ""
-"Crear una aplicación de desarollo en https://github.com/settings/developers "
-"para obtener una clave OAuth2 (ID del cliente) y clave secreta (Client "
-"Secret). Proporcione esta URL como la URL callback para su aplicación."
-
-#: awx/sso/conf.py:621 awx/sso/conf.py:632 awx/sso/conf.py:642
-#: awx/sso/conf.py:654 awx/sso/conf.py:666
+#: awx/sso/conf.py:614 awx/sso/conf.py:626 awx/sso/conf.py:637
+#: awx/sso/conf.py:649 awx/sso/conf.py:661
 msgid "GitHub OAuth2"
 msgstr "GitHub OAuth2"
 
-#: awx/sso/conf.py:630
+#: awx/sso/conf.py:624
 msgid "GitHub OAuth2 Key"
 msgstr "Clave para Github OAuth2"
 
-#: awx/sso/conf.py:631
+#: awx/sso/conf.py:625
 msgid "The OAuth2 key (Client ID) from your GitHub developer application."
 msgstr ""
 "La clave OAuth2 (ID del cliente) de su aplicación de desarrollo GitHub."
 
-#: awx/sso/conf.py:640
+#: awx/sso/conf.py:635
 msgid "GitHub OAuth2 Secret"
 msgstr "Clave secreta para GitHub OAuth2"
 
-#: awx/sso/conf.py:641
+#: awx/sso/conf.py:636
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub developer application."
 msgstr ""
 "La clave secreta OAuth2 (Clave secreta del cliente) de su aplicación de "
 "desarrollo GitHub."
 
-#: awx/sso/conf.py:652
+#: awx/sso/conf.py:647
 msgid "GitHub OAuth2 Organization Map"
 msgstr "Mapa de organización para GitHub OAuth2"
 
-#: awx/sso/conf.py:664
+#: awx/sso/conf.py:659
 msgid "GitHub OAuth2 Team Map"
 msgstr "Mapa de equipo para GitHub OAuth2"
 
-#: awx/sso/conf.py:680
+#: awx/sso/conf.py:675
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr "OAuth2 URL Callback para organización Github"
 
-#: awx/sso/conf.py:681 awx/sso/conf.py:756
+#: awx/sso/conf.py:679 awx/sso/conf.py:691 awx/sso/conf.py:702
+#: awx/sso/conf.py:715 awx/sso/conf.py:726 awx/sso/conf.py:738
+msgid "GitHub Organization OAuth2"
+msgstr "OAuth2 para la organización Github"
+
+#: awx/sso/conf.py:689
+msgid "GitHub Organization OAuth2 Key"
+msgstr "Clave OAuth2 para la organización Github"
+
+#: awx/sso/conf.py:690 awx/sso/conf.py:768
+msgid "The OAuth2 key (Client ID) from your GitHub organization application."
+msgstr ""
+"La clave OAuth2 (ID del cliente) de su aplicación de organización GitHub."
+
+#: awx/sso/conf.py:700
+msgid "GitHub Organization OAuth2 Secret"
+msgstr "Clave secreta OAuth2 para la organización GitHub"
+
+#: awx/sso/conf.py:701 awx/sso/conf.py:779
+msgid ""
+"The OAuth2 secret (Client Secret) from your GitHub organization application."
+msgstr ""
+"La clave secreta OAuth2 (Clave secreta del cliente) from your GitHub "
+"organization application."
+
+#: awx/sso/conf.py:712
+msgid "GitHub Organization Name"
+msgstr "Nombre para la organización GitHub"
+
+#: awx/sso/conf.py:713
+msgid ""
+"The name of your GitHub organization, as used in your organization's URL: "
+"https://github.com/<yourorg>/."
+msgstr ""
+"El nombre de su organización de su GitHub, el utilizado en su URL de "
+"organización: https://github.com/<suorganizacion>/."
+
+#: awx/sso/conf.py:724
+msgid "GitHub Organization OAuth2 Organization Map"
+msgstr "Mapa de organización OAuth2 para organizaciones GitHub"
+
+#: awx/sso/conf.py:736
+msgid "GitHub Organization OAuth2 Team Map"
+msgstr "Mapa de equipos OAuth2 para equipos GitHub"
+
+#: awx/sso/conf.py:752
+msgid "GitHub Team OAuth2 Callback URL"
+msgstr "URL callback OAuth2 para los equipos GitHub"
+
+#: awx/sso/conf.py:753
 msgid ""
 "Create an organization-owned application at "
 "https://github.com/organizations/<yourorg>/settings/applications and obtain "
@@ -4300,65 +4377,16 @@ msgstr ""
 "obtener una clave OAuth2 (ID del cliente ) y clave secreta (Clave secreta "
 "del cliente). Proporcione esta URL como URL callback para su aplicación."
 
-#: awx/sso/conf.py:685 awx/sso/conf.py:696 awx/sso/conf.py:706
-#: awx/sso/conf.py:718 awx/sso/conf.py:729 awx/sso/conf.py:741
-msgid "GitHub Organization OAuth2"
-msgstr "OAuth2 para la organización Github"
-
-#: awx/sso/conf.py:694
-msgid "GitHub Organization OAuth2 Key"
-msgstr "Clave OAuth2 para la organización Github"
-
-#: awx/sso/conf.py:695 awx/sso/conf.py:770
-msgid "The OAuth2 key (Client ID) from your GitHub organization application."
-msgstr ""
-"La clave OAuth2 (ID del cliente) de su aplicación de organización GitHub."
-
-#: awx/sso/conf.py:704
-msgid "GitHub Organization OAuth2 Secret"
-msgstr "Clave secreta OAuth2 para la organización GitHub"
-
-#: awx/sso/conf.py:705 awx/sso/conf.py:780
-msgid ""
-"The OAuth2 secret (Client Secret) from your GitHub organization application."
-msgstr ""
-"La clave secreta OAuth2 (Clave secreta del cliente) from your GitHub "
-"organization application."
-
-#: awx/sso/conf.py:715
-msgid "GitHub Organization Name"
-msgstr "Nombre para la organización GitHub"
-
-#: awx/sso/conf.py:716
-msgid ""
-"The name of your GitHub organization, as used in your organization's URL: "
-"https://github.com/<yourorg>/."
-msgstr ""
-"El nombre de su organización de su GitHub, el utilizado en su URL de "
-"organización: https://github.com/<suorganizacion>/."
-
-#: awx/sso/conf.py:727
-msgid "GitHub Organization OAuth2 Organization Map"
-msgstr "Mapa de organización OAuth2 para organizaciones GitHub"
-
-#: awx/sso/conf.py:739
-msgid "GitHub Organization OAuth2 Team Map"
-msgstr "Mapa de equipos OAuth2 para equipos GitHub"
-
-#: awx/sso/conf.py:755
-msgid "GitHub Team OAuth2 Callback URL"
-msgstr "URL callback OAuth2 para los equipos GitHub"
-
-#: awx/sso/conf.py:760 awx/sso/conf.py:771 awx/sso/conf.py:781
+#: awx/sso/conf.py:757 awx/sso/conf.py:769 awx/sso/conf.py:780
 #: awx/sso/conf.py:793 awx/sso/conf.py:804 awx/sso/conf.py:816
 msgid "GitHub Team OAuth2"
 msgstr "OAuth2 para equipos GitHub"
 
-#: awx/sso/conf.py:769
+#: awx/sso/conf.py:767
 msgid "GitHub Team OAuth2 Key"
 msgstr "Clave OAuth2 para equipos GitHub"
 
-#: awx/sso/conf.py:779
+#: awx/sso/conf.py:778
 msgid "GitHub Team OAuth2 Secret"
 msgstr "Clave secreta OAuth2 para equipos GitHub"
 
@@ -4388,18 +4416,16 @@ msgstr "URL callback OAuth2 para Azure AD"
 
 #: awx/sso/conf.py:831
 msgid ""
-"Register an Azure AD application as described by https://msdn.microsoft.com"
-"/en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
-"secret (Client Secret). Provide this URL as the callback URL for your "
-"application."
+"Provide this URL as the callback URL for your application as part of your "
+"registration process. Refer to the Ansible Tower documentation for more "
+"detail. "
 msgstr ""
-"Registrar una aplicacción AZURE AD como es descrito en "
-"https://msdn.microsoft.com/en-us/library/azure/dn132599.aspx y obtén una "
-"clave OAuth2 (ID de client) y clave secreta (Clave secreta de cliente). "
-"Proporcione esta URL como URL callback para su aplicación."
+"Indique esta URL como URL de callback para su aplicación como parte del "
+"proceso de registro. Consulte la documentación de Ansible Tower para obtener"
+" información detallada."
 
-#: awx/sso/conf.py:835 awx/sso/conf.py:846 awx/sso/conf.py:856
-#: awx/sso/conf.py:868 awx/sso/conf.py:880
+#: awx/sso/conf.py:834 awx/sso/conf.py:846 awx/sso/conf.py:857
+#: awx/sso/conf.py:869 awx/sso/conf.py:881
 msgid "Azure AD OAuth2"
 msgstr "Azure AD OAuth2"
 
@@ -4411,29 +4437,29 @@ msgstr "Clave OAuth2 para Azure AD"
 msgid "The OAuth2 key (Client ID) from your Azure AD application."
 msgstr "La clave OAuth2 (ID del cliente) de su aplicación en Azure AD."
 
-#: awx/sso/conf.py:854
+#: awx/sso/conf.py:855
 msgid "Azure AD OAuth2 Secret"
 msgstr "Clave secreta OAuth2 para Azure AD"
 
-#: awx/sso/conf.py:855
+#: awx/sso/conf.py:856
 msgid "The OAuth2 secret (Client Secret) from your Azure AD application."
 msgstr ""
 "La clave secreta OAuth2  (Clave secreta del cliente) de su aplicación Azure "
 "AD."
 
-#: awx/sso/conf.py:866
+#: awx/sso/conf.py:867
 msgid "Azure AD OAuth2 Organization Map"
 msgstr "Mapa de organizaciones OAuth2 para Azure AD"
 
-#: awx/sso/conf.py:878
+#: awx/sso/conf.py:879
 msgid "Azure AD OAuth2 Team Map"
 msgstr "Mapa de equipos OAuth2 para Azure AD"
 
-#: awx/sso/conf.py:903
+#: awx/sso/conf.py:904
 msgid "SAML Assertion Consumer Service (ACS) URL"
 msgstr "URL del Servicio de consumidor de aserciones (ACS) SAML"
 
-#: awx/sso/conf.py:904
+#: awx/sso/conf.py:905
 msgid ""
 "Register Tower as a service provider (SP) with each identity provider (IdP) "
 "you have configured. Provide your SP Entity ID and this ACS URL for your "
@@ -4443,18 +4469,18 @@ msgstr ""
 "identidad (IdP) que ha configurado. Proporcione su ID de entidad SP y esta "
 "dirección URL ACS para su aplicación."
 
-#: awx/sso/conf.py:907 awx/sso/conf.py:921 awx/sso/conf.py:935
-#: awx/sso/conf.py:950 awx/sso/conf.py:964 awx/sso/conf.py:982
-#: awx/sso/conf.py:1004 awx/sso/conf.py:1023 awx/sso/conf.py:1043
-#: awx/sso/conf.py:1077 awx/sso/conf.py:1090 awx/sso/models.py:16
+#: awx/sso/conf.py:908 awx/sso/conf.py:922 awx/sso/conf.py:936
+#: awx/sso/conf.py:951 awx/sso/conf.py:965 awx/sso/conf.py:978
+#: awx/sso/conf.py:999 awx/sso/conf.py:1017 awx/sso/conf.py:1036
+#: awx/sso/conf.py:1070 awx/sso/conf.py:1083 awx/sso/models.py:16
 msgid "SAML"
 msgstr "SAML"
 
-#: awx/sso/conf.py:918
+#: awx/sso/conf.py:919
 msgid "SAML Service Provider Metadata URL"
 msgstr "URL de metadatos para el proveedor de servicios SAML"
 
-#: awx/sso/conf.py:919
+#: awx/sso/conf.py:920
 msgid ""
 "If your identity provider (IdP) allows uploading an XML metadata file, you "
 "can download one from this URL."
@@ -4462,11 +4488,11 @@ msgstr ""
 "Si su proveedor de identidad (IdP) permite subir ficheros de metadatos en "
 "XML, puede descargarlo desde esta dirección."
 
-#: awx/sso/conf.py:931
+#: awx/sso/conf.py:932
 msgid "SAML Service Provider Entity ID"
 msgstr "ID de la entidad del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:932
+#: awx/sso/conf.py:933
 msgid ""
 "The application-defined unique identifier used as the audience of the SAML "
 "service provider (SP) configuration. This is usually the URL for Tower."
@@ -4475,11 +4501,11 @@ msgstr ""
 "configuración para la audiencia del proveedor de servicio (SP) SAML. Por lo "
 "general, es la URL para Tower."
 
-#: awx/sso/conf.py:947
+#: awx/sso/conf.py:948
 msgid "SAML Service Provider Public Certificate"
 msgstr "Certificado público del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:948
+#: awx/sso/conf.py:949
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " certificate content here."
@@ -4487,11 +4513,11 @@ msgstr ""
 "Crear par de claves para Tower a usar como proveedor de servicio (SP) e "
 "incluir el contenido del certificado aquí."
 
-#: awx/sso/conf.py:961
+#: awx/sso/conf.py:962
 msgid "SAML Service Provider Private Key"
 msgstr "Clave privada del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:962
+#: awx/sso/conf.py:963
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " private key content here."
@@ -4499,51 +4525,70 @@ msgstr ""
 "Crear par de claves para Tower a usar como proveedor de servicio (SP) e "
 "incluir el contenido de la clave privada  aquí."
 
-#: awx/sso/conf.py:980
+#: awx/sso/conf.py:975
 msgid "SAML Service Provider Organization Info"
 msgstr "Información organizacional del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:981
-msgid "Configure this setting with information about your app."
-msgstr "Configure esta configuración con la información de su aplicación."
+#: awx/sso/conf.py:976
+msgid ""
+"Provide the URL, display name, and the name of your app. Refer to the "
+"Ansible Tower documentation for example syntax."
+msgstr ""
+"Indique la URL, el nombre de la pantalla y el nombre de la aplicación. "
+"Consulte la documentación de Ansible Tower para acceder a ejemplos de "
+"sintaxis."
 
-#: awx/sso/conf.py:1002
+#: awx/sso/conf.py:995
 msgid "SAML Service Provider Technical Contact"
 msgstr "Contacto técnico del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:1003 awx/sso/conf.py:1022
-msgid "Configure this setting with your contact information."
-msgstr "Configure este configuración con su información de contacto."
+#: awx/sso/conf.py:996
+msgid ""
+"Provide the name and email address of the technical contact for your service"
+" provider. Refer to the Ansible Tower documentation for example syntax."
+msgstr ""
+"Indique el nombre y la dirección de correo electrónico del contacto técnico"
+"  de su proveedor de servicios. Consulte la documentación de Ansible Tower "
+"para obtener ejemplos de sintaxis."
 
-#: awx/sso/conf.py:1021
+#: awx/sso/conf.py:1013
 msgid "SAML Service Provider Support Contact"
 msgstr "Contacto de soporte del proveedor de servicio SAML"
 
-#: awx/sso/conf.py:1036
+#: awx/sso/conf.py:1014
+msgid ""
+"Provide the name and email address of the support contact for your service "
+"provider. Refer to the Ansible Tower documentation for example syntax."
+msgstr ""
+"Indique el nombre y la dirección de correo electrónico del contacto de "
+"soporte técnico de su proveedor de servicios. Consulte la documentación de "
+"Ansible Tower para obtener ejemplos de sintaxis."
+
+#: awx/sso/conf.py:1030
 msgid "SAML Enabled Identity Providers"
 msgstr "Proveedores de identidad habilitados SAML"
 
-#: awx/sso/conf.py:1037
+#: awx/sso/conf.py:1031
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
-"data using attribute names that differ from the default OIDs "
-"(https://github.com/omab/python-social-"
-"auth/blob/master/social/backends/saml.py#L16). Attribute names may be "
-"overridden for each IdP."
+"data using attribute names that differ from the default OIDs. Attribute "
+"names may be overridden for each IdP. Refer to the Ansible documentation for"
+" additional details and syntax."
 msgstr ""
-"Configurar el ID de entidad, URL SSO y certificado para cada proveedor de "
-"identidad (IdP) en uso. Varios IdPs SAML están soportadas. Algunos IdPs "
-"pueden proporcionar datos de usuario usando nombres de atributos diferentes "
-"a los valores por defecto OIDs (https://github.com/omab/python-social-"
-"auth/blob/master/social/backends/saml.py#L16). Nombres de atributos pueden "
-"ser redefinidos por cada IdP."
+"Configure la ID de la entidad, la URL del acceso SSO y el certificado de "
+"cada proveedor de identidad (IdP) en uso. Se admiten varios IdP de SAML. "
+"Algunos IdP pueden proporcionar datos sobre los usuarios por medio del uso "
+"de nombres de atributos que difieren de los OID predeterminados. Pueden "
+"anularse los nombres de los atributos para cada IdP. Consulte la "
+"documentación de Ansible Tower para obtener información detallada adicional "
+"y ejemplos de sintaxis."
 
-#: awx/sso/conf.py:1075
+#: awx/sso/conf.py:1068
 msgid "SAML Organization Map"
 msgstr "Mapa de organización SAML"
 
-#: awx/sso/conf.py:1088
+#: awx/sso/conf.py:1081
 msgid "SAML Team Map"
 msgstr "Mapa de equipo SAML"
 
@@ -4679,10 +4724,6 @@ msgstr "La clave secreta TACACS+ no permite caracteres no ascii"
 msgid "AWX"
 msgstr "AWX"
 
-#: awx/templates/rest_framework/api.html:4
-msgid "AWX REST API"
-msgstr "API REST de AWX"
-
 #: awx/templates/rest_framework/api.html:39
 msgid "Ansible Tower API Guide"
 msgstr "Guía de la API de Ansible Tower"
@@ -4745,7 +4786,7 @@ msgstr "Realizar una petición PUT en el recurso %(name)s"
 msgid "Make a PATCH request on the %(name)s resource"
 msgstr "Realizar una petición PATCH en el recurso %(name)s"
 
-#: awx/ui/apps.py:9 awx/ui/conf.py:22 awx/ui/conf.py:38 awx/ui/conf.py:53
+#: awx/ui/apps.py:9 awx/ui/conf.py:22 awx/ui/conf.py:36 awx/ui/conf.py:51
 msgid "UI"
 msgstr "UI"
 
@@ -4778,21 +4819,19 @@ msgid ""
 "If needed, you can add specific information (such as a legal notice or a "
 "disclaimer) to a text box in the login modal using this setting. Any content"
 " added must be in plain text, as custom HTML or other markup languages are "
-"not supported. If multiple paragraphs of text are needed, new lines "
-"(paragraphs) must be escaped as `\\n` within the block of text."
+"not supported."
 msgstr ""
-"Si es necesario, usted puede añadir información específica (como un aviso "
-"legal o condiciones) a un cuadro de texto en el formulario de inicio de "
-"sesión utilizando esta configuración. Todo contenido debe ser añadido en "
-"texto plano: HTML personalizado u otros lenguajes markup no están "
-"permitidos. Si varios párrafos de texto son necesarios, nuevas líneas "
-"(párrafos) pueden ser indicados con  `\\n` dentro del bloque de texto."
+"En caso de ser necesario, puede agregar información específica (como avisos "
+"legales o exenciones de responsabilidad) en un cuadro de texto en el modal "
+"de inicio de sesión con esta configuración. Los contenidos que se agreguen "
+"deberán ser texto simple, ya que las HTML personalizadas u otros lenguajes "
+"de marcado no son compatibles."
 
-#: awx/ui/conf.py:48
+#: awx/ui/conf.py:46
 msgid "Custom Logo"
 msgstr "Logo personalizado"
 
-#: awx/ui/conf.py:49
+#: awx/ui/conf.py:47
 msgid ""
 "To set up a custom logo, provide a file that you create. For the custom logo"
 " to look its best, use a .png file with a transparent background. GIF, PNG "

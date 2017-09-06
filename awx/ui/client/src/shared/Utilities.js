@@ -224,7 +224,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     if (Array.isArray(data[keys[0]])) {
                         msg = data[keys[0]][0];
                     } else {
-                        msg = data[keys[0]];
+                        msg = "";
+                        _.forOwn(data, function(value, key) {
+                            msg += `${key} : ${value} `;
+                        });
                     }
                     Alert(defaultMsg.hdr, msg);
                 } else {
@@ -640,10 +643,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     // Don't toggle the dropdown when a multiselect option is
                     // being removed
                     if (multiple) {
-                        if (params.disabledOptions) {
-                            $(element).on('select2:selecting', e => e.preventDefault());
-                        }
-
                         $(element).on('select2:opening', (e) => {
                             var unselecting = $(e.target).data('select2-unselecting');
                             if (unselecting === true) {

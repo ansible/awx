@@ -41,6 +41,19 @@
                         </div>
                     </div>
 
+                    <!-- EXPLANATION DETAIL -->
+                    <div class="StandardOut-detailsRow">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>EXPLANATION</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{task_detail | limitTo:explanationLimit}}
+                            <span ng-show="explanationLimit && task_detail.length > explanationLimit">
+                                <span>... </span>
+                                <span class="StandardOut-seeMoreLess" ng-click="explanationLimit=undefined">Show More</span>
+                            </span>
+                            <span ng-show="explanationLimit === undefined" class="StandardOut-seeMoreLess" ng-click="explanationLimit=150">Show Less</span>
+                        </div>
+                    </div>
+
                     <div class="StandardOut-detailsRow" ng-show="{{job.license_error !== null}}">
                         <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>LICENSE ERROR</div>
                         <div class="StandardOut-detailsContent StandardOut--capitalize">

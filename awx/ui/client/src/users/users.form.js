@@ -69,8 +69,10 @@ export default ['i18n', function(i18n) {
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    ngRequired: "$state.match('add')",
-                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
+                    awRequiredWhen: {
+                        reqExpression: "isAddForm",
+                        init: false
+                    },
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -80,8 +82,10 @@ export default ['i18n', function(i18n) {
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    ngRequired: "$state.match('add')",
-                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
+                    awRequiredWhen: {
+                        reqExpression: "isAddForm",
+                        init: false
+                    },
                     awPassMatch: true,
                     associated: 'password',
                     autocomplete: false,

@@ -59,6 +59,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         return concated;
                     }
                     else {
+                        if(value && typeof value === 'string') {
+                            value = decodeURIComponent(value).replace(/"|'/g, "");
+                        }
+
                         return `${key}=${value}&`;
                     }
                 }
@@ -80,10 +84,20 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 let valueString = paramParts[1];
                 if(keySplit.length === 1) {
                     if(params.searchTerm && !lessThanGreaterThan) {
-                        paramString += keySplit[0] + '__icontains_DEFAULT';
+                        if(params.singleSearchParam) {
+                            paramString += keySplit[0] + '__icontains';
+                        }
+                        else {
+                            paramString += keySplit[0] + '__icontains_DEFAULT';
+                        }
                     }
                     else if(params.relatedSearchTerm) {
-                        paramString += keySplit[0] + '__search_DEFAULT';
+                        if(params.singleSearchParam) {
+                            paramString += keySplit[0] + '__search';
+                        }
+                        else {
+                            paramString += keySplit[0] + '__search_DEFAULT';
+                        }
                     }
                     else {
                         paramString += keySplit[0];
@@ -242,10 +256,6 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     })
                     .catch(function(response) {
                         Wait('stop');
-
-                        if (/^\/api\/v[0-9]+\/workflow_job_templates\/$/.test(endpoint) && response.status === 402) {
-                            return response;
-                        }
 
                         this.error(response.data, response.status);
 

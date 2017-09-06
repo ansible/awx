@@ -5,6 +5,7 @@ export default ['i18n', function(i18n) {
         iterator: 'instance_group',
         editTitle: i18n._('INSTANCE GROUPS'),
         listTitle: i18n._('INSTANCE GROUPS'),
+        emptyListText: i18n._('THERE ARE CURRENTLY NO INSTANCE GROUPS DEFINED'),
         index: false,
         hover: false,
 
@@ -17,7 +18,7 @@ export default ['i18n', function(i18n) {
                 uiSref: 'instanceGroups.instances.list({instance_group_id: instance_group.id})',
                 ngClass: "{'isActive' : isActive()}"
             },
-            percent_capacity_remaining: {
+            consumed_capacity: {
                 label: i18n._('Capacity'),
                 nosort: true,
             },

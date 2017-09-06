@@ -54,10 +54,7 @@ function SmartInventoryAdd($scope, $location,
 
             data.variables = ToJSON($scope.parseType, $scope.smartinventory_variables, true);
 
-            let decodedHostFilter = decodeURIComponent($scope.smart_hosts.host_filter);
-            decodedHostFilter = decodedHostFilter.replace(/__icontains_DEFAULT/g, "__icontains");
-            decodedHostFilter = decodedHostFilter.replace(/__search_DEFAULT/g, "__search");
-            data.host_filter = decodedHostFilter;
+            data.host_filter = decodeURIComponent($scope.smart_hosts.host_filter);
 
             data.kind = "smart";
 

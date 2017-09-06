@@ -377,9 +377,11 @@ class InstanceAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return Instance.objects.all().distinct()
+            qs = Instance.objects.all().distinct()
         else:
-            return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+            qs = Instance.objects.filter(
+                rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+        return qs.prefetch_related('rampart_groups')
 
     def can_add(self, data):
         return False
@@ -397,9 +399,11 @@ class InstanceGroupAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return InstanceGroup.objects.all()
+            qs = InstanceGroup.objects.all()
         else:
-            return InstanceGroup.objects.filter(organization__in=Organization.accessible_objects(self.user, 'admin_role'))
+            qs = InstanceGroup.objects.filter(
+                organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
+        return qs.prefetch_related('instances')
 
     def can_add(self, data):
         return False
@@ -506,6 +510,8 @@ class OrganizationAccess(BaseAccess):
     I can change or delete organizations when:
      - I am a superuser.
      - I'm an admin of that organization.
+    I can associate/disassociate instance groups when:
+     - I am a superuser.
     '''
 
     model = Organization
@@ -537,7 +543,7 @@ class OrganizationAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.admin_role:
+            if self.user.is_superuser:
                 return True
             return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -596,9 +602,18 @@ class InventoryAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data):
+        # Host filter may only be modified by org admin level
+        org_admin_mandatory = False
+        new_host_filter = data.get('host_filter', None) if data else None
+        if new_host_filter and new_host_filter != obj.host_filter:
+            org_admin_mandatory = True
         # Verify that the user has access to the new organization if moving an
         # inventory to a new organization.  Otherwise, just check for admin permission.
-        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
+        return (
+            self.check_related('organization', Organization, data, obj=obj,
+                               mandatory=org_admin_mandatory) and
+            self.user in obj.admin_role
+        )
 
     @check_superuser
     def can_update(self, obj):
@@ -834,6 +849,10 @@ class InventoryUpdateAccess(BaseAccess):
     def get_queryset(self):
         qs = InventoryUpdate.objects.distinct()
         qs = qs.select_related('created_by', 'modified_by', 'inventory_source__inventory')
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group'
+        )
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
 
@@ -1080,11 +1099,17 @@ class ProjectUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
-        qs = ProjectUpdate.objects.distinct()
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                project__in=Project.accessible_pk_qs(self.user, 'read_role')
+            )
         qs = qs.select_related('created_by', 'modified_by', 'project')
-        project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
-        return qs.filter(project_id__in=project_ids)
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group'
+        )
+        return qs
 
     @check_superuser
     def can_cancel(self, obj):
@@ -1304,7 +1329,11 @@ class JobAccess(BaseAccess):
         qs = self.model.objects
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'job_template')
-        qs = qs.prefetch_related('unified_job_template')
+        qs = qs.prefetch_related(
+            'unified_job_template',
+            'instance_group',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
+        )
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
@@ -2170,10 +2199,13 @@ class LabelAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
-        return self.model.objects.all().filter(
-            organization__in=Organization.accessible_objects(self.user, 'read_role')
-        )
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.all().filter(
+                organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
+            )
+        qs = qs.prefetch_related('modified_by', 'created_by', 'organization')
+        return qs
 
     @check_superuser
     def can_read(self, obj):

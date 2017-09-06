@@ -61,10 +61,7 @@ function(i18n, InventoryCompletedJobsList) {
                 list: 'OrganizationList',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                awRequiredWhen: {
-                    reqExpression: "organizationrequired",
-                    init: "true"
-                },
+                required: true,
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
@@ -77,12 +74,13 @@ function(i18n, InventoryCompletedJobsList) {
                 sourceField: 'name',
                 search: {
                     credential_type: '13' //insights
-                }
+                },
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
             },
             instance_groups: {
                 label: i18n._('Instance Groups'),
                 type: 'custom',
-                awPopOver: "<p>" + i18n._("Select the Instance Groups for this Inventory to run on.") + "</p>",
+                awPopOver: i18n._('Select the Instance Groups for this Inventory to run on. Refer to the Ansible Tower documentation for more detail.'),
                 dataTitle: i18n._('Instance Groups'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
@@ -95,14 +93,8 @@ function(i18n, InventoryCompletedJobsList) {
                 class: 'Form-formGroup--fullWidth',
                 rows: 6,
                 "default": "---",
-                awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
-                    "JSON:<br />\n" +
-                    "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
-                    "YAML:<br />\n" +
-                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    '<p>' + i18n.sprintf(i18n._('View JSON examples at %s'), '<a href="http://www.json.org" target="_blank">www.json.org</a>') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('View YAML examples at %s'), '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a>') + '</p>',
-                dataTitle: i18n._('Inventory Variables'),
+                awPopOver: i18n._('Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.'),
+                dataTitle: i18n._('Variables'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working

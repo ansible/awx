@@ -33,7 +33,8 @@ import inventoryHosts from './related/hosts/related-host.route';
 import smartInventoryHosts from './smart-inventory/smart-inventory-hosts.route';
 import inventoriesList from './inventories.route';
 import inventoryHostsAdd from './related/hosts/add/host-add.route';
-import inventoryHostsEdit from './related/hosts/edit/host-edit.route';
+import inventoryHostsEdit from './related/hosts/edit/standard-host-edit.route';
+import smartInventoryHostsEdit from './related/hosts/edit/smart-host-edit.route';
 import ansibleFactsRoute from '../shared/ansible-facts/ansible-facts.route';
 import insightsRoute from './insights/insights.route';
 import inventorySourcesCredentialRoute from './related/sources/lookup/sources-lookup-credential.route';
@@ -130,13 +131,15 @@ angular.module('inventory', [
                                             });
                                     });
                             }],
-                            checkProjectPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath',
-                                function(resourceData, $stateParams, Rest, GetBasePath){
+                            checkProjectPermission: ['resourceData', '$stateParams', 'Rest', 'GetBasePath', 'credentialTypesLookup',
+                                function(resourceData, $stateParams, Rest, GetBasePath, credentialTypesLookup){
                                     if(_.has(resourceData, 'data.summary_fields.insights_credential')){
-                                        let credential_id = resourceData.data.summary_fields.insights_credential.id,
-                                            path = `${GetBasePath('projects')}?credential__id=${credential_id}&role_level=use_role`;
-                                            Rest.setUrl(path);
-                                            return Rest.get().then(({data}) => {
+                                        return credentialTypesLookup()
+                                            .then(kinds => {
+                                                let insightsKind = kinds.Insights;
+                                                let path = `${GetBasePath('projects')}?credential__credential_type=${insightsKind}&role_level=use_role`;
+                                                Rest.setUrl(path);
+                                                return Rest.get().then(({data}) => {
                                                     if (data.results.length > 0){
                                                         return true;
                                                     }
@@ -146,6 +149,7 @@ angular.module('inventory', [
                                                 }).catch(() => {
                                                     return false;
                                                 });
+                                            });
                                     }
                                     else {
                                         return false;
@@ -319,6 +323,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(smartInventoryHosts),
                             stateExtender.buildDefinition(inventoryHostsAdd),
                             stateExtender.buildDefinition(inventoryHostsEdit),
+                            stateExtender.buildDefinition(smartInventoryHostsEdit),
                             stateExtender.buildDefinition(hostNestedGroupsRoute),
                             stateExtender.buildDefinition(inventorySourceListRoute),
                             stateExtender.buildDefinition(inventorySourceAddRoute),

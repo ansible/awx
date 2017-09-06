@@ -16,7 +16,7 @@ export default ['i18n', function(i18n) {
                 modalColumnClass: 'col-md-8',
                 uiSref: 'instanceGroups.instances.list.job({instance_id: instance.id})'
             },
-            percent_capacity_remaining: {
+            consumed_capacity: {
                 label: i18n._('Capacity'),
                 nosort: true,
             },

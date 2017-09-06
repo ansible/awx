@@ -14,6 +14,7 @@ from django.db import transaction, connection, DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now as tz_now, utc
 from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
 
 # AWX
 from awx.main.models import * # noqa
@@ -37,10 +38,10 @@ class TaskManager():
 
     def __init__(self):
         self.graph = dict()
-        for rampart_group in InstanceGroup.objects.all():
+        for rampart_group in InstanceGroup.objects.prefetch_related('instances'):
             self.graph[rampart_group.name] = dict(graph=DependencyGraph(rampart_group.name),
                                                   capacity_total=rampart_group.capacity,
-                                                  capacity_used=0)
+                                                  consumed_capacity=0)
 
     def is_job_blocked(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -77,11 +78,18 @@ class TaskManager():
     '''
     def get_running_tasks(self):
         execution_nodes = {}
+        waiting_jobs = []
         now = tz_now()
-        jobs = UnifiedJob.objects.filter(Q(status='running') |
-                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60)))
-        [execution_nodes.setdefault(j.execution_node, [j]).append(j) for j in jobs]
-        return execution_nodes
+        workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+        jobs = UnifiedJob.objects.filter((Q(status='running') |
+                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60))) &
+                                         ~Q(polymorphic_ctype_id=workflow_ctype_id))
+        for j in jobs:
+            if j.execution_node:
+                execution_nodes.setdefault(j.execution_node, [j]).append(j)
+            else:
+                waiting_jobs.append(j)
+        return (execution_nodes, waiting_jobs)
 
     '''
     Tasks that are currently running in celery
@@ -395,17 +403,44 @@ class TaskManager():
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
             for rampart_group in preferred_instance_groups:
-                if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug("Skipping group %s capacity <= 0", rampart_group.name)
+                remaining_capacity = self.get_remaining_capacity(rampart_group.name)
+                if remaining_capacity <= 0:
+                    logger.debug("Skipping group %s, remaining_capacity %s <= 0",
+                                 rampart_group.name, remaining_capacity)
                     continue
                 if not self.would_exceed_capacity(task, rampart_group.name):
-                    logger.debug("Starting %s in group %s", task.log_format, rampart_group.name)
+                    logger.debug("Starting %s in group %s (remaining_capacity=%s)",
+                                 task.log_format, rampart_group.name, remaining_capacity)
                     self.graph[rampart_group.name]['graph'].add_job(task)
                     self.start_task(task, rampart_group, task.get_jobs_fail_chain())
                     found_acceptable_queue = True
                     break
+                else:
+                    logger.debug("Not enough capacity to run %s on %s (remaining_capacity=%s)",
+                                 task.log_format, rampart_group.name, remaining_capacity)
             if not found_acceptable_queue:
                 logger.debug("%s couldn't be scheduled on graph, waiting for next cycle", task.log_format)
+
+    def fail_jobs_if_not_in_celery(self, node_jobs, active_tasks, celery_task_start_time):
+        for task in node_jobs:
+            if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
+                if isinstance(task, WorkflowJob):
+                    continue
+                if task.modified > celery_task_start_time:
+                    continue
+                task.status = 'failed'
+                task.job_explanation += ' '.join((
+                    'Task was marked as running in Tower but was not present in',
+                    'Celery, so it has been marked as failed.',
+                ))
+                try:
+                    task.save(update_fields=['status', 'job_explanation'])
+                except DatabaseError:
+                    logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
+                    continue
+                awx_tasks._send_notification_templates(task, 'failed')
+                task.websocket_emit_status('failed')
+                logger.error("Task {} has no record in celery. Marking as failed".format(task.log_format))
 
     def cleanup_inconsistent_celery_tasks(self):
         '''
@@ -428,7 +463,13 @@ class TaskManager():
         Only consider failing tasks on instances for which we obtained a task 
         list from celery for.
         '''
-        running_tasks = self.get_running_tasks()
+        running_tasks, waiting_tasks = self.get_running_tasks()
+        all_celery_task_ids = []
+        for node, node_jobs in active_queues.iteritems():
+            all_celery_task_ids.extend(node_jobs)
+
+        self.fail_jobs_if_not_in_celery(waiting_tasks, all_celery_task_ids, celery_task_start_time)
+
         for node, node_jobs in running_tasks.iteritems():
             if node in active_queues:
                 active_tasks = active_queues[node]
@@ -445,54 +486,35 @@ class TaskManager():
                         continue
                 except Instance.DoesNotExist:
                     logger.error("Execution node Instance {} not found in database. "
-                                 "The node is currently executing jobs {}".format(node, [str(j) for j in node_jobs]))
+                                 "The node is currently executing jobs {}".format(node, 
+                                                                                  [j.log_format for j in node_jobs]))
                     active_tasks = []
-            for task in node_jobs:
-                if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-                    if isinstance(task, WorkflowJob):
-                        continue
-                    if task.modified > celery_task_start_time:
-                        continue
-                    task.status = 'failed'
-                    task.job_explanation += ' '.join((
-                        'Task was marked as running in Tower but was not present in',
-                        'Celery, so it has been marked as failed.',
-                    ))
-                    try:
-                        task.save(update_fields=['status', 'job_explanation'])
-                    except DatabaseError:
-                        logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
-                        continue
-                    awx_tasks._send_notification_templates(task, 'failed')
-                    task.websocket_emit_status('failed')
-                    logger.error("Task {} has no record in celery. Marking as failed".format(task.log_format))
 
-    def calculate_capacity_used(self, tasks):
-        for rampart_group in self.graph:
-            self.graph[rampart_group]['capacity_used'] = 0
-        for t in tasks:
-            # TODO: dock capacity for isolated job management tasks running in queue
-            for group_actual in InstanceGroup.objects.filter(instances__hostname=t.execution_node).values_list('name'):
-                if group_actual[0] in self.graph:
-                    self.graph[group_actual[0]]['capacity_used'] += t.task_impact
+            self.fail_jobs_if_not_in_celery(node_jobs, active_tasks, celery_task_start_time)
+
+    def calculate_capacity_consumed(self, tasks):
+        self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
     def would_exceed_capacity(self, task, instance_group):
-        current_capacity = self.graph[instance_group]['capacity_used']
+        current_capacity = self.graph[instance_group]['consumed_capacity']
         capacity_total = self.graph[instance_group]['capacity_total']
         if current_capacity == 0:
             return False
         return (task.task_impact + current_capacity > capacity_total)
 
     def consume_capacity(self, task, instance_group):
-        self.graph[instance_group]['capacity_used'] += task.task_impact
+        logger.debug('%s consumed %s capacity units from %s with prior total of %s',
+                     task.log_format, task.task_impact, instance_group,
+                     self.graph[instance_group]['consumed_capacity'])
+        self.graph[instance_group]['consumed_capacity'] += task.task_impact
 
     def get_remaining_capacity(self, instance_group):
-        return (self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['capacity_used'])
+        return (self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity'])
 
     def process_tasks(self, all_sorted_tasks):
         running_tasks = filter(lambda t: t.status in ['waiting', 'running'], all_sorted_tasks)
 
-        self.calculate_capacity_used(running_tasks)
+        self.calculate_capacity_consumed(running_tasks)
 
         self.process_running_tasks(running_tasks)
 
@@ -521,12 +543,13 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
-        logger.debug("Starting Schedule")
         with transaction.atomic():
             # Lock
             with advisory_lock('task_manager_lock', wait=False) as acquired:
                 if acquired is False:
+                    logger.debug("Not running scheduler, another task holds lock")
                     return
+                logger.debug("Starting Scheduler")
 
                 self.cleanup_inconsistent_celery_tasks()
                 finished_wfjs = self._schedule()

@@ -108,6 +108,7 @@ class TestJobTemplateSerializerGetSummaryFields():
         request.user = user
         view = JobTemplateDetail()
         view.request = request
+        view.kwargs = {}
         serializer.context['view'] = view
 
         with mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie'):

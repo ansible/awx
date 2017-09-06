@@ -8,12 +8,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
     'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupsService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'inventorySourceData', 'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
-    'Wait', 'Rest', 'Alert', '$rootScope',
+    'Wait', 'Rest', 'Alert', '$rootScope', 'i18n',
     function($state, $stateParams, $scope, ParseVariableString,
         rbacUiControlService, ToJSON,ParseTypeChange, GroupsService,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
         inventorySourceData, SourcesService, inventoryData, inventorySourcesOptions, Empty,
-        Wait, Rest, Alert, $rootScope) {
+        Wait, Rest, Alert, $rootScope, i18n) {
 
         function init() {
             $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
@@ -243,46 +243,45 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
 
         function initGroupBySelect(){
             let add_new = false;
-            if($scope && $scope.source && $scope.source === 'ec2' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'ec2'){
+            if( _.get($scope, 'source') === 'ec2' || _.get($scope.source, 'value') === 'ec2') {
                 $scope.group_by_choices = $scope.ec2_group_by;
                 let group_by = inventorySourceData.group_by.split(',');
                 $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
-                $scope.groupByPopOver = "<p>Select which groups to create automatically. " +
-                    $rootScope.BRAND_NAME + " will create group names similar to the following examples based on the options selected:</p><ul>" +
-                    "<li>Availability Zone: <strong>zones &raquo; us-east-1b</strong></li>" +
-                    "<li>Image ID: <strong>images &raquo; ami-b007ab1e</strong></li>" +
-                    "<li>Instance ID: <strong>instances &raquo; i-ca11ab1e</strong></li>" +
-                    "<li>Instance Type: <strong>types &raquo; type_m1_medium</strong></li>" +
-                    "<li>Key Name: <strong>keys &raquo; key_testing</strong></li>" +
-                    "<li>Region: <strong>regions &raquo; us-east-1</strong></li>" +
-                    "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
-                    "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
-                    "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
-                    "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
-                    "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>";
-                $scope.instanceFilterPopOver = "<p>Provide a comma-separated list of filter expressions. " +
-                    "Hosts are imported to " + $rootScope.BRAND_NAME + " when <em>ANY</em> of the filters match.</p>" +
-                    "Limit to hosts having a tag:<br />\n" +
+
+                $scope.groupByPopOver = "<p>" + i18n._("Select which groups to create automatically. ") +
+                    $rootScope.BRAND_NAME + i18n._(" will create group names similar to the following examples based on the options selected:") + "</p><ul>" +
+                    "<li>" + i18n._("Availability Zone:") + "<strong>zones &raquo; us-east-1b</strong></li>" +
+                    "<li>" + i18n._("Image ID:") + "<strong>images &raquo; ami-b007ab1e</strong></li>" +
+                    "<li>" + i18n._("Instance ID:") + "<strong>instances &raquo; i-ca11ab1e</strong></li>" +
+                    "<li>" + i18n._("Instance Type:") + "<strong>types &raquo; type_m1_medium</strong></li>" +
+                    "<li>" + i18n._("Key Name:") + "<strong>keys &raquo; key_testing</strong></li>" +
+                    "<li>" + i18n._("Region:") + "<strong>regions &raquo; us-east-1</strong></li>" +
+                    "<li>" + i18n._("Security Group:") + "<strong>security_groups &raquo; security_group_default</strong></li>" +
+                    "<li>" + i18n._("Tags:") + "<strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
+                    "<li>" + i18n._("VPC ID:") + "<strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                    "<li>" + i18n._("Tag None:") + "<strong>tags &raquo; tag_none</strong></li>" +
+                    "</ul><p>" + i18n._("If blank, all groups above are created except") + "<em>" + i18n._("Instance ID") + "</em>.</p>";
+
+
+                $scope.instanceFilterPopOver = "<p>" + i18n._("Provide a comma-separated list of filter expressions. ") +
+                    i18n._("Hosts are imported to ") + $rootScope.BRAND_NAME + i18n._(" when ") + "<em>" + i18n._("ANY") + "</em>" + i18n._(" of the filters match.") + "</p>" +
+                    i18n._("Limit to hosts having a tag:") + "<br />\n" +
                     "<blockquote>tag-key=TowerManaged</blockquote>\n" +
-                    "Limit to hosts using either key pair:<br />\n" +
+                    i18n._("Limit to hosts using either key pair:") + "<br />\n" +
                     "<blockquote>key-name=staging, key-name=production</blockquote>\n" +
-                    "Limit to hosts where the Name tag begins with <em>test</em>:<br />\n" +
+                    i18n._("Limit to hosts where the Name tag begins with ") + "<em>" + i18n._("test") + "</em>:<br />\n" +
                     "<blockquote>tag:Name=test*</blockquote>\n" +
-                    "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
-                    "for a complete list of supported filters.</p>";
+                    "<p>" + i18n._("View the ") + "<a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">" + i18n._("Describe Instances documentation") + "</a> " +
+                    i18n._("for a complete list of supported filters.") + "</p>";
 
             }
-            if($scope && $scope.source && $scope.source === 'vmware' || $scope && $scope.source && $scope.source.value  && $scope.source.value === 'vmware'){
+        if( _.get($scope, 'source') === 'vmware' || _.get($scope.source, 'value') === 'vmware') {
                 add_new = true;
                 $scope.group_by_choices = (inventorySourceData.group_by) ? inventorySourceData.group_by.split(',')
                     .map((i) => ({name: i, label: i, value: i})) : [];
                 $scope.group_by = $scope.group_by_choices;
-                $scope.groupByPopOver = `Specify which groups to create automatically.
-                    Group names will be created similar to the options selected.
-                    If blank, all groups above are created. Refer to Ansible Tower documentation for more detail.`;
-                $scope.instanceFilterPopOver = `Provide a comma-separated list of filter expressions.
-                    Hosts are imported when <em>ANY</em> of the filters match.
-                    Refer to Ansible Tower documentation for more detail.`;
+                $scope.groupByPopOver = i18n._(`Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail.`);
+                $scope.instanceFilterPopOver = i18n._(`Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail.`);
             }
             CreateSelect2({
                 element: '#inventory_source_group_by',

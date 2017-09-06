@@ -20,7 +20,7 @@ export default ['i18n', function(i18n) {
 
         fields: {
             toggleHost: {
-                ngDisabled: 'host.has_inventory_sources',
+                ngDisabled: '!host.summary_fields.user_capabilities.edit || host.has_inventory_sources',
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",
@@ -115,7 +115,7 @@ export default ['i18n', function(i18n) {
                 showTipWhenDisabled: true,
                 tooltipInnerClass: "Tooltip-wide",
                 // TODO: we don't always want to show this
-                ngShow: true
+                ngShow: 'inventory_obj.summary_fields.user_capabilities.adhoc'
             },
             create: {
                 mode: 'all',

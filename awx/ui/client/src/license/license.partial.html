@@ -99,13 +99,18 @@
 				</div>
 
 				<form id="License-form" name="uploadlicense">
-					<div class="License-subTitleText prepend-asterisk"> <translate>License File</translate></div>
+					<div class="License-subTitleText">
+						<span class="Form-requiredAsterisk">*</span>
+						<translate>License File</translate>
+					</div>
 					<div class="input-group License-file--container">
 						<span class="btn btn-primary" ng-click="fakeClick()" ng-disabled="!user_is_superuser" translate>Browse</span>
                         <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
-					<div class="License-subTitleText prepend-asterisk"> <translate>End User License Agreement</translate>
+					<div class="License-subTitleText">
+						<span class="Form-requiredAsterisk">*</span>
+						<translate>End User License Agreement</translate>
 					</div>
 					<div id="eula_notice"
 						class="License-eulaNotice">{{ license.eula }}</div>

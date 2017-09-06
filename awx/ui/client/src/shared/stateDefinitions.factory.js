@@ -313,15 +313,61 @@ function($injector, $stateExtender, $log, i18n) {
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],
-                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath', 'resourceData',
-                            function(list, qs, $stateParams, GetBasePath, resourceData) {
+                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath', 'resourceData', 'Rest', '$q',
+                            function(list, qs, $stateParams, GetBasePath, resourceData, Rest, $q) {
                                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
 
                                 if(resourceData.data.type === "team") {
                                     $stateParams[`${list.iterator}_search`].organization = resourceData.data.organization;
                                 }
 
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                                if(resourceData.data.type === "user") {
+
+                                    let resolve = $q.defer();
+
+                                    let getMoreOrgs = function(data, arr) {
+                                        Rest.setUrl(data.next);
+                                        Rest.get()
+                                            .then(function (resData) {
+                                                if (data.next) {
+                                                    getMoreOrgs(resData.data, arr.concat(resData.data.results));
+                                                } else {
+                                                    resolve.resolve(arr.concat(resData.data.results));
+                                                }
+                                            });
+                                    };
+
+                                    Rest.setUrl(GetBasePath('users') + `${resourceData.data.id}/organizations?page_size=200`);
+                                    Rest.get()
+                                        .then(function(resData) {
+                                            if (resData.data.next) {
+                                                getMoreOrgs(resData.data, resData.data.results);
+                                            } else {
+                                                resolve.resolve(resData.data.results);
+                                            }
+                                        });
+
+                                    return resolve.promise.then(function (organizations) {
+                                        if(organizations && organizations.length > 0) {
+                                            let orgIds = _.map(organizations, function(organization){
+                                                return organization.id;
+                                            });
+
+                                            $stateParams[`${list.iterator}_search`].or__organization = 'null';
+                                            $stateParams[`${list.iterator}_search`].or__organization__in = orgIds.join();
+
+                                        }
+                                        else {
+                                            $stateParams[`${list.iterator}_search`].organization = 'null';
+                                        }
+
+                                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                                    });
+
+                                }
+                                else {
+                                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                                }
                             }
                         ],
                         organizationsDataset: ['OrganizationList', 'QuerySet', '$stateParams', 'GetBasePath',

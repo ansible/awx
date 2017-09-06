@@ -2,7 +2,8 @@ export default ['templateUrl', function(templateUrl) {
     return {
         restrict: 'E',
         scope: {
-            hostFilter: '='
+            hostFilter: '=',
+            organization: '='
         },
         templateUrl: templateUrl('inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal'),
         link: function(scope, element) {
@@ -27,12 +28,14 @@ export default ['templateUrl', function(templateUrl) {
 
                 $scope.host_default_params = {
                     order_by: 'name',
-                    page_size: 5
+                    page_size: 5,
+                    inventory__organization: $scope.organization
                 };
 
                 $scope.host_queryset = _.merge({
                     order_by: 'name',
-                    page_size: 5
+                    page_size: 5,
+                    inventory__organization: $scope.organization
                 }, $scope.hostFilter ? $scope.hostFilter : {});
 
                 // Fire off the initial search
@@ -44,11 +47,13 @@ export default ['templateUrl', function(templateUrl) {
                         let hostList = _.cloneDeep(HostsList);
                         delete hostList.fields.toggleHost;
                         delete hostList.fields.active_failures;
-                        delete hostList.fields.inventory;
                         delete hostList.fields.name.ngClick;
                         hostList.fields.name.class += " HostFilterModal-tableRow";
                         hostList.fields.name.noLink = true;
                         hostList.well = false;
+                        delete hostList.fields.inventory.ngClick;
+                        hostList.fields.inventory.ngBind = 'host.summary_fields.inventory.name';
+                        hostList.emptyListText = 'You must have access to at least one host in order to create a smart inventory host filter';
                         let html = GenerateList.build({
                             list: hostList,
                             input_type: 'host-filter-modal-body',
@@ -79,7 +84,6 @@ export default ['templateUrl', function(templateUrl) {
 
                 $scope.destroyModal();
             };
-
         }]
     };
 }];

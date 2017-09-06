@@ -15,6 +15,13 @@
 
 var directive =
     {   require: 'ngModel',
+        controller: function($scope) {
+            $('select').on('select2:unselecting', (event) => {
+                if (_.has($scope.$parent, 'preview')) {
+                    event.preventDefault();
+                }
+            });
+        },
         compile: function() {
             return {
                 pre: function(scope, element, attrs, ngModel) {

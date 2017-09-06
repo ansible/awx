@@ -89,8 +89,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'source_project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
-    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
-    'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
+    'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -779,10 +779,10 @@ class UserSerializer(BaseSerializer):
                   'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
-    def to_representation(self, obj):
+    def to_representation(self, obj):  # TODO: Remove in 3.3
         ret = super(UserSerializer, self).to_representation(obj)
         ret.pop('password', None)
-        if obj:
+        if obj and type(self) is UserSerializer or self.version == 1:
             ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
 
@@ -1171,24 +1171,41 @@ class InventorySerializer(BaseSerializerWithVariables):
             ret['organization'] = None
         return ret
 
+    def validate_host_filter(self, host_filter):
+        if host_filter:
+            try:
+                SmartFilter().query_from_string(host_filter)
+            except RuntimeError, e:
+                raise models.base.ValidationError(e)
+        return host_filter
+
     def validate(self, attrs):
-        kind = attrs.get('kind', 'standard')
-        if kind == 'smart':
-            host_filter = attrs.get('host_filter')
-            if host_filter is not None:
-                try:
-                    SmartFilter().query_from_string(host_filter)
-                except RuntimeError, e:
-                    raise models.base.ValidationError(e)
+        kind = None
+        if 'kind' in attrs:
+            kind = attrs['kind']
+        elif self.instance:
+            kind = self.instance.kind
+
+        host_filter = None
+        if 'host_filter' in attrs:
+            host_filter = attrs['host_filter']
+        elif self.instance:
+            host_filter = self.instance.host_filter
+
+        if kind == 'smart' and not host_filter:
+            raise serializers.ValidationError({'host_filter': _(
+                'Smart inventories must specify host_filter')})
         return super(InventorySerializer, self).validate(attrs)
 
 
+# TODO: Remove entire serializer in 3.3, replace with normal serializer
 class InventoryDetailSerializer(InventorySerializer):
 
-    class Meta:
-        fields = ('*', 'can_run_ad_hoc_commands')
-
-    can_run_ad_hoc_commands = serializers.SerializerMethodField()
+    def get_fields(self):
+        fields = super(InventoryDetailSerializer, self).get_fields()
+        if self.version == 1:
+            fields['can_run_ad_hoc_commands'] = serializers.SerializerMethodField()
+        return fields
 
     def get_can_run_ad_hoc_commands(self, obj):
         view = self.context.get('view', None)
@@ -1551,11 +1568,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                             errors['inventory'] = _("Must provide an inventory.")
                     else:
                         dest_inventory = self.instance.inventory
-                    if source_script.organization != dest_inventory.organization:
+                    if dest_inventory and source_script.organization != dest_inventory.organization:
                         errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
-                except Exception as exc:
+                except Exception:
                     errors['source_script'] = _("'source_script' doesn't exist.")
-                    logger.error(str(exc))
+                    logger.exception('Problem processing source_script validation.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1670,7 +1687,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
+        if value and value.kind == 'smart':
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
 
@@ -2141,6 +2158,14 @@ class CredentialSerializer(BaseSerializer):
             return value
         return super(CredentialSerializer, self).to_internal_value(data)
 
+    def validate_credential_type(self, credential_type):
+        if self.instance and credential_type.pk != self.instance.credential_type.pk:
+            raise ValidationError(
+                _('You cannot change the credential type of the credential, as it may break the functionality'
+                  ' of the resources using it.'),
+            )
+        return credential_type
+
 
 class CredentialSerializerCreate(CredentialSerializer):
 
@@ -2490,6 +2515,22 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
+        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+            extra_creds = []
+            for cred in obj.extra_credentials.all():
+                extra_creds.append({
+                    'id': cred.pk,
+                    'name': cred.name,
+                    'description': cred.description,
+                    'kind': cred.kind,
+                    'credential_type_id': cred.credential_type_id
+                })
+            summary_fields['extra_credentials'] = extra_creds
+        return summary_fields
+
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
@@ -2525,7 +2566,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         if obj.job_template:
             res['job_template'] = self.reverse('api:job_template_detail',
                                                kwargs={'pk': obj.job_template.pk})
-        if obj.can_start or True:
+        if (obj.can_start or True) and self.version == 1:  # TODO: remove in 3.3
             res['start'] = self.reverse('api:job_start', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:job_cancel', kwargs={'pk': obj.pk})
@@ -2576,6 +2617,21 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         if 'extra_vars' in ret:
             ret['extra_vars'] = obj.display_extra_vars()
         return ret
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(JobSerializer, self).get_summary_fields(obj)
+        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+            extra_creds = []
+            for cred in obj.extra_credentials.all():
+                extra_creds.append({
+                    'id': cred.pk,
+                    'name': cred.name,
+                    'description': cred.description,
+                    'kind': cred.kind,
+                    'credential_type_id': cred.credential_type_id
+                })
+            summary_fields['extra_credentials'] = extra_creds
+        return summary_fields
 
 
 class JobCancelSerializer(JobSerializer):
@@ -2630,7 +2686,7 @@ class JobRelaunchSerializer(JobSerializer):
             raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
         if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
-        if obj.inventory is None:
+        if obj.inventory is None or obj.inventory.pending_deletion:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
@@ -3564,6 +3620,7 @@ class InstanceSerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
@@ -3581,17 +3638,37 @@ class InstanceGroupSerializer(BaseSerializer):
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
 
+    def get_jobs_qs(self):
+        # Store running jobs queryset in context, so it will be shared in ListView
+        if 'running_jobs' not in self.context:
+            self.context['running_jobs'] = UnifiedJob.objects.filter(
+                status__in=('running', 'waiting'))
+        return self.context['running_jobs']
+
+    def get_capacity_dict(self):
+        # Store capacity values (globally computed) in the context
+        if 'capacity_map' not in self.context:
+            ig_qs = None
+            if self.parent:  # Is ListView:
+                ig_qs = self.parent.instance
+            self.context['capacity_map'] = InstanceGroup.objects.capacity_values(
+                qs=ig_qs, tasks=self.get_jobs_qs(), breakdown=True)
+        return self.context['capacity_map']
+
     def get_consumed_capacity(self, obj):
-        return obj.consumed_capacity
+        return self.get_capacity_dict()[obj.name]['consumed_capacity']
 
     def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+        if not obj.capacity:
             return 0.0
         else:
-            return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
+            return float("{0:.2f}".format(
+                ((float(obj.capacity) - float(self.get_consumed_capacity(obj))) / (float(obj.capacity))) * 100)
+            )
 
     def get_jobs_running(self, obj):
-        return UnifiedJob.objects.filter(instance_group=obj, status__in=('running', 'waiting',)).count()
+        jobs_qs = self.get_jobs_qs()
+        return sum(1 for job in jobs_qs if job.instance_group_id == obj.id)
 
     def get_instances(self, obj):
         return obj.instances.count()

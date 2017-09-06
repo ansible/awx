@@ -177,7 +177,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
         }, credTypes, credTypeOptions, credTags;
 
         let credDefers = [];
-
+        let job_template_obj = data;
         // get machine credential
         if (data.related.credential) {
             Rest.setUrl(data.related.credential);
@@ -186,14 +186,20 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                     selectedCredentials.machine = data;
                 })
                 .catch(({data, status}) => {
-                    ProcessErrors(
-                        null, data, status, null,
-                        {
-                            hdr: 'Error!',
-                            msg: 'Failed to get machine credential. ' +
-                            'Get returned status: ' +
-                            status
+                    if (status === 403) {
+                        /* User doesn't have read access to the machine credential, so use summary_fields */
+                        selectedCredentials.machine = job_template_obj.summary_fields.credential;
+                        selectedCredentials.machine.credential_type = job_template_obj.summary_fields.credential.credential_type_id;
+                    } else {
+                        ProcessErrors(
+                            null, data, status, null,
+                            {
+                                hdr: 'Error!',
+                                msg: 'Failed to get machine credential. ' +
+                                'Get returned status: ' +
+                                status
                         });
+                    }
                 }));
         }
 
@@ -204,14 +210,20 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                     selectedCredentials.vault = data;
                 })
                 .catch(({data, status}) => {
-                    ProcessErrors(
-                        null, data, status, null,
-                        {
-                            hdr: 'Error!',
-                            msg: 'Failed to get machine credential. ' +
-                            'Get returned status: ' +
-                            status
+                    if (status === 403) {
+                        /* User doesn't have read access to the vault credential, so use summary_fields */
+                        selectedCredentials.vault = job_template_obj.summary_fields.vault_credential;
+                        selectedCredentials.vault.credential_type = job_template_obj.summary_fields.vault_credential.credential_type_id;
+                    } else {
+                        ProcessErrors(
+                            null, data, status, null,
+                            {
+                                hdr: 'Error!',
+                                msg: 'Failed to get machine credential. ' +
+                                'Get returned status: ' +
+                                status
                         });
+                    }
                 }));
         }
 
@@ -223,13 +235,22 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                     selectedCredentials.extra = data.results;
                 })
                 .catch(({data, status}) => {
-                    ProcessErrors(null, data, status, null,
-                        {
-                            hdr: 'Error!',
-                            msg: 'Failed to get extra credentials. ' +
-                            'Get returned status: ' +
-                            status
+                    if (status === 403) {
+                        /* User doesn't have read access to the extra credentials, so use summary_fields */
+                        selectedCredentials.extra = job_template_obj.summary_fields.extra_credentials;
+                        _.map(selectedCredentials.extra, (cred) => {
+                            cred.credential_type = cred.credential_type_id;
+                            return cred;
                         });
+                    } else {
+                        ProcessErrors(null, data, status, null,
+                            {
+                                hdr: 'Error!',
+                                msg: 'Failed to get extra credentials. ' +
+                                'Get returned status: ' +
+                                status
+                            });
+                    }
                 }));
         }
 

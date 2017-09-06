@@ -12,7 +12,8 @@
 
 export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
-    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n) {
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n,
+    fieldChoices, fieldLabels) {
 
     var job_id = $stateParams.id,
         jobType = $state.current.data.jobType;
@@ -21,6 +22,8 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // is expanded to take up the full screen
     $scope.stdoutFullScreen = false;
     $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
+    $scope.explanationLimit = 150;
 
     // Listen for job status updates that may come across via sockets.  We need to check the payload
     // to see whethere the updated job is the one that we're currently looking at.
@@ -32,6 +35,37 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
         if (data.status === 'failed' || data.status === 'canceled' || data.status === 'error' || data.status === 'successful') {
             // Go out and refresh the job details
             getjobResults();
+        }
+    });
+
+    $scope.previousTaskFailed = false;
+
+    $scope.$watch('job.job_explanation', function(explanation) {
+        if (explanation && explanation.split(":")[0] === "Previous Task Failed") {
+            $scope.previousTaskFailed = true;
+
+            var taskObj = JSON.parse(explanation.substring(explanation.split(":")[0].length + 1));
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var fieldChoice = fieldChoices({
+                $scope: $scope,
+                url: GetBasePath('unified_jobs'),
+                field: 'type'
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            fieldChoice.then(function (choices) {
+                choices =
+                    fieldLabels({
+                        choices: choices
+                    });
+                $scope.explanation_fail_type = choices[taskObj.job_type];
+                $scope.explanation_fail_name = taskObj.job_name;
+                $scope.explanation_fail_id = taskObj.job_id;
+                $scope.task_detail = $scope.explanation_fail_type + " failed for " + $scope.explanation_fail_name + " with ID " + $scope.explanation_fail_id + ".";
+            });
+        } else {
+            $scope.previousTaskFailed = false;
         }
     });
 
@@ -242,4 +276,5 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
     '$stateParams', 'GetBasePath', 'Rest', 'ProcessErrors',
     'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
-    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n'];
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n',
+    'fieldChoices', 'fieldLabels'];

@@ -20,7 +20,7 @@ from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
 from dateutil import parser
 from dateutil.tz import tzutc
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, smart_str
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -785,10 +785,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
                     host.insights_system_id = ansible_facts['insights']['system_id']
                 host.save()
-                system_tracking_logger.info('New fact for inventory {} host {}'.format(host.inventory.name, host.name),
-                                            extra=dict(inventory_id=host.inventory.id, host_name=host.name,
-                                                       ansible_facts=host.ansible_facts,
-                                                       ansible_facts_modified=host.ansible_facts_modified.isoformat()))
+                system_tracking_logger.info(
+                    'New fact for inventory {} host {}'.format(
+                        smart_str(host.inventory.name), smart_str(host.name)),
+                    extra=dict(inventory_id=host.inventory.id, host_name=host.name,
+                               ansible_facts=host.ansible_facts,
+                               ansible_facts_modified=host.ansible_facts_modified.isoformat()))
 
 
 class JobHostSummary(CreatedModifiedModel):
@@ -830,8 +832,9 @@ class JobHostSummary(CreatedModifiedModel):
     failed = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
+        hostname = self.host.name if self.host else 'N/A'
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
-            (self.host.name, self.changed, self.dark, self.failures, self.ok,
+            (hostname, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
     def get_absolute_url(self, request=None):
@@ -1163,7 +1166,6 @@ class JobEvent(CreatedModifiedModel):
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
-        from awx.main.models.inventory import Host
         extra_host_pks = set(extra_host_pks or [])
         hostnames = set()
         if self.host_name:
@@ -1174,7 +1176,7 @@ class JobEvent(CreatedModifiedModel):
                     hostnames.update(v.keys())
             except AttributeError: # In case event_data or v isn't a dict.
                 pass
-        qs = Host.objects.filter(inventory__jobs__id=self.job_id)
+        qs = self.job.inventory.hosts.all()
         qs = qs.filter(Q(name__in=hostnames) | Q(pk__in=extra_host_pks))
         qs = qs.exclude(job_events__pk=self.id).only('id')
         for host in qs:
@@ -1185,30 +1187,32 @@ class JobEvent(CreatedModifiedModel):
                 parent = parent[0]
                 parent._update_hosts(qs.values_list('id', flat=True))
 
-    def _update_host_summary_from_stats(self):
-        from awx.main.models.inventory import Host
+    def _hostnames(self):
         hostnames = set()
         try:
             for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                 hostnames.update(self.event_data.get(stat, {}).keys())
-        except AttributeError: # In case event_data or v isn't a dict.
+        except AttributeError:  # In case event_data or v isn't a dict.
             pass
+        return hostnames
+
+    def _update_host_summary_from_stats(self, hostnames):
         with ignore_inventory_computed_fields():
-            qs = Host.objects.filter(inventory__jobs__id=self.job_id,
-                                     name__in=hostnames)
+            qs = self.job.inventory.hosts.filter(name__in=hostnames)
             job = self.job
             for host in hostnames:
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
-                    except AttributeError: # in case event_data[stat] isn't a dict.
+                    except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
                 if qs.filter(name=host).exists():
                     host_actual = qs.get(name=host)
                     host_summary, created = job.job_host_summaries.get_or_create(host=host_actual, host_name=host_actual.name, defaults=host_stats)
                 else:
                     host_summary, created = job.job_host_summaries.get_or_create(host_name=host, defaults=host_stats)
+
                 if not created:
                     update_fields = []
                     for stat, value in host_stats.items():
@@ -1217,11 +1221,8 @@ class JobEvent(CreatedModifiedModel):
                             update_fields.append(stat)
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
-            job.inventory.update_computed_fields()
-            emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job.id))
 
     def save(self, *args, **kwargs):
-        from awx.main.models.inventory import Host
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -1236,7 +1237,7 @@ class JobEvent(CreatedModifiedModel):
                     update_fields.append(field)
             # Update host related field from host_name.
             if not self.host_id and self.host_name:
-                host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
+                host_qs = self.job.inventory.hosts.filter(name=self.host_name)
                 host_id = host_qs.only('id').values_list('id', flat=True).first()
                 if host_id != self.host_id:
                     self.host_id = host_id
@@ -1249,7 +1250,12 @@ class JobEvent(CreatedModifiedModel):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
                 self._update_parents_failed_and_changed()
-                self._update_host_summary_from_stats()
+
+                hostnames = self._hostnames()
+                self._update_host_summary_from_stats(hostnames)
+                self.job.inventory.update_computed_fields()
+
+                emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
 
     @classmethod
     def create_from_data(self, **kwargs):

@@ -1,16 +1,19 @@
 let BaseModel;
 
-function getSelf () {
-    return this.get('results[0]');
-}
-
 function MeModel (method, resource, graft) {
     BaseModel.call(this, 'me');
 
     this.Constructor = MeModel;
-    this.getSelf = getSelf.bind(this);
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, graft)
+        .then(() => {
+            if (this.has('results')) {
+                _.merge(this.model.GET, this.get('results[0]'));
+                this.unset('results');
+            }
+
+             return this;
+        });
 }
 
 function MeModelLoader (_BaseModel_) {

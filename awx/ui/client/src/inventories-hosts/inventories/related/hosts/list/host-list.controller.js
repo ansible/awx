@@ -89,7 +89,7 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
         $state.go('inventories.edit.hosts.add');
     };
     $scope.editHost = function(host){
-        $state.go('inventories.edit.hosts.edit', {inventory_id: host.inventory_id, host_id: host.id});
+        $state.go('.edit', {inventory_id: host.inventory_id, host_id: host.id});
     };
     $scope.goToInsights = function(host){
         $state.go('inventories.edit.hosts.edit.insights', {inventory_id: host.inventory_id, host_id:host.id});

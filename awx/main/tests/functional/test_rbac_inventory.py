@@ -174,3 +174,17 @@ def test_inventory_source_org_admin_schedule_access(org_admin, inventory_source)
     assert access.get_queryset()
     assert access.can_read(schedule)
     assert access.can_change(schedule, {'rrule': 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2'})
+
+
+@pytest.fixture
+def smart_inventory(organization):
+    return organization.inventories.create(name="smart-inv", kind="smart")
+
+
+@pytest.mark.django_db
+class TestSmartInventory:
+
+    def test_host_filter_edit(self, smart_inventory, rando, org_admin):
+        assert InventoryAccess(org_admin).can_admin(smart_inventory, {'host_filter': 'search=foo'})
+        smart_inventory.admin_role.members.add(rando)
+        assert not InventoryAccess(rando).can_admin(smart_inventory, {'host_filter': 'search=foo'})

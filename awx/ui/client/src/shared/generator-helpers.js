@@ -744,7 +744,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         html += (options.ngHide) ? "ng-hide=\"" + options.ngHide + "\" " : "";
         html += (options.awFeature) ? "aw-feature=\"" + options.awFeature + "\" " : "";
         html += '>';
-        html += '<span>';
+        html += '<span translate>';
         html += (options.buttonContent) ? options.buttonContent : "";
         html += '</span>';
         html += '</button>';

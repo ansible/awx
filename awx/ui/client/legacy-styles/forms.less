@@ -404,7 +404,7 @@
 
 .select2-dropdown {
     border:1px solid @field-border;
-
+    z-index: 1030;
 }
 
 .select2-container--open .select2-dropdown--below {
@@ -698,6 +698,10 @@ input[type='radio']:checked:before {
     display: flex;
     height: auto;
     width: 30px;
+}
+
+.Form-requiredAsterisk {
+  color: @red;
 }
 
 @media only screen and (max-width: 650px) {

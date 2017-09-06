@@ -347,7 +347,6 @@ class AdHocCommandEvent(CreatedModifiedModel):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     def save(self, *args, **kwargs):
-        from awx.main.models.inventory import Host
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -364,16 +363,16 @@ class AdHocCommandEvent(CreatedModifiedModel):
         self.host_name = self.event_data.get('host', '').strip()
         if 'host_name' not in update_fields:
             update_fields.append('host_name')
-        try:
-            if not self.host_id and self.host_name:
-                host_qs = Host.objects.filter(inventory__ad_hoc_commands__id=self.ad_hoc_command_id, name=self.host_name)
+        if not self.host_id and self.host_name:
+            host_qs = self.ad_hoc_command.inventory.hosts.filter(name=self.host_name)
+            try:
                 host_id = host_qs.only('id').values_list('id', flat=True)
                 if host_id.exists():
                     self.host_id = host_id[0]
                     if 'host_id' not in update_fields:
                         update_fields.append('host_id')
-        except (IndexError, AttributeError):
-            pass
+            except (IndexError, AttributeError):
+                pass
         super(AdHocCommandEvent, self).save(*args, **kwargs)
 
     @classmethod

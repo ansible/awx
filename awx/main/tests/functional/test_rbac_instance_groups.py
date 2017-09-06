@@ -50,7 +50,7 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     organization.instance_groups.add(default_instance_group)
 
     assert admin_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
-    assert oadmin_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
+    assert not oadmin_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     assert not auditor_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_unattach(organization, default_instance_group, 'instance_groups', None)
     

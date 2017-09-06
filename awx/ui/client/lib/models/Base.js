@@ -277,9 +277,35 @@ function has (method, keys) {
     return value !== undefined && value !== null;
 }
 
+function extend (method, related) {
+    if (!related) {
+        related = method
+        method = 'GET'
+    } else {
+        method = method.toUpperCase()
+    }
+
+    if (this.has(method, `related.${related}`)) {
+        let id = this.get('id')
+
+        let req = {
+            method,
+            url: this.get(`related.${related}`)
+        };
+
+        return $http(req)
+            .then(({data}) => {
+                this.set(method, `related.${related}`, data);
+                return this;
+            })
+    }
+
+    return Promise.reject(new Error(`No related property, ${related}, exists`));
+}
+
 function normalizePath (resource) {
     let version = '/api/v2/';
-    
+
     return `${version}${resource}/`;
 }
 
@@ -383,6 +409,7 @@ function BaseModel (path, settings) {
     this.search = search;
     this.set = set;
     this.unset = unset;
+    this.extend = extend;
 
     this.http = {
         get: httpGet.bind(this),
