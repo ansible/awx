@@ -281,6 +281,15 @@ class TestGenericRun(TestJobExecution):
         args, cwd, env, stdout = call_args
         assert args[0] == 'bwrap'
 
+    def test_bwrap_virtualenvs_are_readonly(self):
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '--ro-bind %s %s' % (settings.ANSIBLE_VENV_PATH, settings.ANSIBLE_VENV_PATH) in ' '.join(args)  # noqa
+        assert '--ro-bind %s %s' % (settings.AWX_VENV_PATH, settings.AWX_VENV_PATH) in ' '.join(args)  # noqa
+
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
         patch.start()

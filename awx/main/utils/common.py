@@ -699,7 +699,11 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    show_paths.extend([settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH])
+    for venv in (
+        settings.ANSIBLE_VENV_PATH,
+        settings.AWX_VENV_PATH
+    ):
+        new_args.extend(['--ro-bind', venv, venv])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     show_paths.extend(kwargs.get('proot_show_paths', []))
     for path in sorted(set(show_paths)):
