@@ -224,7 +224,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     if (Array.isArray(data[keys[0]])) {
                         msg = data[keys[0]][0];
                     } else {
-                        msg = data[keys[0]];
+                        msg = "";
+                        _.forOwn(data, function(value, key) {
+                            msg += `${key} : ${value} `;
+                        });
                     }
                     Alert(defaultMsg.hdr, msg);
                 } else {
