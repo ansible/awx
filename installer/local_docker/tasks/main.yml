@@ -1,0 +1,211 @@
+---
+- name: Export Docker web image if it isnt local and there isnt a registry defined
+  docker_image:
+    name: "{{ awx_web_image }}"
+    tag: "{{ awx_version }}"
+    archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_web_image }}_{{ awx_version }}.tar"
+  when: inventory_hostname != "localhost" and docker_registry is not defined
+  delegate_to: localhost
+
+- name: Export Docker task image if it isnt local and there isnt a registry defined
+  docker_image:
+    name: "{{ awx_task_image }}"
+    tag: "{{ awx_version }}"
+    archive_path: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_task_image }}_{{ awx_version }}.tar"
+  when: inventory_hostname != "localhost" and docker_registry is not defined
+  delegate_to: localhost
+
+- name: Authenticate with Docker registry if registry password given
+  docker_login:
+    registry: "{{ docker_registry }}"
+    username: "{{ docker_registry_username }}"
+    password: "{{ docker_registry_password }}"
+    reauthorize: yes
+  when: docker_registry is defined and docker_registry_password is defined
+  delegate_to: localhost
+
+- name: Set docker base path
+  set_fact:
+    docker_deploy_base_path: "{{ awx_base_path|default('/tmp') }}/docker_deploy"
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Ensure directory exists
+  file:
+    path: "{{ docker_deploy_base_path }}"
+    state: directory
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Copy web image to docker execution
+  copy:
+    src: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_web_image }}_{{ awx_version }}.tar"
+    dest: "{{ docker_deploy_base_path }}/{{ awx_web_image }}_{{ awx_version }}.tar"
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Copy task image to docker execution
+  copy:
+    src: "{{ awx_local_base_config_path|default('/tmp') }}/{{ awx_task_image }}_{{ awx_version }}.tar"
+    dest: "{{ docker_deploy_base_path }}"
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Load web image
+  docker_image:
+    name: "{{ awx_web_image }}"
+    tag: "{{ awx_version }}"
+    load_path: "{{ docker_deploy_base_path }}/{{ awx_web_image }}_{{ awx_version }}.tar"
+    timeout: 300
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Load task image
+  docker_image:
+    name: "{{ awx_task_image }}"
+    tag: "{{ awx_version }}"
+    load_path: "{{ docker_deploy_base_path }}/{{ awx_task_image }}_{{ awx_version }}.tar"
+    timeout: 300
+  when: ansible_connection != "local" and docker_registry is not defined
+
+- name: Tag and push web image to registry
+  docker_image:
+    name: "{{ awx_web_image }}"
+    repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+    tag: "{{ awx_version }}"
+    push: yes
+  when: docker_registry is defined
+  delegate_to: localhost
+
+- name: Tag and push task image to registry
+  docker_image:
+    name: "{{ awx_task_image }}"
+    repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+    tag: "{{ awx_version }}"
+    push: yes
+  when: docker_registry is defined
+  delegate_to: localhost
+
+- name: Set full image path for Registry
+  set_fact:
+    awx_web_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+    awx_task_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+  when: docker_registry is defined
+
+- name: Set full image path for local install
+  set_fact:
+    awx_web_docker_actual_image: "{{ awx_web_image }}"
+    awx_task_docker_actual_image: "{{ awx_task_image }}"
+  when: docker_registry is not defined
+
+## Docker-compose instead?
+
+- name: Activate postgres container
+  docker_container:
+    name: postgres
+    state: started
+    image: postgres:9.6
+    volumes:
+      - "{{ postgres_data_dir }}:/var/lib/postgresql/data"
+    env:
+      POSTGRES_USER: "{{ pg_username }}"
+      POSTGRES_PASSWORD: "{{ pg_password }}"
+      POSTGRES_DB: "{{ pg_database }}"
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Activate rabbitmq container
+  docker_container:
+    name: rabbitmq
+    state: started
+    image: rabbitmq:3
+    env:
+      RABBITMQ_DEFAULT_VHOST: "awx"
+
+- name: Activate memcached container
+  docker_container:
+    name: memcached
+    state: started
+    image: memcached:alpine
+
+- name: Wait for postgres and rabbitmq to activate
+  pause:
+    seconds: 15
+
+- name: Set properties without postgres for awx_web
+  set_fact:
+    pg_hostname_actual: "{{ pg_hostname }}"
+    awx_web_container_links:
+      - rabbitmq
+      - memcached
+  when: pg_hostname is defined
+
+- name: Set properties with postgres for awx_web
+  set_fact:
+    pg_hostname_actual: postgres
+    awx_web_container_links:
+      - rabbitmq
+      - memcached
+      - postgres
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Set properties without postgres for awx_task
+  set_fact:
+    pg_hostname_actual: "{{ pg_hostname }}"
+    awx_task_container_links:
+      - rabbitmq
+      - memcached
+      - awx_web
+  when: pg_hostname is defined
+
+- name: Set properties with postgres for awx_web
+  set_fact:
+    pg_hostname_actual: postgres
+    awx_task_container_links:
+      - rabbitmq
+      - memcached
+      - awx_web
+      - postgres
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Activate AWX Web Container
+  docker_container:
+    name: awx_web
+    state: started
+    image: "{{ awx_web_docker_actual_image }}:{{ awx_version }}"
+    user: root
+    ports:
+      - "{{ host_port }}:8052"
+    links: "{{ awx_web_container_links|list }}"
+    hostname: awxweb
+    env:
+      SECRET_KEY: "{{ awx_secret_key }}"
+      DATABASE_NAME: "{{ pg_database }}"
+      DATABASE_USER: "{{ pg_username }}"
+      DATABASE_PASSWORD: "{{ pg_password }}"
+      DATABASE_PORT: "{{ pg_port }}"
+      DATABASE_HOST: "{{ pg_hostname_actual }}"
+      RABBITMQ_USER: "guest"
+      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_VHOST: "awx"
+      MEMCACHED_HOST: "memcached"
+      MEMCACHED_PORT: "11211"
+
+- name: Activate AWX Task Container
+  docker_container:
+    name: awx_task
+    state: started
+    image: "{{ awx_task_docker_actual_image }}:{{ awx_version }}"
+    links: "{{ awx_task_container_links|list }}"
+    user: root
+    hostname: awx
+    env:
+      SECRET_KEY: "{{ awx_secret_key }}"
+      DATABASE_NAME: "{{ pg_database }}"
+      DATABASE_USER: "{{ pg_username }}"
+      DATABASE_PASSWORD: "{{ pg_password }}"
+      DATABASE_HOST: "{{ pg_hostname_actual }}"
+      DATABASE_PORT: "{{ pg_port }}"
+      RABBITMQ_USER: "guest"
+      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_VHOST: "awx"
+      MEMCACHED_HOST: "memcached"
+      MEMCACHED_PORT: "11211"
