@@ -264,7 +264,7 @@ def test_setting_from_db_with_unicode(settings, mocker, encrypted):
     # this simulates a bug in python-memcached; see https://github.com/linsomniac/python-memcached/issues/79
     value = six.u('Iñtërnâtiônàlizætiøn').encode('utf-8')
 
-    setting_from_db = mocker.Mock(key='AWX_SOME_SETTING', value=value)
+    setting_from_db = mocker.Mock(id=1, key='AWX_SOME_SETTING', value=value)
     mocks = mocker.Mock(**{
         'order_by.return_value': mocker.Mock(**{
             '__iter__': lambda self: iter([setting_from_db]),
