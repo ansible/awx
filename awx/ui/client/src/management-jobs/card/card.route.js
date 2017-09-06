@@ -17,7 +17,6 @@ export default {
         activityStreamTarget: 'job'
     },
     ncyBreadcrumb: {
-        parent: 'setup',
         label: N_('MANAGEMENT JOBS')
     },
 };

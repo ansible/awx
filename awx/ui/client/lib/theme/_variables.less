@@ -1,5 +1,5 @@
 /**
- * All base variables used. These should only be referenced by the contextual variables defined 
+ * All base variables used. These should only be referenced by the contextual variables defined
  * below. In development, unless you are intentionally making a fundamental change, these variables
  * should not be modified, removed, or added to.
  *
@@ -7,8 +7,8 @@
  * alias doesn't exist for the context you're working within, check with UX to create a new alias
  * or to define a more applicable alias.
  *
- * The goal is for UX to define the contexts for the contextual variables, so it's easy to make 
- * modifications like, "Change heading text to be smaller" or "Make all warnings a lighter shade  
+ * The goal is for UX to define the contexts for the contextual variables, so it's easy to make
+ * modifications like, "Change heading text to be smaller" or "Make all warnings a lighter shade
  * of orange"
  *
  * 1. Colors
@@ -20,6 +20,7 @@
 // 1. Colors --------------------------------------------------------------------------------------
 
 @at-gray-light-3x: #fcfcfc;
+@at-gray-light-2-5x: #fafafa;
 @at-gray-light-2x: #f2f2f2;
 @at-gray-light: #ebebeb;
 @at-gray: #e1e1e1;
@@ -149,6 +150,19 @@
 @at-color-table-header-background: @at-gray-light;
 @at-color-line-separator: @at-gray;
 
+@at-color-top-nav-background: @at-white;
+@at-color-top-nav-border-bottom: @at-gray-dark-2x;
+@at-color-top-nav-item-text: @at-gray-dark-5x;
+@at-color-top-nav-item-icon: @at-gray-dark-4x;
+@at-color-top-nav-item-icon-socket-outline: @at-white;
+@at-color-top-nav-item-background-hover: @at-gray-light-2-5x;
+@at-color-side-nav-background: @at-gray-dark-4x;
+@at-color-side-nav-content: @at-white;
+@at-color-side-nav-item-background-hover: @at-gray-dark-2x;
+@at-color-side-nav-item-border-hover: @at-white;
+@at-color-footer-background: @at-gray-light-3x;
+@at-color-footer: @at-gray-dark-5x;
+
 // 2. Typography ----------------------------------------------------------------------------------
 
 @at-font-size-body: @at-font-size-3x;
@@ -178,6 +192,10 @@
 @at-padding-popover: @at-space-2x;
 @at-padding-well: @at-space-2x;
 @at-padding-input: @at-space-2x;
+@at-padding-top-nav-item-sides: @at-space-4x;
+@at-padding-side-nav-item-icon: @at-space-3x;
+@at-padding-between-side-nav-icon-text: @at-space-3x;
+@at-padding-footer-right: @at-space-4x;
 
 @at-margin-input-message: @at-space;
 @at-margin-item-column: @at-space-3x;
@@ -187,6 +205,9 @@
 @at-margin-tag: @at-space-2x;
 @at-margin-form-label: @at-space;
 @at-margin-form-label-hint: @at-space-2x;
+@at-margin-top-nav-item-between-icon-and-name: @at-space-2x;
+@at-margin-top-nav-item-icon-socket-top-makeup: -3px;
+@at-margin-after-footer-link: @at-space;
 
 @at-margin-top-search-key: @at-space-2x;
 
@@ -195,9 +216,17 @@
 @at-height-textarea: 144px;
 @at-height-button: 30px;
 @at-height-tab: 30px;
+@at-height-top-nav: 60px;
+@at-height-top-nav-item-icon: 21px;
+@at-height-top-nav-item-icon-socket: 18px;
+@at-height-side-nav-item-icon: 20px;
+@at-height-side-nav-spacer: 20px;
+@at-height-top-side-nav-makeup: 55px;
 
 @at-width-input-button-sm: 72px;
 @at-width-input-button-md: 84px;
+@at-width-collapsed-side-nav: 50px;
+@at-width-expanded-side-nav: 200px;
 
 // 4. Transitions ---------------------------------------------------------------------------------
 
@@ -210,3 +239,7 @@
 @at-line-height-short: 0.9;
 @at-line-height-tall: 2;
 @at-line-height: 24px;
+@at-highlight-left-border-size: 5px;
+@at-highlight-left-border-margin-makeup: -5px;
+@at-z-index-nav: 1040;
+@at-border-default-width: 1px;

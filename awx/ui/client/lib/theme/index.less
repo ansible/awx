@@ -19,7 +19,6 @@
  * stuff, we'd be better off managing them via npm where possible.
  */
 @import '../../legacy-styles/fonts';
-@import '../../legacy-styles/main-layout';
 @import '../../legacy-styles/animations';
 @import '../../legacy-styles/jquery-ui-overrides';
 @import '../../legacy-styles/codemirror';
@@ -29,12 +28,10 @@
 @import '../../legacy-styles/job-details';
 @import '../../legacy-styles/jobs';
 @import '../../legacy-styles/inventory-edit';
-@import '../../legacy-styles/breadcrumbs';
 @import '../../legacy-styles/stdout';
 @import '../../legacy-styles/lists';
 @import '../../legacy-styles/forms';
 @import '../../legacy-styles/dashboard';
-@import '../../legacy-styles/jPushMenu';
 @import '../../legacy-styles/survey-maker';
 @import '../../legacy-styles/text-label';
 @import '../../legacy-styles/bootstrap-datepicker';
@@ -70,7 +67,6 @@
 @import '../../src/bread-crumb/bread-crumb.block.less';
 @import '../../src/configuration/configuration.block.less';
 @import '../../src/credentials/ownerList.block.less';
-@import '../../src/footer/footer.block.less';
 @import '../../src/home/dashboard/counts/dashboard-counts.block.less';
 @import '../../src/home/dashboard/graphs/dashboard-graphs.block.less';
 @import '../../src/home/dashboard/lists/dashboard-list.block.less';
@@ -93,7 +89,6 @@
 @import '../../src/login/loginModal/thirdPartySignOn/thirdPartySignOn.block.less';
 @import '../../src/login/loginModal/loginModal.block.less';
 @import '../../src/login/loginModal/loginModalNotice.block.less';
-@import '../../src/main-menu/main-menu.block.less';
 @import '../../src/management-jobs/card/mgmtcards.block.less';
 @import '../../src/notifications/notifications.block.less';
 @import '../../src/organizations/linkout/addUsers/addUsers.block.less';
@@ -105,10 +100,6 @@
 @import '../../src/scheduler/schedulertime.block.less';
 @import '../../src/scheduler/scheduleToggle.block.less';
 @import '../../src/scheduler/spinnerInput.block.less';
-@import '../../src/setup-menu/hover-icon.block.less';
-@import '../../src/setup-menu/setup-extra.block.less';
-@import '../../src/setup-menu/setup-item.block.less';
-@import '../../src/setup-menu/setup-menu.block.less';
 @import '../../src/shared/container/container.block.less';
 @import '../../src/shared/detail-nav/detail-nav.block.less';
 @import '../../src/shared/icon/icon.block.less';
@@ -145,10 +136,10 @@
 
 
 /**
- * App-wide style 
+ * App-wide style
  *
  * NOTE: Variables, mixins, and classes below are useful in more than one place across the
- * application. When working with Less, if the need for a variable, mixin, class, etc exists in 
+ * application. When working with Less, if the need for a variable, mixin, class, etc exists in
  * more than one location, take a moment to move it to this more general location for easy reuse
  * and to avoid duplication.
  */
@@ -161,8 +152,8 @@
  * Component and Feature style
  *
  * NOTE: These index files are aggregation points for components and features. To view the more
- * granular imports, view the contents of these files. Variables, classes, etc defined within 
- * these specific files ought to have no use elsewhere. As we shift to leverage components, very 
+ * granular imports, view the contents of these files. Variables, classes, etc defined within
+ * these specific files ought to have no use elsewhere. As we shift to leverage components, very
  * few feature-specific styles will exist.
  */
 @import '../components/_index';

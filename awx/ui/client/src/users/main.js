@@ -42,7 +42,6 @@ angular.module('Users', [])
                         activityStreamTarget: 'user'
                     },
                     ncyBreadcrumb: {
-                        parent: 'setup',
                         label: N_('USERS')
                     }
                 })

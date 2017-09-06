@@ -594,15 +594,6 @@ dd {
   text-decoration: none;
 }
 
-.navbar.site-footer {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  margin-bottom: 0;
-  background-color: @black;
-}
-
 .login-header img {
     width: 60%;
 }
@@ -2302,4 +2293,38 @@ input[disabled].ui-spinner-input {
 
 .ui-dialog .ui-dialog-content {
     background: @default-bg;
+}
+
+html { height: 100%; }
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    color: @default-data-txt;
+    background-color: @default-secondary-bg;
+}
+
+.container-fluid {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#content-container {
+    padding-bottom: 0px;
+}
+
+.Panel {
+    background-color: @panel-bg;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid @panel-border;
+    margin-top: 20px;
+}
+
+.Panel-hidden {
+    display: none;
+}
+
+.btn {
+    text-transform: uppercase;
 }

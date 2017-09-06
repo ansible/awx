@@ -15,7 +15,6 @@ export default {
 	controller: 'licenseController',
 	data: {},
 	ncyBreadcrumb: {
-		parent: 'setup',
 		label: N_('LICENSE')
 	},
     onEnter: ['$state', 'ConfigService', (state, configService) => {

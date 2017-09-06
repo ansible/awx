@@ -42,7 +42,6 @@ angular.module('Teams', [])
                         activityStreamTarget: 'team'
                     },
                     ncyBreadcrumb: {
-                        parent: 'setup',
                         label: N_('TEAMS')
                     }
                 })

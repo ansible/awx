@@ -10,7 +10,7 @@ export default ['$rootScope', '$scope', '$state', 'ConfigService',
             $('#about-modal').modal('show');
         });
 
-    $('#about-modal').on('hidden.bs.modal', () => $state.go('setup'));
+    $('#about-modal').on('hidden.bs.modal', () => $state.go('dashboard'));
 
     function createSpeechBubble (brand, version) {
         let text = `${brand} ${version}`;

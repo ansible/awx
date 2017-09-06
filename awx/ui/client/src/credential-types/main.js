@@ -41,7 +41,6 @@ angular.module('credentialTypes', [
                         activityStreamTarget: 'credential_type'
                     },
                     ncyBreadcrumb: {
-                        parent: 'setup',
                         label: N_('CREDENTIAL TYPES')
                     }
                 })
