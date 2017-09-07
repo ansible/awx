@@ -1,3 +1,5 @@
+const templateUrl = require('@components/form/form.partial.html');
+
 function atFormLink (scope, el, attrs, controllers) {
     let formController = controllers[0];
     let form = el[0];
@@ -195,13 +197,13 @@ function AtFormController (eventService, strings) {
 
 AtFormController.$inject = ['EventService', 'ComponentsStrings'];
 
-function atForm (pathService) {
+function atForm () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
         require: ['atForm'],
-        templateUrl: pathService.getPartialPath('components/form/form'),
+        templateUrl,
         controller: AtFormController,
         controllerAs: 'vm',
         link: atFormLink,
@@ -210,7 +212,5 @@ function atForm (pathService) {
         }
     };
 }
-
-atForm.$inject = ['PathService'];
 
 export default atForm;

@@ -3,13 +3,14 @@ module.exports = {
         options: {
             format: 'json'
         },
-        files: [ {
+        files: [{
             expand: true,
-            dot:    true,
-            dest:   'client/languages',
-            cwd:    'po',
-            ext:    '.json',
-            src:    ['*.po']
-        } ]
+            dot: true,
+            dest: 'client/languages',
+            cwd: 'po',
+            ext: '.json',
+            src: ['*.po']
+        }]
     }
 };
+

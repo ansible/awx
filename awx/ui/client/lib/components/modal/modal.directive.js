@@ -1,3 +1,5 @@
+const templateUrl = require('@components/modal/modal.partial.html');
+
 const DEFAULT_ANIMATION_DURATION = 150;
 
 function atModalLink (scope, el, attrs, controllers) {
@@ -74,22 +76,18 @@ AtModalController.$inject = [
     'ComponentsStrings'
 ]
 
-function atModal (pathService) {
+function atModal () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
         require: ['atModal'],
-        templateUrl: pathService.getPartialPath('components/modal/modal'),
+        templateUrl,
         controller: AtModalController,
         controllerAs: 'vm',
         link: atModalLink,
         scope: true
     };
 }
-
-atModal.$inject = [
-    'PathService'
-];
 
 export default atModal;

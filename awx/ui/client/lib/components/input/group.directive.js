@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/group.partial.html');
+
 function atInputGroupLink (scope, el, attrs, controllers) {
     let groupController = controllers[0];
     let formController = controllers[1];
@@ -168,13 +170,13 @@ function AtInputGroupController ($scope, $compile) {
 
 AtInputGroupController.$inject = ['$scope', '$compile'];
 
-function atInputGroup (pathService) {
+function atInputGroup () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
         require: ['atInputGroup', '^^atForm'],
-        templateUrl: pathService.getPartialPath('components/input/group'),
+        templateUrl,
         controller: AtInputGroupController,
         controllerAs: 'vm',
         link: atInputGroupLink,
@@ -185,7 +187,5 @@ function atInputGroup (pathService) {
         }
     };
 }
-
-atInputGroup.$inject = ['PathService'];
 
 export default atInputGroup;

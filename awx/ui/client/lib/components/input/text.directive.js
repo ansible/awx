@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/text.partial.html');
+
 function atInputTextLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -21,13 +23,13 @@ function AtInputTextController (baseInputController) {
 
 AtInputTextController.$inject = ['BaseInputController'];
 
-function atInputText (pathService) {
+function atInputText () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputText'],
-        templateUrl: pathService.getPartialPath('components/input/text'),
+        templateUrl,
         controller: AtInputTextController,
         controllerAs: 'vm',
         link: atInputTextLink,
@@ -38,7 +40,5 @@ function atInputText (pathService) {
         }
     };
 }
-
-atInputText.$inject = ['PathService'];
 
 export default atInputText;

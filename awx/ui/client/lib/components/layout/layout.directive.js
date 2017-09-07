@@ -1,3 +1,5 @@
+const templateUrl = require('@components/layout/layout.partial.html');
+
 function AtLayoutController ($scope, strings) {
     let vm = this || {};
 
@@ -34,19 +36,17 @@ function AtLayoutController ($scope, strings) {
 
 AtLayoutController.$inject = ['$scope', 'ComponentsStrings'];
 
-function atLayout (pathService) {
+function atLayout () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/layout/layout'),
+        templateUrl,
         controller: AtLayoutController,
         controllerAs: 'vm',
         scope: {
         }
     };
 }
-
-atLayout.$inject = ['PathService'];
 
 export default atLayout;

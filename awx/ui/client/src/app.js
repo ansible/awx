@@ -1,39 +1,17 @@
-/*************************************************
- * Copyright (c) 2016 Ansible, Inc.
- *
- * All Rights Reserved
- *************************************************/
-
-// Vendor dependencies
-import 'jquery';
-import 'angular';
-import 'angular-gettext';
-import 'bootstrap';
-import 'jquery-ui';
-import 'bootstrap-datepicker';
-import 'jquery.resize';
-import 'codemirror';
-import 'js-yaml';
-import 'select2';
-import uiRouter from 'angular-ui-router';
-// backwards compatibility for $stateChange* events
-import 'angular-ui-router/release/stateEvents';
-
-
 // Configuration dependencies
 global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {} ;
 // ui-router debugging
 if ($ENV['route-debug']){
-    let trace = require('angular-ui-router').trace;
+    let trace = angular.module('ui.router').trace;
     trace.enable();
 }
 
 var urlPrefix;
 
 if ($basePath) {
-    urlPrefix = $basePath;
+    urlPrefix = `${$basePath}`;
 }
 
 // Modules
@@ -73,22 +51,21 @@ import '../lib/models';
 import '../lib/services';
 import '../features';
 
-var awApp = angular.module('awApp', [
-    // how to add CommonJS / AMD  third-party dependencies:
-    // 1. npm install --save package-name
-    // 2. add package name to ./grunt-tasks/webpack.vendorFiles
-    require('angular-breadcrumb'),
-    require('angular-codemirror'),
-    require('angular-drag-and-drop-lists'),
-    require('angular-sanitize'),
-    require('angular-scheduler').name,
-    require('angular-tz-extensions'),
-    require('angular-md5'),
-    require('lr-infinite-scroll'),
-    require('ng-toast'),
-    'gettext',
+angular.module('awApp', [
     'I18N',
-    uiRouter,
+    'AngularCodeMirrorModule',
+    'angular-duration-format',
+    'angularMoment',
+    'AngularScheduler',
+    'angular-md5',
+    'dndLists',
+    'ncy-angular-breadcrumb',
+    'ngSanitize',
+    'ngCookies',
+    'ngToast',
+    'gettext',
+    'Timezones',
+    'ui.router',
     'ui.router.state.events',
     'lrInfiniteScroll',
 
@@ -134,7 +111,6 @@ var awApp = angular.module('awApp', [
     'at.lib.services',
     'at.features',
 ])
-
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
@@ -465,5 +441,3 @@ var awApp = angular.module('awApp', [
             LoadConfig();
         }
     ]);
-
-export default awApp;

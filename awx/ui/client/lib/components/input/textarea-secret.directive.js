@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/textarea-secret.partial.html');
+
 function atInputTextareaSecretLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -96,13 +98,13 @@ AtInputTextareaSecretController.$inject = [
     'ComponentsStrings'
 ];
 
-function atInputTextareaSecret (pathService) {
+function atInputTextareaSecret () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputTextareaSecret'],
-        templateUrl: pathService.getPartialPath('components/input/textarea-secret'),
+        templateUrl,
         controller: AtInputTextareaSecretController,
         controllerAs: 'vm',
         link: atInputTextareaSecretLink,
@@ -113,7 +115,5 @@ function atInputTextareaSecret (pathService) {
         }
     };
 }
-
-atInputTextareaSecret.$inject = ['PathService'];
 
 export default atInputTextareaSecret;

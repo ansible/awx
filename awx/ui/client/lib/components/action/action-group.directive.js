@@ -1,16 +1,16 @@
-function atActionGroup (pathService) {
+const templateUrl = require('@components/action/action-group.partial.html');
+
+function atActionGroup () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/action/action-group'),
+        templateUrl,
         scope: {
             col: '@',
             pos: '@'
         }
     };
 }
-
-atActionGroup.$inject = ['PathService'];
 
 export default atActionGroup;

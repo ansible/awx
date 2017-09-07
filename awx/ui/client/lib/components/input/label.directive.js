@@ -1,11 +1,11 @@
-function atInputLabel (pathService) {
+const templateUrl = require('@components/input/label.partial.html');
+
+function atInputLabel () {
     return {
         restrict: 'E',
         replace: true,
-        templateUrl: pathService.getPartialPath('components/input/label')
+        templateUrl
     };
 }
-
-atInputLabel.$inject = ['PathService'];
 
 export default atInputLabel;

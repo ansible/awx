@@ -1,11 +1,11 @@
-function atInputMessage (pathService) {
+const templateUrl = require('@components/input/message.partial.html');
+
+function atInputMessage () {
     return {
         restrict: 'E',
         replace: true,
-        templateUrl: pathService.getPartialPath('components/input/message'),
+        templateUrl
     };
 }
-
-atInputMessage.$inject = ['PathService'];
 
 export default atInputMessage;

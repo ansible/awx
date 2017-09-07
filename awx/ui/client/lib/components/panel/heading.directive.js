@@ -1,18 +1,18 @@
+const templateUrl = require('@components/panel/heading.partial.html');
+
 function link (scope, el, attrs, panel) {
     panel.use(scope);
 }
 
-function atPanelHeading (pathService) {
+function atPanelHeading () {
     return {
         restrict: 'E',
         require: '^^atPanel',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/panel/heading'),
+        templateUrl,
         link
     };
 }
-
-atPanelHeading.$inject = ['PathService'];
 
 export default atPanelHeading;

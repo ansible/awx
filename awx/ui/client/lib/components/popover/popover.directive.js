@@ -1,3 +1,5 @@
+const templateUrl = require('@components/popover/popover.partial.html');
+
 const DEFAULT_POSITION = 'right';
 const DEFAULT_ACTION = 'click';
 const DEFAULT_ICON = 'fa fa-question-circle';
@@ -201,13 +203,13 @@ function AtPopoverController () {
     };
 }
 
-function atPopover (pathService) {
+function atPopover () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
         require: ['atPopover'],
-        templateUrl: pathService.getPartialPath('components/popover/popover'),
+        templateUrl,
         controller: AtPopoverController,
         controllerAs: 'vm',
         link: atPopoverLink,
@@ -216,9 +218,5 @@ function atPopover (pathService) {
         }
     };
 }
-
-atPopover.$inject = [
-    'PathService'
-];
 
 export default atPopover;

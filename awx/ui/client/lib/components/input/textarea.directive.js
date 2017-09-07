@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/textarea.partial.html');
+
 function atInputTextareaLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -21,13 +23,13 @@ function AtInputTextareaController (baseInputController) {
 
 AtInputTextareaController.$inject = ['BaseInputController'];
 
-function atInputTextarea (pathService) {
+function atInputTextarea () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputTextarea'],
-        templateUrl: pathService.getPartialPath('components/input/textarea'),
+        templateUrl,
         controller: AtInputTextareaController,
         controllerAs: 'vm',
         link: atInputTextareaLink,
@@ -38,7 +40,5 @@ function atInputTextarea (pathService) {
         }
     };
 }
-
-atInputTextarea.$inject = ['PathService'];
 
 export default atInputTextarea;

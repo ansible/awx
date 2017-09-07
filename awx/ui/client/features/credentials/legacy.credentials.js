@@ -5,6 +5,8 @@ import OrganizationList from '../../src/organizations/organizations.list';
 import ListController from '../../src/credentials/list/credentials-list.controller';
 import { N_ } from '../../src/i18n';
 
+const indexTemplate = require('@features/credentials/index.view.html');
+
 function LegacyCredentialsService (pathService) {
     this.list = {
         name: 'credentials',
@@ -18,7 +20,7 @@ function LegacyCredentialsService (pathService) {
         },
         views: {
             '@': {
-                templateUrl: pathService.getViewPath('credentials/index')
+                templateUrl: indexTemplate
             },
             'list@credentials': {
                 templateProvider: function(CredentialList, generateList) {
