@@ -87,7 +87,8 @@ class Command(NoArgsCommand):
 
     def cleanup_ad_hoc_commands(self):
         skipped, deleted = 0, 0
-        for ad_hoc_command in AdHocCommand.objects.all():
+        ad_hoc_commands = AdHocCommand.objects.filter(created__lte=self.cutoff)
+        for ad_hoc_command in ad_hoc_commands:
             ad_hoc_command_display = '"%s" (%d events)' % \
                 (unicode(ad_hoc_command),
                  ad_hoc_command.ad_hoc_command_events.count())
@@ -109,7 +110,8 @@ class Command(NoArgsCommand):
 
     def cleanup_project_updates(self):
         skipped, deleted = 0, 0
-        for pu in ProjectUpdate.objects.all():
+        project_updates = ProjectUpdate.objects.filter(created__lte=self.cutoff)
+        for pu in project_updates
             pu_display = '"%s" (type %s)' % (unicode(pu), unicode(pu.launch_type))
             if pu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -133,6 +135,7 @@ class Command(NoArgsCommand):
 
     def cleanup_inventory_updates(self):
         skipped, deleted = 0, 0
+        inventory_updates = InventoryUpdate.objects.filter(created__lte=self.cutoff)
         for iu in InventoryUpdate.objects.all():
             iu_display = '"%s" (source %s)' % (unicode(iu), unicode(iu.source))
             if iu.status in ('pending', 'waiting', 'running'):
@@ -157,7 +160,8 @@ class Command(NoArgsCommand):
 
     def cleanup_management_jobs(self):
         skipped, deleted = 0, 0
-        for sj in SystemJob.objects.all():
+        system_jobs = SystemJob.objects.filter(created__lte=self.cutoff)
+        for sj in system_jobs:
             sj_display = '"%s" (type %s)' % (unicode(sj), unicode(sj.job_type))
             if sj.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -187,7 +191,8 @@ class Command(NoArgsCommand):
 
     def cleanup_workflow_jobs(self):
         skipped, deleted = 0, 0
-        for workflow_job in WorkflowJob.objects.all():
+        workflow_jobs = WorkflowJob.objects.filter(created__lte=self.cutoff)
+        for workflow_job in workflow_jobs:
             workflow_job_display = '"{}" ({} nodes)'.format(
                 unicode(workflow_job),
                 workflow_job.workflow_nodes.count())
@@ -209,7 +214,8 @@ class Command(NoArgsCommand):
 
     def cleanup_notifications(self):
         skipped, deleted = 0, 0
-        for notification in Notification.objects.all():
+        notifications = Notification.objects.filter(created__lte=self.cutoff)
+        for notification in notifications:
             notification_display = '"{}" (started {}, {} type, {} sent)'.format(
                 unicode(notification), unicode(notification.created),
                 notification.notification_type, notification.notifications_sent)
@@ -255,3 +261,4 @@ class Command(NoArgsCommand):
                         self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
                     else:
                         self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)
+
