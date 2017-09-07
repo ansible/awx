@@ -28,7 +28,9 @@ def json_topology_data(request):
 def yaml_topology_data(request):
     form = TopologyForm(request.GET)
     if form.is_valid():
-        return HttpResponse(yaml.safe_dump(topology_data(form.cleaned_data['topology_id']), default_flow_style=False))
+        return HttpResponse(yaml.safe_dump(topology_data(form.cleaned_data['topology_id']),
+                                           default_flow_style=False),
+                            content_type='application/yaml')
     else:
         return HttpResponseBadRequest(form.errors)
 
