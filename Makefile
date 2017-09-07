@@ -38,6 +38,9 @@ endif
 ifeq ($(UNAME_S),Darwin)
     SHASUM_BIN ?= shasum -a 256
 endif
+ifeq ($(UNAME_S),FreeBSD)
+    SHASUM_BIN ?= sha256
+endif
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
