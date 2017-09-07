@@ -1,8 +1,8 @@
 # Installing AWX
 
-This document provides a guide for intalling AWX.
+This document provides a guide for installing AWX.
 
-## Table of contents 
+## Table of contents
 
 - [Getting started](#getting-started)
   - [Clone the repo](#clone-the-repo)
@@ -19,8 +19,8 @@ This document provides a guide for intalling AWX.
   - [Start the build](#start-the-build)
   - [Post build](#post-build)
   - [Accessing AWX](#accessing-awx)
-- [Docker](#Docker)
-  - [Prerequisites](#prerequisites-1)
+- [Docker](#docker)
+  - [Prerequisites](#prerequisites-2)
   - [Pre-build steps](#pre-build-steps-1)
     - [Deploying to a remote host](#deploying-to-a-remote-host)
     - [Inventory variables](#inventory-variables)
@@ -40,7 +40,7 @@ Once you have a local copy, run commands within the root of the project tree.
 
 ### AWX branding
 
-You can optionally install the AWX branding assets from the [awx-logos repo](https://github.com/ansible/awx-logos). Prior to installing, please review and agree to the [trademark guidelines](https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md). 
+You can optionally install the AWX branding assets from the [awx-logos repo](https://github.com/ansible/awx-logos). Prior to installing, please review and agree to the [trademark guidelines](https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md).
 
 To install the assets, clone the awx-logos repo into the root of your local AWX clone. The `awx-logos` directory should be next to the `awx` directory. As you progress through the installation steps, you'll be setting variables in the [inventory](./installer/inventory) file. To include the assets in the build, set `awx_official=true`.
 
@@ -92,14 +92,14 @@ You will also need to have the `oc` command in your PATH. The `install.yml` play
 
 #### Deploying to Minishift
 
-Install Minishift by following the [installation guide](https://docs.openshift.org/latest/minishift/getting-started/installing.html). 
+Install Minishift by following the [installation guide](https://docs.openshift.org/latest/minishift/getting-started/installing.html).
 
 The Minishift VM contains a Docker daemon, which you can use to build the AWX images. This is generally the approach you should take, and we recommend doing so. To use this instance, run the following command to setup your environment:
- 
+
 ```bash
 # Set DOCKER environment variable to point to the Minishift VM
 $ eval $(minishift docker-env)
-``` 
+```
 
 **Note**
 
@@ -112,22 +112,22 @@ Before starting the build process, review the [inventory](./installer/inventory)
 *openshift_host*
 
 > IP address or hostname of the OpenShift cluster. If you're using Minishift, this will be the value returned by `minishift ip`.
-    
+
 *awx_openshift_project*
 
-> Name of the OpenShift project that will be created, and used as the namespace for the AWX app. Defaults to *awx*.  
+> Name of the OpenShift project that will be created, and used as the namespace for the AWX app. Defaults to *awx*.
 
 *awx_node_port*
 
 > The web server port running inside the AWX pod. Defaults to *30083*.
-  
+
 *openshift_user*
 
 > Username of the OpenShift user that will create the project, and deploy the application. Defaults to *developer*.
 
 *docker_registry*
 
-> IP address and port, or URL, for accessing a registry that the OpenShift cluster can access. Defaults to *172.30.1.1:5000*, the internal registry delivered with Minishift. 
+> IP address and port, or URL, for accessing a registry that the OpenShift cluster can access. Defaults to *172.30.1.1:5000*, the internal registry delivered with Minishift.
 
 *docker_registry_repository*
 
@@ -153,7 +153,7 @@ To start the build and deployment, run the following:
 
 ```bash
 # Start the build and deployment
-$ ansible-playbook -i inventory install.yml -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t) 
+$ ansible-playbook -i inventory install.yml -e openshift_password=developer  -e docker_registry_password=$(oc whoami -t)
 ```
 
 ### Post build
@@ -229,7 +229,7 @@ Once database migrations complete, the web interface will be accessible.
 ### Accessing AWX
 
 The AWX web interface is running in the AWX pod, behind the `awx-web-svc` service. To view the service, and its port value, run the following command:
- 
+
 ```bash
 # View available services
 $ oc get services
@@ -243,13 +243,13 @@ The deployment process creates a route, `awx-web-svc`, to expose the service. Ho
 
 ```bash
 # View available routes
-$ oc get routes 
+$ oc get routes
 
 NAME          HOST/PORT                             PATH      SERVICES      PORT      TERMINATION   WILDCARD
 awx-web-svc   awx-web-svc-awx.192.168.64.2.nip.io             awx-web-svc   http      edge/Allow    None
 ```
 
-The above example is taken from a Minishift instance. From a web browser, use `https` to access the `HOST/PORT` value from your environment. Using the above example, the URL to access the server would be [https://awx-web-svc-awx.192.168.64.2.nip.io](https://awx-web-svc-awx.192.168.64.2.nip.io). 
+The above example is taken from a Minishift instance. From a web browser, use `https` to access the `HOST/PORT` value from your environment. Using the above example, the URL to access the server would be [https://awx-web-svc-awx.192.168.64.2.nip.io](https://awx-web-svc-awx.192.168.64.2.nip.io).
 
 Once you access the AWX server, you will be prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
 
@@ -284,10 +284,10 @@ In the above example, image build tasks will be delegated to `localhost`, which 
 
 > You may also want to set additional variables to control how Ansible connects to the host. For more information about this, view [Behavioral Inventory Parameters](http://docs.ansible.com/ansible/latest/intro_inventory.html#id12).
 
-> As mentioned above, in Prerequisites](#prerequisites-1), the prerequisites are required on the remote host.
+> As mentioned above, in [Prerequisites](#prerequisites-1), the prerequisites are required on the remote host.
 
 
-#### Inventory variables 
+#### Inventory variables
 
 Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
 
@@ -300,15 +300,15 @@ Before starting the build process, review the [inventory](./installer/inventory)
 > Proide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container. Defaults to *80*.
 
 
-#### Docker registry 
+#### Docker registry
 
 If you wish to tag and push built images to a Docker registry, set the following variables in the inventory file:
 
 *docker_registry*
 
-> IP address and port, or URL, for accessing a registry. 
+> IP address and port, or URL, for accessing a registry.
 
-*docker_registry_repository* 
+*docker_registry_repository*
 
 > Namespace to use when pushing and pulling images to and from the registry. Defaults to *awx*.
 
@@ -332,7 +332,7 @@ $ cd installer
 
 # Run the Ansible playbook
 $ ansible-playbook -i inventory install.yml
-``` 
+```
 
 If you're pushing built images to a repository, then use the `-e` option to pass the registry password as follows, replacing *password* with the password of the username assigned to `docker_registry_username`:
 
@@ -347,7 +347,7 @@ $ ansible-playbook -i inventory -e docker_registry_password=password install.yml
 ### Post build
 
 After the playbook run completes, Docker will report up to 5 running containers. If you chose to use an existing PostgresSQL database, then it will report 4. You can view the running containers using the `docker ps` command, as follows:
- 
+
 ```bash
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                NAMES
 e240ed8209cd        awx_task:1.0.0.8    "/tini -- /bin/sh ..."   2 minutes ago       Up About a minute   8052/tcp                             awx_task
