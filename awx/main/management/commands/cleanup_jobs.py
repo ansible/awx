@@ -111,7 +111,7 @@ class Command(NoArgsCommand):
     def cleanup_project_updates(self):
         skipped, deleted = 0, 0
         project_updates = ProjectUpdate.objects.filter(created__lte=self.cutoff)
-        for pu in project_updates
+        for pu in project_updates:
             pu_display = '"%s" (type %s)' % (unicode(pu), unicode(pu.launch_type))
             if pu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -136,7 +136,7 @@ class Command(NoArgsCommand):
     def cleanup_inventory_updates(self):
         skipped, deleted = 0, 0
         inventory_updates = InventoryUpdate.objects.filter(created__lte=self.cutoff)
-        for iu in InventoryUpdate.objects.all():
+        for iu in inventory_updates:
             iu_display = '"%s" (source %s)' % (unicode(iu), unicode(iu.source))
             if iu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
