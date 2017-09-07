@@ -1,4 +1,4 @@
-[![Devel Requirements Status](https://requires.io/github/ansible/awx/requirements.svg?branch=devel)](https://requires.io/github/ansible/awx/requirements/?branch=devel)
+[![Run Status](https://api.shippable.com/projects/591c82a22f895107009e8b35/badge?branch=devel)](https://app.shippable.com/github/ansible/awx)
 
 AWX
 ===
