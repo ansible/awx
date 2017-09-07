@@ -41,7 +41,7 @@
   register: sdist
 
 - name: Clean distribution
-  shell: make clean
+  shell: gmake clean
   args:
     chdir: ..
   ignore_errors: yes
@@ -49,7 +49,7 @@
   delegate_to: localhost
 
 - name: Build AWX distribution
-  shell: make sdist
+  shell: gmake sdist
   args:
     chdir: ..
     creates: "./dist/{{ awx_sdist_file }}"
