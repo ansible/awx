@@ -217,7 +217,7 @@ If you want to start and use the development environment, you'll first need to b
 (container)# /bootstrap_development.sh
 ```
 
-The above will do all the setup tasks, including running database migratoins, so it amy take a couple minutes.
+The above will do all the setup tasks, including running database migrations, so it amy take a couple minutes.
     
 Now you can start each service individually, or start all services in a pre-configured tmux session like so:
 
