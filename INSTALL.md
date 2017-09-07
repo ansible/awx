@@ -54,6 +54,8 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [Node 6.x LTS version](https://nodejs.org/en/download/)
 - [NPM 3.x LTS](https://docs.npmjs.com/)
+- [GNU Make](https://www.gnu.org/software/make/)
+- [Git](https://git-scm.com/)
 
 #### Installing gettext
 
