@@ -1,6 +1,6 @@
 # Installing AWX
 
-This document provides a guide for intalling AWX.
+This document provides a guide for installing AWX.
 
 ## Table of contents 
 
