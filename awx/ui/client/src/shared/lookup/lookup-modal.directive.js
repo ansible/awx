@@ -29,10 +29,8 @@ export default ['templateUrl', function(templateUrl) {
             $scope.init = function() {
                 let list = $scope.list;
                 if($state.params.selected) {
-                    $scope.currentSelection = {
-                        name: null,
-                        id: parseInt($state.params.selected)
-                    };
+                    let selection = $scope[list.name].find(({id}) => id === parseInt($state.params.selected));
+                    $scope.currentSelection = _.pick(selection, 'id', 'name');
                 }
                 $scope.$watch(list.name, function(){
                     selectRowIfPresent();
