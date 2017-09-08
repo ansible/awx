@@ -1,3 +1,5 @@
+const templateUrl = require('@components/truncate/truncate.partial.html');
+
 function atTruncateLink (scope, el, attr, ctrl) {
     let truncateController = ctrl;
     let string = attr.string;
@@ -44,12 +46,12 @@ function AtTruncateController (strings) {
 
 AtTruncateController.$inject = ['ComponentsStrings'];
 
-function atTruncate(pathService) {
+function atTruncate() {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/truncate/truncate'),
+        templateUrl,
         controller: AtTruncateController,
         controllerAs: 'vm',
         link: atTruncateLink,
@@ -60,9 +62,5 @@ function atTruncate(pathService) {
         }
     }
 }
-
-atTruncate.$inject = [
-    'PathService'
-];
 
 export default atTruncate;

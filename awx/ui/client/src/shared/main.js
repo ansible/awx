@@ -34,10 +34,10 @@ import orgAdminLookup from './org-admin-lookup/main';
 import limitPanels from './limit-panels/main';
 import multiSelectPreview from './multi-select-preview/main';
 import credentialTypesLookup from './credentialTypesLookup.factory';
-import 'angular-duration-format';
 
 export default
-angular.module('shared', [listGenerator.name,
+angular.module('shared', [
+        listGenerator.name,
         formGenerator.name,
         lookupModal.name,
         smartSearch.name,
@@ -64,7 +64,7 @@ angular.module('shared', [listGenerator.name,
         orgAdminLookup.name,
         limitPanels.name,
         multiSelectPreview.name,
-        require('angular-cookies'),
+        'ngCookies',
         'angular-duration-format'
     ])
     .factory('stateDefinitions', stateDefinitions)

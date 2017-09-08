@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/checkbox.partial.html');
+
 function atInputCheckboxLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -23,13 +25,13 @@ function AtInputCheckboxController (baseInputController) {
 
 AtInputCheckboxController.$inject = ['BaseInputController'];
 
-function atInputCheckbox (pathService) {
+function atInputCheckbox () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputCheckbox'],
-        templateUrl: pathService.getPartialPath('components/input/checkbox'),
+        templateUrl,
         controller: AtInputCheckboxController,
         controllerAs: 'vm',
         link: atInputCheckboxLink,
@@ -40,7 +42,5 @@ function atInputCheckbox (pathService) {
         }
     };
 }
-
-atInputCheckbox.$inject = ['PathService'];
 
 export default atInputCheckbox;

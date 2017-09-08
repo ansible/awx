@@ -1,3 +1,5 @@
+const templateUrl = require('@components/layout/top-nav-item.partial.html');
+
 function atTopNavItemLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 
@@ -12,19 +14,17 @@ function atTopNavItemLink (scope, element, attrs, ctrl) {
     }
 }
 
-function atTopNavItem (pathService) {
+function atTopNavItem () {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/layout/top-nav-item'),
+        templateUrl,
         require: '^^atLayout',
         link: atTopNavItemLink,
         scope: {
         }
     };
 }
-
-atTopNavItem.$inject = ['PathService'];
 
 export default atTopNavItem;

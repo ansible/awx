@@ -1,3 +1,5 @@
+const templateUrl = require('@components/layout/side-nav.partial.html');
+
 function atSideNavLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 }
@@ -12,7 +14,7 @@ function AtSideNavController () {
     }
 }
 
-function atSideNav (pathService) {
+function atSideNav () {
     return {
         restrict: 'E',
         replace: true,
@@ -21,12 +23,10 @@ function atSideNav (pathService) {
         controllerAs: 'vm',
         link: atSideNavLink,
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/layout/side-nav'),
+        templateUrl,
         scope: {
         }
     };
 }
-
-atSideNav.$inject = ['PathService'];
 
 export default atSideNav;

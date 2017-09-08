@@ -1,3 +1,5 @@
+const templateUrl = require('@components/panel/panel.partial.html');
+
 function atPanelLink (scope, el, attrs, controllers) {
     let panelController = controllers[0];
 
@@ -26,13 +28,13 @@ function AtPanelController ($state) {
 
 AtPanelController.$inject = ['$state'];
 
-function atPanel (pathService, _$animate_) {
+function atPanel () {
     return {
         restrict: 'E',
         replace: true,
         require: ['atPanel'],
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/panel/panel'),
+        templateUrl,
         controller: AtPanelController,
         controllerAs: 'vm',
         link: atPanelLink,
@@ -42,7 +44,5 @@ function atPanel (pathService, _$animate_) {
         }
     };
 }
-
-atPanel.$inject = ['PathService'];
 
 export default atPanel;

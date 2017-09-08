@@ -1,3 +1,5 @@
+const templateUrl = require('@components/tabs/group.partial.html');
+
 function atTabGroupLink (scope, el, attrs, controllers) {
     let groupController = controllers[0];
 
@@ -26,13 +28,13 @@ function AtTabGroupController ($state) {
 
 AtTabGroupController.$inject = ['$state'];
 
-function atTabGroup (pathService, _$animate_) {
+function atTabGroup () {
     return {
         restrict: 'E',
         replace: true,
         require: ['atTabGroup'],
         transclude: true,
-        templateUrl: pathService.getPartialPath('components/tabs/group'),
+        templateUrl,
         controller: AtTabGroupController,
         controllerAs: 'vm',
         link: atTabGroupLink,
@@ -41,7 +43,5 @@ function atTabGroup (pathService, _$animate_) {
         }
     };
 }
-
-atTabGroup.$inject = ['PathService'];
 
 export default atTabGroup;

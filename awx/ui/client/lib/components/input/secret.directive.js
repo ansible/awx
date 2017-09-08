@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/secret.partial.html');
+
 function atInputSecretLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -48,13 +50,13 @@ function AtInputSecretController (baseInputController) {
 
 AtInputSecretController.$inject = ['BaseInputController'];
 
-function atInputSecret (pathService) {
+function atInputSecret () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputSecret'],
-        templateUrl: pathService.getPartialPath('components/input/secret'),
+        templateUrl,
         controller: AtInputSecretController,
         controllerAs: 'vm',
         link: atInputSecretLink,
@@ -65,7 +67,5 @@ function atInputSecret (pathService) {
         }
     };
 }
-
-atInputSecret.$inject = ['PathService'];
 
 export default atInputSecret;

@@ -1,5 +1,4 @@
-var path = require('path'),
-    webpack = require('webpack');
+const webpackTestConfig = require('./build/webpack.test.js');
 
 module.exports = function(config) {
     config.set({
@@ -16,80 +15,20 @@ module.exports = function(config) {
             'jasmine',
         ],
         reporters: ['progress', 'coverage', 'junit'],
-        files: [
+        files:[
+            './client/src/vendor.js',
             './client/src/app.js',
             './node_modules/angular-mocks/angular-mocks.js',
             { pattern: './tests/**/*-test.js' },
             'client/src/**/*.html'
         ],
         preprocessors: {
+            './client/src/vendor.js': ['webpack', 'sourcemap'],
             './client/src/app.js': ['webpack', 'sourcemap'],
             './tests/**/*-test.js': ['webpack', 'sourcemap'],
             'client/src/**/*.html': ['html2js']
         },
-        webpack: {
-            plugins: [
-                // Django-provided definitions
-                new webpack.DefinePlugin({
-                    $basePath: '/static/'
-                }),
-                // vendor shims:
-                // [{expected_local_var : dependency}, ...]
-                new webpack.ProvidePlugin({
-                    $: 'jquery',
-                    jQuery: 'jquery',
-                    'window.jQuery': 'jquery',
-                    _: 'lodash',
-                    'CodeMirror': 'codemirror',
-                    '$.fn.datepicker': 'bootstrap-datepicker'
-                })
-            ],
-            module: {
-                loaders: [{
-                        test: /\.angular.js$/,
-                        loader: 'expose?angular'
-                    },
-                    {
-                        test: /\.json$/,
-                        loader: 'json-loader',
-                        exclude: '/(node_modules)/'
-                    },
-                    {
-                        test: /\.js$/,
-                        loader: 'babel-loader',
-                        include: [path.resolve() + '/tests/'],
-                        exclude: '/(node_modules)/',
-                        query: {
-                            presets: ['es2015']
-                        }
-                    }, {
-                        test: /\.js$/,
-                        loader: 'babel-loader',
-                        include: [
-                            path.resolve() + '/client/src/',
-                            path.resolve() + '/client/lib/',
-                            path.resolve() + '/client/features/'
-                        ],
-                        exclude: '/(node_modules)/',
-                        query: {
-                            presets: ['es2015'],
-                            plugins: ['istanbul']
-                        }
-                    }
-                ]
-            },
-            resolve: {
-                root: [],
-                modulesDirectory: ['node_modules'],
-                alias: {
-                    'jquery.resize': path.resolve() + '/node_modules/javascript-detect-element-resize/jquery.resize.js',
-                    'select2': path.resolve() + '/node_modules/select2/dist/js/select2.full.js'
-                }
-            },
-            devtool: 'inline-source-map',
-            debug: true,
-            cache: true
-        },
+        webpack: webpackTestConfig,
         webpackMiddleware: {
             stats: {
                 colors: true

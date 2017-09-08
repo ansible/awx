@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/select.partial.html');
+
 function atInputSelectLink (scope, element, attrs, controllers) {
     let formController = controllers[0];
     let inputController = controllers[1];
@@ -72,13 +74,13 @@ function AtInputSelectController (baseInputController, eventService) {
 
 AtInputSelectController.$inject = ['BaseInputController', 'EventService'];
 
-function atInputSelect (pathService) {
+function atInputSelect () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^at-form', 'atInputSelect'],
-        templateUrl: pathService.getPartialPath('components/input/select'),
+        templateUrl,
         controller: AtInputSelectController,
         controllerAs: 'vm',
         link: atInputSelectLink,
@@ -89,7 +91,5 @@ function atInputSelect (pathService) {
         }
     };
 }
-
-atInputSelect.$inject = ['PathService'];
 
 export default atInputSelect;

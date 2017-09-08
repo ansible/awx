@@ -1,3 +1,5 @@
+const templateUrl = require('@components/input/lookup.partial.html');
+
 const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_KEY = 'name';
 
@@ -120,13 +122,13 @@ AtInputLookupController.$inject = [
     '$stateParams'
 ];
 
-function atInputLookup (pathService) {
+function atInputLookup () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
         require: ['^^atForm', 'atInputLookup'],
-        templateUrl: pathService.getPartialPath('components/input/lookup'),
+        templateUrl,
         controller: AtInputLookupController,
         controllerAs: 'vm',
         link: atInputLookupLink,
@@ -137,7 +139,5 @@ function atInputLookup (pathService) {
         }
     };
 }
-
-atInputLookup.$inject = ['PathService'];
 
 export default atInputLookup;

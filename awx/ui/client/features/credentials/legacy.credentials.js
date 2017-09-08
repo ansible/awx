@@ -5,7 +5,9 @@ import OrganizationList from '../../src/organizations/organizations.list';
 import ListController from '../../src/credentials/list/credentials-list.controller';
 import { N_ } from '../../src/i18n';
 
-function LegacyCredentialsService (pathService) {
+const indexTemplate = require('@features/credentials/index.view.html');
+
+function LegacyCredentialsService () {
     this.list = {
         name: 'credentials',
         route: '/credentials',
@@ -18,7 +20,7 @@ function LegacyCredentialsService (pathService) {
         },
         views: {
             '@': {
-                templateUrl: pathService.getViewPath('credentials/index')
+                templateUrl: indexTemplate
             },
             'list@credentials': {
                 templateProvider: function(CredentialList, generateList) {
@@ -360,9 +362,5 @@ function LegacyCredentialsService (pathService) {
         };
     };
 }
-
-LegacyCredentialsService.$inject = [
-    'PathService'
-];
 
 export default LegacyCredentialsService;

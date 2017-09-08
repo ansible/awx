@@ -1,12 +1,12 @@
-function atPanelBody (pathService) {
+const templateUrl = require('@components/utility/divider.partial.html');
+
+function atPanelBody () {
     return {
         restrict: 'E',
         replace: true,
-        templateUrl: pathService.getPartialPath('components/utility/divider'),
+        templateUrl,
         scope: false
     };
 }
-
-atPanelBody.$inject = ['PathService'];
 
 export default atPanelBody;

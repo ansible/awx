@@ -3,6 +3,8 @@ import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
 import CredentialsStrings from './credentials.strings'
 
+const addEditTemplate = require('@features/credentials/add-edit-credentials.view.html');
+
 function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
     let id = $stateParams.credential_id;
 
@@ -51,8 +53,7 @@ CredentialsResolve.$inject = [
     'OrganizationModel'
 ];
 
-function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider, stringProvider) {
-    let path = pathProvider.$get();
+function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvider) {
     let stateExtender = $stateExtenderProvider.$get();
     let legacy = legacyProvider.$get();
     let strings = stringProvider.$get();
@@ -69,7 +70,7 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         },
         views: {
             'add@credentials': {
-                templateUrl: path.getViewPath('credentials/add-edit-credentials'),
+                templateUrl: addEditTemplate,
                 controller: AddController,
                 controllerAs: 'vm'
             }
@@ -92,7 +93,7 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
         },
         views: {
             'edit@credentials': {
-                templateUrl: path.getViewPath('credentials/add-edit-credentials'),
+                templateUrl: addEditTemplate,
                 controller: EditController,
                 controllerAs: 'vm'
             }
@@ -114,7 +115,6 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
 CredentialsConfig.$inject = [
     '$stateExtenderProvider',
     'LegacyCredentialsServiceProvider',
-    'PathServiceProvider',
     'CredentialsStringsProvider'
 ];
 
