@@ -50,6 +50,7 @@ from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.exceptions import AwxTaskError, TaskCancel, TaskError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
@@ -80,7 +81,10 @@ logger = logging.getLogger('awx.main.tasks')
 
 class LogErrorsTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        if isinstance(self, BaseTask):
+        if isinstance(exc, AwxTaskError):
+            # Error caused by user / tracked in job output
+            logger.warning(str(exc))
+        elif isinstance(self, BaseTask):
             logger.exception(
                 '%s %s execution encountered exception.',
                 get_type_for_model(self.model), args[0])
@@ -524,10 +528,6 @@ class BaseTask(LogErrorsTask):
                 logger.error('Failed to update %s after %d retries.',
                              self.model._meta.object_name, _attempt)
 
-    def signal_finished(self, pk):
-        pass
-        # notify_task_runner(dict(complete=pk))
-
     def get_path_to(self, *args):
         '''
         Return absolute path relative to this file.
@@ -900,12 +900,9 @@ class BaseTask(LogErrorsTask):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
-                raise Exception("%s was canceled (rc=%s)" % (instance.log_format, str(rc)))
+                raise TaskCancel(instance, rc)
             else:
-                raise Exception("%s encountered an error (rc=%s), please see task stdout for details." %
-                                (instance.log_format, str(rc)))
-        if not hasattr(settings, 'CELERY_UNIT_TEST'):
-            self.signal_finished(pk)
+                raise TaskError(instance, rc)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
