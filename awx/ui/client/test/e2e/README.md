@@ -4,6 +4,7 @@
 docker exec -i tools_awx_1 sh <<-EOSH
   awx-manage createsuperuser --noinput --username=awx-e2e --email=null@ansible.com
   awx-manage update_password --username=awx-e2e --password=password
+  make --directory=/awx_devel DATA_GEN_PRESET=e2e bulk_data
 EOSH
 
 # run with with a live browser
