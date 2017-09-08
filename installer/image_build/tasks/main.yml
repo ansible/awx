@@ -140,6 +140,11 @@
     dest: "{{ docker_base_path }}/Makefile"
   delegate_to: localhost
 
+- name: Docker should be running
+  service:
+    name: docker
+    state: started
+
 - name: Build base web image
   docker_image:
     path: "{{ docker_base_path }}"
