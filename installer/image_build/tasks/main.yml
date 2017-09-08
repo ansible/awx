@@ -1,5 +1,4 @@
 ---
-
 - name: Get Version from checkout if not provided
   shell: "git describe --long | sed 's/\\-g.*//' | sed 's/\\-/\\./'"
   delegate_to: localhost
@@ -157,7 +156,7 @@
     tag: "{{ awx_version }}"
     pull: no
   delegate_to: localhost
-    
+
 - name: Clean docker base directory
   file:
     path: "{{ docker_base_path }}"

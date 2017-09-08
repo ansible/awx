@@ -1,5 +1,5 @@
 # check_docker.yml
---- 
+---
 - name: postgres_data_dir should be defined
   assert:
     that:
@@ -12,4 +12,3 @@
     that:
     - host_port is defined and host_port != ''
     msg: "Set the value of 'host_port' in the inventory file."
-
