@@ -2,6 +2,11 @@
 - name: Build and deploy AWX
   hosts: all
   gather_facts: false
+
+  pre_tasks:
+    - include: docker.yml
+      when: openshift_host is not defined or openshift_host == ''
+
   roles:
     - { role: check_vars }
     - { role: image_build }

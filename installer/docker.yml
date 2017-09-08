@@ -1,0 +1,45 @@
+---
+- name: Install EPEL
+  package:
+    name: epel-release
+    state: installed
+
+- name: Install dependencies
+  package:
+    name:
+      - docker 
+      - gettext 
+      - python-pip 
+      - gcc-c++ 
+      - bzip2 
+    state: installed
+
+- name: Start and enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Upgrade pip
+  pip:
+    name: pip
+    extra_args: --upgrade
+
+- name: Install docker-py
+  pip:
+    name: docker-py
+
+- name: Get NodeJS repo
+  shell: "curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -"
+
+- name: Install NodeJS
+  package:
+    name: nodejs
+    state: installed
+
+- name: Update npm
+  npm:
+    name: npm
+    state: latest
+    global: yes
+
