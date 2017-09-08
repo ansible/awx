@@ -299,7 +299,7 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 *host_port*
 
-> Proide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container. Defaults to *80*.
+> Provide a port number that can be mapped from the Docker daemon host to the web server running inside the AWX container. Defaults to *80*.
 
 
 #### Docker registry
