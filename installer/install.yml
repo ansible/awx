@@ -2,6 +2,13 @@
 - name: Build and deploy AWX
   hosts: all
   gather_facts: false
+
+  pre_tasks:
+    - include: dependency_setup.yml
+      when: 
+        - openshift_host is not defined or openshift_host == ''
+        - local_install == 'yes'
+
   roles:
     - { role: check_vars }
     - { role: image_build }

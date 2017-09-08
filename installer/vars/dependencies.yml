@@ -1,0 +1,30 @@
+---
+package_dict:
+  RedHat:
+    docker: 'docker'
+    gnu_comp: 'gcc-c++'
+  CentOS:
+    docker: 'docker'
+    gnu_comp: 'gcc-c++'
+  Fedora:
+    docker: 'docker'
+    gnu_comp: 'gcc-c++'
+  Ubuntu:
+    docker: 'docker-ce'
+    gnu_comp: 'g++'
+
+docker: "{{ package_dict[ansible_distribution]['docker']}}"
+gnu_comp: "{{ package_dict[ansible_distribution]['gnu_comp']}}"
+
+
+node_dict:
+  RedHat:
+    type: 'el'
+  CentOS:
+    type: 'el'
+  Fedora:
+    type: 'fc'
+
+nodejs_repo: https://rpm.nodesource.com/pub_6.x/{{ node_dict[ansible_distribution]['type']}}/{{ ansible_distribution_major_version}}/{{ ansible_architecture }}
+
+
