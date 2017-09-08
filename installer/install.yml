@@ -7,7 +7,8 @@
     - include: dependency_setup.yml
       when: 
         - openshift_host is not defined or openshift_host == ''
-        
+        - local_install == 'yes'
+
   roles:
     - { role: check_vars }
     - { role: image_build }

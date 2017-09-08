@@ -36,3 +36,4 @@ pg_port=5432
 
 # AWX Tunables
 awx_secret_key=aabbcc
+local_install=no
