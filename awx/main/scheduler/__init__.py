@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import logging
 import uuid
 from sets import Set
-import itertools
 
 # Django
 from django.conf import settings
@@ -437,7 +436,7 @@ class TaskManager():
                 if isolated:
                     # TODO: cancel and reap artifacts of lost jobs from heartbeat
                     task.job_explanation += ' '.join((
-                        'Task was marked as running in Tower but its'
+                        'Task was marked as running in Tower but its ',
                         'controller management daemon was not present in',
                         'Celery, so it has been marked as failed.',
                         'Task may still be running, but contactability is unknown.'
@@ -452,7 +451,7 @@ class TaskManager():
                 except DatabaseError:
                     logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
                     continue
-                awx_tasks._send_notification_templates(task, new_status)
+                awx_tasks._send_notification_templates(task, 'failed')
                 task.websocket_emit_status(new_status)
                 logger.error("{}Task {} has no record in celery. Marking as failed".format(
                     'Isolated ' if isolated else '', task.log_format))
@@ -506,16 +505,11 @@ class TaskManager():
                     active_tasks = []
                 elif instance.capacity == 0:
                     active_tasks = []
+                elif instance.rampart_groups.filter(controller__isnull=False).exists():
+                    active_tasks = all_celery_task_ids
+                    isolated = True
                 else:
-                    cids = instance.rampart_groups.filter(
-                        controller__isnull=False).values_list('id', flat=True)
-                    if cids:
-                        control_hosts = Instance.objects.filter(
-                            rampart_groups__in=cids).values_list('hostname', flat=True)
-                        active_tasks = set(itertools.chain(active_queues[host] for host in control_hosts))
-                        isolated = True
-                    else:
-                        continue
+                    continue
 
             self.fail_jobs_if_not_in_celery(
                 node_jobs, active_tasks, celery_task_start_time,
