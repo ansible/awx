@@ -48,7 +48,8 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
         obj = getattr(view, 'object', None)
         if obj is None and hasattr(view, 'get_object') and hasattr(view, 'retrieve'):
             try:
-                obj = view.get_object()
+                view.object = view.get_object()
+                obj = view.object
             except Exception:
                 obj = None
         with override_method(view, request, method) as request:
