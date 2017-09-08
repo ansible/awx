@@ -19,6 +19,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import distutils.spawn
 import optparse
 from operator import attrgetter
 
@@ -316,10 +317,9 @@ class InventoryCLI(CLI):
 
 if __name__ == '__main__':
     import imp
-    import subprocess
     import sys
     with open(__file__) as f:
         imp.load_source('ansible.cli.inventory', __file__ + '.py', f)
-    ansible_path = subprocess.check_output(['which', 'ansible']).strip()
+    ansible_path = distutils.spawn.find_executable('ansible')
     sys.argv[0] = 'ansible-inventory'
     execfile(ansible_path)
