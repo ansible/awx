@@ -152,7 +152,7 @@
       - awx_web
   when: pg_hostname is defined
 
-- name: Set properties with postgres for awx_web
+- name: Set properties with postgres for awx_task
   set_fact:
     pg_hostname_actual: postgres
     awx_task_container_links:
