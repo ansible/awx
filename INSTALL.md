@@ -54,6 +54,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [Node 6.x LTS version](https://nodejs.org/en/download/)
 - [NPM 3.x LTS](https://docs.npmjs.com/)
+- other packages required to build npm packages (See [Installing other](#installing-other))
 
 #### Installing gettext
 
@@ -68,6 +69,14 @@ On macOS:
 ```bash
 $ brew install gettext
 $ brew link gettext --force
+```
+
+#### Installing other
+
+On Fedora / CentOS / RHEL:
+
+```bash
+$ yum install gcc-g++ bzip2
 ```
 
 ### AWX Tunables
