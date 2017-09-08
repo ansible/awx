@@ -23,7 +23,7 @@ const STATIC_PATH = path.join(UI_PATH, 'static');
 
 const APP_ENTRY = path.join(SOURCE_PATH, 'app.js');
 const VENDOR_ENTRY = path.join(SOURCE_PATH, 'vendor.js');
-const INDEX_ENTRY = path.join(CLIENT_PATH, 'index.template.html');
+const INDEX_ENTRY = path.join(CLIENT_PATH, 'index.template.ejs');
 const INDEX_OUTPUT = path.join(UI_PATH, 'templates/ui/index.html');
 const THEME_ENTRY = path.join(LIB_PATH, 'theme', 'index.less');
 const OUTPUT = 'js/[name].[hash].js';
@@ -39,7 +39,7 @@ let base = {
     },
     output: {
         path: STATIC_PATH,
-        publicPath: '{{ STATIC_URL }}',
+        publicPath: '',
         filename: OUTPUT
     },
     module: {
@@ -162,7 +162,7 @@ let base = {
             alwaysWriteToDisk: true,
             template: INDEX_ENTRY,
             filename: INDEX_OUTPUT,
-            inject: 'head',
+            inject: false,
             chunks: CHUNKS,
             chunksSortMode: (moduleA, moduleB) => {
                 moduleA.files.sort((fileA, fileB) => fileA.includes('js') ? -1 : 1)

@@ -53,8 +53,7 @@ CredentialsResolve.$inject = [
     'OrganizationModel'
 ];
 
-function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider, stringProvider) {
-    let path = pathProvider.$get();
+function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvider) {
     let stateExtender = $stateExtenderProvider.$get();
     let legacy = legacyProvider.$get();
     let strings = stringProvider.$get();
@@ -116,7 +115,6 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, pathProvider
 CredentialsConfig.$inject = [
     '$stateExtenderProvider',
     'LegacyCredentialsServiceProvider',
-    'PathServiceProvider',
     'CredentialsStringsProvider'
 ];
 

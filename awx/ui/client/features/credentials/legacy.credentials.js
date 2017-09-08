@@ -7,7 +7,7 @@ import { N_ } from '../../src/i18n';
 
 const indexTemplate = require('@features/credentials/index.view.html');
 
-function LegacyCredentialsService (pathService) {
+function LegacyCredentialsService () {
     this.list = {
         name: 'credentials',
         route: '/credentials',
@@ -362,9 +362,5 @@ function LegacyCredentialsService (pathService) {
         };
     };
 }
-
-LegacyCredentialsService.$inject = [
-    'PathService'
-];
 
 export default LegacyCredentialsService;

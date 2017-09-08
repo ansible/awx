@@ -8,6 +8,12 @@
     <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
     <title ng-bind="tabTitle"></title>
     <script>var $basePath = '{{ STATIC_URL }}'</script>
+    <% htmlWebpackPlugin.files.css.forEach(file => {%>
+        <link href="{{ STATIC_URL }}<%= file %>" rel="stylesheet" />
+    <% }) %>
+    <% htmlWebpackPlugin.files.js.forEach(file => {%>
+        <script src="{{ STATIC_URL }}<%= file %>"></script>
+    <% }) %>
 </head>
 
 <body data-user-agent="{{userAgent}}">

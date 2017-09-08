@@ -11,7 +11,7 @@
   },
   "engines": {
     "node": "^6.11.3",
-    "npm": "^3.10.3"
+    "npm": "^3.10.10"
   },
   "scripts": {
     "ui-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev;",
@@ -90,18 +90,18 @@
   },
   "dependencies": {
     "angular": "~1.4.14",
-    "angular-breadcrumb": "github:ansible/angular-breadcrumb#0.4.1",
-    "angular-codemirror": "github:ansible/angular-codemirror#1.0.4",
+    "angular-breadcrumb": "git+https://git@github.com/ansible/angular-breadcrumb#0.4.1",
+    "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror#1.0.4",
     "angular-cookies": "~1.4.14",
-    "angular-drag-and-drop-lists": "github:ansible/angular-drag-and-drop-lists#1.4.0",
+    "angular-drag-and-drop-lists": "git+https://git@github.com/ansible/angular-drag-and-drop-lists#1.4.0",
     "angular-duration-format": "^1.0.1",
     "angular-gettext": "^2.3.5",
     "angular-md5": "^0.1.8",
     "angular-moment": "^0.10.1",
     "angular-resource": "~1.4.14",
     "angular-sanitize": "~1.4.14",
-    "angular-scheduler": "github:ansible/angular-scheduler#0.1.1",
-    "angular-tz-extensions": "github:ansible/angular-tz-extensions#0.3.13",
+    "angular-scheduler": "git+https://git@github.com/ansible/angular-scheduler#0.1.1",
+    "angular-tz-extensions": "git+https://git@github.com/ansible/angular-tz-extensions#0.3.13",
     "angular-ui-router": "1.0.0-beta.3",
     "bootstrap": "^3.3.7",
     "bootstrap-datepicker": "^1.7.1",
@@ -114,12 +114,12 @@
     "js-yaml": "^3.2.7",
     "legacy-loader": "0.0.2",
     "lodash": "~3.8.0",
-    "lr-infinite-scroll": "github:lorenzofox3/lrInfiniteScroll",
+    "lr-infinite-scroll": "git+https://git@github.com/lorenzofox3/lrInfiniteScroll",
     "moment": "~2.10.0",
-    "ng-toast": "github:ansible/ngToast#2.0.1",
-    "nvd3": "github:ansible/nvd3#1.7.1",
+    "ng-toast": "git+https://git@github.com/ansible/ngToast#2.0.1",
+    "nvd3": "git+https://git@github.com/ansible/nvd3#1.7.1",
     "reconnectingwebsocket": "^1.0.0",
-    "rrule": "github:jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
+    "rrule": "git+https://git@github.com/jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
     "select2": "^4.0.2",
     "sprintf-js": "^1.0.3"
   }

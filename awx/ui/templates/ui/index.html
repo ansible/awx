@@ -8,7 +8,17 @@
     <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
     <title ng-bind="tabTitle"></title>
     <script>var $basePath = '{{ STATIC_URL }}'</script>
-<link href="css/vendor.ef74d311a51ca363f1e2.css" rel="stylesheet"><link href="css/app.ef74d311a51ca363f1e2.css" rel="stylesheet"><script type="text/javascript" src="js/vendor.ef74d311a51ca363f1e2.js"></script><script type="text/javascript" src="js/app.ef74d311a51ca363f1e2.js"></script></head>
+    
+        <link href="{{ STATIC_URL }}css/vendor.f283b4795bc6921b48e5.css" rel="stylesheet" />
+    
+        <link href="{{ STATIC_URL }}css/app.f283b4795bc6921b48e5.css" rel="stylesheet" />
+    
+    
+        <script src="{{ STATIC_URL }}js/vendor.f283b4795bc6921b48e5.js"></script>
+    
+        <script src="{{ STATIC_URL }}js/app.f283b4795bc6921b48e5.js"></script>
+    
+</head>
 
 <body data-user-agent="{{userAgent}}">
     <at-layout>

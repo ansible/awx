@@ -1,4 +1,4 @@
-import defaults from '../../assets/default.strings.json';
+import defaults from '@assets/default.strings.json';
 
 let i18n;
 
