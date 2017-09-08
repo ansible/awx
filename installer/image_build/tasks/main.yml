@@ -144,6 +144,12 @@
   service:
     name: docker
     state: started
+  when: not (ansible_distribution == "MacOSX")
+
+- name: Docker should be running For Mac
+  shell: '[ $(launchctl list | grep com.docker.docker | cut -f 1) != "-" ]'
+  delegate_to: localhost
+  when: ansible_distribution == "MacOSX"
 
 - name: Build base web image
   docker_image:

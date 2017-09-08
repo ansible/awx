@@ -1,7 +1,7 @@
 ---
 - name: Build and deploy AWX
   hosts: all
-  gather_facts: false
+  gather_facts: true
   roles:
     - { role: check_vars }
     - { role: image_build }
