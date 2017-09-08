@@ -4,8 +4,10 @@
   gather_facts: false
 
   pre_tasks:
-    - include: docker.yml
-      when: openshift_host is not defined or openshift_host == ''
+    - include: provision_el.yml
+      when: 
+        - openshift_host is not defined or openshift_host == ''
+        - ansible_os_family == "RedHat"
 
   roles:
     - { role: check_vars }
