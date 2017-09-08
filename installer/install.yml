@@ -4,11 +4,10 @@
   gather_facts: false
 
   pre_tasks:
-    - include: provision_el.yml
+    - include: dependency_setup.yml
       when: 
         - openshift_host is not defined or openshift_host == ''
-        - ansible_os_family == "RedHat"
-
+        
   roles:
     - { role: check_vars }
     - { role: image_build }

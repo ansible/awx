@@ -1,4 +1,7 @@
 ---
+- include_vars: 
+    file: vars/dependencies.yml
+
 - name: Install EPEL
   package:
     name: epel-release
@@ -7,10 +10,10 @@
 - name: Install dependencies
   package:
     name:
-      - docker 
+      - "{{ docker }}"
       - gettext 
       - python-pip 
-      - gcc-c++ 
+      - "{{ gnu_comp }}"
       - bzip2 
     state: installed
 
@@ -30,7 +33,10 @@
     name: docker-py
 
 - name: Get NodeJS repo
-  shell: "curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -"
+  yum_repository: 
+    name: nodejs-6
+    description: "NodeJS repo for {{ ansible_distribution }} {{ ansible_distribution_major_version }}"
+    baseurl: "{{ nodejs_repo }}"
 
 - name: Install NodeJS
   package:
