@@ -65,7 +65,7 @@ class Command(NoArgsCommand):
         #jobs_qs = Job.objects.exclude(status__in=('pending', 'running'))
         #jobs_qs = jobs_qs.filter(created__lte=self.cutoff)
         skipped, deleted = 0, 0
-        jobs = Job.objects.filter(created__lte=self.cutoff)
+        jobs = Job.objects.filter(created__lt=self.cutoff)
         for job in jobs.iterator():
             job_display = '"%s" (%d host summaries, %d events)' % \
                           (unicode(job),
@@ -74,21 +74,19 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s job %s', action_text, job.status, job_display)
                 skipped += 1
-            elif job.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, job_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, job_display)
                 if not self.dry_run:
                     job.delete()
                 deleted += 1
+
+        skipped += Job.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def cleanup_ad_hoc_commands(self):
         skipped, deleted = 0, 0
-        ad_hoc_commands = AdHocCommand.objects.filter(created__lte=self.cutoff)
+        ad_hoc_commands = AdHocCommand.objects.filter(created__lt=self.cutoff)
         for ad_hoc_command in ad_hoc_commands.iterator():
             ad_hoc_command_display = '"%s" (%d events)' % \
                 (unicode(ad_hoc_command),
@@ -97,21 +95,19 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s ad hoc command %s', action_text, ad_hoc_command.status, ad_hoc_command_display)
                 skipped += 1
-            elif ad_hoc_command.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, ad_hoc_command_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, ad_hoc_command_display)
                 if not self.dry_run:
                     ad_hoc_command.delete()
                 deleted += 1
+
+        skipped += AdHocCommand.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def cleanup_project_updates(self):
         skipped, deleted = 0, 0
-        project_updates = ProjectUpdate.objects.filter(created__lte=self.cutoff)
+        project_updates = ProjectUpdate.objects.filter(created__lt=self.cutoff)
         for pu in project_updates.iterator():
             pu_display = '"%s" (type %s)' % (unicode(pu), unicode(pu.launch_type))
             if pu.status in ('pending', 'waiting', 'running'):
@@ -122,21 +118,19 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s', action_text, pu_display)
                 skipped += 1
-            elif pu.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, pu_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, pu_display)
                 if not self.dry_run:
                     pu.delete()
                 deleted += 1
+
+        skipped += ProjectUpdate.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def cleanup_inventory_updates(self):
         skipped, deleted = 0, 0
-        inventory_updates = InventoryUpdate.objects.filter(created__lte=self.cutoff)
+        inventory_updates = InventoryUpdate.objects.filter(created__lt=self.cutoff)
         for iu in inventory_updates.iterator():
             iu_display = '"%s" (source %s)' % (unicode(iu), unicode(iu.source))
             if iu.status in ('pending', 'waiting', 'running'):
@@ -147,30 +141,24 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s', action_text, iu_display)
                 skipped += 1
-            elif iu.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, iu_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, iu_display)
                 if not self.dry_run:
                     iu.delete()
                 deleted += 1
+
+        skipped += InventoryUpdate.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def cleanup_management_jobs(self):
         skipped, deleted = 0, 0
-        system_jobs = SystemJob.objects.filter(created__lte=self.cutoff)
+        system_jobs = SystemJob.objects.filter(created__lt=self.cutoff)
         for sj in system_jobs.iterator():
             sj_display = '"%s" (type %s)' % (unicode(sj), unicode(sj.job_type))
             if sj.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s system_job %s', action_text, sj.status, sj_display)
-                skipped += 1
-            elif sj.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, sj_display)
                 skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
@@ -178,6 +166,8 @@ class Command(NoArgsCommand):
                 if not self.dry_run:
                     sj.delete()
                 deleted += 1
+
+        skipped += SystemJob.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def init_logging(self):
@@ -192,7 +182,7 @@ class Command(NoArgsCommand):
 
     def cleanup_workflow_jobs(self):
         skipped, deleted = 0, 0
-        workflow_jobs = WorkflowJob.objects.filter(created__lte=self.cutoff)
+        workflow_jobs = WorkflowJob.objects.filter(created__lt=self.cutoff)
         for workflow_job in workflow_jobs.iterator():
             workflow_job_display = '"{}" ({} nodes)'.format(
                 unicode(workflow_job),
@@ -201,21 +191,19 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s job %s', action_text, workflow_job.status, workflow_job_display)
                 skipped += 1
-            elif workflow_job.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, workflow_job_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, workflow_job_display)
                 if not self.dry_run:
                     workflow_job.delete()
                 deleted += 1
+
+        skipped += WorkflowJob.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     def cleanup_notifications(self):
         skipped, deleted = 0, 0
-        notifications = Notification.objects.filter(created__lte=self.cutoff)
+        notifications = Notification.objects.filter(created__lt=self.cutoff)
         for notification in notifications.iterator():
             notification_display = '"{}" (started {}, {} type, {} sent)'.format(
                 unicode(notification), unicode(notification.created),
@@ -224,16 +212,14 @@ class Command(NoArgsCommand):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s notification %s', action_text, notification.status, notification_display)
                 skipped += 1
-            elif notification.created >= self.cutoff:
-                action_text = 'would skip' if self.dry_run else 'skipping'
-                self.logger.debug('%s %s', action_text, notification_display)
-                skipped += 1
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, notification_display)
                 if not self.dry_run:
                     notification.delete()
                 deleted += 1
+
+        skipped += Notification.objects.filter(created__gte=self.cutoff).count()
         return skipped, deleted
 
     @transaction.atomic
