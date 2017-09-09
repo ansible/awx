@@ -17,6 +17,11 @@ class Command(BaseCommand):
     Deprovision a Tower cluster node
     """
 
+    help = (
+        'Remove instance from the database. '
+        'Specify `--hostname` to use this command.'
+    )
+
     option_list = BaseCommand.option_list + (
         make_option('--hostname', dest='hostname', type='string',
                     help='Hostname used during provisioning'),
