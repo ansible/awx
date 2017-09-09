@@ -8,11 +8,6 @@ env:
   - AWX_BUILD_TARGET=ui-test-ci
   - AWX_BUILD_TARGET="flake8 jshint"
 
-branches:
-  only:
-    - devel
-    - release_*
-
 build:
   pre_ci:
     - docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
