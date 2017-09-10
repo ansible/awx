@@ -35,6 +35,7 @@ The currently defined Notification Types are:
 * Email
 * Slack
 * Hipchat
+* Mattermost
 * Pagerduty
 * Twilio
 * IRC
@@ -98,6 +99,26 @@ There are several ways to integrate with hipchat.  The Tower implementation uses
 Hipchat allows you to create a team with limited users and message history for free, which is easy to set up and get started with.   Hipchat contains a self-hosted server also which we should test for parity... it has a 30 day trial but there might be some other way to negotiate with them, redhat, or ansible itself:
 
 https://www.hipchat.com/server
+
+## Mattermost
+
+The mattermost notification integration uses Incoming Webhooks. These must be enabled in the System Console of Mattermost. If the user wishes to allow Ansible Tower notifications to modify the Icon URL and username of the notification then they must enabled these options as well.
+
+* `url`: The incoming webhook URL that was configured in Mattermost. Notifications will use this URL to POST.
+* `username`: Optional. The username to display for the notification.
+* `channel`: Optional. Override the channel to display the notification in. Mattermost incoming webhooks are tied to a channel by default, so if left blank then this will use the incoming webhook channel. Note, if the channel does not exist then the notification will error out.
+* `icon_url`: Optional. A URL pointing to an icon to use for the notification.
+
+### Testing considerations
+
+* Make sure all options behave as expected
+* Test that all notification options are obeyed
+* Test formatting and appearance. Mattermost will use the minimal version of the notification.
+
+### Test Service
+
+* Utilize an existing Mattermost installation or use their docker container here: `docker run --name mattermost-preview -d --publish 8065:8065 mattermost/mattermost-preview`
+* Turn on Incoming Webhooks and optionally allow Integrations to override usernames and icons in the System Console. 
 
 ## Pagerduty
 
