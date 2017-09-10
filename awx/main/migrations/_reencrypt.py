@@ -12,6 +12,7 @@ from awx.main.notifications.slack_backend import SlackBackend
 from awx.main.notifications.twilio_backend import TwilioBackend
 from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
+from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.irc_backend import IrcBackend
 
@@ -25,6 +26,7 @@ NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
                       ('twilio', _('Twilio'), TwilioBackend),
                       ('pagerduty', _('Pagerduty'), PagerDutyBackend),
                       ('hipchat', _('HipChat'), HipChatBackend),
+                      ('mattermost', _('Mattermost'), MattermostBackend),
                       ('webhook', _('Webhook'), WebhookBackend),
                       ('irc', _('IRC'), IrcBackend)]
 
