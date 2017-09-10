@@ -8,7 +8,6 @@ import json
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import AWXBaseEmailBackend
-from awx.main.utils import get_awx_version
 
 logger = logging.getLogger('awx.main.notifications.mattermost_backend')
 
@@ -16,9 +15,6 @@ logger = logging.getLogger('awx.main.notifications.mattermost_backend')
 class MattermostBackend(AWXBaseEmailBackend):
 
     init_parameters = {"mattermost_url": {"label": "Target URL", "type": "string"}}
-                       #"mattermost_channel": {"label": "Channel", "type": "string"},
-                       #"mattermost_username": {"label": "Username", "type": "string"},
-                       #"mattermost_icon_url": {"label": "Icon URL", "type": "string"}}
     recipient_parameter = "mattermost_url"
     sender_parameter = None
 
@@ -38,9 +34,9 @@ class MattermostBackend(AWXBaseEmailBackend):
             payload = {}
             for opt, optval in {'mattermost_icon_url':'icon_url',
                                 'mattermost_channel': 'channel', 'mattermost_username': 'username'}.iteritems():
-              optvalue = getattr(self, opt)
-              if optvalue is not None:
-                  payload[optval] = optvalue.strip()
+                optvalue = getattr(self, opt)
+                if optvalue is not None:
+                    payload[optval] = optvalue.strip()
 
             payload['text'] = m.subject
 
@@ -48,7 +44,6 @@ class MattermostBackend(AWXBaseEmailBackend):
                               data=json.dumps(payload))
             if r.status_code >= 400:
                 logger.error(smart_text(_("Error sending notification mattermost: {}").format(r.text)))
-                logger.error(smart_text(_("Error sending notification mattermost: {}").format(payload)))
                 if not self.fail_silently:
                     raise Exception(smart_text(_("Error sending notification mattermost: {}").format(r.text)))
             sent_messages += 1
