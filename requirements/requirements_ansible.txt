@@ -4,30 +4,30 @@
 #
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
-adal==0.4.5               # via msrestazure
+adal==0.4.7               # via azure-cli-core, msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==2.0.0
 appdirs==1.4.3            # via os-client-config, python-ironicclient, setuptools
+applicationinsights==0.11.0  # via azure-cli-core
+argcomplete==1.9.2        # via azure-cli-core
 asn1crypto==0.22.0        # via cryptography
-azure-batch==1.0.0        # via azure
-azure-common[autorest]==1.1.4  # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage, azure-servicebus, azure-servicemanagement-legacy, azure-storage
-azure-mgmt-batch==1.0.0   # via azure-mgmt
-azure-mgmt-compute==0.30.0rc6  # via azure-mgmt
-azure-mgmt-keyvault==0.30.0rc6  # via azure-mgmt
-azure-mgmt-logic==1.0.0   # via azure-mgmt
-azure-mgmt-network==0.30.0rc6  # via azure-mgmt
-azure-mgmt-nspkg==2.0.0   # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage
-azure-mgmt-redis==1.0.0   # via azure-mgmt
-azure-mgmt-resource==0.30.0rc6  # via azure-mgmt
-azure-mgmt-scheduler==1.0.0  # via azure-mgmt
-azure-mgmt-storage==0.30.0rc6  # via azure-mgmt
-azure-mgmt==0.30.0rc6     # via azure
-azure-nspkg==2.0.0        # via azure-common, azure-mgmt-nspkg, azure-storage
-azure-servicebus==0.20.3  # via azure
-azure-servicemanagement-legacy==0.20.4  # via azure
-azure-storage==0.33.0     # via azure
-azure==2.0.0rc6
+azure-cli-core==2.0.15
+azure-cli-nspkg==3.0.1    # via azure-cli-core
+azure-common==1.1.8       # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azu
+azure-mgmt-batch==4.1.0
+azure-mgmt-compute==2.1.0
+azure-mgmt-containerservice==1.0.0
+azure-mgmt-dns==1.0.1
+azure-mgmt-keyvault==0.40.0
+azure-mgmt-network==1.4.0
+azure-mgmt-nspkg==2.0.0   # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azu
+azure-mgmt-resource==1.1.0
+azure-mgmt-sql==0.7.1
+azure-mgmt-storage==1.2.1
+azure-mgmt-web==0.32.0
+azure-nspkg==2.0.0        # via azure-cli-nspkg, azure-common, azure-mgmt-nspkg, azure-storage
+azure-storage==0.35.1
 babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-neutronclient, python-novaclient, python-openstackclient
 backports.ssl-match-hostname==3.5.0.1
 boto3==1.4.4
@@ -37,7 +37,8 @@ certifi==2017.4.17        # via msrest
 cffi==1.10.0              # via cryptography
 cliff==2.7.0              # via osc-lib, python-designateclient, python-neutronclient, python-openstackclient
 cmd2==0.7.2               # via cliff
-cryptography==1.9         # via adal, azure-storage, pyopenssl, secretstorage
+colorama==0.3.9           # via azure-cli-core
+cryptography==2.0.3       # via adal, azure-storage, paramiko, pyopenssl, secretstorage
 debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
 decorator==4.0.11         # via shade
 deprecation==1.0.1        # via openstacksdk
@@ -47,6 +48,7 @@ enum34==1.1.6             # via cryptography, msrest
 funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
 futures==3.1.1            # via azure-storage, s3transfer, shade
+humanfriendly==4.4.1      # via azure-cli-core
 idna==2.5                 # via cryptography
 ipaddress==1.0.18         # via cryptography, shade
 iso8601==0.1.11           # via keystoneauth1, oslo.utils, python-neutronclient, python-novaclient
@@ -61,8 +63,8 @@ kombu==3.0.37
 lxml==3.8.0               # via pyvmomi
 monotonic==1.3            # via oslo.utils
 msgpack-python==0.4.8     # via oslo.serialization
-msrest==0.4.10            # via azure-common, msrestazure
-msrestazure==0.4.9        # via azure-common
+msrest==0.4.14            # via azure-cli-core, msrestazure
+msrestazure==0.4.13
 munch==2.1.1              # via shade
 netaddr==0.7.19           # via oslo.config, oslo.utils, python-neutronclient
 netifaces==0.10.6         # via oslo.utils, shade
@@ -83,9 +85,10 @@ prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient,
 psphere==0.5.2
 psutil==5.2.2
 pycparser==2.17           # via cffi
-pyjwt==1.5.0              # via adal
+pygments==2.2.0           # via azure-cli-core
+pyjwt==1.5.2              # via adal, azure-cli-core
 pykerberos==1.1.14        # via requests-kerberos
-pyopenssl==17.0.0         # via pyvmomi
+pyopenssl==17.2.0         # via azure-cli-core, python-glanceclient, pyvmomi
 pyparsing==2.2.0          # via cliff, cmd2, oslo.utils, packaging
 python-cinderclient==2.2.0  # via python-openstackclient, shade
 python-dateutil==2.6.0    # via adal, azure-storage, botocore
@@ -114,6 +117,7 @@ simplejson==3.11.1        # via osc-lib, python-cinderclient, python-neutronclie
 six==1.10.0               # via cliff, cmd2, cryptography, debtcollector, keystoneauth1, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, pyopenssl, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, pywinrm, setuptools, shade, stevedore, warlock
 stevedore==1.23.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
 suds==0.4                 # via psphere
+tabulate==0.7.7           # via azure-cli-core
 unicodecsv==0.14.1        # via cliff
 warlock==1.2.0            # via python-glanceclient
 wrapt==1.10.10            # via debtcollector, positional, python-glanceclient
