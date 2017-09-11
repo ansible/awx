@@ -47,12 +47,22 @@
   when: not sdist.stat.exists
   delegate_to: localhost
 
+- name: Build sdist builder image
+  docker_image:
+    path: "image_build/files"
+    dockerfile: Dockerfile.sdist
+    name: awx_sdist_builder
+    tag: "{{ awx_version }}"
+    force: true
+
 - name: Build AWX distribution
-  shell: make sdist
-  args:
-    chdir: ..
-    creates: "./dist/{{ awx_sdist_file }}"
-  delegate_to: localhost
+  docker_container:
+    image: "awx_sdist_builder:{{ awx_version }}"
+    name: awx_sdist_builder
+    state: started
+    detach: false
+    volumes:
+      - ../:/awx
 
 - name: Set docker build base path
   set_fact:

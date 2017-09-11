@@ -8,7 +8,6 @@ This document provides a guide for installing AWX.
   - [Clone the repo](#clone-the-repo)
   - [AWX branding](#awx-branding)
   - [Prerequisites](#prerequisites)
-    - [Installing gettext](#installing-gettext)
   - [AWX Tunables](#awx-tunables)
   - [Choose a deployment platform](#choose-a-deployment-platform)
 - [OpenShift](#openshift)
@@ -49,28 +48,10 @@ To install the assets, clone the awx-logos repo into the root of your local AWX 
 Before you can run a deployment, you'll need the following installed in your local environment:
 
 - [Ansible](http://docs.ansible.com/ansible/latest/intro_installation.html)
-- gettext package for your platform (See [Installing gettext](#installing-gettext))
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-py](https://github.com/docker/docker-py) Python module
-- [Node 6.x LTS version](https://nodejs.org/en/download/)
-- [NPM 3.x LTS](https://docs.npmjs.com/)
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/)
-
-#### Installing gettext
-
-On Fedora / CentOS / RHEL:
-
-```bash
-$ yum install gettext
-```
-
-On macOS:
-
-```bash
-$ brew install gettext
-$ brew link gettext --force
-```
 
 ### AWX Tunables
 

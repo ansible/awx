@@ -1,0 +1,20 @@
+FROM centos:7
+
+RUN yum install -y epel-release
+
+RUN yum install -y bzip2 \
+    gcc-c++ \
+    gettext \
+    git \
+    make \
+    python \
+    python-pip
+
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+RUN yum install -y nodejs
+RUN npm set progress=false
+
+WORKDIR "/awx"
+
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["make sdist"]
