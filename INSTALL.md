@@ -52,6 +52,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/)
+- [Bzip2](http://www.bzip.org/)
 
 ### AWX Tunables
 
