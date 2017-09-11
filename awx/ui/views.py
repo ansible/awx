@@ -20,3 +20,9 @@ class PortalRedirectView(RedirectView):
     url = '/#/portal'
 
 portal_redirect = PortalRedirectView.as_view()
+
+class MigrationsNotran(TemplateView):
+
+    template_name = 'ui/installing.html'
+
+migrations_notran = MigrationsNotran.as_view()
