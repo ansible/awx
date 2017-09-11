@@ -9,6 +9,8 @@ To install AWX, please view the [Install guide](./INSTALL.md).
 
 To learn more about using AWX, and Tower, view the [Tower docs site](http://docs.ansible.com/ansible-tower/index.html).
 
+The AWX Project Frequently Asked Questions can be found [here](https://www.ansible.com/awx-project-faq).
+
 Contributing
 ------------
 
