@@ -20,6 +20,7 @@ celerybeat-schedule
 awx/ui/static
 awx/ui/build_test
 awx/ui/client/languages
+awx/ui/templates/ui/index.html
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
