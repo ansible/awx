@@ -38,7 +38,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.constants import SCHEDULEABLE_PROVIDERS
+from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
@@ -3120,6 +3120,14 @@ class JobEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+            set_count = 0
+            reset_count = 0
+            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
+                if m.string[m.start():m.end()] == u'\u001b[0m':
+                    reset_count += 1
+                else:
+                    set_count += 1
+            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
         return ret
 
 
@@ -3151,6 +3159,14 @@ class AdHocCommandEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+            set_count = 0
+            reset_count = 0
+            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
+                if m.string[m.start():m.end()] == u'\u001b[0m':
+                    reset_count += 1
+                else:
+                    set_count += 1
+            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
         return ret
 
 
