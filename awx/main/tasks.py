@@ -1307,7 +1307,7 @@ class RunProjectUpdate(BaseTask):
             }
         }
         '''
-        handle, self.revision_path = tempfile.mkstemp(dir=settings.AWX_PROOT_BASE_PATH)
+        handle, self.revision_path = tempfile.mkstemp(dir=settings.PROJECTS_ROOT)
         self.cleanup_paths.append(self.revision_path)
         private_data = {'credentials': {}}
         if project_update.credential:

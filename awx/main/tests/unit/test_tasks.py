@@ -181,6 +181,8 @@ class TestJobExecution:
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
     def setup_method(self, method):
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.mkdir(settings.PROJECTS_ROOT)
         self.project_path = tempfile.mkdtemp(prefix='awx_project_')
         with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
             f.write('---')
@@ -1124,6 +1126,7 @@ class TestProjectUpdateCredentials(TestJobExecution):
             settings.PROJECTS_ROOT,
             settings.PROJECTS_ROOT,
         ]) in ' '.join(args)
+        assert '"scm_revision_output": "/projects/tmp' in ' '.join(args)
 
     def test_username_and_password_auth(self, scm_type):
         ssh = CredentialType.defaults['ssh']()
