@@ -4,7 +4,7 @@
  - Feature Idea
  - Documentation
 
-##### COMPONENT
+##### COMPONENT NAME
 <!-- Pick the area of AWX for this issue, you can have multiple, delete the rest: -->
  - API
  - UI
