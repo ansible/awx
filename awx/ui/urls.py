@@ -6,5 +6,6 @@ from django.conf.urls import *
 
 urlpatterns = patterns('awx.ui.views',
     url(r'^$', 'index', name='index'),
+    url(r'^migrations_notran/$', 'migrations_notran', name='migrations_notran'),
     url(r'^portal/$', 'portal_redirect', name='portal_redirect'),
 )

@@ -34,7 +34,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
         if not hasattr(request, 'successful_authenticator'):
             request.successful_authenticator = None
 
-        if not request.path.startswith('/sso/'):
+        if not request.path.startswith('/sso/') and 'migrations_notran' not in request.path:
 
             # If token isn't present but we still have a user logged in via Django
             # sessions, log them out.

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="awApp">
+  <head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
+    <title ng-bind="tabTitle"></title>
+    <% htmlWebpackPlugin.files.css.forEach(file => {%>
+        <link href="{{ STATIC_URL }}<%= file %>" rel="stylesheet" />
+    <% }) %>
+    <% htmlWebpackPlugin.files.js.forEach(file => {%>
+        <script src="{{ STATIC_URL }}<%= file %>"></script>
+    <% }) %>
+    <script>
+        setInterval(function() {
+        window.location = '/#/index.html';
+        }, 10000);
+    </script>
+  </head>
+  <body>
+    <div class="jumbotron">
+      <div class="container-fluid" id="content-container">
+        <div class="span4">
+          <img style="float:left" src="{% static 'assets/logo-header.svg' %}" width="200"/>
+          <div class="content-heading"><h1>AWX is Upgrading</h1></div>
+          <p>
+            AWX is currently upgrading or installing, this page will refresh when done.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

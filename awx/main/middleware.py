@@ -9,11 +9,13 @@ import six
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from django.db import IntegrityError
+from django.db.migrations.executor import MigrationExecutor
+from django.db import IntegrityError, connection
 from django.utils.functional import curry
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
 from awx.main.models import ActivityStream
 from awx.api.authentication import TokenAuthentication
@@ -162,3 +164,12 @@ class URLModificationMiddleware(object):
         if request.path_info != new_path:
             request.path = request.path.replace(request.path_info, new_path)
             request.path_info = new_path
+
+
+class MigrationRanCheckMiddleware(object):
+
+    def process_request(self, request):
+        executor = MigrationExecutor(connection)
+        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+        if bool(plan) and 'migrations_notran' not in request.path:
+            return redirect(reverse("ui:migrations_notran"))
