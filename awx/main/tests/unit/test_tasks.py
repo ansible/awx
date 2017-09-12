@@ -181,6 +181,8 @@ class TestJobExecution:
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 
     def setup_method(self, method):
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.mkdir(settings.PROJECTS_ROOT)
         self.project_path = tempfile.mkdtemp(prefix='awx_project_')
         with open(os.path.join(self.project_path, 'helloworld.yml'), 'w') as f:
             f.write('---')
@@ -280,6 +282,15 @@ class TestGenericRun(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
         assert args[0] == 'bwrap'
+
+    def test_bwrap_virtualenvs_are_readonly(self):
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '--ro-bind %s %s' % (settings.ANSIBLE_VENV_PATH, settings.ANSIBLE_VENV_PATH) in ' '.join(args)  # noqa
+        assert '--ro-bind %s %s' % (settings.AWX_VENV_PATH, settings.AWX_VENV_PATH) in ' '.join(args)  # noqa
 
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
@@ -1095,6 +1106,27 @@ class TestProjectUpdateCredentials(TestJobExecution):
             dict(scm_type='svn'),
         ]
     }
+
+    def test_bwrap_exposes_projects_root(self):
+        ssh = CredentialType.defaults['ssh']()
+        self.instance.scm_type = 'git'
+        self.instance.credential = Credential(
+            pk=1,
+            credential_type=ssh,
+        )
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+
+        assert ' '.join(args).startswith('bwrap')
+        ' '.join([
+            '--bind',
+            settings.PROJECTS_ROOT,
+            settings.PROJECTS_ROOT,
+        ]) in ' '.join(args)
+        assert '"scm_revision_output": "/projects/tmp' in ' '.join(args)
 
     def test_username_and_password_auth(self, scm_type):
         ssh = CredentialType.defaults['ssh']()
