@@ -105,7 +105,14 @@ def get_user_capabilities(user, instance, **kwargs):
     convenient for the user interface to consume and hide or show various
     actions in the interface.
     '''
-    access_class = access_registry[instance.__class__]
+    cls = instance.__class__
+    # When `.defer()` is used w/ the Django ORM, the result is a subclass of
+    # the original that represents e.g.,
+    # awx.main.models.ad_hoc_commands.AdHocCommand_Deferred_result_stdout_text
+    # We want to do the access registry lookup keyed on the base class name.
+    if getattr(cls, '_deferred', False):
+        cls = instance.__class__.__bases__[0]
+    access_class = access_registry[cls]
     return access_class(user).get_user_capabilities(instance, **kwargs)
 
 
@@ -2071,6 +2078,7 @@ class UnifiedJobAccess(BaseAccess):
         #    'job_template__project',
         #    'job_template__credential',
         #)
+        qs = qs.defer('result_stdout_text')
         return qs.all()
 
 
