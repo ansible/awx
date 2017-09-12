@@ -5,6 +5,9 @@ files:
     awx/api/:
         labels: component:api
         maintainers: $team_api
+    awx/main/:
+        labels: component:api
+        maintainers: $team_api
     installer/:
         labels: component:installer
 

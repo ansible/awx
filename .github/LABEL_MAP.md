@@ -6,4 +6,4 @@ UI: component:ui
 API: component:api
 Installer: component:installer
 Docs Pull Request: component:docs
-Docs: component:docs
+Documentation: component:docs
