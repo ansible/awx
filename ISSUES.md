@@ -25,6 +25,63 @@ We triage our issues into high, medium, and low, and tag them with the relevant 
 If your issue isn't considered high priority, then please be patient as it may take some time to get to it.
 
 
-## Ansible Issue Bot
+### Issue states
 
-**TODO** 
+`state:needs_triage` This issue has not been looked at by a person yet and still needs to be triaged. This is the initial state for all new issues/pull requests.
+
+`state:needs_info` The issue needs more information. This could be more debug output, more specifics out the system such as version information. Any detail that is currently preventing this issue from moving forward. This should be considered a blocked state.
+
+`state:needs_review` The the issue/pull request needs to be reviewed by other maintainers and contributors. This is usually used when there is a question out to another maintainer or when a person is less familar with an area of the code base the issue is for.
+
+`state:needs_revision` More commonly used on pull requests, this state represents that there are changes that are being waited on.
+
+`state:in_progress` The issue is actively being worked on and you should be in contact with who ever is assigned if you are also working on or plan to work on a similar issue.
+
+`state:in_testing` The issue or pull request is currently being tested.
+
+
+### AWX Issue Bot (awxbot)
+We use an issue bot to help us label and organize incoming issues, this bot, awxbot, is a version of [ansible/ansibullbot](https://github.com/ansible/ansibullbot).
+
+#### Overview
+
+AWXbot performs many functions:
+
+ * Respond quickly to issues and pull requests.
+ * Identify the maintainers responsible for reviewing pull requests.
+ * Identify issues and pull request types and components (e.g. type:bug, component: api)
+
+#### For issue submitters
+
+The bot requires a minimal subset of information from the issue template:
+
+ * issue type
+ * component
+ * summary
+
+If any of those items are missing your issue will still get the `needs_triage` label, but may end up being responded to slower than issues that have the complete set of information.
+So please use the template whenever possible.
+
+Currently you can expect the bot to add common labels such as `state:needs_triage`, `type:bug`, `type:enhancement`, `component:ui`, etc...
+These labels are determined by the template data. Please use the template and fill it out as accurately as possible.
+
+The `state:needs_triage` label will remain on your issue until a person has looked at it.
+
+#### For pull request submitters
+
+The bot requires a minimal subset of information from the pull request template:
+
+ * issue type
+ * component
+ * summary
+
+If any of those items are missing your pull request will still get the `needs_triage` label, but may end up being responded to slower than other pull requests that have a complete set of information.
+
+Currently you can expect awxbot to add common labels such as `state:needs_triage`, `type:bug`, `component:docs`, etc...
+These labels are determined by the templkate data. Please use the template and fill it out as accurately as possible.
+
+The `state:needs_triage` label will will remain on your pull request until a person has looked at it.
+
+You can also expect the bot to CC maintainers of specific areas of the code, this will notify them that there is a pull request by placing a comment on the pull request.
+The comment will look something like `CC @matburt @wwitzel3 ...`.
+
