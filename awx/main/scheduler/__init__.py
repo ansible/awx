@@ -300,7 +300,7 @@ class TaskManager():
         # Already processed dependencies for this job
         if job.dependent_jobs.all():
             return False
-        latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("created")
+        latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
         if not latest_inventory_update.exists():
             return True
         latest_inventory_update = latest_inventory_update.first()
@@ -323,7 +323,7 @@ class TaskManager():
         now = tz_now()
         if job.dependent_jobs.all():
             return False
-        latest_project_update = ProjectUpdate.objects.filter(project=job.project).order_by("created")
+        latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
         if not latest_project_update.exists():
             return True
         latest_project_update = latest_project_update.first()
