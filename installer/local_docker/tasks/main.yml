@@ -101,7 +101,7 @@
     state: started
     image: postgres:9.6
     volumes:
-      - "{{ postgres_data_dir }}:/var/lib/postgresql/data"
+      - "{{ postgres_data_dir }}:/var/lib/postgresql/data:Z"
     env:
       POSTGRES_USER: "{{ pg_username }}"
       POSTGRES_PASSWORD: "{{ pg_password }}"
