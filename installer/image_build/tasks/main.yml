@@ -54,6 +54,7 @@
     name: awx_sdist_builder
     tag: "{{ awx_version }}"
     force: true
+  delegate_to: localhost
 
 - name: Build AWX distribution
   docker_container:
@@ -63,6 +64,7 @@
     detach: false
     volumes:
       - ../:/awx:Z
+  delegate_to: localhost
 
 - name: Set docker build base path
   set_fact:
