@@ -44,16 +44,7 @@ export default
             Rest.get()
             .success(function (data) {
                 if(params.updateAllSources) {
-                    let userCanUpdateAllSources = true;
-                    _.forEach(data, function(inventory_source){
-                        if (!inventory_source.can_update) {
-                            userCanUpdateAllSources = false;
-                        }
-                    });
-
-                    if(userCanUpdateAllSources) {
-                        scope.$emit('StartTheUpdate', {});
-                    }
+                    scope.$emit('StartTheUpdate', {});
                 }
                 else {
                     inventory_source = data;
