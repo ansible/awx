@@ -37,10 +37,10 @@ This document provides a guide for installing AWX.
 ### Minimum Hardware Requirements
 
 #### CPU
-2 CPUs recommended.
+2 CPUs are recommended.
 
 #### RAM
-2 GB RAM is the minimum .
+2 GB RAM is required.
 4 GB RAM is recommended.
 
 ### Clone the repo
