@@ -62,7 +62,7 @@
     state: started
     detach: false
     volumes:
-      - ../:/awx
+      - ../:/awx:Z
 
 - name: Set docker build base path
   set_fact:
