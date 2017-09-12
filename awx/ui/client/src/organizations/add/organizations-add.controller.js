@@ -54,9 +54,16 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
                         .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, {
                                 hdr: 'Error!',
-                                msg: 'Failed to add new organization. Post returned status: ' + status
+                                msg: 'Failed to save instance groups. POST returned status: ' + status
                             });
                         });
+                })
+                .catch(({data, status}) => {
+                    let explanation = _.has(data, "name") ? data.name[0] : "";
+                    ProcessErrors($scope, data, status, OrganizationForm, {
+                        hdr: 'Error!',
+                        msg: `Failed to save organization. PUT status: ${status}. ${explanation}`
+                    });
                 });
         };
 
