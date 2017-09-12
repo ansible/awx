@@ -606,5 +606,5 @@ psql-container:
 	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
-	echo $(VERSION_TARGET) > $@
-
+	@echo $(VERSION_TARGET) > $@
+	@echo "awx: $(VERSION_TARGET)"
