@@ -121,7 +121,7 @@ setup(
     description='awx: API, UI and Task Engine for Ansible',
     long_description='AWX provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
-    license='MIT',
+    license='Apache License 2.0',
     keywords='ansible',
     url='http://github.com/ansible/awx',
     packages=['awx'],
@@ -135,7 +135,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators'
-        'License :: Other/Proprietary License',
+        'License :: Apache License 2.0',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Operating System :: POSIX',
