@@ -85,7 +85,7 @@ function(NotificationsList, CompletedJobsList, i18n) {
                         ngChange: 'job_template_form.inventory_name.$validate()',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canChangeInventory'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources'
                 },
                 project: {
                     label: i18n._('Project'),
@@ -100,14 +100,14 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     dataTitle: i18n._('Project'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canChangeProject',
-                    awLookupWhen: 'canChangeProject'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources',
+                    awLookupWhen: 'canGetAllRelatedResources'
                 },
                 playbook: {
                     label: i18n._('Playbook'),
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canChangeProject",
+                    ngDisabled: "!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources",
                     id: 'playbook-select',
                     required: true,
                     column: 1,

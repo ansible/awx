@@ -37,8 +37,7 @@
                 $scope.mode = "add";
                 $scope.parseType = 'yaml';
                 $scope.credentialNotPresent = false;
-                $scope.canChangeProject = true;
-                $scope.canChangeInventory = true;
+                $scope.canGetAllRelatedResources = true;
 
                 md5Setup({
                     scope: $scope,

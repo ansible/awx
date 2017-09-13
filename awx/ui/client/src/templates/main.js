@@ -150,7 +150,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                             });
                                         });
                             }],
-                            canChangeProject: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                            canGetProject: ['Rest', 'ProcessErrors', 'jobTemplateData',
                                 function(Rest, ProcessErrors, jobTemplateData) {
                                     Rest.setUrl(jobTemplateData.related.project);
                                     return Rest.get()
@@ -171,7 +171,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                             return false;
                                     });
                             }],
-                            canChangeInventory: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                            canGetInventory: ['Rest', 'ProcessErrors', 'jobTemplateData',
                                 function(Rest, ProcessErrors, jobTemplateData) {
                                     Rest.setUrl(jobTemplateData.related.inventory);
                                     return Rest.get()

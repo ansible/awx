@@ -18,7 +18,7 @@ export default
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService', 'availableLabels',
-        'canChangeProject', 'canChangeInventory', 'jobTemplateData', 'ParseVariableString',
+        'canGetProject', 'canGetInventory', 'jobTemplateData', 'ParseVariableString',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -26,7 +26,7 @@ export default
             ParseTypeChange, Wait, selectedLabels, i18n,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService, availableLabels,
-            canChangeProject, canChangeInventory, jobTemplateData, ParseVariableString
+            canGetProject, canGetInventory, jobTemplateData, ParseVariableString
         ) {
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -60,8 +60,6 @@ export default
                 $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
                 $scope.job_tag_options = [];
                 $scope.skip_tag_options = [];
-                $scope.canChangeProject = canChangeProject;
-                $scope.canChangeInventory = canChangeInventory;
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -361,7 +359,8 @@ export default
                 if($scope.job_template_obj.summary_fields.user_capabilities.edit) {
                     MultiCredentialService.loadCredentials(jobTemplateData)
                         .then(([selectedCredentials, credTypes, credTypeOptions,
-                            credTags]) => {
+                            credTags, credentialGetPermissionDenied]) => {
+                                $scope.canGetAllRelatedResources = canGetProject && canGetInventory && !credentialGetPermissionDenied ? true : false;
                                 $scope.selectedCredentials = selectedCredentials;
                                 $scope.credential_types = credTypes;
                                 $scope.credentialTypeOptions = credTypeOptions;
