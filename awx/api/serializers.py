@@ -2334,8 +2334,13 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if obj.vault_credential:
             res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential.pk})
         if self.version > 1:
-            view = 'api:%s_extra_credentials_list' % camelcase_to_underscore(obj.__class__.__name__)
-            res['extra_credentials'] = self.reverse(view, kwargs={'pk': obj.pk})
+            if isinstance(obj, UnifiedJobTemplate):
+                res['extra_credentials'] = self.reverse(
+                    'api:job_template_extra_credentials_list',
+                    kwargs={'pk': obj.pk}
+                )
+            elif isinstance(obj, UnifiedJob):
+                res['extra_credentials'] = self.reverse('api:job_extra_credentials_list', kwargs={'pk': obj.pk})
         else:
             cloud_cred = obj.cloud_credential
             if cloud_cred:
