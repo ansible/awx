@@ -36,3 +36,7 @@ pg_port=5432
 
 # AWX Tunables
 awx_secret_key=aabbcc
+
+# Proxy
+#http_proxy=http://proxy:3128
+#https_proxy=http://proxy:3128
