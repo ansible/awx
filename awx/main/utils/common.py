@@ -17,6 +17,7 @@ import threading
 import contextlib
 import tempfile
 import six
+import psutil
 
 # Decorator
 from decorator import decorator
@@ -581,12 +582,8 @@ def get_system_task_capacity():
     from django.conf import settings
     if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
         return settings.SYSTEM_TASK_CAPACITY
-    try:
-        out = subprocess.check_output(['free', '-m'])
-    except subprocess.CalledProcessError:
-        logger.exception('Problem obtaining capacity from system.')
-        return 0
-    total_mem_value = out.split()[7]
+    mem = psutil.virtual_memory()
+    total_mem_value = mem.total/1024/1024
     if int(total_mem_value) <= 2048:
         return 50
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
