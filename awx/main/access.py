@@ -470,8 +470,10 @@ class UserAccess(BaseAccess):
 
     def can_change(self, obj, data):
         if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
-            if (to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) or
-                    to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True)) and not self.user.is_superuser:
+            if to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) and \
+               not self.user.is_superuser:
+                return False
+            if to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True) and not (self.user.is_superuser or self.user == obj):
                 return False
         # A user can be changed if they are themselves, or by org admins or
         # superusers.  Change permission implies changing only certain fields
