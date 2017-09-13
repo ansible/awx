@@ -49,6 +49,9 @@
 
 - name: Build sdist builder image
   docker_image:
+    buildargs:
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ https_proxy }}"
     path: "image_build/files"
     dockerfile: Dockerfile.sdist
     name: awx_sdist_builder
@@ -58,6 +61,9 @@
 
 - name: Build AWX distribution
   docker_container:
+    env:
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ https_proxy }}"
     image: "awx_sdist_builder:{{ awx_version }}"
     name: awx_sdist_builder
     state: started
@@ -154,6 +160,9 @@
 
 - name: Build base web image
   docker_image:
+    buildargs:
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ https_proxy }}"
     path: "{{ docker_base_path }}"
     dockerfile: Dockerfile
     name: "{{ awx_web_image }}"
@@ -162,6 +171,9 @@
 
 - name: Build base task image
   docker_image:
+    buildargs:
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ https_proxy }}"
     path: "{{ docker_base_path }}"
     dockerfile: Dockerfile.task
     name: "{{ awx_task_image }}"
