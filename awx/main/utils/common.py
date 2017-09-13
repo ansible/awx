@@ -583,7 +583,7 @@ def get_system_task_capacity():
     if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
         return settings.SYSTEM_TASK_CAPACITY
     mem = psutil.virtual_memory()
-    total_mem_value = mem.total/1024/1024
+    total_mem_value = mem.total / 1024 / 1024
     if int(total_mem_value) <= 2048:
         return 50
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
