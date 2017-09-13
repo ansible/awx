@@ -584,9 +584,9 @@ def get_system_task_capacity():
         return settings.SYSTEM_TASK_CAPACITY
     mem = psutil.virtual_memory()
     total_mem_value = mem.total / 1024 / 1024
-    if int(total_mem_value) <= 2048:
+    if total_mem_value <= 2048:
         return 50
-    return 50 + ((int(total_mem_value) / 1024) - 2) * 75
+    return 50 + ((total_mem_value / 1024) - 2) * 75
 
 
 _inventory_updates = threading.local()
