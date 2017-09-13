@@ -138,6 +138,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
             name: cred.name,
             id: cred.id,
             postType: cred.postType,
+            readOnly: cred.readOnly,
             kind: typeOpts
                 .filter(type => {
                     return parseInt(cred.credential_type) === type.value;
@@ -190,6 +191,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                         /* User doesn't have read access to the machine credential, so use summary_fields */
                         selectedCredentials.machine = job_template_obj.summary_fields.credential;
                         selectedCredentials.machine.credential_type = job_template_obj.summary_fields.credential.credential_type_id;
+                        selectedCredentials.machine.readOnly = true;
                     } else {
                         ProcessErrors(
                             null, data, status, null,
@@ -214,6 +216,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                         /* User doesn't have read access to the vault credential, so use summary_fields */
                         selectedCredentials.vault = job_template_obj.summary_fields.vault_credential;
                         selectedCredentials.vault.credential_type = job_template_obj.summary_fields.vault_credential.credential_type_id;
+                        selectedCredentials.vault.readOnly = true;
                     } else {
                         ProcessErrors(
                             null, data, status, null,
@@ -240,6 +243,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                         selectedCredentials.extra = job_template_obj.summary_fields.extra_credentials;
                         _.map(selectedCredentials.extra, (cred) => {
                             cred.credential_type = cred.credential_type_id;
+                            cred.readOnly = true;
                             return cred;
                         });
                     } else {
