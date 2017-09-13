@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import APIException
 
 # Tower
-from awx.main.utils.common import get_licenser
+from awx.main.utils.common import get_licenser, memoize
 
 __all__ = ['LicenseForbids', 'get_license', 'get_licensed_features',
            'feature_enabled', 'feature_exists']
@@ -40,6 +40,7 @@ def get_licensed_features():
     return features
 
 
+@memoize(cache_name='ephemeral')
 def feature_enabled(name):
     """Return True if the requested feature is enabled, False otherwise."""
     validated_license_data = _get_validated_license_data()

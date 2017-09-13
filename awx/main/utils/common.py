@@ -107,13 +107,14 @@ class RequireDebugTrueOrTest(logging.Filter):
         return settings.DEBUG or 'test' in sys.argv
 
 
-def memoize(ttl=60, cache_key=None):
+def memoize(ttl=60, cache_key=None, cache_name='default'):
     '''
     Decorator to wrap a function and cache its result.
     '''
-    from django.core.cache import cache
+    from django.core.cache import caches
 
     def _memoizer(f, *args, **kwargs):
+        cache = caches[cache_name]
         key = cache_key or slugify('%s %r %r' % (f.__name__, args, kwargs))
         value = cache.get(key)
         if value is None:
