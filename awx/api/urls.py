@@ -84,6 +84,11 @@ team_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'team_access_list'),
 )
 
+ansible_versions_urls = patterns('awx.api.views',
+    url(r'^$',                                          'ansible_versions_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'ansible_versions_detail'),
+)
+
 inventory_urls = patterns('awx.api.views',
     url(r'^$',                                          'inventory_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_detail'),
@@ -387,6 +392,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^roles/',                 include(role_urls)),
     url(r'^job_templates/',         include(job_template_urls)),
     url(r'^jobs/',                  include(job_urls)),
+    url(r'^ansible_versions/',      include(ansible_versions_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),
     url(r'^job_events/',            include(job_event_urls)),
     url(r'^ad_hoc_commands/',       include(ad_hoc_command_urls)),
