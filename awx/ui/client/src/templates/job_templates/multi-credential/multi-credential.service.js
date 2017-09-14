@@ -138,7 +138,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
             name: cred.name,
             id: cred.id,
             postType: cred.postType,
-            readOnly: cred.readOnly,
+            readOnly: cred.readOnly ? true : false,
             kind: typeOpts
                 .filter(type => {
                     return parseInt(cred.credential_type) === type.value;
