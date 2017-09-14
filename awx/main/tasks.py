@@ -1054,9 +1054,6 @@ class RunJob(BaseTask):
                 env['GCE_EMAIL'] = cloud_cred.username
                 env['GCE_PROJECT'] = cloud_cred.project
                 env['GCE_PEM_FILE_PATH'] = cred_files.get(cloud_cred, '')
-            elif cloud_cred and cloud_cred.kind == 'azure':
-                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
-                env['AZURE_CERT_PATH'] = cred_files.get(cloud_cred, '')
             elif cloud_cred and cloud_cred.kind == 'azure_rm':
                 if len(cloud_cred.client) and len(cloud_cred.tenant):
                     env['AZURE_CLIENT_ID'] = cloud_cred.client
@@ -1616,8 +1613,8 @@ class RunInventoryUpdate(BaseTask):
         If no private data is needed, return None.
         """
         private_data = {'credentials': {}}
-        # If this is Microsoft Azure or GCE, return the RSA key
-        if inventory_update.source in ('azure', 'gce'):
+        # If this is GCE, return the RSA key
+        if inventory_update.source == 'gce':
             credential = inventory_update.credential
             private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
             return private_data
@@ -1847,9 +1844,6 @@ class RunInventoryUpdate(BaseTask):
             env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'vmware':
             env['VMWARE_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'azure':
-            env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
-            env['AZURE_CERT_PATH'] = cloud_credential
         elif inventory_update.source == 'azure_rm':
             if len(passwords.get('source_client', '')) and \
                len(passwords.get('source_tenant', '')):

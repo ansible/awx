@@ -533,29 +533,6 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
-    def test_azure_credentials(self):
-        azure = CredentialType.defaults['azure']()
-        credential = Credential(
-            pk=1,
-            credential_type=azure,
-            inputs = {
-                'username': 'bob',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
-        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        self.instance.extra_credentials.add(credential)
-
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'bob'
-            ssh_key_data = env['AZURE_CERT_PATH']
-            assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
-            return ['successful', 0]
-
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-
     def test_azure_rm_with_tenant(self):
         azure = CredentialType.defaults['azure_rm']()
         credential = Credential(
@@ -1027,29 +1004,25 @@ class TestJobCredentials(TestJobExecution):
         gce_credential.inputs['ssh_key_data'] = encrypt_field(gce_credential, 'ssh_key_data')
         self.instance.extra_credentials.add(gce_credential)
 
-        azure = CredentialType.defaults['azure']()
-        azure_credential = Credential(
+        azure_rm = CredentialType.defaults['azure_rm']()
+        azure_rm_credential = Credential(
             pk=2,
-            credential_type=azure,
+            credential_type=azure_rm,
             inputs = {
-                'username': 'joe',
-                'ssh_key_data': 'AZURE: %s' % self.EXAMPLE_PRIVATE_KEY
+                'subscription': 'some-subscription',
+                'username': 'bob',
+                'password': 'secret'
             }
         )
-        azure_credential.inputs['ssh_key_data'] = encrypt_field(azure_credential, 'ssh_key_data')
-        self.instance.extra_credentials.add(azure_credential)
+        azure_rm_credential.inputs['secret'] = encrypt_field(azure_rm_credential, 'secret')
+        self.instance.extra_credentials.add(azure_rm_credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
 
-            assert env['GCE_EMAIL'] == 'bob'
-            assert env['GCE_PROJECT'] == 'some-project'
-            ssh_key_data = env['GCE_PEM_FILE_PATH']
-            assert open(ssh_key_data, 'rb').read() == 'GCE: %s' % self.EXAMPLE_PRIVATE_KEY
-
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'joe'
-            ssh_key_data = env['AZURE_CERT_PATH']
-            assert open(ssh_key_data, 'rb').read() == 'AZURE: %s' % self.EXAMPLE_PRIVATE_KEY
+            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+            assert env['AZURE_AD_USER'] == 'bob'
+            assert env['AZURE_PASSWORD'] == 'secret'
 
             return ['successful', 0]
 
@@ -1241,31 +1214,6 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('vmware', 'username') == 'bob'
             assert config.get('vmware', 'password') == 'secret'
             assert config.get('vmware', 'server') == 'https://example.org'
-            return ['successful', 0]
-
-        self.run_pexpect.side_effect = run_pexpect_side_effect
-        self.task.run(self.pk)
-
-    def test_azure_source(self):
-        azure = CredentialType.defaults['azure']()
-        self.instance.source = 'azure'
-        self.instance.credential = Credential(
-            pk=1,
-            credential_type=azure,
-            inputs = {
-                'username': 'bob',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY
-            }
-        )
-        self.instance.credential.inputs['ssh_key_data'] = encrypt_field(
-            self.instance.credential, 'ssh_key_data'
-        )
-
-        def run_pexpect_side_effect(*args, **kwargs):
-            args, cwd, env, stdout = args
-            assert env['AZURE_SUBSCRIPTION_ID'] == 'bob'
-            ssh_key_data = env['AZURE_CERT_PATH']
-            assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect

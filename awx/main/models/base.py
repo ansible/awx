@@ -52,7 +52,7 @@ PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms', 'scm',]
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms', 'scm',]
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),

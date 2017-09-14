@@ -770,14 +770,12 @@ GCE_HOST_FILTER = r'^.+$'
 GCE_EXCLUDE_EMPTY_GROUPS = True
 GCE_INSTANCE_ID_VAR = None
 
-
-# -------------------
-# -- Microsoft Azure --
-# -------------------
-
+# --------------------------------------
+# -- Microsoft Azure Resource Manager --
+# --------------------------------------
 # It's not possible to get zones in Azure without authenticating, so we
 # provide a list here.
-AZURE_REGION_CHOICES = [
+AZURE_RM_REGION_CHOICES = [
     ('eastus', _('US East')),
     ('eastus2', _('US East 2')),
     ('centralus', _('US Central')),
@@ -804,23 +802,8 @@ AZURE_REGION_CHOICES = [
     ('koreacentral', _('Korea Central')),
     ('koreasouth', _('Korea South')),
 ]
-AZURE_REGIONS_BLACKLIST = []
+AZURE_RM_REGIONS_BLACKLIST = []
 
-# Inventory variable name/value for determining whether a host is active
-# in Microsoft Azure.
-AZURE_ENABLED_VAR = 'instance_status'
-AZURE_ENABLED_VALUE = 'ReadyRole'
-
-# Filter for allowed group and host names when importing inventory from
-# Microsoft Azure.
-AZURE_GROUP_FILTER = r'^.+$'
-AZURE_HOST_FILTER = r'^.+$'
-AZURE_EXCLUDE_EMPTY_GROUPS = True
-AZURE_INSTANCE_ID_VAR = 'private_id'
-
-# --------------------------------------
-# -- Microsoft Azure Resource Manager --
-# --------------------------------------
 AZURE_RM_GROUP_FILTER = r'^.+$'
 AZURE_RM_HOST_FILTER = r'^.+$'
 AZURE_RM_ENABLED_VAR = 'powerstate'
