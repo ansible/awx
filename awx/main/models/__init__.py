@@ -147,6 +147,7 @@ activity_stream_registrar.connect(WorkflowJob)
 prevent_search(User._meta.get_field('password'))
 
 # Always, always, always defer result_stdout_text for polymorphic UnifiedJob rows
+# TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
 def defer_stdout(f):
     def _wrapped(*args, **kwargs):
         objs = f(*args, **kwargs)
