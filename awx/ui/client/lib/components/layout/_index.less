@@ -142,31 +142,25 @@
         overflow-x: hidden;
     }
 
+    &-content {
+        flex: 1px;
+    }
+
     &-footer {
-        height: 40px;
         background-color: @at-color-footer-background;
         color: @at-color-footer;
-        z-index: 1040;
-        position: absolute;
-        right: @at-padding-footer-right;
-        left: 0;
-        bottom: 0;
+        position: relative;
+        padding-right: @at-padding-footer-right;
+        padding-bottom: @at-padding-footer-bottom;
+        margin-top: @at-margin-footer-top;
+        flex: 0;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        margin-left: (@at-width-collapsed-side-nav + 5);
 
         a {
             cursor: pointer;
             margin-right: @at-margin-after-footer-link;
-        }
-    }
-
-    &-side--expanded {
-        + .at-Layout-main {
-            .at-Layout-footer {
-                margin-left: @at-width-expanded-side-nav;
-            }
         }
     }
 }
