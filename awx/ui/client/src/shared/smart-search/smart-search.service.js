@@ -14,12 +14,8 @@ export default [function() {
             let groups = [];
             let quoted;
 
-            if (!searchString.includes(' ')) {
-                return this.splitSearchIntoTerms(this.encode(searchString));
-            }
-
             searchString.split(' ').forEach(substring => {
-                if (substring.includes(':"')) {
+                if (/:"/g.test(substring)) {
                     if (/"$/.test(substring)) {
                         groups.push(this.encode(substring));
                     } else {
@@ -28,7 +24,7 @@ export default [function() {
                 } else if (quoted) {
                     quoted += ` ${substring}`;
 
-                    if (substring.includes('"')) {
+                    if (/"/g.test(substring)) {
                         groups.push(this.encode(quoted));
                         quoted = undefined;
                     }

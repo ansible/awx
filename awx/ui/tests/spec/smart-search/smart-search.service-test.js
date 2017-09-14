@@ -54,7 +54,7 @@ describe('Service: SmartSearch', () => {
             expect(SmartSearchService.splitFilterIntoTerms('name:"foo bar" a b c')).toEqual(["name:%22foo%20bar%22", 'a', 'b', 'c']);
             expect(SmartSearchService.splitFilterIntoTerms('name:"1"')).toEqual(["name:%221%22"]);
             expect(SmartSearchService.splitFilterIntoTerms('name:1')).toEqual(["name:1"]);
-            expect(SmartSearchService.splitFilterIntoTerms(`name:"foo ba'r" a b c`)).toEqual(["name:%22foo%20ba%27r%22", 'a', 'b', 'c']);
+            expect(SmartSearchService.splitFilterIntoTerms('name:"foo ba\'r" a b c')).toEqual(["name:%22foo%20ba%27r%22", 'a', 'b', 'c']);
             expect(SmartSearchService.splitFilterIntoTerms('name:"foobar" other:"barbaz"')).toEqual(["name:%22foobar%22", "other:%22barbaz%22"]);
             expect(SmartSearchService.splitFilterIntoTerms('name:"foobar" other:"bar baz"')).toEqual(["name:%22foobar%22", "other:%22bar%20baz%22"]);
         });
