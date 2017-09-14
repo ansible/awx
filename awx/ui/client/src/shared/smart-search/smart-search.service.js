@@ -6,9 +6,13 @@ export default [function() {
          * work is done to encode quotes in quoted values and the spaces within those quoted
          * values before calling to `splitSearchIntoTerms`.
          */
-        splitHostIntoTerms (searchString) {
+        splitFilterIntoTerms (searchString) {
             let groups = [];
             let quoted;
+
+            if (!searchString.includes(' ')) {
+                return this.splitSearchIntoTerms(this.encode(searchString));
+            }
 
             searchString.split(' ').forEach(substring => {
                 if (substring.includes(':"')) {
@@ -17,9 +21,7 @@ export default [function() {
                     quoted += ` ${substring}`;
 
                     if (substring.includes('"')) {
-                        quoted = quoted.replace(/"/g, encodeURIComponent('"'));
-                        quoted = quoted.replace(/ /g, encodeURIComponent(' '));
-                        groups.push(quoted);
+                        groups.push(this.encode(quoted));
                         quoted = undefined;
                     }
                 } else {
@@ -28,6 +30,11 @@ export default [function() {
             });
 
             return this.splitSearchIntoTerms(groups.join(' '));
+        },
+        encode (string) {
+            string = string.replace(/'/g, '%27');
+
+            return string.replace(/("| )/g, match => encodeURIComponent(match));
         },
         splitSearchIntoTerms(searchString) {
             return searchString.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);

@@ -164,7 +164,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 let splitTerms;
 
                 if ($scope.singleSearchParam === 'host_filter') {
-                    splitTerms = SmartSearchService.splitHostIntoTerms(terms);
+                    splitTerms = SmartSearchService.splitFilterIntoTerms(terms);
                 } else {
                     splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
                 }
