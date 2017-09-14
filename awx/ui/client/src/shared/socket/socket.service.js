@@ -34,7 +34,6 @@ export default
 
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
-                        socketPromise.resolve();
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -76,6 +75,10 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
+                if(_.has(data, "accept") && data.accept === true){
+                    socketPromise.resolve();
+                    return;
+                }
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
                     // summary complete message b/c status is missing.
