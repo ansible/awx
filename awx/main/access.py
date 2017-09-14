@@ -22,7 +22,7 @@ from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
 
-from awx.conf.license import LicenseForbids
+from awx.conf.license import LicenseForbids, feature_enabled
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',
@@ -310,6 +310,10 @@ class BaseAccess(object):
                 validation_errors, resources_needed_to_start = obj.resource_validation_data()
                 if validation_errors:
                     user_capabilities[display_method] = False
+                    continue
+            elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)):
+                if not feature_enabled('workflows'):
+                    user_capabilities[display_method] = (display_method == 'delete')
                     continue
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
