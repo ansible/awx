@@ -79,10 +79,27 @@ sso_complete = CompleteView.as_view()
 class MetadataView(View):
 
     def get(self, request, *args, **kwargs):
+        def strategy_get_port(self):
+            # The basic social-auth django strategy calls SERVER_PORT
+            # instead of using the .get_port() builtin which seems to
+            # cause problems for some proxies.
+            # This is totally ripped off from the later social-auth library
+            # that does the right thing
+            # TODO: Remove after social-auth upgrade
+            try:  # django >= 1.9
+                return self.request.get_port()
+            except AttributeError:  # django < 1.9
+                host_parts = self.request.get_host().split(':')
+                try:
+                    return host_parts[1]
+                except IndexError:
+                    return self.request.META['SERVER_PORT']
         from social.apps.django_app.utils import load_backend, load_strategy
         complete_url = reverse('social:complete', args=('saml', ))
+        django_strategy = load_strategy(request)
+        django_strategy.request_port = strategy_get_port
         saml_backend = load_backend(
-            load_strategy(request),
+            django_strategy,
             'saml',
             redirect_uri=complete_url,
         )
