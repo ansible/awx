@@ -5,6 +5,7 @@
 # is not available when `make languages` is invoked.
 #
 
+from __future__ import print_function
 import codecs
 import datetime
 import locale
@@ -31,7 +32,7 @@ def has_bom(fn):
     return sample.startswith((codecs.BOM_UTF8, codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
 
 
-def popen_wrapper(args, os_err_exc_type=StandardError, stdout_encoding='utf-8'):
+def popen_wrapper(args, os_err_exc_type=Exception, stdout_encoding='utf-8'):
     """
     Friendly wrapper around Popen.
     Returns stdout output, stderr output and OS status code.

@@ -1,12 +1,17 @@
 language: python
 
 python:
-    - 2.7
+    - "2.7"
+    - "3.6"
 
 env:
   - AWX_BUILD_TARGET=test
   - AWX_BUILD_TARGET=ui-test-ci
   - AWX_BUILD_TARGET="flake8 jshint"
+
+matrix:
+  allow_failures:
+    - python "3.6"
 
 branches:
   only:

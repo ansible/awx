@@ -72,6 +72,7 @@ Author: Eric Johnson <erjohnso@google.com>
 Contributors: Matt Hite <mhite@hotmail.com>, Tom Melendez <supertom@google.com>
 Version: 0.0.3
 '''
+from __future__ import print_function
 
 __requires__ = ['pycrypto>=2.6']
 try:

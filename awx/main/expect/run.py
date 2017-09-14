@@ -47,7 +47,7 @@ def open_fifo_write(path, data):
     This blocks the thread until an external process (such as ssh-agent)
     reads data from the pipe.
     '''
-    os.mkfifo(path, 0600)
+    os.mkfifo(path, 0o600)
     thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
 
 

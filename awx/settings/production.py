@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -13,7 +14,7 @@ import traceback
 from split_settings.tools import optional, include
 
 # Load default settings.
-from defaults import *  # NOQA
+from .defaults import *  # NOQA
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG

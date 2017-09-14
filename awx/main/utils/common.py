@@ -32,6 +32,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.utils.text import slugify
 from django.apps import apps
+from functools import reduce
 
 logger = logging.getLogger('awx.main.utils')
 

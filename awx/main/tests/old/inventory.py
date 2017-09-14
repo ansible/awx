@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -758,9 +759,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.get(inv_up_url, expect=404)
 
     def print_group_tree(self, group, depth=0):
-        print ('  ' * depth) + '+ ' + group.name
+        print(('  ' * depth) + '+ ' + group.name)
         for host in group.hosts.order_by('name'):
-            print ('  ' * depth) + '  - ' + host.name
+            print(('  ' * depth) + '  - ' + host.name)
         for child in group.children.order_by('name'):
             self.print_group_tree(child, depth + 1)
 

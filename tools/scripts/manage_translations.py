@@ -37,6 +37,7 @@
 #  $ python tools/scripts/manage_translations.py pull --both --lang ja
 
 # python
+from __future__ import print_function
 import os
 from argparse import ArgumentParser
 from subprocess import PIPE, Popen

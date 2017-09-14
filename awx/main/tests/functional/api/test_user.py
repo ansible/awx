@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 
 from awx.api.versioning import reverse

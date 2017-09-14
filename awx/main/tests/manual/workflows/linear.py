@@ -1,3 +1,4 @@
+from __future__ import print_function
 # AWX
 from awx.main.models import (
     WorkflowJobTemplateNode,

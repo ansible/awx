@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -17,7 +18,7 @@ import mimetypes
 from split_settings.tools import optional, include
 
 # Load default settings.
-from defaults import *  # NOQA
+from .defaults import *  # NOQA
 
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py

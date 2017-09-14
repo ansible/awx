@@ -45,6 +45,7 @@
 #                When set to False, the inventory will return hosts from
 #                whichever other clouds it can contact. (Default: True)
 
+from __future__ import print_function
 import argparse
 import collections
 import os

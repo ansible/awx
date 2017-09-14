@@ -126,7 +126,7 @@ class InventoryScript(object):
                 self.get_data(output)
             else:
                 raise RuntimeError('Either --list or --host must be specified')
-        except Exception, e:
+        except Exception as e:
             output.write('%s\n' % json.dumps(dict(failed=True)))
             if self.options.get('traceback', False):
                 sys.stderr.write(traceback.format_exc())
