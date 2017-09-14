@@ -34,12 +34,6 @@ export default
                         "two words followed by a three digit number.  Such " +
                         "as: ") + "</p><p>adjective-noun-000</p>";
                     break;
-                    case 'azure':
-                        scope.sshKeyDataLabel = i18n._('Management Certificate');
-                        scope.subscription_required = true;
-                        scope.key_required = true;
-                        scope.key_description = i18n._("Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.");
-                    break;
                     case 'azure_rm':
                         scope.usernameLabel = i18n._("Username");
                         scope.subscription_required = true;

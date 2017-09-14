@@ -150,7 +150,7 @@ export default ['i18n', function(i18n) {
                 "subscription": {
                     label: i18n._("Subscription ID"),
                     type: 'text',
-                    ngShow: "kind.value == 'azure' || kind.value == 'azure_rm'",
+                    ngShow: "kind.value == 'azure_rm'",
                     awRequiredWhen: {
                         reqExpression: 'subscription_required',
                         init: false
@@ -169,7 +169,7 @@ export default ['i18n', function(i18n) {
                     labelBind: 'usernameLabel',
                     type: 'text',
                     ngShow: "kind.value && kind.value !== 'aws' && " +
-                            "kind.value !== 'gce' && kind.value!=='azure'",
+                            "kind.value !== 'gce'",
                     awRequiredWhen: {
                         reqExpression: 'username_required',
                         init: false
@@ -241,7 +241,7 @@ export default ['i18n', function(i18n) {
                     labelBind: 'sshKeyDataLabel',
                     type: 'textarea',
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm' || " +
-                            "kind.value == 'gce' || kind.value == 'azure' || kind.value == 'net'",
+                            "kind.value == 'gce' || kind.value == 'net'",
                     awRequiredWhen: {
                         reqExpression: 'key_required',
                         init: true

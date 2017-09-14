@@ -132,7 +132,7 @@ return {
             type: 'select',
             ngOptions: 'source.label for source in source_region_choices track by source.value',
             multiSelect: true,
-            ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure' || source.value == 'azure_rm')",
+            ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure_rm')",
             dataTitle: i18n._('Source Regions'),
             dataPlacement: 'right',
             awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
