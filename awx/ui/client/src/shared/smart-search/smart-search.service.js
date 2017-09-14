@@ -6,20 +6,26 @@ export default [function() {
          * work is done to encode quotes in quoted values and the spaces within those quoted
          * values before calling to `splitSearchIntoTerms`.
          */
-        splitHostIntoTerms (searchString) {
+        splitFilterIntoTerms (searchString) {
+            if (!searchString) {
+                return null;
+            }
+
             let groups = [];
             let quoted;
 
             searchString.split(' ').forEach(substring => {
-                if (substring.includes(':"')) {
-                    quoted = substring;
+                if (/:"/g.test(substring)) {
+                    if (/"$/.test(substring)) {
+                        groups.push(this.encode(substring));
+                    } else {
+                        quoted = substring;
+                    }
                 } else if (quoted) {
                     quoted += ` ${substring}`;
 
-                    if (substring.includes('"')) {
-                        quoted = quoted.replace(/"/g, encodeURIComponent('"'));
-                        quoted = quoted.replace(/ /g, encodeURIComponent(' '));
-                        groups.push(quoted);
+                    if (/"/g.test(substring)) {
+                        groups.push(this.encode(quoted));
                         quoted = undefined;
                     }
                 } else {
@@ -28,6 +34,11 @@ export default [function() {
             });
 
             return this.splitSearchIntoTerms(groups.join(' '));
+        },
+        encode (string) {
+            string = string.replace(/'/g, '%27');
+
+            return string.replace(/("| )/g, match => encodeURIComponent(match));
         },
         splitSearchIntoTerms(searchString) {
             return searchString.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
