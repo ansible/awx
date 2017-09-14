@@ -7,6 +7,10 @@ from social.strategies.django_strategy import DjangoStrategy
 class AWXDjangoStrategy(DjangoStrategy):
     """A DjangoStrategy for python-social-auth containing
        fixes and updates from social-app-django
+
+       TODO: Revert back to using the default DjangoStrategy after
+       we upgrade to social-core / social-app-django. We will also
+       want to ensure we update the SOCIAL_AUTH_STRATEGY setting.
     """
 
     def __init__(self, storage, request=None, tpl=None):
