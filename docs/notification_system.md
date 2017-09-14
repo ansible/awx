@@ -102,7 +102,13 @@ https://www.hipchat.com/server
 
 ## Mattermost
 
-The mattermost notification integration uses Incoming Webhooks. These must be enabled in the System Console of Mattermost. If the user wishes to allow Ansible Tower notifications to modify the Icon URL and username of the notification then they must enabled these options as well.
+The mattermost notification integration uses Incoming Webhooks. A password is not required because the webhook URL itself is the secret. Webhooks must be enabled in the System Console of Mattermost. If the user wishes to allow Ansible Tower notifications to modify the Icon URL and username of the notification then they must enabled these options as well.
+
+In order to enable these settings in Mattermost:
+1. First go to System Console > Integrations > Custom Integrations. Check Enable Incoming Webhooks
+2. Optionally, go to System Console > Integrations > Custom Integrations. Check "Enable integrations to override usernames" and Check "Enable integrations to override profile picture icons"
+3. Go to Main Menu > Integrations > Incoming Webhook. Click "Add Incoming Webhook"
+4. Choose a "Display Name", "Description", and Channel. This channel will be overridden if the notification uses the `channel` option
 
 * `url`: The incoming webhook URL that was configured in Mattermost. Notifications will use this URL to POST.
 * `username`: Optional. The username to display for the notification.
