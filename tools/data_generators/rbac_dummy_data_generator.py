@@ -89,7 +89,7 @@ options = vars(options)
 
 
 if options['preset']:
-    print ' Using preset data numbers set ' + str(options['preset'])
+    print(' Using preset data numbers set ' + str(options['preset']))
     # Read the numbers of resources from presets file, if provided
     presets_filename = os.path.abspath(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'presets.tsv'))
