@@ -365,6 +365,13 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            mattermost_no_verify_ssl: {
+                label: i18n._('Disable SSL Verification'),
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'mattermost' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             server: {
                 label: i18n._('IRC Server Address'),
                 type: 'text',
