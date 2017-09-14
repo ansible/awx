@@ -149,7 +149,7 @@
     awx_task_container_links:
       - rabbitmq
       - memcached
-      - awx_web
+      - awx_web:awxweb
   when: pg_hostname is defined
 
 - name: Set properties with postgres for awx_task
@@ -158,7 +158,7 @@
     awx_task_container_links:
       - rabbitmq
       - memcached
-      - awx_web
+      - awx_web:awxweb
       - postgres
   when: pg_hostname is not defined or pg_hostname == ''
 
