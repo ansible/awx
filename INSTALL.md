@@ -25,6 +25,7 @@ This document provides a guide for installing AWX.
     - [Inventory variables](#inventory-variables)
       - [Docker registry](#docker-registry)
       - [PostgreSQL](#postgresql-1)
+      - [Proxy settings](#proxy-settings)
   - [Start the build](#start-the-build-1)
   - [Post build](#post-build-1)
   - [Accessing AWX](#accessing-awx-1)
@@ -298,6 +299,21 @@ If you wish to tag and push built images to a Docker registry, set the following
 *docker_registry_username*
 
 > Username of the user that will push images to the registry. Defaults to *developer*.
+
+
+#### Proxy settings
+
+*http_proxy*
+
+> IP address and port, or URL, for using an http_proxy.
+
+*https_proxy*
+
+> IP address and port, or URL, for using an https_proxy.
+
+*no_proxy*
+
+> Exlude IP address or URL from the proxy.
 
 #### PostgreSQL
 
