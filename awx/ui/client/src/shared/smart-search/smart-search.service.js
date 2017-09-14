@@ -7,6 +7,10 @@ export default [function() {
          * values before calling to `splitSearchIntoTerms`.
          */
         splitFilterIntoTerms (searchString) {
+            if (!searchString) {
+                return null;
+            }
+
             let groups = [];
             let quoted;
 
@@ -16,7 +20,11 @@ export default [function() {
 
             searchString.split(' ').forEach(substring => {
                 if (substring.includes(':"')) {
-                    quoted = substring;
+                    if (/"$/.test(substring)) {
+                        groups.push(this.encode(substring));
+                    } else {
+                        quoted = substring;
+                    }
                 } else if (quoted) {
                     quoted += ` ${substring}`;
 
