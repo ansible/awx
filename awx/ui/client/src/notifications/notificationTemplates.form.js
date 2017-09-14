@@ -347,10 +347,6 @@ export default ['i18n', function(i18n) {
             mattermost_username: {
                 label: i18n._('Username'),
                 type: 'text',
-                awRequiredWhen: {
-                    reqExpression: "mattermost_username_required",
-                    init: "false"
-                },
                 ngShow: "notification_type.value == 'mattermost' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
@@ -358,10 +354,6 @@ export default ['i18n', function(i18n) {
             mattermost_channel: {
                 label: i18n._('Channel'),
                 type: 'text',
-                awRequiredWhen: {
-                    reqExpression: "mattermost_channel_required",
-                    init: "false"
-                },
                 ngShow: "notification_type.value == 'mattermost' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
@@ -369,10 +361,6 @@ export default ['i18n', function(i18n) {
             mattermost_icon_url: {
                 label: i18n._('Icon URL'),
                 type: 'text',
-                awRequiredWhen: {
-                    reqExpression: "mattermost_icon_url_required",
-                    init: "false"
-                },
                 ngShow: "notification_type.value == 'mattermost' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'

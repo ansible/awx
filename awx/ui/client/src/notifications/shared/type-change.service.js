@@ -51,9 +51,6 @@ function (i18n) {
                     break;
                 case 'mattermost':
                     obj.mattermost_required = true;
-                    obj.mattermost_username_required = false;
-                    obj.mattermost_channel_required = false;
-                    obj.mattermost_icon_url_required = false;
                     break;
                 case 'pagerduty':
                     obj.tokenLabel = ' ' + i18n._('API Token');
