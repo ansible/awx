@@ -18,7 +18,7 @@ class MattermostBackend(AWXBaseEmailBackend):
     recipient_parameter = "mattermost_url"
     sender_parameter = None
 
-    def __init__(self, mattermost_channel=None, mattermost_username=None, 
+    def __init__(self, mattermost_channel=None, mattermost_username=None,
                  mattermost_icon_url=None, fail_silently=False, **kwargs):
         super(MattermostBackend, self).__init__(fail_silently=fail_silently)
         self.mattermost_channel = mattermost_channel
