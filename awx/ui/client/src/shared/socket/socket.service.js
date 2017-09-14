@@ -119,6 +119,7 @@ export default
             disconnect: function(){
                 if(this.socket){
                     this.socket.close();
+                    delete this.socket;
                 }
             },
             subscribe: function(state){
