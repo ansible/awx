@@ -191,14 +191,17 @@ export default
                 var self = this;
                 $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
-                    self.socket.send(data, function () {
-                        var args = arguments;
-                        self.scope.$apply(function () {
-                            if (callback) {
-                                callback.apply(self.socket, args);
-                            }
+                    console.log("socket readyState: " + self.socket.readyState);
+                    if(self.socket.readyState === 1){
+                        self.socket.send(data, function () {
+                            var args = arguments;
+                            self.scope.$apply(function () {
+                                if (callback) {
+                                    callback.apply(self.socket, args);
+                                }
+                            });
                         });
-                    });
+                    }
                 });
             },
             addStateResolve: function(state, id){
