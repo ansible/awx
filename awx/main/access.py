@@ -2084,6 +2084,7 @@ class UnifiedJobAccess(BaseAccess):
         #    'job_template__project',
         #    'job_template__credential',
         #)
+        # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
         qs = qs.defer('result_stdout_text')
         return qs.all()
 
