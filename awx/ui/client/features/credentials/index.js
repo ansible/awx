@@ -1,35 +1,33 @@
 import LegacyCredentials from './legacy.credentials';
 import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
-import CredentialsStrings from './credentials.strings'
+import CredentialsStrings from './credentials.strings';
 
-const addEditTemplate = require('@features/credentials/add-edit-credentials.view.html');
+const addEditTemplate = require('~features/credentials/add-edit-credentials.view.html');
 
 function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
-    let id = $stateParams.credential_id;
+    const id = $stateParams.credential_id;
 
-    let promises = {
-        me: new Me('get').then((me) => {
-            return me.extend('get', 'admin_of_organizations');
-        })
+    const promises = {
+        me: new Me('get').then((me) => me.extend('get', 'admin_of_organizations'))
     };
 
     if (!id) {
         promises.credential = new Credential('options');
-        promises.credentialType =  new CredentialType();
-        promises.organization =  new Organization();
+        promises.credentialType = new CredentialType();
+        promises.organization = new Organization();
 
-        return $q.all(promises)
+        return $q.all(promises);
     }
 
     promises.credential = new Credential(['get', 'options'], [id, id]);
 
     return $q.all(promises)
         .then(models => {
-            let typeId = models.credential.get('credential_type');
-            let orgId = models.credential.get('organization');
+            const typeId = models.credential.get('credential_type');
+            const orgId = models.credential.get('organization');
 
-            let dependents = {
+            const dependents = {
                 credentialType: new CredentialType('get', typeId),
                 organization: new Organization('get', orgId)
             };
@@ -54,9 +52,9 @@ CredentialsResolve.$inject = [
 ];
 
 function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvider) {
-    let stateExtender = $stateExtenderProvider.$get();
-    let legacy = legacyProvider.$get();
-    let strings = stringProvider.$get();
+    const stateExtender = $stateExtenderProvider.$get();
+    const legacy = legacyProvider.$get();
+    const strings = stringProvider.$get();
 
     stateExtender.addState({
         name: 'credentials.add',

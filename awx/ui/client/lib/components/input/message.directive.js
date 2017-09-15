@@ -1,4 +1,4 @@
-const templateUrl = require('@components/input/message.partial.html');
+const templateUrl = require('~components/input/message.partial.html');
 
 function atInputMessage () {
     return {

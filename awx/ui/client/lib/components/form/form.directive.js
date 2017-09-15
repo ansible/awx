@@ -1,8 +1,8 @@
-const templateUrl = require('@components/form/form.partial.html');
+const templateUrl = require('~components/form/form.partial.html');
 
 function atFormLink (scope, el, attrs, controllers) {
-    let formController = controllers[0];
-    let form = el[0];
+    const formController = controllers[0];
+    const form = el[0];
 
     scope.ns = 'form';
     scope[scope.ns] = { modal: {} };
@@ -11,7 +11,7 @@ function atFormLink (scope, el, attrs, controllers) {
 }
 
 function AtFormController (eventService, strings) {
-    let vm = this || {};
+    const vm = this || {};
 
     let scope;
     let modal;
@@ -27,22 +27,22 @@ function AtFormController (eventService, strings) {
     vm.init = (_scope_, _form_) => {
         scope = _scope_;
         form = _form_;
-        modal = scope[scope.ns].modal;
+        ({ modal } = scope[scope.ns]);
 
         vm.state.disabled = scope.state.disabled;
 
         vm.setListeners();
     };
 
-    vm.register = (category, component, el) => { 
+    vm.register = (category, component) => {
         component.category = category;
         component.form = vm.state;
 
-        vm.components.push(component)
+        vm.components.push(component);
     };
 
     vm.setListeners = () => {
-        let listeners = eventService.addListeners([
+        const listeners = eventService.addListeners([
             [form, 'keypress', vm.submitOnEnter]
         ]);
 
@@ -58,14 +58,14 @@ function AtFormController (eventService, strings) {
         scope.$apply(vm.submit);
     };
 
-    vm.submit = event => {
+    vm.submit = () => {
         if (!vm.state.isValid) {
             return;
         }
 
         vm.state.disabled = true;
 
-        let data = vm.components
+        const data = vm.components
             .filter(component => component.category === 'input')
             .reduce((values, component) => {
                 if (!component.state._value) {
@@ -87,7 +87,7 @@ function AtFormController (eventService, strings) {
         scope.state.save(data)
             .then(scope.state.onSaveSuccess)
             .catch(err => vm.onSaveError(err))
-            .finally(() => vm.state.disabled = false);
+            .finally(() => { vm.state.disabled = false; });
     };
 
     vm.onSaveError = err => {
@@ -103,22 +103,22 @@ function AtFormController (eventService, strings) {
 
         if (!handled) {
             let message;
-            let title = strings.get('form.SUBMISSION_ERROR_TITLE');
-            let preface = strings.get('form.SUBMISSION_ERROR_PREFACE');
+            const title = strings.get('form.SUBMISSION_ERROR_TITLE');
+            const preface = strings.get('form.SUBMISSION_ERROR_PREFACE');
 
             if (typeof err.data === 'object') {
-                message = JSON.stringify(err.data);  
+                message = JSON.stringify(err.data);
             } else {
                 message = err.data;
             }
 
-            modal.show(title, `${preface}: ${message}`)
+            modal.show(title, `${preface}: ${message}`);
         }
     };
 
-    vm.handleUnexpectedError = err => {
-        let title = strings.get('form.SUBMISSION_ERROR_TITLE');
-        let message = strings.get('form.SUBMISSION_ERROR_MESSAGE');
+    vm.handleUnexpectedError = () => {
+        const title = strings.get('form.SUBMISSION_ERROR_TITLE');
+        const message = strings.get('form.SUBMISSION_ERROR_MESSAGE');
 
         modal.show(title, message);
 
@@ -126,7 +126,7 @@ function AtFormController (eventService, strings) {
     };
 
     vm.handleValidationError = errors => {
-        let errorMessageSet = vm.setValidationMessages(errors);
+        const errorMessageSet = vm.setValidationMessages(errors);
 
         if (errorMessageSet) {
             vm.check();
@@ -138,22 +138,23 @@ function AtFormController (eventService, strings) {
     vm.setValidationMessages = (errors, errorSet) => {
         let errorMessageSet = errorSet || false;
 
-        for (let id in errors) {
-            if (!Array.isArray(errors[id]) && typeof errors[id] === 'object') {
-                errorMessageSet = vm.setValidationMessages(errors[id], errorMessageSet);
-                continue;
+        Object.keys(errors).forEach(error => {
+            if (!Array.isArray(error) && typeof error === 'object') {
+                errorMessageSet = vm.setValidationMessages(error, errorMessageSet);
+
+                return;
             }
 
             vm.components
                 .filter(component => component.category === 'input')
-                .filter(component => errors[component.state.id])
+                .filter(component => error[component.state.id])
                 .forEach(component => {
                     errorMessageSet = true;
 
                     component.state._rejected = true;
-                    component.state._message = errors[component.state.id].join(' ');
+                    component.state._message = error[component.state.id].join(' ');
                 });
-        }
+        });
 
         return errorMessageSet;
     };
@@ -176,7 +177,7 @@ function AtFormController (eventService, strings) {
     };
 
     vm.check = () => {
-        let isValid = vm.validate();
+        const isValid = vm.validate();
 
         if (isValid !== vm.state.isValid) {
             vm.state.isValid = isValid;

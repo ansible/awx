@@ -8,19 +8,19 @@ function createFormSchema (method, config) {
         method = 'GET';
     }
 
-    let schema = Object.assign({}, this.options(`actions.${method.toUpperCase()}`));
+    const schema = Object.assign({}, this.options(`actions.${method.toUpperCase()}`));
 
     if (config && config.omit) {
         config.omit.forEach(key => delete schema[key]);
     }
 
-    for (let key in schema) {
+    Object.keys(schema).forEach(key => {
         schema[key].id = key;
 
         if (this.has(key)) {
             schema[key]._value = this.get(key);
         }
-    }
+    });
 
     return schema;
 }
@@ -31,7 +31,7 @@ function assignInputGroupValues (inputs) {
     }
 
     return inputs.map(input => {
-        let value = this.get(`inputs.${input.id}`);
+        const value = this.get(`inputs.${input.id}`);
 
         input._value = value;
         input._encrypted = value === ENCRYPTED_VALUE;
@@ -50,7 +50,7 @@ function CredentialModel (method, resource, graft) {
     return this.create(method, resource, graft);
 }
 
-function CredentialModelLoader (_BaseModel_ ) {
+function CredentialModelLoader (_BaseModel_) {
     BaseModel = _BaseModel_;
 
     return CredentialModel;

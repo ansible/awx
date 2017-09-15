@@ -1,8 +1,8 @@
-const templateUrl = require('@components/input/checkbox.partial.html');
+const templateUrl = require('~components/input/checkbox.partial.html');
 
 function atInputCheckboxLink (scope, element, attrs, controllers) {
-    let formController = controllers[0];
-    let inputController = controllers[1];
+    const formController = controllers[0];
+    const inputController = controllers[1];
 
     if (scope.tab === '1') {
         element.find('input')[0].focus();
@@ -12,7 +12,7 @@ function atInputCheckboxLink (scope, element, attrs, controllers) {
 }
 
 function AtInputCheckboxController (baseInputController) {
-    let vm = this || {};
+    const vm = this || {};
 
     vm.init = (scope, element, form) => {
         baseInputController.call(vm, 'input', scope, element, form);

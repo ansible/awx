@@ -42,12 +42,16 @@ let base = {
         publicPath: '',
         filename: OUTPUT
     },
+    stats: 'minimal',
     module: {
         rules: [
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                options: {
+                    presets: ['env']
+                }
             },
             {
                 test: /\.css$/,
@@ -104,8 +108,9 @@ let base = {
             _: 'lodash'
         }),
         new ExtractTextPlugin('css/[name].[hash].css'),
-        new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH], {
+        new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH, LANGUAGES_PATH], {
             root: UI_PATH,
+            verbose: false
         }),
         new CopyWebpackPlugin([
             {
@@ -174,23 +179,23 @@ let base = {
     ],
     resolve: {
         alias: {
-            '@features': FEATURES_PATH,
-            '@models': MODELS_PATH,
-            '@services': SERVICES_PATH,
-            '@components': COMPONENTS_PATH,
-            '@modules': NODE_MODULES_PATH,
-            '@assets': ASSETS_PATH,
-            'd3$': '@modules/d3/d3.min.js',
-            'codemirror.jsonlint$': '@modules/codemirror/addon/lint/json-lint.js',
-            'jquery-resize$': '@modules/javascript-detect-element-resize/jquery.resize.js',
-            'select2$': '@modules/select2/dist/js/select2.full.min.js',
-            'js-yaml$': '@modules/js-yaml/dist/js-yaml.min.js',
-            'lr-infinite-scroll$': '@modules/lr-infinite-scroll/lrInfiniteScroll.js',
-            'angular-ui-router$': '@modules/angular-ui-router/release/angular-ui-router.js',
-            'angular-ui-router-state-events$': '@modules/angular-ui-router/release/stateEvents.js',
-            'ng-toast-provider$': '@modules/ng-toast/src/scripts/provider.js',
-            'ng-toast-directives$': '@modules/ng-toast/src/scripts/directives.js',
-            'ng-toast$': '@modules/ng-toast/src/scripts/module.js'
+            '~features': FEATURES_PATH,
+            '~models': MODELS_PATH,
+            '~services': SERVICES_PATH,
+            '~components': COMPONENTS_PATH,
+            '~modules': NODE_MODULES_PATH,
+            '~assets': ASSETS_PATH,
+            'd3$': '~modules/d3/d3.min.js',
+            'codemirror.jsonlint$': '~modules/codemirror/addon/lint/json-lint.js',
+            'jquery-resize$': '~modules/javascript-detect-element-resize/jquery.resize.js',
+            'select2$': '~modules/select2/dist/js/select2.full.min.js',
+            'js-yaml$': '~modules/js-yaml/dist/js-yaml.min.js',
+            'lr-infinite-scroll$': '~modules/lr-infinite-scroll/lrInfiniteScroll.js',
+            'angular-ui-router$': '~modules/angular-ui-router/release/angular-ui-router.js',
+            'angular-ui-router-state-events$': '~modules/angular-ui-router/release/stateEvents.js',
+            'ng-toast-provider$': '~modules/ng-toast/src/scripts/provider.js',
+            'ng-toast-directives$': '~modules/ng-toast/src/scripts/directives.js',
+            'ng-toast$': '~modules/ng-toast/src/scripts/module.js'
         }
     }
 };

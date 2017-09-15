@@ -1,8 +1,8 @@
 function ComponentsStrings (BaseString) {
     BaseString.call(this, 'components');
 
-    let t = this.t;
-    let ns = this.components;
+    const { t } = this;
+    const ns = this.components;
 
     ns.REPLACE = t.s('REPLACE');
     ns.REVERT = t.s('REVERT');
@@ -18,7 +18,7 @@ function ComponentsStrings (BaseString) {
 
     ns.form = {
         SUBMISSION_ERROR_TITLE: t.s('Unable to Submit'),
-        SUBMISSION_ERROR_MESSAGE:t.s('Unexpected server error. View the console for more information'),
+        SUBMISSION_ERROR_MESSAGE: t.s('Unexpected server error. View the console for more information'),
         SUBMISSION_ERROR_PREFACE: t.s('Unexpected Error')
     };
 
@@ -46,7 +46,7 @@ function ComponentsStrings (BaseString) {
     ns.truncate = {
         DEFAULT: t.s('Copy full revision to clipboard.'),
         COPIED: t.s('Copied to clipboard.')
-    }
+    };
 
     ns.layout = {
         CURRENT_USER_LABEL: t.s('Logged in as'),
@@ -71,7 +71,7 @@ function ComponentsStrings (BaseString) {
         SETTINGS: t.s('Settings'),
         FOOTER_ABOUT: t.s('About'),
         FOOTER_COPYRIGHT: t.s('Copyright © 2017 Red Hat, Inc.')
-    }
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

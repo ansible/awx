@@ -1,4 +1,4 @@
-const templateUrl = require('@components/utility/divider.partial.html');
+const templateUrl = require('~components/utility/divider.partial.html');
 
 function atPanelBody () {
     return {

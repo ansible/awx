@@ -1,4 +1,4 @@
-const templateUrl = require('@components/popover/popover.partial.html');
+const templateUrl = require('~components/popover/popover.partial.html');
 
 const DEFAULT_POSITION = 'right';
 const DEFAULT_ACTION = 'click';
@@ -10,21 +10,20 @@ const DEFAULT_REFRESH_DELAY = 50;
 const DEFAULT_RESET_ON_EXIT = false;
 
 function atPopoverLink (scope, el, attr, controllers) {
-    let popoverController = controllers[0];
-    let container = el[0];
-    let popover = container.getElementsByClassName('at-Popover-container')[0];
-    let icon = container.getElementsByTagName('i')[0];
+    const popoverController = controllers[0];
+    const container = el[0];
+    const popover = container.getElementsByClassName('at-Popover-container')[0];
+    const icon = container.getElementsByTagName('i')[0];
 
-    let done = scope.$watch('state', () => {
+    const done = scope.$watch('state', () => {
         popoverController.init(scope, container, icon, popover);
         done();
     });
 }
 
 function AtPopoverController () {
-    let vm = this;
+    const vm = this;
 
-    let container;
     let icon;
     let popover;
     let scope;
@@ -59,24 +58,22 @@ function AtPopoverController () {
         }
     };
 
-    vm.createDismissListener = (createEvent) => {
-        return event => {
-            event.stopPropagation();
+    vm.createDismissListener = () => event => {
+        event.stopPropagation();
 
-            if (vm.isClickWithinPopover(event, popover)) {
-                return;
-            }
+        if (vm.isClickWithinPopover(event, popover)) {
+            return;
+        }
 
-            vm.dismiss();
+        vm.dismiss();
 
-            if (scope.popover.on === 'mouseenter') {
-                icon.removeEventListener('mouseleave', vm.dismissListener);
-            } else {
-                window.addEventListener(scope.popover.on, vm.dismissListener);
-            }
+        if (scope.popover.on === 'mouseenter') {
+            icon.removeEventListener('mouseleave', vm.dismissListener);
+        } else {
+            window.addEventListener(scope.popover.on, vm.dismissListener);
+        }
 
-            window.removeEventListener('resize', vm.dismissListener);
-        };
+        window.removeEventListener('resize', vm.dismissListener);
     };
 
     vm.dismiss = (refresh) => {
@@ -91,11 +88,11 @@ function AtPopoverController () {
         popover.style.opacity = 0;
     };
 
-    vm.isClickWithinPopover = (event, popover) => {
-        let box = popover.getBoundingClientRect();
+    vm.isClickWithinPopover = (event, popoverEl) => {
+        const box = popoverEl.getBoundingClientRect();
 
-        let x = event.clientX;
-        let y = event.clientY;
+        const x = event.clientX;
+        const y = event.clientY;
 
         if ((x <= box.right && x >= box.left) && (y >= box.top && y <= box.bottom)) {
             return true;
@@ -104,26 +101,24 @@ function AtPopoverController () {
         return false;
     };
 
-    vm.createDisplayListener = () => {
-        return event => {
-            if (vm.open) {
-                return;
-            }
+    vm.createDisplayListener = () => event => {
+        if (vm.open) {
+            return;
+        }
 
-            event.stopPropagation();
+        event.stopPropagation();
 
-            vm.display();
+        vm.display();
 
-            vm.dismissListener = vm.createDismissListener(event);
+        vm.dismissListener = vm.createDismissListener(event);
 
-            if (scope.popover.on === 'mouseenter') {
-                icon.addEventListener('mouseleave', vm.dismissListener);
-            } else {
-                window.addEventListener(scope.popover.on, vm.dismissListener);
-            }
+        if (scope.popover.on === 'mouseenter') {
+            icon.addEventListener('mouseleave', vm.dismissListener);
+        } else {
+            window.addEventListener(scope.popover.on, vm.dismissListener);
+        }
 
-            window.addEventListener('resize', vm.dismissListener);
-        };
+        window.addEventListener('resize', vm.dismissListener);
     };
 
     vm.refresh = () => {
@@ -136,12 +131,12 @@ function AtPopoverController () {
     };
 
     vm.getPositions = () => {
-        let arrow = popover.getElementsByClassName('at-Popover-arrow')[0];
+        const arrow = popover.getElementsByClassName('at-Popover-arrow')[0];
 
         arrow.style.lineHeight = `${DEFAULT_ARROW_HEIGHT}px`;
         arrow.children[0].style.lineHeight = `${scope.popover.arrowHeight}px`;
 
-        let data = {
+        const data = {
             arrow,
             icon: icon.getBoundingClientRect(),
             popover: popover.getBoundingClientRect(),
@@ -158,7 +153,7 @@ function AtPopoverController () {
     vm.display = () => {
         vm.open = true;
 
-        let positions = vm.getPositions();
+        const positions = vm.getPositions();
 
         popover.style.visibility = 'visible';
         popover.style.opacity = 1;
@@ -171,19 +166,18 @@ function AtPopoverController () {
     };
 
     vm.displayRight = (pos) => {
-        let arrowHeight = pos.arrow.offsetHeight;
-        let arrowLeft = pos.rightBoundary + DEFAULT_PADDING;
+        const arrowHeight = pos.arrow.offsetHeight;
+        const arrowLeft = pos.rightBoundary + DEFAULT_PADDING;
+        const popoverLeft = arrowLeft + DEFAULT_PADDING - 1;
 
         let popoverTop;
-        let popoverLeft = arrowLeft + DEFAULT_PADDING - 1;
-
         if (pos.cy < (pos.popover.height / 2)) {
             popoverTop = DEFAULT_PADDING;
         } else {
             popoverTop = Math.floor((pos.cy - pos.popover.height / 2));
         }
 
-        let arrowTop = Math.floor(popoverTop + (pos.popover.height / 2) - (arrowHeight / 2));
+        const arrowTop = Math.floor(popoverTop + (pos.popover.height / 2) - (arrowHeight / 2));
 
         pos.arrow.style.top = `${arrowTop}px`;
         pos.arrow.style.left = `${arrowLeft}px`;
@@ -193,11 +187,11 @@ function AtPopoverController () {
     };
 
     vm.displayTop = (pos) => {
-        let arrowTop = pos.icon.top - pos.icon.height - DEFAULT_PADDING;
-        let arrowLeft = Math.floor(pos.icon.right - pos.icon.width - (pos.arrow.style.width / 2));
+        const arrowTop = pos.icon.top - pos.icon.height - DEFAULT_PADDING;
+        const arrowLeft = Math.floor(pos.icon.right - pos.icon.width - (pos.arrow.style.width / 2));
 
-        let popoverTop = pos.icon.top - pos.popover.height - pos.icon.height - 5;
-        let popoverLeft = Math.floor(pos.cx - (pos.popover.width / 2));
+        const popoverTop = pos.icon.top - pos.popover.height - pos.icon.height - 5;
+        const popoverLeft = Math.floor(pos.cx - (pos.popover.width / 2));
 
         pos.arrow.style.top = `${arrowTop}px`;
         pos.arrow.style.left = `${arrowLeft}px`;

@@ -1,17 +1,17 @@
-const templateUrl = require('@components/layout/side-nav.partial.html');
+const templateUrl = require('~components/layout/side-nav.partial.html');
 
 function atSideNavLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 }
 
 function AtSideNavController () {
-    let vm = this || {};
+    const vm = this || {};
 
     vm.isExpanded = false;
 
     vm.toggleExpansion = () => {
         vm.isExpanded = !vm.isExpanded;
-    }
+    };
 }
 
 function atSideNav () {

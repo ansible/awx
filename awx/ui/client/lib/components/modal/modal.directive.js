@@ -1,19 +1,19 @@
-const templateUrl = require('@components/modal/modal.partial.html');
+const templateUrl = require('~components/modal/modal.partial.html');
 
 const DEFAULT_ANIMATION_DURATION = 150;
 
 function atModalLink (scope, el, attrs, controllers) {
-    let modalController = controllers[0];
-    let property = `scope.${scope.ns}.modal`;
+    const modalController = controllers[0];
+    const property = `scope.${scope.ns}.modal`;
 
-    let done = scope.$watch(property, () => {
+    const done = scope.$watch(property, () => {
         modalController.init(scope, el);
         done();
     });
 }
 
 function AtModalController (eventService, strings) {
-    let vm = this;
+    const vm = this;
 
     let overlay;
     let modal;
@@ -22,15 +22,15 @@ function AtModalController (eventService, strings) {
     vm.strings = strings;
 
     vm.init = (scope, el) => {
-        overlay = el[0];
-        modal = el.find('.at-Modal-window')[0];
+        [overlay] = el;
+        [modal] = el.find('.at-Modal-window');
 
         vm.modal = scope[scope.ns].modal;
         vm.modal.show = vm.show;
         vm.modal.hide = vm.hide;
     };
 
-    vm.show = (title, message) => {
+    vm.show = (title, message, event) => {
         vm.modal.title = title;
         vm.modal.message = message;
 
@@ -49,7 +49,9 @@ function AtModalController (eventService, strings) {
 
         eventService.remove(listeners);
 
-        setTimeout(() => overlay.style.display = 'none', DEFAULT_ANIMATION_DURATION);
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, DEFAULT_ANIMATION_DURATION);
     };
 
     vm.clickToHide = event => {
@@ -59,10 +61,10 @@ function AtModalController (eventService, strings) {
     };
 
     vm.clickIsOutsideModal = e => {
-        let m = modal.getBoundingClientRect();
-        let cx = e.clientX;
-        let cy = e.clientY;
-        
+        const m = modal.getBoundingClientRect();
+        const cx = e.clientX;
+        const cy = e.clientY;
+
         if (cx < m.left || cx > m.right || cy > m.bottom || cy < m.top) {
             return true;
         }
@@ -74,7 +76,7 @@ function AtModalController (eventService, strings) {
 AtModalController.$inject = [
     'EventService',
     'ComponentsStrings'
-]
+];
 
 function atModal () {
     return {

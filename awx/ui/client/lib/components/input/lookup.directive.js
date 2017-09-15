@@ -1,11 +1,11 @@
-const templateUrl = require('@components/input/lookup.partial.html');
+const templateUrl = require('~components/input/lookup.partial.html');
 
 const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_KEY = 'name';
 
 function atInputLookupLink (scope, element, attrs, controllers) {
-    let formController = controllers[0];
-    let inputController = controllers[1];
+    const formController = controllers[0];
+    const inputController = controllers[1];
 
     if (scope.tab === '1') {
         element.find('input')[0].focus();
@@ -14,8 +14,8 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputLookupController (baseInputController, $q, $state, $stateParams) {
-    let vm = this || {};
+function AtInputLookupController (baseInputController, $q, $state) {
+    const vm = this || {};
 
     let scope;
     let model;
@@ -52,7 +52,7 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
     };
 
     vm.lookup = () => {
-        let params = {};
+        const params = {};
 
         if (scope.state._value && scope.state._isValid) {
             params.selected = scope.state._value;
@@ -77,7 +77,7 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
 
     vm.resetDebounce = () => {
         clearTimeout(vm.debounce);
-        vm.searchAfterDebounce(); 
+        vm.searchAfterDebounce();
     };
 
     vm.search = () => {
@@ -90,7 +90,9 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
         return model.search({ [search.key]: scope.state._displayValue }, search.config)
             .then(found => {
                 if (!found) {
-                    return vm.reset();
+                    vm.reset();
+
+                    return;
                 }
 
                 scope[scope.state._resource] = model.get('id');
@@ -99,8 +101,8 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
             })
             .catch(() => vm.reset())
             .finally(() => {
-                let isValid = scope.state._value !== undefined;
-                let message = isValid ? '' : vm.strings.get('lookup.NOT_FOUND');
+                const isValid = scope.state._value !== undefined;
+                const message = isValid ? '' : vm.strings.get('lookup.NOT_FOUND');
 
                 vm.check({ isValid, message });
             });
@@ -108,7 +110,9 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
 
     vm.searchOnInput = () => {
         if (vm.isDebouncing) {
-            return vm.resetDebounce();
+            vm.resetDebounce();
+
+            return;
         }
 
         vm.searchAfterDebounce();
@@ -118,8 +122,7 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
 AtInputLookupController.$inject = [
     'BaseInputController',
     '$q',
-    '$state',
-    '$stateParams'
+    '$state'
 ];
 
 function atInputLookup () {
