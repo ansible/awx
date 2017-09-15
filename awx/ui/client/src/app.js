@@ -146,7 +146,8 @@ var awApp = angular.module('awApp', [
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled($ENV['ng-debug'] || false);
+        // $logProvider.debugEnabled($ENV['ng-debug'] || false);
+        $logProvider.debugEnabled(true);
     }])
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({
