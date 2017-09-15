@@ -107,7 +107,7 @@
       POSTGRES_PASSWORD: "{{ pg_password }}"
       POSTGRES_DB: "{{ pg_database }}"
   when: pg_hostname is not defined or pg_hostname == ''
-  register: postgres_container_started
+  register: postgres_container_activate
 
 - name: Activate rabbitmq container
   docker_container:
@@ -116,7 +116,7 @@
     image: rabbitmq:3
     env:
       RABBITMQ_DEFAULT_VHOST: "awx"
-  register: rabbitmq_container_started
+  register: rabbitmq_container_activate
 
 - name: Activate memcached container
   docker_container:
@@ -127,7 +127,7 @@
 - name: Wait for postgres and rabbitmq to activate
   pause:
     seconds: 15
-  when: postgres_container_started.changed or rabbitmq_container_started.changed
+  when: postgres_container_activate.changed or rabbitmq_container_activate.changed
 
 - name: Set properties without postgres for awx_web
   set_fact:
