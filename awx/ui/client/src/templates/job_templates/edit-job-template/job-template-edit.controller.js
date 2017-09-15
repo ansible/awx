@@ -378,71 +378,51 @@ export default
                         $scope.selectedCredentials.vault = jobTemplateData.summary_fields.vault_credential;
                     }
 
-                    // Extra credentials are not included in summary_fields so we have to go
-                    // out and get them ourselves.
+                    if (jobTemplateData.summary_fields.extra_credentials) {
+                        $scope.selectedCredentials.extra = jobTemplateData.summary_fields.extra_credentials;
+                    }
 
-                    let defers = [],
-                        typesArray = [],
-                        credTypeOptions;
-
-                    Rest.setUrl(jobTemplateData.related.extra_credentials);
-                    defers.push(Rest.get()
-                        .then((data) => {
-                            $scope.selectedCredentials.extra = data.data.results;
-                        })
-                        .catch(({data, status}) => {
-                            ProcessErrors(null, data, status, null,
-                                {
-                                    hdr: 'Error!',
-                                    msg: 'Failed to get extra credentials. ' +
-                                    'Get returned status: ' +
-                                    status
-                                });
-                        }));
-
-                    defers.push(MultiCredentialService.getCredentialTypes()
+                    MultiCredentialService.getCredentialTypes()
                         .then(({credential_types, credentialTypeOptions}) => {
-                            typesArray = Object.keys(credential_types).map(key => credential_types[key]);
-                            credTypeOptions = credentialTypeOptions;
-                        })
-                    );
+                            let typesArray = Object.keys(credential_types).map(key => credential_types[key]);
+                            let credTypeOptions = credentialTypeOptions;
 
+                            let machineAndVaultCreds = [],
+                                extraCreds = [];
 
-                    return $q.all(defers).then(() => {
-                        let machineAndVaultCreds = [],
-                            extraCreds = [];
+                            if($scope.selectedCredentials.machine) {
+                                machineAndVaultCreds.push($scope.selectedCredentials.machine);
+                            }
+                            if($scope.selectedCredentials.vault) {
+                                machineAndVaultCreds.push($scope.selectedCredentials.vault);
+                            }
 
-                        if($scope.selectedCredentials.machine) {
-                            machineAndVaultCreds.push($scope.selectedCredentials.machine);
-                        }
-                        if($scope.selectedCredentials.vault) {
-                            machineAndVaultCreds.push($scope.selectedCredentials.vault);
-                        }
+                            machineAndVaultCreds.map(cred => ({
+                                name: cred.name,
+                                id: cred.id,
+                                postType: cred.postType,
+                                kind: typesArray
+                                    .filter(type => {
+                                        return cred.kind === type.kind || parseInt(cred.credential_type) === type.value;
+                                    })[0].name + ":"
+                            }));
 
-                        machineAndVaultCreds.map(cred => ({
-                            name: cred.name,
-                            id: cred.id,
-                            postType: cred.postType,
-                            kind: typesArray
-                                .filter(type => {
-                                    return cred.kind === type.kind || parseInt(cred.credential_type) === type.value;
-                                })[0].name + ":"
-                        }));
+                            if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0) {
+                                extraCreds = extraCreds.concat($scope.selectedCredentials.extra).map(cred => ({
+                                    name: cred.name,
+                                    id: cred.id,
+                                    postType: cred.postType,
+                                    kind: credTypeOptions
+                                        .filter(type => {
+                                            return parseInt(cred.credential_type_id) === type.value;
+                                        })[0].name + ":"
+                                }));
+                            }
 
-                        extraCreds = extraCreds.concat($scope.selectedCredentials.extra).map(cred => ({
-                            name: cred.name,
-                            id: cred.id,
-                            postType: cred.postType,
-                            kind: credTypeOptions
-                                .filter(type => {
-                                    return parseInt(cred.credential_type) === type.value;
-                                })[0].name + ":"
-                        }));
+                            $scope.credentialsToPost = machineAndVaultCreds.concat(extraCreds);
 
-                        $scope.credentialsToPost = machineAndVaultCreds.concat(extraCreds);
-
-                        $scope.$emit('jobTemplateLoaded', master);
-                    });
+                            $scope.$emit('jobTemplateLoaded', master);
+                        });
 
                 }
             });
