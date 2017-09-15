@@ -2835,7 +2835,6 @@ class JobTemplateSchedulesList(SubListCreateAPIView):
 class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
-    parent_model = JobTemplate
     serializer_class = EmptySerializer
     new_in_210 = True
 
@@ -3365,7 +3364,6 @@ class WorkflowJobTemplateDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroy
 class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
 
     model = WorkflowJobTemplate
-    parent_model = WorkflowJobTemplate
     serializer_class = EmptySerializer
     new_in_310 = True
 
