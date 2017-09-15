@@ -77,7 +77,7 @@ I18N_FLAG_FILE = .i18n_built
 	receiver test test_unit test_ansible test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
-	ui-test ui-deps ui-test-ci ui-test-saucelabs VERSION
+	ui-test ui-deps ui-test-ci VERSION
 
 # remove ui build artifacts
 clean-ui:
@@ -501,9 +501,6 @@ testjs_ci:
 
 jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
-
-ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run test:saucelabs
 
 # END UI TASKS
 # --------------------------------------

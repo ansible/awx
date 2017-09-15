@@ -107,6 +107,9 @@ if options['preset']:
 
     options.update({cols[0]: cols[col + 1] for cols in split_lines})
 
+    if not options['prefix']:
+        options['prefix'] = options['preset']
+
 
 n_organizations    = int(options['organizations'])
 n_users            = int(options['users'])
