@@ -313,7 +313,7 @@ If you wish to tag and push built images to a Docker registry, set the following
 
 *no_proxy*
 
-> Exlude IP address or URL from the proxy.
+> Exclude IP address or URL from the proxy.
 
 #### PostgreSQL
 
@@ -418,5 +418,3 @@ Added instance awx to tower
 The AWX web server is accessible on the deployment host, using the *host_port* value set in the *inventory* file. The default URL is [http://localhost](http://localhost).
 
 You will prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
-
-
