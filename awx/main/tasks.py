@@ -1073,6 +1073,7 @@ class RunJob(BaseTask):
                 env['VMWARE_USER'] = cloud_cred.username
                 env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
                 env['VMWARE_HOST'] = cloud_cred.host
+                env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)
             elif cloud_cred and cloud_cred.kind == 'openstack':
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 

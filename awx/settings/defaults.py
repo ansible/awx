@@ -722,7 +722,7 @@ VMWARE_GROUP_FILTER = r'^.+$'
 VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
 
-
+VMWARE_VALIDATE_CERTS = False
 # ---------------------------
 # -- Google Compute Engine --
 # ---------------------------
