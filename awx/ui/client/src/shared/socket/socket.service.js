@@ -34,6 +34,8 @@ export default
 
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
+                        socketPromise.resolve();
+                        console.log('promise resolved, and readyState: '+ self.readyState);
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -75,10 +77,6 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
-                if(_.has(data, "accept") && data.accept === true){
-                    socketPromise.resolve();
-                    return;
-                }
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
                     // summary complete message b/c status is missing.
@@ -191,7 +189,10 @@ export default
                 var self = this;
                 $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
-                    console.log("socket readyState: " + self.socket.readyState);
+                    console.log("socket readyState at emit: " + self.socket.readyState);
+                    if(self.socket.readyState === 0){
+                        self.subscribe(self.getLast());
+                    }
                     if(self.socket.readyState === 1){
                         self.socket.send(data, function () {
                             var args = arguments;
