@@ -52,7 +52,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "license_type !== 'enterprise' || form.$invalid || form.$pending"
+                ngDisabled: "!enterprise_auth || form.$invalid || form.$pending"
             }
         }
     };

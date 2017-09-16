@@ -7,7 +7,7 @@
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
-    'Wait', 'configDataResolve', 'ToJSON',
+    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService',
     //Form definitions
     'configurationAzureForm',
     'configurationGithubForm',
@@ -26,7 +26,7 @@ export default [
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert,
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
-        Wait, configDataResolve, ToJSON,
+        Wait, configDataResolve, ToJSON, ConfigService,
         //Form definitions
         configurationAzureForm,
         configurationGithubForm,
@@ -94,9 +94,6 @@ export default [
                                 }
 
                             } else {
-                                if (key === "LICENSE") {
-                                    $scope.license_type = data[key].license_type;
-                                }
                                 //handle nested objects
                                 if(ConfigurationUtils.isEmpty(data[key])) {
                                     $scope[key] = '{}';
@@ -109,6 +106,11 @@ export default [
                         }
                     });
                     $scope.$broadcast('populated', data);
+                });
+            ConfigService.getConfig()
+                .then(function(data) {
+                    $scope.ldap_auth = data.license_info.features.ldap;
+                    $scope.enterprise_auth = data.license_info.features.enterprise_auth;
                 });
         };
 
