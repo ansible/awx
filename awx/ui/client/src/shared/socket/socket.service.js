@@ -190,9 +190,9 @@ export default
                 $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
                     console.log("socket readyState at emit: " + self.socket.readyState);
-                    if(self.socket.readyState === 0){
-                        self.subscribe(self.getLast());
-                    }
+                    // if(self.socket.readyState === 0){
+                    //     self.subscribe(self.getLast());
+                    // }
                     if(self.socket.readyState === 1){
                         self.socket.send(data, function () {
                             var args = arguments;
