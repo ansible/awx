@@ -248,6 +248,14 @@ You will need the following installed on the host where AWX will be deployed:
 
 ### Pre-build steps
 
+#### Prepare the environment
+
+Install the required packages from the setup file in the root of the cloned git repository.
+
+```
+./setup.py install
+```
+
 #### Deploying to a remote host
 
 By default, the delivered [installer/inventory](./installer/inventory) file will deploy AWX to the local host. It is possible; however, to deploy to a remote host. The [installer/install.yml](./installer/install.yml) playbook can be used to build images on the local host, and ship the built images to, and run deployment tasks on, a remote host. To do this, modify the [installer/inventory](./installer/inventory) file, by commenting out `localhost`, and adding the remote host.
