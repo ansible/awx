@@ -316,7 +316,11 @@ def awx_periodic_scheduler(self):
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError(_("status_str must be either succeeded or failed"))
-    notification_templates = instance.get_notification_templates()
+    try:
+        notification_templates = instance.get_notification_templates()
+    except:
+        logger.warn("No notification template defined for emitting notification")
+        notification_templates = None
     if notification_templates:
         if status_str == 'succeeded':
             notification_template_type = 'success'
