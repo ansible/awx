@@ -35,6 +35,8 @@ host_port=80
 # docker_registry=172.30.1.1:5000
 # docker_registry_repository=awx
 # docker_registry_username=developer
+# docker_registry_password=developerpass
+# docker_registry_email=dev@example.org
 
 # Set pg_hostname if you have an external postgres server, otherwise
 # a new ephemeral postgres service will be created
