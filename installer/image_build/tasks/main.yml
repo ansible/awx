@@ -59,8 +59,9 @@
     tag: "{{ awx_version }}"
     force: true
   delegate_to: localhost
+  when: use_container_for_build|bool
 
-- name: Build AWX distribution
+- name: Build AWX distribution using container
   docker_container:
     env:
       http_proxy: "{{ http_proxy | default('') }}"
@@ -73,6 +74,14 @@
     volumes:
       - ../:/awx:Z
   delegate_to: localhost
+  when: use_container_for_build|bool
+
+- name: Build AWX distribution locally
+  shell: make sdist
+  args:
+    chdir: ..
+  delegate_to: localhost
+  when: not use_container_for_build|bool
 
 - name: Set docker build base path
   set_fact:
