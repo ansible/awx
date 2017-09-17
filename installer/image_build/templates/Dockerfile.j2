@@ -21,7 +21,8 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
-
+ADD ansible.repo /etc/yum.repos.d/ansible.repo
+ADD RPM-GPG-KEY-ansible-release /etc/pki/rpm-gpg/RPM-GPG-KEY-ansible-release
 # OS Dependencies
 WORKDIR /tmp
 RUN mkdir -p /var/lib/awx/public/static
