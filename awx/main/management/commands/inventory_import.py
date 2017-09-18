@@ -194,7 +194,6 @@ def load_inventory_source(source, group_filter_re=None,
     '''
     # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
     # good naming conventions
-    source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
     source = source.replace('vmware.py', 'vmware_inventory.py')
     if not os.path.exists(source):

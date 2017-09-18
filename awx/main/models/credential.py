@@ -57,7 +57,6 @@ class V1Credential(object):
         ('satellite6', 'Red Hat Satellite 6'),
         ('cloudforms', 'Red Hat CloudForms'),
         ('gce', 'Google Compute Engine'),
-        ('azure', 'Microsoft Azure Classic (deprecated)'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
         ('insights', 'Insights'),
@@ -928,35 +927,6 @@ def gce(cls):
                 'multiline': True,
                 'help_text': ('Paste the contents of the PEM file associated '
                               'with the service account email.')
-            }],
-            'required': ['username', 'ssh_key_data'],
-        }
-    )
-
-
-@CredentialType.default
-def azure(cls):
-    return cls(
-        kind='cloud',
-        name='Microsoft Azure Classic (deprecated)',
-        managed_by_tower=True,
-        inputs={
-            'fields': [{
-                'id': 'username',
-                'label': 'Subscription ID',
-                'type': 'string',
-                'help_text': ('Subscription ID is an Azure construct, which is '
-                              'mapped to a username.')
-            }, {
-                'id': 'ssh_key_data',
-                'label': 'Management Certificate',
-                'type': 'string',
-                'format': 'ssh_private_key',
-                'secret': True,
-                'multiline': True,
-                'help_text': ('Paste the contents of the PEM file that corresponds '
-                              'to the certificate you uploaded in the Microsoft '
-                              'Azure console.')
             }],
             'required': ['username', 'ssh_key_data'],
         }

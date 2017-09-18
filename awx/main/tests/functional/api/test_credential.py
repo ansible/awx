@@ -1072,43 +1072,6 @@ def test_gce_create_ok(post, organization, admin, version, params):
 
 
 #
-# Azure Classic
-#
-@pytest.mark.django_db
-@pytest.mark.parametrize('version, params', [
-    ['v1', {
-        'kind': 'azure',
-        'name': 'Best credential ever',
-        'username': 'some_username',
-        'ssh_key_data': EXAMPLE_PRIVATE_KEY
-    }],
-    ['v2', {
-        'credential_type': 1,
-        'name': 'Best credential ever',
-        'inputs': {
-            'username': 'some_username',
-            'ssh_key_data': EXAMPLE_PRIVATE_KEY
-        }
-    }]
-])
-def test_azure_create_ok(post, organization, admin, version, params):
-    azure = CredentialType.defaults['azure']()
-    azure.save()
-    params['organization'] = organization.id
-    response = post(
-        reverse('api:credential_list', kwargs={'version': version}),
-        params,
-        admin
-    )
-    assert response.status_code == 201
-
-    assert Credential.objects.count() == 1
-    cred = Credential.objects.all()[:1].get()
-    assert cred.inputs['username'] == 'some_username'
-    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
-
-
-#
 # Azure Resource Manager
 #
 @pytest.mark.django_db

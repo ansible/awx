@@ -867,7 +867,6 @@ class InventorySourceOptions(BaseModel):
         ('scm', _('Sourced from a Project')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
-        ('azure', _('Microsoft Azure Classic (deprecated)')),
         ('azure_rm', _('Microsoft Azure Resource Manager')),
         ('vmware', _('VMware vCenter')),
         ('satellite6', _('Red Hat Satellite 6')),
@@ -1087,7 +1086,7 @@ class InventorySourceOptions(BaseModel):
         return regions
 
     @classmethod
-    def get_azure_region_choices(self):
+    def get_azure_rm_region_choices(self):
         """Return a complete list of regions in Microsoft Azure, as a list of
         two-tuples.
         """
@@ -1095,13 +1094,9 @@ class InventorySourceOptions(BaseModel):
         # authenticating first (someone reading these might think there's
         # a pattern here!).  Therefore, you guessed it, use a list from
         # settings.
-        regions = list(getattr(settings, 'AZURE_REGION_CHOICES', []))
+        regions = list(getattr(settings, 'AZURE_RM_REGION_CHOICES', []))
         regions.insert(0, ('all', 'All'))
         return regions
-
-    @classmethod
-    def get_azure_rm_region_choices(self):
-        return InventorySourceOptions.get_azure_region_choices()
 
     @classmethod
     def get_vmware_region_choices(self):

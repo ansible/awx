@@ -19,7 +19,6 @@ EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRY
 def test_default_cred_types():
     assert sorted(CredentialType.defaults.keys()) == [
         'aws',
-        'azure',
         'azure_rm',
         'cloudforms',
         'gce',
