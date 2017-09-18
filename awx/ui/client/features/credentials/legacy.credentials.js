@@ -48,60 +48,59 @@ function LegacyCredentialsService () {
         url: '/permissions?{permission_search:queryset}',
         resolve: {
             ListDefinition: () => ({
-                    name: 'permissions',
-                    disabled: 'organization === undefined',
-                    ngClick: 'organization === undefined || $state.go(\'credentials.edit.permissions\')',
-                    awToolTip: '{{permissionsTooltip}}',
-                    dataTipWatch: 'permissionsTooltip',
-                    awToolTipTabEnabledInEditMode: true,
-                    dataPlacement: 'right',
-                    basePath: 'api/v2/credentials/{{$stateParams.id}}/access_list/',
-                    search: {
-                        order_by: 'username'
-                    },
-                    type: 'collection',
-                    title: N_('Permissions'),
-                    iterator: 'permission',
-                    index: false,
-                    open: false,
-                    actions: {
-                        add: {
-                            ngClick: '$state.go(\'.add\')',
-                            label: 'Add',
-                            awToolTip: N_('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: `&#43; ${N_('ADD')}`,
-                            ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
-                        }
-                    },
-                    fields: {
-                        username: {
-                            key: true,
-                            label: N_('User'),
-                            linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                        },
-                        role: {
-                            label: N_('Role'),
-                            type: 'role',
-                            nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
-                        },
-                        team_roles: {
-                            label: N_('Team Roles'),
-                            type: 'team_roles',
-                            nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
-                        }
+                name: 'permissions',
+                disabled: 'organization === undefined',
+                ngClick: 'organization === undefined || $state.go(\'credentials.edit.permissions\')',
+                awToolTip: '{{permissionsTooltip}}',
+                dataTipWatch: 'permissionsTooltip',
+                awToolTipTabEnabledInEditMode: true,
+                dataPlacement: 'right',
+                basePath: 'api/v2/credentials/{{$stateParams.id}}/access_list/',
+                search: {
+                    order_by: 'username'
+                },
+                type: 'collection',
+                title: N_('Permissions'),
+                iterator: 'permission',
+                index: false,
+                open: false,
+                actions: {
+                    add: {
+                        ngClick: '$state.go(\'.add\')',
+                        label: 'Add',
+                        awToolTip: N_('Add a permission'),
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: `&#43; ${N_('ADD')}`,
+                        ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
-                }),
-            Dataset: ['QuerySet', '$stateParams', (qs, $stateParams) => {
-                    const id = $stateParams.credential_id;
-                    const path = `api/v2/credentials/${id}/access_list/`;
-
-                    return qs.search(path, $stateParams.permission_search);
+                },
+                fields: {
+                    username: {
+                        key: true,
+                        label: N_('User'),
+                        linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                    },
+                    role: {
+                        label: N_('Role'),
+                        type: 'role',
+                        nosort: true,
+                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                    },
+                    team_roles: {
+                        label: N_('Team Roles'),
+                        type: 'team_roles',
+                        nosort: true,
+                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
+                    }
                 }
-            ]
+            }),
+            Dataset: ['QuerySet', '$stateParams', (qs, $stateParams) => {
+                const id = $stateParams.credential_id;
+                const path = `api/v2/credentials/${id}/access_list/`;
+
+                return qs.search(path, $stateParams.permission_search);
+            }]
         },
         params: {
             permission_search: {
@@ -144,7 +143,14 @@ function LegacyCredentialsService () {
                 'GetBasePath',
                 'resourceData',
                 (list, qs, $stateParams, GetBasePath, resourceData) => {
-                    const path = resourceData.data.organization ? `${GetBasePath('organizations')}${resourceData.data.organization}/users` : ((list.basePath) || GetBasePath(list.name));
+                    let path;
+
+                    if (resourceData.data.organization) {
+                        path = `${GetBasePath('organizations')}${resourceData.data.organization}/users`;
+                    } else {
+                        path = list.basePath || GetBasePath(list.name);
+                    }
+
                     return qs.search(path, $stateParams.user_search);
                 }
             ],
@@ -156,17 +162,21 @@ function LegacyCredentialsService () {
                 'resourceData',
                 (list, qs, $stateParams, GetBasePath, resourceData) => {
                     const path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                    const org = resourceData.data.organization;
 
-                    if (!resourceData.data.organization) {
+                    if (!org) {
                         return null;
                     }
 
-                        $stateParams[`${list.iterator}_search`].organization = resourceData.data.organization;
-                        return qs.search(path, $stateParams.team_search);
+                    $stateParams[`${list.iterator}_search`].organization = org;
+
+                    return qs.search(path, $stateParams.team_search);
                 }
             ],
-            resourceData: ['CredentialModel', '$stateParams', (Credential, $stateParams) => new Credential('get', $stateParams.credential_id)
-                    .then(credential => ({ data: credential.get() }))],
+            resourceData: ['CredentialModel', '$stateParams', (Credential, $stateParams) =>
+                new Credential('get', $stateParams.credential_id)
+                    .then(credential => ({ data: credential.get() }))
+            ]
         },
         params: {
             user_search: {
@@ -246,9 +256,9 @@ function LegacyCredentialsService () {
             ListDefinition: ['OrganizationList', list => list],
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => qs.search(
-                        GetBasePath('organizations'),
-                        $stateParams[`${list.iterator}_search`]
-                    )
+                    GetBasePath('organizations'),
+                    $stateParams[`${list.iterator}_search`]
+                )
             ]
         },
         onExit ($state) {
@@ -285,9 +295,9 @@ function LegacyCredentialsService () {
             ListDefinition: ['CredentialTypesList', list => list],
             Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
                 (list, qs, $stateParams, GetBasePath) => qs.search(
-                        GetBasePath('credential_types'),
-                        $stateParams[`${list.iterator}_search`]
-                    )
+                    GetBasePath('credential_types'),
+                    $stateParams[`${list.iterator}_search`]
+                )
             ]
         },
         onExit ($state) {

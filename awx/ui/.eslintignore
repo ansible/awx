@@ -16,5 +16,4 @@ test
 !client/lib/components/**/*.js
 !client/lib/models/**/*.js
 !client/lib/services/**/*.js
-
 !client/features/**/*.js

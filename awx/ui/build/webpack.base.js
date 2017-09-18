@@ -3,8 +3,8 @@ const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const CLIENT_PATH = path.resolve(__dirname, '../client');
 const LIB_PATH = path.join(CLIENT_PATH, 'lib');
@@ -20,6 +20,7 @@ const NODE_MODULES_PATH = path.join(UI_PATH, 'node_modules');
 const SERVICES_PATH = path.join(LIB_PATH, 'services');
 const SOURCE_PATH = path.join(CLIENT_PATH, 'src');
 const STATIC_PATH = path.join(UI_PATH, 'static');
+const THEME_PATH = path.join(LIB_PATH, 'theme');
 
 const APP_ENTRY = path.join(SOURCE_PATH, 'app.js');
 const VENDOR_ENTRY = path.join(SOURCE_PATH, 'vendor.js');
@@ -32,7 +33,7 @@ const CHUNKS = ['vendor', 'app'];
 const VENDOR = VENDOR_ENTRY;
 const APP = [THEME_ENTRY, APP_ENTRY];
 
-let base = {
+const base = {
     entry: {
         vendor: VENDOR,
         app: APP
@@ -42,7 +43,17 @@ let base = {
         publicPath: '',
         filename: OUTPUT
     },
-    stats: 'minimal',
+    stats: {
+        children: false,
+        modules: false,
+        chunks: false,
+        excludeAssets: name => {
+            const chunkNames = `(${CHUNKS.join('|')})`;
+            const outputPattern = new RegExp(`${chunkNames}\.[a-f0-9]+\.(js|css)$`, 'i');
+
+            return !outputPattern.test(name);
+        }
+    },
     module: {
         rules: [
             {
@@ -50,7 +61,13 @@ let base = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
-                    presets: ['env']
+                    presets: [
+                        ['env', {
+                            targets: {
+                                browsers: ['last 2 versions']
+                            }
+                        }]
+                    ]
                 }
             },
             {
@@ -80,10 +97,6 @@ let base = {
                     /node_modules\/javascript-detect-element-resize\/jquery.resize\.js$/,
                     /node_modules\/d3\/d3\.min.js$/
                 ]
-            },
-            {
-                test: /\.js$/,
-                use: 'imports-loader?define=>false'
             },
             {
                 test: /\.html$/,
@@ -169,11 +182,12 @@ let base = {
             filename: INDEX_OUTPUT,
             inject: false,
             chunks: CHUNKS,
-            chunksSortMode: (moduleA, moduleB) => {
-                moduleA.files.sort((fileA, fileB) => fileA.includes('js') ? -1 : 1)
-                moduleB.files.sort((fileA, fileB) => fileA.includes('js') ? -1 : 1)
+            chunksSortMode: (chunk) => {
+                if (chunk.names[0] === 'polyfill' || chunk.names[0] === 'vendor') {
+                    return -1;
+                }
 
-                return moduleA.names[0] === 'vendor' ? -1 : 1
+                return 1;
             }
         })
     ],
@@ -183,12 +197,13 @@ let base = {
             '~models': MODELS_PATH,
             '~services': SERVICES_PATH,
             '~components': COMPONENTS_PATH,
+            '~theme': THEME_PATH,
             '~modules': NODE_MODULES_PATH,
             '~assets': ASSETS_PATH,
-            'd3$': '~modules/d3/d3.min.js',
+            d3$: '~modules/d3/d3.min.js',
             'codemirror.jsonlint$': '~modules/codemirror/addon/lint/json-lint.js',
             'jquery-resize$': '~modules/javascript-detect-element-resize/jquery.resize.js',
-            'select2$': '~modules/select2/dist/js/select2.full.min.js',
+            select2$: '~modules/select2/dist/js/select2.full.min.js',
             'js-yaml$': '~modules/js-yaml/dist/js-yaml.min.js',
             'lr-infinite-scroll$': '~modules/lr-infinite-scroll/lrInfiniteScroll.js',
             'angular-ui-router$': '~modules/angular-ui-router/release/angular-ui-router.js',

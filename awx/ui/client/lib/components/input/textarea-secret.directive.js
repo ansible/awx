@@ -33,9 +33,9 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
             scope.state._buttonText = vm.strings.get('REPLACE');
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
         } else if (scope.state.format === 'ssh_private_key') {
-                vm.listeners = vm.setFileListeners(textarea, input);
-                scope.state._displayHint = true;
-            }
+            vm.listeners = vm.setFileListeners(textarea, input);
+            scope.state._displayHint = true;
+        }
 
         vm.check();
     };
@@ -55,25 +55,25 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
     };
 
     vm.setFileListeners = (textareaEl, inputEl) => eventService.addListeners([
-            [textareaEl, 'dragenter', event => {
-                event.stopPropagation();
-                event.preventDefault();
-                scope.$apply(() => { scope.drag = true; });
-            }],
+        [textareaEl, 'dragenter', event => {
+            event.stopPropagation();
+            event.preventDefault();
+            scope.$apply(() => { scope.drag = true; });
+        }],
 
-            [inputEl, 'dragleave', event => {
-                event.stopPropagation();
-                event.preventDefault();
-                scope.$apply(() => { scope.drag = false; });
-            }],
+        [inputEl, 'dragleave', event => {
+            event.stopPropagation();
+            event.preventDefault();
+            scope.$apply(() => { scope.drag = false; });
+        }],
 
-            [inputEl, 'change', event => {
-                const reader = new FileReader();
+        [inputEl, 'change', event => {
+            const reader = new FileReader();
 
-                reader.onload = () => vm.readFile(reader, event);
-                reader.readAsText(inputEl.files[0]);
-            }]
-        ]);
+            reader.onload = () => vm.readFile(reader, event);
+            reader.readAsText(inputEl.files[0]);
+        }]
+    ]);
 
     vm.readFile = (reader) => {
         scope.$apply(() => {

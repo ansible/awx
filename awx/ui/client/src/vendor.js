@@ -8,6 +8,7 @@ require('~modules/codemirror/theme/elegant.css');
 require('~modules/codemirror/addon/lint/lint.css');
 require('~modules/nvd3/build/nv.d3.css');
 require('~modules/ng-toast/dist/ngToast.min.css');
+
 require('jquery');
 require('jquery-resize');
 require('jquery-ui');

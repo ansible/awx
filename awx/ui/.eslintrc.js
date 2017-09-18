@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+    root: true,
     extends: [
         'airbnb-base'
     ],
@@ -27,15 +28,22 @@ module.exports = {
         jsyaml: true
     },
     rules: {
-        indent: [0, 4],
-        'comma-dangle': 0,
-        'space-before-function-paren': [2, 'always'],
-        'arrow-parens': 0,
-        'no-param-reassign': 0,
-        'no-underscore-dangle': 0,
-        'no-mixed-operators': 0,
-        'no-plusplus': 0,
-        'no-continue': 0,
-        'object-curly-newline': 0
+        'arrow-parens': 'off',
+        'comma-dangle': 'off',
+        indent: ['error', 4, {
+            SwitchCase: 1
+        }],
+        'max-len': ['error', {
+            code: 100,
+            ignoreStrings: true,
+            ignoreTemplateLiterals: true,
+        }],
+        'no-continue': 'off',
+        'no-mixed-operators': 'off',
+        'no-param-reassign': 'off',
+        'no-plusplus': 'off',
+        'no-underscore-dangle': 'off',
+        'object-curly-newline': 'off',
+        'space-before-function-paren': ['error', 'always']
     }
 };
