@@ -326,7 +326,7 @@ If you wish to use an external database, in the inventory file, set the value of
 If you are not pushing images to a Docker registry, start the build by running the following:
 
 ```bash
-# Set the working director to installer
+# Set the working directory to installer
 $ cd installer
 
 # Run the Ansible playbook
