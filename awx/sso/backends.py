@@ -307,7 +307,7 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
                 should_add = True
     if should_add:
         rel.add(user)
-    elif remove:
+    elif remove and user in rel.all():
         rel.remove(user)
 
 
