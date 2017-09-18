@@ -137,6 +137,61 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                     },
                     resolve: {
                         edit: {
+                            jobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors',
+                                function($stateParams, TemplatesService, ProcessErrors) {
+                                    return TemplatesService.getJobTemplate($stateParams.job_template_id)
+                                        .then(function(res) {
+                                            return res.data;
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get job template. GET returned status: ' +
+                                                    response.status
+                                            });
+                                        });
+                            }],
+                            canGetProject: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                                function(Rest, ProcessErrors, jobTemplateData) {
+                                    Rest.setUrl(jobTemplateData.related.project);
+                                    return Rest.get()
+                                        .then(() => {
+                                            return true;
+                                        })
+                                        .catch(({data, status}) => {
+                                            if (status === 403) {
+                                                /* User doesn't have read access to the project, no problem. */
+                                            } else {
+                                                ProcessErrors(null, data, status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get project. GET returned ' +
+                                                        'status: ' + status
+                                                });
+                                            }
+
+                                            return false;
+                                    });
+                            }],
+                            canGetInventory: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                                function(Rest, ProcessErrors, jobTemplateData) {
+                                    Rest.setUrl(jobTemplateData.related.inventory);
+                                    return Rest.get()
+                                        .then(() => {
+                                            return true;
+                                        })
+                                        .catch(({data, status}) => {
+                                            if (status === 403) {
+                                                /* User doesn't have read access to the project, no problem. */
+                                            } else {
+                                                ProcessErrors(null, data, status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get project. GET returned ' +
+                                                        'status: ' + status
+                                                });
+                                            }
+
+                                            return false;
+                                    });
+                            }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
                                 function($stateParams, Rest, GetBasePath, ProcessErrors){
                                     let path = `${GetBasePath('job_templates')}${$stateParams.job_template_id}/instance_groups/`;
@@ -155,32 +210,32 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                             });
                                     });
                                 }],
-                                availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
-                                    function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
-                                        return TemplatesService.getAllLabelOptions()
-                                            .then(function(labels){
-                                                return labels;
-                                            }).catch(function(response){
-                                                ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get labels. GET returned status: ' +
-                                                        response.status
-                                                });
+                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
+                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                                    return TemplatesService.getAllLabelOptions()
+                                        .then(function(labels){
+                                            return labels;
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                    response.status
                                             });
-                                }],
-                                selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
-                                    function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
-                                        return TemplatesService.getAllJobTemplateLabels($stateParams.job_template_id)
-                                            .then(function(labels){
-                                                return labels;
-                                            }).catch(function(response){
-                                                ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get workflow job template labels. GET returned status: ' +
-                                                        response.status
-                                                });
+                                        });
+                            }],
+                            selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
+                                function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
+                                    return TemplatesService.getAllJobTemplateLabels($stateParams.job_template_id)
+                                        .then(function(labels){
+                                            return labels;
+                                        }).catch(function(response){
+                                            ProcessErrors(null, response.data, response.status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get workflow job template labels. GET returned status: ' +
+                                                    response.status
                                             });
-                                }]
+                                        });
+                            }]
                         }
                     }
                 });

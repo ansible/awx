@@ -320,7 +320,11 @@ def awx_periodic_scheduler(self):
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError(_("status_str must be either succeeded or failed"))
-    notification_templates = instance.get_notification_templates()
+    try:
+        notification_templates = instance.get_notification_templates()
+    except:
+        logger.warn("No notification template defined for emitting notification")
+        notification_templates = None
     if notification_templates:
         if status_str == 'succeeded':
             notification_template_type = 'success'
@@ -482,6 +486,7 @@ class BaseTask(LogErrorsTask):
     model = None
     abstract = True
     cleanup_paths = []
+    proot_show_paths = []
 
     def update_model(self, pk, _attempt=0, **updates):
         """Reload the model instance from the database and update the
@@ -793,6 +798,7 @@ class BaseTask(LogErrorsTask):
             # May have to serialize the value
             kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
+            kwargs['proot_show_paths'] = self.proot_show_paths
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
@@ -1068,6 +1074,7 @@ class RunJob(BaseTask):
                 env['VMWARE_USER'] = cloud_cred.username
                 env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
                 env['VMWARE_HOST'] = cloud_cred.host
+                env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)
             elif cloud_cred and cloud_cred.kind == 'openstack':
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
@@ -1285,6 +1292,10 @@ class RunProjectUpdate(BaseTask):
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 
+    @property
+    def proot_show_paths(self):
+        return [settings.PROJECTS_ROOT]
+
     def build_private_data(self, project_update, **kwargs):
         '''
         Return SSH private key data needed for this project update.
@@ -1298,7 +1309,7 @@ class RunProjectUpdate(BaseTask):
             }
         }
         '''
-        handle, self.revision_path = tempfile.mkstemp(dir=settings.AWX_PROOT_BASE_PATH)
+        handle, self.revision_path = tempfile.mkstemp(dir=settings.PROJECTS_ROOT)
         self.cleanup_paths.append(self.revision_path)
         private_data = {'credentials': {}}
         if project_update.credential:
@@ -1590,6 +1601,12 @@ class RunProjectUpdate(BaseTask):
         if len(dependent_inventory_sources) > 0:
             if status == 'successful' and instance.launch_type != 'sync':
                 self._update_dependent_inventories(instance, dependent_inventory_sources)
+
+    def should_use_proot(self, instance, **kwargs):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
 
 class RunInventoryUpdate(BaseTask):

@@ -14,7 +14,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 .then(kinds => {
                     scope.credentialKinds = kinds;
 
-                    scope.credentialKind = "" + kinds.Machine;
+                    scope.credentialKind = scope.selectedCredentials.machine && scope.selectedCredentials.machine.readOnly ? (scope.selectedCredentials.vault && scope.selectedCredentials.vault.readOnly ? "" + kinds.Network : "" + kinds.Vault) : "" + kinds.Machine;
 
                     scope.showModal = function() {
                         $('#multi-credential-modal').modal('show');
@@ -50,6 +50,22 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                         .then(({credential_types, credentialTypeOptions}) => {
                             scope.credential_types = credential_types;
                             scope.credentialTypeOptions = credentialTypeOptions;
+                            scope.allCredentialTypeOptions = _.cloneDeep(credentialTypeOptions);
+
+                            // We want to hide machine and vault dropdown options if a credential
+                            // has already been selected for those types and the user interacting
+                            // with the form doesn't have the ability to change them
+                            for(let i=scope.credentialTypeOptions.length - 1; i >=0; i--) {
+                                if((scope.selectedCredentials.machine &&
+                                    scope.selectedCredentials.machine.credential_type_id === scope.credentialTypeOptions[i].value &&
+                                    scope.selectedCredentials.machine.readOnly) ||
+                                    (scope.selectedCredentials.vault &&
+                                    scope.selectedCredentials.vault.credential_type_id === scope.credentialTypeOptions[i].value &&
+                                    scope.selectedCredentials.vault.readOnly)) {
+                                        scope.credentialTypeOptions.splice(i, 1);
+                                }
+                            }
+
                             scope.$emit('multiCredentialModalLinked');
                         });
                 });
@@ -70,7 +86,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
                 $scope.credTags = MultiCredentialService
                     .updateCredentialTags($scope.selectedCredentials,
-                        $scope.credentialTypeOptions);
+                        $scope.allCredentialTypeOptions);
             };
 
             let updateMachineCredentialList = function() {
@@ -85,7 +101,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
                 $scope.credTags = MultiCredentialService
                     .updateCredentialTags($scope.selectedCredentials,
-                        $scope.credentialTypeOptions);
+                        $scope.allCredentialTypeOptions);
             };
 
             let updateVaultCredentialList = function() {
@@ -100,7 +116,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
                 $scope.credTags = MultiCredentialService
                     .updateCredentialTags($scope.selectedCredentials,
-                        $scope.credentialTypeOptions);
+                        $scope.allCredentialTypeOptions);
             };
 
             let uncheckAllCredentials = function() {
@@ -110,7 +126,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
 
                 $scope.credTags = MultiCredentialService
                     .updateCredentialTags($scope.selectedCredentials,
-                        $scope.credentialTypeOptions);
+                        $scope.allCredentialTypeOptions);
             };
 
             let init = function() {

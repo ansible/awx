@@ -32,7 +32,7 @@
 
 .SmartSearch-searchTermContainer {
     flex: initial;
-    width: 100%;
+    flex-grow: 1;
     border: 1px solid @b7grey;
     border-radius: 4px;
     display: flex;
@@ -167,7 +167,7 @@
     color: @default-interface-txt;
     border: 1px solid @b7grey;
     cursor: pointer;
-    width: 70px;
+    min-width: 70px;
     height: 34px;
     line-height: 20px;
 }
@@ -238,15 +238,6 @@
     border-radius: 5px;
     padding: 0px 5px;
     margin-right: 5px;
-}
-
-
-// Additional modal specific styles
-.modal-body, #add-permissions-modal,
-.JobResults {
-    .SmartSearch-searchTermContainer {
-        width: 100%;
-    }
 }
 
 @media (max-width: 700px) {

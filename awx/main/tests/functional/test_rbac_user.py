@@ -45,6 +45,12 @@ def test_system_auditor_is_system_auditor(system_auditor):
 
 
 @pytest.mark.django_db
+def test_system_auditor_can_modify_self(system_auditor):
+    access = UserAccess(system_auditor)
+    assert access.can_change(obj=system_auditor, data=dict(is_system_auditor='true'))
+
+
+@pytest.mark.django_db
 def test_user_queryset(user):
     u = user('pete', False)
 

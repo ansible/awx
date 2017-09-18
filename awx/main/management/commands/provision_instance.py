@@ -16,6 +16,11 @@ class Command(BaseCommand):
     Regsiter this instance with the database for HA tracking.
     """
 
+    help = (
+        'Add instance to the database. '
+        'Specify `--hostname` to use this command.'
+    )
+
     option_list = BaseCommand.option_list + (
         make_option('--hostname', dest='hostname', type='string',
                     help='Hostname used during provisioning'),

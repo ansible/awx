@@ -37,6 +37,7 @@
                 $scope.mode = "add";
                 $scope.parseType = 'yaml';
                 $scope.credentialNotPresent = false;
+                $scope.canGetAllRelatedResources = true;
 
                 md5Setup({
                     scope: $scope,

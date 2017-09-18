@@ -2383,24 +2383,24 @@ class InventoryScriptView(RetrieveAPIView):
             host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
         else:
-            data = OrderedDict()
+            data = dict()
             if obj.variables_dict:
-                all_group = data.setdefault('all', OrderedDict())
+                all_group = data.setdefault('all', dict())
                 all_group['vars'] = obj.variables_dict
             if obj.kind == 'smart':
                 if len(obj.hosts.all()) == 0:
                     return Response({})
                 else:
-                    all_group = data.setdefault('all', OrderedDict())
-                    smart_hosts_qs = obj.hosts.all().order_by('name')
+                    all_group = data.setdefault('all', dict())
+                    smart_hosts_qs = obj.hosts.all()
                     smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
                     all_group['hosts'] = smart_hosts
             else:
                 # Add hosts without a group to the all group.
-                groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+                groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q)
                 groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
                 if groupless_hosts:
-                    all_group = data.setdefault('all', OrderedDict())
+                    all_group = data.setdefault('all', dict())
                     all_group['hosts'] = groupless_hosts
 
                 # Build in-memory mapping of groups and their hosts.
@@ -2408,7 +2408,6 @@ class InventoryScriptView(RetrieveAPIView):
                 if 'enabled' in hosts_q:
                     group_hosts_kw['host__enabled'] = hosts_q['enabled']
                 group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-                group_hosts_qs = group_hosts_qs.order_by('host__name')
                 group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
                 group_hosts_map = {}
                 for group_id, host_id, host_name in group_hosts_qs:
@@ -2420,7 +2419,6 @@ class InventoryScriptView(RetrieveAPIView):
                     from_group__inventory_id=obj.id,
                     to_group__inventory_id=obj.id,
                 )
-                group_parents_qs = group_parents_qs.order_by('from_group__name')
                 group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
                 group_children_map = {}
                 for from_group_id, from_group_name, to_group_id in group_parents_qs:
@@ -2429,15 +2427,15 @@ class InventoryScriptView(RetrieveAPIView):
 
                 # Now use in-memory maps to build up group info.
                 for group in obj.groups.all():
-                    group_info = OrderedDict()
+                    group_info = dict()
                     group_info['hosts'] = group_hosts_map.get(group.id, [])
                     group_info['children'] = group_children_map.get(group.id, [])
                     group_info['vars'] = group.variables_dict
                     data[group.name] = group_info
 
             if hostvars:
-                data.setdefault('_meta', OrderedDict())
-                data['_meta'].setdefault('hostvars', OrderedDict())
+                data.setdefault('_meta', dict())
+                data['_meta'].setdefault('hostvars', dict())
                 for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
 
@@ -2668,6 +2666,12 @@ class InventoryUpdateList(ListAPIView):
 
     model = InventoryUpdate
     serializer_class = InventoryUpdateListSerializer
+
+    def get_queryset(self):
+        qs = super(InventoryUpdateList, self).get_queryset()
+        # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
+        qs = qs.defer('result_stdout_text')
+        return qs
 
 
 class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):

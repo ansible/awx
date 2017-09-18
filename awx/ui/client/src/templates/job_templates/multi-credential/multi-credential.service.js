@@ -138,6 +138,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
             name: cred.name,
             id: cred.id,
             postType: cred.postType,
+            readOnly: cred.readOnly ? true : false,
             kind: typeOpts
                 .filter(type => {
                     return parseInt(cred.credential_type) === type.value;
@@ -178,6 +179,8 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
 
         let credDefers = [];
         let job_template_obj = data;
+        let credentialGetPermissionDenied = false;
+
         // get machine credential
         if (data.related.credential) {
             Rest.setUrl(data.related.credential);
@@ -188,8 +191,10 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 .catch(({data, status}) => {
                     if (status === 403) {
                         /* User doesn't have read access to the machine credential, so use summary_fields */
+                        credentialGetPermissionDenied = true;
                         selectedCredentials.machine = job_template_obj.summary_fields.credential;
                         selectedCredentials.machine.credential_type = job_template_obj.summary_fields.credential.credential_type_id;
+                        selectedCredentials.machine.readOnly = true;
                     } else {
                         ProcessErrors(
                             null, data, status, null,
@@ -212,8 +217,10 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 .catch(({data, status}) => {
                     if (status === 403) {
                         /* User doesn't have read access to the vault credential, so use summary_fields */
+                        credentialGetPermissionDenied = true;
                         selectedCredentials.vault = job_template_obj.summary_fields.vault_credential;
                         selectedCredentials.vault.credential_type = job_template_obj.summary_fields.vault_credential.credential_type_id;
+                        selectedCredentials.vault.readOnly = true;
                     } else {
                         ProcessErrors(
                             null, data, status, null,
@@ -237,9 +244,11 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 .catch(({data, status}) => {
                     if (status === 403) {
                         /* User doesn't have read access to the extra credentials, so use summary_fields */
+                        credentialGetPermissionDenied = true;
                         selectedCredentials.extra = job_template_obj.summary_fields.extra_credentials;
                         _.map(selectedCredentials.extra, (cred) => {
                             cred.credential_type = cred.credential_type_id;
+                            cred.readOnly = true;
                             return cred;
                         });
                     } else {
@@ -267,7 +276,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 .updateCredentialTags(selectedCredentials, credTypeOptions);
 
             return [selectedCredentials, credTypes, credTypeOptions,
-                credTags];
+                credTags, credentialGetPermissionDenied];
         });
     };
 

@@ -108,13 +108,14 @@ class RequireDebugTrueOrTest(logging.Filter):
         return settings.DEBUG or 'test' in sys.argv
 
 
-def memoize(ttl=60, cache_key=None):
+def memoize(ttl=60, cache_key=None, cache_name='default'):
     '''
     Decorator to wrap a function and cache its result.
     '''
-    from django.core.cache import cache
+    from django.core.cache import caches
 
     def _memoizer(f, *args, **kwargs):
+        cache = caches[cache_name]
         key = cache_key or slugify('%s %r %r' % (f.__name__, args, kwargs))
         value = cache.get(key)
         if value is None:
@@ -696,8 +697,13 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    show_paths.extend([settings.ANSIBLE_VENV_PATH, settings.AWX_VENV_PATH])
+    for venv in (
+        settings.ANSIBLE_VENV_PATH,
+        settings.AWX_VENV_PATH
+    ):
+        new_args.extend(['--ro-bind', venv, venv])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    show_paths.extend(kwargs.get('proot_show_paths', []))
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue

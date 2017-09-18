@@ -35,6 +35,7 @@ export default
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
                         socketPromise.resolve();
+                        console.log('promise resolved, and readyState: '+ self.readyState);
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -116,6 +117,8 @@ export default
             disconnect: function(){
                 if(this.socket){
                     this.socket.close();
+                    delete this.socket;
+                    console.log("Socket deleted: "+this.socket);
                 }
             },
             subscribe: function(state){
@@ -186,14 +189,20 @@ export default
                 var self = this;
                 $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
-                    self.socket.send(data, function () {
-                        var args = arguments;
-                        self.scope.$apply(function () {
-                            if (callback) {
-                                callback.apply(self.socket, args);
-                            }
+                    console.log("socket readyState at emit: " + self.socket.readyState);
+                    // if(self.socket.readyState === 0){
+                    //     self.subscribe(self.getLast());
+                    // }
+                    if(self.socket.readyState === 1){
+                        self.socket.send(data, function () {
+                            var args = arguments;
+                            self.scope.$apply(function () {
+                                if (callback) {
+                                    callback.apply(self.socket, args);
+                                }
+                            });
                         });
-                    });
+                    }
                 });
             },
             addStateResolve: function(state, id){

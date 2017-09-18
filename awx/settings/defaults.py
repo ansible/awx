@@ -481,12 +481,18 @@ if is_testing():
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         },
+        'ephemeral': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
     }
 else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
             'LOCATION': 'memcached:11211',
+        },
+        'ephemeral': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         },
     }
 
@@ -716,7 +722,7 @@ VMWARE_GROUP_FILTER = r'^.+$'
 VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
 
-
+VMWARE_VALIDATE_CERTS = False
 # ---------------------------
 # -- Google Compute Engine --
 # ---------------------------

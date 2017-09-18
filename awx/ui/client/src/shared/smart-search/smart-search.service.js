@@ -1,5 +1,45 @@
 export default [function() {
     return {
+        /**
+         * For the Smart Host Filter, values with spaces are wrapped with double quotes on input.
+         * To avoid having these quoted values split up and treated as terms themselves, some
+         * work is done to encode quotes in quoted values and the spaces within those quoted
+         * values before calling to `splitSearchIntoTerms`.
+         */
+        splitFilterIntoTerms (searchString) {
+            if (!searchString) {
+                return null;
+            }
+
+            let groups = [];
+            let quoted;
+
+            searchString.split(' ').forEach(substring => {
+                if (/:"/g.test(substring)) {
+                    if (/"$/.test(substring)) {
+                        groups.push(this.encode(substring));
+                    } else {
+                        quoted = substring;
+                    }
+                } else if (quoted) {
+                    quoted += ` ${substring}`;
+
+                    if (/"/g.test(substring)) {
+                        groups.push(this.encode(quoted));
+                        quoted = undefined;
+                    }
+                } else {
+                    groups.push(substring);
+                }
+            });
+
+            return this.splitSearchIntoTerms(groups.join(' '));
+        },
+        encode (string) {
+            string = string.replace(/'/g, '%27');
+
+            return string.replace(/("| )/g, match => encodeURIComponent(match));
+        },
         splitSearchIntoTerms(searchString) {
             return searchString.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
         },

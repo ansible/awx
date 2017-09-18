@@ -92,7 +92,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "license_type !== 'enterprise' || form.$invalid || form.$pending"
+                ngDisabled: "license_type !== 'enterprise' && license_type !== 'open' || configuration_saml_template_form.$invalid || configuration_saml_template_form.$pending"
             }
         }
     };

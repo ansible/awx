@@ -27,7 +27,7 @@ from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
 
-from awx.conf.license import LicenseForbids
+from awx.conf.license import LicenseForbids, feature_enabled
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',
@@ -140,7 +140,14 @@ def get_user_capabilities(user, instance, **kwargs):
     convenient for the user interface to consume and hide or show various
     actions in the interface.
     '''
-    access_class = access_registry[instance.__class__]
+    cls = instance.__class__
+    # When `.defer()` is used w/ the Django ORM, the result is a subclass of
+    # the original that represents e.g.,
+    # awx.main.models.ad_hoc_commands.AdHocCommand_Deferred_result_stdout_text
+    # We want to do the access registry lookup keyed on the base class name.
+    if getattr(cls, '_deferred', False):
+        cls = instance.__class__.__bases__[0]
+    access_class = access_registry[cls]
     return access_class(user).get_user_capabilities(instance, **kwargs)
 
 
@@ -323,6 +330,10 @@ class BaseAccess(object):
                 if validation_errors:
                     user_capabilities[display_method] = False
                     continue
+            elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)):
+                if not feature_enabled('workflows'):
+                    user_capabilities[display_method] = (display_method == 'delete')
+                    continue
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
@@ -482,8 +493,10 @@ class UserAccess(BaseAccess):
 
     def can_change(self, obj, data):
         if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
-            if (to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) or
-                    to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True)) and not self.user.is_superuser:
+            if to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) and \
+               not self.user.is_superuser:
+                return False
+            if to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True) and not (self.user.is_superuser or self.user == obj):
                 return False
         # A user can be changed if they are themselves, or by org admins or
         # superusers.  Change permission implies changing only certain fields
@@ -2068,6 +2081,8 @@ class UnifiedJobAccess(BaseAccess):
         #    'job_template__project',
         #    'job_template__credential',
         #)
+        # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
+        qs = qs.defer('result_stdout_text')
         return qs.all()
 
 

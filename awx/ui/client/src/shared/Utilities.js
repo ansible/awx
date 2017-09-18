@@ -120,6 +120,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 if (action) {
                     action();
                 }
+                $('.modal-backdrop').remove();
             });
             $('#alert-modal').on('shown.bs.modal', function() {
                 $('#alert_ok_btn').focus();

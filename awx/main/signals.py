@@ -388,6 +388,9 @@ def activity_stream_create(sender, instance, created, **kwargs):
         # Skip recording any inventory source directly associated with a group.
         if isinstance(instance, InventorySource) and instance.deprecated_group:
             return
+        _type = type(instance)
+        if getattr(_type, '_deferred', False):
+            return
         object1 = camelcase_to_underscore(instance.__class__.__name__)
         changes = model_to_dict(instance, model_serializer_mapping)
         # Special case where Job survey password variables need to be hidden
@@ -421,6 +424,9 @@ def activity_stream_update(sender, instance, **kwargs):
     changes = model_instance_diff(old, new, model_serializer_mapping)
     if changes is None:
         return
+    _type = type(instance)
+    if getattr(_type, '_deferred', False):
+        return
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
         operation='update',
@@ -445,6 +451,9 @@ def activity_stream_delete(sender, instance, **kwargs):
     # explicitly called with flag on in Inventory.schedule_deletion.
     if isinstance(instance, Inventory) and not kwargs.get('inventory_delete_flag', False):
         return
+    _type = type(instance)
+    if getattr(_type, '_deferred', False):
+        return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
@@ -466,6 +475,9 @@ def activity_stream_associate(sender, instance, **kwargs):
         else:
             return
         obj1 = instance
+        _type = type(instance)
+        if getattr(_type, '_deferred', False):
+            return
         object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
 
@@ -476,6 +488,9 @@ def activity_stream_associate(sender, instance, **kwargs):
             if not obj2_actual.exists():
                 continue
             obj2_actual = obj2_actual[0]
+            _type = type(obj2_actual)
+            if getattr(_type, '_deferred', False):
+                return
             if isinstance(obj2_actual, Role) and obj2_actual.content_object is not None:
                 obj2_actual = obj2_actual.content_object
                 object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)

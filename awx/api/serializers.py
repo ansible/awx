@@ -38,7 +38,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.constants import SCHEDULEABLE_PROVIDERS
+from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
@@ -343,6 +343,8 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
+                    if field == 'credential_type_id' and fk == 'credential' and self.version < 2:  # TODO: remove version check in 3.3
+                        continue
 
                     fval = getattr(fkval, field, None)
 
@@ -2332,8 +2334,13 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if obj.vault_credential:
             res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential.pk})
         if self.version > 1:
-            view = 'api:%s_extra_credentials_list' % camelcase_to_underscore(obj.__class__.__name__)
-            res['extra_credentials'] = self.reverse(view, kwargs={'pk': obj.pk})
+            if isinstance(obj, UnifiedJobTemplate):
+                res['extra_credentials'] = self.reverse(
+                    'api:job_template_extra_credentials_list',
+                    kwargs={'pk': obj.pk}
+                )
+            elif isinstance(obj, UnifiedJob):
+                res['extra_credentials'] = self.reverse('api:job_extra_credentials_list', kwargs={'pk': obj.pk})
         else:
             cloud_cred = obj.cloud_credential
             if cloud_cred:
@@ -3120,6 +3127,14 @@ class JobEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+            set_count = 0
+            reset_count = 0
+            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
+                if m.string[m.start():m.end()] == u'\u001b[0m':
+                    reset_count += 1
+                else:
+                    set_count += 1
+            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
         return ret
 
 
@@ -3151,6 +3166,14 @@ class AdHocCommandEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+            set_count = 0
+            reset_count = 0
+            for m in ANSI_SGR_PATTERN.finditer(ret['stdout']):
+                if m.string[m.start():m.end()] == u'\u001b[0m':
+                    reset_count += 1
+                else:
+                    set_count += 1
+            ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
         return ret
 
 

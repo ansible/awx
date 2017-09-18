@@ -95,7 +95,11 @@ export default [
 
                             } else {
                                 if (key === "LICENSE") {
-                                    $scope.license_type = data[key].license_type;
+                                    if (_.isEmpty(data[key])) {
+                                        $scope.license_type = "open";
+                                    } else {
+                                        $scope.license_type = data[key].license_type;
+                                    }
                                 }
                                 //handle nested objects
                                 if(ConfigurationUtils.isEmpty(data[key])) {

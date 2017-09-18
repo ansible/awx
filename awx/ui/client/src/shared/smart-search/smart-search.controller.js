@@ -161,10 +161,15 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             terms = (terms) ? terms.trim() : "";
 
             if(terms && terms !== '') {
-                // Split the terms up
-                let splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
-                _.forEach(splitTerms, (term) => {
+                let splitTerms;
 
+                if ($scope.singleSearchParam === 'host_filter') {
+                    splitTerms = SmartSearchService.splitFilterIntoTerms(terms);
+                } else {
+                    splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
+                }
+
+                _.forEach(splitTerms, (term) => {
                     let termParts = SmartSearchService.splitTermIntoParts(term);
 
                     function combineSameSearches(a,b){
