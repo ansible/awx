@@ -60,6 +60,10 @@ class sdist_isolated(sdist):
         'recursive-include awx/lib *.py',
     ]
 
+    def __init__(self, dist):
+        sdist.__init__(self, dist)
+        dist.metadata.version = get_version()
+
     def get_file_list(self):
         self.filelist.process_template_line('include setup.py')
         for line in self.includes:
