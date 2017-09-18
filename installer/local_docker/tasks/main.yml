@@ -212,3 +212,4 @@
       RABBITMQ_VHOST: "awx"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
+      SECRET_KEY: "{{ awx_secret_key }}"
