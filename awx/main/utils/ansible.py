@@ -61,10 +61,14 @@ def could_be_playbook(project_path, dir_path, filename):
 def could_be_inventory(project_path, dir_path, filename):
     # Decisions based exclusively on filename
     inventory_path = os.path.join(dir_path, filename)
+    inventory_rel_path = os.path.relpath(inventory_path, smart_str(project_path))
     suspected_ext = os.path.splitext(filename)[-1]
-    if suspected_ext in ['.yml', '.yaml', '.ini'] or os.access(inventory_path, os.X_OK):
+    if filename in ['inventory', 'hosts']:
+        # Users commonly name their inventory files these names
+        return inventory_rel_path
+    elif suspected_ext == '.ini' or os.access(inventory_path, os.X_OK):
         # Files with any of these extensions are always included
-        return os.path.relpath(inventory_path, smart_str(project_path))
+        return inventory_rel_path
     elif '.' in suspected_ext:
         # If not using those extensions, inventory must have _no_ extension
         return None
@@ -79,4 +83,4 @@ def could_be_inventory(project_path, dir_path, filename):
                     return None
     except IOError:
         return None
-    return os.path.relpath(inventory_path, smart_str(project_path))
+    return inventory_rel_path
