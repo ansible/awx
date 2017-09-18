@@ -89,4 +89,7 @@ data:
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
             'LOCATION': '{}:{}'.format("localhost", "11211")
         },
+        'ephemeral': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
     }

@@ -108,4 +108,7 @@ CACHES = {
         'LOCATION': '{}:{}'.format(os.getenv("MEMCACHED_HOST", None),
                                    os.getenv("MEMCACHED_PORT", "11211"))
     },
+    'ephemeral': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
 }
