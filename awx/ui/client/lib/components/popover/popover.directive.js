@@ -43,6 +43,7 @@ function AtPopoverController () {
         scope.popover.icon = scope.popover.icon || DEFAULT_ICON;
         scope.popover.on = scope.popover.on || DEFAULT_ACTION;
         scope.popover.resetOnExit = scope.popover.resetOnExit || DEFAULT_RESET_ON_EXIT;
+        scope.popover.arrowHeight = scope.popover.arrowHeight || DEFAULT_ARROW_HEIGHT;
 
         if (scope.popover.resetOnExit) {
             scope.originalText = scope.popover.text;
@@ -138,7 +139,7 @@ function AtPopoverController () {
         let arrow = popover.getElementsByClassName('at-Popover-arrow')[0];
 
         arrow.style.lineHeight = `${DEFAULT_ARROW_HEIGHT}px`;
-        arrow.children[0].style.lineHeight = `${DEFAULT_ARROW_HEIGHT}px`;
+        arrow.children[0].style.lineHeight = `${scope.popover.arrowHeight}px`;
 
         let data = {
             arrow,
@@ -149,6 +150,7 @@ function AtPopoverController () {
 
         data.cx = Math.floor(data.icon.left + (data.icon.width / 2));
         data.cy = Math.floor(data.icon.top + (data.icon.height / 2));
+        data.rightBoundary = Math.floor(data.icon.right);
 
         return data;
     };
@@ -161,7 +163,7 @@ function AtPopoverController () {
         popover.style.visibility = 'visible';
         popover.style.opacity = 1;
 
-        if (scope.popover.position === 'right') {
+       if (scope.popover.position === 'right') {
             vm.displayRight(positions);
         } else if (scope.popover.position === 'top') {
             vm.displayTop(positions);
@@ -169,8 +171,8 @@ function AtPopoverController () {
     };
 
     vm.displayRight = (pos) => {
-        let arrowTop = Math.floor((pos.cy - (pos.icon.height / 2)));
-        let arrowLeft = pos.cx + DEFAULT_PADDING;
+        let arrowHeight = pos.arrow.offsetHeight;
+        let arrowLeft = pos.rightBoundary + DEFAULT_PADDING;
 
         let popoverTop;
         let popoverLeft = arrowLeft + DEFAULT_PADDING - 1;
@@ -180,6 +182,8 @@ function AtPopoverController () {
         } else {
             popoverTop = Math.floor((pos.cy - pos.popover.height / 2));
         }
+
+        let arrowTop = Math.floor(popoverTop + (pos.popover.height / 2) - (arrowHeight / 2));
 
         pos.arrow.style.top = `${arrowTop}px`;
         pos.arrow.style.left = `${arrowLeft}px`;

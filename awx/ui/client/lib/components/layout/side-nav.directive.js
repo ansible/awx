@@ -7,7 +7,7 @@ function atSideNavLink (scope, element, attrs, ctrl) {
 function AtSideNavController () {
     let vm = this || {};
 
-    vm.isExpanded = true;
+    vm.isExpanded = false;
 
     vm.toggleExpansion = () => {
         vm.isExpanded = !vm.isExpanded;
