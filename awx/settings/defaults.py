@@ -497,7 +497,7 @@ else:
     }
 
 # Social Auth configuration.
-SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
+SOCIAL_AUTH_STRATEGY = 'awx.sso.strategies.django_strategy.AWXDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
 SOCIAL_AUTH_PIPELINE = (
