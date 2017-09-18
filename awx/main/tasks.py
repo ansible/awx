@@ -1719,7 +1719,7 @@ class RunInventoryUpdate(BaseTask):
             section = 'vmware'
             cp.add_section(section)
             cp.set('vmware', 'cache_max_age', 0)
-
+            cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
             cp.set('vmware', 'username', credential.username)
             cp.set('vmware', 'password', decrypt_field(credential, 'password'))
             cp.set('vmware', 'server', credential.host)
