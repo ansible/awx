@@ -5,9 +5,9 @@ function atSideNavItemLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl[1];
 }
 
-function AtSideNavItemController ($state, $scope) {
+function AtSideNavItemController ($state, $scope, strings) {
     let vm = this || {};
-    vm.popoverText = $scope.name.replace(/_/g,' ');
+
     $scope.$watch('layoutVm.currentState', function(current) {
         if ($scope.name === 'portal mode') {
             vm.isRoute = (current && current.indexOf('portalMode') === 0);
@@ -30,7 +30,7 @@ function AtSideNavItemController ($state, $scope) {
 
     vm.tooltip = {
         popover: {
-            text: vm.popoverText,
+            text: strings.get(`layout.${$scope.name}`),
             on: 'mouseenter',
             icon: $scope.iconClass,
             position: 'right',
@@ -39,7 +39,7 @@ function AtSideNavItemController ($state, $scope) {
     }
 }
 
-AtSideNavItemController.$inject = ['$state', '$scope'];
+AtSideNavItemController.$inject = ['$state', '$scope', 'ComponentsStrings'];
 
 function atSideNavItem () {
     return {
