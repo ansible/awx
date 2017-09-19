@@ -7,7 +7,7 @@
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
-    'Wait', 'configDataResolve', 'ToJSON',
+    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService',
     //Form definitions
     'configurationAzureForm',
     'configurationGithubForm',
@@ -26,7 +26,7 @@ export default [
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert,
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
-        Wait, configDataResolve, ToJSON,
+        Wait, configDataResolve, ToJSON, ConfigService,
         //Form definitions
         configurationAzureForm,
         configurationGithubForm,
@@ -94,13 +94,6 @@ export default [
                                 }
 
                             } else {
-                                if (key === "LICENSE") {
-                                    if (_.isEmpty(data[key])) {
-                                        $scope.license_type = "open";
-                                    } else {
-                                        $scope.license_type = data[key].license_type;
-                                    }
-                                }
                                 //handle nested objects
                                 if(ConfigurationUtils.isEmpty(data[key])) {
                                     $scope[key] = '{}';
@@ -114,6 +107,19 @@ export default [
                     });
                     $scope.$broadcast('populated', data);
                 });
+                ConfigService.getConfig()
+                    .then(function(data) {
+                        $scope.ldap_auth = data.license_info.features.ldap;
+                        $scope.enterprise_auth = data.license_info.features.enterprise_auth;
+                    })
+                    .catch(function(data, status) {
+                        ProcessErrors($scope, data, status, null,
+                            {
+                                hdr: i18n._('Error'),
+                                msg: i18n._('There was an error getting config values: ') + status
+                            }
+                        );
+                    });
         };
 
         populateFromApi();

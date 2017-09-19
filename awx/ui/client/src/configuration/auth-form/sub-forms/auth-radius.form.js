@@ -39,7 +39,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'vm.formSave()',
-                ngDisabled: "license_type !== 'enterprise' && license_type !== 'open' || configuration_radius_template_form.$invalid || configuration_radius_template_form.$pending"
+                ngDisabled: "!enterprise_auth || configuration_radius_template_form.$invalid || configuration_radius_template_form.$pending"
             }
         }
     };
