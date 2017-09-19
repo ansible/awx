@@ -91,25 +91,35 @@
         overflow-y: auto;
         max-height: 100vh;
         min-width: @at-width-collapsed-side-nav;
+        z-index: @at-z-index-side-nav;
 
         .at-Layout-sideNavItem {
             display: flex;
             cursor: pointer;
+            text-transform: uppercase;
 
-            i {
-                font-size: @at-height-side-nav-item-icon;
-                padding: @at-padding-side-nav-item-icon;
-            }
 
-            &:hover,
-            &.is-active {
-                background: @at-color-side-nav-item-background-hover;
-                border-left: @at-highlight-left-border-size solid @at-color-side-nav-item-border-hover;
+                > i.fa {
+                    padding-left: 20px;
+                }
 
                 i {
-                    margin-left: @at-highlight-left-border-margin-makeup;
+                    cursor: pointer;
+                    color: @at-color-side-nav-content;
+                    font-size: @at-height-side-nav-item-icon;
+                    padding: @at-padding-side-nav-item-icon;
                 }
-            }
+
+                &:hover,
+                &.is-active {
+                    background: @at-color-side-nav-item-background-hover;
+                    border-left: @at-highlight-left-border-size solid @at-color-side-nav-item-border-hover;
+
+                    i {
+                        color: @at-color-side-nav-content;
+                        margin-left: @at-highlight-left-border-margin-makeup;
+                    }
+                }
         }
 
         .at-Layout-sideNavSpacer {
@@ -124,7 +134,6 @@
                 justify-content: flex-start;
                 align-items: center;
                 padding-right: @at-padding-between-side-nav-icon-text;
-                text-transform: uppercase;
             }
 
             + .at-Layout-main {
