@@ -16,6 +16,7 @@ export default
                     protocol,
                     url;
 
+                console.log("UPDATED");
                 if($location.protocol() === 'http'){
                     protocol = 'ws';
                 }
@@ -33,9 +34,9 @@ export default
                         maxReconnectAttempts: 10                    });
 
                     self.socket.onopen = function () {
-                        $log.debug("Websocket connection opened.");
-                        socketPromise.resolve();
-                        console.log('promise resolved, and readyState: '+ self.readyState);
+                        $log.debug("Websocket connection opened." + self.socket.readyState);
+                        // socketPromise.resolve();
+                        // console.log('promise resolved, and readyState: '+ self.socket.readyState);
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -79,6 +80,8 @@ export default
                 var data = JSON.parse(e.data), str = "";
                 if(_.has(data, "accept") && data.accept === true){
                     console.log('handshake message received from server. readyState: '+ this.readyState, data);
+                    socketPromise.resolve();
+                    return;
                 }
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
@@ -196,10 +199,20 @@ export default
                 $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
                     console.log("socket readyState at emit: " + self.socket.readyState);
-                    // if(self.socket.readyState === 0){
-                    //     self.subscribe(self.getLast());
-                    // }
-                    if(self.socket.readyState === 1){
+                    if(self.socket.readyState === 0){
+                        setTimeout(function(){
+                            console.log('inside timeout: ' + self.socket.readyState);
+                            self.socket.send(data, function () {
+                                var args = arguments;
+                                self.scope.$apply(function () {
+                                    if (callback) {
+                                        callback.apply(self.socket, args);
+                                    }
+                                });
+                            });
+                        }, 500);
+                    }
+                    else if(self.socket.readyState === 1){
                         self.socket.send(data, function () {
                             var args = arguments;
                             self.scope.$apply(function () {
