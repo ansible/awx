@@ -158,7 +158,7 @@ function AtPopoverController () {
         popover.style.visibility = 'visible';
         popover.style.opacity = 1;
 
-       if (scope.popover.position === 'right') {
+        if (scope.popover.position === 'right') {
             vm.displayRight(positions);
         } else if (scope.popover.position === 'top') {
             vm.displayTop(positions);
