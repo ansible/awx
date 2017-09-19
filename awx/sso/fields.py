@@ -323,7 +323,8 @@ class LDAPGroupTypeField(fields.ChoiceField):
         if not data:
             return None
         if data.endswith('MemberDNGroupType'):
-            return getattr(django_auth_ldap.config, data)(member_attr='member')
+            from django.conf import settings
+            return getattr(django_auth_ldap.config, data)(member_attr=settings.AUTH_LDAP_GROUP_TYPE_MEMBER_ATTR)
         else:
             return getattr(django_auth_ldap.config, data)()
 
