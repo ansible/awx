@@ -40,7 +40,6 @@ RUN yum -y install epel-release && \
 
 RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
-RUN echo "awxsecret" > /etc/tower/SECRET_KEY
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN OFFICIAL=yes pip install /tmp/{{ awx_sdist_file }}
 

@@ -44,8 +44,10 @@ pg_password=awxpass
 pg_database=awx
 pg_port=5432
 
-# AWX Tunables
-awx_secret_key=aabbcc
+# AWX Secret key
+# It's *very* important that this stay the same between upgrades or you will use the ability to decrypt
+# your credentials
+awx_secret_key=awxsecret
 
 # Proxy
 #http_proxy=http://proxy:3128
