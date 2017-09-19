@@ -138,21 +138,21 @@ function AtFormController (eventService, strings) {
     vm.setValidationMessages = (errors, errorSet) => {
         let errorMessageSet = errorSet || false;
 
-        Object.keys(errors).forEach(error => {
-            if (!Array.isArray(error) && typeof error === 'object') {
-                errorMessageSet = vm.setValidationMessages(error, errorMessageSet);
+        Object.keys(errors).forEach(id => {
+            if (!Array.isArray(errors[id]) && typeof errors[id] === 'object') {
+                errorMessageSet = vm.setValidationMessages(errors[id], errorMessageSet);
 
                 return;
             }
 
             vm.components
                 .filter(component => component.category === 'input')
-                .filter(component => error[component.state.id])
+                .filter(component => errors[component.state.id])
                 .forEach(component => {
                     errorMessageSet = true;
 
                     component.state._rejected = true;
-                    component.state._message = error[component.state.id].join(' ');
+                    component.state._message = errors[component.state.id].join(' ');
                 });
         });
 

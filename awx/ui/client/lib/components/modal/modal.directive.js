@@ -30,11 +30,9 @@ function AtModalController (eventService, strings) {
         vm.modal.hide = vm.hide;
     };
 
-    vm.show = (title, message, event) => {
+    vm.show = (title, message) => {
         vm.modal.title = title;
         vm.modal.message = message;
-
-        event.stopPropagation();
 
         listeners = eventService.addListeners([
             [window, 'click', vm.clickToHide]
