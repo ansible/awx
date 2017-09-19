@@ -4,14 +4,24 @@ function atSideNavLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 }
 
-function AtSideNavController () {
-    const vm = this || {};
+function AtSideNavController ($scope) {
+    let vm = this || {};
 
     vm.isExpanded = false;
 
     vm.toggleExpansion = () => {
         vm.isExpanded = !vm.isExpanded;
-    };
+    }
+
+    document.body.onclick = (e) => {
+        if ($(e.target).parents(".at-Layout-side").length === 0) {
+            vm.isExpanded = false;
+        }
+    }
+
+    $scope.$on('$locationChangeStart', function(event) {
+        vm.isExpanded = false;
+    });
 }
 
 function atSideNav () {

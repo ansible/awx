@@ -85,6 +85,7 @@
 }
 
 @breadcrumb-breakpoint: 900px;
+@breakpoint-sm: 700px;
 
 @media screen and (max-width: @breadcrumb-breakpoint) {
     .BreadCrumb-menuLinkImage {
@@ -93,5 +94,13 @@
     .BreadCrumb-menuLink {
         width: 67px;
         padding: 0 21px;
+    }
+}
+
+@media screen and (max-width: @breakpoint-sm) {
+    .BreadCrumb {
+        padding-left: 50px;
+        position: fixed;
+        z-index: 2;
     }
 }
