@@ -171,12 +171,13 @@ angular.module('awApp', [
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings', 'I18NInit',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings) {
+            $filter, SocketService, AppStrings, I18NInit) {
+            I18NInit();
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;
