@@ -27,7 +27,7 @@ export default
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
 
                     $log.debug('Socket connecting to: ' + url);
-
+                    console.log("prior to new ReconnectingWebSocket..., self.socket is: " + self.socket);
                     self.socket = new ReconnectingWebSocket(url, null, {
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10                    });
@@ -77,6 +77,9 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
+                if(_.has(data, "accept") && data.accept === true){
+                    console.log('handshake message received from server. readyState: '+ this.readyState, data);
+                }
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
                     // summary complete message b/c status is missing.
@@ -126,8 +129,11 @@ export default
                 // listen for specific messages. A subscription object could
                 // look like {"groups":{"jobs": ["status_changed", "summary"]}.
                 // This is used by all socket-enabled $states
-                this.emit(JSON.stringify(state.data.socket));
-                this.setLast(state);
+                let self = this;
+                socketPromise.promise.then(function(){
+                    self.emit(JSON.stringify(state.data.socket));
+                    self.setLast(state);
+                });
             },
             unsubscribe: function(state){
                 // Unsubscribing tells the API that the user is no longer on
