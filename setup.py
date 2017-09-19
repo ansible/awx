@@ -52,6 +52,7 @@ else:
 
 class sdist_isolated(sdist):
     includes = [
+        'include VERSION',
         'include Makefile',
         'include awx/__init__.py',
         'include awx/main/expect/run.py',
