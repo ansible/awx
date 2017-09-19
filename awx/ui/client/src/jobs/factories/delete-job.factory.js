@@ -1,4 +1,4 @@
-export default
+    export default
     function DeleteJob($state, Find, Rest, Wait, ProcessErrors, Prompt, Alert,
         $filter, i18n) {
         return function(params) {
@@ -76,7 +76,7 @@ export default
                                     reloadListStateParams = _.cloneDeep($state.params);
                                     reloadListStateParams.job_search.page = (parseInt(reloadListStateParams.job_search.page)-1).toString();
                                 }
-                                
+
                                 $state.go('.', reloadListStateParams, {reload: true});
                                 Wait('stop');
                             }
@@ -107,12 +107,12 @@ export default
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
                 var cancelBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Submit the request to cancel?") + "</div>";
-                var deleteBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to delete the job below?") + "</div><div class=\"Prompt-bodyTarget\">#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to delete the job below?") + "</div><div class=\"Prompt-bodyTarget\" translate>#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
                 Prompt({
                     hdr: hdr,
                     body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
                     action: action,
-                    actionText: (action_label === 'cancel' || job.status === 'new') ? "OK" : "DELETE"
+                    actionText: (action_label === 'cancel' || job.status === 'new') ? i18n._("OK") : i18n._("DELETE")
                 });
             });
 

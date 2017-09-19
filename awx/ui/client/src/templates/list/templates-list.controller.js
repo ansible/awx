@@ -8,12 +8,12 @@ export default ['$scope', '$rootScope',
     'Alert','TemplateList', 'Prompt', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
-    'TemplateCopyService',
+    'TemplateCopyService', 'i18n',
     function(
         $scope, $rootScope, Alert,
         TemplateList, Prompt, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs, TemplateCopyService
+        qs, TemplateCopyService, i18n
     ) {
 
         var list = TemplateList;
@@ -99,8 +99,8 @@ export default ['$scope', '$rootScope',
         $scope.deleteJobTemplate = function(template) {
            if(template) {
                     Prompt({
-                        hdr: 'Delete',
-                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
+                        hdr: i18n._('Delete'),
+                        body: `<div class="Prompt-bodyQuery">${i18n._("Are you sure you want to delete the template below?")}</div><div class="Prompt-bodyTarget">${$filter('sanitize')(template.name)}</div>`,
                         action: function() {
 
                             function handleSuccessfulDelete(isWorkflow) {
@@ -151,7 +151,7 @@ export default ['$scope', '$rootScope',
                                 Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while deleting.');
                             }
                         },
-                        actionText: 'DELETE'
+                        actionText: i18n._('DELETE')
                     });
                 }
                 else {
