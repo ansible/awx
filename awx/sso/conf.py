@@ -294,6 +294,17 @@ register(
 )
 
 register(
+    'AUTH_LDAP_GROUP_TYPE_MEMBER_ATTR',
+    field_class=fields.CharField,
+    default='member',
+    label=_('LDAP Group Type Member Attribute'),
+    help_text=_('Specify member_attr when AUTH_LDAP_GROUP_TYPE=MemberDNGroupType.'),
+    category=_('LDAP'),
+    category_slug='ldap',
+    feature_required='ldap',
+)
+
+register(
     'AUTH_LDAP_REQUIRE_GROUP',
     field_class=fields.LDAPDNField,
     allow_blank=True,
