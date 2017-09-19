@@ -16,6 +16,7 @@ from django.conf import settings
 
 
 from awx.main.models import (
+    AdHocCommand,
     Credential,
     CredentialType,
     Inventory,
@@ -26,6 +27,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     UnifiedJob,
+    User
 )
 
 from awx.main import tasks
@@ -292,6 +294,18 @@ class TestGenericRun(TestJobExecution):
         assert '--ro-bind %s %s' % (settings.ANSIBLE_VENV_PATH, settings.ANSIBLE_VENV_PATH) in ' '.join(args)  # noqa
         assert '--ro-bind %s %s' % (settings.AWX_VENV_PATH, settings.AWX_VENV_PATH) in ' '.join(args)  # noqa
 
+    def test_created_by_extra_vars(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"tower_user_id": 123,' in ' '.join(args)
+        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_user_id": 123,' in ' '.join(args)
+        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
         patch.start()
@@ -302,6 +316,35 @@ class TestGenericRun(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
+
+
+class TestAdhocRun(TestJobExecution):
+
+    TASK_CLS = tasks.RunAdHocCommand
+
+    def get_instance(self):
+        return AdHocCommand(
+            pk=1,
+            created=datetime.utcnow(),
+            inventory=Inventory(pk=1),
+            status='new',
+            cancel_flag=False,
+            verbosity=3,
+            extra_vars={'awx_foo': 'awx-bar'}
+        )
+
+    def test_created_by_extra_vars(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"tower_user_id": 123,' in ' '.join(args)
+        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_user_id": 123,' in ' '.join(args)
+        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_foo": "awx-bar' in ' '.join(args)
 
 
 class TestIsolatedExecution(TestJobExecution):

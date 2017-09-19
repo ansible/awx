@@ -2138,14 +2138,27 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
+        # Define special extra_vars for AWX, combine with ad_hoc_command.extra_vars
+        extra_vars = {
+            'tower_job_id': ad_hoc_command.pk,
+            'awx_job_id': ad_hoc_command.pk,
+        }
+        if ad_hoc_command.created_by:
+            extra_vars.update({
+                'tower_user_id': ad_hoc_command.created_by.pk,
+                'tower_user_name': ad_hoc_command.created_by.username,
+                'awx_user_id': ad_hoc_command.created_by.pk,
+                'awx_user_name': ad_hoc_command.created_by.username,
+            })
+
         if ad_hoc_command.extra_vars_dict:
             redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_(
                     "{} are prohibited from use in ad hoc commands."
                 ).format(", ".join(removed_vars)))
-
-            args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
+            extra_vars.update(ad_hoc_command.extra_vars_dict)
+        args.extend(['-e', json.dumps(extra_vars)])
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])
