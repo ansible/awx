@@ -4,7 +4,9 @@ import re
 import mock # noqa
 import pytest
 
-from awx.main.models.credential import Credential, CredentialType
+from awx.main.models import (AdHocCommand, Credential, CredentialType, Job, JobTemplate,
+                             Inventory, InventorySource, Project,
+                             WorkflowJobNode)
 from awx.main.utils import decrypt_field
 from awx.api.versioning import reverse
 
@@ -1410,7 +1412,17 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
 
 
 @pytest.mark.django_db
-def test_credential_type_immutable_in_v2(patch, organization, admin, credentialtype_ssh, credentialtype_aws):
+@pytest.mark.parametrize('relation, related_obj', [
+    ['ad_hoc_commands', AdHocCommand()],
+    ['insights_inventories', Inventory()],
+    ['inventorysources', InventorySource()],
+    ['jobs', Job()],
+    ['jobtemplates', JobTemplate()],
+    ['projects', Project()],
+    ['workflowjobnodes', WorkflowJobNode()],
+])
+def test_credential_type_mutability(patch, organization, admin, credentialtype_ssh,
+                                    credentialtype_aws, relation, related_obj):
     cred = Credential(
         credential_type=credentialtype_ssh,
         name='Best credential ever',
@@ -1422,19 +1434,31 @@ def test_credential_type_immutable_in_v2(patch, organization, admin, credentialt
     )
     cred.save()
 
-    response = patch(
-        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
-        {
-            'credential_type': credentialtype_aws.pk,
-            'inputs': {
-                'username': u'jim',
-                'password': u'pass'
-            }
-        },
-        admin
-    )
+    related_obj.save()
+    getattr(cred, relation).add(related_obj)
+
+    def _change_credential_type():
+        return patch(
+            reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+            {
+                'credential_type': credentialtype_aws.pk,
+                'inputs': {
+                    'username': u'jim',
+                    'password': u'pass'
+                }
+            },
+            admin
+        )
+
+    response = _change_credential_type()
     assert response.status_code == 400
-    assert 'credential_type' in response.data
+    expected = ['You cannot change the credential type of the credential, '
+                'as it may break the functionality of the resources using it.']
+    assert response.data['credential_type'] == expected
+
+    related_obj.delete()
+    response = _change_credential_type()
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
