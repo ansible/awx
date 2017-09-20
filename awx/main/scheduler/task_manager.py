@@ -17,8 +17,19 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
-from awx.main.models import * # noqa
-#from awx.main.scheduler.dag_simple import SimpleDAG
+from awx.main.models import (
+    AdHocCommand,
+    Instance,
+    InstanceGroup,
+    InventorySource,
+    InventoryUpdate,
+    Job,
+    Project,
+    ProjectUpdate,
+    SystemJob,
+    UnifiedJob,
+    WorkflowJob,
+)
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import get_type_for_model
@@ -294,16 +305,23 @@ class TaskManager():
                 # Add task + all deps except self
                 dep.dependent_jobs.add(*([task] + filter(lambda d: d != dep, dependencies)))
 
+    def get_latest_inventory_update(self, inventory_source):
+        latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
+        if not latest_inventory_update.exists():
+            return None
+        return latest_inventory_update.first()
+
     def should_update_inventory_source(self, job, inventory_source):
         now = tz_now()
 
         # Already processed dependencies for this job
         if job.dependent_jobs.all():
             return False
-        latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
-        if not latest_inventory_update.exists():
+
+        latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+
+        if latest_inventory_update is None:
             return True
-        latest_inventory_update = latest_inventory_update.first()
         '''
         If there's already a inventory update utilizing this job that's about to run
         then we don't need to create one
@@ -319,14 +337,22 @@ class TaskManager():
             return True
         return False
 
+    def get_latest_project_update(self, job):
+            latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
+            if not latest_project_update.exists():
+                return None
+            return latest_project_update.first()
+
     def should_update_related_project(self, job):
         now = tz_now()
         if job.dependent_jobs.all():
             return False
-        latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
-        if not latest_project_update.exists():
+
+        latest_project_update = self.get_latest_project_update(job)
+
+        if latest_project_update is None:
             return True
-        latest_project_update = latest_project_update.first()
+
         if latest_project_update.status in ['failed', 'canceled']:
             return True
 
@@ -358,16 +384,27 @@ class TaskManager():
         dependencies = []
         if type(task) is Job:
             # TODO: Can remove task.project None check after scan-job-default-playbook is removed
-            if task.project is not None and task.project.scm_update_on_launch is True and \
-                    self.should_update_related_project(task):
-                project_task = self.create_project_update(task)
-                dependencies.append(project_task)
-                # Inventory created 2 seconds behind job
+            if task.project is not None and task.project.scm_update_on_launch is True:
+                if self.should_update_related_project(task):
+                    project_task = self.create_project_update(task)
+                    dependencies.append(project_task)
+                else:
+                    latest_project_update = self.get_latest_project_update(task)
+                    if latest_project_update.status in ['waiting', 'pending', 'running']:
+                        dependencies.append(latest_project_update)
+
+            # Inventory created 2 seconds behind job
             if task.launch_type != 'callback':
                 for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
+                    if not inventory_source.update_on_launch:
+                        continue
                     if self.should_update_inventory_source(task, inventory_source):
                         inventory_task = self.create_inventory_update(task, inventory_source)
                         dependencies.append(inventory_task)
+                    else:
+                        latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+                            dependencies.append(latest_inventory_update)
 
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)
