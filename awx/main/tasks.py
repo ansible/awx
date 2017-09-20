@@ -769,7 +769,10 @@ class BaseTask(LogErrorsTask):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='running')
+        execution_node = settings.CLUSTER_HOST_ID
+        if isolated_host is not None:
+            execution_node = isolated_host
+        instance = self.update_model(pk, status='running', execution_node=execution_node)
 
         instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
@@ -856,12 +859,7 @@ class BaseTask(LogErrorsTask):
                 pexpect_timeout=getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
             )
-            execution_node = settings.CLUSTER_HOST_ID
-            if isolated_host is not None:
-                execution_node = isolated_host
-            instance = self.update_model(instance.pk, status='running',
-                                         execution_node=execution_node,
-                                         output_replacements=output_replacements)
+            instance = self.update_model(instance.pk, output_replacements=output_replacements)
             if isolated_host:
                 manager_instance = isolated_manager.IsolatedManager(
                     args, cwd, env, stdout_handle, ssh_key_path, **_kw

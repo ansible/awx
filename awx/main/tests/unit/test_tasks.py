@@ -259,7 +259,7 @@ class TestGenericRun(TestJobExecution):
         with pytest.raises(Exception):
             self.task.run(self.pk)
         for c in [
-            mock.call(self.pk, status='running'),
+            mock.call(self.pk, execution_node=settings.CLUSTER_HOST_ID, status='running'),
             mock.call(self.pk, output_replacements=[], result_traceback=mock.ANY, status='canceled')
         ]:
             assert c in self.task.update_model.call_args_list

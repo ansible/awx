@@ -495,6 +495,8 @@ class TaskManager():
                  - instance is reported as down, then fail all jobs on the node
                  - instance is an isolated node, then check running tasks
                     among all allowed controller nodes for management process
+                 - valid healthy instance not included in celery task list
+                    probably a netsplit case, leave it alone
                 '''
                 instance = Instance.objects.filter(hostname=node).first()
 
