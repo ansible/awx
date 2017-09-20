@@ -178,6 +178,30 @@ class AnsibleInventoryLoader(object):
         logger.info('Reading Ansible inventory source: %s', self.source)
         data = self.command_to_json(base_args + ['--list'])
 
+        # TODO: remove after we run custom scripts through ansible-inventory
+        if self.is_custom and '_meta' not in data or 'hostvars' not in data['_meta']:
+            # Invoke the executable once for each host name we've built up
+            # to set their variables
+            data.setdefault('_meta', {})
+            data['_meta'].setdefault('hostvars', {})
+            logger.warning('Re-calling script for hostvars individually.')
+            for group_name, group_dict in data.iteritems():
+                if group_name == '_meta':
+                    continue
+                for hostname in group_dict.get('hosts', []):
+                    logger.debug('Obtaining hostvars for %s' % hostname.encode('utf-8'))
+                    hostdata = self.command_to_json(
+                        base_args + ['--host', hostname.encode("utf-8")]
+                    )
+                    if isinstance(hostdata, dict):
+                        data['_meta']['hostvars'][hostname] = hostdata
+                    else:
+                        self.logger.warning(
+                            'Expected dict of vars for host "%s" when '
+                            'calling with `--host`, got %s instead',
+                            k, str(type(data))
+                        )
+
         logger.info('Processing JSON output...')
         inventory = MemInventory(
             group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
