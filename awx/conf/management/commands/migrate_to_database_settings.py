@@ -103,7 +103,7 @@ class Command(BaseCommand):
     def _get_settings_file_patterns(self):
         if MODE == 'development':
             return [
-                '/etc/tower/settings.py', 
+                '/etc/tower/settings.py',
                 '/etc/tower/conf.d/*.py',
                 os.path.join(os.path.dirname(__file__), '..', '..', '..', 'settings', 'local_*.py')
             ]
@@ -409,12 +409,12 @@ class Command(BaseCommand):
                 self.stdout.write('  No settings to migrate!')
         for name, db_value in to_migrate.items():
             display_value = json.dumps(db_value, indent=4)
-            setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
+            setting = Setting.objects.filter(key=name).order_by('pk').first()
             action = 'No Change'
             if not setting:
                 action = 'Migrated'
                 if not self.dry_run:
-                    Setting.objects.create(key=name, user=None, value=db_value)
+                    Setting.objects.create(key=name, value=db_value)
             elif setting.value != db_value or type(setting.value) != type(db_value):
                 action = 'Updated'
                 if not self.dry_run:

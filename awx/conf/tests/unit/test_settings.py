@@ -308,11 +308,7 @@ def test_db_setting_create(settings, mocker):
     ]):
         settings.AWX_SOME_SETTING = 'NEW-VALUE'
 
-    models.Setting.objects.create.assert_called_with(
-        key='AWX_SOME_SETTING',
-        user=None,
-        value='NEW-VALUE'
-    )
+    models.Setting.objects.create.assert_called_with(key='AWX_SOME_SETTING', value='NEW-VALUE')
 
 
 def test_db_setting_update(settings, mocker):
@@ -384,11 +380,7 @@ def test_charfield_properly_sets_none(settings, mocker):
     ]):
         settings.AWX_SOME_SETTING = None
 
-    models.Setting.objects.create.assert_called_with(
-        key='AWX_SOME_SETTING',
-        user=None,
-        value=None
-    )
+    models.Setting.objects.create.assert_called_with(key='AWX_SOME_SETTING', value=None)
 
 
 def test_settings_use_cache(settings, mocker):

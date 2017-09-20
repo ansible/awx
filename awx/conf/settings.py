@@ -161,7 +161,7 @@ class EncryptedCacheProxy(object):
     def _get_setting_from_db(self, key):
         field = self.registry.get_setting_field(key)
         if not field.read_only:
-            return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
+            return Setting.objects.filter(key=key).order_by('pk').first()
 
     def __getattr__(self, name):
         return getattr(self.cache, name)
@@ -265,7 +265,7 @@ class SettingsWrapper(UserSettingsHolder):
         settings_to_cache = get_settings_to_cache(self.registry)
         setting_ids = {}
         # Load all settings defined in the database.
-        for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
+        for setting in Setting.objects.filter(key__in=settings_to_cache.keys()).order_by('pk'):
             if settings_to_cache[setting.key] != SETTING_CACHE_NOTSET:
                 continue
             if self.registry.is_setting_encrypted(setting.key):
@@ -329,7 +329,7 @@ class SettingsWrapper(UserSettingsHolder):
                 'AWX_ISOLATED_PRIVATE_KEY',
                 'AWX_ISOLATED_PUBLIC_KEY',
             ):
-                setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
+                setting = Setting.objects.filter(key=name).order_by('pk').first()
             if setting:
                 if getattr(field, 'encrypted', False):
                     value = decrypt_field(setting, 'value')
@@ -403,9 +403,9 @@ class SettingsWrapper(UserSettingsHolder):
                              value, name, exc_info=True)
             raise e
 
-        setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
+        setting = Setting.objects.filter(key=name).order_by('pk').first()
         if not setting:
-            setting = Setting.objects.create(key=name, user=None, value=db_value)
+            setting = Setting.objects.create(key=name, value=db_value)
             # post_save handler will delete from cache when added.
         elif setting.value != db_value or type(setting.value) != type(db_value):
             setting.value = db_value
@@ -424,7 +424,7 @@ class SettingsWrapper(UserSettingsHolder):
         if field.read_only:
             logger.warning('Attempt to delete read only setting "%s".', name)
             raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
-        for setting in Setting.objects.filter(key=name, user__isnull=True):
+        for setting in Setting.objects.filter(key=name):
             setting.delete()
             # pre_delete handler will delete from cache.
 
@@ -439,7 +439,7 @@ class SettingsWrapper(UserSettingsHolder):
         keys = []
         with _log_database_error():
             for setting in Setting.objects.filter(
-                    key__in=self._get_supported_settings(), user__isnull=True):
+                    key__in=self._get_supported_settings()):
                 # Skip returning settings that have been overridden but are
                 # considered to be "not set".
                 if setting.value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
@@ -455,6 +455,6 @@ class SettingsWrapper(UserSettingsHolder):
         set_locally = False
         if setting in self._get_supported_settings():
             with _log_database_error():
-                set_locally = Setting.objects.filter(key=setting, user__isnull=True).exists()
+                set_locally = Setting.objects.filter(key=setting).exists()
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
         return (set_locally or set_on_default)

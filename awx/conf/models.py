@@ -8,7 +8,7 @@ import json
 from django.db import models
 
 # Tower
-from awx.main.models.base import CreatedModifiedModel, prevent_search
+from awx.main.models.base import CreatedModifiedModel
 from awx.main.fields import JSONField
 from awx.main.utils import encrypt_field
 from awx.conf import settings_registry
@@ -24,14 +24,6 @@ class Setting(CreatedModifiedModel):
     value = JSONField(
         null=True,
     )
-    user = prevent_search(models.ForeignKey(
-        'auth.User',
-        related_name='settings',
-        default=None,
-        null=True,
-        editable=False,
-        on_delete=models.CASCADE,
-    ))
 
     def __unicode__(self):
         try:
@@ -39,10 +31,7 @@ class Setting(CreatedModifiedModel):
         except ValueError:
             # In the rare case the DB value is invalid JSON.
             json_value = u'<Invalid JSON>'
-        if self.user:
-            return u'{} ({}) = {}'.format(self.key, self.user, json_value)
-        else:
-            return u'{} = {}'.format(self.key, json_value)
+        return u'{} = {}'.format(self.key, json_value)
 
     def save(self, *args, **kwargs):
         encrypted = settings_registry.is_setting_encrypted(self.key)

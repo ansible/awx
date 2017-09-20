@@ -45,18 +45,12 @@ def handle_setting_change(key, for_delete=False):
 @receiver(post_save, sender=Setting)
 def on_post_save_setting(sender, **kwargs):
     instance = kwargs['instance']
-    # Skip for user-specific settings.
-    if instance.user:
-        return
     handle_setting_change(instance.key)
 
 
 @receiver(pre_delete, sender=Setting)
 def on_pre_delete_setting(sender, **kwargs):
     instance = kwargs['instance']
-    # Skip for user-specific settings.
-    if instance.user:
-        return
     # Save instance key (setting name) for post_delete.
     instance._saved_key_ = instance.key
 
