@@ -311,14 +311,12 @@ class TaskManager():
             return None
         return latest_inventory_update.first()
 
-    def should_update_inventory_source(self, job, inventory_source):
+    def should_update_inventory_source(self, job, latest_inventory_update):
         now = tz_now()
 
         # Already processed dependencies for this job
         if job.dependent_jobs.all():
             return False
-
-        latest_inventory_update = self.get_latest_inventory_update(inventory_source)
 
         if latest_inventory_update is None:
             return True
@@ -343,12 +341,10 @@ class TaskManager():
                 return None
             return latest_project_update.first()
 
-    def should_update_related_project(self, job):
+    def should_update_related_project(self, job, latest_project_update):
         now = tz_now()
         if job.dependent_jobs.all():
             return False
-
-        latest_project_update = self.get_latest_project_update(job)
 
         if latest_project_update is None:
             return True
@@ -385,11 +381,11 @@ class TaskManager():
         if type(task) is Job:
             # TODO: Can remove task.project None check after scan-job-default-playbook is removed
             if task.project is not None and task.project.scm_update_on_launch is True:
-                if self.should_update_related_project(task):
+                latest_project_update = self.get_latest_project_update(task)
+                if self.should_update_related_project(task, latest_project_update):
                     project_task = self.create_project_update(task)
                     dependencies.append(project_task)
                 else:
-                    latest_project_update = self.get_latest_project_update(task)
                     if latest_project_update.status in ['waiting', 'pending', 'running']:
                         dependencies.append(latest_project_update)
 
@@ -398,11 +394,11 @@ class TaskManager():
                 for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
                     if not inventory_source.update_on_launch:
                         continue
-                    if self.should_update_inventory_source(task, inventory_source):
+                    latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                    if self.should_update_inventory_source(task, latest_inventory_update):
                         inventory_task = self.create_inventory_update(task, inventory_source)
                         dependencies.append(inventory_task)
                     else:
-                        latest_inventory_update = self.get_latest_inventory_update(inventory_source)
                         if latest_inventory_update.status in ['waiting', 'pending', 'running']:
                             dependencies.append(latest_inventory_update)
 
