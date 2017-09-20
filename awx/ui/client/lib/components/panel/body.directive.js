@@ -1,4 +1,4 @@
-const templateUrl = require('@components/panel/body.partial.html');
+const templateUrl = require('~components/panel/body.partial.html');
 
 function atPanelBody () {
     return {

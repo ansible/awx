@@ -1,4 +1,4 @@
-const templateUrl = require('@components/panel/heading.partial.html');
+const templateUrl = require('~components/panel/heading.partial.html');
 
 function link (scope, el, attrs, panel) {
     panel.use(scope);

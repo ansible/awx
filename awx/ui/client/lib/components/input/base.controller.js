@@ -4,7 +4,7 @@ function BaseInputController (strings) {
     const ENCRYPTED_VALUE = '$encrypted$';
 
     return function extend (type, scope, element, form) {
-        let vm = this;
+        const vm = this;
 
         vm.strings = strings;
 
@@ -50,10 +50,10 @@ function BaseInputController (strings) {
             }
 
             if (scope.state._required && !scope.state._value && !scope.state._displayValue) {
-                isValid = false;    
+                isValid = false;
                 message = vm.strings.get('message.REQUIRED_INPUT_MISSING');
             } else if (scope.state._validate) {
-                let result = scope.state._validate(scope.state._value);
+                const result = scope.state._validate(scope.state._value);
 
                 if (!result.isValid) {
                     isValid = false;
@@ -111,18 +111,16 @@ function BaseInputController (strings) {
                 scope.state._activeModel = '_displayValue';
                 scope.state._disabled = true;
                 scope.state._enableToggle = false;
+            } else if (scope.state._isBeingReplaced === false) {
+                scope.state._disabled = true;
+                scope.state._enableToggle = true;
+                scope.state._value = scope.state._preEditValue;
             } else {
-                if (scope.state._isBeingReplaced === false) {
-                    scope.state._disabled = true;
-                    scope.state._enableToggle = true;
-                    scope.state._value = scope.state._preEditValue;
-                } else {
-                    scope.state._activeModel = '_value';
-                    scope.state._disabled = false;
-                    scope.state._value = ''; 
-                }
+                scope.state._activeModel = '_value';
+                scope.state._disabled = false;
+                scope.state._value = '';
             }
-            
+
             vm.check();
         };
     };

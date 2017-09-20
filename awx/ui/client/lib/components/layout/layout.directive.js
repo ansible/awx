@@ -1,13 +1,13 @@
-const templateUrl = require('@components/layout/layout.partial.html');
+const templateUrl = require('~components/layout/layout.partial.html');
 
 function AtLayoutController ($scope, strings) {
-    let vm = this || {};
+    const vm = this || {};
 
-    $scope.$on('$stateChangeSuccess', function(event, next) {
+    $scope.$on('$stateChangeSuccess', (event, next) => {
         vm.currentState = next.name;
     });
 
-    $scope.$watch('$root.current_user', function(val) {
+    $scope.$watch('$root.current_user', (val) => {
         vm.isLoggedIn = val && val.username;
         if (val) {
             vm.isSuperUser = $scope.$root.user_is_superuser || $scope.$root.user_is_system_auditor;
@@ -16,19 +16,19 @@ function AtLayoutController ($scope, strings) {
         }
     });
 
-    $scope.$watch('$root.socketStatus', function(newStatus) {
+    $scope.$watch('$root.socketStatus', (newStatus) => {
         vm.socketState = newStatus;
-        vm.socketIconClass = "icon-socket-" + $scope.socketStatus;
+        vm.socketIconClass = `icon-socket-${$scope.socketStatus}`;
     });
 
-    $scope.$watch('$root.licenseMissing', function(licenseMissing) {
+    $scope.$watch('$root.licenseMissing', (licenseMissing) => {
         vm.licenseIsMissing = licenseMissing;
     });
 
-    vm.getString = function(string) {
+    vm.getString = string => {
         try {
             return strings.get(`layout.${string}`);
-        } catch(err) {
+        } catch (err) {
             return strings.get(string);
         }
     };
@@ -44,8 +44,7 @@ function atLayout () {
         templateUrl,
         controller: AtLayoutController,
         controllerAs: 'vm',
-        scope: {
-        }
+        scope: {}
     };
 }
 

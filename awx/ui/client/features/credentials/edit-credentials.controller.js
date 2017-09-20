@@ -1,25 +1,22 @@
 function EditCredentialsController (models, $state, $scope, strings) {
-    let vm = this || {};
+    const vm = this || {};
 
-    let me = models.me;
-    let credential = models.credential;
-    let credentialType = models.credentialType;
-    let organization = models.organization;
+    const { me, credential, credentialType, organization } = models;
 
-    let omit = ['user', 'team', 'inputs'];
-    let isEditable = credential.isEditable();
+    const omit = ['user', 'team', 'inputs'];
+    const isEditable = credential.isEditable();
 
     vm.mode = 'edit';
     vm.strings = strings;
     vm.panelTitle = credential.get('name');
 
     vm.tab = {
-        details: {  
+        details: {
             _active: true,
             _go: 'credentials.edit',
             _params: { credential_id: credential.get('id') }
         },
-        permissions:{
+        permissions: {
             _go: 'credentials.edit.permissions',
             _params: { credential_id: credential.get('id') }
         }
@@ -45,11 +42,11 @@ function EditCredentialsController (models, $state, $scope, strings) {
         vm.form.disabled = !isEditable;
     }
 
-    let isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => {return org.id === organization.get('id');});
-    let isSuperuser = me.get('is_superuser');
-    let isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
+    const isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => org.id === organization.get('id'));
+    const isSuperuser = me.get('is_superuser');
+    const isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
     vm.form.organization._disabled = true;
-    if(isSuperuser || isOrgAdmin || (credential.get('organization') === null && isCurrentAuthor)){
+    if (isSuperuser || isOrgAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
         vm.form.organization._disabled = false;
     }
 
@@ -66,11 +63,11 @@ function EditCredentialsController (models, $state, $scope, strings) {
     vm.form.credential_type._value = credentialType.get('id');
     vm.form.credential_type._displayValue = credentialType.get('name');
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
- 
+
     vm.form.inputs = {
-        _get (id) {
+        _get () {
             credentialType.mergeInputProperties();
-            
+
             if (credentialType.get('id') === credential.get('credential_type')) {
                 return credential.assignInputGroupValues(credentialType.get('inputs.fields'));
             }
@@ -94,7 +91,7 @@ function EditCredentialsController (models, $state, $scope, strings) {
         return credential.request('put', data);
     };
 
-    vm.form.onSaveSuccess = res => {
+    vm.form.onSaveSuccess = () => {
         $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
     };
 }

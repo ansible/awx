@@ -1,8 +1,8 @@
 function CredentialsStrings (BaseString) {
     BaseString.call(this, 'credentials');
-    
-    let t = this.t;
-    let ns = this.credentials;
+
+    const { t } = this;
+    const ns = this.credentials;
 
     ns.state = {
         ADD_BREADCRUMB_LABEL: t.s('CREATE CREDENTIAL'),

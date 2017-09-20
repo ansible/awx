@@ -1,4 +1,4 @@
-const templateUrl = require('@components/action/action-group.partial.html');
+const templateUrl = require('~components/action/action-group.partial.html');
 
 function atActionGroup () {
     return {

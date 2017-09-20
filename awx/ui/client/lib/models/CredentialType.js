@@ -1,7 +1,7 @@
 let BaseModel;
 
 function categorizeByKind () {
-    let group = {};
+    const group = {};
 
     this.get('results').forEach(result => {
         group[result.kind] = group[result.kind] || [];
@@ -16,12 +16,12 @@ function categorizeByKind () {
 
 function mergeInputProperties () {
     if (!this.has('inputs.fields')) {
-        return;
+        return undefined;
     }
 
-    let required = this.get('inputs.required');
+    const required = this.get('inputs.required');
 
-    return this.get('inputs.fields').map((field, i) => {
+    return this.get('inputs.fields').forEach((field, i) => {
         if (!required || required.indexOf(field.id) === -1) {
             this.set(`inputs.fields[${i}].required`, false);
         } else {

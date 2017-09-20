@@ -1,8 +1,8 @@
-const templateUrl = require('@components/input/secret.partial.html');
+const templateUrl = require('~components/input/secret.partial.html');
 
 function atInputSecretLink (scope, element, attrs, controllers) {
-    let formController = controllers[0];
-    let inputController = controllers[1];
+    const formController = controllers[0];
+    const inputController = controllers[1];
 
     if (scope.tab === '1') {
         element.find('input')[0].focus();
@@ -12,7 +12,7 @@ function atInputSecretLink (scope, element, attrs, controllers) {
 }
 
 function AtInputSecretController (baseInputController) {
-    let vm = this || {};
+    const vm = this || {};
 
     let scope;
 

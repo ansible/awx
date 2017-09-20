@@ -12,7 +12,7 @@ function MeModel (method, resource, graft) {
                 this.unset('results');
             }
 
-             return this;
+            return this;
         });
 }
 

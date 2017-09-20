@@ -1,9 +1,9 @@
-import Base from '@models/Base';
-import Config from '@models/Config';
-import Credential from '@models/Credential';
-import CredentialType from '@models/CredentialType';
-import Me from '@models/Me';
-import Organization from '@models/Organization';
+import Base from '~models/Base';
+import Config from '~models/Config';
+import Credential from '~models/Credential';
+import CredentialType from '~models/CredentialType';
+import Me from '~models/Me';
+import Organization from '~models/Organization';
 
 angular
     .module('at.lib.models', [])

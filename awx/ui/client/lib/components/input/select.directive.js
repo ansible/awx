@@ -1,18 +1,13 @@
-const templateUrl = require('@components/input/select.partial.html');
+const templateUrl = require('~components/input/select.partial.html');
 
 function atInputSelectLink (scope, element, attrs, controllers) {
-    let formController = controllers[0];
-    let inputController = controllers[1];
-
-    if (scope.tab === '1') {
-        elements.select.focus();
-    }
+    const [formController, inputController] = controllers;
 
     inputController.init(scope, element, formController);
 }
 
 function AtInputSelectController (baseInputController, eventService) {
-    let vm = this || {};
+    const vm = this || {};
 
     let scope;
     let element;
@@ -24,8 +19,12 @@ function AtInputSelectController (baseInputController, eventService) {
 
         scope = _scope_;
         element = _element_;
-        input = element.find('input')[0];
-        select = element.find('select')[0];
+        [input] = element.find('input');
+        [select] = element.find('select');
+
+        if (scope.tab === '1') {
+            select.focus();
+        }
 
         if (!scope.state._data || scope.state._data.length === 0) {
             scope.state._disabled = true;
@@ -36,14 +35,14 @@ function AtInputSelectController (baseInputController, eventService) {
         vm.check();
 
         if (scope.state._value) {
-            vm.updateDisplayModel();  
+            vm.updateDisplayModel();
         }
     };
 
     vm.setListeners = () => {
-        let listeners = eventService.addListeners([
+        const listeners = eventService.addListeners([
             [input, 'focus', () => select.focus],
-            [select, 'mousedown', () => scope.$apply(() => scope.open = !scope.open)],
+            [select, 'mousedown', () => scope.$apply(() => { scope.open = !scope.open; })],
             [select, 'focus', () => input.classList.add('at-Input--focus')],
             [select, 'change', () => scope.$apply(() => {
                 scope.open = false;

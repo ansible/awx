@@ -2,9 +2,9 @@ const path = require('path');
 
 const _ = require('lodash');
 
-let base = require('./webpack.base');
+const base = require('./webpack.base');
 
-let development = {
+const development = {
     devtool: 'cheap-source-map'
 };
 

@@ -1,5 +1,6 @@
-// The purpose of this file is to instantiate the BaseStringService
-// for app-wide usage. 
+/**
+ * This service is used to access the app-wide strings defined in BaseStringService.
+ */
 function AppStrings (BaseString) {
     BaseString.call(this, 'app');
 }

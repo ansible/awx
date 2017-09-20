@@ -1,10 +1,7 @@
 function AddCredentialsController (models, $state, strings) {
-    let vm = this || {};
+    const vm = this || {};
 
-    let me = models.me;
-    let credential = models.credential;
-    let credentialType = models.credentialType;
-    let organization = models.organization;
+    const { me, credential, credentialType, organization } = models;
 
     vm.mode = 'add';
     vm.strings = strings;
@@ -12,7 +9,7 @@ function AddCredentialsController (models, $state, strings) {
 
     vm.tab = {
         details: { _active: true },
-        permissions:{ _disabled: true }
+        permissions: { _disabled: true }
     };
 
     vm.form = credential.createFormSchema('post', {
@@ -25,14 +22,14 @@ function AddCredentialsController (models, $state, strings) {
     vm.form.organization._route = 'credentials.add.organization';
     vm.form.organization._model = organization;
     vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
-    
+
     vm.form.credential_type._resource = 'credential_type';
     vm.form.credential_type._route = 'credentials.add.credentialType';
     vm.form.credential_type._model = credentialType;
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
 
     vm.form.inputs = {
-        _get: id => {
+        _get: () => {
             credentialType.mergeInputProperties();
 
             return credentialType.get('inputs.fields');

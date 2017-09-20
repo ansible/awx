@@ -1,4 +1,4 @@
-const templateUrl = require('@components/input/label.partial.html');
+const templateUrl = require('~components/input/label.partial.html');
 
 function atInputLabel () {
     return {

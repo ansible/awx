@@ -1,16 +1,11 @@
 function CacheService ($cacheFactory, $q) {
-    let cache = $cacheFactory('api');
+    const cache = $cacheFactory('api');
 
-    this.put = (key, data) => {
-        return cache.put(key, data); 
-    };
-
-    this.get = (key) => {
-        return $q.resolve(cache.get(key));
-    };
+    this.put = (key, data) => cache.put(key, data);
+    this.get = (key) => $q.resolve(cache.get(key));
 
     this.remove = (key) => {
-        if (!key) { 
+        if (!key) {
             return cache.removeAll();
         }
 
@@ -29,7 +24,7 @@ function CacheService ($cacheFactory, $q) {
         }
 
         return key;
-    }
+    };
 }
 
 CacheService.$inject = ['$cacheFactory', '$q'];

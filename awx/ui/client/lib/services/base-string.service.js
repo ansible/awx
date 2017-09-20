@@ -1,4 +1,4 @@
-import defaults from '@assets/default.strings.json';
+import defaults from '~assets/default.strings.json';
 
 let i18n;
 
@@ -45,7 +45,7 @@ function BaseStringService (namespace) {
      */
     this.t.p = i18n.translatePlural;
 
-    let t = this.t;
+    const { t } = this;
 
     /*
      * These strings are globally relevant and configured to give priority to values in
@@ -79,7 +79,7 @@ function BaseStringService (namespace) {
      * @arg {object=} context - An object containing data to use in the interpolation of the string
      */
     this.get = (name, ...args) => {
-        let keys = name.split('.');
+        const keys = name.split('.');
         let value;
 
         keys.forEach(key => {
@@ -90,7 +90,7 @@ function BaseStringService (namespace) {
             }
 
             if (!value) {
-                throw new Error(ERROR_NO_STRING + `: ${name}`);
+                throw new Error(`${ERROR_NO_STRING}: ${name}`);
             }
         });
 

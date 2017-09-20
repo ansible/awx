@@ -1,14 +1,14 @@
-const templateUrl = require('@components/layout/top-nav-item.partial.html');
+const templateUrl = require('~components/layout/top-nav-item.partial.html');
 
 function atTopNavItemLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 
     scope.isHidden = false;
 
-    var shownWhen = attrs.isShown;
+    const shownWhen = attrs.isShown;
 
     if (shownWhen !== 'missingLicense') {
-        scope.$watch('layoutVm.licenseIsMissing', function(val) {
+        scope.$watch('layoutVm.licenseIsMissing', (val) => {
             scope.isHidden = val;
         });
     }

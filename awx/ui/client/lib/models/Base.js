@@ -4,9 +4,8 @@ let cache;
 
 function request (method, resource) {
     if (Array.isArray(method)) {
-        let promises = method.map((_method_, i) => {
-            return this.request(_method_, Array.isArray(resource) ? resource[i] : resource);
-        });
+        const promises = method.map((_method_, i) =>
+            this.request(_method_, Array.isArray(resource) ? resource[i] : resource));
 
         return $q.all(promises);
     }
@@ -14,12 +13,12 @@ function request (method, resource) {
     if (this.isCacheable(method, resource)) {
         return this.requestWithCache(method, resource);
     }
- 
+
     return this.http[method](resource);
 }
 
 function requestWithCache (method, resource) {
-    let key = cache.createKey(method, this.path, resource);
+    const key = cache.createKey(method, this.path, resource);
 
     return cache.get(key)
         .then(data => {
@@ -43,16 +42,16 @@ function requestWithCache (method, resource) {
  * supported by the API.
  *
  * @arg {Object} params - An object of keys and values to to format and
- * to the URL as a query string. Refer to the API documentation for the 
+ * to the URL as a query string. Refer to the API documentation for the
  * resource in use for specifics.
  * @arg {Object} config - Configuration specific to the UI to accommodate
  * common use cases.
  *
- * @yields {boolean} - Indicating a match has been found. If so, the results 
+ * @yields {boolean} - Indicating a match has been found. If so, the results
  * are set on the model.
  */
 function search (params, config) {
-    let req = {
+    const req = {
         method: 'GET',
         url: this.path,
         params
@@ -69,7 +68,7 @@ function search (params, config) {
                     return false;
                 }
 
-                this.model.GET = data.results[0];
+                [this.model.GET] = data.results;
             } else {
                 this.model.GET = data;
             }
@@ -79,7 +78,7 @@ function search (params, config) {
 }
 
 function httpGet (resource) {
-    let req = {
+    const req = {
         method: 'GET',
         url: this.path
     };
@@ -101,7 +100,7 @@ function httpGet (resource) {
 }
 
 function httpPost (data) {
-    let req = {
+    const req = {
         method: 'POST',
         url: this.path,
         data
@@ -115,9 +114,9 @@ function httpPost (data) {
 }
 
 function httpPut (changes) {
-    let model = Object.assign(this.get(), changes);
+    const model = Object.assign(this.get(), changes);
 
-    let req = {
+    const req = {
         method: 'PUT',
         url: `${this.path}${model.id}/`,
         data: model
@@ -127,7 +126,7 @@ function httpPut (changes) {
 }
 
 function httpOptions (resource) {
-    let req = {
+    const req = {
         method: 'OPTIONS',
         url: this.path
     };
@@ -157,7 +156,7 @@ function unset (method, keys) {
         keys = method;
         method = 'GET';
     }
-    
+
     method = method.toUpperCase();
     keys = keys.split('.');
 
@@ -166,10 +165,10 @@ function unset (method, keys) {
     } else if (keys.length === 1) {
         delete this.model[method][keys[0]];
     } else {
-        let property = keys.splice(-1);
+        const property = keys.splice(-1);
         keys = keys.join('.');
 
-        let model = this.find(method, keys)
+        const model = this.find(method, keys);
         delete model[property];
     }
 }
@@ -180,29 +179,29 @@ function set (method, keys, value) {
         keys = method;
         method = 'GET';
     }
-    
+
     keys = keys.split('.');
 
     if (keys.length === 1) {
-        model[keys[0]] = value;
+        this.model[keys[0]] = value;
     } else {
-        let property = keys.splice(-1);
+        const property = keys.splice(-1);
         keys = keys.join('.');
 
-        let model = this.find(method, keys)
+        const model = this.find(method, keys);
 
         model[property] = value;
     }
 }
 
 function match (method, key, value) {
-    if(!value) {
+    if (!value) {
         value = key;
         key = method;
         method = 'GET';
     }
 
-    let model = this.model[method.toUpperCase()];
+    const model = this.model[method.toUpperCase()];
 
     if (!model) {
         return null;
@@ -216,7 +215,7 @@ function match (method, key, value) {
         return null;
     }
 
-    let result = model.results.filter(result => result[key] === value);
+    const result = model.results.filter(object => object[key] === value);
 
     return result.length === 0 ? null : result[0];
 }
@@ -232,8 +231,8 @@ function find (method, keys) {
         keys = keys.split('.');
 
         keys.forEach(key => {
-            let bracketIndex = key.indexOf('[');
-            let hasArray = bracketIndex !== -1;
+            const bracketIndex = key.indexOf('[');
+            const hasArray = bracketIndex !== -1;
 
             if (!hasArray) {
                 value = value[key];
@@ -245,8 +244,8 @@ function find (method, keys) {
                 return;
             }
 
-            let prop = key.substring(0, bracketIndex);
-            let index = Number(key.substring(bracketIndex + 1, key.length - 1));
+            const prop = key.substring(0, bracketIndex);
+            const index = Number(key.substring(bracketIndex + 1, key.length - 1));
 
             value = value[prop][index];
         });
@@ -279,38 +278,37 @@ function has (method, keys) {
 
 function extend (method, related) {
     if (!related) {
-        related = method
-        method = 'GET'
+        related = method;
+        method = 'GET';
     } else {
-        method = method.toUpperCase()
+        method = method.toUpperCase();
     }
 
     if (this.has(method, `related.${related}`)) {
-        let id = this.get('id')
-
-        let req = {
+        const req = {
             method,
             url: this.get(`related.${related}`)
         };
 
         return $http(req)
-            .then(({data}) => {
+            .then(({ data }) => {
                 this.set(method, `related.${related}`, data);
+
                 return this;
-            })
+            });
     }
 
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
 function normalizePath (resource) {
-    let version = '/api/v2/';
+    const version = '/api/v2/';
 
     return `${version}${resource}/`;
 }
 
 function isEditable () {
-    let canEdit = this.get('summary_fields.user_capabilities.edit');
+    const canEdit = this.get('summary_fields.user_capabilities.edit');
 
     if (canEdit) {
         return true;
@@ -321,7 +319,6 @@ function isEditable () {
     }
 
     return false;
-
 }
 
 function isCreatable () {
@@ -361,20 +358,20 @@ function graft (id) {
  * @arg {string=} method - Populate the model with `GET` or `OPTIONS` data.
  * @arg {(string|Object)=} resource - An `id` reference to a particular
  * resource or an existing model's data.
- * @arg {boolean=} graft - Create a new instance from existing model data.
+ * @arg {boolean=} isGraft - Create a new instance from existing model data.
  *
  * @returns {(Object|Promise)} - Returns a reference to the model instance
  * if an empty instance or graft is created. Otherwise, a promise yielding
  * a model instance is returned.
  */
-function create (method, resource, graft, config) {
+function create (method, resource, isGraft, config) {
     if (!method) {
         return this;
     }
 
     this.promise = this.request(method, resource, config);
 
-    if (graft) {
+    if (isGraft) {
         return this;
     }
 
@@ -421,7 +418,7 @@ function BaseModel (path, settings) {
     this.model = {};
     this.path = this.normalizePath(path);
     this.settings = settings || {};
-};
+}
 
 function BaseModelLoader (_$http_, _$q_, _cache_) {
     $http = _$http_;

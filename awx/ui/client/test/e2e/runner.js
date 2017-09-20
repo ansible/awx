@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-require('babel-register');
+require('babel-core/register');
 require('nightwatch/bin/runner.js');

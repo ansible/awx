@@ -1,20 +1,18 @@
-const templateUrl = require('@components/panel/panel.partial.html');
+const templateUrl = require('~components/panel/panel.partial.html');
 
-function atPanelLink (scope, el, attrs, controllers) {
-    let panelController = controllers[0];
+function atPanelLink (scope, el, attrs, controller) {
+    const panelController = controller;
 
-    panelController.init(scope, el);
+    panelController.init(scope);
 }
 
 function AtPanelController ($state) {
-    let vm = this;
+    const vm = this;
 
     let scope;
-    let el;
 
-    vm.init = (_scope_, _el_) => {
+    vm.init = (_scope_) => {
         scope = _scope_;
-        el = _el_;
     };
 
     vm.dismiss = () => {
@@ -32,7 +30,7 @@ function atPanel () {
     return {
         restrict: 'E',
         replace: true,
-        require: ['atPanel'],
+        require: 'atPanel',
         transclude: true,
         templateUrl,
         controller: AtPanelController,

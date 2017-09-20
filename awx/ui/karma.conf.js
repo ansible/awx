@@ -4,7 +4,6 @@ module.exports = function(config) {
     config.set({
         autoWatch: true,
         colors: true,
-        logLevel: config.LOG_INFO,
         browsers: ['Chrome', 'Firefox'],
         coverageReporter: {
             reporters: [
@@ -30,9 +29,7 @@ module.exports = function(config) {
         },
         webpack: webpackTestConfig,
         webpackMiddleware: {
-            stats: {
-                colors: true
-            }
+            noInfo: true
         },
         junitReporter: {
             outputDir: 'coverage',

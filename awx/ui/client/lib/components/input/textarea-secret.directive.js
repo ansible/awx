@@ -1,8 +1,7 @@
-const templateUrl = require('@components/input/textarea-secret.partial.html');
+const templateUrl = require('~components/input/textarea-secret.partial.html');
 
 function atInputTextareaSecretLink (scope, element, attrs, controllers) {
-    let formController = controllers[0];
-    let inputController = controllers[1];
+    const [formController, inputController] = controllers;
 
     if (scope.tab === '1') {
         element.find('textarea')[0].focus();
@@ -12,34 +11,30 @@ function atInputTextareaSecretLink (scope, element, attrs, controllers) {
 }
 
 function AtInputTextareaSecretController (baseInputController, eventService) {
-    let vm = this || {};
+    const vm = this || {};
 
     let scope;
     let textarea;
-    let container;
     let input;
 
     vm.init = (_scope_, element, form) => {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
-        textarea = element.find('textarea')[0];
-        container = element[0];
+        [textarea] = element.find('textarea');
 
         if (scope.state.format === 'ssh_private_key') {
             scope.ssh = true;
             scope.state._hint = scope.state._hint || vm.strings.get('textarea.SSH_KEY_HINT');
-            input = element.find('input')[0];
+            [input] = element.find('input');
         }
 
         if (scope.state._value) {
             scope.state._buttonText = vm.strings.get('REPLACE');
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
-        } else {
-            if (scope.state.format === 'ssh_private_key') {
-                vm.listeners = vm.setFileListeners(textarea, input);
-                scope.state._displayHint = true;
-            }
+        } else if (scope.state.format === 'ssh_private_key') {
+            vm.listeners = vm.setFileListeners(textarea, input);
+            scope.state._displayHint = true;
         }
 
         vm.check();
@@ -59,34 +54,32 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         }
     };
 
-    vm.setFileListeners = (textarea, input) => { 
-        return eventService.addListeners([
-            [textarea, 'dragenter', event => {
-                event.stopPropagation();
-                event.preventDefault();
-                scope.$apply(() => scope.drag = true);
-            }],
+    vm.setFileListeners = (textareaEl, inputEl) => eventService.addListeners([
+        [textareaEl, 'dragenter', event => {
+            event.stopPropagation();
+            event.preventDefault();
+            scope.$apply(() => { scope.drag = true; });
+        }],
 
-            [input, 'dragleave', event => {
-                event.stopPropagation();
-                event.preventDefault();
-                scope.$apply(() => scope.drag = false);
-            }],
+        [inputEl, 'dragleave', event => {
+            event.stopPropagation();
+            event.preventDefault();
+            scope.$apply(() => { scope.drag = false; });
+        }],
 
-            [input, 'change', event => {
-                let reader = new FileReader();
+        [inputEl, 'change', event => {
+            const reader = new FileReader();
 
-                reader.onload = () => vm.readFile(reader, event);
-                reader.readAsText(input.files[0]);
-            }]
-        ]);
-    };
+            reader.onload = () => vm.readFile(reader, event);
+            reader.readAsText(inputEl.files[0]);
+        }]
+    ]);
 
-    vm.readFile = (reader, event) => {
+    vm.readFile = (reader) => {
         scope.$apply(() => {
             scope.state._value = reader.result;
             vm.check();
-            scope.drag = false
+            scope.drag = false;
             input.value = '';
         });
     };

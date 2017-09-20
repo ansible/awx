@@ -1,6 +1,6 @@
 function EventService () {
     this.addListeners = list => {
-        let listeners = [];
+        const listeners = [];
 
         list.forEach(args => listeners.push(this.addListener(...args)));
 
@@ -8,7 +8,7 @@ function EventService () {
     };
 
     this.addListener = (el, name, fn) => {
-        let listener = {
+        const listener = {
             fn,
             name,
             el
