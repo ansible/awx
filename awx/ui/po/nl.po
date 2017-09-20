@@ -1,11 +1,13 @@
+# Froebel Flores <froebel.flores@welocalize.com>, 2017. #zanata
 # helena <info@helena.nl>, 2017. #zanata
 # helena02 <vertaler2helena@gmail.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2017-09-01 10:44+0000\n"
-"Last-Translator: helena <info@helena.nl>\n"
+"PO-Revision-Date: 2017-09-13 08:29+0000\n"
+"Last-Translator: Froebel Flores <froebel.flores@welocalize.com>\n"
 "Language-Team: Dutch\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: nl\n"
@@ -42,6 +44,7 @@ msgid "(defaults to %s)"
 msgstr "(wordt standaard %s)"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
 msgid "(seconds)"
 msgstr "(seconden)"
 
@@ -88,6 +91,7 @@ msgstr "ACTIVITEITSGEGEVENS"
 #: client/src/activity-stream/activitystream.route.js:28
 #: client/src/activity-stream/streams.list.js:14
 #: client/src/activity-stream/streams.list.js:15
+#: client/src/activity-stream/activitystream.route.js:27
 msgid "ACTIVITY STREAM"
 msgstr "ACTIVITEITENLOGBOEK"
 
@@ -110,6 +114,11 @@ msgstr "ACTIVITEITENLOGBOEK"
 #: client/src/templates/templates.list.js:58
 #: client/src/templates/workflows.form.js:125
 #: client/src/users/users.list.js:50
+#: client/features/credentials/legacy.credentials.js:74
+#: client/src/credential-types/credential-types.list.js:41
+#: client/src/projects/projects.form.js:242
+#: client/src/templates/job_templates/job-template.form.js:422
+#: client/src/templates/workflows.form.js:130
 msgid "ADD"
 msgstr "TOEVOEGEN"
 
@@ -122,6 +131,7 @@ msgid "ADD HOST"
 msgstr "HOST TOEVOEGEN"
 
 #: client/src/teams/teams.form.js:157 client/src/users/users.form.js:212
+#: client/src/users/users.form.js:213
 msgid "ADD PERMISSIONS"
 msgstr "MACHTIGINGEN TOEVOEGEN"
 
@@ -139,6 +149,7 @@ msgstr "AANVULLENDE INFORMATIE"
 
 #: client/src/organizations/linkout/organizations-linkout.route.js:330
 #: client/src/organizations/list/organizations-list.controller.js:84
+#: client/src/organizations/linkout/organizations-linkout.route.js:323
 msgid "ADMINS"
 msgstr "BEHEERDERS"
 
@@ -160,6 +171,7 @@ msgid "API Key"
 msgstr "API-sleutel"
 
 #: client/src/notifications/notificationTemplates.form.js:246
+#: client/src/notifications/notificationTemplates.form.js:251
 msgid "API Service/Integration Key"
 msgstr "Service-/integratiesleutel API"
 
@@ -182,6 +194,7 @@ msgid "ASSOCIATED HOSTS"
 msgstr "VERBONDEN HOSTS"
 
 #: client/src/setup-menu/setup-menu.partial.html:66
+#: client/src/setup-menu/setup-menu.partial.html:72
 msgid "About {{BRAND_NAME}}"
 msgstr "Over {{BRAND_NAME}}"
 
@@ -190,10 +203,12 @@ msgid "Access Key"
 msgstr "Toegangssleutel"
 
 #: client/src/notifications/notificationTemplates.form.js:224
+#: client/src/notifications/notificationTemplates.form.js:229
 msgid "Account SID"
 msgstr "SID account"
 
 #: client/src/notifications/notificationTemplates.form.js:183
+#: client/src/notifications/notificationTemplates.form.js:186
 msgid "Account Token"
 msgstr "Accounttoken"
 
@@ -221,6 +236,8 @@ msgstr "Activiteitenlogboek"
 #: client/src/organizations/organizations.form.js:81
 #: client/src/teams/teams.form.js:82
 #: client/src/templates/workflows.form.js:122
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:143
+#: client/src/templates/workflows.form.js:127
 msgid "Add"
 msgstr "Toevoegen"
 
@@ -243,6 +260,9 @@ msgstr "Project toevoegen"
 #: client/src/shared/form-generator.js:1703
 #: client/src/templates/job_templates/job-template.form.js:450
 #: client/src/templates/workflows.form.js:170
+#: client/src/shared/form-generator.js:1754
+#: client/src/templates/job_templates/job-template.form.js:467
+#: client/src/templates/workflows.form.js:175
 msgid "Add Survey"
 msgstr "Vragenlijst toevoegen"
 
@@ -257,6 +277,8 @@ msgstr "Gebruiker toevoegen"
 #: client/src/shared/stateDefinitions.factory.js:410
 #: client/src/shared/stateDefinitions.factory.js:578
 #: client/src/users/users.list.js:17
+#: client/src/shared/stateDefinitions.factory.js:364
+#: client/src/shared/stateDefinitions.factory.js:532
 msgid "Add Users"
 msgstr "Gebruikers toevoegen"
 
@@ -283,6 +305,11 @@ msgstr "Een nieuw schema toevoegen"
 #: client/src/projects/projects.form.js:241
 #: client/src/templates/job_templates/job-template.form.js:400
 #: client/src/templates/workflows.form.js:123
+#: client/features/credentials/legacy.credentials.js:72
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:145
+#: client/src/projects/projects.form.js:240
+#: client/src/templates/job_templates/job-template.form.js:420
+#: client/src/templates/workflows.form.js:128
 msgid "Add a permission"
 msgstr "Een machtiging toevoegen"
 
@@ -292,10 +319,11 @@ msgid ""
 "against machines, or when syncing inventories or projects."
 msgstr ""
 "Wachtwoorden, SSH-sleutels en andere toegangsgegevens toevoegen voor gebruik"
-" bij het starten van taken tegen machines of bij het synchroniseren van "
+" bij het starten van taken m.b.t. machines of bij het synchroniseren van "
 "inventarissen of projecten."
 
 #: client/src/shared/form-generator.js:1439
+#: client/src/shared/form-generator.js:1490
 msgid "Admin"
 msgstr "Beheerder"
 
@@ -319,6 +347,7 @@ msgstr ""
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:65
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:74
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:139
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid "All"
 msgstr "Alle"
 
@@ -348,6 +377,7 @@ msgid "Always"
 msgstr "Altijd"
 
 #: client/src/projects/list/projects-list.controller.js:267
+#: client/src/projects/list/projects-list.controller.js:265
 msgid ""
 "An SCM update does not appear to be running for project: %s. Click the "
 "%sRefresh%s button to view the latest status."
@@ -361,6 +391,7 @@ msgid "Answer Type"
 msgstr "Antwoordtype"
 
 #: client/src/credentials/list/credentials-list.controller.js:114
+#: client/src/credentials/list/credentials-list.controller.js:106
 msgid "Are you sure you want to delete the credential below?"
 msgstr "Weet u zeker dat u onderstaande toegangsgegevens wilt verwijderen?"
 
@@ -381,6 +412,7 @@ msgid "Are you sure you want to delete the organization below?"
 msgstr "Weet u zeker dat u onderstaande organisatie wilt verwijderen?"
 
 #: client/src/projects/list/projects-list.controller.js:208
+#: client/src/projects/list/projects-list.controller.js:207
 msgid "Are you sure you want to delete the project below?"
 msgstr "Weet u zeker dat u onderstaand project wilt verwijderen?"
 
@@ -403,6 +435,7 @@ msgid "Are you sure you want to disassociate the host below from"
 msgstr "Weet u zeker dat u onderstaande host los wilt koppelen van"
 
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:47
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:69
 msgid ""
 "Are you sure you want to permanently delete the group below from the "
 "inventory?"
@@ -411,6 +444,7 @@ msgstr ""
 "inventaris?"
 
 #: client/src/inventories-hosts/inventories/related/hosts/list/host-list.controller.js:98
+#: client/src/inventories-hosts/inventories/related/hosts/list/host-list.controller.js:93
 msgid ""
 "Are you sure you want to permanently delete the host below from the "
 "inventory?"
@@ -449,6 +483,7 @@ msgid "Associate this host with a new group"
 msgstr "Deze host verbinden met een nieuwe groep"
 
 #: client/src/shared/form-generator.js:1441
+#: client/src/shared/form-generator.js:1492
 msgid "Auditor"
 msgstr "Auditor"
 
@@ -495,11 +530,12 @@ msgstr "Beschikbaarheidsgebied:"
 msgid "Azure AD"
 msgstr "Azure AD"
 
-#: client/src/shared/directives.js:75
+#: client/src/shared/directives.js:75 client/src/shared/directives.js:133
 msgid "BROWSE"
 msgstr "BLADEREN"
 
 #: client/src/projects/projects.form.js:80
+#: client/src/projects/projects.form.js:79
 msgid ""
 "Base path used for locating playbooks. Directories found inside this path "
 "will be listed in the playbook directory drop-down. Together the base path "
@@ -512,6 +548,7 @@ msgstr ""
 "samen het volledige pad dat gebruikt wordt om draaiboeken te vinden."
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:128
+#: client/src/templates/job_templates/job-template.form.js:274
 msgid "Become Privilege Escalation"
 msgstr "Verhoging van rechten worden"
 
@@ -534,6 +571,9 @@ msgstr "Bladeren"
 #: client/src/partials/survey-maker-modal.html:84
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:17
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:65
+#: client/lib/services/base-string.service.js:29
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:73
+#: client/src/job-submission/job-submission.partial.html:360
 msgid "CANCEL"
 msgstr "ANNULEREN"
 
@@ -552,6 +592,7 @@ msgstr "SLUITEN"
 #: client/src/inventories-hosts/inventories/related/completed-jobs/completed-jobs.list.js:19
 #: client/src/inventories-hosts/inventories/related/completed-jobs/completed-jobs.route.js:18
 #: client/src/templates/completed-jobs.list.js:20
+#: client/src/inventories-hosts/inventories/related/completed-jobs/completed-jobs.route.js:17
 msgid "COMPLETED JOBS"
 msgstr "VOLTOOIDE TAKEN"
 
@@ -605,6 +646,8 @@ msgstr "BRON AANMAKEN"
 #: client/src/partials/job-template-details.html:2
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:93
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:82
+#: client/src/job-submission/job-submission.partial.html:341
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:80
 msgid "CREDENTIAL"
 msgstr "TOEGANGSGEGEVENS"
 
@@ -614,6 +657,7 @@ msgstr "SOORT TOEGANGSGEGEVENS"
 
 #: client/src/job-submission/job-submission.partial.html:92
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:56
+#: client/src/job-submission/job-submission.partial.html:90
 msgid "CREDENTIAL TYPE:"
 msgstr "SOORT TOEGANGSGEGEVENS:"
 
@@ -628,6 +672,8 @@ msgstr "SOORTEN TOEGANGSGEGEVENS"
 #: client/src/credentials/credentials.list.js:15
 #: client/src/credentials/credentials.list.js:16
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:5
+#: client/features/credentials/legacy.credentials.js:13
+#: client/src/activity-stream/get-target-title.factory.js:14
 msgid "CREDENTIALS"
 msgstr "TOEGANGSGEGEVENS"
 
@@ -638,20 +684,27 @@ msgstr "MACHTIGINGEN TOEGANGSGEGEVENS"
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:378
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:390
 #: client/src/projects/projects.form.js:199
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:334
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:346
+#: client/src/projects/projects.form.js:198
 msgid "Cache Timeout"
 msgstr "Cache time-out"
 
 #: client/src/projects/projects.form.js:188
+#: client/src/projects/projects.form.js:187
 msgid "Cache Timeout%s (seconds)%s"
 msgstr "Cache time-out %s (seconden)%s"
 
 #: client/src/projects/list/projects-list.controller.js:199
 #: client/src/users/list/users-list.controller.js:83
+#: client/src/projects/list/projects-list.controller.js:198
 msgid "Call to %s failed. DELETE returned status:"
 msgstr "Oproepen %s mislukt. Geretourneerde status VERWIJDEREN:"
 
 #: client/src/projects/list/projects-list.controller.js:247
 #: client/src/projects/list/projects-list.controller.js:264
+#: client/src/projects/list/projects-list.controller.js:246
+#: client/src/projects/list/projects-list.controller.js:262
 msgid "Call to %s failed. GET status:"
 msgstr "Oproepen %s mislukt. Status OPHALEN:"
 
@@ -660,6 +713,7 @@ msgid "Call to %s failed. POST returned status:"
 msgstr "Oproepen %s mislukt. Geretourneerde status POSTEN:"
 
 #: client/src/projects/list/projects-list.controller.js:226
+#: client/src/projects/list/projects-list.controller.js:225
 msgid "Call to %s failed. POST status:"
 msgstr "Oproepen %s mislukt. Status POSTEN:"
 
@@ -668,6 +722,7 @@ msgid "Call to %s failed. Return status: %d"
 msgstr "Oproepen %s mislukt. Status retourneren: %d"
 
 #: client/src/projects/list/projects-list.controller.js:273
+#: client/src/projects/list/projects-list.controller.js:271
 msgid "Call to get project failed. GET status:"
 msgstr "Oproep om project op te halen mislukt. Status OPHALEN:"
 
@@ -679,10 +734,13 @@ msgstr "Oproep om project op te halen mislukt. Status OPHALEN:"
 #: client/src/shared/form-generator.js:1691
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:12
 #: client/src/workflow-results/workflow-results.partial.html:42
+#: client/src/configuration/configuration.controller.js:529
+#: client/src/shared/form-generator.js:1742
 msgid "Cancel"
 msgstr "Annuleren"
 
 #: client/src/projects/list/projects-list.controller.js:242
+#: client/src/projects/list/projects-list.controller.js:241
 msgid "Cancel Not Allowed"
 msgstr "Annuleren niet toegestaan"
 
@@ -705,6 +763,8 @@ msgstr "Geannuleerd. Klik voor meer informatie"
 
 #: client/src/shared/smart-search/smart-search.controller.js:49
 #: client/src/shared/smart-search/smart-search.controller.js:91
+#: client/src/shared/smart-search/smart-search.controller.js:39
+#: client/src/shared/smart-search/smart-search.controller.js:81
 msgid "Cannot search running job"
 msgstr "Kan taak in uitvoering niet zoeken"
 
@@ -718,6 +778,7 @@ msgid "Capacity"
 msgstr "Capaciteit"
 
 #: client/src/projects/projects.form.js:82
+#: client/src/projects/projects.form.js:81
 msgid "Change %s under \"Configure {{BRAND_NAME}}\" to change this location."
 msgstr ""
 "Wijzig %s onder \"{{BRAND_NAME}} configureren\" om deze locatie te wijzigen."
@@ -727,6 +788,7 @@ msgid "Changes"
 msgstr "Wijzigingen"
 
 #: client/src/shared/form-generator.js:1064
+#: client/src/shared/form-generator.js:1116
 msgid "Choose a %s"
 msgstr "Kies een %s"
 
@@ -748,7 +810,7 @@ msgstr ""
 msgid "Choose an inventory file"
 msgstr "Kies een inventarisbestand"
 
-#: client/src/shared/directives.js:76
+#: client/src/shared/directives.js:76 client/src/shared/directives.js:134
 msgid "Choose file"
 msgstr "Bestand kiezen"
 
@@ -761,6 +823,7 @@ msgstr ""
 "eindgebruikers en klik op indienen."
 
 #: client/src/projects/projects.form.js:156
+#: client/src/projects/projects.form.js:155
 msgid "Clean"
 msgstr "Opschonen"
 
@@ -802,6 +865,7 @@ msgstr ""
 " Klik op de knop %s om een nieuw taaksjabloon aan te maken."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:138
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:129
 msgid ""
 "Click on the regions field to see a list of regions for your cloud provider."
 " You can select multiple regions, or choose"
@@ -814,6 +878,7 @@ msgid "Client ID"
 msgstr "Klant-ID"
 
 #: client/src/notifications/notificationTemplates.form.js:257
+#: client/src/notifications/notificationTemplates.form.js:262
 msgid "Client Identifier"
 msgstr "Klant-identificeerder"
 
@@ -822,6 +887,7 @@ msgid "Client Secret"
 msgstr "Klant-geheim"
 
 #: client/src/shared/form-generator.js:1695
+#: client/src/shared/form-generator.js:1746
 msgid "Close"
 msgstr "Sluiten"
 
@@ -839,12 +905,16 @@ msgstr "Cloudbron niet geconfigureerd. Klik op"
 
 #: client/src/credentials/factories/become-method-change.factory.js:86
 #: client/src/credentials/factories/kind-change.factory.js:143
+#: client/src/credentials/factories/become-method-change.factory.js:88
+#: client/src/credentials/factories/kind-change.factory.js:145
 msgid "CloudForms URL"
 msgstr "CloudForms URL"
 
 #: client/src/job-results/job-results.controller.js:226
 #: client/src/standard-out/standard-out.controller.js:243
 #: client/src/workflow-results/workflow-results.controller.js:118
+#: client/src/job-results/job-results.controller.js:219
+#: client/src/standard-out/standard-out.controller.js:245
 msgid "Collapse Output"
 msgstr "Output samenvouwen"
 
@@ -854,22 +924,26 @@ msgid "Completed Jobs"
 msgstr "Voltooide taken"
 
 #: client/src/management-jobs/card/card.partial.html:34
+#: client/src/management-jobs/card/card.partial.html:32
 msgid "Configure Notifications"
 msgstr "Notificaties configureren"
 
 #: client/src/setup-menu/setup-menu.partial.html:60
+#: client/src/setup-menu/setup-menu.partial.html:66
 msgid "Configure {{BRAND_NAME}}"
 msgstr "{{BRAND_NAME}} configureren"
 
-#: client/src/users/users.form.js:79
+#: client/src/users/users.form.js:79 client/src/users/users.form.js:80
 msgid "Confirm Password"
 msgstr "Wachtwoord bevestigen"
 
 #: client/src/configuration/configuration.controller.js:542
+#: client/src/configuration/configuration.controller.js:536
 msgid "Confirm Reset"
 msgstr "Reset bevestigen"
 
 #: client/src/configuration/configuration.controller.js:551
+#: client/src/configuration/configuration.controller.js:545
 msgid "Confirm factory reset"
 msgstr "Reset naar fabrieksinstellingen bevestigen"
 
@@ -879,6 +953,8 @@ msgstr "Bevestig het verwijderen van de"
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:134
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:149
+#: client/src/templates/job_templates/job-template.form.js:222
+#: client/src/templates/job_templates/job-template.form.js:241
 msgid ""
 "Consult the Ansible documentation for further details on the usage of tags."
 msgstr ""
@@ -890,6 +966,7 @@ msgid "Contains 0 hosts."
 msgstr "Bevat 0 hosts."
 
 #: client/src/templates/job_templates/job-template.form.js:185
+#: client/src/templates/job_templates/job-template.form.js:194
 msgid ""
 "Control the level of output ansible will produce as the playbook executes."
 msgstr ""
@@ -897,6 +974,7 @@ msgstr ""
 "draaiboek."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:313
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:269
 msgid ""
 "Control the level of output ansible will produce for inventory source update"
 " jobs."
@@ -941,6 +1019,7 @@ msgid "Create a new credential"
 msgstr "Nieuwe toegangsgegevens aanmaken"
 
 #: client/src/credential-types/credential-types.list.js:42
+#: client/src/credential-types/credential-types.list.js:39
 msgid "Create a new credential type"
 msgstr "Een nieuwe soort toegangsgegevens aanmaken"
 
@@ -989,11 +1068,13 @@ msgid "Create a new user"
 msgstr "Een nieuwe gebruiker aanmaken"
 
 #: client/src/setup-menu/setup-menu.partial.html:42
+#: client/src/setup-menu/setup-menu.partial.html:35
 msgid "Create and edit scripts to dynamically load hosts from any source."
 msgstr ""
 "Scripts aanmaken en bewerken zodat ze van iedere bron dynamisch hosts laden."
 
 #: client/src/setup-menu/setup-menu.partial.html:30
+#: client/src/setup-menu/setup-menu.partial.html:49
 msgid ""
 "Create custom credential types to be used for authenticating to network "
 "hosts and cloud sources"
@@ -1002,6 +1083,7 @@ msgstr ""
 "authenticeren van netwerkhosts en cloudbronnen"
 
 #: client/src/setup-menu/setup-menu.partial.html:49
+#: client/src/setup-menu/setup-menu.partial.html:42
 msgid ""
 "Create templates for sending notifications with Email, HipChat, Slack, and "
 "SMS."
@@ -1016,11 +1098,13 @@ msgstr ""
 #: client/src/templates/job_templates/job-template.form.js:126
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:53
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:62
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:70
 msgid "Credential"
 msgstr "Toegangsgegevens"
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:32
 #: client/src/setup-menu/setup-menu.partial.html:29
+#: client/src/setup-menu/setup-menu.partial.html:48
 msgid "Credential Types"
 msgstr "Soorten toegangsgegevens"
 
@@ -1029,6 +1113,8 @@ msgstr "Soorten toegangsgegevens"
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:24
 #: client/src/setup-menu/setup-menu.partial.html:22
 #: client/src/templates/job_templates/job-template.form.js:139
+#: client/src/templates/job_templates/job-template.form.js:130
+#: client/src/templates/job_templates/job-template.form.js:142
 msgid "Credentials"
 msgstr "Toegangsgegevens"
 
@@ -1036,7 +1122,7 @@ msgstr "Toegangsgegevens"
 msgid "Critical"
 msgstr "Cruciaal"
 
-#: client/src/shared/directives.js:77
+#: client/src/shared/directives.js:77 client/src/shared/directives.js:135
 msgid "Current Image:"
 msgstr "Huidige afbeelding:"
 
@@ -1047,11 +1133,13 @@ msgstr ""
 " stoppen met volgen."
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:171
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:159
 msgid "Custom Inventory Script"
 msgstr "Aangepast inventarisscript"
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:53
 #: client/src/inventory-scripts/inventory-scripts.form.js:63
+#: client/src/inventory-scripts/inventory-scripts.form.js:64
 msgid "Custom Script"
 msgstr "Aangepast script"
 
@@ -1069,6 +1157,8 @@ msgstr "DASHBOARD"
 #: client/src/partials/survey-maker-modal.html:18
 #: client/src/projects/edit/projects-edit.controller.js:240
 #: client/src/users/list/users-list.controller.js:92
+#: client/src/credentials/list/credentials-list.controller.js:108
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:74
 msgid "DELETE"
 msgstr "VERWIJDEREN"
 
@@ -1110,6 +1200,9 @@ msgstr "DYNAMISCHE HOSTS"
 #: client/src/users/list/users-list.controller.js:89
 #: client/src/users/users.list.js:79
 #: client/src/workflow-results/workflow-results.partial.html:54
+#: client/src/credential-types/credential-types.list.js:70
+#: client/src/credentials/list/credentials-list.controller.js:105
+#: client/src/projects/list/projects-list.controller.js:206
 msgid "Delete"
 msgstr "Verwijderen"
 
@@ -1127,6 +1220,7 @@ msgid "Delete credential"
 msgstr "Toegangsgegevens verwijderen"
 
 #: client/src/credential-types/credential-types.list.js:75
+#: client/src/credential-types/credential-types.list.js:72
 msgid "Delete credential type"
 msgstr "Soort toegangsgegevens verwijderen"
 
@@ -1138,10 +1232,12 @@ msgstr[0] "Groep verwijderen"
 msgstr[1] "Groepen verwijderen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:48
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:48
 msgid "Delete groups"
 msgstr "Groepen verwijderen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:37
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:37
 msgid "Delete groups and hosts"
 msgstr "Groepen en hosts verwijderen"
 
@@ -1153,6 +1249,7 @@ msgstr[0] "Host verwijderen"
 msgstr[1] "Hosts verwijderen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:59
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:59
 msgid "Delete hosts"
 msgstr "Hosts verwijderen"
 
@@ -1169,6 +1266,7 @@ msgid "Delete notification"
 msgstr "Bericht verwijderen"
 
 #: client/src/projects/projects.form.js:166
+#: client/src/projects/projects.form.js:165
 msgid "Delete on Update"
 msgstr "Verwijderen bij update"
 
@@ -1200,6 +1298,7 @@ msgid "Delete the job"
 msgstr "De taak verwijderen"
 
 #: client/src/projects/projects.form.js:168
+#: client/src/projects/projects.form.js:167
 msgid ""
 "Delete the local repository in its entirety prior to performing an update."
 msgstr ""
@@ -1227,6 +1326,7 @@ msgid "Deleting group"
 msgstr "Groep wordt verwijderd"
 
 #: client/src/projects/projects.form.js:168
+#: client/src/projects/projects.form.js:167
 msgid ""
 "Depending on the size of the repository this may significantly increase the "
 "amount of time required to complete an update."
@@ -1257,6 +1357,10 @@ msgstr "Documentatie Instances beschrijven"
 #: client/src/templates/survey-maker/shared/question-definition.form.js:36
 #: client/src/templates/workflows.form.js:39
 #: client/src/users/users.form.js:141 client/src/users/users.form.js:167
+#: client/src/inventories-hosts/hosts/host.form.js:62
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:61
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:55
+#: client/src/users/users.form.js:142 client/src/users/users.form.js:168
 msgid "Description"
 msgstr "Omschrijving"
 
@@ -1264,26 +1368,36 @@ msgstr "Omschrijving"
 #: client/src/notifications/notificationTemplates.form.js:143
 #: client/src/notifications/notificationTemplates.form.js:155
 #: client/src/notifications/notificationTemplates.form.js:159
+#: client/src/notifications/notificationTemplates.form.js:140
+#: client/src/notifications/notificationTemplates.form.js:145
+#: client/src/notifications/notificationTemplates.form.js:157
+#: client/src/notifications/notificationTemplates.form.js:162
+#: client/src/notifications/notificationTemplates.form.js:378
 msgid "Destination Channels"
 msgstr "Bestemmingskanalen"
 
 #: client/src/notifications/notificationTemplates.form.js:362
 #: client/src/notifications/notificationTemplates.form.js:366
+#: client/src/notifications/notificationTemplates.form.js:373
 msgid "Destination Channels or Users"
 msgstr "Bestemmingskanalen of -gebruikers"
 
 #: client/src/notifications/notificationTemplates.form.js:208
 #: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:212
+#: client/src/notifications/notificationTemplates.form.js:213
 msgid "Destination SMS Number"
 msgstr "Sms-nummer bestemming"
 
 #: client/features/credentials/credentials.strings.js:13
 #: client/src/license/license.partial.html:5
 #: client/src/shared/form-generator.js:1474
+#: client/src/shared/form-generator.js:1525
 msgid "Details"
 msgstr "Meer informatie"
 
 #: client/src/job-submission/job-submission.partial.html:257
+#: client/src/job-submission/job-submission.partial.html:255
 msgid "Diff Mode"
 msgstr "Diff-modus"
 
@@ -1318,13 +1432,15 @@ msgstr "Wijzigingen annuleren"
 msgid "Dissasociate permission from team"
 msgstr "Machtiging loskoppelen van team"
 
-#: client/src/users/users.form.js:221
+#: client/src/users/users.form.js:221 client/src/users/users.form.js:222
 msgid "Dissasociate permission from user"
 msgstr "Machtiging loskoppelen van gebruiker"
 
 #: client/src/credentials/credentials.form.js:384
 #: client/src/credentials/factories/become-method-change.factory.js:60
 #: client/src/credentials/factories/kind-change.factory.js:117
+#: client/src/credentials/factories/become-method-change.factory.js:62
+#: client/src/credentials/factories/kind-change.factory.js:119
 msgid "Domain Name"
 msgstr "Domeinnaam"
 
@@ -1332,8 +1448,9 @@ msgstr "Domeinnaam"
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:134
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:141
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:102
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:128
 msgid "Download Output"
-msgstr "Downloadoutput"
+msgstr "Download output"
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:62
 msgid ""
@@ -1368,6 +1485,7 @@ msgstr "MELDING VRAGENLIJST WIJZIGEN"
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:46
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:79
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:59
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:66
 msgid "ELAPSED"
 msgstr "VERLOPEN"
 
@@ -1397,6 +1515,7 @@ msgstr ""
 "opdrachten van de taak uitgevoerd worden."
 
 #: client/src/projects/projects.form.js:179
+#: client/src/projects/projects.form.js:178
 msgid ""
 "Each time a job runs using this project, perform an update to the local "
 "repository prior to starting the job."
@@ -1413,16 +1532,21 @@ msgstr ""
 #: client/src/scheduler/schedules.list.js:75 client/src/teams/teams.list.js:55
 #: client/src/templates/templates.list.js:103
 #: client/src/users/users.list.js:60
+#: client/src/credential-types/credential-types.list.js:53
 msgid "Edit"
 msgstr "Wijzigen"
 
 #: client/src/shared/form-generator.js:1707
 #: client/src/templates/job_templates/job-template.form.js:457
 #: client/src/templates/workflows.form.js:177
+#: client/src/shared/form-generator.js:1758
+#: client/src/templates/job_templates/job-template.form.js:474
+#: client/src/templates/workflows.form.js:182
 msgid "Edit Survey"
 msgstr "Vragenlijst wijzigen"
 
 #: client/src/credential-types/credential-types.list.js:58
+#: client/src/credential-types/credential-types.list.js:55
 msgid "Edit credenital type"
 msgstr "Soort toegangsgegevens wijzigen"
 
@@ -1509,10 +1633,12 @@ msgid "Edit user"
 msgstr "Gebruiker wijzigen"
 
 #: client/src/setup-menu/setup-menu.partial.html:61
+#: client/src/setup-menu/setup-menu.partial.html:67
 msgid "Edit {{BRAND_NAME}}'s configuration."
 msgstr "Configuratie van {{BRAND_NAME}} wijzigen."
 
 #: client/src/projects/list/projects-list.controller.js:242
+#: client/src/projects/list/projects-list.controller.js:241
 msgid ""
 "Either you do not have access or the SCM update process completed. Click the"
 " %sRefresh%s button to view the latest status."
@@ -1562,6 +1688,9 @@ msgstr "Licentie-overeenkomst voor eindgebruikers"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:72
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:72
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:89
+#: client/src/inventories-hosts/hosts/host.form.js:72
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:71
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:98
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax. Use the radio "
 "button to toggle between the two."
@@ -1616,6 +1745,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:87
 #: client/src/credentials/factories/kind-change.factory.js:144
+#: client/src/credentials/factories/become-method-change.factory.js:89
+#: client/src/credentials/factories/kind-change.factory.js:146
 msgid ""
 "Enter the URL for the virtual machine which %scorresponds to your CloudForm "
 "instance. %sFor example, %s"
@@ -1625,6 +1756,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:77
 #: client/src/credentials/factories/kind-change.factory.js:134
+#: client/src/credentials/factories/become-method-change.factory.js:79
+#: client/src/credentials/factories/kind-change.factory.js:136
 msgid ""
 "Enter the URL which corresponds to your %sRed Hat Satellite 6 server. %sFor "
 "example, %s"
@@ -1634,6 +1767,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:55
 #: client/src/credentials/factories/kind-change.factory.js:112
+#: client/src/credentials/factories/become-method-change.factory.js:57
+#: client/src/credentials/factories/kind-change.factory.js:114
 msgid ""
 "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr ""
@@ -1659,6 +1794,8 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:187
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:194
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:174
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:181
 msgid "Environment Variables"
 msgstr "Omgevingsvariabelen"
 
@@ -1688,10 +1825,25 @@ msgstr "Omgevingsvariabelen"
 #: client/src/users/edit/users-edit.controller.js:180
 #: client/src/users/edit/users-edit.controller.js:80
 #: client/src/users/list/users-list.controller.js:82
+#: client/src/configuration/configuration.controller.js:341
+#: client/src/configuration/configuration.controller.js:440
+#: client/src/configuration/configuration.controller.js:474
+#: client/src/configuration/configuration.controller.js:518
+#: client/src/job-submission/job-submission-factories/launchjob.factory.js:188
+#: client/src/job-submission/job-submission-factories/launchjob.factory.js:207
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:119
+#: client/src/projects/list/projects-list.controller.js:168
+#: client/src/projects/list/projects-list.controller.js:197
+#: client/src/projects/list/projects-list.controller.js:225
+#: client/src/projects/list/projects-list.controller.js:246
+#: client/src/projects/list/projects-list.controller.js:261
+#: client/src/projects/list/projects-list.controller.js:270
+#: client/src/users/edit/users-edit.controller.js:163
 msgid "Error!"
 msgstr "Fout!"
 
 #: client/src/activity-stream/streams.list.js:40
+#: client/src/activity-stream/streams.list.js:41
 msgid "Event"
 msgstr "Gebeurtenis"
 
@@ -1736,6 +1888,9 @@ msgstr "Bestaande host"
 #: client/src/standard-out/standard-out.controller.js:245
 #: client/src/workflow-results/workflow-results.controller.js:120
 #: client/src/workflow-results/workflow-results.controller.js:76
+#: client/src/job-results/job-results.controller.js:221
+#: client/src/standard-out/standard-out.controller.js:23
+#: client/src/standard-out/standard-out.controller.js:247
 msgid "Expand Output"
 msgstr "Output uitklappen"
 
@@ -1761,6 +1916,10 @@ msgstr "Extra toegangsgegevens"
 #: client/src/templates/job_templates/job-template.form.js:354
 #: client/src/templates/workflows.form.js:74
 #: client/src/templates/workflows.form.js:81
+#: client/src/job-submission/job-submission.partial.html:159
+#: client/src/templates/job_templates/job-template.form.js:359
+#: client/src/templates/job_templates/job-template.form.js:371
+#: client/src/templates/workflows.form.js:86
 msgid "Extra Variables"
 msgstr "Extra variabelen"
 
@@ -1780,12 +1939,16 @@ msgstr "VELDEN:"
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:39
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:72
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:52
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:59
 msgid "FINISHED"
 msgstr "VOLTOOID"
 
 #: client/src/inventories-hosts/hosts/host.form.js:107
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:106
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:106
+#: client/src/inventories-hosts/hosts/host.form.js:111
+#: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:111
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:105
 msgid "Facts"
 msgstr "Feiten"
 
@@ -1810,6 +1973,7 @@ msgid "Failed to create new project. POST returned status:"
 msgstr "Nieuw project aanmaken mislukt. Geretourneerde status POSTEN:"
 
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:211
+#: client/src/job-submission/job-submission-factories/launchjob.factory.js:208
 msgid "Failed to retrieve job template extra variables."
 msgstr "Extra variabelen van taaksjabloon ophalen mislukt."
 
@@ -1819,14 +1983,17 @@ msgstr "Project ophalen mislukt: %s. status OPHALEN:"
 
 #: client/src/users/edit/users-edit.controller.js:181
 #: client/src/users/edit/users-edit.controller.js:81
+#: client/src/users/edit/users-edit.controller.js:164
 msgid "Failed to retrieve user: %s. GET status:"
 msgstr "Gebruiker ophalen mislukt: %s. Status OPHALEN:"
 
 #: client/src/configuration/configuration.controller.js:444
+#: client/src/configuration/configuration.controller.js:441
 msgid "Failed to save settings. Returned status:"
 msgstr "Instellingen opslaan mislukt. Geretourneerde status:"
 
 #: client/src/configuration/configuration.controller.js:478
+#: client/src/configuration/configuration.controller.js:475
 msgid "Failed to save toggle settings. Returned status:"
 msgstr "Instellingen wisselen mislukt. Geretourneerde status:"
 
@@ -1841,6 +2008,7 @@ msgstr "Project updaten mislukt: %s. Status PLAATSEN:"
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:192
 #: client/src/management-jobs/card/card.controller.js:141
 #: client/src/management-jobs/card/card.controller.js:231
+#: client/src/job-submission/job-submission-factories/launchjob.factory.js:189
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr "Taak %s met variabelen bijwerken mislukt. Geretourneerde POSTEN: %d"
 
@@ -1865,6 +2033,7 @@ msgstr "Laatste uitvoering"
 #: client/src/jobs/all-jobs.list.js:66
 #: client/src/portal-mode/portal-jobs.list.js:40
 #: client/src/templates/completed-jobs.list.js:59
+#: client/src/portal-mode/portal-jobs.list.js:39
 msgid "Finished"
 msgstr "Voltooid"
 
@@ -1886,6 +2055,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:69
 #: client/src/credentials/factories/kind-change.factory.js:126
+#: client/src/credentials/factories/become-method-change.factory.js:71
+#: client/src/credentials/factories/kind-change.factory.js:128
 msgid "For example, %s"
 msgstr "Bijvoorbeeld %s"
 
@@ -1895,6 +2066,8 @@ msgstr "Bijvoorbeeld %s"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:32
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:35
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:31
+#: client/src/inventories-hosts/hosts/host.form.js:35
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:34
 msgid ""
 "For hosts that are part of an external inventory, this flag cannot be "
 "changed. It will be set by the inventory sync process."
@@ -1909,12 +2082,13 @@ msgid ""
 "check playbook syntax, test environment setup, and report problems without "
 "executing the playbook."
 msgstr ""
-"Selecteer voor taaksjablonen uitvoeren om het draaiboek uit te voeren. "
-"Selecteer controleren om slechts de syntaxis van het draaiboek te "
+"Voor taaksjablonen selecteer \"uitvoeren\" om het draaiboek uit te voeren. "
+"Selecteer \"controleren\" om slechts de syntaxis van het draaiboek te "
 "controleren, de installatie van de omgeving te testen en problemen te "
 "rapporteren zonder het draaiboek uit te voeren."
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:118
+#: client/src/templates/job_templates/job-template.form.js:176
 msgid ""
 "For more information and examples see %sthe Patterns topic at "
 "docs.ansible.com%s."
@@ -1928,6 +2102,8 @@ msgstr ""
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:87
 #: client/src/templates/job_templates/job-template.form.js:149
 #: client/src/templates/job_templates/job-template.form.js:159
+#: client/src/templates/job_templates/job-template.form.js:152
+#: client/src/templates/job_templates/job-template.form.js:165
 msgid "Forks"
 msgstr "Vorken"
 
@@ -1957,6 +2133,7 @@ msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
 #: client/src/teams/teams.form.js:155 client/src/users/users.form.js:210
+#: client/src/users/users.form.js:211
 msgid "Grant Permission"
 msgstr "Machtiging toekennen"
 
@@ -1993,6 +2170,10 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:114
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups.list.js:32
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:172
+#: client/src/inventories-hosts/hosts/host.form.js:119
+#: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:119
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:113
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:178
 msgid "Groups"
 msgstr "Groepen"
 
@@ -2010,11 +2191,14 @@ msgstr "TIP: sleep een SSH-privésleutelbestand naar het onderstaande veld."
 #: client/src/inventories-hosts/inventories/inventories.partial.html:14
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.route.js:18
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-hosts.route.js:17
+#: client/src/activity-stream/get-target-title.factory.js:38
 msgid "HOSTS"
 msgstr "HOSTS"
 
 #: client/src/notifications/notificationTemplates.form.js:323
 #: client/src/notifications/notificationTemplates.form.js:324
+#: client/src/notifications/notificationTemplates.form.js:328
+#: client/src/notifications/notificationTemplates.form.js:329
 msgid "HTTP Headers"
 msgstr "HTTP-koppen"
 
@@ -2033,6 +2217,8 @@ msgstr "Host"
 
 #: client/src/credentials/factories/become-method-change.factory.js:58
 #: client/src/credentials/factories/kind-change.factory.js:115
+#: client/src/credentials/factories/become-method-change.factory.js:60
+#: client/src/credentials/factories/kind-change.factory.js:117
 msgid "Host (Authentication URL)"
 msgstr "Host (authenticatie-URL)"
 
@@ -2044,6 +2230,8 @@ msgstr "Configuratiesleutel host"
 #: client/src/inventories-hosts/hosts/host.form.js:40
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:39
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:39
+#: client/src/inventories-hosts/hosts/host.form.js:39
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:38
 msgid "Host Enabled"
 msgstr "Host ingeschakeld"
 
@@ -2053,12 +2241,18 @@ msgstr "Host ingeschakeld"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:56
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:45
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:56
+#: client/src/inventories-hosts/hosts/host.form.js:45
+#: client/src/inventories-hosts/hosts/host.form.js:56
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:44
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:55
 msgid "Host Name"
 msgstr "Hostnaam"
 
 #: client/src/inventories-hosts/hosts/host.form.js:80
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:79
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:79
+#: client/src/inventories-hosts/hosts/host.form.js:79
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:78
 msgid "Host Variables"
 msgstr "Hostvariabelen"
 
@@ -2086,6 +2280,8 @@ msgstr "Host is niet beschikbaar. Klik om te wisselen."
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:170
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:181
 #: client/src/job-results/job-results.partial.html:501
+#: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:168
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:187
 msgid "Hosts"
 msgstr "Hosts"
 
@@ -2149,11 +2345,14 @@ msgstr "INSTANTIES"
 #: client/src/main-menu/main-menu.partial.html:27
 #: client/src/organizations/linkout/organizations-linkout.route.js:143
 #: client/src/organizations/list/organizations-list.controller.js:66
+#: client/src/activity-stream/get-target-title.factory.js:11
+#: client/src/organizations/linkout/organizations-linkout.route.js:141
 msgid "INVENTORIES"
 msgstr "INVENTARISSEN"
 
 #: client/src/job-submission/job-submission.partial.html:339
 #: client/src/partials/job-template-details.html:2
+#: client/src/job-submission/job-submission.partial.html:336
 msgid "INVENTORY"
 msgstr "INVENTARIS"
 
@@ -2164,6 +2363,7 @@ msgstr "INVENTARISSCRIPT"
 #: client/src/activity-stream/get-target-title.factory.js:35
 #: client/src/inventory-scripts/inventory-scripts.list.js:12
 #: client/src/inventory-scripts/main.js:66
+#: client/src/activity-stream/get-target-title.factory.js:32
 msgid "INVENTORY SCRIPTS"
 msgstr "INVENTARISSCRIPTS"
 
@@ -2172,10 +2372,12 @@ msgid "INVENTORY SOURCES"
 msgstr "INVENTARISBRONNEN"
 
 #: client/src/notifications/notificationTemplates.form.js:351
+#: client/src/notifications/notificationTemplates.form.js:362
 msgid "IRC Nick"
 msgstr "IRC-bijnaam"
 
 #: client/src/notifications/notificationTemplates.form.js:340
+#: client/src/notifications/notificationTemplates.form.js:351
 msgid "IRC Server Address"
 msgstr "IRC-serveradres"
 
@@ -2232,6 +2434,7 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:120
 #: client/src/templates/job_templates/job-template.form.js:256
+#: client/src/templates/job_templates/job-template.form.js:258
 msgid ""
 "If enabled, show the changes made by Ansible tasks, where supported. This is"
 " equivalent to Ansible's --diff mode."
@@ -2285,6 +2488,8 @@ msgstr "Afbeelding-ID:"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:30
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:33
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:29
+#: client/src/inventories-hosts/hosts/host.form.js:33
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:32
 msgid ""
 "Indicates if a host is available and should be included in running jobs."
 msgstr ""
@@ -2293,21 +2498,27 @@ msgstr ""
 
 #: client/src/activity-stream/activity-detail.form.js:31
 #: client/src/activity-stream/streams.list.js:33
+#: client/src/activity-stream/streams.list.js:34
 msgid "Initiated by"
 msgstr "Gestart door"
 
 #: client/src/credential-types/credential-types.form.js:53
 #: client/src/credential-types/credential-types.form.js:61
+#: client/src/credential-types/credential-types.form.js:60
+#: client/src/credential-types/credential-types.form.js:75
 msgid "Injector Configuration"
 msgstr "Configuratie-injector"
 
 #: client/src/credential-types/credential-types.form.js:39
 #: client/src/credential-types/credential-types.form.js:47
+#: client/src/credential-types/credential-types.form.js:54
 msgid "Input Configuration"
 msgstr "Configuratie-input"
 
 #: client/src/inventories-hosts/hosts/host.form.js:123
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:121
+#: client/src/inventories-hosts/hosts/host.form.js:127
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:120
 msgid "Insights"
 msgstr "Inzichten"
 
@@ -2317,6 +2528,7 @@ msgstr "Inzichten toegangsgegevens"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:145
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:148
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:135
 msgid "Instance Filters"
 msgstr "Instantiefilters"
 
@@ -2333,6 +2545,9 @@ msgstr "Instantiegroep"
 #: client/src/setup-menu/setup-menu.partial.html:54
 #: client/src/templates/job_templates/job-template.form.js:196
 #: client/src/templates/job_templates/job-template.form.js:199
+#: client/src/setup-menu/setup-menu.partial.html:60
+#: client/src/templates/job_templates/job-template.form.js:205
+#: client/src/templates/job_templates/job-template.form.js:208
 msgid "Instance Groups"
 msgstr "Instantiegroepen"
 
@@ -2387,16 +2602,21 @@ msgstr "Inventarissen"
 #: client/src/templates/job_templates/job-template.form.js:80
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:72
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:82
+#: client/src/templates/job_templates/job-template.form.js:70
+#: client/src/templates/job_templates/job-template.form.js:84
 msgid "Inventory"
 msgstr "Inventaris"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:110
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:124
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:104
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:116
 msgid "Inventory File"
 msgstr "Inventarisbestand"
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:27
 #: client/src/setup-menu/setup-menu.partial.html:41
+#: client/src/setup-menu/setup-menu.partial.html:34
 msgid "Inventory Scripts"
 msgstr "Inventarisscript"
 
@@ -2409,6 +2629,7 @@ msgid "Inventory Sync Failures"
 msgstr "Fouten bij inventarissynchronisatie"
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:96
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:105
 msgid "Inventory Variables"
 msgstr "Inventarisvariabelen"
 
@@ -2428,6 +2649,7 @@ msgstr "TAAKSJABLOON"
 #: client/src/organizations/list/organizations-list.controller.js:78
 #: client/src/portal-mode/portal-job-templates.list.js:13
 #: client/src/portal-mode/portal-job-templates.list.js:14
+#: client/src/organizations/linkout/organizations-linkout.route.js:250
 msgid "JOB TEMPLATES"
 msgstr "TAAKSJABLONEN"
 
@@ -2441,10 +2663,12 @@ msgstr "TAAKSJABLONEN"
 #: client/src/main-menu/main-menu.partial.html:43
 #: client/src/portal-mode/portal-jobs.list.js:13
 #: client/src/portal-mode/portal-jobs.list.js:17
+#: client/src/activity-stream/get-target-title.factory.js:29
 msgid "JOBS"
 msgstr "TAKEN"
 
 #: client/src/job-submission/job-submission.partial.html:169
+#: client/src/job-submission/job-submission.partial.html:167
 msgid "JSON"
 msgstr "JSON"
 
@@ -2460,6 +2684,9 @@ msgstr "JSON:"
 #: client/src/templates/job_templates/job-template.form.js:212
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:127
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:135
+#: client/src/job-submission/job-submission.partial.html:220
+#: client/src/templates/job_templates/job-template.form.js:214
+#: client/src/templates/job_templates/job-template.form.js:223
 msgid "Job Tags"
 msgstr "Taaktags"
 
@@ -2470,6 +2697,7 @@ msgstr "Taaksjabloon"
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:109
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:36
 #: client/src/organizations/linkout/organizations-linkout.route.js:268
+#: client/src/organizations/linkout/organizations-linkout.route.js:262
 msgid "Job Templates"
 msgstr "Taaksjablonen"
 
@@ -2480,6 +2708,8 @@ msgstr "Taaksjablonen"
 #: client/src/templates/job_templates/job-template.form.js:55
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:103
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:92
+#: client/src/job-submission/job-submission.partial.html:194
+#: client/src/templates/job_templates/job-template.form.js:59
 msgid "Job Type"
 msgstr "Soort taak"
 
@@ -2505,6 +2735,7 @@ msgstr "Meteen naar de laatste regel van de standaardoutput gaan."
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:61
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:102
 #: client/src/shared/smart-search/smart-search.partial.html:14
+#: client/src/access/add-rbac-resource/rbac-resource.partial.html:63
 msgid "Key"
 msgstr "Sleutel"
 
@@ -2524,6 +2755,7 @@ msgstr "TAAK STARTEN"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:86
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:66
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:73
 msgid "LAUNCH TYPE"
 msgstr "SOORT STARTEN"
 
@@ -2532,10 +2764,12 @@ msgid "LDAP"
 msgstr "LDAP"
 
 #: client/src/license/license.route.js:19
+#: client/src/license/license.route.js:18
 msgid "LICENSE"
 msgstr "LICENTIE"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:58
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:45
 msgid "LICENSE ERROR"
 msgstr "LICENTIEFOUT"
 
@@ -2553,6 +2787,8 @@ msgstr "AFMELDEN"
 #: client/src/templates/templates.list.js:43
 #: client/src/templates/workflows.form.js:62
 #: client/src/templates/workflows.form.js:67
+#: client/src/templates/job_templates/job-template.form.js:347
+#: client/src/templates/job_templates/job-template.form.js:352
 msgid "Labels"
 msgstr "Labels"
 
@@ -2572,10 +2808,12 @@ msgstr "Laatst geüpdatet"
 #: client/src/portal-mode/portal-job-templates.list.js:36
 #: client/src/shared/form-generator.js:1699
 #: client/src/templates/templates.list.js:80
+#: client/src/shared/form-generator.js:1750
 msgid "Launch"
 msgstr "Starten"
 
 #: client/src/management-jobs/card/card.partial.html:23
+#: client/src/management-jobs/card/card.partial.html:21
 msgid "Launch Management Job"
 msgstr "Beheertaak starten"
 
@@ -2586,6 +2824,7 @@ msgid "Launched By"
 msgstr "Gestart door"
 
 #: client/src/job-submission/job-submission.partial.html:99
+#: client/src/job-submission/job-submission.partial.html:97
 msgid ""
 "Launching this job requires the passwords listed below. Enter and confirm "
 "each password before continuing."
@@ -2594,6 +2833,7 @@ msgstr ""
 "wachtwoord dient ingevoerd en bevestigd te worden voordat u verdergaat."
 
 #: client/features/credentials/legacy.credentials.js:360
+#: client/features/credentials/legacy.credentials.js:343
 msgid "Legacy state configuration for  does not exist"
 msgstr "Er bestaat geen oude staat van configuratie voor"
 
@@ -2627,6 +2867,9 @@ msgstr "Licentiesoort"
 #: client/src/templates/job_templates/job-template.form.js:169
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:113
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:120
+#: client/src/job-submission/job-submission.partial.html:212
+#: client/src/templates/job_templates/job-template.form.js:171
+#: client/src/templates/job_templates/job-template.form.js:178
 msgid "Limit"
 msgstr "Limiet"
 
@@ -2663,6 +2906,7 @@ msgid "Live events: error connecting to the  server."
 msgstr "Livegebeurtenissen: fout bij het verbinding maken met de server."
 
 #: client/src/shared/form-generator.js:1975
+#: client/src/shared/form-generator.js:2026
 msgid "Loading..."
 msgstr "Laden..."
 
@@ -2692,6 +2936,7 @@ msgstr "Laag"
 
 #: client/src/management-jobs/card/card.partial.html:6
 #: client/src/management-jobs/card/card.route.js:21
+#: client/src/management-jobs/card/card.partial.html:4
 msgid "MANAGEMENT JOBS"
 msgstr "BEHEERDERSTAKEN"
 
@@ -2701,6 +2946,7 @@ msgstr "MIJN BEELD"
 
 #: client/src/credentials/credentials.form.js:67
 #: client/src/job-submission/job-submission.partial.html:349
+#: client/src/job-submission/job-submission.partial.html:346
 msgid "Machine"
 msgstr "Machine"
 
@@ -2710,28 +2956,34 @@ msgid "Machine Credential"
 msgstr "Toegangsgegevens machine"
 
 #: client/src/setup-menu/setup-menu.partial.html:36
+#: client/src/setup-menu/setup-menu.partial.html:29
 msgid ""
 "Manage the cleanup of old job history, activity streams, data marked for "
 "deletion, and system tracking info."
 msgstr ""
 "Het opschonen van oude taakgeschiedenis, activiteitenlogboeken, gegevens die"
-" verwijderd moeten worden en trackinginformatie van het systeem beheren."
+" verwijderd moeten worden en trackinginformatie van het systeem."
 
 #: client/src/credentials/factories/become-method-change.factory.js:38
 #: client/src/credentials/factories/kind-change.factory.js:95
+#: client/src/credentials/factories/become-method-change.factory.js:40
+#: client/src/credentials/factories/kind-change.factory.js:97
 msgid "Management Certificate"
 msgstr "Beheerderscertificaat"
 
 #: client/src/setup-menu/setup-menu.partial.html:35
+#: client/src/setup-menu/setup-menu.partial.html:28
 msgid "Management Jobs"
 msgstr "Beheerderstaken"
 
 #: client/src/projects/list/projects-list.controller.js:89
+#: client/src/projects/list/projects-list.controller.js:88
 msgid "Manual projects do not require a schedule"
 msgstr "Voor handmatige projecten is geen schema nodig"
 
 #: client/src/projects/edit/projects-edit.controller.js:140
 #: client/src/projects/list/projects-list.controller.js:88
+#: client/src/projects/list/projects-list.controller.js:87
 msgid "Manual projects do not require an SCM update"
 msgstr "Voor handmatige projecten is geen SCM-update nodig"
 
@@ -2852,6 +3104,7 @@ msgstr "BERICHTSJABLOON"
 
 #: client/src/activity-stream/get-target-title.factory.js:26
 #: client/src/notifications/notificationTemplates.list.js:14
+#: client/src/activity-stream/get-target-title.factory.js:23
 msgid "NOTIFICATION TEMPLATES"
 msgstr "BERICHTSJABLONEN"
 
@@ -2906,6 +3159,11 @@ msgstr "BERICHTEN"
 #: client/src/templates/workflows.form.js:32
 #: client/src/users/users.form.js:138 client/src/users/users.form.js:164
 #: client/src/users/users.form.js:190
+#: client/src/credential-types/credential-types.list.js:21
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:48
+#: client/src/portal-mode/portal-jobs.list.js:34
+#: client/src/users/users.form.js:139 client/src/users/users.form.js:165
+#: client/src/users/users.form.js:191
 msgid "Name"
 msgstr "Naam"
 
@@ -2956,6 +3214,7 @@ msgid "No Remediation Playbook Available"
 msgstr "Geen draaiboek voor herstel beschikbaar"
 
 #: client/src/projects/list/projects-list.controller.js:159
+#: client/src/projects/list/projects-list.controller.js:158
 msgid "No SCM Configuration"
 msgstr "Geen SCM-configuratie"
 
@@ -2968,6 +3227,7 @@ msgid "No Teams exist"
 msgstr "Er bestaan geen teams"
 
 #: client/src/projects/list/projects-list.controller.js:150
+#: client/src/projects/list/projects-list.controller.js:149
 msgid "No Updates Available"
 msgstr "Er zijn geen updates beschikbaar"
 
@@ -3023,6 +3283,7 @@ msgid "No jobs were recently run."
 msgstr "Er zijn recent geen taken uitgevoerd."
 
 #: client/src/teams/teams.form.js:121 client/src/users/users.form.js:187
+#: client/src/users/users.form.js:188
 msgid "No permissions have been granted"
 msgstr "Geen machtigingen toegekend"
 
@@ -3040,6 +3301,7 @@ msgstr "Geen recente berichten."
 
 #: client/src/inventories-hosts/hosts/hosts.partial.html:36
 #: client/src/shared/form-generator.js:1871
+#: client/src/shared/form-generator.js:1922
 msgid "No records matched your search."
 msgstr "Er zijn geen gegevens die overeenkomen met uw zoekopdracht."
 
@@ -3049,6 +3311,8 @@ msgstr "Er bestaan geen schema's"
 
 #: client/src/job-submission/job-submission.partial.html:341
 #: client/src/job-submission/job-submission.partial.html:346
+#: client/src/job-submission/job-submission.partial.html:338
+#: client/src/job-submission/job-submission.partial.html:343
 msgid "None selected"
 msgstr "Geen geselecteerd"
 
@@ -3059,6 +3323,7 @@ msgid "Normal User"
 msgstr "Normale gebruiker"
 
 #: client/src/projects/list/projects-list.controller.js:91
+#: client/src/projects/list/projects-list.controller.js:90
 msgid "Not configured for SCM"
 msgstr "Niet geconfigureerd voor SCM"
 
@@ -3068,6 +3333,8 @@ msgstr "Niet geconfigureerd voor inventarissynchronisatie."
 
 #: client/src/notifications/notificationTemplates.form.js:291
 #: client/src/notifications/notificationTemplates.form.js:292
+#: client/src/notifications/notificationTemplates.form.js:296
+#: client/src/notifications/notificationTemplates.form.js:297
 msgid "Notification Color"
 msgstr "Berichtkleur"
 
@@ -3076,6 +3343,7 @@ msgid "Notification Failed."
 msgstr "Bericht mislukt"
 
 #: client/src/notifications/notificationTemplates.form.js:280
+#: client/src/notifications/notificationTemplates.form.js:285
 msgid "Notification Label"
 msgstr "Berichtlabel"
 
@@ -3087,10 +3355,12 @@ msgstr "Berichtsjablonen"
 #: client/src/management-jobs/notifications/notification.route.js:21
 #: client/src/notifications/notifications.list.js:17
 #: client/src/setup-menu/setup-menu.partial.html:48
+#: client/src/setup-menu/setup-menu.partial.html:41
 msgid "Notifications"
 msgstr "Berichten"
 
 #: client/src/notifications/notificationTemplates.form.js:305
+#: client/src/notifications/notificationTemplates.form.js:310
 msgid "Notify Channel"
 msgstr "Bericht naar kanaal sturen"
 
@@ -3099,10 +3369,13 @@ msgstr "Bericht naar kanaal sturen"
 #: client/src/partials/survey-maker-modal.html:27
 #: client/src/shared/form-generator.js:538
 #: client/src/shared/generator-helpers.js:551
+#: client/src/job-submission/job-submission.partial.html:260
+#: client/src/shared/form-generator.js:555
 msgid "OFF"
 msgstr "UIT"
 
 #: client/lib/services/base-string.service.js:63
+#: client/lib/services/base-string.service.js:31
 msgid "OK"
 msgstr "OK"
 
@@ -3111,6 +3384,8 @@ msgstr "OK"
 #: client/src/partials/survey-maker-modal.html:26
 #: client/src/shared/form-generator.js:536
 #: client/src/shared/generator-helpers.js:547
+#: client/src/job-submission/job-submission.partial.html:259
+#: client/src/shared/form-generator.js:553
 msgid "ON"
 msgstr "AAN"
 
@@ -3121,14 +3396,17 @@ msgstr "OPTIES"
 #: client/src/activity-stream/get-target-title.factory.js:29
 #: client/src/organizations/list/organizations-list.partial.html:6
 #: client/src/organizations/main.js:52
+#: client/src/activity-stream/get-target-title.factory.js:26
 msgid "ORGANIZATIONS"
 msgstr "ORGANISATIES"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:116
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:103
 msgid "OVERWRITE"
 msgstr "OVERSCHRIJVEN"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:123
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:110
 msgid "OVERWRITE VARS"
 msgstr "VARIABELEN OVERSCHRIJVEN"
 
@@ -3142,6 +3420,7 @@ msgstr "Bij&nbsp;slagen"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:157
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:162
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:146
 msgid "Only Group By"
 msgstr "Alleen ordenen op"
 
@@ -3155,6 +3434,7 @@ msgstr ""
 
 #: client/src/templates/job_templates/job-template.form.js:245
 #: client/src/templates/workflows.form.js:69
+#: client/src/templates/job_templates/job-template.form.js:354
 msgid ""
 "Optional labels that describe this job template, such as 'dev' or 'test'. "
 "Labels can be used to group and filter job templates and completed jobs."
@@ -3166,6 +3446,8 @@ msgstr ""
 #: client/src/notifications/notificationTemplates.form.js:385
 #: client/src/partials/logviewer.html:7
 #: client/src/templates/job_templates/job-template.form.js:264
+#: client/src/notifications/notificationTemplates.form.js:397
+#: client/src/templates/job_templates/job-template.form.js:265
 msgid "Options"
 msgstr "Opties"
 
@@ -3188,7 +3470,7 @@ msgstr "Organisatie"
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:65
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:30
 #: client/src/setup-menu/setup-menu.partial.html:4
-#: client/src/users/users.form.js:128
+#: client/src/users/users.form.js:128 client/src/users/users.form.js:129
 msgid "Organizations"
 msgstr "Organisaties"
 
@@ -3250,11 +3532,15 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:328
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:333
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:282
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:288
 msgid "Overwrite"
 msgstr "Overschrijven"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:340
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:345
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:295
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:301
 msgid "Overwrite Variables"
 msgstr "Variabelen overschrijven"
 
@@ -3267,6 +3553,7 @@ msgid "PASSWORD"
 msgstr "WACHTWOORD"
 
 #: client/features/credentials/legacy.credentials.js:125
+#: client/features/credentials/legacy.credentials.js:120
 msgid "PERMISSIONS"
 msgstr "MACHTIGINGEN"
 
@@ -3283,6 +3570,7 @@ msgstr "VOEG EEN MELDING VOOR DE VRAGENLIJST TOE."
 #: client/src/organizations/list/organizations-list.partial.html:47
 #: client/src/shared/form-generator.js:1877
 #: client/src/shared/list-generator/list-generator.factory.js:248
+#: client/src/shared/form-generator.js:1928
 msgid "PLEASE ADD ITEMS TO THIS LIST"
 msgstr "VOEG ITEMS AAN DEZE LIJST TOE"
 
@@ -3306,6 +3594,7 @@ msgstr "PROJECT"
 #: client/src/organizations/list/organizations-list.controller.js:72
 #: client/src/projects/main.js:73 client/src/projects/projects.list.js:14
 #: client/src/projects/projects.list.js:15
+#: client/src/organizations/linkout/organizations-linkout.route.js:191
 msgid "PROJECTS"
 msgstr "PROJECTEN"
 
@@ -3314,6 +3603,7 @@ msgid "Page"
 msgstr "Pagina"
 
 #: client/src/notifications/notificationTemplates.form.js:235
+#: client/src/notifications/notificationTemplates.form.js:240
 msgid "Pagerduty subdomain"
 msgstr "Subdomein Pagerduty"
 
@@ -3365,6 +3655,19 @@ msgstr ""
 #: client/src/job-submission/job-submission.partial.html:103
 #: client/src/notifications/shared/type-change.service.js:28
 #: client/src/users/users.form.js:68
+#: client/src/credentials/factories/become-method-change.factory.js:23
+#: client/src/credentials/factories/become-method-change.factory.js:48
+#: client/src/credentials/factories/become-method-change.factory.js:56
+#: client/src/credentials/factories/become-method-change.factory.js:76
+#: client/src/credentials/factories/become-method-change.factory.js:86
+#: client/src/credentials/factories/become-method-change.factory.js:96
+#: client/src/credentials/factories/kind-change.factory.js:105
+#: client/src/credentials/factories/kind-change.factory.js:113
+#: client/src/credentials/factories/kind-change.factory.js:133
+#: client/src/credentials/factories/kind-change.factory.js:143
+#: client/src/credentials/factories/kind-change.factory.js:153
+#: client/src/credentials/factories/kind-change.factory.js:80
+#: client/src/job-submission/job-submission.partial.html:101
 msgid "Password"
 msgstr "Wachtwoord"
 
@@ -3387,6 +3690,8 @@ msgstr "Afgelopen week"
 
 #: client/src/credentials/factories/become-method-change.factory.js:29
 #: client/src/credentials/factories/kind-change.factory.js:86
+#: client/src/credentials/factories/become-method-change.factory.js:31
+#: client/src/credentials/factories/kind-change.factory.js:88
 msgid ""
 "Paste the contents of the PEM file associated with the service account "
 "email."
@@ -3396,6 +3701,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:41
 #: client/src/credentials/factories/kind-change.factory.js:98
+#: client/src/credentials/factories/become-method-change.factory.js:43
+#: client/src/credentials/factories/kind-change.factory.js:100
 msgid ""
 "Paste the contents of the PEM file that corresponds to the certificate you "
 "uploaded in the Microsoft Azure console."
@@ -3435,6 +3742,12 @@ msgstr "Machtigingsfout"
 #: client/src/templates/job_templates/job-template.form.js:391
 #: client/src/templates/workflows.form.js:114
 #: client/src/users/users.form.js:183
+#: client/features/credentials/legacy.credentials.js:64
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:134
+#: client/src/projects/projects.form.js:232
+#: client/src/templates/job_templates/job-template.form.js:411
+#: client/src/templates/workflows.form.js:119
+#: client/src/users/users.form.js:184
 msgid "Permissions"
 msgstr "Machtigingen"
 
@@ -3442,10 +3755,14 @@ msgstr "Machtigingen"
 #: client/src/shared/form-generator.js:1062
 #: client/src/templates/job_templates/job-template.form.js:109
 #: client/src/templates/job_templates/job-template.form.js:120
+#: client/src/shared/form-generator.js:1114
+#: client/src/templates/job_templates/job-template.form.js:113
+#: client/src/templates/job_templates/job-template.form.js:124
 msgid "Playbook"
 msgstr "Draaiboek"
 
 #: client/src/projects/projects.form.js:89
+#: client/src/projects/projects.form.js:88
 msgid "Playbook Directory"
 msgstr "Draaiboekmap"
 
@@ -3457,7 +3774,7 @@ msgstr "Draaiboek uitvoering"
 msgid "Plays"
 msgstr "Uitvoeringen van het draaiboek"
 
-#: client/src/users/users.form.js:122
+#: client/src/users/users.form.js:122 client/src/users/users.form.js:123
 msgid "Please add user to an Organization."
 msgstr "Voeg gebruiker toe aan een organisatie"
 
@@ -3466,6 +3783,7 @@ msgid "Please assign roles to the selected resources"
 msgstr "Wijs rollen toe aan de geselecteerde bronnen"
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:60
+#: client/src/access/add-rbac-resource/rbac-resource.partial.html:62
 msgid "Please assign roles to the selected users/teams"
 msgstr "Wijs rollen toe aan de geselecteerde gebruikers/teams"
 
@@ -3478,11 +3796,14 @@ msgstr ""
 "licentiesleutel voor Tower te bemachtigen."
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:25
+#: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.strings.js:8
 msgid "Please click the icon to edit the host filter."
 msgstr "Klik op het icoon om de hostfilter te wijzigen."
 
 #: client/src/shared/form-generator.js:854
 #: client/src/shared/form-generator.js:949
+#: client/src/shared/form-generator.js:877
+#: client/src/shared/form-generator.js:973
 msgid ""
 "Please enter a URL that begins with ssh, http or https.  The URL may not "
 "contain the '@' character."
@@ -3491,14 +3812,17 @@ msgstr ""
 " '@' bevatten."
 
 #: client/src/shared/form-generator.js:1151
+#: client/src/shared/form-generator.js:1203
 msgid "Please enter a number greater than %d and less than %d."
 msgstr "Voer een getal in dat groter is dan %d en kleiner dan %d."
 
 #: client/src/shared/form-generator.js:1153
+#: client/src/shared/form-generator.js:1205
 msgid "Please enter a number greater than %d."
 msgstr "Voer een getal in dat groter is dan %d."
 
 #: client/src/shared/form-generator.js:1145
+#: client/src/shared/form-generator.js:1197
 msgid "Please enter a number."
 msgstr "Voer een getal in."
 
@@ -3507,6 +3831,10 @@ msgstr "Voer een getal in."
 #: client/src/job-submission/job-submission.partial.html:137
 #: client/src/job-submission/job-submission.partial.html:150
 #: client/src/login/loginModal/loginModal.partial.html:78
+#: client/src/job-submission/job-submission.partial.html:109
+#: client/src/job-submission/job-submission.partial.html:122
+#: client/src/job-submission/job-submission.partial.html:135
+#: client/src/job-submission/job-submission.partial.html:148
 msgid "Please enter a password."
 msgstr "Voer een wachtwoord in."
 
@@ -3516,6 +3844,8 @@ msgstr "Voer een gebruikersnaam in."
 
 #: client/src/shared/form-generator.js:844
 #: client/src/shared/form-generator.js:939
+#: client/src/shared/form-generator.js:867
+#: client/src/shared/form-generator.js:963
 msgid "Please enter a valid email address."
 msgstr "Voer een geldig e-mailadres in."
 
@@ -3523,6 +3853,9 @@ msgstr "Voer een geldig e-mailadres in."
 #: client/src/shared/form-generator.js:1009
 #: client/src/shared/form-generator.js:839
 #: client/src/shared/form-generator.js:934
+#: client/src/shared/form-generator.js:1061
+#: client/src/shared/form-generator.js:862
+#: client/src/shared/form-generator.js:958
 msgid "Please enter a value."
 msgstr "Voer een waarde in."
 
@@ -3531,14 +3864,21 @@ msgstr "Voer een waarde in."
 #: client/src/job-submission/job-submission.partial.html:298
 #: client/src/job-submission/job-submission.partial.html:304
 #: client/src/job-submission/job-submission.partial.html:310
+#: client/src/job-submission/job-submission.partial.html:279
+#: client/src/job-submission/job-submission.partial.html:284
+#: client/src/job-submission/job-submission.partial.html:295
+#: client/src/job-submission/job-submission.partial.html:301
+#: client/src/job-submission/job-submission.partial.html:307
 msgid "Please enter an answer between"
 msgstr "Voer een antwoord in tussen"
 
 #: client/src/job-submission/job-submission.partial.html:309
+#: client/src/job-submission/job-submission.partial.html:306
 msgid "Please enter an answer that is a decimal number."
 msgstr "Voer een antwoord in dat een decimaal getal is."
 
 #: client/src/job-submission/job-submission.partial.html:303
+#: client/src/job-submission/job-submission.partial.html:300
 msgid "Please enter an answer that is a valid integer."
 msgstr "Voer een antwoord in dat een geldig geheel getal is."
 
@@ -3547,6 +3887,11 @@ msgstr "Voer een antwoord in dat een geldig geheel getal is."
 #: client/src/job-submission/job-submission.partial.html:297
 #: client/src/job-submission/job-submission.partial.html:302
 #: client/src/job-submission/job-submission.partial.html:308
+#: client/src/job-submission/job-submission.partial.html:278
+#: client/src/job-submission/job-submission.partial.html:283
+#: client/src/job-submission/job-submission.partial.html:294
+#: client/src/job-submission/job-submission.partial.html:299
+#: client/src/job-submission/job-submission.partial.html:305
 msgid "Please enter an answer."
 msgstr "Voer een antwoord in."
 
@@ -3577,22 +3922,29 @@ msgstr "Sla op voordat u gebruikers toevoegt."
 #: client/src/projects/projects.form.js:225 client/src/teams/teams.form.js:113
 #: client/src/templates/job_templates/job-template.form.js:384
 #: client/src/templates/workflows.form.js:107
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:130
+#: client/src/projects/projects.form.js:224
+#: client/src/templates/job_templates/job-template.form.js:404
+#: client/src/templates/workflows.form.js:112
 msgid "Please save before assigning permissions."
 msgstr "Sla op voordat u machtigingen toekent."
 
 #: client/src/users/users.form.js:120 client/src/users/users.form.js:179
+#: client/src/users/users.form.js:121 client/src/users/users.form.js:180
 msgid "Please save before assigning to organizations."
 msgstr "Sla op voordat u toewijst aan organisaties."
 
-#: client/src/users/users.form.js:148
+#: client/src/users/users.form.js:148 client/src/users/users.form.js:149
 msgid "Please save before assigning to teams."
 msgstr "Sla op voordat u toewijst aan teams."
 
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:169
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:175
 msgid "Please save before creating groups."
 msgstr "Sla op voordat u groepen aanmaakt."
 
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:178
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:184
 msgid "Please save before creating hosts."
 msgstr "Sla op voordat u hosts aanmaakt."
 
@@ -3600,6 +3952,9 @@ msgstr "Sla op voordat u hosts aanmaakt."
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:86
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:111
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:111
+#: client/src/inventories-hosts/hosts/host.form.js:116
+#: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:116
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:110
 msgid "Please save before defining groups."
 msgstr "Sla op voordat u groepen bepaalt."
 
@@ -3608,6 +3963,7 @@ msgid "Please save before defining hosts."
 msgstr "Sla op voordat u hosts bepaalt."
 
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:187
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:193
 msgid "Please save before defining inventory sources."
 msgstr "Sla op voordat u inventarisbronnen bepaalt."
 
@@ -3617,12 +3973,17 @@ msgstr "Sla op voordat u de workflowgrafiek bepaalt."
 
 #: client/src/inventories-hosts/hosts/host.form.js:121
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:119
+#: client/src/inventories-hosts/hosts/host.form.js:125
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:118
 msgid "Please save before viewing Insights."
 msgstr "Sla op voordat u Insights bekijkt."
 
 #: client/src/inventories-hosts/hosts/host.form.js:105
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:104
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:104
+#: client/src/inventories-hosts/hosts/host.form.js:109
+#: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:109
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:103
 msgid "Please save before viewing facts."
 msgstr "Sla op voordat u feiten bekijkt."
 
@@ -3643,6 +4004,7 @@ msgid "Please select a Credential."
 msgstr "Selecteer toegangsgegevens."
 
 #: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:46
+#: client/src/templates/job_templates/multi-credential/multi-credential.partial.html:43
 msgid ""
 "Please select a machine (SSH) credential or check the \"Prompt on launch\" "
 "option."
@@ -3651,10 +4013,12 @@ msgstr ""
 "opstarten\" aan."
 
 #: client/src/shared/form-generator.js:1186
+#: client/src/shared/form-generator.js:1238
 msgid "Please select a number between"
 msgstr "Selecteer een getal tussen"
 
 #: client/src/shared/form-generator.js:1182
+#: client/src/shared/form-generator.js:1234
 msgid "Please select a number."
 msgstr "Selecteer een getal."
 
@@ -3662,10 +4026,15 @@ msgstr "Selecteer een getal."
 #: client/src/shared/form-generator.js:1142
 #: client/src/shared/form-generator.js:1263
 #: client/src/shared/form-generator.js:1371
+#: client/src/shared/form-generator.js:1126
+#: client/src/shared/form-generator.js:1194
+#: client/src/shared/form-generator.js:1314
+#: client/src/shared/form-generator.js:1422
 msgid "Please select a value."
 msgstr "Selecteer een waarde."
 
 #: client/src/templates/job_templates/job-template.form.js:77
+#: client/src/templates/job_templates/job-template.form.js:81
 msgid "Please select an Inventory or check the Prompt on launch option."
 msgstr "Selecteer een inventaris of vink de optie Melding bij opstarten aan."
 
@@ -3674,6 +4043,7 @@ msgid "Please select an Inventory."
 msgstr "Selecteer een inventaris."
 
 #: client/src/shared/form-generator.js:1179
+#: client/src/shared/form-generator.js:1231
 msgid "Please select at least one value."
 msgstr "Selecteer ten minste één waarde."
 
@@ -3697,6 +4067,7 @@ msgstr "Privésleutel"
 
 #: client/src/credentials/credentials.form.js:264
 #: client/src/job-submission/job-submission.partial.html:116
+#: client/src/job-submission/job-submission.partial.html:114
 msgid "Private Key Passphrase"
 msgstr "Privésleutel wachtwoordzin"
 
@@ -3707,10 +4078,15 @@ msgstr "Verhoging van rechten"
 
 #: client/src/credentials/credentials.form.js:305
 #: client/src/job-submission/job-submission.partial.html:129
+#: client/src/credentials/factories/become-method-change.factory.js:19
+#: client/src/credentials/factories/kind-change.factory.js:76
+#: client/src/job-submission/job-submission.partial.html:127
 msgid "Privilege Escalation Password"
 msgstr "Wachtwoord verhoging van rechten"
 
 #: client/src/credentials/credentials.form.js:295
+#: client/src/credentials/factories/become-method-change.factory.js:18
+#: client/src/credentials/factories/kind-change.factory.js:75
 msgid "Privilege Escalation Username"
 msgstr "Gebruikersnaam verhoging van rechten"
 
@@ -3720,16 +4096,25 @@ msgstr "Gebruikersnaam verhoging van rechten"
 #: client/src/job-results/job-results.partial.html:213
 #: client/src/templates/job_templates/job-template.form.js:103
 #: client/src/templates/job_templates/job-template.form.js:91
+#: client/src/credentials/factories/become-method-change.factory.js:32
+#: client/src/credentials/factories/kind-change.factory.js:89
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:88
+#: client/src/templates/job_templates/job-template.form.js:107
+#: client/src/templates/job_templates/job-template.form.js:95
 msgid "Project"
 msgstr "Projecten"
 
 #: client/src/credentials/factories/become-method-change.factory.js:59
 #: client/src/credentials/factories/kind-change.factory.js:116
+#: client/src/credentials/factories/become-method-change.factory.js:61
+#: client/src/credentials/factories/kind-change.factory.js:118
 msgid "Project (Tenant Name)"
 msgstr "Projecten (naam huurder)"
 
 #: client/src/projects/projects.form.js:75
 #: client/src/projects/projects.form.js:83
+#: client/src/projects/projects.form.js:74
+#: client/src/projects/projects.form.js:82
 msgid "Project Base Path"
 msgstr "Basispad project"
 
@@ -3738,6 +4123,7 @@ msgid "Project Name"
 msgstr "Projectnaam"
 
 #: client/src/projects/projects.form.js:100
+#: client/src/projects/projects.form.js:99
 msgid "Project Path"
 msgstr "Projectpad"
 
@@ -3746,6 +4132,7 @@ msgid "Project Sync Failures"
 msgstr "Mislukte projectsynchronisaties"
 
 #: client/src/projects/list/projects-list.controller.js:170
+#: client/src/projects/list/projects-list.controller.js:169
 msgid "Project lookup failed. GET returned:"
 msgstr "Ophalen project mislukt. Geretourneerde OPHALEN:"
 
@@ -3764,10 +4151,12 @@ msgstr[0] "Groep promoveren"
 msgstr[1] "Groepen promoveren"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:43
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:43
 msgid "Promote groups"
 msgstr "Groepen promoveren"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:32
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:32
 msgid "Promote groups and hosts"
 msgstr "Groepen en hosts promoveren"
 
@@ -3778,6 +4167,7 @@ msgstr[0] "Host promoveren"
 msgstr[1] "Hosts promoveren"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:54
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:54
 msgid "Promote hosts"
 msgstr "Hosts promoveren"
 
@@ -3799,11 +4189,22 @@ msgstr "Melding"
 #: client/src/templates/job_templates/job-template.form.js:359
 #: client/src/templates/job_templates/job-template.form.js:60
 #: client/src/templates/job_templates/job-template.form.js:86
+#: client/src/templates/job_templates/job-template.form.js:147
+#: client/src/templates/job_templates/job-template.form.js:183
+#: client/src/templates/job_templates/job-template.form.js:200
+#: client/src/templates/job_templates/job-template.form.js:228
+#: client/src/templates/job_templates/job-template.form.js:247
+#: client/src/templates/job_templates/job-template.form.js:261
+#: client/src/templates/job_templates/job-template.form.js:376
+#: client/src/templates/job_templates/job-template.form.js:64
+#: client/src/templates/job_templates/job-template.form.js:90
 msgid "Prompt on launch"
 msgstr "Melding bij opstarten"
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:132
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:147
+#: client/src/templates/job_templates/job-template.form.js:220
+#: client/src/templates/job_templates/job-template.form.js:239
 msgid "Provide a comma separated list of tags."
 msgstr "Geef een lijst van tags gescheiden door komma's op."
 
@@ -3826,6 +4227,8 @@ msgstr ""
 #: client/src/inventories-hosts/hosts/host.form.js:50
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:49
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:49
+#: client/src/inventories-hosts/hosts/host.form.js:49
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:48
 msgid "Provide a host name, ip address, or ip address:port. Examples include:"
 msgstr "Geef een hostnaam, IP-adres, of IP-adres:poort op. Voorbeelden:"
 
@@ -3841,6 +4244,7 @@ msgstr ""
 "en voorbeelden van patronen."
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:116
+#: client/src/templates/job_templates/job-template.form.js:174
 msgid ""
 "Provide a host pattern to further constrain the list of hosts that will be "
 "managed or affected by the playbook. Multiple patterns can be separated by "
@@ -3902,10 +4306,12 @@ msgstr "SJABLONEN DIE RECENT GEBRUIKT ZIJN"
 #: client/src/portal-mode/portal-mode-jobs.partial.html:20
 #: client/src/projects/projects.list.js:71
 #: client/src/scheduler/schedules.list.js:61
+#: client/src/activity-stream/streams.list.js:55
 msgid "REFRESH"
 msgstr "VERNIEUWEN"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:109
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:96
 msgid "REGIONS"
 msgstr "REGIO'S"
 
@@ -3913,7 +4319,7 @@ msgstr "REGIO'S"
 msgid "RELATED FIELDS:"
 msgstr "VERWANTE VELDEN:"
 
-#: client/src/shared/directives.js:78
+#: client/src/shared/directives.js:78 client/src/shared/directives.js:136
 msgid "REMOVE"
 msgstr "VERWIJDEREN"
 
@@ -3931,11 +4337,14 @@ msgstr "RESULTATEN"
 #: client/src/job-submission/job-submission.partial.html:44
 #: client/src/job-submission/job-submission.partial.html:87
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:52
+#: client/src/job-submission/job-submission.partial.html:85
 msgid "REVERT"
 msgstr "TERUGZETTEN"
 
 #: client/src/credentials/factories/become-method-change.factory.js:25
 #: client/src/credentials/factories/kind-change.factory.js:82
+#: client/src/credentials/factories/become-method-change.factory.js:27
+#: client/src/credentials/factories/kind-change.factory.js:84
 msgid "RSA Private Key"
 msgstr "RSA-privésleutel"
 
@@ -3971,6 +4380,7 @@ msgstr "Recente berichten"
 
 #: client/src/notifications/notificationTemplates.form.js:101
 #: client/src/notifications/notificationTemplates.form.js:97
+#: client/src/notifications/notificationTemplates.form.js:102
 msgid "Recipient List"
 msgstr "Lijst van ontvangers"
 
@@ -3997,6 +4407,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/sources/sources.list.js:50
 #: client/src/projects/projects.list.js:67
 #: client/src/scheduler/schedules.list.js:57
+#: client/src/activity-stream/streams.list.js:52
 msgid "Refresh the page"
 msgstr "Pagina vernieuwen"
 
@@ -4006,6 +4417,7 @@ msgid "Region:"
 msgstr "Regio:"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:131
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:122
 msgid "Regions"
 msgstr "Regio's"
 
@@ -4023,16 +4435,21 @@ msgid "Relaunch using the same parameters"
 msgstr "Opnieuw opstarten met dezelfde parameters"
 
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:199
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:205
 msgid "Remediate Inventory"
 msgstr "Inventaris herstellen"
 
 #: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:96
 #: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:97
 #: client/src/teams/teams.form.js:142 client/src/users/users.form.js:218
+#: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:85
+#: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:86
+#: client/src/users/users.form.js:219
 msgid "Remove"
 msgstr "Verwijderen"
 
 #: client/src/projects/projects.form.js:158
+#: client/src/projects/projects.form.js:157
 msgid "Remove any local modifications prior to performing an update."
 msgstr ""
 "Verwijder alle plaatselijke aanpassingen voordat een update uitgevoerd "
@@ -4059,6 +4476,7 @@ msgid "Results Traceback"
 msgstr "Resultaten-traceback"
 
 #: client/src/shared/form-generator.js:684
+#: client/src/shared/form-generator.js:701
 msgid "Revert"
 msgstr "Terugzetten"
 
@@ -4098,6 +4516,11 @@ msgstr "Herziening #"
 #: client/src/teams/teams.form.js:98
 #: client/src/templates/workflows.form.js:138
 #: client/src/users/users.form.js:201
+#: client/features/credentials/legacy.credentials.js:86
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:160
+#: client/src/projects/projects.form.js:254
+#: client/src/templates/workflows.form.js:143
+#: client/src/users/users.form.js:202
 msgid "Role"
 msgstr "Rol"
 
@@ -4124,10 +4547,11 @@ msgstr "SAML"
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
 #: client/src/partials/survey-maker-modal.html:86
 #: client/src/shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.partial.html:18
+#: client/lib/services/base-string.service.js:30
 msgid "SAVE"
 msgstr "OPSLAAN"
 
-#: client/src/scheduler/main.js:331
+#: client/src/scheduler/main.js:331 client/src/scheduler/main.js:330
 msgid "SCHEDULED"
 msgstr "GEPLAND"
 
@@ -4143,6 +4567,7 @@ msgstr "GEPLANDE TAKEN"
 #: client/src/scheduler/main.js:145 client/src/scheduler/main.js:183
 #: client/src/scheduler/main.js:235 client/src/scheduler/main.js:273
 #: client/src/scheduler/main.js:52 client/src/scheduler/main.js:90
+#: client/src/activity-stream/get-target-title.factory.js:35
 msgid "SCHEDULES"
 msgstr "SCHEMA'S"
 
@@ -4162,15 +4587,19 @@ msgid "SCM Branch/Tag/Revision"
 msgstr "SCM-vertakking/tag/herziening"
 
 #: client/src/projects/projects.form.js:159
+#: client/src/projects/projects.form.js:158
 msgid "SCM Clean"
 msgstr "SCM-zuiveren"
 
 #: client/src/projects/projects.form.js:170
+#: client/src/projects/projects.form.js:169
 msgid "SCM Delete"
 msgstr "SCM-verwijderen"
 
 #: client/src/credentials/factories/become-method-change.factory.js:20
 #: client/src/credentials/factories/kind-change.factory.js:77
+#: client/src/credentials/factories/become-method-change.factory.js:22
+#: client/src/credentials/factories/kind-change.factory.js:79
 msgid "SCM Private Key"
 msgstr "SCM-privésleutel"
 
@@ -4180,19 +4609,23 @@ msgstr "SCM-soort"
 
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/projects/projects.form.js:180
+#: client/src/projects/projects.form.js:179
 msgid "SCM Update"
 msgstr "SCM-update"
 
 #: client/src/projects/list/projects-list.controller.js:222
+#: client/src/projects/list/projects-list.controller.js:221
 msgid "SCM Update Cancel"
 msgstr "SCM-updatekanaal"
 
 #: client/src/projects/projects.form.js:150
+#: client/src/projects/projects.form.js:149
 msgid "SCM Update Options"
 msgstr "SCM-update-opties"
 
 #: client/src/projects/edit/projects-edit.controller.js:136
 #: client/src/projects/list/projects-list.controller.js:84
+#: client/src/projects/list/projects-list.controller.js:83
 msgid "SCM update currently running"
 msgstr "SCM-update nu in uitvoering"
 
@@ -4225,6 +4658,7 @@ msgstr "GESELECTEERD:"
 
 #: client/src/main-menu/main-menu.partial.html:59
 #: client/src/setup-menu/setup.route.js:9
+#: client/src/setup-menu/setup.route.js:8
 msgid "SETTINGS"
 msgstr "INSTELLINGEN"
 
@@ -4246,6 +4680,7 @@ msgid "SMART INVENTORY"
 msgstr "SMART-INVENTARIS"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:102
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:89
 msgid "SOURCE"
 msgstr "BRON"
 
@@ -4255,6 +4690,8 @@ msgstr "BRONNEN"
 
 #: client/src/credentials/factories/become-method-change.factory.js:95
 #: client/src/credentials/factories/kind-change.factory.js:152
+#: client/src/credentials/factories/become-method-change.factory.js:97
+#: client/src/credentials/factories/kind-change.factory.js:154
 msgid "SSH Key"
 msgstr "SSH-sleutel"
 
@@ -4263,18 +4700,21 @@ msgid "SSH key description"
 msgstr "Beschrijving SSH-sleutel"
 
 #: client/src/notifications/notificationTemplates.form.js:378
+#: client/src/notifications/notificationTemplates.form.js:390
 msgid "SSL Connection"
 msgstr "SSL-verbinding"
 
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:128
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:135
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:96
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:122
 msgid "STANDARD OUT"
 msgstr "STANDAARDOUTPUT"
 
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:32
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:65
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:45
+#: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:52
 msgid "STARTED"
 msgstr "BEGONNEN"
 
@@ -4291,7 +4731,7 @@ msgstr "STS-token"
 
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:60
 msgid "SUCCESSFUL"
-msgstr "GELUKT"
+msgstr "GESLAAGD"
 
 #: client/src/partials/survey-maker-modal.html:24
 msgid "SURVEY"
@@ -4307,6 +4747,8 @@ msgstr "SYSTEEMTRACKING"
 
 #: client/src/credentials/factories/become-method-change.factory.js:76
 #: client/src/credentials/factories/kind-change.factory.js:133
+#: client/src/credentials/factories/become-method-change.factory.js:78
+#: client/src/credentials/factories/kind-change.factory.js:135
 msgid "Satellite 6 URL"
 msgstr "Satellite 6-URL"
 
@@ -4314,6 +4756,7 @@ msgstr "Satellite 6-URL"
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:196
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:157
 #: client/src/shared/form-generator.js:1683
+#: client/src/shared/form-generator.js:1734
 msgid "Save"
 msgstr "Opslaan"
 
@@ -4329,10 +4772,12 @@ msgid "Save successful!"
 msgstr "Opslaan gelukt!"
 
 #: client/src/templates/templates.list.js:88
+#: client/src/partials/subhome.html:10
 msgid "Schedule"
 msgstr "Schema"
 
 #: client/src/management-jobs/card/card.partial.html:28
+#: client/src/management-jobs/card/card.partial.html:26
 msgid "Schedule Management Job"
 msgstr "Schema beheertaak"
 
@@ -4350,11 +4795,14 @@ msgstr "Toekomstige uitvoeringen van het taaksjabloon inplannen"
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:33
 #: client/src/jobs/jobs.partial.html:10
+#: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:32
 msgid "Schedules"
 msgstr "Schema's"
 
 #: client/src/shared/smart-search/smart-search.controller.js:49
 #: client/src/shared/smart-search/smart-search.controller.js:94
+#: client/src/shared/smart-search/smart-search.controller.js:39
+#: client/src/shared/smart-search/smart-search.controller.js:84
 msgid "Search"
 msgstr "Zoeken"
 
@@ -4378,6 +4826,7 @@ msgstr ""
 "AWS Identity en Access Management (IAM)"
 
 #: client/src/shared/form-generator.js:1687
+#: client/src/shared/form-generator.js:1738
 msgid "Select"
 msgstr "Selecteren"
 
@@ -4426,6 +4875,7 @@ msgstr ""
 #: client/src/configuration/jobs-form/configuration-jobs.controller.js:109
 #: client/src/configuration/jobs-form/configuration-jobs.controller.js:134
 #: client/src/configuration/ui-form/configuration-ui.controller.js:95
+#: client/src/configuration/jobs-form/configuration-jobs.controller.js:124
 msgid "Select commands"
 msgstr "Commando's selecteren"
 
@@ -4448,6 +4898,7 @@ msgstr ""
 "standaardtoegangsgegevens en kunnen deze bij het opstarten gewijzigd worden."
 
 #: client/src/projects/projects.form.js:98
+#: client/src/projects/projects.form.js:97
 msgid ""
 "Select from the list of directories found in the Project Base Path. Together"
 " the base path and the playbook directory provide the full path used to "
@@ -4467,6 +4918,7 @@ msgid "Select roles"
 msgstr "Selecteer rollen"
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:77
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:85
 msgid "Select the Instance Groups for this Inventory to run on."
 msgstr ""
 "Selecteer de instantiegroepen waar deze inventaris op uitgevoerd wordt."
@@ -4480,6 +4932,7 @@ msgstr ""
 "Raadpleeg de documentatie van Ansible Tower voor meer informatie."
 
 #: client/src/templates/job_templates/job-template.form.js:198
+#: client/src/templates/job_templates/job-template.form.js:207
 msgid "Select the Instance Groups for this Job Template to run on."
 msgstr ""
 "Selecteer de instantiegroepen waar deze taaksjabloon op uitgevoerd wordt."
@@ -4502,6 +4955,7 @@ msgstr ""
 
 #: client/src/templates/job_templates/job-template.form.js:79
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:81
+#: client/src/templates/job_templates/job-template.form.js:83
 msgid "Select the inventory containing the hosts you want this job to manage."
 msgstr ""
 "Selecteer de inventaris met de hosts waarvan u wilt dat deze taak ze "
@@ -4517,10 +4971,12 @@ msgstr ""
 "invoerveld."
 
 #: client/src/templates/job_templates/job-template.form.js:119
+#: client/src/templates/job_templates/job-template.form.js:123
 msgid "Select the playbook to be executed by this job."
 msgstr "Selecteer het draaiboek dat uitgevoerd moet worden door deze taak."
 
 #: client/src/templates/job_templates/job-template.form.js:102
+#: client/src/templates/job_templates/job-template.form.js:106
 msgid ""
 "Select the project containing the playbook you want this job to execute."
 msgstr ""
@@ -4537,11 +4993,14 @@ msgid "Select which groups to create automatically."
 msgstr "Selecteer welke groepen automatisch aangemaakt moeten worden."
 
 #: client/src/notifications/notificationTemplates.form.js:113
+#: client/src/notifications/notificationTemplates.form.js:114
 msgid "Sender Email"
 msgstr "Afzender e-mail"
 
 #: client/src/credentials/factories/become-method-change.factory.js:24
 #: client/src/credentials/factories/kind-change.factory.js:81
+#: client/src/credentials/factories/become-method-change.factory.js:26
+#: client/src/credentials/factories/kind-change.factory.js:83
 msgid "Service Account Email Address"
 msgstr "E-mailadres service-account"
 
@@ -4573,6 +5032,12 @@ msgstr "Instellingen"
 #: client/src/job-submission/job-submission.partial.html:146
 #: client/src/job-submission/job-submission.partial.html:292
 #: client/src/shared/form-generator.js:869
+#: client/src/job-submission/job-submission.partial.html:105
+#: client/src/job-submission/job-submission.partial.html:118
+#: client/src/job-submission/job-submission.partial.html:131
+#: client/src/job-submission/job-submission.partial.html:144
+#: client/src/job-submission/job-submission.partial.html:289
+#: client/src/shared/form-generator.js:892
 msgid "Show"
 msgstr "Tonen"
 
@@ -4580,6 +5045,8 @@ msgstr "Tonen"
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:117
 #: client/src/templates/job_templates/job-template.form.js:250
 #: client/src/templates/job_templates/job-template.form.js:253
+#: client/src/templates/job_templates/job-template.form.js:252
+#: client/src/templates/job_templates/job-template.form.js:255
 msgid "Show Changes"
 msgstr "Wijzigingen tonen"
 
@@ -4587,14 +5054,20 @@ msgstr "Wijzigingen tonen"
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:44
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:55
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:76
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:34
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:45
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:56
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:77
 msgid "Sign in with %s"
 msgstr "Aanmelden met %s"
 
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:63
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:64
 msgid "Sign in with %s Organizations"
 msgstr "Aanmelden met %s organisaties"
 
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:61
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:62
 msgid "Sign in with %s Teams"
 msgstr "Aanmelden met %s teams"
 
@@ -4604,10 +5077,14 @@ msgstr "Aanmelden met %s teams"
 #: client/src/templates/job_templates/job-template.form.js:229
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:142
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:150
+#: client/src/job-submission/job-submission.partial.html:237
+#: client/src/templates/job_templates/job-template.form.js:233
+#: client/src/templates/job_templates/job-template.form.js:242
 msgid "Skip Tags"
 msgstr "Tags overslaan"
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:148
+#: client/src/templates/job_templates/job-template.form.js:240
 msgid ""
 "Skip tags are useful when you have a large playbook, and you want to skip "
 "specific parts of a play or task."
@@ -4622,7 +5099,7 @@ msgid ""
 "Refer to Ansible Tower documentation for details on the usage of tags."
 msgstr ""
 "Tags overslaan is nuttig wanneer u een groot draaiboek heeft en specifieke "
-"delen van het draaiboek of een taak wilt overslaan. Gebruik komma's om "
+"delen van het draaiboek of een taak wilt overslaan. Gebruik een komma om "
 "meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible "
 "Tower voor meer informatie over het gebruik van tags."
 
@@ -4635,6 +5112,7 @@ msgstr "Smart-hostfilter"
 #: client/src/inventories-hosts/inventories/list/inventory-list.controller.js:69
 #: client/src/organizations/linkout/controllers/organizations-inventories.controller.js:70
 #: client/src/shared/form-generator.js:1449
+#: client/src/shared/form-generator.js:1500
 msgid "Smart Inventory"
 msgstr "Smart-inventaris"
 
@@ -4644,6 +5122,8 @@ msgstr "Op te lossen met draaiboek"
 
 #: client/src/inventories-hosts/inventories/list/source-summary-popover/source-summary-popover.directive.js:57
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:64
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:61
+#: client/src/partials/subhome.html:8
 msgid "Source"
 msgstr "Bron"
 
@@ -4658,10 +5138,13 @@ msgstr "Broninformatie"
 
 #: client/src/notifications/notificationTemplates.form.js:195
 #: client/src/notifications/notificationTemplates.form.js:196
+#: client/src/notifications/notificationTemplates.form.js:198
+#: client/src/notifications/notificationTemplates.form.js:199
 msgid "Source Phone Number"
 msgstr "Brontelefoonnummer"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:136
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:127
 msgid "Source Regions"
 msgstr "Bronregio's"
 
@@ -4675,6 +5158,10 @@ msgstr "Bronregio's"
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:281
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:291
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:298
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:195
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:202
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:218
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:241
 msgid "Source Variables"
 msgstr "Bronvariabelen"
 
@@ -4684,6 +5171,7 @@ msgstr "Bronvariabelen"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.list.js:34
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:189
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:195
 msgid "Sources"
 msgstr "Bronnen"
 
@@ -4886,6 +5374,8 @@ msgstr "TACACS+"
 #: client/src/organizations/list/organizations-list.controller.js:60
 #: client/src/teams/main.js:46 client/src/teams/teams.list.js:14
 #: client/src/teams/teams.list.js:15
+#: client/src/activity-stream/get-target-title.factory.js:20
+#: client/src/organizations/linkout/organizations-linkout.route.js:96
 msgid "TEAMS"
 msgstr "TEAMS"
 
@@ -4895,6 +5385,7 @@ msgstr "TEAMS"
 #: client/src/templates/list/templates-list.route.js:13
 #: client/src/templates/templates.list.js:15
 #: client/src/templates/templates.list.js:16
+#: client/src/activity-stream/get-target-title.factory.js:41
 msgid "TEMPLATES"
 msgstr "SJABLONEN"
 
@@ -4912,6 +5403,7 @@ msgid "Tag None:"
 msgstr "Tag geen:"
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:133
+#: client/src/templates/job_templates/job-template.form.js:221
 msgid ""
 "Tags are useful when you have a large playbook, and you want to run a "
 "specific part of a play or task."
@@ -4926,9 +5418,9 @@ msgid ""
 " to Ansible Tower documentation for details on the usage of tags."
 msgstr ""
 "Tags zijn nuttig wanneer u een groot draaiboek heeft en specifieke delen van"
-" het draaiboek of een taak wilt uitvoeren. Gebruik komma's om meerdere tags "
-"van elkaar te scheiden. Raadpleeg de documentatie van Ansible Tower voor "
-"meer informatie over het gebruik van tags."
+" het draaiboek of een taak wilt uitvoeren. Gebruik een komma om meerdere "
+"tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Tower "
+"voor meer informatie over het gebruik van tags."
 
 #: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:179
 #: client/src/inventories-hosts/inventories/related/sources/edit/sources-edit.controller.js:260
@@ -4936,6 +5428,7 @@ msgid "Tags:"
 msgstr "Tags:"
 
 #: client/src/notifications/notificationTemplates.form.js:312
+#: client/src/notifications/notificationTemplates.form.js:317
 msgid "Target URL"
 msgstr "Doel-URL"
 
@@ -4949,6 +5442,10 @@ msgstr "Taken"
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:160
 #: client/src/projects/projects.form.js:261
 #: client/src/templates/workflows.form.js:144
+#: client/features/credentials/legacy.credentials.js:92
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:166
+#: client/src/projects/projects.form.js:260
+#: client/src/templates/workflows.form.js:149
 msgid "Team Roles"
 msgstr "Teamrollen"
 
@@ -4958,6 +5455,9 @@ msgstr "Teamrollen"
 #: client/src/setup-menu/setup-menu.partial.html:16
 #: client/src/shared/stateDefinitions.factory.js:410
 #: client/src/users/users.form.js:155
+#: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:33
+#: client/src/shared/stateDefinitions.factory.js:364
+#: client/src/users/users.form.js:156
 msgid "Teams"
 msgstr "Teams"
 
@@ -4967,6 +5467,7 @@ msgid "Template"
 msgstr "Sjabloon"
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
+#: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:34
 msgid "Templates"
 msgstr "Sjablonen"
 
@@ -4984,6 +5485,8 @@ msgstr "Testbericht"
 
 #: client/src/shared/form-generator.js:1379
 #: client/src/shared/form-generator.js:1385
+#: client/src/shared/form-generator.js:1430
+#: client/src/shared/form-generator.js:1436
 msgid "That value was not found.  Please enter or select a valid value."
 msgstr ""
 "De waarde is niet gevonden. Voer een geldige waarde in of selecteer er een."
@@ -5002,6 +5505,8 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:32
 #: client/src/credentials/factories/kind-change.factory.js:89
+#: client/src/credentials/factories/become-method-change.factory.js:34
+#: client/src/credentials/factories/kind-change.factory.js:91
 msgid ""
 "The Project ID is the GCE assigned identification. It is constructed as two "
 "words followed by a three digit number.  Such as:"
@@ -5031,6 +5536,8 @@ msgstr "Het hostaantal wordt bijgewerkt wanneer de taak voltooid is."
 
 #: client/src/credentials/factories/become-method-change.factory.js:68
 #: client/src/credentials/factories/kind-change.factory.js:125
+#: client/src/credentials/factories/become-method-change.factory.js:70
+#: client/src/credentials/factories/kind-change.factory.js:127
 msgid "The host to authenticate with."
 msgstr "De host waarmee geauthenticeerd moet worden."
 
@@ -5051,6 +5558,7 @@ msgstr ""
 "verwijderproces verwerkt is."
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:104
+#: client/src/templates/job_templates/job-template.form.js:160
 msgid ""
 "The number of parallel or simultaneous processes to use while executing the "
 "playbook. Inputting no value will use the default value from the %sansible "
@@ -5071,6 +5579,7 @@ msgstr ""
 "documentatie van Ansible voor informatie over het configuratiebestand."
 
 #: client/src/job-results/job-results.controller.js:590
+#: client/src/job-results/job-results.controller.js:585
 msgid "The output is too large to display. Please download."
 msgstr ""
 "De output is te groot om weer te geven. Download het om het in te zien."
@@ -5080,6 +5589,7 @@ msgid "The project value"
 msgstr "De projectwaarde"
 
 #: client/src/projects/list/projects-list.controller.js:159
+#: client/src/projects/list/projects-list.controller.js:158
 msgid ""
 "The selected project is not configured for SCM. To configure for SCM, edit "
 "the project and provide SCM settings, and then run an update."
@@ -5117,6 +5627,7 @@ msgid "There are no jobs to display at this time"
 msgstr "Er zijn op dit moment geen taken om weer te geven"
 
 #: client/src/projects/list/projects-list.controller.js:150
+#: client/src/projects/list/projects-list.controller.js:149
 msgid ""
 "There is no SCM update information available for this project. An update has"
 " not yet been  completed.  If you have not already done so, start an update "
@@ -5127,10 +5638,12 @@ msgstr ""
 "niet gedaan heeft."
 
 #: client/src/configuration/configuration.controller.js:345
+#: client/src/configuration/configuration.controller.js:342
 msgid "There was an error resetting value. Returned status:"
 msgstr "Er was een fout bij het resetten van de waarde. Teruggegeven status:"
 
 #: client/src/configuration/configuration.controller.js:525
+#: client/src/configuration/configuration.controller.js:519
 msgid "There was an error resetting values. Returned status:"
 msgstr "Er was een fout bij het resetten van de waardes. Teruggegeven status:"
 
@@ -5160,6 +5673,8 @@ msgstr "Dit is geen geldig nummer."
 
 #: client/src/credentials/factories/become-method-change.factory.js:65
 #: client/src/credentials/factories/kind-change.factory.js:122
+#: client/src/credentials/factories/become-method-change.factory.js:67
+#: client/src/credentials/factories/kind-change.factory.js:124
 msgid ""
 "This is the tenant name.  This value is usually the same  as the username."
 msgstr ""
@@ -5182,18 +5697,21 @@ msgstr ""
 "bij Insights"
 
 #: client/src/shared/form-generator.js:740
+#: client/src/shared/form-generator.js:765
 msgid ""
 "This setting has been set manually in a settings file and is now disabled."
 msgstr ""
 "Deze instelling is handmatig gekozen in een instellingenbestand en is nu "
 "uitgeschakeld."
 
-#: client/src/users/users.form.js:160
+#: client/src/users/users.form.js:160 client/src/users/users.form.js:161
 msgid "This user is not a member of any teams"
 msgstr "Deze gebruiker is niet lid van een team"
 
 #: client/src/shared/form-generator.js:849
 #: client/src/shared/form-generator.js:944
+#: client/src/shared/form-generator.js:872
+#: client/src/shared/form-generator.js:968
 msgid ""
 "This value does not match the password you entered previously.  Please "
 "confirm that password."
@@ -5202,6 +5720,7 @@ msgstr ""
 "heeft. Bevestig dat wachtwoord."
 
 #: client/src/configuration/configuration.controller.js:550
+#: client/src/configuration/configuration.controller.js:544
 msgid ""
 "This will reset all configuration values to their factory defaults. Are you "
 "sure you want to proceed?"
@@ -5212,6 +5731,7 @@ msgstr ""
 #: client/src/activity-stream/streams.list.js:25
 #: client/src/home/dashboard/lists/jobs/jobs-list.partial.html:14
 #: client/src/notifications/notification-templates-list/list.controller.js:72
+#: client/src/activity-stream/streams.list.js:26
 msgid "Time"
 msgstr "Tijd"
 
@@ -5220,6 +5740,7 @@ msgid "Time Remaining"
 msgstr "Tijd over"
 
 #: client/src/projects/projects.form.js:196
+#: client/src/projects/projects.form.js:195
 msgid ""
 "Time in seconds to consider a project to be current. During job runs and "
 "callbacks the task system will evaluate the timestamp of the latest project "
@@ -5254,8 +5775,9 @@ msgstr ""
 "token."
 
 #: client/src/shared/form-generator.js:874
+#: client/src/shared/form-generator.js:897
 msgid "Toggle the display of plaintext."
-msgstr "Weergave van plaintext wisselen."
+msgstr "Tekst tonen/verbergen"
 
 #: client/src/notifications/shared/type-change.service.js:34
 #: client/src/notifications/shared/type-change.service.js:40
@@ -5294,6 +5816,8 @@ msgstr "Traceback"
 #: client/src/templates/templates.list.js:31
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:27
 #: client/src/users/users.form.js:196
+#: client/src/credential-types/credential-types.list.js:28
+#: client/src/users/users.form.js:197
 msgid "Type"
 msgstr "Soort"
 
@@ -5301,7 +5825,7 @@ msgstr "Soort"
 #: client/src/credentials/credentials.form.js:23
 #: client/src/notifications/notificationTemplates.form.js:26
 msgid "Type Details"
-msgstr "Soortinformatie"
+msgstr "Soortdetails"
 
 #: client/src/projects/add/projects-add.controller.js:169
 #: client/src/projects/edit/projects-edit.controller.js:298
@@ -5317,6 +5841,8 @@ msgstr "GEBRUIKERSNAAM"
 #: client/src/organizations/list/organizations-list.controller.js:54
 #: client/src/users/main.js:46 client/src/users/users.list.js:18
 #: client/src/users/users.list.js:19
+#: client/src/activity-stream/get-target-title.factory.js:17
+#: client/src/organizations/linkout/organizations-linkout.route.js:41
 msgid "USERS"
 msgstr "GEBRUIKERS"
 
@@ -5341,10 +5867,12 @@ msgid "Unsupported input type"
 msgstr "Soort input niet ondersteund"
 
 #: client/src/projects/list/projects-list.controller.js:267
+#: client/src/projects/list/projects-list.controller.js:265
 msgid "Update Not Found"
 msgstr "Update niet gevonden"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:321
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:276
 msgid "Update Options"
 msgstr "Update-opties"
 
@@ -5355,14 +5883,19 @@ msgstr "Update in uitvoering"
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:352
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:357
 #: client/src/projects/projects.form.js:177
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:308
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:313
+#: client/src/projects/projects.form.js:176
 msgid "Update on Launch"
 msgstr "Update bij opstarten"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:364
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:320
 msgid "Update on Project Change"
 msgstr "Update voor projectwijziging"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:370
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:326
 msgid "Update on Project Update"
 msgstr "Update voor projectupdate"
 
@@ -5376,10 +5909,12 @@ msgid "Use Fact Cache"
 msgstr "Feitcache gebruiken"
 
 #: client/src/notifications/notificationTemplates.form.js:398
+#: client/src/notifications/notificationTemplates.form.js:410
 msgid "Use SSL"
 msgstr "SSL gebruiken"
 
 #: client/src/notifications/notificationTemplates.form.js:393
+#: client/src/notifications/notificationTemplates.form.js:405
 msgid "Use TLS"
 msgstr "TLS gebruiken"
 
@@ -5400,6 +5935,10 @@ msgstr ""
 #: client/src/organizations/organizations.form.js:92
 #: client/src/projects/projects.form.js:250 client/src/teams/teams.form.js:93
 #: client/src/templates/workflows.form.js:133
+#: client/features/credentials/legacy.credentials.js:81
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:155
+#: client/src/projects/projects.form.js:249
+#: client/src/templates/workflows.form.js:138
 msgid "User"
 msgstr "Gebruiker"
 
@@ -5407,7 +5946,7 @@ msgstr "Gebruiker"
 msgid "User Interface"
 msgstr "Gebruikersinterface"
 
-#: client/src/users/users.form.js:91
+#: client/src/users/users.form.js:91 client/src/users/users.form.js:92
 msgid "User Type"
 msgstr "Soort gebruiker"
 
@@ -5420,6 +5959,8 @@ msgstr "Soort gebruiker"
 #: client/src/credentials/factories/kind-change.factory.js:74
 #: client/src/notifications/notificationTemplates.form.js:67
 #: client/src/users/users.form.js:58 client/src/users/users.list.js:29
+#: client/src/credentials/factories/become-method-change.factory.js:46
+#: client/src/credentials/factories/kind-change.factory.js:103
 msgid "Username"
 msgstr "Gebruikersnaam"
 
@@ -5439,6 +5980,7 @@ msgstr ""
 #: client/src/organizations/organizations.form.js:74
 #: client/src/setup-menu/setup-menu.partial.html:10
 #: client/src/teams/teams.form.js:75
+#: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
 msgid "Users"
 msgstr "Gebruikers"
 
@@ -5478,10 +6020,13 @@ msgstr "Geldige licentie"
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:84
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:93
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:99
+#: client/src/inventories-hosts/hosts/host.form.js:67
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:66
 msgid "Variables"
 msgstr "Variabelen"
 
 #: client/src/job-submission/job-submission.partial.html:357
+#: client/src/job-submission/job-submission.partial.html:354
 msgid "Vault"
 msgstr "Kluis"
 
@@ -5491,6 +6036,7 @@ msgstr "Toegangsgegevens kluis"
 
 #: client/src/credentials/credentials.form.js:391
 #: client/src/job-submission/job-submission.partial.html:142
+#: client/src/job-submission/job-submission.partial.html:140
 msgid "Vault Password"
 msgstr "Wachtwoord kluis"
 
@@ -5503,6 +6049,11 @@ msgstr "Wachtwoord kluis"
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:99
 #: client/src/templates/job_templates/job-template.form.js:179
 #: client/src/templates/job_templates/job-template.form.js:186
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:263
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:270
+#: client/src/job-submission/job-submission.partial.html:176
+#: client/src/templates/job_templates/job-template.form.js:188
+#: client/src/templates/job_templates/job-template.form.js:195
 msgid "Verbosity"
 msgstr "Verbositeit"
 
@@ -5520,6 +6071,8 @@ msgstr "Versie"
 #: client/src/scheduler/schedules.list.js:83 client/src/teams/teams.list.js:64
 #: client/src/templates/templates.list.js:112
 #: client/src/users/users.list.js:70
+#: client/src/activity-stream/streams.list.js:64
+#: client/src/credential-types/credential-types.list.js:61
 msgid "View"
 msgstr "weergeven"
 
@@ -5545,6 +6098,9 @@ msgstr "Bekijk JSON-voorbeelden op"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:77
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:77
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:94
+#: client/src/inventories-hosts/hosts/host.form.js:77
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:76
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:103
 msgid "View JSON examples at %s"
 msgstr "Zie JSON-voorbeelden op %s"
 
@@ -5559,6 +6115,9 @@ msgstr "Meer weergeven"
 #: client/src/shared/form-generator.js:1711
 #: client/src/templates/job_templates/job-template.form.js:441
 #: client/src/templates/workflows.form.js:161
+#: client/src/shared/form-generator.js:1762
+#: client/src/templates/job_templates/job-template.form.js:458
+#: client/src/templates/workflows.form.js:166
 msgid "View Survey"
 msgstr "Vragenlijst weergeven"
 
@@ -5572,14 +6131,19 @@ msgstr "Bekijk YAML-voorbeelden op"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:78
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:78
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:95
+#: client/src/inventories-hosts/hosts/host.form.js:78
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:77
+#: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:104
 msgid "View YAML examples at %s"
 msgstr "Zie YAML-voorbeelden op %s"
 
 #: client/src/setup-menu/setup-menu.partial.html:72
+#: client/src/setup-menu/setup-menu.partial.html:54
 msgid "View Your License"
 msgstr "Uw licentie weergeven"
 
 #: client/src/setup-menu/setup-menu.partial.html:73
+#: client/src/setup-menu/setup-menu.partial.html:55
 msgid "View and edit your license information."
 msgstr "Uw licentie-informatie weergeven en bewerken."
 
@@ -5588,10 +6152,12 @@ msgid "View credential"
 msgstr "Toegangsgegevens weergeven"
 
 #: client/src/credential-types/credential-types.list.js:66
+#: client/src/credential-types/credential-types.list.js:63
 msgid "View credential type"
 msgstr "Soort toegangsgegevens weergeven"
 
 #: client/src/activity-stream/streams.list.js:67
+#: client/src/activity-stream/streams.list.js:68
 msgid "View event details"
 msgstr "Evenementinformatie weergeven"
 
@@ -5608,6 +6174,7 @@ msgid "View host"
 msgstr "Host weergeven"
 
 #: client/src/setup-menu/setup-menu.partial.html:67
+#: client/src/setup-menu/setup-menu.partial.html:73
 msgid "View information about this version of Ansible {{BRAND_NAME}}."
 msgstr "Informatie over deze versie van Ansible {{BRAND_NAME}} weergeven."
 
@@ -5620,6 +6187,7 @@ msgid "View inventory script"
 msgstr "Inventarisscript weergeven"
 
 #: client/src/setup-menu/setup-menu.partial.html:55
+#: client/src/setup-menu/setup-menu.partial.html:61
 msgid "View list and capacity of {{BRAND_NAME}} instances."
 msgstr "Lijst en capaciteit van {{BRAND_NAME}}-instanties weergeven."
 
@@ -5718,6 +6286,7 @@ msgstr ""
 "synchronisatieproces van de inventaris."
 
 #: client/src/templates/workflows/workflow-maker/workflow-maker.form.js:97
+#: client/src/templates/job_templates/job-template.form.js:54
 msgid ""
 "When this template is submitted as a job, setting the type to %s will "
 "execute the playbook, running tasks  on the selected hosts."
@@ -5728,6 +6297,8 @@ msgstr ""
 
 #: client/src/shared/form-generator.js:1715
 #: client/src/templates/workflows.form.js:187
+#: client/src/shared/form-generator.js:1766
+#: client/src/templates/workflows.form.js:192
 msgid "Workflow Editor"
 msgstr "Workfloweditor"
 
@@ -5741,6 +6312,7 @@ msgid "Workflow Templates"
 msgstr "Workflowsjablonen"
 
 #: client/src/job-submission/job-submission.partial.html:167
+#: client/src/job-submission/job-submission.partial.html:165
 msgid "YAML"
 msgstr "YAML"
 
@@ -5787,6 +6359,7 @@ msgstr ""
 " op te slaan?"
 
 #: client/src/projects/list/projects-list.controller.js:222
+#: client/src/projects/list/projects-list.controller.js:221
 msgid "Your request to cancel the update was submitted to the task manager."
 msgstr ""
 "Uw verzoek om de update te annuleren is ingediend bij de taakbeheerder."
@@ -5798,12 +6371,17 @@ msgstr "Uw sessie is verlopen vanwege inactiviteit. Meld u opnieuw aan."
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:24
 #: client/src/job-submission/job-submission.partial.html:310
 #: client/src/shared/form-generator.js:1186
+#: client/src/job-submission/job-submission.partial.html:307
+#: client/src/shared/form-generator.js:1238
 msgid "and"
 msgstr "en"
 
 #: client/src/job-submission/job-submission.partial.html:282
 #: client/src/job-submission/job-submission.partial.html:287
 #: client/src/job-submission/job-submission.partial.html:298
+#: client/src/job-submission/job-submission.partial.html:279
+#: client/src/job-submission/job-submission.partial.html:284
+#: client/src/job-submission/job-submission.partial.html:295
 msgid "characters long."
 msgstr "tekens lang."
 
@@ -5828,10 +6406,12 @@ msgstr[0] "groep"
 msgstr[1] "groepen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:26
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:26
 msgid "groups"
 msgstr "groepen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:24
 msgid "groups and"
 msgstr "groepen en"
 
@@ -5843,6 +6423,8 @@ msgstr[1] "hosts"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:24
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:25
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:24
+#: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:25
 msgid "hosts"
 msgstr "hosts"
 
@@ -5868,6 +6450,7 @@ msgid "organization"
 msgstr "organisatie"
 
 #: client/src/shared/form-generator.js:1062
+#: client/src/shared/form-generator.js:1114
 msgid "playbook"
 msgstr "draaiboek"
 
@@ -5888,10 +6471,14 @@ msgstr "test"
 #: client/src/job-submission/job-submission.partial.html:282
 #: client/src/job-submission/job-submission.partial.html:287
 #: client/src/job-submission/job-submission.partial.html:298
+#: client/src/job-submission/job-submission.partial.html:279
+#: client/src/job-submission/job-submission.partial.html:284
+#: client/src/job-submission/job-submission.partial.html:295
 msgid "to"
 msgstr "om"
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:139
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:130
 msgid ""
 "to include all regions. Only Hosts associated with the selected regions will"
 " be updated."
@@ -5960,3 +6547,221 @@ msgstr "{{breadcrumb.instance_group_name}}"
 #: client/src/shared/paginate/paginate.partial.html:55
 msgid "{{pageSize}}"
 msgstr "{{pageSize}}"
+
+#: client/src/notifications/notificationTemplates.form.js:377
+msgid "%s or %s"
+msgstr "%s of %s"
+
+#: client/src/partials/subhome.html:30
+msgid "<i class=\"fa fa-arrow-circle-left\"></i> Back to options"
+msgstr ""
+
+#: client/src/partials/subhome.html:32
+msgid "<i class=\"fa fa-check\"></i> Save"
+msgstr ""
+
+#: client/src/partials/subhome.html:29
+msgid "<i class=\"fa fa-search-plus\"></i> View Details"
+msgstr ""
+
+#: client/src/partials/subhome.html:31
+msgid "<i class=\"fa fa-times\"></i> Cancel"
+msgstr ""
+
+#: client/src/shared/smart-search/smart-search.partial.html:51
+msgid "ADDITIONAL INFORMATION:"
+msgstr ""
+
+#: client/lib/services/base-string.service.js:8
+msgid "BaseString cannot be extended without providing a namespace"
+msgstr ""
+"BaseString kan niet verlengd worden als er geen naamruimte opgegeven is"
+
+#: client/src/notifications/notificationTemplates.form.js:299
+msgid "Color can be one of %s."
+msgstr "Kleur kan een van %s zijn."
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:62
+msgid ""
+"Drag and drop your custom inventory script file here or create one in the "
+"field to import your custom inventory."
+msgstr ""
+"Sleep uw aangepaste inventarisscriptbestand hierheen of maak een nieuwe aan "
+"in het veld om uw aangepaste inventaris te importeren."
+
+#: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:104
+msgid ""
+"Extra Variables\n"
+"                            <i class=\"StandardOut-extraVarsHelp fa fa-question-circle\" aw-tool-tip=\"Read only view of extra variables added to the ad-hoc command.\" data-placement=\"top\">\n"
+"                            </i>"
+msgstr ""
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:120
+msgid "Failed to get third-party login types.  Returned status:"
+msgstr ""
+"Soorten aanmeldingen van derde partijen ophalen mislukt. Geretourneerde "
+"status:"
+
+#: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:68
+msgid "Filter that will be applied to the hosts of this inventory."
+msgstr "Filters die toegepast zullen worden op de hosts van deze inventaris."
+
+#: client/src/shared/smart-search/smart-search.partial.html:51
+msgid ""
+"For additional information on advanced search search syntax please see the "
+"Ansible Tower<a href=\"http://docs.ansible.com/ansible-"
+"tower/3.1.0/html/userguide/search_sort.html\" target=\"_blank\"> "
+"documentation</a>."
+msgstr ""
+
+#: client/src/notifications/notificationTemplates.form.js:101
+#: client/src/notifications/notificationTemplates.form.js:144
+#: client/src/notifications/notificationTemplates.form.js:161
+#: client/src/notifications/notificationTemplates.form.js:217
+#: client/src/notifications/notificationTemplates.form.js:339
+#: client/src/notifications/notificationTemplates.form.js:377
+msgid "For example:"
+msgstr "Bijvoorbeeld:"
+
+#: client/src/templates/job_templates/job-template.form.js:272
+msgid ""
+"If enabled, run this playbook as an administrator. This is the equivalent of"
+" passing the %s option to the %s command."
+msgstr ""
+"Voer dit draaiboek uit als beheerder, indien deze mogelijkheid ingeschakeld "
+"is. Dit staat gelijk aan het doorgeven van de optie %s aan het commando %s."
+
+#: client/src/templates/job_templates/job-template.form.js:57
+msgid ""
+"Instead, %s will check playbook  syntax, test environment setup and report "
+"problems."
+msgstr ""
+"In plaats daarvan zal %s de syntaxis van het draaiboek controleren, de "
+"installatie van de omgeving testen en problemen rapporteren."
+
+#: client/src/inventories-hosts/inventories/insights/insights.partial.html:63
+msgid ""
+"No data is available. Either there are no issues to report or no scan jobs "
+"have been run on this host."
+msgstr ""
+"Geen gegevens beschikbaar. Dit kan betekenen dat er geen problemen zijn om "
+"te rapporteren of dat er geen scantaken uitgevoerd zijn op deze host."
+
+#: client/lib/services/base-string.service.js:9
+msgid "No string exists with this name"
+msgstr "Er bestaat geen string met deze naam"
+
+#: client/src/notifications/notificationTemplates.form.js:201
+msgid "Number associated with the \"Messaging Service\" in Twilio."
+msgstr "Nummer dat verbonden is aan de \"berichtendienst\" in Twilio."
+
+#: client/src/partials/survey-maker-modal.html:45
+msgid "PLEASE ADD A SURVEY PROMPT ON THE LEFT."
+msgstr "VOEG LINKS EEN MELDING VOOR EEN VRAGENLIJST TOE."
+
+#: client/src/shared/paginate/paginate.partial.html:33
+msgid ""
+"Page\n"
+"                <span id=\"current-page\">{{current}}</span> of\n"
+"        <span id=\"total-pages\">{{last}}</span>"
+msgstr ""
+
+#: client/src/templates/job_templates/job-template.form.js:365
+#: client/src/templates/workflows.form.js:80
+msgid ""
+"Pass extra command line variables to the playbook. This is the %s or %s "
+"command line parameter for %s. Provide key/value pairs using either YAML or "
+"JSON."
+msgstr ""
+"Geef extra commandoregelvariabelen op in het draaiboek. Dit is de %s of %s "
+"commandoregelparameter voor %s. Geef sleutel/waarde-paren op met YAML of "
+"JSON."
+
+#: client/src/partials/inventory-add.html:11
+msgid "Please enter a name for this job template copy."
+msgstr "Voer een naam in voor deze kopie van een taaksjabloon."
+
+#: client/src/partials/subhome.html:6
+msgid "Properties"
+msgstr "Eigenschappen"
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:63
+msgid "Script must begin with a hashbang sequence: i.e.... %s"
+msgstr "Script moet beginnen met een hashbang-reeks, bijvoorbeeld ... %s"
+
+#: client/src/templates/job_templates/job-template.form.js:141
+msgid ""
+"Select credentials that allow {{BRAND_NAME}} to access the nodes this job "
+"will be ran against. You can only select one credential of each type.<br "
+"/><br />You must select either a machine (SSH) credential or \"Prompt on "
+"launch\".  \"Prompt on launch\" requires you to select a machine credential "
+"at run time.<br /><br />If you select credentials AND check the \"Prompt on "
+"launch\" box, you make the selected credentials the defaults that can be "
+"updated at run time."
+msgstr ""
+"Selecteer toegangsgegevens waarmee {{BRAND_NAME}} toegang kan krijgen tot de"
+" knooppunten waartegen deze taak uitgevoerd zal worden. U kunt slechts één "
+"set toegangsgegevens van iedere soort kiezen.<br /><br />U moet óf machine "
+"(SSH)-toegangsgegevens kiezen, óf \"Melding bij opstarten\". Indien u kiest "
+"voor \"Melding bij opstarten\", moet u bij het opstarten "
+"machinetoegangsgegevens kiezen.<br /><br />Als u toegangsgegevens kiest EN "
+"het vakje \"Melding bij opstarten\" aanklikt, maakt u van de gekozen "
+"toegangsgegevens de standaard die bij opstarten gewijzigd kan worden."
+
+#: client/src/inventories-hosts/inventories/related/sources/sources.form.js:115
+msgid ""
+"Select the inventory file to be synced by this source.  You can select from "
+"the dropdown or enter a file within the input."
+msgstr ""
+"Selecteer het inventarisbestand dat gesynchroniseerd moet worden door deze "
+"bron. U kunt kiezen uit het uitklapbare menu of een bestand invoeren in het "
+"invoerveld."
+
+#: client/src/templates/job_templates/job-template.form.js:56
+msgid "Setting the type to %s will not execute the playbook."
+msgstr ""
+"Als %s ingesteld wordt als de soort, wordt het draaiboek niet uitgevoerd."
+
+#: client/src/notifications/notificationTemplates.form.js:338
+msgid "Specify HTTP Headers in JSON format"
+msgstr "Specificeer HTTP-koppen in JSON-formaat"
+
+#: client/src/notifications/notificationTemplates.form.js:202
+msgid "This must be of the form %s."
+msgstr "Dit moet uit het formulier %s komen."
+
+#: client/src/notifications/notificationTemplates.form.js:100
+#: client/src/notifications/notificationTemplates.form.js:216
+msgid "Type an option on each line."
+msgstr "Voer op iedere regel een optie in."
+
+#: client/src/notifications/notificationTemplates.form.js:143
+#: client/src/notifications/notificationTemplates.form.js:160
+#: client/src/notifications/notificationTemplates.form.js:376
+msgid "Type an option on each line. The pound symbol (#) is not required."
+msgstr ""
+"Voer op iedere regel een optie in. Het hekje (#) is hierbij niet vereist."
+
+#: client/src/templates/templates.list.js:66
+msgid "Workflow Job Template"
+msgstr ""
+
+#: client/src/shared/form-generator.js:980
+msgid "Your password must be %d characters long."
+msgstr "Uw wachtwoord moet ten minste %d tekens lang zijn."
+
+#: client/src/shared/form-generator.js:985
+msgid "Your password must contain a lowercase letter."
+msgstr "Uw wachtwoord moet een kleine letter bevatten."
+
+#: client/src/shared/form-generator.js:995
+msgid "Your password must contain a number."
+msgstr "Uw wachtwoord moet een getal bevatten."
+
+#: client/src/shared/form-generator.js:990
+msgid "Your password must contain an uppercase letter."
+msgstr "Uw wachtwoord moet een hoofdletter bevatten."
+
+#: client/src/shared/form-generator.js:1000
+msgid "Your password must contain one of the following characters: %s"
+msgstr "Uw wachtwoord moet één van de volgende tekens bevatten: %s"

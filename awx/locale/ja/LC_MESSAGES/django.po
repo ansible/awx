@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-08-27 19:27+0000\n"
-"PO-Revision-Date: 2017-08-29 04:04+0000\n"
+"PO-Revision-Date: 2017-09-15 11:22+0000\n"
 "Last-Translator: asasaki <asasaki@redhat.com>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -1751,7 +1751,7 @@ msgstr ""
 
 #: awx/main/conf.py:419
 msgid "Log System Tracking Facts Individually"
-msgstr "ログシステムトラッキングの個別ファクト"
+msgstr "ログシステムによるファクトの個別トラッキング"
 
 #: awx/main/conf.py:420
 msgid ""
@@ -1876,11 +1876,11 @@ msgstr "%s に必須です"
 
 #: awx/main/fields.py:571
 msgid "must be set when SSH key is encrypted."
-msgstr "SSH 鍵が暗号化されている場合に設定する必要があります。"
+msgstr "SSH キーが暗号化されている場合に設定する必要があります。"
 
 #: awx/main/fields.py:577
 msgid "should not be set when SSH key is not encrypted."
-msgstr "SSH 鍵が暗号化されていない場合は設定できません。"
+msgstr "SSH キーが暗号化されていない場合は設定できません。"
 
 #: awx/main/fields.py:635
 msgid "'dependencies' is not supported for custom credentials."
@@ -2116,7 +2116,7 @@ msgstr "パスワードの代わりに使用される RSA または DSA 秘密�
 
 #: awx/main/models/credential.py:131
 msgid "SSH key unlock"
-msgstr "SSH 鍵のロック解除"
+msgstr "SSH キーのロック解除"
 
 #: awx/main/models/credential.py:132
 msgid ""
@@ -2147,11 +2147,11 @@ msgstr "Vault パスワード (またはユーザーにプロンプトを出す�
 
 #: awx/main/models/credential.py:162
 msgid "Whether to use the authorize mechanism."
-msgstr "承認メカニズムを使用するかどうか。"
+msgstr "認証メカニズムを使用するかどうか。"
 
 #: awx/main/models/credential.py:168
 msgid "Password used by the authorize mechanism."
-msgstr "承認メカニズムで使用されるパスワード。"
+msgstr "認証メカニズムで使用されるパスワード。"
 
 #: awx/main/models/credential.py:174
 msgid "Client Id or Application Id for the credential"
