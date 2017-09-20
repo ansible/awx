@@ -2162,10 +2162,22 @@ class CredentialSerializer(BaseSerializer):
 
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
-            raise ValidationError(
-                _('You cannot change the credential type of the credential, as it may break the functionality'
-                  ' of the resources using it.'),
-            )
+            for rel in (
+                'ad_hoc_commands',
+                'insights_inventories',
+                'inventorysources',
+                'inventoryupdates',
+                'jobs',
+                'jobtemplates',
+                'projects',
+                'projectupdates',
+                'workflowjobnodes'
+            ):
+                if getattr(self.instance, rel).count() > 0:
+                    raise ValidationError(
+                        _('You cannot change the credential type of the credential, as it may break the functionality'
+                          ' of the resources using it.'),
+                    )
         return credential_type
 
 
