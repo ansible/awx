@@ -202,14 +202,7 @@ export default
                     if(self.socket.readyState === 0){
                         setTimeout(function(){
                             console.log('inside timeout: ' + self.socket.readyState);
-                            self.socket.send(data, function () {
-                                var args = arguments;
-                                self.scope.$apply(function () {
-                                    if (callback) {
-                                        callback.apply(self.socket, args);
-                                    }
-                                });
-                            });
+                            self.subscribe(self.getLast());
                         }, 500);
                     }
                     else if(self.socket.readyState === 1){
