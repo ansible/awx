@@ -69,20 +69,10 @@ def test_multi_group_with_shared_dependency(instance_factory, default_instance_g
         pu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j1, ig1, [])
-        j1.finished = j1.created + timedelta(seconds=2)
-        j1.status = "successful"
-        j1.save()
-    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        pu = p.project_updates.last()
-        TaskManager.start_task.assert_called_once_with(pu, default_instance_group, [j2])
-        pu.finished = pu.created + timedelta(seconds=1)
-        pu.status = "successful"
-        pu.save()
-    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j2, ig2, [])
+
+        TaskManager.start_task.assert_any_call(j1, ig1, [])
+        TaskManager.start_task.assert_any_call(j2, ig2, [])
+        assert TaskManager.start_task.call_count == 2
 
 
 @pytest.mark.django_db
