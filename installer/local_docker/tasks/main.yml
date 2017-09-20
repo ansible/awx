@@ -99,6 +99,7 @@
   docker_container:
     name: postgres
     state: started
+    restart_policy: always
     image: postgres:9.6
     volumes:
       - "{{ postgres_data_dir }}:/var/lib/postgresql/data:Z"
@@ -113,6 +114,7 @@
   docker_container:
     name: rabbitmq
     state: started
+    restart_policy: always
     image: rabbitmq:3
     env:
       RABBITMQ_DEFAULT_VHOST: "awx"
@@ -122,6 +124,7 @@
   docker_container:
     name: memcached
     state: started
+    restart_policy: always
     image: memcached:alpine
 
 - name: Wait for postgres and rabbitmq to activate
@@ -169,6 +172,7 @@
   docker_container:
     name: awx_web
     state: started
+    restart_policy: always
     image: "{{ awx_web_docker_actual_image }}:{{ awx_version }}"
     user: root
     ports:
@@ -194,6 +198,7 @@
   docker_container:
     name: awx_task
     state: started
+    restart_policy: always
     image: "{{ awx_task_docker_actual_image }}:{{ awx_version }}"
     links: "{{ awx_task_container_links|list }}"
     user: root
