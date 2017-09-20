@@ -1,4 +1,5 @@
-<div class="CapacityBar">
-    <div class="CapacityBar-remaining" ng-style="CapacityStyle"></div>
-    <div class="CapacityBar-consumed"></div>
+<div class="CapacityBar"
+    ng-class="{'CapacityBar--offline': isOffline">
+        <div class="CapacityBar-remaining" ng-style="CapacityStyle"></div>
+        <div class="CapacityBar-consumed"></div>
 </div>

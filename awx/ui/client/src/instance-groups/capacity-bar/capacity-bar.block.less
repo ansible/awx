@@ -23,4 +23,12 @@ capacity-bar {
     .CapacityBar-consumed {
         flex: 0 0 auto;
     }
+
+    .CapacityBar--offline {
+        border-color: @d7grey;
+
+        .CapacityBar-remaining {
+            background-color: @d7grey;
+        }
+    }
 }
