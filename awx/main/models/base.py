@@ -309,7 +309,10 @@ class PrimordialModel(CreatedModifiedModel):
                 continue
             if not (self.pk and self.pk == obj.pk):
                 errors.append(
-                    '%s with this (%s) combination already exists.' % (model.__name__, ', '.join(ut))
+                    '%s with this (%s) combination already exists.' % (
+                        model.__name__,
+                        ', '.join(set(ut) - {'polymorphic_ctype'})
+                    )
                 )
         if errors:
             raise ValidationError(errors)
