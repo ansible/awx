@@ -13,9 +13,6 @@ class AWXDjangoStrategy(DjangoStrategy):
        want to ensure we update the SOCIAL_AUTH_STRATEGY setting.
     """
 
-    def __init__(self, storage, request=None, tpl=None):
-        super(AWXDjangoStrategy, self).__init__(storage, tpl)
-
     def request_port(self):
         """Port in use for this request
            https://github.com/python-social-auth/social-app-django/blob/master/social_django/strategy.py#L76
