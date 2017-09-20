@@ -481,18 +481,12 @@ if is_testing():
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         },
-        'ephemeral': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
     }
 else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
             'LOCATION': 'memcached:11211',
-        },
-        'ephemeral': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         },
     }
 
