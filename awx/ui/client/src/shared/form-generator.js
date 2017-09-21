@@ -1875,7 +1875,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     <div
                         class="row"
                         ng-show="${itm}.length === 0 && !(searchTags | isEmpty)">
-                        <div class="col-lg-12 List-searchNoResults">`;
+                        <div class="col-lg-12 List-searchNoResults" translate>`;
                 html += i18n._('No records matched your search.');
                 html += `</div>
                     </div>
