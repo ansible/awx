@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Django
-from django.core.cache import cache
 from django.core.signals import setting_changed
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
@@ -12,7 +11,7 @@ from rest_framework.exceptions import APIException
 
 # Tower
 from awx.main.utils.common import get_licenser
-from awx.main.utils import memoize
+from awx.main.utils import memoize, memoize_delete
 
 __all__ = ['LicenseForbids', 'get_license', 'get_licensed_features',
            'feature_enabled', 'feature_exists']
@@ -23,7 +22,6 @@ class LicenseForbids(APIException):
     default_detail = _('Your Tower license does not allow that.')
 
 
-@memoize(cache_key='_validated_license_data')
 def _get_validated_license_data():
     return get_licenser().validate()
 
@@ -32,7 +30,7 @@ def _get_validated_license_data():
 def _on_setting_changed(sender, **kwargs):
     # Clear cached result above when license changes.
     if kwargs.get('setting', None) == 'LICENSE':
-        cache.delete('_validated_license_data')
+        memoize_delete('feature_enabled')
 
 
 def get_license(show_key=False):
@@ -52,6 +50,7 @@ def get_licensed_features():
     return features
 
 
+@memoize(track_function=True)
 def feature_enabled(name):
     """Return True if the requested feature is enabled, False otherwise."""
     validated_license_data = _get_validated_license_data()
