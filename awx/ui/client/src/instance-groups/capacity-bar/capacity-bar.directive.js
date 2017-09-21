@@ -19,9 +19,19 @@ export default ['templateUrl',
                 }, true);
 
                 scope.$watch('capacity', function() {
-                    scope.CapacityStyle = {
-                        'flex-grow': scope.capacity * 0.01
-                    };
+                    if (scope.totalCapacity !== 0) {
+                        scope.CapacityStyle = {
+                            'flex-grow': scope.capacity * 0.01
+                        };
+
+                        scope.consumedCapacity = `${scope.capacity}%`;
+                    } else {
+                        scope.CapacityStyle = {
+                            'flex-grow': 1
+                        };
+
+                        scope.consumedCapacity = null;
+                    }
                 }, true);
             }
         };

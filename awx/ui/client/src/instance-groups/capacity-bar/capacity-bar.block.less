@@ -1,8 +1,10 @@
 capacity-bar {
 
     width: 50%;
-    margin-right: 10px;
+    margin-right: 25px;
     min-width: 100px;
+    display: flex;
+    align-items: center;
 
     .CapacityBar {
         background-color: @default-bg;
@@ -13,6 +15,7 @@ capacity-bar {
         width: 100%;
         border-radius: 100vw;
         overflow: hidden;
+        margin-right: 10px;
     }
 
     .CapacityBar-remaining {
@@ -30,5 +33,9 @@ capacity-bar {
         .CapacityBar-remaining {
             background-color: @d7grey;
         }
+    }
+
+    .Capacity-details--percentage {
+        color: @default-data-txt;
     }
 }
