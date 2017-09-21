@@ -97,7 +97,7 @@ class TaskManager():
                                          ~Q(polymorphic_ctype_id=workflow_ctype_id))
         for j in jobs:
             if j.execution_node:
-                execution_nodes.setdefault(j.execution_node, [j]).append(j)
+                execution_nodes.setdefault(j.execution_node, []).append(j)
             else:
                 waiting_jobs.append(j)
         return (execution_nodes, waiting_jobs)
@@ -142,10 +142,10 @@ class TaskManager():
                 active_tasks = set()
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
 
-            # celery worker name is of the form celery@myhost.com
-            queue_name = queue.split('@')
-            queue_name = queue_name[1 if len(queue_name) > 1 else 0]
-            queues[queue_name] = active_tasks
+                # celery worker name is of the form celery@myhost.com
+                queue_name = queue.split('@')
+                queue_name = queue_name[1 if len(queue_name) > 1 else 0]
+                queues[queue_name] = active_tasks
         else:
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return (None, None)
