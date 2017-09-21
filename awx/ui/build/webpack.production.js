@@ -25,13 +25,7 @@ const production = {
             filename: INSTALL_RUNNING_OUTPUT,
             inject: false,
             chunks: CHUNKS,
-            chunksSortMode: (chunk) => {
-                if (chunk.names[0] === 'polyfill' || chunk.names[0] === 'vendor') {
-                    return -1;
-                }
-
-                return 1;
-            }
+            chunksSortMode: chunk => chunk.names[0] === 'vendor' ? -1 : 1
         })
     ]
 };

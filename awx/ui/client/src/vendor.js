@@ -1,3 +1,4 @@
+// Theme
 require('~assets/custom-theme/jquery-ui-1.10.3.custom.min.css');
 require('~assets/ansible-bootstrap.min.css');
 require('~assets/fontcustom/fontcustom.css');
@@ -9,17 +10,28 @@ require('~modules/codemirror/addon/lint/lint.css');
 require('~modules/nvd3/build/nv.d3.css');
 require('~modules/ng-toast/dist/ngToast.min.css');
 
-require('jquery');
+// jQuery + extensions
+global.jQuery = require('jquery');
+global.jquery = global.jQuery;
+global.$ = global.jQuery;
 require('jquery-resize');
 require('jquery-ui');
 require('bootstrap');
 require('bootstrap-datepicker');
-require('moment');
 require('select2');
+
+// Standalone libs
+global._ = require('lodash');
+require('moment');
+require('rrule');
 require('sprintf-js');
 require('reconnectingwebsocket');
+
+// D3 + extensions
 require('d3');
 require('nvd3');
+
+// Angular
 require('angular');
 require('angular-cookies');
 require('angular-sanitize');

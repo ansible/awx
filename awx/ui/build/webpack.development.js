@@ -5,7 +5,7 @@ const _ = require('lodash');
 const base = require('./webpack.base');
 
 const development = {
-    devtool: 'cheap-source-map'
+    devtool: 'source-map'
 };
 
 module.exports = _.merge(base, development);
