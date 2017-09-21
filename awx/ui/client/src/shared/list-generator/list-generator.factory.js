@@ -237,7 +237,7 @@ export default ['$compile', 'Attr', 'Icon',
                     // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
                     html +=`
                         <div class="row" ng-show="${list.name}.length === 0 && !(searchTags | isEmpty)">
-                            <div class="col-lg-12 List-searchNoResults">No records matched your search.</div>
+                            <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
                         </div>
                         `;
                 }
