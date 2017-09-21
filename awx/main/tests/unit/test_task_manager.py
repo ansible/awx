@@ -50,3 +50,20 @@ class TestCleanupInconsistentCeleryTasks():
             tm.cleanup_inconsistent_celery_tasks()
             job.save.assert_called_once()
             logger_mock.error.assert_called_once_with("Task job 2 (failed) DB error in marking failed. Job possibly deleted.")
+
+    @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
+    @mock.patch('awx.main.scheduler.task_manager.inspect')
+    def test_multiple_active_instances_sanity_check(self, inspect_mock, *args):
+        class MockInspector:
+            pass
+
+        mock_inspector = MockInspector()
+        mock_inspector.active = lambda: {
+            'celery@host1': [],
+            'celery@host2': []
+        }
+        inspect_mock.return_value = mock_inspector
+        tm = TaskManager()
+        active_task_queues, queues = tm.get_active_tasks()
+        assert 'host1' in queues
+        assert 'host2' in queues
