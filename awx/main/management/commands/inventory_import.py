@@ -176,6 +176,13 @@ class AnsibleInventoryLoader(object):
     def load(self):
         base_args = self.get_base_args()
         logger.info('Reading Ansible inventory source: %s', self.source)
+
+        # by default, the GCE inventory source caches results on disk for
+        # 5 minutes; disable this behavior
+        # https://github.com/ansible/tower/blob/cfb633e8a643b0190fa07b6204b339a1d336cbb3/awx/plugins/inventory/gce.py#L115
+        if self.source.endswith('gce.py'):
+            base_args += ['--refresh-cache']
+
         data = self.command_to_json(base_args + ['--list'])
 
         # TODO: remove after we run custom scripts through ansible-inventory
