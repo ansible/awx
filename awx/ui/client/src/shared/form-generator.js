@@ -535,11 +535,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.flag) ? field.flag : 'enabled';
                     html += "' ";
                     html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
-                    html += " class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
+                    html += " class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "' translate>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
                     html += "' ";
                     html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
-                    html += " class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
+                    html += " class='ScheduleToggle-switch' ng-click='" + field.ngClick + "' translate>" + i18n._("OFF") + "</button></div></div>";
                 }
                 return html;
             },
@@ -706,9 +706,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
                     html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
-                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
+                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "' translate>ON</div><div ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
+                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "' translate>OFF</div></div></td>";
                 }
 
                 if (field.type === 'alertblock') {
@@ -768,9 +768,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
                         html += `data-placement="top">`;
                         html += `<button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')"
-                                ng-disabled="${field.ngDisabled}">ON</button>
+                                ng-disabled="${field.ngDisabled}" translate>${i18n._("ON")}</button>
                             <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')"
-                                ng-disabled="${field.ngDisabled}">OFF</button>
+                                ng-disabled="${field.ngDisabled}" translate>${i18n._("OFF")}</button>
                         </div>`;
                     }
 
