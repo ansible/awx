@@ -22,7 +22,7 @@ def validate_ldap_dn(value, with_user=False):
     else:
         dn_value = value
     try:
-        ldap.dn.str2dn(dn_value)
+        ldap.dn.str2dn(dn_value.encode('utf-8'))
     except ldap.DECODING_ERROR:
         raise ValidationError(_('Invalid DN: %s') % value)
 
