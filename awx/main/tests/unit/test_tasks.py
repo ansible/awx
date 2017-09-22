@@ -106,6 +106,7 @@ def test_openstack_client_config_generation(mocker):
         'credential.password': 'secrete',
         'credential.project': 'demo-project',
         'credential.domain': 'my-demo-domain',
+        'credential.ca_file': '/var/ca.cert',
         'source_vars_dict': {}
     })
     cloud_config = update.build_private_data(inventory_update)
@@ -121,7 +122,9 @@ def test_openstack_client_config_generation(mocker):
                 'username': 'demo',
                 'domain_name': 'my-demo-domain',
             },
-            'private': True
+            'private': True,
+            'verify': True,
+            'cacert': '/var/ca.cert',
         }
     }
 
@@ -138,6 +141,7 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
         'credential.password': 'secrete',
         'credential.project': 'demo-project',
         'credential.domain': None,
+        'credential.ca_file': '',
         'source_vars_dict': {'private': source}
     })
     cloud_config = update.build_private_data(inventory_update)
@@ -152,7 +156,8 @@ def test_openstack_client_config_generation_with_private_source_vars(mocker, sou
                 'project_name': 'demo-project',
                 'username': 'demo'
             },
-            'private': expected
+            'private': expected,
+            'verify': True
         }
     }
 

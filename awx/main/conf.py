@@ -489,6 +489,17 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'SSL_OPENSTACK_VERIFY_CERT',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable/disable HTTPS certificate verification in openstack inventory updates.'),
+    help_text=_('Flag to control enable/disable of certificate verification during openstack'
+                ' inventory updates. If enabled, Tower will verify certificate sent by'
+                ' openstack backend before establishing connection.'),
+    category=_('SSL'),
+    category_slug='ssl',
+)
 
 
 def logging_validate(serializer, attrs):

@@ -806,6 +806,11 @@ def openstack(cls):
                               'It is only needed for Keystone v3 authentication '
                               'URLs. Refer to Ansible Tower documentation for '
                               'common scenarios.')
+            }, {
+                'id': 'ca_file',
+                'label': 'CA File',
+                'type': 'string',
+                'help_text': ('Absolute file path to the CA file to use (optional)')
             }],
             'required': ['username', 'password', 'host', 'project']
         }

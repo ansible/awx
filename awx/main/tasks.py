@@ -1653,10 +1653,13 @@ class RunInventoryUpdate(BaseTask):
                     'devstack': {
                         'private': private_state,
                         'auth': openstack_auth,
+                        'verify': settings.SSL_OPENSTACK_VERIFY_CERT,
                     },
                 },
                 'cache': cache,
             }
+            if getattr(credential, 'ca_file', False):
+                openstack_data['clouds']['devstack']['cacert'] = credential.ca_file
             ansible_variables = {
                 'use_hostnames': True,
                 'expand_hostvars': False,

@@ -173,3 +173,8 @@ def migrate_job_credentials(apps, schema_editor):
     finally:
         utils.get_current_apps = orig_current_apps
 
+
+def add_openstack_input_ca_file(apps, schema_editor):
+    openstack = CredentialType.objects.get(name='OpenStack', kind='cloud')
+    openstack.inputs = CredentialType.defaults['openstack']().inputs
+    openstack.save()
