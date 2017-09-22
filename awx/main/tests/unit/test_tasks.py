@@ -1319,6 +1319,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['GCE_ZONE'] == expected_gce_zone
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+
+            config = ConfigParser.ConfigParser()
+            config.read(env['GCE_INI_PATH'])
+            assert 'cache' in config.sections()
+            assert config.getint('cache', 'cache_max_age') == 0
+
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
