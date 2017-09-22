@@ -1881,6 +1881,16 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
             env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''
+
+            # by default, the GCE inventory source caches results on disk for
+            # 5 minutes; disable this behavior
+            cp = ConfigParser.ConfigParser()
+            cp.add_section('cache')
+            cp.set('cache', 'cache_max_age', '0')
+            handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+            cp.write(os.fdopen(handle, 'w'))
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            env['GCE_INI_PATH'] = path
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'satellite6':
