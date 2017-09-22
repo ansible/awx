@@ -39,7 +39,7 @@ class SettingsRegistry(object):
             raise ImproperlyConfigured('Setting "{}" is already registered.'.format(setting))
         category = kwargs.setdefault('category', None)
         category_slug = kwargs.setdefault('category_slug', slugify(category or '') or None)
-        if category_slug in {'all', 'changed', 'user-defaults'}:
+        if category_slug in {'all', 'changed'}:
             raise ImproperlyConfigured('"{}" is a reserved category slug.'.format(category_slug))
         if 'field_class' not in kwargs:
             raise ImproperlyConfigured('Setting must provide a field_class keyword argument.')
@@ -81,17 +81,11 @@ class SettingsRegistry(object):
                 feature_required = kwargs.get('feature_required', None)
                 if feature_required and feature_required not in features_enabled:
                     continue
-            if category_slug == 'user':
-                categories['user'] = _('User')
-                categories['user-defaults'] = _('User-Defaults')
-            else:
-                categories[category_slug] = kwargs.get('category', None) or category_slug
+            categories[category_slug] = kwargs.get('category', None) or category_slug
         return categories
 
     def get_registered_settings(self, category_slug=None, read_only=None, features_enabled=None, slugs_to_ignore=set()):
         setting_names = []
-        if category_slug == 'user-defaults':
-            category_slug = 'user'
         if category_slug == 'changed':
             category_slug = 'all'
         for setting, kwargs in self._registry.items():
@@ -120,7 +114,7 @@ class SettingsRegistry(object):
     def is_setting_read_only(self, setting):
         return bool(self._registry.get(setting, {}).get('read_only', False))
 
-    def get_setting_field(self, setting, mixin_class=None, for_user=False, **kwargs):
+    def get_setting_field(self, setting, mixin_class=None, **kwargs):
         from rest_framework.fields import empty
         field_kwargs = {}
         field_kwargs.update(self._registry[setting])
@@ -156,12 +150,7 @@ class SettingsRegistry(object):
         original_field_instance = field_instance
         if field_class != original_field_class:
             original_field_instance = original_field_class(**field_kwargs)
-        if category_slug == 'user' and for_user:
-            try:
-                field_instance.default = original_field_instance.to_representation(getattr(self.settings, setting))
-            except:
-                logger.warning('Unable to retrieve default value for user setting "%s".', setting, exc_info=True)
-        elif not field_instance.read_only or field_instance.default is empty or field_instance.defined_in_file:
+        if not field_instance.read_only or field_instance.default is empty or field_instance.defined_in_file:
             try:
                 field_instance.default = original_field_instance.to_representation(self.settings._awx_conf_settings._get_default(setting))
             except AttributeError:

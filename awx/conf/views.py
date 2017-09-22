@@ -49,17 +49,15 @@ class SettingCategoryList(ListAPIView):
 
     def get_queryset(self):
         setting_categories = []
-        categories = settings_registry.get_registered_categories(features_enabled=get_licensed_features())
+        categories = {}
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
-            pass  # categories = categories
-        elif 'user' in categories:
-            categories = {'user', _('User')}
-        else:
-            categories = {}
+            categories = settings_registry.get_registered_categories(features_enabled=get_licensed_features())
         for category_slug in sorted(categories.keys()):
             if category_slug in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
                 continue
-            url = reverse('api:setting_singleton_detail', kwargs={'category_slug': category_slug}, request=self.request)
+            url = reverse('api:setting_singleton_detail',
+                          kwargs={'category_slug': category_slug},
+                          request=self.request)
             setting_categories.append(SettingCategory(url, category_slug, categories[category_slug]))
         return setting_categories
 
@@ -80,7 +78,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
             category_slugs = all_category_slugs
         else:
-            category_slugs = {'user'}
+            category_slugs = set()
         if self.category_slug not in all_category_slugs:
             raise Http404
         if self.category_slug not in category_slugs:
@@ -90,10 +88,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             category_slug=self.category_slug, read_only=False, features_enabled=get_licensed_features(),
             slugs_to_ignore=VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]
         )
-        if self.category_slug == 'user':
-            return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
-        else:
-            return Setting.objects.filter(key__in=registered_settings, user__isnull=True)
+        return Setting.objects.filter(key__in=registered_settings)
 
     def get_object(self):
         settings_qs = self.get_queryset()
@@ -108,18 +103,16 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             if key in all_settings or self.category_slug == 'changed':
                 continue
             try:
-                field = settings_registry.get_setting_field(key, for_user=bool(self.category_slug == 'user'))
+                field = settings_registry.get_setting_field(key)
                 all_settings[key] = field.get_default()
             except serializers.SkipField:
                 all_settings[key] = None
-        all_settings['user'] = self.request.user if self.category_slug == 'user' else None
         obj = type('Settings', (object,), all_settings)()
         self.check_object_permissions(self.request, obj)
         return obj
 
     def perform_update(self, serializer):
         settings_qs = self.get_queryset()
-        user = self.request.user if self.category_slug == 'user' else None
         settings_change_list = []
         for key, value in serializer.validated_data.items():
             if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
@@ -131,7 +124,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             setattr(serializer.instance, key, value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
-                setting = Setting.objects.create(key=key, user=user, value=value)
+                setting = Setting.objects.create(key=key, value=value)
                 settings_change_list.append(key)
             elif setting.value != value:
                 setting.value = value
