@@ -19,7 +19,7 @@
   when: awx_official
 
 - name: Copy logos for inclusion in sdist
-  synchronize:
+  copy:
     src: "../../awx-logos/awx/ui/client/assets"
     dest: "../awx/ui/client/"
   delegate_to: localhost
