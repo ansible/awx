@@ -13,6 +13,7 @@ export default {
             controller: function($scope, $rootScope, instance) {
                 $scope.instanceName = instance.hostname;
                 $scope.instanceCapacity = instance.consumed_capacity;
+                $scope.instanceTotalCapacity = instance.capacity;
                 $scope.instanceJobsRunning = instance.jobs_running;
                 $rootScope.breadcrumb.instance_name = instance.hostname;
             }

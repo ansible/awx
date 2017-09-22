@@ -10,6 +10,7 @@ export default {
             controller: function($scope, $rootScope, instanceGroup) {
                 $scope.instanceGroupName = instanceGroup.name;
                 $scope.instanceGroupCapacity = instanceGroup.consumed_capacity;
+                $scope.instanceGroupTotalCapacity = instanceGroup.capacity;
                 $scope.instanceGroupJobsRunning = instanceGroup.jobs_running;
                 $rootScope.breadcrumb.instance_group_name = instanceGroup.name;
             }
