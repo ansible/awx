@@ -42,7 +42,7 @@ Once you have a local copy, run commands within the root of the project tree.
 
 You can optionally install the AWX branding assets from the [awx-logos repo](https://github.com/ansible/awx-logos). Prior to installing, please review and agree to the [trademark guidelines](https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md).
 
-To install the assets, clone the awx-logos repo into the root of your local AWX clone. The `awx-logos` directory should be next to the `awx` directory. As you progress through the installation steps, you'll be setting variables in the [inventory](./installer/inventory) file. To include the assets in the build, set `awx_official=true`.
+To install the assets, clone the `awx-logos` repo so that it is next to your `awx` clone. As you progress through the installation steps, you'll be setting variables in the [inventory](./installer/inventory) file. To include the assets in the build, set `awx_official=true`.
 
 ### Prerequisites
 
@@ -271,6 +271,8 @@ In the above example, image build tasks will be delegated to `localhost`, which 
 > You may also want to set additional variables to control how Ansible connects to the host. For more information about this, view [Behavioral Inventory Parameters](http://docs.ansible.com/ansible/latest/intro_inventory.html#id12).
 
 > As mentioned above, in [Prerequisites](#prerequisites-1), the prerequisites are required on the remote host.
+
+> When deploying to a remote host, the playook does not execute tasks with the `become` option. For this reason, make sure the user that connects to the remote host has privileges to run the `docker` command. This typically means that non-privileged users need to be part of the `docker` group.
 
 
 #### Inventory variables
