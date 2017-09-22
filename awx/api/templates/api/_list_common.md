@@ -1,9 +1,9 @@
 The resulting data structure contains:
 
     {
-        "count": 99, 
-        "next": null, 
-        "previous": null, 
+        "count": 99,
+        "next": null,
+        "previous": null,
         "results": [
             ...
         ]
@@ -60,6 +60,10 @@ _Added in AWX 1.4_
 
     ?related__search=findme
 
+Note: If you want to provide more than one search terms, please use multiple
+search fields with the same key, like `?related__search=foo&related__search=bar`,
+All search terms with the same key will be ORed together.
+
 ## Filtering
 
 Any additional query string parameters may be used to filter the list of
@@ -70,7 +74,7 @@ in the specified value should be url-encoded. For example:
     ?field=value%20xyz
 
 Fields may also span relations, only for fields and relationships defined in
-the database: 
+the database:
 
     ?other__field=value
 
