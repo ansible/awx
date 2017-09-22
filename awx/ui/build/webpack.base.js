@@ -27,7 +27,7 @@ const VENDOR_ENTRY = path.join(SOURCE_PATH, 'vendor.js');
 const INDEX_ENTRY = path.join(CLIENT_PATH, 'index.template.ejs');
 const INDEX_OUTPUT = path.join(UI_PATH, 'templates/ui/index.html');
 const THEME_ENTRY = path.join(LIB_PATH, 'theme', 'index.less');
-const OUTPUT = 'js/[name].[hash].js';
+const OUTPUT = 'js/[name].[chunkhash].js';
 const CHUNKS = ['vendor', 'app'];
 
 const VENDOR = VENDOR_ENTRY;
@@ -49,7 +49,7 @@ const base = {
         chunks: false,
         excludeAssets: name => {
             const chunkNames = `(${CHUNKS.join('|')})`;
-            const outputPattern = new RegExp(`${chunkNames}\.[a-f0-9]+\.(js|css)$`, 'i');
+            const outputPattern = new RegExp(`${chunkNames}\.[a-f0-9]+\.(js|css)(|\.map)$`, 'i');
 
             return !outputPattern.test(name);
         }
@@ -88,17 +88,6 @@ const base = {
                 })
             },
             {
-                test: require.resolve('jquery'),
-                loader: 'expose-loader?$!expose-loader?jQuery!expose-loader?jquery'
-            },
-            {
-                loader: 'script-loader',
-                test: [
-                    /node_modules\/javascript-detect-element-resize\/jquery.resize\.js$/,
-                    /node_modules\/d3\/d3\.min.js$/
-                ]
-            },
-            {
                 test: /\.html$/,
                 use: ['ngtemplate-loader', 'html-loader'],
                 include: [
@@ -117,10 +106,9 @@ const base = {
         new webpack.ProvidePlugin({
             jsyaml: 'js-yaml',
             CodeMirror: 'codemirror',
-            jsonlint: 'codemirror.jsonlint',
-            _: 'lodash'
+            jsonlint: 'codemirror.jsonlint'
         }),
-        new ExtractTextPlugin('css/[name].[hash].css'),
+        new ExtractTextPlugin('css/[name].[chunkhash].css'),
         new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH, LANGUAGES_PATH], {
             root: UI_PATH,
             verbose: false
@@ -182,13 +170,7 @@ const base = {
             filename: INDEX_OUTPUT,
             inject: false,
             chunks: CHUNKS,
-            chunksSortMode: (chunk) => {
-                if (chunk.names[0] === 'polyfill' || chunk.names[0] === 'vendor') {
-                    return -1;
-                }
-
-                return 1;
-            }
+            chunksSortMode: chunk => chunk.names[0] === 'vendor' ? -1 : 1
         })
     ],
     resolve: {
@@ -200,12 +182,14 @@ const base = {
             '~theme': THEME_PATH,
             '~modules': NODE_MODULES_PATH,
             '~assets': ASSETS_PATH,
-            d3$: '~modules/d3/d3.min.js',
+            'd3$': '~modules/d3/d3.min.js',
             'codemirror.jsonlint$': '~modules/codemirror/addon/lint/json-lint.js',
+            'jquery': '~modules/jquery/dist/jquery.js',
             'jquery-resize$': '~modules/javascript-detect-element-resize/jquery.resize.js',
-            select2$: '~modules/select2/dist/js/select2.full.min.js',
+            'select2$': '~modules/select2/dist/js/select2.full.min.js',
             'js-yaml$': '~modules/js-yaml/dist/js-yaml.min.js',
             'lr-infinite-scroll$': '~modules/lr-infinite-scroll/lrInfiniteScroll.js',
+            'angular-tz-extensions$': '~modules/angular-tz-extensions/lib/angular-tz-extensions.js',
             'angular-ui-router$': '~modules/angular-ui-router/release/angular-ui-router.js',
             'angular-ui-router-state-events$': '~modules/angular-ui-router/release/stateEvents.js',
             'ng-toast-provider$': '~modules/ng-toast/src/scripts/provider.js',
