@@ -136,8 +136,9 @@ class LDAPBackend(BaseLDAPBackend):
 def _decorate_enterprise_user(user, provider):
     user.set_unusable_password()
     user.save()
-    enterprise_auth = UserEnterpriseAuth(user=user, provider=provider)
-    enterprise_auth.save()
+    enterprise_auth, created = UserEnterpriseAuth.objects.get_or_create(user=user, provider=provider)
+    if created:
+        enterprise_auth.save()
     return enterprise_auth
 
 
