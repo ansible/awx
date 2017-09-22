@@ -26,6 +26,11 @@ const production = {
             inject: false,
             chunks: CHUNKS,
             chunksSortMode: chunk => chunk.names[0] === 'vendor' ? -1 : 1
+        }),
+        new webpack.DefinePlugin({
+           'process.env': {
+               'NODE_ENV': JSON.stringify('production')
+            }
         })
     ]
 };

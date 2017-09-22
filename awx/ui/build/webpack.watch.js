@@ -3,14 +3,21 @@ const path = require('path');
 const _ = require('lodash');
 const webpack = require('webpack');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const TARGET_PORT = _.get(process.env, 'npm_package_config_django_port', 8043);
 const TARGET_HOST = _.get(process.env, 'npm_package_config_django_host', 'https://localhost');
 const TARGET = `https://${TARGET_HOST}:${TARGET_PORT}`;
+const OUTPUT = 'js/[name].js';
 
 const development = require('./webpack.development');
 
 const watch = {
+    cache: true,
+    devtool: 'cheap-source-map',
+    output: {
+        filename: OUTPUT
+    },
     module: {
         rules: [
             {
@@ -22,10 +29,24 @@ const watch = {
         ]
     },
     plugins: [
+        new HardSourceWebpackPlugin({
+            cacheDirectory: 'node_modules/.cache/hard-source/[confighash]',
+            recordsPath: 'node_modules/.cache/hard-source/[confighash]/records.json',
+            configHash: config => {
+                return require('node-object-hash')({ sort: false }).hash(config);
+            },
+            environmentHash: {
+                root: process.cwd(),
+                directories: ['node_modules'],
+                files: ['package.json']
+            }
+        }),
         new HtmlWebpackHarddiskPlugin(),
         new webpack.HotModuleReplacementPlugin()
     ],
     devServer: {
+        hot: true,
+        inline: true,
         contentBase: path.resolve(__dirname, '..', 'static'),
         stats: 'minimal',
         publicPath: '/static/',
@@ -35,7 +56,8 @@ const watch = {
             '/': {
                 target: TARGET,
                 secure: false,
-                ws: false
+                ws: false,
+                bypass: req => req.originalUrl.includes('hot-update.json')
             },
             '/websocket': {
                 target: TARGET,
@@ -50,4 +72,3 @@ watch.module.rules = development.module.rules.concat(watch.module.rules);
 watch.plugins = development.plugins.concat(watch.plugins);
 
 module.exports = _.merge(development, watch);
-

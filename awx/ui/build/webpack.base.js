@@ -27,7 +27,7 @@ const VENDOR_ENTRY = path.join(SOURCE_PATH, 'vendor.js');
 const INDEX_ENTRY = path.join(CLIENT_PATH, 'index.template.ejs');
 const INDEX_OUTPUT = path.join(UI_PATH, 'templates/ui/index.html');
 const THEME_ENTRY = path.join(LIB_PATH, 'theme', 'index.less');
-const OUTPUT = 'js/[name].[hash].js';
+const OUTPUT = 'js/[name].[chunkhash].js';
 const CHUNKS = ['vendor', 'app'];
 
 const VENDOR = VENDOR_ENTRY;
@@ -108,7 +108,7 @@ const base = {
             CodeMirror: 'codemirror',
             jsonlint: 'codemirror.jsonlint'
         }),
-        new ExtractTextPlugin('css/[name].[hash].css'),
+        new ExtractTextPlugin('css/[name].[chunkhash].css'),
         new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH, LANGUAGES_PATH], {
             root: UI_PATH,
             verbose: false
