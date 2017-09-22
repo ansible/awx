@@ -822,6 +822,16 @@ OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 
 # ---------------------
+# ----- oVirt4 -----
+# ---------------------
+OVIRT4_ENABLED_VAR = 'status'
+OVIRT4_ENABLED_VALUE = 'up'
+OVIRT4_GROUP_FILTER = r'^.+$'
+OVIRT4_HOST_FILTER = r'^.+$'
+OVIRT4_EXCLUDE_EMPTY_GROUPS = True
+OVIRT4_INSTANCE_ID_VAR = 'id'
+
+# ---------------------
 # ----- Foreman -----
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'

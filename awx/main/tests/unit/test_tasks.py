@@ -689,6 +689,41 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
+    def test_ovirt4_credentials(self, ca_file):
+        ovirt4 = CredentialType.defaults['ovirt4']()
+        inputs = {
+            'host': 'some-ovirt-host.example.org',
+            'username': 'bob',
+            'password': 'some-pass',
+        }
+        if ca_file:
+            inputs['ca_file'] = ca_file
+        credential = Credential(
+            pk=1,
+            credential_type=ovirt4,
+            inputs=inputs
+        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            config = ConfigParser.ConfigParser()
+            config.read(env['OVIRT_INI_PATH'])
+            assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
+            assert config.get('ovirt', 'ovirt_username') == 'bob'
+            assert config.get('ovirt', 'ovirt_password') == 'some-pass'
+            if ca_file:
+                assert config.get('ovirt', 'ovirt_ca_file') == ca_file
+            else:
+                with pytest.raises(ConfigParser.NoOptionError):
+                    config.get('ovirt', 'ovirt_ca_file')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
     def test_net_credentials(self):
         net = CredentialType.defaults['net']()
         credential = Credential(

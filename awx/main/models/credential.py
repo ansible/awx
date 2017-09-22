@@ -59,6 +59,7 @@ class V1Credential(object):
         ('gce', 'Google Compute Engine'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
+        ('ovirt4', 'oVirt4'),
         ('insights', 'Insights'),
     ]
     FIELDS = {
@@ -998,5 +999,50 @@ def insights(cls):
                 "scm_username": "{{username}}",
                 "scm_password": "{{password}}",
             },
+        },
+    )
+
+
+@CredentialType.default
+def ovirt4(cls):
+    return cls(
+        kind='cloud',
+        name='oVirt4',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'Host (Authentication URL)',
+                'type': 'string',
+                'help_text': ('The host to authenticate with.')
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'ca_file',
+                'label': 'CA File',
+                'type': 'string',
+                'help_text': ('Absolute file path to the CA file to use (optional)')
+            }],
+            'required': ['host', 'username', 'password'],
+        },
+        injectors={
+            'file': {
+                'template': '\n'.join([
+                    '[ovirt]',
+                    'ovirt_url={{host}}',
+                    'ovirt_username={{username}}',
+                    'ovirt_password={{password}}',
+                    '{% if ca_file %}ovirt_ca_file={{ca_file}}{% endif %}'])
+            },
+            'env': {
+                'OVIRT_INI_PATH': '{{tower.filename}}'
+            }
         },
     )
