@@ -236,7 +236,9 @@ class AuthToken(BaseModel):
         valid_n_tokens_qs = self.user.auth_tokens.filter(
             expires__gt=now,
             reason='',
-        ).order_by('-created')[0:settings.AUTH_TOKEN_PER_USER]
+        ).order_by('-created')
+        if settings.AUTH_TOKEN_PER_USER != -1:
+            valid_n_tokens_qs = valid_n_tokens_qs[0:settings.AUTH_TOKEN_PER_USER]
         valid_n_tokens = valid_n_tokens_qs.values_list('key', flat=True)
 
         return bool(self.key in valid_n_tokens)
