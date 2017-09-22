@@ -25,7 +25,7 @@
     "jshint": "grunt jshint:source --no-color",
     "test:ci": "npm run test -- --single-run --reporter junit,dots --browsers=PhantomJS",
     "e2e": "./client/test/e2e/runner.js --config ./client/test/e2e/nightwatch.conf.js",
-    "component-test": "karma start client/test/karma.conf.js",
+    "component-test": "karma start client/test/unit/karma.conf.js --auto-watch --no-single-run",
     "lint": "eslint -c .eslintrc.js .",
     "dev": "webpack --config build/webpack.development.js --progress",
     "watch": "webpack-dev-server --config build/webpack.watch.js --progress",
