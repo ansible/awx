@@ -46,7 +46,11 @@ function ComponentsStrings (BaseString) {
     ns.truncate = {
         DEFAULT: t.s('Copy full revision to clipboard.'),
         COPIED: t.s('Copied to clipboard.')
-    }
+    };
+
+    ns.capacityBar = {
+        IS_OFFLINE: t.s('Unavailable to run jobs.')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

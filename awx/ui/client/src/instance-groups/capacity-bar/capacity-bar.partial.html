@@ -1,5 +1,10 @@
 <div class="CapacityBar"
-    ng-class="{'CapacityBar--offline': isOffline}">
+    ng-class="{'CapacityBar--offline': isOffline}"
+    aw-tool-tip="{{ offlineTip }}"
+    data-tip-watch="offlineTip"
+    data-placement="top"
+    data-trigger="hover"
+    data-container="body">
         <div class="CapacityBar-remaining" ng-style="CapacityStyle"></div>
         <div class="CapacityBar-consumed"></div>
 </div>

@@ -1,5 +1,5 @@
-export default ['templateUrl',
-    function (templateUrl) {
+export default ['templateUrl', 'ComponentsStrings',
+    function (templateUrl, strings) {
         return {
             scope: {
                 capacity: '=',
@@ -13,8 +13,10 @@ export default ['templateUrl',
                 scope.$watch('totalCapacity', function(val) {
                     if (val === 0) {
                         scope.isOffline = true;
+                        scope.offlineTip = strings.get(`capacityBar.IS_OFFLINE`);
                     } else {
                         scope.isOffline = false;
+                        scope.offlineTip = null;
                     }
                 }, true);
 
