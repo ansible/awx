@@ -123,9 +123,11 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 #### PostgreSQL
 
-AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a container. In this scenario, the database is ephemeral, and all data persisted to it will be lost when the container stops running.
+AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a pod. The database is configured for persistence and will create a persistent volume claim named `postgresql`. By default it will claim 5GB from the available persistent volume pool. This can be tuned by setting a variable in the inventory file or on the command line during the `ansible-playbook` run.
 
-If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information.
+    ansible-playbook ... -e pg_volume_capacity=n
+
+If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
 
 ### Start the build
 

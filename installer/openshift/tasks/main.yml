@@ -67,7 +67,7 @@
   delegate_to: localhost
 
 - name: Deploy and Activate Postgres
-  shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('1')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
+  shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
   when: (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
   register: openshift_pg_activate
 
