@@ -45,7 +45,13 @@ export default
             },
 
             getToken: function () {
-                return ($rootScope.token) ? $rootScope.token : $cookies.get('token');
+                if ($rootScope.token) {
+                    return $rootScope.token;
+                }
+
+                let token = $cookies.get('token');
+
+                return token ? token.replace(/"/g, '') : undefined;
             },
 
             retrieveToken: function (username, password) {
@@ -101,7 +107,7 @@ export default
                         $rootScope.lastPath = '/home';
                     }
                     x = Store('sessionTime');
-                    if ($rootScope.current_user) {
+                    if ($rootScope.current_user && x && x[$rootScope.current_user.id]) {
                         x[$rootScope.current_user.id].loggedIn = false;
                     }
                     Store('sessionTime', x);
