@@ -173,6 +173,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                             }],
                             canGetInventory: ['Rest', 'ProcessErrors', 'jobTemplateData',
                                 function(Rest, ProcessErrors, jobTemplateData) {
+                                    if (jobTemplateData.ask_inventory_on_launch){
+                                          return true;
+                                    }
                                     Rest.setUrl(jobTemplateData.related.inventory);
                                     return Rest.get()
                                         .then(() => {
