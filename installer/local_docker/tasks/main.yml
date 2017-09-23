@@ -193,6 +193,8 @@
       RABBITMQ_VHOST: "awx"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
+      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
 
 - name: Activate AWX Task Container
   docker_container:
@@ -217,4 +219,6 @@
       RABBITMQ_VHOST: "awx"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
-      SECRET_KEY: "{{ awx_secret_key }}"
+      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+
