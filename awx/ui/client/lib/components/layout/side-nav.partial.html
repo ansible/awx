@@ -1,6 +1,6 @@
 <div class="at-Layout-side"
-    ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}">
-        <div class="at-Layout-sideNavItem" ng-click="vm.toggleExpansion()"
+    ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}" ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
+        <div class="at-Layout-sideNavItem at-Layout-sideNavToggle" ng-click="vm.toggleExpansion()"
             ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
                 <i class="fa fa-bars"></i>
         </div>

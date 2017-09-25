@@ -1,4 +1,5 @@
 let path = require('path');
+const webpackConfig = require('../../../build/webpack.test.js');
 
 module.exports = config => {
     config.set({
@@ -30,22 +31,7 @@ module.exports = config => {
                 return '/static/partials' + filepath;
             }
         },
-        webpack: {
-            module: {
-                loaders: [
-                    {
-                        test: /\.js$/,
-                        loader: 'babel',
-                        exclude: /node_modules/
-                    },
-                    {
-                        test: /\.json$/,
-                        loader: 'json',
-                        exclude: /node_modules/
-                    },
-                ]
-            }
-        },
+        webpack: webpackConfig,
         webpackMiddleware: {
             noInfo: 'errors-only'
         }
