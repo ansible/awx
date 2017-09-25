@@ -286,7 +286,7 @@ register(
     label=_('LDAP Group Type'),
     help_text=_('The group type may need to be changed based on the type of the '
                 'LDAP server.  Values are listed at: '
-                'http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups'),
+                'https://django-auth-ldap.readthedocs.io/en/stable/groups.html#types-of-groups'),
     category=_('LDAP'),
     category_slug='ldap',
     feature_required='ldap',
