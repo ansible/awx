@@ -16,7 +16,6 @@ export default
                     protocol,
                     url;
 
-                console.log("UPDATED");
                 if($location.protocol() === 'http'){
                     protocol = 'ws';
                 }
@@ -28,15 +27,13 @@ export default
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
 
                     $log.debug('Socket connecting to: ' + url);
-                    console.log("prior to new ReconnectingWebSocket..., self.socket is: " + self.socket);
                     self.socket = new ReconnectingWebSocket(url, null, {
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10                    });
 
                     self.socket.onopen = function () {
-                        $log.debug("Websocket connection opened." + self.socket.readyState);
-                        // socketPromise.resolve();
-                        // console.log('promise resolved, and readyState: '+ self.socket.readyState);
+                        $log.debug("Websocket connection opened. Socket readyState: " + self.socket.readyState);
+                        socketPromise.resolve();
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -78,11 +75,6 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
-                if(_.has(data, "accept") && data.accept === true){
-                    console.log('handshake message received from server. readyState: '+ this.readyState, data);
-                    socketPromise.resolve();
-                    return;
-                }
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
                     // summary complete message b/c status is missing.
@@ -124,7 +116,6 @@ export default
                 if(this.socket){
                     this.socket.close();
                     delete this.socket;
-                    console.log("Socket deleted: "+this.socket);
                 }
             },
             subscribe: function(state){
@@ -132,11 +123,8 @@ export default
                 // listen for specific messages. A subscription object could
                 // look like {"groups":{"jobs": ["status_changed", "summary"]}.
                 // This is used by all socket-enabled $states
-                let self = this;
-                socketPromise.promise.then(function(){
-                    self.emit(JSON.stringify(state.data.socket));
-                    self.setLast(state);
-                });
+                this.emit(JSON.stringify(state.data.socket));
+                this.setLast(state);
             },
             unsubscribe: function(state){
                 // Unsubscribing tells the API that the user is no longer on
@@ -196,12 +184,10 @@ export default
                 // Function used for sending objects to the API over the
                 // websocket.
                 var self = this;
-                $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
-                    console.log("socket readyState at emit: " + self.socket.readyState);
                     if(self.socket.readyState === 0){
+                        $log.debug('Unable to send message, waiting 500ms to resend. Socket readyState: ' + self.socket.readyState);
                         setTimeout(function(){
-                            console.log('inside timeout: ' + self.socket.readyState);
                             self.subscribe(self.getLast());
                         }, 500);
                     }
@@ -214,6 +200,7 @@ export default
                                 }
                             });
                         });
+                        $log.debug('Sent to Websocket Server: ' + data);
                     }
                 });
             },
