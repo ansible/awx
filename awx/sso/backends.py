@@ -266,16 +266,12 @@ class SAMLAuth(BaseSAMLAuth):
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to authenticate, license does not support SAML authentication")
             return None
-        created = False
-        try:
-            user = User.objects.get(username=kwargs.get('username', ''))
-            if user and not user.is_in_enterprise_category('saml'):
-                return None
-        except User.DoesNotExist:
-            created = True
         user = super(SAMLAuth, self).authenticate(*args, **kwargs)
-        if user and created:
+        # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
+        if getattr(user, 'is_new', False):
             _decorate_enterprise_user(user, 'saml')
+        elif user and not user.is_in_enterprise_category('saml'):
+            return None
         return user
 
     def get_user(self, user_id):
