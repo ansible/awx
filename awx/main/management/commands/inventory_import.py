@@ -503,6 +503,12 @@ class Command(NoArgsCommand):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for group_pk in groups_qs.filter(name__in=group_names).values_list('pk', flat=True):
                 del_group_pks.discard(group_pk)
+        if self.inventory_source.deprecated_group_id in del_group_pks:  # TODO: remove in 3.3
+            logger.warning(
+                'Group "%s" from v1 API is not deleted by overwrite',
+                self.inventory_source.deprecated_group.name
+            )
+            del_group_pks.discard(self.inventory_source.deprecated_group_id)
         # Now delete all remaining groups in batches.
         all_del_pks = sorted(list(del_group_pks))
         for offset in xrange(0, len(all_del_pks), self._batch_size):
@@ -531,6 +537,12 @@ class Command(NoArgsCommand):
         group_host_count = 0
         db_groups = self.inventory_source.groups
         for db_group in db_groups.all():
+            if self.inventory_source.deprecated_group_id == db_group.id:  # TODO: remove in 3.3
+                logger.info(
+                    'Group "%s" from v1 API child group/host connections preserved',
+                    db_group.name
+                )
+                continue
             # Delete child group relationships not present in imported data.
             db_children = db_group.children
             db_children_name_pk_map = dict(db_children.values_list('name', 'pk'))
