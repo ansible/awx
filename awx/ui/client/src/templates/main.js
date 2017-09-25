@@ -150,47 +150,57 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                             });
                                         });
                             }],
-                            canGetProject: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                            projectGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData',
                                 function(Rest, ProcessErrors, jobTemplateData) {
-                                    Rest.setUrl(jobTemplateData.related.project);
-                                    return Rest.get()
-                                        .then(() => {
-                                            return true;
-                                        })
-                                        .catch(({data, status}) => {
-                                            if (status === 403) {
-                                                /* User doesn't have read access to the project, no problem. */
-                                            } else {
-                                                ProcessErrors(null, data, status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get project. GET returned ' +
-                                                        'status: ' + status
-                                                });
-                                            }
-
-                                            return false;
-                                    });
+                                    if(jobTemplateData.related.project) {
+                                        Rest.setUrl(jobTemplateData.related.project);
+                                        return Rest.get()
+                                            .then(() => {
+                                                return false;
+                                            })
+                                            .catch(({data, status}) => {
+                                                if (status !== 403) {
+                                                    ProcessErrors(null, data, status, null, {
+                                                        hdr: 'Error!',
+                                                        msg: 'Failed to get project. GET returned ' +
+                                                            'status: ' + status
+                                                    });
+                                                    return false;
+                                                }
+                                                else {
+                                                    return true;
+                                                }
+                                        });
+                                    }
+                                    else {
+                                        return false;
+                                    }
                             }],
-                            canGetInventory: ['Rest', 'ProcessErrors', 'jobTemplateData',
+                            inventoryGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData',
                                 function(Rest, ProcessErrors, jobTemplateData) {
-                                    Rest.setUrl(jobTemplateData.related.inventory);
-                                    return Rest.get()
-                                        .then(() => {
-                                            return true;
-                                        })
-                                        .catch(({data, status}) => {
-                                            if (status === 403) {
-                                                /* User doesn't have read access to the project, no problem. */
-                                            } else {
-                                                ProcessErrors(null, data, status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get project. GET returned ' +
-                                                        'status: ' + status
-                                                });
-                                            }
-
-                                            return false;
-                                    });
+                                    if(jobTemplateData.related.inventory) {
+                                        Rest.setUrl(jobTemplateData.related.inventory);
+                                        return Rest.get()
+                                            .then(() => {
+                                                return false;
+                                            })
+                                            .catch(({data, status}) => {
+                                                if (status !== 403) {
+                                                    ProcessErrors(null, data, status, null, {
+                                                        hdr: 'Error!',
+                                                        msg: 'Failed to get project. GET returned ' +
+                                                            'status: ' + status
+                                                    });
+                                                    return false;
+                                                }
+                                                else {
+                                                    return true;
+                                                }
+                                        });
+                                    }
+                                    else {
+                                        return false;
+                                    }
                             }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
                                 function($stateParams, Rest, GetBasePath, ProcessErrors){
