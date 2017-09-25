@@ -185,10 +185,20 @@ class AnsibleInventoryLoader(object):
             data.setdefault('_meta', {})
             data['_meta'].setdefault('hostvars', {})
             logger.warning('Re-calling script for hostvars individually.')
-            for group_name, group_dict in data.iteritems():
+            for group_name, group_data in data.iteritems():
                 if group_name == '_meta':
                     continue
-                for hostname in group_dict.get('hosts', []):
+
+                if isinstance(group_data, dict):
+                    group_host_list = group_data.get('hosts', [])
+                elif isinstance(group_data, list):
+                    group_host_list = group_data
+                else:
+                    logger.warning('Group data for "%s" is not a dict or list',
+                                   group_name)
+                    group_host_list = []
+
+                for hostname in group_host_list:
                     logger.debug('Obtaining hostvars for %s' % hostname.encode('utf-8'))
                     hostdata = self.command_to_json(
                         base_args + ['--host', hostname.encode("utf-8")]
@@ -196,7 +206,7 @@ class AnsibleInventoryLoader(object):
                     if isinstance(hostdata, dict):
                         data['_meta']['hostvars'][hostname] = hostdata
                     else:
-                        self.logger.warning(
+                        logger.warning(
                             'Expected dict of vars for host "%s" when '
                             'calling with `--host`, got %s instead',
                             k, str(type(data))
