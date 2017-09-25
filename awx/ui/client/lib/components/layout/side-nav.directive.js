@@ -11,7 +11,7 @@ function atSideNavLink (scope, element, attrs, ctrl) {
 }
 
 function AtSideNavController ($scope, $window) {
-    let vm = this || {};
+    const vm = this || {};
     const breakpoint = 700;
 
     vm.isExpanded = false;
