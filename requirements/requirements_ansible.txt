@@ -44,7 +44,7 @@ decorator==4.0.11         # via shade
 deprecation==1.0.1        # via openstacksdk
 #docutils==0.12            # via botocore
 dogpile.cache==0.6.3      # via python-ironicclient, shade
-enum34==1.1.6             # via cryptography, msrest
+enum34==1.1.6             # via cryptography, msrest, ovirt-engine-sdk-python
 funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
 futures==3.1.1            # via azure-storage, s3transfer, shade
@@ -78,6 +78,7 @@ oslo.config==4.6.0        # via python-keystoneclient
 oslo.i18n==3.15.3         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
 oslo.serialization==2.18.0  # via python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
 oslo.utils==3.26.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
+ovirt-engine-sdk-python==4.1.6
 packaging==16.8           # via setuptools
 pbr==3.1.1                # via cliff, debtcollector, keystoneauth1, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, requestsexceptions, shade, stevedore
 positional==1.1.1         # via keystoneauth1, python-keystoneclient
@@ -114,7 +115,7 @@ s3transfer==0.1.10        # via boto3
 secretstorage==2.3.1
 shade==1.20.0
 simplejson==3.11.1        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
-six==1.10.0               # via cliff, cmd2, cryptography, debtcollector, keystoneauth1, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, packaging, pyopenssl, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, pywinrm, setuptools, shade, stevedore, warlock
+six==1.10.0               # via cliff, cmd2, cryptography, debtcollector, keystoneauth1, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, ovirt-engine-sdk-python, packaging, pyopenssl, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, pywinrm, setuptools, shade, stevedore, warlock
 stevedore==1.23.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
 suds==0.4                 # via psphere
 tabulate==0.7.7           # via azure-cli-core

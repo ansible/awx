@@ -17,6 +17,7 @@ backports.ssl-match-hostname==3.5.0.1
 kombu==3.0.37
 boto==2.46.1
 boto3==1.4.4
+ovirt-engine-sdk-python==4.1.6
 python-memcached==1.58
 psphere==0.5.2
 psutil==5.2.2
