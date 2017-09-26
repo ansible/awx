@@ -16,14 +16,14 @@
   delegate_to: localhost
   register: logosdir
   failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
-  when: awx_official
+  when: awx_official|default(false)|bool
 
 - name: Copy logos for inclusion in sdist
   copy:
     src: "../../awx-logos/awx/ui/client/assets"
     dest: "../awx/ui/client/"
   delegate_to: localhost
-  when: awx_official
+  when: awx_official|default(false)|bool
 
 - name: Set sdist file name
   set_fact:
@@ -59,7 +59,7 @@
     tag: "{{ awx_version }}"
     force: true
   delegate_to: localhost
-  when: use_container_for_build|bool
+  when: use_container_for_build|default(true)|bool
 
 - name: Build AWX distribution using container
   docker_container:
@@ -74,14 +74,14 @@
     volumes:
       - ../:/awx:Z
   delegate_to: localhost
-  when: use_container_for_build|bool
+  when: use_container_for_build|default(true)|bool
 
 - name: Build AWX distribution locally
   shell: make sdist
   args:
     chdir: ..
   delegate_to: localhost
-  when: not use_container_for_build|bool
+  when: not use_container_for_build|default(true)|bool
 
 - name: Set docker build base path
   set_fact:
