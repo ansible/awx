@@ -33,7 +33,7 @@ from celery.signals import celeryd_init, worker_process_init, worker_shutdown
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, OperationalError
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -451,12 +451,12 @@ def delete_inventory(self, inventory_id, user_id):
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
             logger.debug('Deleted inventory %s as user %s.' % (inventory_id, user_id))
-        except OperationalError:
-            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
-            self.retry(countdown=10)
         except Inventory.DoesNotExist:
             logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
+        except DatabaseError:
+            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
+            self.retry(countdown=10)
 
 
 def with_path_cleanup(f):
