@@ -21,50 +21,69 @@
 - name: Mark Openshift User as Admin
   shell: "oc adm policy add-role-to-user admin {{ openshift_user }} -n {{ awx_openshift_project }}"
 
-- name: Get docker registry password from oc if needed
+- name: Manage AWX Container Images
   block:
-    - name: Set docker registry password
-      shell: oc whoami -t
-      register: docker_registry_password_shell
-    - name: Set docker registry password
+    - name: Get docker registry password from oc if needed
+      block:
+        - name: Set docker registry password
+          shell: oc whoami -t
+          register: docker_registry_password_shell
+        - name: Set docker registry password
+          set_fact:
+            docker_registry_password: "{{ docker_registry_password_shell.stdout }}"
+      when: docker_registry_password is not defined
+
+    - name: Authenticate with Docker registry
+      docker_login:
+        registry: "{{ docker_registry }}"
+        username: "{{ docker_registry_username }}"
+        password: "{{ docker_registry_password }}"
+        reauthorize: yes
+      when: docker_registry is defined and docker_registry_password is defined
+      delegate_to: localhost
+
+    - name: Wait for Openshift
+      pause:
+        seconds: 30
+
+    - name: Tag and push web image to registry
+      docker_image:
+        name: "{{ awx_web_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+        tag: "{{ awx_version }}"
+        push: yes
+      when: docker_registry is defined
+      delegate_to: localhost
+
+    - name: Wait for openshift
+      pause:
+        seconds: 10
+
+    - name: Tag and push task image to registry
+      docker_image:
+        name: "{{ awx_task_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+        tag: "{{ awx_version }}"
+        push: yes
+      when: docker_registry is defined
+      delegate_to: localhost
+
+    - name: Set full web image path
       set_fact:
-        docker_registry_password: "{{ docker_registry_password_shell.stdout }}"
-  when: docker_registry_password is not defined
+        awx_web_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}"
+      when: awx_web_openshift_image is not defined
 
-- name: Authenticate with Docker registry
-  docker_login:
-    registry: "{{ docker_registry }}"
-    username: "{{ docker_registry_username }}"
-    password: "{{ docker_registry_password }}"
-    reauthorize: yes
-  when: docker_registry is defined and docker_registry_password is defined
-  delegate_to: localhost
+    - name: Set full task image path
+      set_fact:
+        awx_task_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}"
+      when: awx_task_openshift_image is not defined
+  when: dockerhub_base is not defined
 
-- name: Wait for Openshift
-  pause:
-    seconds: 30
-
-- name: Tag and push web image to registry
-  docker_image:
-    name: "{{ awx_web_image }}"
-    repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-    tag: "{{ awx_version }}"
-    push: yes
-  when: docker_registry is defined
-  delegate_to: localhost
-
-- name: Wait for openshift
-  pause:
-    seconds: 10
-
-- name: Tag and push task image to registry
-  docker_image:
-    name: "{{ awx_task_image }}"
-    repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
-    tag: "{{ awx_version }}"
-    push: yes
-  when: docker_registry is defined
-  delegate_to: localhost
+- name: Set DockerHub Image Paths
+  set_fact:
+    awx_web_openshift_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
+    awx_task_openshift_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
+  when: dockerhub_base is defined
 
 - name: Deploy and Activate Postgres
   shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
@@ -75,16 +94,6 @@
   pause:
     seconds: 15
   when: openshift_pg_activate|changed
-
-- name: Set full web image path
-  set_fact:
-    awx_web_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}"
-  when: awx_web_openshift_image is not defined
-
-- name: Set full task image path
-  set_fact:
-    awx_task_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}"
-  when: awx_task_openshift_image is not defined
 
 - name: Set openshift base path
   set_fact:
