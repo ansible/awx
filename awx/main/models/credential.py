@@ -3,6 +3,7 @@
 from collections import OrderedDict
 import functools
 import json
+import logging
 import operator
 import os
 import stat
@@ -34,6 +35,8 @@ from awx.main.models.rbac import (
 from awx.main.utils import encrypt_field
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential']
+
+logger = logging.getLogger('awx.main.models.credential')
 
 
 class V1Credential(object):
@@ -468,6 +471,11 @@ class CredentialType(CommonModelNameNotUnique):
         for default in cls.defaults.values():
             default_ = default()
             if persisted:
+                if CredentialType.objects.filter(name=default_.name, kind=default_.kind).count():
+                    continue
+                logger.debug(_(
+                    "adding %s credential type" % default_.name
+                ))
                 default_.save()
 
     @classmethod
