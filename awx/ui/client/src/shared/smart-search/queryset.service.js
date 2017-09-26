@@ -93,7 +93,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                     else if(params.relatedSearchTerm) {
                         if(params.singleSearchParam) {
-                            paramString += keySplit[0] + '__search';
+                            paramString += keySplit[0];
                         }
                         else {
                             paramString += keySplit[0] + '__search_DEFAULT';
