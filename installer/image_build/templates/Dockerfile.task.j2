@@ -1,4 +1,13 @@
 FROM {{ awx_web_image }}:{{ awx_version }}
+{% if http_proxy is defined %}
+ENV http_proxy={{ http_proxy }}
+{% endif %}
+{% if https_proxy is defined %}
+ENV https_proxy={{ https_proxy }}
+{% endif %}
+{% if no_proxy is defined %}
+ENV no_proxy={{ no_proxy }}
+{% endif %}
 USER 0
 RUN sudo yum -y remove nginx
 USER 1000
