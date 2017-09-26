@@ -63,6 +63,9 @@ class Instance(models.Model):
             grace_period = settings.AWX_ISOLATED_PERIODIC_CHECK * 2
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
+    def is_controller(self):
+        return Instance.objects.filter(rampart_groups__controller__instances=self).exists()
+
 
 class InstanceGroup(models.Model):
     """A model representing a Queue/Group of AWX Instances."""

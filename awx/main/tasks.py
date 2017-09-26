@@ -29,7 +29,7 @@ except:
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_process_init, worker_shutdown
+from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready
 
 # Django
 from django.conf import settings
@@ -59,6 +59,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model)
 from awx.main.utils.reload import restart_local_services, stop_local_services
+from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
@@ -147,6 +148,36 @@ def handle_setting_changes(self, setting_keys):
         if key.startswith('LOG_AGGREGATOR_'):
             restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
             break
+
+
+@task(bind=True, queue='tower_broadcast_all', base=LogErrorsTask)
+def handle_ha_toplogy_changes(self):
+    instance = Instance.objects.me()
+    logger.debug("Reconfigure celeryd queues task on host {}".format(self.request.hostname))
+    (instance, removed_queues, added_queues) = register_celery_worker_queues(self.app, self.request.hostname)
+    logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
+                .format(instance.hostname, removed_queues, added_queues))
+    updated_routes = update_celery_worker_routes(instance, settings)
+    logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
+                .format(instance.hostname, updated_routes, self.app.conf.CELERY_ROUTES))
+
+
+@worker_ready.connect
+def handle_ha_toplogy_worker_ready(sender, **kwargs):
+    logger.debug("Configure celeryd queues task on host {}".format(sender.hostname))
+    (instance, removed_queues, added_queues) = register_celery_worker_queues(sender.app, sender.hostname)
+    logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
+                .format(instance.hostname, removed_queues, added_queues))
+
+
+@celeryd_init.connect
+def handle_update_celery_routes(sender=None, conf=None, **kwargs):
+    logger.debug("Registering celery routes for {}".format(sender))
+    instance = Instance.objects.me()
+    added_routes = update_celery_worker_routes(instance, conf)
+    logger.info("Workers on tower node '{}' added routes {} all routes are now {}"
+                .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
+
 
 
 @task(queue='tower', base=LogErrorsTask)
