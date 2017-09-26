@@ -13,3 +13,4 @@ import '../../lib/models';
 // Import tests
 import './panel-body.spec';
 import './layout.spec';
+import './side-nav.spec';
