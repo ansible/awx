@@ -10,7 +10,13 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#team_form input.Form-textInput',
+            '#team_form .Form-lookupButton'
+        ]
+    }
 });
 
 module.exports = {

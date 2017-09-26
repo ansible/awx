@@ -79,13 +79,48 @@ const generatorOptions = {
 };
 
 
-const createFormSection = function({ selector, labels, strategy }) {
+const checkAllFieldsDisabled = function() {
+    let client = this.client.api;
+
+    // let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
+    //     '.at-Input',
+    //     '.Form-textInput',
+    //     'select.Form-dropDown',
+    //     'input[type="checkbox"]',
+    //     'input[type="radio"]',
+    //     '.ui-spinner-input',
+    //     '.Form-textArea',
+    //     '.ScheduleToggle-switch',
+    //     '.Form-lookupButton'
+    // ];
+
+    let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
+        '.at-Input'
+    ];
+
+    selectors.forEach(function(selector) {
+        client.elements('css selector', selector, inputs => {
+            inputs.value.map(o => o.ELEMENT).forEach(id => {
+                client.elementIdAttribute(id, 'disabled', ({ value }) => {
+                    client.assert.equal(value, 'true');
+                });
+            });
+        });
+    });
+};
+
+
+const createFormSection = function({ selector, labels, strategy, props }) {
     let options = generatorOptions[strategy || 'default'];
 
     let formSection = {
         selector,
         sections: {},
-        elements: {}
+        elements: {},
+        commands: [{
+            checkAllFieldsDisabled: checkAllFieldsDisabled
+        }],
+        props: props
     };
 
     for (let key in labels) {
@@ -95,7 +130,7 @@ const createFormSection = function({ selector, labels, strategy }) {
 
         formSection.elements[key] = inputElement;
         formSection.sections[key] = inputContainer;
-    };
+    }
 
     return formSection;
 };

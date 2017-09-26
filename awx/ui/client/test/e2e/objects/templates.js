@@ -10,7 +10,17 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#job_template_form .Form-textInput',
+            '#job_template_form select.Form-dropDown',
+            '#job_template_form .Form-textArea',
+            '#job_template_form input[type="checkbox"]',
+            '#job_template_form .ui-spinner-input',
+            '#job_template_form .ScheduleToggle-switch'
+        ]
+    }
 });
 
 module.exports = {

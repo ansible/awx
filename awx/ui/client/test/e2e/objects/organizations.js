@@ -8,7 +8,14 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#organization_form input.Form-textInput',
+            '#organization_form .Form-lookupButton',
+            '#organization_form #InstanceGroups'
+        ]
+    }
 });
 
 module.exports = {

@@ -82,18 +82,6 @@ let credentials,
     inventories,
     teams;
 
-function checkDisabledElements(client, selectors) {
-    selectors.forEach(function(selector) {
-        client.elements('css selector', selector, inputs => {
-            inputs.value.map(o => o.ELEMENT).forEach(id => {
-                client.elementIdAttribute(id, 'disabled', ({ value }) => {
-                    client.assert.equal(value, 'true');
-                });
-            });
-        });
-    });
-}
-
 function navigateAndWaitForSpinner(client, url) {
     client
         .url(url)
@@ -104,15 +92,17 @@ function navigateAndWaitForSpinner(client, url) {
 module.exports = {
     before: function (client, done) {
 
-        credentials = client.useCss().page.credentials();
-        inventoryScripts = client.useCss().page.inventoryScripts();
-        templates = client.useCss().page.templates();
-        notificationTemplates = client.useCss().page.notificationTemplates();
-        organizations = client.useCss().page.organizations();
-        projects = client.useCss().page.projects();
-        users = client.useCss().page.users();
-        inventories = client.useCss().page.inventories();
-        teams = client.useCss().page.teams();
+        client.useCss();
+
+        credentials = client.page.credentials();
+        inventoryScripts = client.page.inventoryScripts();
+        templates = client.page.templates();
+        notificationTemplates = client.page.notificationTemplates();
+        organizations = client.page.organizations();
+        projects = client.page.projects();
+        users = client.page.users();
+        inventories = client.page.inventories();
+        teams = client.page.teams();
 
         client.login();
         client.waitForAngular();
@@ -233,32 +223,8 @@ module.exports = {
                     };
                 });
         },
-        ({ adminJobTemplate,
-           adminAWSCredential,
-           adminMachineCredential,
-           adminOrganization,
-           adminInventoryScript,
-           adminNotificationTemplate,
-           adminProject,
-           adminSmartInventory,
-           adminStandardInventory,
-           adminTeam,
-           adminUser,
-           auditor }) => {
-            store.created = {
-                adminJobTemplate,
-                adminAWSCredential,
-                adminMachineCredential,
-                adminOrganization,
-                adminInventoryScript,
-                adminNotificationTemplate,
-                adminProject,
-                adminSmartInventory,
-                adminStandardInventory,
-                adminTeam,
-                adminUser,
-                auditor
-           };
+        created => {
+           store.created = created;
 
            client.login(store.auditor.username, store.auditor.password);
 
@@ -271,7 +237,7 @@ module.exports = {
         credentials.section.edit
             .expect.element('@title').text.contain(store.created.adminAWSCredential.name);
 
-        checkDisabledElements(client, ['.at-Input']);
+        credentials.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify an auditor\'s inventory scripts inputs are read-only': function (client) {
         navigateAndWaitForSpinner(client, `${inventoryScripts.url()}/${store.created.adminInventoryScript.id}/`);
@@ -279,57 +245,31 @@ module.exports = {
         inventoryScripts.section.edit
             .expect.element('@title').text.contain(store.created.adminInventoryScript.name);
 
-        let selectors = [
-            '#inventory_script_form .Form-textInput',
-            '#inventory_script_form .Form-textArea',
-            '#inventory_script_form .Form-lookupButton'
-        ];
-
-        checkDisabledElements(client, selectors);
+        inventoryScripts.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on inventory scripts form': function () {
         inventoryScripts.expect.element('@save').to.not.be.visible;
     },
-    'verify an auditor\'s job template inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${templates.url()}/job_template/${store.created.adminJobTemplate.id}/`);
-
-        templates.section.editJobTemplate
-            .expect.element('@title').text.contain(store.created.adminJobTemplate.name);
-
-        client.pause(2000);
-
-        let selectors = [
-            '#job_template_form .Form-textInput',
-            '#job_template_form select.Form-dropDown',
-            '#job_template_form .Form-textArea',
-            '#job_template_form input[type="checkbox"]',
-            '#job_template_form .ui-spinner-input',
-            '#job_template_form .ScheduleToggle-switch'
-        ];
-
-        checkDisabledElements(client, selectors);
-    },
-    'verify save button hidden from auditor on job templates form': function () {
-        templates.expect.element('@save').to.not.be.visible;
-    },
+    // TODO: re-enable these tests when JT edit has been re-factored to reliably show/remove the loading spinner
+    // only one time.  Without this, we can't tell when all the requisite data is available.
+    // 'verify an auditor\'s job template inputs are read-only': function (client) {
+    //     navigateAndWaitForSpinner(client, `${templates.url()}/job_template/${store.created.adminJobTemplate.id}/`);
+    //
+    //     templates.section.editJobTemplate
+    //         .expect.element('@title').text.contain(store.created.adminJobTemplate.name);
+    //
+    //     templates.section.edit.section.details.checkAllFieldsDisabled();
+    // },
+    // 'verify save button hidden from auditor on job templates form': function () {
+    //     templates.expect.element('@save').to.not.be.visible;
+    // },
     'verify an auditor\'s notification templates inputs are read-only': function (client) {
         navigateAndWaitForSpinner(client, `${notificationTemplates.url()}/${store.created.adminNotificationTemplate.id}/`);
 
         notificationTemplates.section.edit
             .expect.element('@title').text.contain(store.created.adminNotificationTemplate.name);
 
-        let selectors = [
-            '#notification_template_form .Form-textInput',
-            '#notification_template_form select.Form-dropDown',
-            '#notification_template_form input[type="checkbox"]',
-            '#notification_template_form input[type="radio"]',
-            '#notification_template_form .ui-spinner-input',
-            '#notification_template_form .Form-textArea',
-            '#notification_template_form .ScheduleToggle-switch',
-            '#notification_template_form .Form-lookupButton'
-        ];
-
-        checkDisabledElements(client, selectors);
+        notificationTemplates.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on notification templates page': function () {
         notificationTemplates.expect.element('@save').to.not.be.visible;
@@ -340,13 +280,7 @@ module.exports = {
         organizations.section.edit
             .expect.element('@title').text.contain(store.created.adminOrganization.name);
 
-        let selectors = [
-            '#organization_form input.Form-textInput',
-            '#organization_form .Form-lookupButton',
-            '#organization_form #InstanceGroups'
-        ];
-
-        checkDisabledElements(client, selectors);
+        organizations.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on organizations form': function () {
         organizations.expect.element('@save').to.not.be.visible;
@@ -357,14 +291,7 @@ module.exports = {
         inventories.section.editSmartInventory
             .expect.element('@title').text.contain(store.created.adminSmartInventory.name);
 
-        let selectors = [
-            '#smartinventory_form input.Form-textInput',
-            '#smartinventory_form textarea.Form-textArea',
-            '#smartinventory_form .Form-lookupButton',
-            '#smartinventory_form #InstanceGroups'
-        ];
-
-        checkDisabledElements(client, selectors);
+        inventories.section.editSmartInventory.section.smartInvDetails.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on smart inventories form': function () {
         inventories.expect.element('@save').to.not.be.visible;
@@ -375,14 +302,7 @@ module.exports = {
         projects.section.edit
             .expect.element('@title').text.contain(store.created.adminProject.name);
 
-        let selectors = [
-            '#project_form .Form-textInput',
-            '#project_form select.Form-dropDown',
-            '#project_form input[type="checkbox"]',
-            '#project_form .ui-spinner-input',
-        ];
-
-        checkDisabledElements(client, selectors);
+        projects.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on projects form': function () {
         projects.expect.element('@save').to.not.be.visible;
@@ -393,16 +313,7 @@ module.exports = {
         inventories.section.editStandardInventory
             .expect.element('@title').text.contain(store.created.adminStandardInventory.name);
 
-        let selectors = [
-            '#inventory_form .Form-textInput',
-            '#inventory_form select.Form-dropDown',
-            '#inventory_form .Form-textArea',
-            '#inventory_form input[type="checkbox"]',
-            '#inventory_form .ui-spinner-input',
-            '#inventory_form .ScheduleToggle-switch'
-        ];
-
-        checkDisabledElements(client, selectors);
+        inventories.section.editStandardInventory.section.standardInvDetails.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on standard inventory form': function () {
         inventories.expect.element('@save').to.not.be.visible;
@@ -413,12 +324,7 @@ module.exports = {
         teams.section.edit
             .expect.element('@title').text.contain(store.created.adminTeam.name);
 
-        let selectors = [
-            '#team_form input.Form-textInput',
-            '#team_form .Form-lookupButton'
-        ];
-
-        checkDisabledElements(client, selectors);
+        teams.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on teams form': function () {
         teams.expect.element('@save').to.not.be.visible;
@@ -429,12 +335,7 @@ module.exports = {
         users.section.edit
             .expect.element('@title').text.contain(store.created.adminUser.username);
 
-        let selectors = [
-            '#user_form .Form-textInput',
-            '#user_form select.Form-dropDown'
-        ];
-
-        checkDisabledElements(client, selectors);
+        users.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify save button hidden from auditor on users form': function (client) {
         users.expect.element('@save').to.not.be.visible;

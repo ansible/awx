@@ -10,7 +10,14 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#inventory_script_form .Form-textInput',
+            '#inventory_script_form .Form-textArea',
+            '#inventory_script_form .Form-lookupButton'
+        ]
+    }
 });
 
 module.exports = {

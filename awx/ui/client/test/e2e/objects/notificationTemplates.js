@@ -10,7 +10,19 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#notification_template_form .Form-textInput',
+            '#notification_template_form select.Form-dropDown',
+            '#notification_template_form input[type="checkbox"]',
+            '#notification_template_form input[type="radio"]',
+            '#notification_template_form .ui-spinner-input',
+            '#notification_template_form .Form-textArea',
+            '#notification_template_form .ScheduleToggle-switch',
+            '#notification_template_form .Form-lookupButton'
+        ]
+    }
 });
 
 module.exports = {

@@ -10,7 +10,13 @@ import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
 const details = createFormSection({
-    selector: 'form'
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#user_form .Form-textInput',
+            '#user_form select.Form-dropDown'
+        ]
+    }
 });
 
 module.exports = {

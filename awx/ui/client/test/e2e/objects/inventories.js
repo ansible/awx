@@ -9,8 +9,30 @@ import pagination from './sections/pagination.js';
 import permissions from './sections/permissions.js';
 import search from './sections/search.js';
 
-const details = createFormSection({
-    selector: 'form'
+const standardInvDetails = createFormSection({
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#inventory_form .Form-textInput',
+            '#inventory_form select.Form-dropDown',
+            '#inventory_form .Form-textArea',
+            '#inventory_form input[type="checkbox"]',
+            '#inventory_form .ui-spinner-input',
+            '#inventory_form .ScheduleToggle-switch'
+        ]
+    }
+});
+
+const smartInvDetails = createFormSection({
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#smartinventory_form input.Form-textInput',
+            '#smartinventory_form textarea.Form-textArea',
+            '#smartinventory_form .Form-lookupButton',
+            '#smartinventory_form #InstanceGroups'
+        ]
+    }
 });
 
 module.exports = {
@@ -25,7 +47,7 @@ module.exports = {
         addStandardInventory: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details
+                standardInvDetails
             },
             elements: {
                 title: 'div[class^="Form-title"]'
@@ -34,7 +56,7 @@ module.exports = {
         editStandardInventory: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details,
+                standardInvDetails,
                 permissions
             },
             elements: {
@@ -44,7 +66,7 @@ module.exports = {
         addSmartInventory: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details
+                smartInvDetails
             },
             elements: {
                 title: 'div[class^="Form-title"]'
@@ -53,7 +75,7 @@ module.exports = {
         editSmartInventory: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details,
+                smartInvDetails,
                 permissions
             },
             elements: {
