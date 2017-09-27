@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 import logging
 import uuid
+import json
 from sets import Set
 
 # Django
@@ -37,6 +38,7 @@ from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main import tasks as awx_tasks
+from awx.main.utils import decrypt_field
 
 # Celery
 from celery.task.control import inspect
@@ -390,17 +392,22 @@ class TaskManager():
                         dependencies.append(latest_project_update)
 
             # Inventory created 2 seconds behind job
-            if task.launch_type != 'callback':
-                for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
-                    if not inventory_source.update_on_launch:
-                        continue
-                    latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-                    if self.should_update_inventory_source(task, latest_inventory_update):
-                        inventory_task = self.create_inventory_update(task, inventory_source)
-                        dependencies.append(inventory_task)
-                    else:
-                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-                            dependencies.append(latest_inventory_update)
+            try:
+                start_args = json.loads(decrypt_field(task, field_name="start_args"))
+            except ValueError:
+                start_args = dict()
+            for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
+                if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
+                    continue
+                if not inventory_source.update_on_launch:
+                    continue
+                latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                if self.should_update_inventory_source(task, latest_inventory_update):
+                    inventory_task = self.create_inventory_update(task, inventory_source)
+                    dependencies.append(inventory_task)
+                else:
+                    if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+                        dependencies.append(latest_inventory_update)
 
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)

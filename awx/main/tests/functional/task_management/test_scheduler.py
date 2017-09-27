@@ -1,11 +1,13 @@
 import pytest
 import mock
+import json
 from datetime import timedelta, datetime
 
 from django.core.cache import cache
 from django.utils.timezone import now as tz_now
 
 from awx.main.scheduler import TaskManager
+from awx.main.utils import encrypt_field
 from awx.main.models import (
     Job,
     Instance,
@@ -154,7 +156,36 @@ def test_single_job_dependencies_inventory_update_launch(default_instance_group,
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, default_instance_group, [])
-        
+
+
+@pytest.mark.django_db
+def test_job_dependency_with_already_updated(default_instance_group, job_template_factory, mocker, inventory_source_factory):
+    objects = job_template_factory('jt', organization='org1', project='proj',
+                                   inventory='inv', credential='cred',
+                                   jobs=["job_should_start"])
+    j = objects.jobs["job_should_start"]
+    j.status = 'pending'
+    j.save()
+    i = objects.inventory
+    ii = inventory_source_factory("ec2")
+    ii.source = "ec2"
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 0
+    ii.save()
+    i.inventory_sources.add(ii)
+    j.start_args = json.dumps(dict(inventory_sources_already_updated=[ii.id]))
+    j.save()
+    j.start_args = encrypt_field(j, field_name="start_args")
+    j.save()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        tm = TaskManager()
+        with mock.patch.object(TaskManager, "create_inventory_update", wraps=tm.create_inventory_update) as mock_iu:
+            tm.schedule()
+            mock_iu.assert_not_called()
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(j, default_instance_group, [])
+
 
 @pytest.mark.django_db
 def test_shared_dependencies_launch(default_instance_group, job_template_factory, mocker, inventory_source_factory):
