@@ -1,76 +1,23 @@
-import uuid from 'uuid';
+import { all } from '../api.js';
+
+import {
+    getAdminAWSCredential,
+    getAdminMachineCredential,
+    getAuditor,
+    getInventory,
+    getInventoryScript,
+    getNotificationTemplate,
+    getOrCreate,
+    getOrganization,
+    getSmartInventory,
+    getTeam,
+    getUpdatedProject,
+    getUser
+} from '../fixtures.js';
 
 
-let testID = uuid().substr(0,8);
 
-
-let store = {
-    auditor: {
-        username: `auditor-${testID}`,
-        first_name: 'auditor',
-        last_name: 'last',
-        email: 'null@ansible.com',
-        is_superuser: false,
-        is_system_auditor: true,
-        password: 'password'
-    },
-    adminJobTemplate: {
-        name: `adminJobTemplate-${testID}`,
-        description: `adminJobTemplate-description-${testID}`,
-        project: 103,
-        playbook: 'check.yml'
-    },
-    adminAWSCredential: {
-        name: `adminAWSCredential-${testID}`,
-        description: `adminAWSCredential-description-${testID}`,
-        inputs: {
-            username: 'username',
-            password: 'password',
-            security_token: 'AAAAAAAAAAAAAAAAAAAAAAAAAA'
-        }
-    },
-    adminMachineCredential: {
-        name: `adminMachineCredential-${testID}`
-    },
-    adminOrganization: {
-        name: `adminOrganization-${testID}`,
-    },
-    adminInventoryScript: {
-        name: `adminInventoryScript-${testID}`,
-        script: '#!/usr/bin/env python'
-    },
-    adminNotificationTemplate: {
-        name: `adminNotificationTemplate-${testID}`,
-        notification_configuration: {channels: ["awx-e2e"], token: "foobar"},
-        notification_type: "slack"
-    },
-    adminProject: {
-        name: `adminProject-${testID}`,
-        scm_type: "git",
-        scm_url: "https://github.com/ansible/tower-example.git"
-    },
-    adminSmartInventory: {
-        name: `adminSmartInventory-${testID}`,
-        host_filter: 'search=localhost',
-        kind: 'smart'
-    },
-    adminStandardInventory: {
-        name: `adminStandardInventory-${testID}`
-    },
-    adminTeam: {
-        name: `adminTeam-${testID}`
-    },
-    adminUser: {
-        username: `adminUser-${testID}`,
-        first_name: `adminUser-${testID}-first`,
-        last_name: `adminUser-${testID}-last`,
-        email: `null-${testID}@ansible.com`,
-        is_superuser: false,
-        is_system_auditor: false,
-        password: 'password'
-    },
-    created: {}
-};
+let data = {};
 
 let credentials,
     inventoryScripts,
@@ -82,6 +29,7 @@ let credentials,
     inventories,
     teams;
 
+
 function navigateAndWaitForSpinner(client, url) {
     client
         .url(url)
@@ -89,161 +37,54 @@ function navigateAndWaitForSpinner(client, url) {
         .waitForElementNotVisible('div.spinny');
 }
 
+
 module.exports = {
     before: function (client, done) {
+        all([
+            getAuditor().then(obj => data.auditor = obj),
+            getOrganization().then(obj => data.organization = obj),
+            getInventory().then(obj => data.inventory = obj),
+            getInventoryScript().then(obj => data.inventoryScript = obj),
+            getAdminAWSCredential().then(obj => data.adminAWSCredential = obj),
+            getAdminMachineCredential().then(obj => data.adminMachineCredential = obj),
+            getSmartInventory().then(obj => data.smartInventory = obj),
+            getTeam().then(obj => data.team = obj),
+            getUser().then(obj => data.user = obj),
+            getNotificationTemplate().then(obj => data.notificationTemplate = obj),
+            getUpdatedProject().then(obj => data.project = obj)
+        ])
+        .then(() => {
+            client.useCss();
 
-        client.useCss();
+            credentials = client.page.credentials();
+            inventoryScripts = client.page.inventoryScripts();
+            templates = client.page.templates();
+            notificationTemplates = client.page.notificationTemplates();
+            organizations = client.page.organizations();
+            projects = client.page.projects();
+            users = client.page.users();
+            inventories = client.page.inventories();
+            teams = client.page.teams();
 
-        credentials = client.page.credentials();
-        inventoryScripts = client.page.inventoryScripts();
-        templates = client.page.templates();
-        notificationTemplates = client.page.notificationTemplates();
-        organizations = client.page.organizations();
-        projects = client.page.projects();
-        users = client.page.users();
-        inventories = client.page.inventories();
-        teams = client.page.teams();
-
-        client.login();
-        client.waitForAngular();
-
-        client.inject([store, '$http'], (store, $http) => {
-
-            let { adminJobTemplate,
-                  adminAWSCredential,
-                  adminMachineCredential,
-                  adminOrganization,
-                  adminInventoryScript,
-                  adminNotificationTemplate,
-                  adminProject,
-                  adminSmartInventory,
-                  adminStandardInventory,
-                  adminTeam,
-                  adminUser,
-                  auditor } = store;
-
-            return $http.get('/api/v2/me')
-                .then(({ data }) => {
-                    let resource = 'Amazon%20Web%20Services+cloud';
-                    adminAWSCredential.user = data.results[0].id;
-
-                    return $http.get(`/api/v2/credential_types/${resource}`);
-                })
-                .then(({ data }) => {
-                    adminAWSCredential.credential_type = data.id;
-
-                    return $http.post('/api/v2/credentials/', adminAWSCredential);
-                })
-                .then(({ data }) => {
-                    adminAWSCredential = data;
-
-                    return $http.post('/api/v2/organizations/', adminOrganization);
-                })
-                .then(({ data }) => {
-                    adminOrganization = data;
-                    adminInventoryScript.organization = data.id;
-                    adminNotificationTemplate.organization = data.id;
-                    adminProject.organization = data.id;
-                    adminSmartInventory.organization = data.id;
-                    adminStandardInventory.organization = data.id;
-                    adminTeam.organization = data.id;
-                    adminUser.organization = data.id;
-                    adminMachineCredential.organization = data.id;
-
-                    return $http.post('/api/v2/teams/', adminTeam);
-                })
-                .then(({ data }) => {
-                    adminTeam = data;
-
-                    return $http.get('/api/v2/credential_types/Machine+ssh');
-                })
-                .then(({ data }) => {
-                    adminMachineCredential.credential_type = data.id;
-
-                    return $http.post('/api/v2/credentials/', adminMachineCredential);
-                })
-                .then(({ data }) => {
-                    adminMachineCredential = data;
-                    adminJobTemplate.credential = data.id;
-
-                    return $http.post('/api/v2/users/', adminUser);
-                })
-                .then(({ data }) => {
-                    adminUser = data;
-
-                    return $http.post('/api/v2/notification_templates/', adminNotificationTemplate);
-                })
-                .then(({ data }) => {
-                    adminNotificationTemplate = data;
-
-                    return $http.post('/api/v2/inventory_scripts/', adminInventoryScript);
-                })
-                .then(({ data }) => {
-                    adminInventoryScript = data;
-
-                    return $http.post('/api/v2/projects/', adminProject);
-                })
-                .then(({ data }) => {
-                    adminProject = data;
-
-                    return $http.post('/api/v2/inventories/', adminSmartInventory);
-                })
-                .then(({ data }) => {
-                    adminSmartInventory = data;
-
-                    return $http.post('/api/v2/inventories/', adminStandardInventory);
-                })
-                .then(({ data }) => {
-                    adminStandardInventory = data;
-                    adminJobTemplate.inventory = data.id;
-
-                    return $http.post('/api/v2/job_templates/', adminJobTemplate);
-                })
-                .then(({ data }) => {
-                    adminJobTemplate = data;
-
-                    return $http.post('/api/v2/users/', auditor);
-                })
-                .then(({ data }) => {
-                    auditor = data;
-
-                    return {
-                        adminJobTemplate,
-                        adminAWSCredential,
-                        adminMachineCredential,
-                        adminOrganization,
-                        adminInventoryScript,
-                        adminNotificationTemplate,
-                        adminProject,
-                        adminSmartInventory,
-                        adminStandardInventory,
-                        adminTeam,
-                        adminUser,
-                        auditor
-                    };
-                });
-        },
-        created => {
-           store.created = created;
-
-           client.login(store.auditor.username, store.auditor.password);
+            client.login(data.auditor.username, data.auditor.password);
+            client.waitForAngular();
 
             done();
         });
     },
     'verify an auditor\'s credentials inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${credentials.url()}/${store.created.adminAWSCredential.id}/`);
+        navigateAndWaitForSpinner(client, `${credentials.url()}/${data.adminAWSCredential.id}/`);
 
         credentials.section.edit
-            .expect.element('@title').text.contain(store.created.adminAWSCredential.name);
-
+            .expect.element('@title').text.contain(data.adminAWSCredential.name);
+        
         credentials.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify an auditor\'s inventory scripts inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${inventoryScripts.url()}/${store.created.adminInventoryScript.id}/`);
+        navigateAndWaitForSpinner(client, `${inventoryScripts.url()}/${data.inventoryScript.id}/`);
 
         inventoryScripts.section.edit
-            .expect.element('@title').text.contain(store.created.adminInventoryScript.name);
+            .expect.element('@title').text.contain(data.inventoryScript.name);
 
         inventoryScripts.section.edit.section.details.checkAllFieldsDisabled();
     },
@@ -253,10 +94,10 @@ module.exports = {
     // TODO: re-enable these tests when JT edit has been re-factored to reliably show/remove the loading spinner
     // only one time.  Without this, we can't tell when all the requisite data is available.
     // 'verify an auditor\'s job template inputs are read-only': function (client) {
-    //     navigateAndWaitForSpinner(client, `${templates.url()}/job_template/${store.created.adminJobTemplate.id}/`);
+    //     navigateAndWaitForSpinner(client, `${templates.url()}/job_template/${data.jobTemplate.id}/`);
     //
     //     templates.section.editJobTemplate
-    //         .expect.element('@title').text.contain(store.created.adminJobTemplate.name);
+    //         .expect.element('@title').text.contain(data.jobTemplate.name);
     //
     //     templates.section.edit.section.details.checkAllFieldsDisabled();
     // },
@@ -264,10 +105,10 @@ module.exports = {
     //     templates.expect.element('@save').to.not.be.visible;
     // },
     'verify an auditor\'s notification templates inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${notificationTemplates.url()}/${store.created.adminNotificationTemplate.id}/`);
+        navigateAndWaitForSpinner(client, `${notificationTemplates.url()}/${data.notificationTemplate.id}/`);
 
         notificationTemplates.section.edit
-            .expect.element('@title').text.contain(store.created.adminNotificationTemplate.name);
+            .expect.element('@title').text.contain(data.notificationTemplate.name);
 
         notificationTemplates.section.edit.section.details.checkAllFieldsDisabled();
     },
@@ -275,10 +116,10 @@ module.exports = {
         notificationTemplates.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s organizations inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${organizations.url()}/${store.created.adminOrganization.id}/`);
+        navigateAndWaitForSpinner(client, `${organizations.url()}/${data.organization.id}/`);
 
         organizations.section.edit
-            .expect.element('@title').text.contain(store.created.adminOrganization.name);
+            .expect.element('@title').text.contain(data.organization.name);
 
         organizations.section.edit.section.details.checkAllFieldsDisabled();
     },
@@ -286,10 +127,10 @@ module.exports = {
         organizations.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s smart inventory inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${inventories.url()}/smart/${store.created.adminSmartInventory.id}/`);
+        navigateAndWaitForSpinner(client, `${inventories.url()}/smart/${data.smartInventory.id}/`);
 
         inventories.section.editSmartInventory
-            .expect.element('@title').text.contain(store.created.adminSmartInventory.name);
+            .expect.element('@title').text.contain(data.smartInventory.name);
 
         inventories.section.editSmartInventory.section.smartInvDetails.checkAllFieldsDisabled();
     },
@@ -297,10 +138,10 @@ module.exports = {
         inventories.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s project inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${projects.url()}/${store.created.adminProject.id}/`);
+        navigateAndWaitForSpinner(client, `${projects.url()}/${data.project.id}/`);
 
         projects.section.edit
-            .expect.element('@title').text.contain(store.created.adminProject.name);
+            .expect.element('@title').text.contain(data.project.name);
 
         projects.section.edit.section.details.checkAllFieldsDisabled();
     },
@@ -308,10 +149,10 @@ module.exports = {
         projects.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s standard inventory inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${inventories.url()}/inventory/${store.created.adminStandardInventory.id}/`);
+        navigateAndWaitForSpinner(client, `${inventories.url()}/inventory/${data.inventory.id}/`);
 
         inventories.section.editStandardInventory
-            .expect.element('@title').text.contain(store.created.adminStandardInventory.name);
+            .expect.element('@title').text.contain(data.inventory.name);
 
         inventories.section.editStandardInventory.section.standardInvDetails.checkAllFieldsDisabled();
     },
@@ -319,10 +160,10 @@ module.exports = {
         inventories.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s teams inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${teams.url()}/${store.created.adminTeam.id}/`);
+        navigateAndWaitForSpinner(client, `${teams.url()}/${data.team.id}/`);
 
         teams.section.edit
-            .expect.element('@title').text.contain(store.created.adminTeam.name);
+            .expect.element('@title').text.contain(data.team.name);
 
         teams.section.edit.section.details.checkAllFieldsDisabled();
     },
@@ -330,10 +171,10 @@ module.exports = {
         teams.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s user inputs are read-only': function (client) {
-        navigateAndWaitForSpinner(client, `${users.url()}/${store.created.adminUser.id}/`);
+        navigateAndWaitForSpinner(client, `${users.url()}/${data.user.id}/`);
 
         users.section.edit
-            .expect.element('@title').text.contain(store.created.adminUser.username);
+            .expect.element('@title').text.contain(data.user.username);
 
         users.section.edit.section.details.checkAllFieldsDisabled();
     },

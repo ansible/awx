@@ -73,26 +73,8 @@ const generateInputSelectors = function(label, containerElements) {
 };
 
 
-const generatorOptions = {
-    default: inputContainerElements,
-    legacy: legacyContainerElements
-};
-
-
 const checkAllFieldsDisabled = function() {
     let client = this.client.api;
-
-    // let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
-    //     '.at-Input',
-    //     '.Form-textInput',
-    //     'select.Form-dropDown',
-    //     'input[type="checkbox"]',
-    //     'input[type="radio"]',
-    //     '.ui-spinner-input',
-    //     '.Form-textArea',
-    //     '.ScheduleToggle-switch',
-    //     '.Form-lookupButton'
-    // ];
 
     let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
         '.at-Input'
@@ -107,6 +89,12 @@ const checkAllFieldsDisabled = function() {
             });
         });
     });
+};
+
+
+const generatorOptions = {
+    default: inputContainerElements,
+    legacy: legacyContainerElements
 };
 
 
