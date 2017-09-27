@@ -390,17 +390,16 @@ class TaskManager():
                         dependencies.append(latest_project_update)
 
             # Inventory created 2 seconds behind job
-            if task.launch_type != 'callback':
-                for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
-                    if not inventory_source.update_on_launch:
-                        continue
-                    latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-                    if self.should_update_inventory_source(task, latest_inventory_update):
-                        inventory_task = self.create_inventory_update(task, inventory_source)
-                        dependencies.append(inventory_task)
-                    else:
-                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-                            dependencies.append(latest_inventory_update)
+            for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
+                if not inventory_source.update_on_launch:
+                    continue
+                latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                if self.should_update_inventory_source(task, latest_inventory_update):
+                    inventory_task = self.create_inventory_update(task, inventory_source)
+                    dependencies.append(inventory_task)
+                else:
+                    if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+                        dependencies.append(latest_inventory_update)
 
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)
