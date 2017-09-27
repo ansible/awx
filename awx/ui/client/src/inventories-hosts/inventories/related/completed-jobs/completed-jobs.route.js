@@ -5,6 +5,7 @@ export default {
     params: {
         completed_job_search: {
             value: {
+                page_size: '20',
                 or__job__inventory:"",
                 or__adhoccommand__inventory:"",
                 or__inventoryupdate__inventory_source__inventory:"",
