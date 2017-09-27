@@ -3,6 +3,8 @@ import AddController from './add-credentials.controller';
 import EditController from './edit-credentials.controller';
 import CredentialsStrings from './credentials.strings';
 
+const MODULE_NAME = 'at.features.credentials';
+
 const addEditTemplate = require('~features/credentials/add-edit-credentials.view.html');
 
 function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
@@ -51,12 +53,8 @@ CredentialsResolve.$inject = [
     'OrganizationModel'
 ];
 
-function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvider) {
-    const stateExtender = $stateExtenderProvider.$get();
-    const legacy = legacyProvider.$get();
-    const strings = stringProvider.$get();
-
-    stateExtender.addState({
+function CredentialsRun ($stateExtender, legacy, strings) {
+    $stateExtender.addState({
         name: 'credentials.add',
         route: '/add',
         ncyBreadcrumb: {
@@ -78,7 +76,7 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvid
         }
     });
 
-    stateExtender.addState({
+    $stateExtender.addState({
         name: 'credentials.edit',
         route: '/:credential_id',
         ncyBreadcrumb: {
@@ -101,25 +99,27 @@ function CredentialsConfig ($stateExtenderProvider, legacyProvider, stringProvid
         }
     });
 
-    stateExtender.addState(legacy.getStateConfiguration('list'));
-    stateExtender.addState(legacy.getStateConfiguration('edit-permissions'));
-    stateExtender.addState(legacy.getStateConfiguration('add-permissions'));
-    stateExtender.addState(legacy.getStateConfiguration('add-organization'));
-    stateExtender.addState(legacy.getStateConfiguration('edit-organization'));
-    stateExtender.addState(legacy.getStateConfiguration('add-credential-type'));
-    stateExtender.addState(legacy.getStateConfiguration('edit-credential-type'));
+    $stateExtender.addState(legacy.getStateConfiguration('list'));
+    $stateExtender.addState(legacy.getStateConfiguration('edit-permissions'));
+    $stateExtender.addState(legacy.getStateConfiguration('add-permissions'));
+    $stateExtender.addState(legacy.getStateConfiguration('add-organization'));
+    $stateExtender.addState(legacy.getStateConfiguration('edit-organization'));
+    $stateExtender.addState(legacy.getStateConfiguration('add-credential-type'));
+    $stateExtender.addState(legacy.getStateConfiguration('edit-credential-type'));
 }
 
-CredentialsConfig.$inject = [
-    '$stateExtenderProvider',
-    'LegacyCredentialsServiceProvider',
-    'CredentialsStringsProvider'
+CredentialsRun.$inject = [
+    '$stateExtender',
+    'LegacyCredentialsService',
+    'CredentialsStrings'
 ];
 
 angular
-    .module('at.features.credentials', [])
-    .config(CredentialsConfig)
+    .module(MODULE_NAME, [])
     .controller('AddController', AddController)
     .controller('EditController', EditController)
     .service('LegacyCredentialsService', LegacyCredentials)
-    .service('CredentialsStrings', CredentialsStrings);
+    .service('CredentialsStrings', CredentialsStrings)
+    .run(CredentialsRun);
+
+export default MODULE_NAME;

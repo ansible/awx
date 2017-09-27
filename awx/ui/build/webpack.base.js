@@ -109,7 +109,7 @@ const base = {
             jsonlint: 'codemirror.jsonlint'
         }),
         new ExtractTextPlugin('css/[name].[chunkhash].css'),
-        new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH, LANGUAGES_PATH], {
+        new CleanWebpackPlugin([STATIC_PATH, COVERAGE_PATH], {
             root: UI_PATH,
             verbose: false
         }),

@@ -2,8 +2,8 @@ const path = require('path');
 
 const _ = require('lodash');
 const webpack = require('webpack');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 
 const TARGET_PORT = _.get(process.env, 'npm_package_config_django_port', 8043);
 const TARGET_HOST = _.get(process.env, 'npm_package_config_django_host', 'https://localhost');
@@ -29,6 +29,7 @@ const watch = {
         ]
     },
     plugins: [
+        new HtmlWebpackHarddiskPlugin(),
         new HardSourceWebpackPlugin({
             cacheDirectory: 'node_modules/.cache/hard-source/[confighash]',
             recordsPath: 'node_modules/.cache/hard-source/[confighash]/records.json',
@@ -41,7 +42,6 @@ const watch = {
                 files: ['package.json']
             }
         }),
-        new HtmlWebpackHarddiskPlugin(),
         new webpack.HotModuleReplacementPlugin()
     ],
     devServer: {

@@ -1,3 +1,5 @@
+import atLibServices from '~services';
+
 import actionGroup from '~components/action/action-group.directive';
 import divider from '~components/utility/divider.directive';
 import form from '~components/form/form.directive';
@@ -28,8 +30,12 @@ import truncate from '~components/truncate/truncate.directive';
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
 
+const MODULE_NAME = 'at.lib.components';
+
 angular
-    .module('at.lib.components', [])
+    .module(MODULE_NAME, [
+        atLibServices
+    ])
     .directive('atActionGroup', actionGroup)
     .directive('atDivider', divider)
     .directive('atForm', form)
@@ -58,3 +64,5 @@ angular
     .directive('atTruncate', truncate)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
+
+export default MODULE_NAME;

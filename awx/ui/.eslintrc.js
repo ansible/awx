@@ -20,7 +20,7 @@ module.exports = {
         node: true
     },
     globals: {
-        angular: true,  
+        angular: true,
         d3: true,
         $: true,
         _: true,
@@ -43,6 +43,7 @@ module.exports = {
         'no-param-reassign': 'off',
         'no-plusplus': 'off',
         'no-underscore-dangle': 'off',
+        'no-use-before-define': 'off',
         'object-curly-newline': 'off',
         'space-before-function-paren': ['error', 'always']
     }

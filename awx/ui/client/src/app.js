@@ -1,7 +1,7 @@
 // Configuration dependencies
 global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
-global.$ENV = {} ;
+global.$ENV = {};
 // ui-router debugging
 if ($ENV['route-debug']){
     let trace = angular.module('ui.router').trace;
@@ -14,7 +14,8 @@ if ($basePath) {
     urlPrefix = `${$basePath}`;
 }
 
-// Modules
+import start from './app.start';
+
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
@@ -46,71 +47,76 @@ import access from './access/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
 
-import '../lib/components';
-import '../lib/models';
-import '../lib/services';
-import '../features';
+import atFeatures from '~features';
+import atLibComponents from '~components';
+import atLibModels from '~models';
+import atLibServices from '~services';
 
-angular.module('awApp', [
-    'I18N',
-    'AngularCodeMirrorModule',
-    'angular-duration-format',
-    'angularMoment',
-    'AngularScheduler',
-    'angular-md5',
-    'dndLists',
-    'ncy-angular-breadcrumb',
-    'ngSanitize',
-    'ngCookies',
-    'ngToast',
-    'gettext',
-    'Timezones',
-    'ui.router',
-    'ui.router.state.events',
-    'lrInfiniteScroll',
+start.bootstrap(() => {
+    angular.bootstrap(document.body, ['awApp']);
+});
 
-    about.name,
-    access.name,
-    license.name,
-    RestServices.name,
-    browserData.name,
-    configuration.name,
-    systemTracking.name,
-    inventoriesHosts.name,
-    inventoryScripts.name,
-    credentials.name,
-    credentialTypes.name,
-    organizations.name,
-    managementJobs.name,
-    breadCrumb.name,
-    home.name,
-    login.name,
-    activityStream.name,
-    workflowResults.name,
-    jobResults.name,
-    jobSubmission.name,
-    notifications.name,
-    standardOut.name,
-    Templates.name,
-    portalMode.name,
-    jobs.name,
-    teams.name,
-    users.name,
-    projects.name,
-    scheduler.name,
-    instanceGroups.name,
+angular
+    .module('awApp', [
+        'I18N',
+        'AngularCodeMirrorModule',
+        'angular-duration-format',
+        'angularMoment',
+        'AngularScheduler',
+        'angular-md5',
+        'dndLists',
+        'ncy-angular-breadcrumb',
+        'ngSanitize',
+        'ngCookies',
+        'ngToast',
+        'gettext',
+        'Timezones',
+        'ui.router',
+        'ui.router.state.events',
+        'lrInfiniteScroll',
 
-    'Utilities',
-    'templates',
-    'PromptDialog',
-    'AWDirectives',
-    'features',
+        about.name,
+        access.name,
+        license.name,
+        RestServices.name,
+        browserData.name,
+        configuration.name,
+        systemTracking.name,
+        inventoriesHosts.name,
+        inventoryScripts.name,
+        credentials.name,
+        credentialTypes.name,
+        organizations.name,
+        managementJobs.name,
+        breadCrumb.name,
+        home.name,
+        login.name,
+        activityStream.name,
+        workflowResults.name,
+        jobResults.name,
+        jobSubmission.name,
+        notifications.name,
+        standardOut.name,
+        Templates.name,
+        portalMode.name,
+        jobs.name,
+        teams.name,
+        users.name,
+        projects.name,
+        scheduler.name,
+        instanceGroups.name,
 
-    'at.lib.components',
-    'at.lib.models',
-    'at.lib.services',
-    'at.features',
-])
+        'Utilities',
+        'templates',
+        'PromptDialog',
+        'AWDirectives',
+        'features',
+
+        atFeatures,
+        atLibComponents,
+        atLibModels,
+        atLibServices
+    ])
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
@@ -171,13 +177,13 @@ angular.module('awApp', [
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings', 'I18NInit',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings, I18NInit) {
-            I18NInit();
+            $filter, SocketService, AppStrings) {
+
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;
