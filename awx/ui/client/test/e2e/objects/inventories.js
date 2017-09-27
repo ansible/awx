@@ -37,7 +37,7 @@ const smartInvDetails = createFormSection({
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/inventories`;
+        return `${this.api.globals.launch_url}/#/inventories`;
     },
     sections: {
         header,

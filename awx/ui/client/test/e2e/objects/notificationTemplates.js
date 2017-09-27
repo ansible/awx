@@ -27,7 +27,7 @@ const details = createFormSection({
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/notification_templates`;
+        return `${this.api.globals.launch_url}/#/notification_templates`;
     },
     sections: {
         header,

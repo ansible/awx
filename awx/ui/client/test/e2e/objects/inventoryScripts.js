@@ -22,7 +22,7 @@ const details = createFormSection({
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/inventory_scripts`;
+        return `${this.api.globals.launch_url}/#/inventory_scripts`;
     },
     sections: {
         header,

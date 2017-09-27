@@ -21,7 +21,7 @@ const details = createFormSection({
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/teams`;
+        return `${this.api.globals.launch_url}/#/teams`;
     },
     sections: {
         header,

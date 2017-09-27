@@ -25,7 +25,7 @@ const details = createFormSection({
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/templates`;
+        return `${this.api.globals.launch_url}/#/templates`;
     },
     sections: {
         header,
