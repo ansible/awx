@@ -4,7 +4,7 @@
   gather_facts: false
   roles:
     - { role: check_vars }
-    - { role: image_build }
+    - { role: image_build, when: "dockerhub_base is not defined" }
     - { role: openshift, when: "openshift_host is defined" }
     - { role: local_docker, when: "openshift_host is not defined" }
 

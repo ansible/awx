@@ -10,6 +10,7 @@ This document provides a guide for installing AWX.
   - [Prerequisites](#prerequisites)
   - [AWX Tunables](#awx-tunables)
   - [Choose a deployment platform](#choose-a-deployment-platform)
+  - [Official vs Building Images](#official-vs-building-images)
 - [OpenShift](#openshift)
   - [Prerequisites](#prerequisites)
     - [Deploying to Minishift](#deploying-to-minishift)
@@ -66,6 +67,27 @@ The [installer](./installer) directory contains an [inventory](./installer/inven
 
 In the sections below, you'll find deployment details and instructions for each platform. To deploy to Docker, view the [Docker section](#docker), and for OpenShift, view the [OpenShift section](#openshift).
 
+### Official vs Building Images
+
+When installing AWX you have the option of building your own images or using the images provided on DockerHub (see [awx_web](https://hub.docker.com/r/ansible/awx_web/) and [awx_task](https://hub.docker.com/r/ansible/awx_task/))
+
+This is controlled by the following variables in the `inventory` file
+
+```
+dockerhub_base=ansible
+dockerhub_version=latest
+```
+
+If these variables are present then all deployments will use these hosted images. If the variables are not present then the images will be built during the install.
+
+*dockerhub_base*
+
+> The base location on DockerHub where the images are hosted (by default this pulls container images named `ansible/awx_web:tag` and `ansible/awx_task:tag`)
+
+*dockerhub_version*
+
+> Multiple versions are provided. `latest` always pulls the most recent. You may also select version numbers at different granularities: 1, 1.0, 1.0.1, 1.0.0.123
+
 ## OpenShift
 
 ### Prerequisites
@@ -111,15 +133,15 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 *docker_registry*
 
-> IP address and port, or URL, for accessing a registry that the OpenShift cluster can access. Defaults to *172.30.1.1:5000*, the internal registry delivered with Minishift.
-
+> IP address and port, or URL, for accessing a registry that the OpenShift cluster can access. Defaults to *172.30.1.1:5000*, the internal registry delivered with Minishift. This is not needed if you are using official hosted images.
+n
 *docker_registry_repository*
 
-> Namespace to use when pushing and pulling images to and from the registry. Generally this will match the project name. It defaults to *awx*.
+> Namespace to use when pushing and pulling images to and from the registry. Generally this will match the project name. It defaults to *awx*. This is not needed if you are using official hosted images.
 
 *docker_registry_username*
 
-> Username of the user that will push images to the registry. Will generally match the *openshift_user* value. Defaults to *developer*.
+> Username of the user that will push images to the registry. Will generally match the *openshift_user* value. Defaults to *developer*. This is not needed if you are using official hosted images.
 
 #### PostgreSQL
 
@@ -135,7 +157,7 @@ To start the build, you will pass two *extra* variables on the command line. The
 
 If you're using the OpenShift internal registry, then you'll pass an access token for the *docker_registry_password* value, rather than a password. The `oc whoami -t` command will generate the required token, as long as you're logged into the cluster via `oc cluster login`.
 
-To start the build and deployment, run the following:
+To start the build and deployment, run the following (docker_registry_password is optional if using official images):
 
 ```bash
 # Start the build and deployment
@@ -266,6 +288,8 @@ awx-server
 
 In the above example, image build tasks will be delegated to `localhost`, which is typically where the clone of the AWX project exists. Built images will be archived, copied to remote host, and imported into the remote Docker image cache. Tasks to start the AWX containers will then execute on the remote host.
 
+If you choose to use the official images then the remote host will be the one to pull those images.
+
 **Note**
 
 > You may also want to set additional variables to control how Ansible connects to the host. For more information about this, view [Behavioral Inventory Parameters](http://docs.ansible.com/ansible/latest/intro_inventory.html#id12).
@@ -304,6 +328,10 @@ If you wish to tag and push built images to a Docker registry, set the following
 
 > Username of the user that will push images to the registry. Defaults to *developer*.
 
+**Note**
+
+> These settings are ignored if using official images
+
 
 #### Proxy settings
 
@@ -337,7 +365,7 @@ $ cd installer
 $ ansible-playbook -i inventory install.yml
 ```
 
-If you're pushing built images to a repository, then use the `-e` option to pass the registry password as follows, replacing *password* with the password of the username assigned to `docker_registry_username`:
+If you're pushing built images to a repository, then use the `-e` option to pass the registry password as follows, replacing *password* with the password of the username assigned to `docker_registry_username` (note that you will also need to remove `dockerhub_base` and `dockerhub_version` from the inventory file):
 
 ```bash
 # Set the working directory to installer
