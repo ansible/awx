@@ -26,7 +26,7 @@ Login.prototype.command = function(username, password) {
         .waitForElementVisible('div.spinny')
         .waitForElementNotVisible('div.spinny');
 
-    // tempoary hack while login issue is resolved
+    // temporary hack while login issue is resolved
     this.api.elements('css selector', '.LoginModal-alert', result => {
         let alertVisible = false;
         result.value.map(i => i.ELEMENT).forEach(id => {

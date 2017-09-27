@@ -229,7 +229,7 @@ const details = _.merge({}, common, {
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/credentials`
+        return `${this.api.globals.launch_url}/#/credentials`
     },
     sections: {
         header,

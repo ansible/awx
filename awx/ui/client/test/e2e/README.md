@@ -17,7 +17,7 @@ docker-compose \
   up --scale chrome=2 --scale firefox=0
 
 # run headlessly with multiple workers on the cluster
-AWX_E2E_URL='https://awx:8043' AWX_E2E_WORKERS=2 npm --prefix awx/ui run e2e
+AWX_E2E_LAUNCH_URL='https://awx:8043' AWX_E2E_WORKERS=2 npm --prefix awx/ui run e2e
 ```
 
 **Note:** Unless overridden in [settings](settings.js), tests will run against `localhost:8043`.

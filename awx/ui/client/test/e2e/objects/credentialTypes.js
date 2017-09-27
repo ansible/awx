@@ -53,7 +53,7 @@ const listPanel = {
 
 module.exports = {
     url() {
-        return `${this.api.globals.awxURL}/#/credential_types`
+        return `${this.api.globals.launch_url}/#/credential_types`
     },
     sections: {
         header,

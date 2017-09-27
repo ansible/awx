@@ -73,19 +73,42 @@ const generateInputSelectors = function(label, containerElements) {
 };
 
 
+const checkAllFieldsDisabled = function() {
+    let client = this.client.api;
+
+    let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
+        '.at-Input'
+    ];
+
+    selectors.forEach(function(selector) {
+        client.elements('css selector', selector, inputs => {
+            inputs.value.map(o => o.ELEMENT).forEach(id => {
+                client.elementIdAttribute(id, 'disabled', ({ value }) => {
+                    client.assert.equal(value, 'true');
+                });
+            });
+        });
+    });
+};
+
+
 const generatorOptions = {
     default: inputContainerElements,
     legacy: legacyContainerElements
 };
 
 
-const createFormSection = function({ selector, labels, strategy }) {
+const createFormSection = function({ selector, labels, strategy, props }) {
     let options = generatorOptions[strategy || 'default'];
 
     let formSection = {
         selector,
         sections: {},
-        elements: {}
+        elements: {},
+        commands: [{
+            checkAllFieldsDisabled: checkAllFieldsDisabled
+        }],
+        props: props
     };
 
     for (let key in labels) {
@@ -95,7 +118,7 @@ const createFormSection = function({ selector, labels, strategy }) {
 
         formSection.elements[key] = inputElement;
         formSection.sections[key] = inputContainer;
-    };
+    }
 
     return formSection;
 };
