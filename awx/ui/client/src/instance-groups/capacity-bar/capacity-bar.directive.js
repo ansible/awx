@@ -22,11 +22,14 @@ export default ['templateUrl', 'ComponentsStrings',
 
                 scope.$watch('capacity', function() {
                     if (scope.totalCapacity !== 0) {
+                        var percentageCapacity = Math
+                            .round(scope.capacity / scope.totalCapacity * 10) / 10 * 100;
+
                         scope.CapacityStyle = {
-                            'flex-grow': scope.capacity / scope.totalCapacity * 0.01
+                            'flex-grow': percentageCapacity * 0.01
                         };
 
-                        scope.consumedCapacity = `${Math.round(scope.capacity / scope.totalCapacity * 10) / 10}%`;
+                        scope.consumedCapacity = `${percentageCapacity}%`;
                     } else {
                         scope.CapacityStyle = {
                             'flex-grow': 1
