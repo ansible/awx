@@ -15,7 +15,7 @@
         hover: true,
         multiSelect: true,
         trackBy: 'nested_group.id',
-        basePath:  '/api/v2/groups/{{$stateParams.group_id}}/children',
+        basePath:  '/api/v2/groups/{{$stateParams.group_id}}/children/',
 
         fields: {
             failed_hosts: {
