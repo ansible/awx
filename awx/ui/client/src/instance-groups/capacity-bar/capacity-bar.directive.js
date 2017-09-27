@@ -23,10 +23,10 @@ export default ['templateUrl', 'ComponentsStrings',
                 scope.$watch('capacity', function() {
                     if (scope.totalCapacity !== 0) {
                         scope.CapacityStyle = {
-                            'flex-grow': scope.capacity * 0.01
+                            'flex-grow': scope.capacity / scope.totalCapacity * 0.01
                         };
 
-                        scope.consumedCapacity = `${scope.capacity}%`;
+                        scope.consumedCapacity = `${Math.round(scope.capacity / scope.totalCapacity * 10) / 10}%`;
                     } else {
                         scope.CapacityStyle = {
                             'flex-grow': 1
