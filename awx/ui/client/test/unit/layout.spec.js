@@ -3,13 +3,14 @@ describe('Components | Layout', () => {
     let $rootScope;
     let element;
     let scope;
+    let i18n;
 
     beforeEach(() => {
         angular.mock.module('gettext');
         angular.mock.module('I18N');
         angular.mock.module('ui.router');
-        angular.mock.module('at.lib.services')
-        angular.mock.module('at.lib.components')
+        angular.mock.module('at.lib.services');
+        angular.mock.module('at.lib.components');
     });
 
     beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {
@@ -125,30 +126,21 @@ describe('Components | Layout', () => {
         });
 
         describe('getString()', () => {
+            it('calls ComponentsStrings get() method', angular.mock.inject((_ComponentsStrings_) => {
+                spyOn(_ComponentsStrings_, 'get');
+                controller.getString('VIEW_DOCS')
+                expect(_ComponentsStrings_.get).toHaveBeenCalled();
+            }));
+
+            it('ComponentsStrings get() method should throw an error if string is not a property name of the layout class', () => {
+                expect(controller.getString.bind(null, 'SUBMISSION_ERROR_TITLE')).toThrow();
+            });
+
             it('should return layout string', () => {
                 let layoutStrings = {
                     CURRENT_USER_LABEL: 'Logged in as',
                     VIEW_DOCS: 'View Documentation',
                     LOGOUT: 'Logout',
-                    DASHBOARD: 'Dashboard',
-                    JOBS: 'Jobs',
-                    SCHEDULES: 'Schedules',
-                    PORTAL_MODE: 'Portal Mode',
-                    PROJECTS: 'Projects',
-                    CREDENTIALS: 'Credentials',
-                    CREDENTIAL_TYPES: 'Credential Types',
-                    INVENTORIES: 'Inventories',
-                    TEMPLATES: 'Templates',
-                    ORGANIZATIONS: 'Organizations',
-                    USERS: 'Users',
-                    TEAMS: 'Teams',
-                    INVENTORY_SCRIPTS: 'Inventory Scripts',
-                    NOTIFICATIONS: 'Notifications',
-                    MANAGEMENT_JOBS: 'Management Jobs',
-                    INSTANCE_GROUPS: 'Instance Groups',
-                    SETTINGS: 'Settings',
-                    FOOTER_ABOUT: 'About',
-                    FOOTER_COPYRIGHT: 'Copyright © 2017 Red Hat, Inc.'
                 };
 
                 _.forEach(layoutStrings, (value, key) => {

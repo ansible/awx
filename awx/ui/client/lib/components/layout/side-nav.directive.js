@@ -5,7 +5,7 @@ let $document;
 function atSideNavLink (scope, element, attrs, ctrl) {
     scope.layoutVm = ctrl;
 
-    $document.on('click', (e) => {
+    $(document).on('click', (e) => {
         if ($(e.target).parents('.at-Layout-side').length === 0) {
             scope.$emit('clickOutsideSideNav');
         }

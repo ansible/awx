@@ -11,8 +11,9 @@ module.exports = config => {
         browsers: ['PhantomJS'],
         reporters: ['progress'],
         files: [
-          './index.js',
-          '../../lib/components/**/*.html'
+            './index.js',
+            '../../../client/src/app.js',
+            '../../lib/components/**/*.html'
         ],
         plugins: [
             'karma-webpack',
@@ -21,8 +22,9 @@ module.exports = config => {
             'karma-ng-html2js-preprocessor'
         ],
         preprocessors: {
-            '../../lib/components/**/*.html': 'ng-html2js',
-            './index.js': 'webpack'
+            './index.js': 'webpack',
+            '../../../client/src/app.js': 'webpack',
+            '../../lib/components/**/*.html': 'ng-html2js'
         },
         ngHtml2JsPreprocessor: {
             moduleName: 'at.test.templates',
