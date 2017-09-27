@@ -381,7 +381,6 @@ class TaskManager():
     def generate_dependencies(self, task):
         dependencies = []
         if type(task) is Job:
-            start_args = json.loads(decrypt_field(task, field_name="start_args"))
             # TODO: Can remove task.project None check after scan-job-default-playbook is removed
             if task.project is not None and task.project.scm_update_on_launch is True:
                 latest_project_update = self.get_latest_project_update(task)
@@ -393,6 +392,10 @@ class TaskManager():
                         dependencies.append(latest_project_update)
 
             # Inventory created 2 seconds behind job
+            try:
+                start_args = json.loads(decrypt_field(task, field_name="start_args"))
+            except ValueError:
+                start_args = dict()
             for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
                 if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
                     continue
