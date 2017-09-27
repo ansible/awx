@@ -9,7 +9,10 @@ import shutil
 # RedBaron
 from redbaron import RedBaron, indent
 
-__all__ = ['comment_assignments']
+# AWX
+from awx.conf.registry import settings_registry
+
+__all__ = ['comment_assignments', 'conf_to_dict']
 
 
 def comment_assignments(patterns, assignment_names, dry_run=True, backup_suffix='.old'):
@@ -101,6 +104,13 @@ def comment_assignments_in_file(filename, assignment_names, dry_run=True, backup
             with open(filename, 'wb') as fileobj:
                 fileobj.write(new_file_data)
     return '\n'.join(diff_lines)
+
+
+def conf_to_dict(obj):
+    return {
+        'category': settings_registry.get_setting_category(obj.key),
+        'name': obj.key,
+    }
 
 
 if __name__ == '__main__':

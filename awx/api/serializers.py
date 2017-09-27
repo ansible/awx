@@ -3797,6 +3797,11 @@ class ActivityStreamSerializer(BaseSerializer):
 
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
+        if obj.setting and obj.setting.get('category', None):
+            rel['setting'] = self.reverse(
+                'api:setting_singleton_detail',
+                kwargs={'category_slug': obj.setting['category']}
+            )
         return rel
 
     def _get_rel(self, obj, fk):
@@ -3848,6 +3853,8 @@ class ActivityStreamSerializer(BaseSerializer):
                                            username = obj.actor.username,
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
+        if obj.setting:
+            summary_fields['setting'] = [obj.setting]
         return summary_fields
 
 
