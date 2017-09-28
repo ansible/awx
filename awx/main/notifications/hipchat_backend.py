@@ -26,9 +26,7 @@ class HipChatBackend(AWXBaseEmailBackend):
     def __init__(self, token, color, api_url, notify, fail_silently=False, **kwargs):
         super(HipChatBackend, self).__init__(fail_silently=fail_silently)
         self.token = token
-	if color == 'None':
-        	self.color = color
-	else:
+	if color is not None:
 		self.color = color.lower()
         self.api_url = api_url
         self.notify = notify
