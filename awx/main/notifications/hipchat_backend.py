@@ -26,10 +26,13 @@ class HipChatBackend(AWXBaseEmailBackend):
     def __init__(self, token, color, api_url, notify, fail_silently=False, **kwargs):
         super(HipChatBackend, self).__init__(fail_silently=fail_silently)
         self.token = token
-        self.color = color
+	if color == 'None':
+        	self.color = color
+	else:
+		self.color = color.lower()
         self.api_url = api_url
         self.notify = notify
-        
+
     def send_messages(self, messages):
         sent_messages = 0
 
@@ -38,7 +41,7 @@ class HipChatBackend(AWXBaseEmailBackend):
                 r = requests.post("{}/v2/room/{}/notification".format(self.api_url, rcp),
                                   params={"auth_token": self.token},
                                   verify=False,
-                                  json={"color": self.color.lower(),
+                                  json={"color": self.color,
                                         "message": m.subject,
                                         "notify": self.notify,
                                         "from": m.from_email,
