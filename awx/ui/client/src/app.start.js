@@ -28,7 +28,7 @@ function bootstrap (callback) {
  * @returns {object=} - Locale data if it exists.
  */
 function fetchLocaleStrings (callback) {
-    const code = normalizeLocaleCode(navigator.language || navigator.userLanguage);
+    const code = getNormalizedLocaleCode();
 
     if (isDefaultLocale(code) || !isSupportedLocale(code)) {
         callback({ code });
@@ -49,14 +49,29 @@ function fetchLocaleStrings (callback) {
     request.fail(() => callback({ code: DEFAULT_LOCALE }));
 }
 
-function normalizeLocaleCode (code) {
+/**
+ * Grabs the language off of navigator for browser compatibility.
+ * If the language isn't set, then it falls back to the DEFAULT_LOCALE. The
+ * locale code is normalized to be lowercase and 2 characters in length.
+ */
+function getNormalizedLocaleCode () {
+    let code;
+
+    if (navigator.languages && navigator.languages[0]) {
+        [code] = navigator.languages;
+    } else if (navigator.language) {
+        code = navigator.language;
+    } else {
+        code = navigator.userLanguage;
+    }
+
     try {
         code = code.split('-')[0].toLowerCase();
     } catch (error) {
         code = DEFAULT_LOCALE;
     }
 
-    return code;
+    return code.substring(0, 2);
 }
 
 function isSupportedLocale (code) {
