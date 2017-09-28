@@ -187,6 +187,9 @@
     links: "{{ awx_web_container_links|list }}"
     hostname: awxweb
     env:
+      http_proxy: "{{ http_proxy | default(omit) }}"
+      https_proxy: "{{ https_proxy | default(omit) }}"
+      no_proxy: "{{ no_proxy | default(omit) }}"
       SECRET_KEY: "{{ awx_secret_key }}"
       DATABASE_NAME: "{{ pg_database }}"
       DATABASE_USER: "{{ pg_username }}"
@@ -213,6 +216,9 @@
     user: root
     hostname: awx
     env:
+      http_proxy: "{{ http_proxy | default(omit) }}"
+      https_proxy: "{{ https_proxy | default(omit) }}"
+      no_proxy: "{{ no_proxy | default(omit) }}"
       SECRET_KEY: "{{ awx_secret_key }}"
       DATABASE_NAME: "{{ pg_database }}"
       DATABASE_USER: "{{ pg_username }}"
@@ -228,4 +234,3 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
-
