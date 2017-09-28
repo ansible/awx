@@ -23,7 +23,7 @@ export default ['templateUrl', 'ComponentsStrings',
                 scope.$watch('capacity', function() {
                     if (scope.totalCapacity !== 0) {
                         var percentageCapacity = Math
-                            .round(scope.capacity / scope.totalCapacity * 10) / 10 * 100;
+                            .round(scope.capacity / scope.totalCapacity * 1000) / 10;
 
                         scope.CapacityStyle = {
                             'flex-grow': percentageCapacity * 0.01
