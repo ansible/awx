@@ -17,3 +17,4 @@ test
 !client/lib/models/**/*.js
 !client/lib/services/**/*.js
 !client/features/**/*.js
+!client/src/app.start.js

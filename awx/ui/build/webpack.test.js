@@ -1,13 +1,12 @@
-const path = require('path');
-
 const _ = require('lodash');
 const webpack = require('webpack');
 
 const STATIC_URL = '/static/';
 
-const development = require('./webpack.development');
+const development = require('./webpack.base');
 
 const test = {
+    devtool: 'cheap-source-map',
     plugins: [
         new webpack.DefinePlugin({
             $basePath: STATIC_URL
