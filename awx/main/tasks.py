@@ -280,7 +280,7 @@ def awx_isolated_heartbeat(self):
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
         logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
-        isolated_manager.IsolatedManager.health_check(isolated_instance_qs)
+        isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask)
