@@ -15,6 +15,7 @@ import logging
 import requests
 from base64 import b64encode
 from collections import OrderedDict
+import six
 
 # Django
 from django.conf import settings
@@ -72,6 +73,7 @@ from awx.main.utils import (
     extract_ansible_vars,
     decrypt_field,
 )
+from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
 
@@ -2899,8 +2901,15 @@ class JobTemplateSurveySpec(GenericAPIView):
             if "required" not in survey_item:
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
 
-            if survey_item["type"] == "password":
-                if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
+            if survey_item["type"] == "password" and "default" in survey_item:
+                if not isinstance(survey_item['default'], six.string_types):
+                    return Response(
+                        _("Value %s for '%s' expected to be a string." % (
+                            survey_item["default"], survey_item["variable"]
+                        )),
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                elif survey_item["default"].startswith('$encrypted$'):
                     if not obj.survey_spec:
                         return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))),
                                         status=status.HTTP_400_BAD_REQUEST)
@@ -2909,6 +2918,8 @@ class JobTemplateSurveySpec(GenericAPIView):
                         for old_item in old_spec['spec']:
                             if old_item['variable'] == survey_item['variable']:
                                 survey_item['default'] = old_item['default']
+                else:
+                    survey_item['default'] = encrypt_value(survey_item['default'])
             idx += 1
 
         obj.survey_spec = new_spec

@@ -13,6 +13,7 @@ from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
 from awx.main.utils import parse_yaml_or_json
+from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.main.fields import JSONField
 
 
@@ -259,6 +260,20 @@ class SurveyJobMixin(models.Model):
             for key, value in self.survey_passwords.items():
                 if key in extra_vars:
                     extra_vars[key] = value
+            return json.dumps(extra_vars)
+        else:
+            return self.extra_vars
+
+    def decrypted_extra_vars(self):
+        '''
+        Decrypts fields marked as passwords in survey.
+        '''
+        if self.survey_passwords:
+            extra_vars = json.loads(self.extra_vars)
+            for key in self.survey_passwords:
+                if key in extra_vars:
+                    value = extra_vars[key]
+                    extra_vars[key] = decrypt_value(get_encryption_key('value', pk=None), value)
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
