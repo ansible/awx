@@ -26,6 +26,8 @@ from awx.main.fields import is_implicit_parent
 
 from awx.main.consumers import emit_channel_notification
 
+from awx.conf.utils import conf_to_dict
+
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
@@ -402,12 +404,15 @@ def activity_stream_create(sender, instance, created, **kwargs):
             object1=object1,
             changes=json.dumps(changes),
             actor=get_current_user_or_none())
-        activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.
         if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
+            activity_entry.save()
             getattr(activity_entry, object1).add(instance)
+        else:
+            activity_entry.setting = conf_to_dict(instance)
+            activity_entry.save()
 
 
 def activity_stream_update(sender, instance, **kwargs):
@@ -433,9 +438,12 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes),
         actor=get_current_user_or_none())
-    activity_entry.save()
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
+        activity_entry.save()
         getattr(activity_entry, object1).add(instance)
+    else:
+        activity_entry.setting = conf_to_dict(instance)
+        activity_entry.save()
 
 
 def activity_stream_delete(sender, instance, **kwargs):
