@@ -211,6 +211,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
 )
 
 MIDDLEWARE_CLASSES = (  # NOQA
+    'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -1134,4 +1135,8 @@ LOGGING = {
         },
     }
 }
+# Apply coloring to messages logged to the console
 COLOR_LOGS = False
+
+# Use middleware to get request statistics
+AWX_REQUEST_PROFILE = False

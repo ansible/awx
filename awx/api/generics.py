@@ -139,7 +139,6 @@ class APIView(views.APIView):
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
 
-        analytics_logger.info("api response", extra=dict(python_objects=dict(request=request, response=response)))
         return response
 
     def get_authenticate_header(self, request):
