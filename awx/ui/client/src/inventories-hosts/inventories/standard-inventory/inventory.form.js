@@ -72,9 +72,6 @@ function(i18n, InventoryCompletedJobsList) {
                 basePath: 'credentials',
                 sourceModel: 'insights_credential',
                 sourceField: 'name',
-                search: {
-                    credential_type: '13' //insights
-                },
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
             },
             instance_groups: {
