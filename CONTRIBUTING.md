@@ -277,7 +277,7 @@ When necessary, remove any AWX containers and images by running the following:
         
 ## What should I work on?
 
-For feature work, take a look at the current [https://github.com/ansible/awx/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Aenhancement](Enhancements)
+For feature work, take a look at the current [Enhancements](https://github.com/ansible/awx/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Aenhancement).
 
 If it has someone assigned to it then that person is the person responsible for working the enhancement. If you feel like you could contribute then reach out to that person.
 
