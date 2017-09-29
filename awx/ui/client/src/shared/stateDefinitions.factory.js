@@ -743,6 +743,7 @@ function($injector, $stateExtender, $log, i18n) {
                 else if(field.sourceModel === "insights_credential"){
                     params = {
                         page_size: '5',
+                        role_level: 'admin_role',
                         credential_type: null
                     };
                 }
@@ -854,6 +855,7 @@ function($injector, $stateExtender, $log, i18n) {
                                     $stateParams[`${list.iterator}_search`].organization = OrganizationId;
                                 }
                                 if(list.iterator === "insights_credential"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                     $stateParams[`${list.iterator}_search`].credential_type = InsightsCredTypePK.toString() ;
                                 }
 
