@@ -42,6 +42,7 @@ cryptography==2.0.3       # via adal, azure-storage, paramiko, pyopenssl, secret
 debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
 decorator==4.0.11         # via shade
 deprecation==1.0.1        # via openstacksdk
+dnspython==1.15.0
 #docutils==0.12            # via botocore
 dogpile.cache==0.6.3      # via python-ironicclient, shade
 enum34==1.1.6             # via cryptography, msrest
