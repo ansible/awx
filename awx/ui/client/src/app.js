@@ -312,9 +312,13 @@ var awApp = angular.module('awApp', [
                         $(this).remove();
                     });
 
-                    $('.ui-dialog-content').each(function() {
-                        $(this).dialog('close');
-                    });
+                    if (next.name !== "templates.editWorkflowJobTemplate.workflowMaker" &&
+                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.inventory" &&
+                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.credential") {
+                            $('.ui-dialog-content').each(function() {
+                                $(this).dialog('close');
+                            });
+                    }
 
                     try {
                         $('#help-modal').dialog('close');
