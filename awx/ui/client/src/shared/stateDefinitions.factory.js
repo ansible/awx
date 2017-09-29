@@ -722,7 +722,8 @@ function($injector, $stateExtender, $log, i18n) {
             function buildFieldDefinition(field) {
 
                 // Some lookup modals require some additional default params,
-                // namely organization and inventory_script. If these params
+                // namely organization and inventory_script, and insights
+                // credentials. If these params
                 // aren't set as default params out of the gate, then smart
                 // search will think they need to be set as search tags.
                 var params;
@@ -737,6 +738,13 @@ function($injector, $stateExtender, $log, i18n) {
                         page_size: '5',
                         role_level: 'admin_role',
                         organization: null
+                    };
+                }
+                else if(field.sourceModel === "insights_credential"){
+                    params = {
+                        page_size: '5',
+                        role_level: 'admin_role',
+                        credential_type: null
                     };
                 }
                 else if(field.sourceModel === 'host') {
@@ -805,8 +813,24 @@ function($injector, $stateExtender, $log, i18n) {
                                     return;
                                 }
                         }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state', 'OrganizationId',
-                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state, OrganizationId) => {
+                        InsightsCredTypePK: ['ListDefinition', 'Rest', 'GetBasePath', 'ProcessErrors',
+                            function(list, Rest, GetBasePath,ProcessErrors) {
+                                if(list.iterator === 'insights_credential'){
+                                    Rest.setUrl(GetBasePath('credential_types') + '?name=Insights');
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            return data.results[0].id;
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: 'Error!',
+                                                msg: 'Failed to get credential type data: ' + status
+                                            });
+                                        });
+                                }
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state', 'OrganizationId', 'InsightsCredTypePK',
+                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state, OrganizationId, InsightsCredTypePK) => {
                                 // allow lookup field definitions to use interpolated $stateParams / $rootScope in basePath field
                                 // the basePath on a form's lookup field will take precedence over the general model list's basepath
                                 let path, interpolator;
@@ -830,6 +854,11 @@ function($injector, $stateExtender, $log, i18n) {
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                     $stateParams[`${list.iterator}_search`].organization = OrganizationId;
                                 }
+                                if(list.iterator === "insights_credential"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
+                                    $stateParams[`${list.iterator}_search`].credential_type = InsightsCredTypePK.toString() ;
+                                }
+
 
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
