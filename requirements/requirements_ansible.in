@@ -26,3 +26,4 @@ secretstorage==2.3.1
 shade==1.20.0
 setuptools==36.0.1
 pip==9.0.1
+zabbix-api==0.5.3
