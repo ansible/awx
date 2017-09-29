@@ -32,6 +32,37 @@ scheduled immediately after creation of the inventory source.
 Also, if this flag is set, no inventory updates will be triggered
 _unless the scm revision of the project changes_.
 
+### Secrets Management
+
+Secrets are relevant for script inventory sources in source control.
+Secrets can be stored inside of AWX as inputs to a credential, and used
+by the script code, or they can be stored as Ansible vault content
+inside of source control.
+
+#### Credential-sourced Secrets
+
+Both custom credential types and built-in types for cloud sources
+should be usable by SCM inventory updates. Using built-in types is valid
+if the environment needed by a users script corresponds exactly
+with what is needed to run the vendored cloud scripts.
+
+Credentials are used by setting the related field `credential` on the
+inventory source to the credential. When the update executes, all the
+environmental setup that the credential performs should be accessible
+by the inventory script that is run.
+
+#### Vault Secrets in Source
+
+Vaulting content is a way to hide it from other people with checkout
+access to source control. SCM inventories should allow use of vault
+content in the same way that `ansible-inventory` does, for Ansible versions
+2.4 and greater, because the backported script will not support this feature.
+Vaulted content can go inside of the `host_vars/` or `group_vars/` folders,
+as an example ([detailed instructions](https://github.com/AlanCoding/Ansible-inventory-file-examples/tree/master/vault)).
+
+Vault decryption is enabled by setting the related field `vault_credential`
+on the inventory source to a vault credential with the decryption key.
+
 ### RBAC
 
 User needs `use` role to the project in order to use it as a source
@@ -51,13 +82,6 @@ This listing should be refreshed to latest SCM info on a project update.
 If no inventory sources use a project as an SCM inventory source, then
 the inventory listing may not be refreshed on update.
 
-### Still-to-come 3.2 Changes
-
-As a part of a different feature, it is planned to have all inventory sources
-inside of an inventory all update with a single button click. When this
-happens for an inventory containing an SCM inventory source, it should
-update the project.
-
 ### Inventory Source Restriction
 
 Since automatic inventory updates (triggered by a project update) do not
@@ -72,7 +96,7 @@ inventory source for its inventory.
 > Any Inventory Ansible supports should be supported by this feature
 
 This is accomplished by making use of the `ansible-inventory` command.
-the inventory import tower-manage command will check for the existence
+the inventory import awx-manage command will check for the existence
 of `ansible-inventory` and if it is not present, it will call a backported
 version of it. The backport is maintained as its own GPL3 licensed
 repository.
@@ -109,7 +133,9 @@ Some test scenarios to look at:
    group_vars, host_vars, etc.
  - Test scripts in the project repo
  - Test scripts that use environment variables provided by a credential
-   in Tower
+   in AWX
+ - Test that vaulted content is source control is decrypted (consistent
+   with ansible-inventory behavior) if given a vault credential
  - Test multiple inventories that use the same project, pointing to different
    files / directories inside of the project
  - Feature works correctly even if project doesn't have any playbook files

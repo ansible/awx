@@ -12,6 +12,7 @@ import sys
 import time
 import traceback
 import shutil
+import getpass
 
 # Django
 from django.conf import settings
@@ -66,10 +67,12 @@ class AnsibleInventoryLoader(object):
     If it fails to find this, it uses the backported script instead
     '''
 
-    def __init__(self, source, group_filter_re=None, host_filter_re=None, is_custom=False):
+    def __init__(self, source, group_filter_re=None, host_filter_re=None,
+                 is_custom=False, vault_password=None):
         self.source = source
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
+        self.vault_password = vault_password
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
         self.group_filter_re = group_filter_re
@@ -98,7 +101,15 @@ class AnsibleInventoryLoader(object):
             potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
             if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
                 logger.debug('Using system install of ansible-inventory CLI: {}'.format(potential_path))
-                return [potential_path, '-i', self.source]
+                cmd = [potential_path, '-i', self.source]
+                if self.vault_password:
+                    cmd += ['--ask-vault-pass']
+                return cmd
+
+        # TODO: remove after other commands can be ran through ansible-inventory
+        # Will be resolved with https://github.com/ansible/ansible/issues/30877
+        if self.vault_password:
+            raise Exception('Cannot (yet) use vault credentials with this type of inventory source.')
 
         # Stopgap solution for group_vars, do not use backported module for official
         # vendored cloud modules or custom scripts TODO: remove after Ansible 2.3 deprecation
@@ -154,7 +165,10 @@ class AnsibleInventoryLoader(object):
             cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        stdout, stderr = proc.communicate()
+        if self.vault_password:
+            stdout, stderr = proc.communicate(input=self.vault_password)
+        else:
+            stdout, stderr = proc.communicate()
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
@@ -222,7 +236,7 @@ class AnsibleInventoryLoader(object):
 
 def load_inventory_source(source, group_filter_re=None,
                           host_filter_re=None, exclude_empty_groups=False,
-                          is_custom=False):
+                          is_custom=False, vault_password=None):
     '''
     Load inventory from given source directory or file.
     '''
@@ -240,7 +254,8 @@ def load_inventory_source(source, group_filter_re=None,
         source=source,
         group_filter_re=group_filter_re,
         host_filter_re=host_filter_re,
-        is_custom=is_custom).load()
+        is_custom=is_custom,
+        vault_password=vault_password).load()
 
     logger.debug('Finished loading from source: %s', source)
     # Exclude groups that are completely empty.
@@ -298,6 +313,9 @@ class Command(NoArgsCommand):
                     action='store_true', default=False, help='when set, '
                     'exclude all groups that have no child groups, hosts, or '
                     'variables.'),
+        make_option('--ask-vault-pass', dest='ask_vault_pass',
+                    action='store_true', default=False,
+                    help='ask password for Ansible vault'),
         make_option('--instance-id-var', dest='instance_id_var', type='str',
                     default=None, metavar='v', help='host variable that '
                     'specifies the unique, immutable instance ID, may be '
@@ -946,6 +964,11 @@ class Command(NoArgsCommand):
 
         self.celery_invoked = False if os.getenv('INVENTORY_SOURCE_ID', None) is None else True
 
+        # Obtain vault password from user if enabled
+        self.vault_password = None
+        if bool(options.get('ask_vault_pass', False)):
+            self.vault_password = getpass.getpass(prompt='Vault password:')
+
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:
             raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
@@ -997,7 +1020,8 @@ class Command(NoArgsCommand):
                                                    self.group_filter_re,
                                                    self.host_filter_re,
                                                    self.exclude_empty_groups,
-                                                   self.is_custom)
+                                                   self.is_custom,
+                                                   self.vault_password)
             if settings.DEBUG:
                 # depending on inventory source, this output can be
                 # *exceedingly* verbose - crawling a deeply nested

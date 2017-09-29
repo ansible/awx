@@ -53,3 +53,6 @@
   `deprovision_node` -> `deprovision_instance`, and `instance_group_remove` -> `remove_from_queue`,
   which backward compatibility support for 3.1 use pattern
   [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]
+* Added `vault_credential` field to inventory sources and allow SCM inventory
+  sources ran through `ansible-inventory` to decrypt vault secrets inside
+  of source control.[[#223](https://github.com/ansible/awx/issues/223)]
