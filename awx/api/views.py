@@ -215,6 +215,7 @@ class ApiVersionRootView(APIView):
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
         data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
         data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
+        data['ansible_versions'] = reverse('api:ansible_versions_list', request=request)
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         return Response(data)
 
@@ -512,6 +513,19 @@ class DashboardJobsGraphView(APIView):
                                                      element[1]])
         return Response(dashboard_data)
 
+class AnsibleVersionsList(ListCreateAPIView):
+
+    view_name = _("AnsibleVersionsList")
+    model = AnsibleVersions
+    serializer_class = AnsibleVersionsSerializer
+    new_in_api_v2 = True
+
+class AnsibleVersionsDetail(RetrieveUpdateAPIView):
+
+    view_name = _("AnsibleVersionsDetail")
+    model = AnsibleVersions
+    serializer_class = AnsibleVersionsSerializer
+    new_in_api_v2 = True
 
 class InstanceList(ListAPIView):
 

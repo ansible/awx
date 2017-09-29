@@ -15,6 +15,7 @@ from awx.main.models.jobs import * # noqa
 from awx.main.models.ad_hoc_commands import * # noqa
 from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa
+from awx.main.models.ansible_versions import * # noqa
 from awx.main.models.ha import * # noqa
 from awx.main.models.rbac import * # noqa
 from awx.main.models.mixins import * # noqa

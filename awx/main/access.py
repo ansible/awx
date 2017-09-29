@@ -400,6 +400,20 @@ class BaseAccess(object):
             return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
         return False
 
+class AnsibleVersionsAccess(BaseAccess):
+
+    model = AnsibleVersions
+
+    def can_read(self, obj):
+        return True
+
+    def can_use(self, obj):
+        return True
+
+    def get_queryset(self):
+        return self.model.objects.all()
+
+
 
 class InstanceAccess(BaseAccess):
 

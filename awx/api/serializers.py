@@ -93,6 +93,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
+    'ansible_versions': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
@@ -3891,3 +3892,12 @@ class FactSerializer(BaseFactSerializer):
         if 'facts' in ret and isinstance(ret['facts'], six.string_types):
             ret['facts'] = json.loads(ret['facts'])
         return ret
+
+class AnsibleVersionsSerializer(BaseSerializer):
+
+    class Meta:
+        model = AnsibleVersions
+        fields = ('*', 'ansible_cmd', 'ansible_playbook',
+                  'ansible_vault', 'ansible_doc', 'ansible_pull', 'ansible_galaxy')
+
+

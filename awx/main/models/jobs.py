@@ -300,7 +300,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'job_tags', 'extra_vars', 'launch_type', 'force_handlers',
                 'skip_tags', 'start_at_task', 'become_enabled', 'labels',
                 'survey_passwords', 'allow_simultaneous', 'timeout',
-                'use_fact_cache', 'diff_mode',]
+                'use_fact_cache', 'diff_mode', 'ansible_version']
 
     def resource_validation_data(self):
         '''

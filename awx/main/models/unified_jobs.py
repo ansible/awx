@@ -158,6 +158,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         'InstanceGroup',
         blank=True,
     )
+    ansible_version = models.ForeignKey(
+        'AnsibleVersions',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
