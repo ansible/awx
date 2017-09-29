@@ -355,6 +355,8 @@ If you wish to use an external database, in the inventory file, set the value of
 
 ### Start the build
 
+Note: The Docker service must be started and running.
+
 If you are not pushing images to a Docker registry, start the build by running the following:
 
 ```bash
