@@ -2616,23 +2616,25 @@ class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificatio
     relationship = 'notification_templates_success'
 
 
-class InventorySourceHostsList(SubListAPIView):
+class InventorySourceHostsList(SubListDestroyAPIView):
 
     model = Host
     serializer_class = HostSerializer
     parent_model = InventorySource
     relationship = 'hosts'
     new_in_148 = True
+    check_sub_obj_permission = False
     capabilities_prefetch = ['inventory.admin']
 
 
-class InventorySourceGroupsList(SubListAPIView):
+class InventorySourceGroupsList(SubListDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer
     parent_model = InventorySource
     relationship = 'groups'
     new_in_148 = True
+    check_sub_obj_permission = False
 
 
 class InventorySourceUpdatesList(SubListAPIView):
