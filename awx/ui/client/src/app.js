@@ -71,8 +71,6 @@ angular
         'ngToast',
         'gettext',
         'Timezones',
-        'ui.router',
-        'ui.router.state.events',
         'lrInfiniteScroll',
 
         about.name,

@@ -133,8 +133,6 @@ export default
                 searchPrefix: 'schedule',
                 name: 'workflowJobTemplateSchedules',
                 route: '/templates/workflow_job_template/:id/schedules',
-                templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
                 data: {
                     activityStream: true,
                     activityStreamTarget: 'job_template',

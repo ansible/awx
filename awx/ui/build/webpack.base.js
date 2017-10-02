@@ -195,8 +195,6 @@ const base = {
             'js-yaml$': '~node_modules/js-yaml/dist/js-yaml.min.js',
             'lr-infinite-scroll$': '~node_modules/lr-infinite-scroll/lrInfiniteScroll.js',
             'angular-tz-extensions$': '~node_modules/angular-tz-extensions/lib/angular-tz-extensions.js',
-            'angular-ui-router$': '~node_modules/angular-ui-router/release/angular-ui-router.js',
-            'angular-ui-router-state-events$': '~node_modules/angular-ui-router/release/stateEvents.js',
             'ng-toast-provider$': '~node_modules/ng-toast/src/scripts/provider.js',
             'ng-toast-directives$': '~node_modules/ng-toast/src/scripts/directives.js',
             'ng-toast$': '~node_modules/ng-toast/src/scripts/module.js'
