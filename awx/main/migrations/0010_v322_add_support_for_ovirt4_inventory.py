@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0008_v320_drop_v1_credential_fields'),
+        ('main', '0009_v322_add_setting_field_for_activity_stream'),
     ]
 
     operations = [
