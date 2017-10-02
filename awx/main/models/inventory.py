@@ -1056,7 +1056,7 @@ class InventorySourceOptions(BaseModel):
                     label_parts.append(part)
                 label = ' '.join(label_parts)
             regions.append((region.name, label))
-        return regions
+        return sorted(regions)
 
     @classmethod
     def get_ec2_group_by_choices(cls):
