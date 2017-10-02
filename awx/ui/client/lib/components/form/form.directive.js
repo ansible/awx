@@ -209,7 +209,8 @@ function atForm () {
         controllerAs: 'vm',
         link: atFormLink,
         scope: {
-            state: '='
+            state: '=',
+            autocomplete: '@'
         }
     };
 }
