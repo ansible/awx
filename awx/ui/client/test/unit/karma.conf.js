@@ -1,4 +1,3 @@
-let path = require('path');
 const webpackConfig = require('../../../build/webpack.test.js');
 
 module.exports = config => {
@@ -11,25 +10,22 @@ module.exports = config => {
         browsers: ['PhantomJS'],
         reporters: ['progress'],
         files: [
-          './index.js',
-          '../../lib/components/**/*.html'
+            '../../../client/src/vendor.js',
+            '../../../client/src/app.js',
+            '../../../client/src/**/*.html',
+            './index.js',
         ],
         plugins: [
             'karma-webpack',
             'karma-jasmine',
             'karma-phantomjs-launcher',
-            'karma-ng-html2js-preprocessor'
+            'karma-html2js-preprocessor'
         ],
         preprocessors: {
-            '../../lib/components/**/*.html': 'ng-html2js',
+            '../../../client/src/vendor.js': 'webpack',
+            '../../../client/src/app.js': 'webpack',
+            '../../../client/src/**/*.html': 'html2js',
             './index.js': 'webpack'
-        },
-        ngHtml2JsPreprocessor: {
-            moduleName: 'at.test.templates',
-            cacheIdFromPath: function (filepath) {
-                filepath = filepath.replace(path.join(__dirname, '../../lib'), '');
-                return '/static/partials' + filepath;
-            }
         },
         webpack: webpackConfig,
         webpackMiddleware: {

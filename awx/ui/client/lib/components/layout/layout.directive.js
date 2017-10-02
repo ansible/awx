@@ -18,7 +18,7 @@ function AtLayoutController ($scope, strings) {
 
     $scope.$watch('$root.socketStatus', (newStatus) => {
         vm.socketState = newStatus;
-        vm.socketIconClass = `icon-socket-${$scope.socketStatus}`;
+        vm.socketIconClass = `icon-socket-${vm.socketState}`;
     });
 
     $scope.$watch('$root.licenseMissing', (licenseMissing) => {
