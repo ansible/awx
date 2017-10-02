@@ -104,6 +104,11 @@ class TestWorkflowJobAccess:
         access = WorkflowJobAccess(rando)
         assert access.can_cancel(workflow_job)
 
+    def test_admin_cancel_access(self, wfjt, workflow_job, rando):
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobAccess(rando)
+        assert access.can_cancel(workflow_job)
+
 
 @pytest.mark.django_db
 class TestWFJTCopyAccess:

@@ -1841,7 +1841,9 @@ class WorkflowJobAccess(BaseAccess):
     def can_cancel(self, obj):
         if not obj.can_cancel:
             return False
-        return self.can_delete(obj) or self.user == obj.created_by
+        if self.user == obj.created_by or self.can_delete(obj):
+            return True
+        return obj.workflow_job_template is not None and self.user in obj.workflow_job_template.admin_role
 
 
 class AdHocCommandAccess(BaseAccess):
