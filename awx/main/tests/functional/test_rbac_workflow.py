@@ -57,7 +57,21 @@ class TestWorkflowJobTemplateNodeAccess:
         # without access to the related job template, admin to the WFJT can
         # not change the prompted parameters
         access = WorkflowJobTemplateNodeAccess(org_admin)
-        assert not access.can_change(wfjt_node, {'job_type': 'scan'})
+        assert not access.can_change(wfjt_node, {'job_type': 'check'})
+
+    def test_node_edit_allowed(self, wfjt_node, org_admin):
+        wfjt_node.unified_job_template.admin_role.members.add(org_admin)
+        access = WorkflowJobTemplateNodeAccess(org_admin)
+        assert access.can_change(wfjt_node, {'job_type': 'check'})
+
+    def test_prompted_resource_prevents_edit(self, wfjt_node, org_admin, machine_credential):
+        # without access to prompted resources, admin to the WFJT can
+        # not change the other prompted resources
+        wfjt_node.unified_job_template.admin_role.members.add(org_admin)
+        wfjt_node.credential = machine_credential
+        wfjt_node.save()
+        access = WorkflowJobTemplateNodeAccess(org_admin)
+        assert not access.can_change(wfjt_node, {'inventory': 45})
 
     def test_add_JT_no_start_perm(self, wfjt, job_template, rando):
         wfjt.admin_role.members.add(rando)
