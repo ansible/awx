@@ -19,46 +19,46 @@ from awx.main.migrations._scan_jobs import _migrate_scan_job_templates
 
 @pytest.fixture
 def organizations():
-    return [Organization.objects.create(name="org-{}".format(x)) for x in range(3)]
+    return [Organization.objects.create(name=u"org-\xe9-{}".format(x)) for x in range(3)]
 
 
 @pytest.fixture
 def inventories(organizations):
-    return [Inventory.objects.create(name="inv-{}".format(x), 
+    return [Inventory.objects.create(name=u"inv-\xe9-{}".format(x), 
                                      organization=organizations[x]) for x in range(3)]
 
 
 @pytest.fixture
 def job_templates_scan(inventories):
-    return [JobTemplate.objects.create(name="jt-scan-{}".format(x), 
+    return [JobTemplate.objects.create(name=u"jt-\xe9-scan-{}".format(x), 
                                        job_type=PERM_INVENTORY_SCAN,
                                        inventory=inventories[x]) for x in range(3)]
 
 
 @pytest.fixture
 def job_templates_deploy(inventories):
-    return [JobTemplate.objects.create(name="jt-deploy-{}".format(x), 
+    return [JobTemplate.objects.create(name=u"jt-\xe9-deploy-{}".format(x), 
                                        job_type=PERM_INVENTORY_DEPLOY,
                                        inventory=inventories[x]) for x in range(3)]
 
 
 @pytest.fixture
 def project_custom(organizations):
-    return Project.objects.create(name="proj-scan_custom", 
+    return Project.objects.create(name=u"proj-\xe9-scan_custom", 
                                   scm_url='https://giggity.com',
                                   organization=organizations[0])
 
 
 @pytest.fixture
 def job_templates_custom_scan_project(project_custom):
-    return [JobTemplate.objects.create(name="jt-scan-custom-{}".format(x), 
+    return [JobTemplate.objects.create(name=u"jt-\xe9-scan-custom-{}".format(x), 
                                        project=project_custom, 
                                        job_type=PERM_INVENTORY_SCAN) for x in range(3)]
 
 
 @pytest.fixture
 def job_template_scan_no_org():
-    return JobTemplate.objects.create(name="jt-scan-no-org",
+    return JobTemplate.objects.create(name=u"jt-\xe9-scan-no-org",
                                       job_type=PERM_INVENTORY_SCAN)
 
 
