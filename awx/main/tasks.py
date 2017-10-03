@@ -702,7 +702,12 @@ class BaseTask(LogErrorsTask):
                 os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
             return path
         else:
-            return plugin
+            # work around an inventory caching bug in Ansible 2.4.0
+            # see: https://github.com/ansible/ansible/pull/30817
+            # see: https://github.com/ansible/awx/issues/246
+            inventory_script = tempfile.mktemp(suffix='.awxrest.py', dir=kwargs['private_data_dir'])
+            shutil.copy(plugin, inventory_script)
+            return inventory_script
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError

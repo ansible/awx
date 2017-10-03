@@ -1,3 +1,4 @@
+import tempfile
 import pytest
 import json
 
@@ -62,7 +63,7 @@ def test_survey_passwords_not_in_extra_vars():
 
 def test_job_safe_args_redacted_passwords(job):
     """Verify that safe_args hides passwords in the job extra_vars"""
-    kwargs = {'ansible_version': '2.1'}
+    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
     run_job = RunJob()
     safe_args = run_job.build_safe_args(job, **kwargs)
     ev_index = safe_args.index('-e') + 1
@@ -70,8 +71,8 @@ def test_job_safe_args_redacted_passwords(job):
     assert extra_vars['secret_key'] == '$encrypted$'
 
 
-def test_job_args_unredacted_passwords(job):
-    kwargs = {'ansible_version': '2.1'}
+def test_job_args_unredacted_passwords(job, tmpdir_factory):
+    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
     run_job = RunJob()
     args = run_job.build_args(job, **kwargs)
     ev_index = args.index('-e') + 1
