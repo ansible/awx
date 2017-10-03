@@ -12,7 +12,7 @@ logger = logging.getLogger('awx.main.migrations')
 
 def _create_fact_scan_project(ContentType, Project, org):
     ct = ContentType.objects.get_for_model(Project)
-    name = "Tower Fact Scan - {}".format(org.name if org else "No Organization")
+    name = u"Tower Fact Scan - {}".format(org.name if org else "No Organization")
     proj = Project(name=name, 
                    scm_url='https://github.com/ansible/awx-facts-playbooks',
                    scm_type='git',
