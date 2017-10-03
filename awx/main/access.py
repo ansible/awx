@@ -1605,9 +1605,9 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         if 'credential' in data or 'inventory' in data:
             new_data = data
             if 'credential' not in data:
-                new_data['credential'] = self.credential
+                new_data['credential'] = obj.credential
             if 'inventory' not in data:
-                new_data['inventory'] = self.inventory
+                new_data['inventory'] = obj.inventory
             return self.can_use_prompted_resources(new_data)
         return True
 
