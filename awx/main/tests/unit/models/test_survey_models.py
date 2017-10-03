@@ -13,6 +13,7 @@ from awx.main.models import (
 @pytest.fixture
 def job(mocker):
     ret = mocker.MagicMock(**{
+        'decrypted_extra_vars.return_value': '{\"secret_key\": \"my_password\"}',
         'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}',
         'extra_vars_dict': {"secret_key": "my_password"},
         'pk': 1, 'job_template.pk': 1, 'job_template.name': '',

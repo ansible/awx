@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import logging
+from collections import namedtuple
 
 import six
 from cryptography.fernet import Fernet, InvalidToken
@@ -8,7 +9,8 @@ from cryptography.hazmat.backends import default_backend
 from django.utils.encoding import smart_str
 
 
-__all__ = ['get_encryption_key', 'encrypt_field', 'decrypt_field', 'decrypt_value']
+__all__ = ['get_encryption_key', 'encrypt_value', 'encrypt_field',
+           'decrypt_field', 'decrypt_value']
 
 logger = logging.getLogger('awx.main.utils.encryption')
 
@@ -48,6 +50,11 @@ def get_encryption_key(field_name, pk=None):
         h.update(str(pk))
     h.update(field_name)
     return base64.urlsafe_b64encode(h.digest())
+
+
+def encrypt_value(value, pk=None):
+    TransientField = namedtuple('TransientField', ['pk', 'value'])
+    return encrypt_field(TransientField(pk=pk, value=value), 'value')
 
 
 def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=False):

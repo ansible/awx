@@ -1180,7 +1180,7 @@ class RunJob(BaseTask):
             if kwargs.get('display', False) and job.job_template:
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
-                extra_vars.update(job.extra_vars_dict)
+                extra_vars.update(json.loads(job.decrypted_extra_vars()))
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).

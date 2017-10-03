@@ -37,6 +37,7 @@ from awx.main.utils import (
     ignore_inventory_computed_fields,
     parse_yaml_or_json,
 )
+from awx.main.utils.encryption import encrypt_value
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
@@ -385,6 +386,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # Sort the runtime fields allowed and disallowed by job template
         ignored_fields = {}
         prompted_fields = {}
+        survey_password_variables = self.survey_password_variables()
 
         ask_for_vars_dict = self._ask_for_vars_dict()
 
@@ -402,7 +404,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                         extra_vars = parse_yaml_or_json(kwargs[field])
                         for key in extra_vars:
                             if key in survey_vars:
-                                prompted_fields[field][key] = extra_vars[key]
+                                if key in survey_password_variables:
+                                    prompted_fields[field][key] = encrypt_value(extra_vars[key])
+                                else:
+                                    prompted_fields[field][key] = extra_vars[key]
                             else:
                                 ignored_fields[field][key] = extra_vars[key]
                     else:

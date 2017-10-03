@@ -31,7 +31,7 @@ from awx.main.models import (
 )
 
 from awx.main import tasks
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, encrypt_value
 
 
 
@@ -305,6 +305,20 @@ class TestGenericRun(TestJobExecution):
         assert '"tower_user_name": "angry-spud"' in ' '.join(args)
         assert '"awx_user_id": 123,' in ' '.join(args)
         assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+
+    def test_survey_extra_vars(self):
+        self.instance.extra_vars = json.dumps({
+            'super_secret': encrypt_value('CLASSIFIED', pk=None)
+        })
+        self.instance.survey_passwords = {
+            'super_secret': '$encrypted$'
+        }
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"super_secret": "CLASSIFIED"' in ' '.join(args)
 
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
