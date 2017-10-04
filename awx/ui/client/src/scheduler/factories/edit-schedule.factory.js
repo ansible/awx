@@ -121,7 +121,7 @@ export default
             // Get the existing record
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     schedule = data;
                     try {
                         schedule.extra_data = JSON.parse(schedule.extra_data);

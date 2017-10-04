@@ -143,7 +143,7 @@ export default ['$stateParams', '$scope', '$rootScope',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
 
                         let reloadListStateParams = null;

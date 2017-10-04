@@ -21,7 +21,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post({ "disassociate": true, "id": Number(userId) })
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
                     })
@@ -54,7 +54,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post({ "disassociate": true, "id": teamId })
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
                     })

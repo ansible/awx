@@ -16,18 +16,18 @@ export default
                 Wait('start');
                 Rest.setUrl(inventory_source.url);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     // Check that we have access to cancelling an update
                     var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
                     url += 'cancel/';
                     Rest.setUrl(url);
                     Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         if (data.can_cancel) {
                             // Cancel the update process
                             Rest.setUrl(url);
                             Rest.post()
-                            .success(function () {
+                            .then(() => {
                                 Wait('stop');
                                 //Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
                                 //    'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');

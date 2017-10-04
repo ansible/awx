@@ -38,7 +38,7 @@
  *     var url = GetBasePath('inventories') + $stateParams.id + '/';
  *     Rest.setUrl(url);
  *     Rest.get()
- *          .success(function(data) {
+ *          .then(({data}) => {
  *             // review the data object and take action
  *         })
  *         .error(function(status, data) {

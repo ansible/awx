@@ -112,7 +112,7 @@ export default [
 
                          Rest.setUrl(GetBasePath("organizations"));
                          Rest.get()
-                             .success(function(data) {
+                             .then(({data}) => {
                                  orgDefer.resolve(data.results[0].id);
                              });
 

@@ -20,7 +20,7 @@ export default
                 var getManagementJobs = function(){
                     Rest.setUrl(defaultUrl);
                     Rest.get()
-                        .success(function(data){
+                        .then(({data}) => {
                             $scope.mgmtCards = data.results;
                             Wait('stop');
                         })
@@ -128,7 +128,7 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .then(({data}) => {
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
                                             $("#configure-dialog").dialog('close');
@@ -218,7 +218,7 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .then(({data}) => {
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-dialog").dialog('close');

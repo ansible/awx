@@ -53,7 +53,7 @@ export default
 
                             Rest.setUrl(url);
                             Rest.post({ "disassociate": true, "id": entry.id })
-                                .success(function() {
+                                .then(() => {
                                     Wait('stop');
                                     $state.go('.', null, { reload: true });
                                 })

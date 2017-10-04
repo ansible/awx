@@ -34,7 +34,7 @@ export default ['$scope', '$rootScope',
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     $scope.organization_name = data.name;
                     $scope.name = data.name;
                     $scope.org_id = data.id;

@@ -13,7 +13,7 @@
                  callback = params.callback;
              Rest.setUrl(url);
              Rest.get()
-                 .success(function(data) {
+                 .then(({data}) => {
                      if (scope_var === 'inventory_source') {
                          scope.inventory = data.inventory;
                      }

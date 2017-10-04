@@ -99,7 +99,7 @@ export default ['Rest', 'Wait',
                     inputs: inputs,
                     injectors: injectors
                 })
-                .success(function(data) {
+                .then(({data}) => {
                     $state.go('credentialTypes.edit', { credential_type_id: data.id }, { reload: true });
                     Wait('stop');
                 })

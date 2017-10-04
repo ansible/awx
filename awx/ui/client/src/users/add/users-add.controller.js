@@ -37,7 +37,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
 
             Rest.setUrl(GetBasePath('users'));
             Rest.options()
-                .success(function(data) {
+                .then(({data}) => {
                     if (!data.actions.POST) {
                         $state.go("^");
                         Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a user.'), 'alert-info');
@@ -85,7 +85,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
                     data.is_system_auditor = $scope.is_system_auditor;
                     Wait('start');
                     Rest.post(data)
-                        .success(function(data) {
+                        .then(({data}) => {
                             var base = $location.path().replace(/^\//, '').split('/')[0];
                             if (base === 'users') {
                                 $rootScope.flashMessage = i18n._('New user successfully created!');

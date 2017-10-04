@@ -51,7 +51,7 @@ export default
                 url = GetBasePath("credentials");
                 Rest.setUrl(url);
                 Rest.post(data)
-                .success(function (data) {
+                .then(({data}) => {
                     scope.addedItem = data.id;
 
                     Wait('stop');
@@ -83,7 +83,7 @@ export default
                 url = GetBasePath('credentials') + scope.id + '/';
                 Rest.setUrl(url);
                 Rest.put(data)
-                .success(function () {
+                .then(() => {
                     Wait('stop');
                     $state.go($state.current, {}, {reload: true});
                 })

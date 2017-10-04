@@ -39,7 +39,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
         Wait('start');
         Rest.setUrl(url);
         Rest.post(params)
-            .success( function(data) {
+            .then(({data}) => {
                 if (callback) {
                     scope.$emit(callback, data.id);
                     notifier[column] = !notifier[column];

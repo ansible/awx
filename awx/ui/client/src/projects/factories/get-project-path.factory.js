@@ -26,7 +26,7 @@ export default
 
             Rest.setUrl(GetBasePath('config'));
             Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     var opts = [], i;
                     if (data.project_local_paths) {
                         for (i = 0; i < data.project_local_paths.length; i++) {

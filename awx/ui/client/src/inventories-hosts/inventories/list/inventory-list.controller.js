@@ -85,7 +85,7 @@ function InventoriesList($scope,
             $('#prompt-modal').modal('hide');
             Rest.setUrl(url);
             Rest.destroy()
-                .success(function () {
+                .then(() => {
                     Wait('stop');
                 })
                 .error(function (data, status) {

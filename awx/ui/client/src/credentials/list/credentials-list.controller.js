@@ -85,7 +85,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
 
                         let reloadListStateParams = null;
 

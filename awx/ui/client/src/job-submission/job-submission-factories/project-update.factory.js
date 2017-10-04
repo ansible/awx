@@ -43,7 +43,7 @@ export default
             Wait('start');
             Rest.setUrl(url);
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 project = data;
                 if (project.can_update) {
                     if (project.passwords_needed_to_updated) {

@@ -9,7 +9,7 @@ export default
             if (!Empty(credential)) {
                 Rest.setUrl(GetBasePath('credentials')+credential);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     credentialTypesLookup()
                         .then(kinds => {
                             if(data.credential_type === kinds.Machine && data.inputs){

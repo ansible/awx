@@ -14,7 +14,7 @@ export default ['$scope', '$rootScope','Wait',
         $scope.$on('ws-jobs', function () {
             Rest.setUrl(GetBasePath('dashboard'));
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 $scope.dashboardData = data;
             })
             .error(function (data, status) {
@@ -23,7 +23,7 @@ export default ['$scope', '$rootScope','Wait',
 
             Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 $scope.dashboardJobsListData = data.results;
             })
             .error(function (data, status) {
@@ -32,7 +32,7 @@ export default ['$scope', '$rootScope','Wait',
 
             Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 $scope.dashboardJobTemplatesListData = data.results;
             })
             .error(function (data, status) {
@@ -90,7 +90,7 @@ export default ['$scope', '$rootScope','Wait',
             Wait('start');
             Rest.setUrl(GetBasePath('dashboard'));
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 $scope.dashboardData = data;
                 $scope.$emit('dashboardReady', data);
             })
@@ -99,7 +99,7 @@ export default ['$scope', '$rootScope','Wait',
             });
             Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 data = data.results;
                 $scope.$emit('dashboardJobsListReady', data);
             })
@@ -108,7 +108,7 @@ export default ['$scope', '$rootScope','Wait',
             });
             Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 data = data.results;
                 $scope.$emit('dashboardJobTemplatesListReady', data);
             })

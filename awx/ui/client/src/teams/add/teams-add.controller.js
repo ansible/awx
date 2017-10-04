@@ -11,7 +11,7 @@ export default ['$scope', '$rootScope', 'TeamForm', 'GenerateForm', 'Rest',
 
         Rest.setUrl(GetBasePath('teams'));
         Rest.options()
-            .success(function(data) {
+            .then(({data}) => {
                 if (!data.actions.POST) {
                     $state.go("^");
                     Alert('Permission Error', 'You do not have permission to add a team.', 'alert-info');
@@ -43,7 +43,7 @@ export default ['$scope', '$rootScope', 'TeamForm', 'GenerateForm', 'Rest',
                 data[fld] = $scope[fld];
             }
             Rest.post(data)
-                .success(function(data) {
+                .then(({data}) => {
                     Wait('stop');
                     $rootScope.flashMessage = "New team successfully created!";
                     $rootScope.$broadcast("EditIndicatorChange", "users", data.id);

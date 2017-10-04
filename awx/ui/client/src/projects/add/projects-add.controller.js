@@ -23,7 +23,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             $scope.canEditOrg = true;
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
-                .success(function(data) {
+                .then(({data}) => {
                     if (!data.actions.POST) {
                         $state.go("^");
                         Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
@@ -99,7 +99,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             Wait('start');
             Rest.setUrl(url);
             Rest.post(data)
-                .success(function(data) {
+                .then(({data}) => {
                     $scope.addedItem = data.id;
                     $state.go('projects.edit', { project_id: data.id }, { reload: true });
                 })

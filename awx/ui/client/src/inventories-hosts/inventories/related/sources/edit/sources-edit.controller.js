@@ -116,7 +116,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         $scope.inventory_files = data;
                         $scope.inventory_files.push("/ (project root)");
 

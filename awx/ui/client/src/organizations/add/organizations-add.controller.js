@@ -12,7 +12,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
-            .success(function(data) {
+            .then(({data}) => {
                 if (!data.actions.POST) {
                     $state.go("^");
                     Alert('Permission Error', 'You do not have permission to add an organization.', 'alert-info');

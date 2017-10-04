@@ -29,10 +29,10 @@ angular.module('ApiLoader', ['Utilities'])
         return function () {
 
             $http({ method: 'GET', url:'/api/', headers: { 'Authorization': "" } })
-                .success(function (data) {
+                .then(({data}) => {
                     var base = data.current_version;
                     $http({ method: 'GET', url:base, headers: { 'Authorization': "" } })
-                        .success(function (data) {
+                        .then(({data}) => {
                             data.base = base;
                             $rootScope.defaultUrls = data;
                             Store('api', data);

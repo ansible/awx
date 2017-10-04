@@ -152,7 +152,7 @@ export default
                 Wait('start');
                 Rest.setUrl(launch_url);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
 
                     // Put all the data that we get back about the launch onto scope
                     angular.extend($scope, data);

@@ -81,7 +81,7 @@ export default
                             Wait('start');
                             Rest.setUrl(url);
                             promises.push(Rest.get()
-                                .success(function (data) {
+                                .then(({data}) => {
                                     $scope.disablePlaybookBecausePermissionDenied = false;
                                     $scope.playbook_options = [];
                                     var playbookNotFound = true;
@@ -112,7 +112,7 @@ export default
 
                             Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                             promises.push(Rest.get()
-                                .success(function (data) {
+                                .then(({data}) => {
                                     var msg;
                                     switch (data.status) {
                                     case 'failed':
@@ -539,7 +539,7 @@ export default
                 var getNext = function(data, arr, resolve) {
                     Rest.setUrl(data.next);
                     Rest.get()
-                        .success(function (data) {
+                        .then(({data}) => {
                             if (data.next) {
                                 getNext(data, arr.concat(data.results), resolve);
                             } else {
@@ -551,7 +551,7 @@ export default
                 Rest.setUrl(data.related.labels);
 
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if (data.next) {
                             getNext(data, data.results, associatedLabelsDefer);
                         } else {
@@ -578,7 +578,7 @@ export default
 
                 Rest.setUrl(GetBasePath("organizations"));
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         orgDefer.resolve(data.results[0].id);
                     });
 
@@ -722,7 +722,7 @@ export default
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.put(data)
-                        .success(function (data) {
+                        .then(({data}) => {
                             $scope.$emit('templateSaveSuccess', data);
                         })
                         .error(function (data, status) {

@@ -59,7 +59,7 @@
                  Wait('start');
                  Rest.setUrl(GetBasePath('ad_hoc_commands') + new_job_id + '/');
                  Rest.destroy()
-                     .success(function() {
+                     .then(() => {
                          Wait('stop');
                      })
                      .error(function (data, status) {
@@ -86,7 +86,7 @@
                  // Re-launch the adhoc job
                  Rest.setUrl(url);
                  Rest.post(postData)
-                     .success(function (data) {
+                     .then(({data}) => {
                           Wait('stop');
                           if($location.path().replace(/^\//, '').split('/')[0] !== 'jobs') {
                               $state.go('adHocJobStdout', {id: data.id});
@@ -133,7 +133,7 @@
              url = GetBasePath('ad_hoc_commands') + id + '/relaunch/';
              Rest.setUrl(url);
              Rest.get()
-                 .success(function (data) {
+                 .then(({data}) => {
                      new_job_id = data.id;
 
                      scope.passwords_needed_to_start = data.passwords_needed_to_start;

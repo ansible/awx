@@ -13,7 +13,7 @@ export default
                     Wait('start');
                     Rest.setUrl(inventory_source.url);
                     Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         // Get the ID from the correct summary field
                         var update_id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
 

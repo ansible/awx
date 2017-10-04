@@ -173,7 +173,7 @@ export default ['Rest', 'Wait',
                     inputs: inputs,
                     injectors: injectors
                 })
-                .success(function() {
+                .then(() => {
                     $state.go($state.current, null, { reload: true });
                     Wait('stop');
                 })

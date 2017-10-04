@@ -42,7 +42,7 @@
                 Rest.setUrl(url);
                 if (action_label === 'cancel') {
                     Rest.post()
-                        .success(function () {
+                        .then(() => {
                             $('#prompt-modal').modal('hide');
                             if (callback) {
                                 scope.$emit(callback, action_label);
@@ -64,7 +64,7 @@
                         });
                 } else {
                     Rest.destroy()
-                        .success(function () {
+                        .then(() => {
                             $('#prompt-modal').modal('hide');
                             if (callback) {
                                 scope.$emit(callback, action_label);
@@ -119,7 +119,7 @@
             if (action_label === 'cancel') {
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if (data.can_cancel) {
                             scope.$emit('CancelJob');
                         }

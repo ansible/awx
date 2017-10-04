@@ -239,7 +239,7 @@ function adhocController($q, $scope, $stateParams,
                 // Launch the adhoc job
                 Rest.setUrl(GetBasePath('inventory') + id + '/ad_hoc_commands/');
                 Rest.post(data)
-                    .success(function (data) {
+                    .then(({data}) => {
                          Wait('stop');
                          $state.go('adHocJobStdout', {id: data.id});
                     })

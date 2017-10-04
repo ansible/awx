@@ -62,7 +62,7 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
 
                         let reloadListStateParams = null;
 

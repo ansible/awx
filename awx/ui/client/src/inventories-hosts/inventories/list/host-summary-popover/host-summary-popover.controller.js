@@ -10,7 +10,7 @@ export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessError
                     url += "&order_by=-finished&page_size=5";
                     Rest.setUrl(url);
                     Rest.get()
-                        .success( function(data) {
+                        .then(({data}) => {
                             $scope.generateTable(data, event);
                         })
                         .error( function(data, status) {

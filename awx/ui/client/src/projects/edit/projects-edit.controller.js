@@ -85,7 +85,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             // Retrieve detail record and prepopulate the form
             Rest.setUrl(defaultUrl);
             Rest.get({ params: { id: id } })
-                .success(function(data) {
+                .then(({data}) => {
                     var fld, i;
                     for (fld in form.fields) {
                         if (form.fields[fld].type === 'checkbox_group') {
@@ -214,7 +214,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
 
             Rest.setUrl(defaultUrl);
             Rest.put(params)
-                .success(function() {
+                .then(() => {
                     Wait('stop');
                     $state.go($state.current, {}, { reload: true });
                 })
@@ -230,7 +230,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                 $rootScope.flashMessage = null;
                 Rest.setUrl(url);
                 Rest.post({ id: itm_id, disassociate: 1 })
-                    .success(function() {
+                    .then(() => {
                         $('#prompt-modal').modal('hide');
                     })
                     .error(function(data, status) {

@@ -81,7 +81,7 @@ export default
                         Rest.setUrl(GetBasePath('workflow_job_templates') + id + '/survey_spec/');
                     }
                     return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                    .success(function () {
+                    .then(() => {
 
                     })
                     .error(function (data, status) {
@@ -98,7 +98,7 @@ export default
                         Rest.setUrl(GetBasePath('workflow_job_templates') + id+ '/');
                     }
                     return Rest.patch({"survey_enabled": scope.survey_enabled})
-                    .success(function () {
+                    .then(() => {
 
                     })
                     .error(function (data, status) {

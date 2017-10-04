@@ -38,7 +38,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             $scope.$watch('is_superuser', hidePermissionsTabSmartSearchAndPaginationIfSuperUser($scope));
             Rest.setUrl(defaultUrl);
             Wait('start');
-            Rest.get(defaultUrl).success(function(data) {
+            Rest.get(defaultUrl).then(({data}) => {
                     $scope.user_id = id;
                     $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
                     $scope.not_ldap_user = !$scope.ldap_user;
@@ -172,7 +172,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             if ($scope[form.name + '_form'].$valid) {
                 Rest.setUrl(defaultUrl + '/');
                 var data = processNewData(form.fields);
-                Rest.put(data).success(function() {
+                Rest.put(data).then(() => {
                         $state.go($state.current, null, { reload: true });
                     })
                     .error(function(data, status) {

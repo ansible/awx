@@ -12,7 +12,7 @@ export default
             scope.removeScheduleFound = scope.$on('ScheduleFound', function(e, data) {
                 data.enabled = (data.enabled) ? false : true;
                 Rest.put(data)
-                    .success( function() {
+                    .then(() => {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
                     })
@@ -27,7 +27,7 @@ export default
             // Get the schedule
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     scope.$emit('ScheduleFound', data);
                 })
                 .error(function(data,status){

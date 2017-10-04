@@ -86,7 +86,7 @@ export default
 		$scope.submit = function(){
 			Wait('start');
 			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
-				.success(function(){
+				.then(() => {
 					reset();
                     ConfigService.delete();
                     ConfigService.getConfig().then(function(config){

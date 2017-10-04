@@ -48,7 +48,7 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
 

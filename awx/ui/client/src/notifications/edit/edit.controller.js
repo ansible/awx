@@ -59,7 +59,7 @@ export default ['Rest', 'Wait',
             Wait('start');
             Rest.setUrl(url + id + '/');
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     var fld;
                     for (fld in form.fields) {
                         if (data[fld]) {
@@ -280,7 +280,7 @@ export default ['Rest', 'Wait',
             Wait('start');
             Rest.setUrl(url + id + '/');
             Rest.put(params)
-                .success(function() {
+                .then(() => {
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })

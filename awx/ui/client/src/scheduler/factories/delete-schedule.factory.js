@@ -22,7 +22,7 @@ export default
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function () {
+                    .then(() => {
                         $('#prompt-modal').modal('hide');
                         scope.$emit(callback, id);
 

@@ -35,7 +35,7 @@ export default
                 Rest.setUrl(url);
                 if (mode === 'add') {
                     Rest.post(schedule)
-                        .success(function(){
+                        .then(() => {
                             if (callback) {
                                 scope.$emit(callback);
                             }
@@ -50,7 +50,7 @@ export default
                 }
                 else {
                     Rest.put(schedule)
-                        .success(function(){
+                        .then(() => {
                             if (callback) {
                                 scope.$emit(callback, schedule);
                             }

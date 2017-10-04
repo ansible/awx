@@ -750,7 +750,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 if (!options) {
                   Rest.setUrl(url);
                   Rest.options()
-                      .success(function(data) {
+                      .then(({data}) => {
                           withOptions(data);
                       })
                       .error(function(data, status) {

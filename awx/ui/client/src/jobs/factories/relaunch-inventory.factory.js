@@ -7,7 +7,7 @@ export default
             Wait('start');
             Rest.setUrl(url);
             Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     InventoryUpdate({
                         scope: scope,
                         url: data.related.update

@@ -77,7 +77,7 @@ function SmartInventoryEdit($scope, $location,
 
         Rest.setUrl(defaultUrl + inventory_id + '/');
         Rest.put(data)
-            .success(function() {
+            .then(() => {
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
                     .then(() => {
                         Wait('stop');

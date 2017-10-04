@@ -139,7 +139,7 @@ export default
 
                     Rest.setUrl(url);
                     Rest.post(job_launch_data)
-                    .success(function(data) {
+                    .then(({data}) => {
                         Wait('stop');
                         var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
                         if(base !== 'portal' && Empty(data.system_job) || (base === 'home')){
@@ -200,7 +200,7 @@ export default
                 var getExtraVars = function() {
                     Rest.setUrl(vars_url);
                     Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         if(!Empty(data.extra_vars)){
                             data.extra_vars = ToJSON('yaml',  data.extra_vars, false);
                             $.each(data.extra_vars, function(key,value){

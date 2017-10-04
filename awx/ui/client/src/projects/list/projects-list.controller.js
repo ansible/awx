@@ -162,7 +162,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                 // Refresh what we have in memory to insure we're accessing the most recent status record
                 Rest.setUrl(project.url);
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         $scope.$emit('GoTojobResults', data);
                     })
                     .error(function(data, status) {
@@ -179,7 +179,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
 
                         let reloadListStateParams = null;
 
@@ -218,7 +218,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             // Cancel the project update process
             Rest.setUrl(url);
             Rest.post()
-                .success(function () {
+                .then(() => {
                     Alert(i18n._('SCM Update Cancel'), i18n._('Your request to cancel the update was submitted to the task manager.'), 'alert-info');
                 })
                 .error(function (data, status) {
@@ -234,7 +234,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             var url = data.related.cancel;
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     if (data.can_cancel) {
                         $scope.$emit('Cancel_Update', url);
                     } else {
@@ -251,11 +251,11 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             project.pending_cancellation = true;
             Rest.setUrl(GetBasePath("projects") + project.id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     if (data.related.current_update) {
                         Rest.setUrl(data.related.current_update);
                         Rest.get()
-                            .success(function(data) {
+                            .then(({data}) => {
                                 $scope.$emit('Check_Cancel', data);
                             })
                             .error(function (data, status) {

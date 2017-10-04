@@ -19,7 +19,7 @@ export default ['Rest', 'Wait',
         function init() {
             Rest.setUrl(url);
             Rest.options()
-                .success(function(data) {
+                .then(({data}) => {
                     if (!data.actions.POST) {
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add an inventory script.', 'alert-info');
@@ -43,7 +43,7 @@ export default ['Rest', 'Wait',
                     organization: $scope.organization,
                     script: $scope.script
                 })
-                .success(function() {
+                .then(() => {
                     $state.go('inventoryScripts', null, { reload: true });
                     Wait('stop');
                 })

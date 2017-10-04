@@ -18,7 +18,7 @@ export default
 
                 Wait("start");
                 Rest.options()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if (data.actions.POST) {
                             canAddVal.resolve({canAdd: true, options: data});
                         } else {

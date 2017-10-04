@@ -26,7 +26,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
 
         Rest.setUrl($rootScope.current_user.related.admin_of_organizations);
         Rest.get()
-            .success(function(data) {
+            .then(({data}) => {
                 scope.current_user_admin_orgs = data.results.map(i => i.name);
             });
 

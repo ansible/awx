@@ -98,7 +98,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
             Rest.setUrl($scope.stdoutEndpoint + '?format=json&start_line=0&end_line=' + page_size);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     Wait('stop');
                     if (data.content) {
                         api_complete = true;
@@ -134,7 +134,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
             $('#stdoutMoreRowsBottom').fadeIn();
             Rest.setUrl(url);
             Rest.get()
-                .success( function(data) {
+                .then(({data}) => {
                     if ($('#pre-container-content').html() === "Waiting for results...") {
                         $('#pre-container-content').html(data.content);
                     } else {
@@ -166,7 +166,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                     '&end_line=' + (current_range.end + page_size);
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function(data){
+                    .then(({data}) => {
                         $('#pre-container-content').append(data.content);
                         current_range = data.range;
                     })

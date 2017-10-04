@@ -146,7 +146,7 @@
                         url = GetBasePath('projects') + $scope.project + '/playbooks/';
                         Rest.setUrl(url);
                         Rest.get()
-                            .success(function (data) {
+                            .then(({data}) => {
                                 var i, opts = [];
                                 for (i = 0; i < data.length; i++) {
                                     opts.push(data[i]);
@@ -172,7 +172,7 @@
                 if (oldValue !== newValue && !Empty($scope.project)) {
                     Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                     Rest.get()
-                        .success(function (data) {
+                        .then(({data}) => {
                             var msg;
                             switch (data.status) {
                             case 'failed':
@@ -394,7 +394,7 @@
 
                             Rest.setUrl(GetBasePath("organizations"));
                             Rest.get()
-                                .success(function(data) {
+                                .then(({data}) => {
                                     orgDefer.resolve(data.results[0].id);
                                 });
 
@@ -434,7 +434,7 @@
                                                 Rest.post({ name: $scope.survey_name,
                                                     description: $scope.survey_description,
                                                     spec: $scope.survey_questions })
-                                                    .success(function () {
+                                                    .then(() => {
                                                         Wait('stop');
                                                     })
                                                     .error(function (data,

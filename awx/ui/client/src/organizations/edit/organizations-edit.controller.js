@@ -36,7 +36,7 @@ export default ['$scope', '$location', '$stateParams',
         Wait('start');
         Rest.setUrl(defaultUrl + id + '/');
         Rest.get()
-            .success(function(data) {
+            .then(({data}) => {
                 let fld;
 
                 $scope.organization_name = data.name;
@@ -124,7 +124,7 @@ export default ['$scope', '$location', '$stateParams',
                 var url = defaultUrl + $stateParams.organization_id + '/' + set + '/';
                 Rest.setUrl(url);
                 Rest.post({ id: itm_id, disassociate: 1 })
-                    .success(function() {
+                    .then(() => {
                         $('#prompt-modal').modal('hide');
                     })
                     .error(function(data, status) {

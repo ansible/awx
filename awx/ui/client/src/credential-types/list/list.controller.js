@@ -60,7 +60,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
 
                         let reloadListStateParams = null;
 

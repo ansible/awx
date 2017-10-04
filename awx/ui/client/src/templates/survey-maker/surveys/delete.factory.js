@@ -41,7 +41,7 @@ export default
 
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function () {
+                    .then(() => {
                         scope.$emit("SurveyDeleted");
 
                     })

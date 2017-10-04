@@ -42,7 +42,7 @@ export default
             Wait('start');
             Rest.setUrl(url);
             Rest.get()
-            .success(function (data) {
+            .then(({data}) => {
                 if(params.updateAllSources) {
                     scope.$emit('StartTheUpdate', {});
                 }
