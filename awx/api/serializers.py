@@ -3663,6 +3663,7 @@ class InstanceSerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
@@ -3670,7 +3671,8 @@ class InstanceGroupSerializer(BaseSerializer):
 
     class Meta:
         model = InstanceGroup
-        fields = ("id", "type", "url", "related", "name", "created", "modified", "capacity", "consumed_capacity",
+        fields = ("id", "type", "url", "related", "name", "created", "modified",
+                  "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "instances", "controller")
 
     def get_related(self, obj):
@@ -3699,7 +3701,10 @@ class InstanceGroupSerializer(BaseSerializer):
         return self.context['capacity_map']
 
     def get_consumed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['consumed_capacity']
+        return self.get_capacity_dict()[obj.name]['running_capacity']
+
+    def get_committed_capacity(self, obj):
+        return self.get_capacity_dict()[obj.name]['committed_capacity']
 
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
