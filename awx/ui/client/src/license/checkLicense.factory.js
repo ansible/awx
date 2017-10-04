@@ -24,7 +24,7 @@ export default
 						.success(function(res){
 							return res;
 						})
-						.error(function(res, status){
+						.catch(({res, status}) => {
 	                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
 	                        msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
 	                    });

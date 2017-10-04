@@ -77,7 +77,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                     val.resolve({results: data.results,
                         next: data.next});
                 })
-                .error(function(obj, status) {
+                .catch(({obj, status}) => {
                     ProcessErrors(null, obj, status, null, {
                         hdr: 'Error!',
                         msg: `Could not get job events.
@@ -106,7 +106,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                             $('#prompt-modal').modal('hide');
                             $state.go('jobs');
                         })
-                        .error(function(obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             ProcessErrors(null, obj, status, null, {
@@ -127,7 +127,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(obj, status) {
+                    .catch(({obj, status}) => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         ProcessErrors(null, obj, status, null, {
@@ -242,7 +242,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                 .then(({data}) => {
                     return data;
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });

@@ -188,7 +188,7 @@ export default
                             $state.go('.', null, {reload: true});
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         let template_id = scope.job_template_id;
                         template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
                         ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
@@ -209,7 +209,7 @@ export default
                         }
                         buildData();
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, { hdr: i18n._('Error!'),
                         msg: i18n._('Failed to retrieve job template extra variables.')  });
                     });

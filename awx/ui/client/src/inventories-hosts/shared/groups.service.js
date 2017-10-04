@@ -24,7 +24,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             post: function(group){
@@ -33,7 +33,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post(group)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             put: function(group){
@@ -42,7 +42,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.put(group)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             delete: function(id){
@@ -51,7 +51,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.destroy()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             getCredential: function(id){
@@ -60,7 +60,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             getInventorySource: function(params){
@@ -69,7 +69,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             putInventorySource: function(params, url){
@@ -78,7 +78,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.put(params)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             // these relationship setters could be consolidated, but verbosity makes the operation feel more clear @ controller level
@@ -88,7 +88,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post(group)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             disassociateGroup: function(group, parent){
@@ -97,7 +97,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post({id: group, disassociate: 1})
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             associateHost: function(host, target){
@@ -106,7 +106,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post(host)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             disassociateHost: function(host, group){
@@ -115,7 +115,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post({id: host, disassociate: 1})
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             promote: function(group, inventory){
@@ -124,7 +124,7 @@ export default
                 Rest.setUrl(this.url);
                 return Rest.post({id: group, disassociate: 1})
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             }
         };

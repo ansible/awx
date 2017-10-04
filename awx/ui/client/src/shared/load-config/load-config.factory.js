@@ -41,7 +41,7 @@ export default
 
                     configInit();
 
-                }).error(function(error) {
+                }).catch(({error}) => {
                     $log.debug(error);
                     configInit();
                 });

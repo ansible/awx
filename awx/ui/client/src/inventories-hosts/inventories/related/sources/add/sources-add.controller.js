@@ -42,7 +42,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                         sync_inventory_file_select2();
                         Wait('stop');
                     })
-                    .error(function () {
+                    .catch(() => {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
                     });

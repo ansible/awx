@@ -149,7 +149,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                     scope.$emit('AuthorizationGetLicense');
                 });
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 Authorization.logout().then( () => {
                     Wait('stop');
                     Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);

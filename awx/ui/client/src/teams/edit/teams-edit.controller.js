@@ -77,7 +77,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
                 Rest.put(data).then(() => {
                         $state.go($state.current, null, { reload: true });
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Failed to retrieve user: ' +

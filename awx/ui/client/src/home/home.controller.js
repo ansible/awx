@@ -17,7 +17,7 @@ export default ['$scope', '$rootScope','Wait',
             .then(({data}) => {
                 $scope.dashboardData = data;
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
             });
 
@@ -26,7 +26,7 @@ export default ['$scope', '$rootScope','Wait',
             .then(({data}) => {
                 $scope.dashboardJobsListData = data.results;
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
             });
 
@@ -35,7 +35,7 @@ export default ['$scope', '$rootScope','Wait',
             .then(({data}) => {
                 $scope.dashboardJobTemplatesListData = data.results;
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
             });
 
@@ -94,7 +94,7 @@ export default ['$scope', '$rootScope','Wait',
                 $scope.dashboardData = data;
                 $scope.$emit('dashboardReady', data);
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             });
             Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
@@ -103,7 +103,7 @@ export default ['$scope', '$rootScope','Wait',
                 data = data.results;
                 $scope.$emit('dashboardJobsListReady', data);
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
             });
             Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
@@ -112,7 +112,7 @@ export default ['$scope', '$rootScope','Wait',
                 data = data.results;
                 $scope.$emit('dashboardJobTemplatesListReady', data);
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard job templates list: ' + status });
             });
         };

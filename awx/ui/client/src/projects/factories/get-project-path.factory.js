@@ -63,7 +63,7 @@ export default
                     }
                     scope.$emit('pathsReady');
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to access API config. GET status: ' + status });
                 });

@@ -117,7 +117,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                         api_complete = true;
                     }
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
                 });
@@ -152,7 +152,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                     }
                     $('#stdoutMoreRowsBottom').fadeOut(400);
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
                 });
@@ -170,7 +170,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                         $('#pre-container-content').append(data.content);
                         current_range = data.range;
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
                     });

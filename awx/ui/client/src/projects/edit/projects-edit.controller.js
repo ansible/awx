@@ -152,7 +152,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     $scope.$emit('projectLoaded');
                     Wait('stop');
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
                         msg: i18n.sprintf(i18n._('Failed to retrieve project: %s. GET status: '), id) + status
                     });
@@ -218,7 +218,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     Wait('stop');
                     $state.go($state.current, {}, { reload: true });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Failed to update project: %s. PUT status: '), id) + status });
                 });
         };
@@ -233,7 +233,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     .then(() => {
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         $('#prompt-modal').modal('hide');
                         ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST returned status: '), url) + status });
                     });

@@ -57,7 +57,7 @@ export default
                                     Wait('stop');
                                     $state.go('.', null, { reload: true });
                                 })
-                                .error(function(data, status) {
+                                .catch(({data, status}) => {
                                     ProcessErrors($rootScope, data, status, null, {
                                         hdr: 'Error!',
                                         msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status

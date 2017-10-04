@@ -86,7 +86,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                                 Wait('stop');
                             }
                         })
-                        .error( function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to update notification ' + data.id + ' PUT returned: ' + status });
                         });

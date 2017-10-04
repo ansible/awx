@@ -94,7 +94,7 @@ export default {
                                 countFinished: true});
                         }
                     })
-                    .error(function() {
+                    .catch(() => {
                         defer.resolve({val: {
                             ok: 0,
                             skipped: 0,

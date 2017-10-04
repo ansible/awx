@@ -40,7 +40,7 @@ export default
                             $state.go('.', reloadListStateParams, {reload: true});
                         }
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         try {
                             $('#prompt-modal').modal('hide');
                         }

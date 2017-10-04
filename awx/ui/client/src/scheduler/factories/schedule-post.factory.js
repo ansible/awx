@@ -43,7 +43,7 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error(function(data, status){
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'POST to ' + url + ' returned: ' + status });
                         });
@@ -58,7 +58,7 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error(function(data, status){
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'POST to ' + url + ' returned: ' + status });
                         });

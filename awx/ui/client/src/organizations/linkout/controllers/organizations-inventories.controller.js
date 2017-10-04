@@ -197,7 +197,7 @@ export default ['$scope', '$rootScope', '$location',
                         .then(({data}) => {
                             $scope.$emit('GroupSummaryReady', event, inventory, data);
                         })
-                        .error(function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, null, {
                                 hdr: 'Error!',
                                 msg: 'Call to ' + inventory.related.inventory_sources + ' failed. GET returned status: ' + status
@@ -221,7 +221,7 @@ export default ['$scope', '$rootScope', '$location',
                         .then(({data}) => {
                             $scope.$emit('HostSummaryReady', event, data);
                         })
-                        .error(function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, null, {
                                 hdr: 'Error!',
                                 msg: 'Call to ' + url + ' failed. GET returned: ' + status

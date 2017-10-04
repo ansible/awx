@@ -26,7 +26,7 @@
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             getBreadcrumbs: function(groups){
@@ -37,7 +37,7 @@
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             rootHostsUrl: function(id){
@@ -61,21 +61,21 @@
                 Rest.setUrl(this.url);
                 return Rest.options()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this));
+                    .catch(this.catch.bind(this));
             },
             updateInventorySourcesGet: function(inventoryId) {
                 this.url = GetBasePath('inventory') + inventoryId + '/update_inventory_sources';
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this));
+                    .catch(this.catch.bind(this));
             },
             getHost: function(inventoryId, hostId) {
                 this.url = GetBasePath('inventory') + inventoryId + '/hosts?id=' + hostId;
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this));
+                    .catch(this.catch.bind(this));
             }
         };
     }];

@@ -65,7 +65,7 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
                             $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         ProcessErrors($scope, data, status, null, {

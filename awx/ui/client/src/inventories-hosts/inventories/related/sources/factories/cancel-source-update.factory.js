@@ -32,7 +32,7 @@ export default
                                 //Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
                                 //    'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');
                             })
-                            .error(function (data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                               msg: 'Call to ' + url + ' failed. POST status: ' + status
                                 });
@@ -42,13 +42,13 @@ export default
                             Wait('stop');
                         }
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                       msg: 'Call to ' + url + ' failed. GET status: ' + status
                         });
                     });
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                   msg: 'Call to ' + inventory_source.url + ' failed. GET status: ' + status
                     });

@@ -103,7 +103,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
                     $scope.addedItem = data.id;
                     $state.go('projects.edit', { project_id: data.id }, { reload: true });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
                         msg: i18n._('Failed to create new project. POST returned status: ') + status });

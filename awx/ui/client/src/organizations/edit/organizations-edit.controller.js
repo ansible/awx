@@ -127,7 +127,7 @@ export default ['$scope', '$location', '$stateParams',
                     .then(() => {
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         $('#prompt-modal').modal('hide');
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',

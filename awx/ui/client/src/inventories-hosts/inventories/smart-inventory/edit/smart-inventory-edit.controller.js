@@ -90,7 +90,7 @@ function SmartInventoryEdit($scope, $location,
                         });
                     });
             })
-            .error(function(data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, form, {
                     hdr: 'Error!',
                     msg: 'Failed to update inventory. PUT returned status: ' + status

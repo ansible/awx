@@ -77,7 +77,7 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
                             $state.go('.', null, { reload: true });
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: i18n._('Error!'),
                             msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status

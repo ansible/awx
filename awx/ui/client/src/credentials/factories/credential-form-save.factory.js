@@ -63,7 +63,7 @@ export default
                         ReturnToCaller(1);
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     // TODO: hopefully this conditional error handling will to away in a future versions.  The reason why we cannot
                     // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
@@ -87,7 +87,7 @@ export default
                     Wait('stop');
                     $state.go($state.current, {}, {reload: true});
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     ProcessErrors(scope, data, status, form, {
                         hdr: i18n._('Error!'),

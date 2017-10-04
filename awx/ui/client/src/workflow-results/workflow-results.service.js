@@ -50,7 +50,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                             $('#prompt-modal').modal('hide');
                             $state.go('jobs');
                         })
-                        .error(function(obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             ProcessErrors(null, obj, status, null, {
@@ -71,7 +71,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(obj, status) {
+                    .catch(({obj, status}) => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         ProcessErrors(null, obj, status, null, {

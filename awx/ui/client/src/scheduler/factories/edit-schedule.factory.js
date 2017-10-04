@@ -141,7 +141,7 @@ export default
 
                     scope.$emit('ScheduleFound');
                 })
-                .error(function(data,status){
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
                 });

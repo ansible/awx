@@ -77,7 +77,7 @@ export default {
                             defer.resolve(data.results);
                         }
                     })
-                    .error(function() {
+                    .catch(() => {
                         // TODO: handle this
                         //defer.resolve(data);
                     });

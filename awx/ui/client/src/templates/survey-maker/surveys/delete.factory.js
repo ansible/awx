@@ -45,7 +45,7 @@ export default
                         scope.$emit("SurveyDeleted");
 
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, { hdr: 'Error!',
                             msg: 'Failed to delete survey. DELETE returned status: ' + status });
                     });

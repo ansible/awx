@@ -65,7 +65,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
                             $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

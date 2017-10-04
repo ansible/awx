@@ -69,7 +69,7 @@ export default
                                         Wait('stop');
                                         $state.go('.', null, {reload: true});
                                     })
-                                    .error(function (data, status) {
+                                    .catch(({data, status}) => {
                                         Wait('stop');
                                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                             msg: 'Could not disassociate host from group.  Call to ' + url + ' failed. DELETE returned status: ' + status });

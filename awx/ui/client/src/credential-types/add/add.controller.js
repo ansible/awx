@@ -103,7 +103,7 @@ export default ['Rest', 'Wait',
                     $state.go('credentialTypes.edit', { credential_type_id: data.id }, { reload: true });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new credential type. PUT returned status: ' + status

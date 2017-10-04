@@ -9,7 +9,7 @@ export default [ '$scope', 'Wait', 'Empty', 'Rest', 'ProcessErrors', '$state',
                     .then(({data}) => {
                         $scope.generateTable(data, event);
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
                             msg: 'Call to ' + $scope.inventory.related.inventory_sources + ' failed. GET returned status: ' + status
                         });

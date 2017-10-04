@@ -753,7 +753,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                       .then(({data}) => {
                           withOptions(data);
                       })
-                      .error(function(data, status) {
+                      .catch(({data, status}) => {
                           ProcessErrors(scope, data, status, null, {
                               hdr: 'Error!',
                               msg: 'Failed to get ' + url + '. OPTIONS status: ' + status

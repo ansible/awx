@@ -95,7 +95,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
                                 ReturnToCaller(1);
                             }
                         })
-                        .error(function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'), msg: i18n._('Failed to add new user. POST returned status: ') + status });
                         });
                 } else {

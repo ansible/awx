@@ -75,7 +75,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     setScopeFields(data);
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: i18n._('Error!'),
                         msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
@@ -175,7 +175,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                 Rest.put(data).then(() => {
                         $state.go($state.current, null, { reload: true });
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: i18n._('Error!'),
                             msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status

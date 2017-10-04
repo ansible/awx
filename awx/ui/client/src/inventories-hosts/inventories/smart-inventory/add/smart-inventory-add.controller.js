@@ -77,7 +77,7 @@ function SmartInventoryAdd($scope, $location,
                             });
                         });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new inventory. Post returned status: ' + status

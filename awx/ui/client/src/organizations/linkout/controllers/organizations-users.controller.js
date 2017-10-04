@@ -53,7 +53,7 @@ export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
                     }).then(() => {
                         $state.go('.', null, { reload: true });
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

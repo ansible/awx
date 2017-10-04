@@ -63,7 +63,7 @@ export default
                     }
                 }
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                 msg: 'Failed to get inventory source ' + url + ' GET returned: ' + status });
                 });

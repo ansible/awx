@@ -74,7 +74,7 @@ export default
                         return;
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, { hdr: 'Error!',
                     msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
                 });

@@ -21,7 +21,7 @@ export default
                     scope.cloudCredentialRequired = false;
                     scope.$emit('sourceTypeOptionsReady');
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                   msg: 'Failed to retrieve options for inventory_sources.source. OPTIONS status: ' + status
                     });

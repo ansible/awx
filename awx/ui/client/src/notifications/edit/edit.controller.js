@@ -144,7 +144,7 @@ export default ['Rest', 'Wait',
                     });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to retrieve notification: ' + id + '. GET status: ' + status
@@ -284,7 +284,7 @@ export default ['Rest', 'Wait',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new notification template. POST returned status: ' + status

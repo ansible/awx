@@ -84,7 +84,7 @@ export default
                     .then(() => {
 
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to add new survey. POST returned status: ' + status });
                     });
@@ -101,7 +101,7 @@ export default
                     .then(() => {
 
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, form, {
                             hdr: 'Error!',
                             msg: 'Failed to save survey_enabled: GET status: ' + status

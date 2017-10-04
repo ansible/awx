@@ -165,7 +165,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     .then(({data}) => {
                         $scope.$emit('GoTojobResults', data);
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                             msg: i18n._('Project lookup failed. GET returned: ') + status });
                     });
@@ -194,7 +194,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                             $state.go('.', reloadListStateParams, {reload: true});
                         }
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                             msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
                     })
@@ -221,7 +221,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                 .then(() => {
                     Alert(i18n._('SCM Update Cancel'), i18n._('Your request to cancel the update was submitted to the task manager.'), 'alert-info');
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST status: '), url) + status });
                 });
         });
@@ -242,7 +242,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                             'Click the %sRefresh%s button to view the latest status.'), '<em>', '</em>') + '</div>', 'alert-info', null, null, null, null, true);
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. GET status: '), url) + status });
                 });
         });
@@ -258,7 +258,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                             .then(({data}) => {
                                 $scope.$emit('Check_Cancel', data);
                             })
-                            .error(function (data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                                     msg: i18n.sprintf(i18n._('Call to %s failed. GET status: '), data.related.current_update) + status });
                             });
@@ -267,7 +267,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                             'button to view the latest status.'), $filter('sanitize')(name), '<em>', '</em>') + '</div>', 'alert-info',undefined,undefined,undefined,undefined,true);
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                         msg: i18n._('Call to get project failed. GET status: ') + status });
                 });

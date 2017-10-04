@@ -130,7 +130,7 @@ export default
                                         Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                                     }
                                 })
-                                .error(function (data, status) {
+                                .catch(({data, status}) => {
                                     if (status === 403) {
                                         /* User doesn't have read access to the project, no problem. */
                                     } else {
@@ -725,7 +725,7 @@ export default
                         .then(({data}) => {
                             $scope.$emit('templateSaveSuccess', data);
                         })
-                        .error(function (data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to update job template. PUT returned status: ' + status });
                         });

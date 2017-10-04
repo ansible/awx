@@ -51,7 +51,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 .then(({data}) => {
                     $scope.organization_name = data.name;
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: `Failed to retrieve organization. GET status: ${status}`
@@ -217,7 +217,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new notifier. POST returned status: ' + status

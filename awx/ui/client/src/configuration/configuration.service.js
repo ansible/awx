@@ -35,7 +35,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
 
                         deferred.resolve(returnData);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 
@@ -50,7 +50,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                     .then(({data}) => {
                         deferred.resolve(data);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 
@@ -64,7 +64,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                     .then(({data}) => {
                         deferred.resolve(data);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 

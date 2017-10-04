@@ -208,7 +208,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                     .then(({data}) => {
                         $scope.$emit('GoTojobResults', data);
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Project lookup failed. GET returned: ' + status
@@ -228,7 +228,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                     Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task manager.', 'alert-info');
                     $scope.refresh();
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
                 });
         });
@@ -249,7 +249,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                             'Click the <em>Refresh</em> button to view the latest status.</div>', 'alert-info', null, null, null, null, true);
                     }
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
                 });
         });
@@ -264,7 +264,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                             .then(({data}) => {
                                 $scope.$emit('Check_Cancel', data);
                             })
-                            .error(function(data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors($scope, data, status, null, {
                                     hdr: 'Error!',
                                     msg: 'Call to ' + data.related.current_update + ' failed. GET status: ' + status
@@ -275,7 +275,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                             'button to view the latest status.</div>', 'alert-info', undefined, undefined, undefined, undefined, true);
                     }
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: 'Error!',
                         msg: 'Call to get project failed. GET status: ' + status

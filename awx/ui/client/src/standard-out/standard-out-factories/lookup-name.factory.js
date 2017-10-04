@@ -25,7 +25,7 @@
                         scope.$emit(callback, data);
                      }
                  })
-                 .error(function(data, status) {
+                 .catch(({data, status}) => {
                      if (status === 403 && params.ignore_403) {
                          return;
                      }

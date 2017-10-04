@@ -243,7 +243,7 @@ function adhocController($q, $scope, $stateParams,
                          Wait('stop');
                          $state.go('adHocJobStdout', {id: data.id});
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, adhocForm, {
                             hdr: 'Error!',
                             msg: 'Failed to launch adhoc command. POST ' +

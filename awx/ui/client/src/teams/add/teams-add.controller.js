@@ -49,7 +49,7 @@ export default ['$scope', '$rootScope', 'TeamForm', 'GenerateForm', 'Rest',
                     $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
                     $state.go('teams.edit', { team_id: data.id }, { reload: true });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',

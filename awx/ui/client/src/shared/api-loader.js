@@ -37,7 +37,7 @@ angular.module('ApiLoader', ['Utilities'])
                             $rootScope.defaultUrls = data;
                             Store('api', data);
                         })
-                        .error(function (data, status) {
+                        .catch(({data, status}) => {
                             $rootScope.defaultUrls = {
                                 status: 'error'
                             };
@@ -47,7 +47,7 @@ angular.module('ApiLoader', ['Utilities'])
                             });
                         });
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     $rootScope.defaultUrls = {
                         status: 'error'
                     };

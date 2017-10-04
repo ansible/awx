@@ -13,7 +13,7 @@ export default
                         url: data.related.update
                     });
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' +
                         url + ' GET returned: ' + status });
                 });

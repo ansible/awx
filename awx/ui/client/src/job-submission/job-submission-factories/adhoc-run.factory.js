@@ -62,7 +62,7 @@
                      .then(() => {
                          Wait('stop');
                      })
-                     .error(function (data, status) {
+                     .catch(({data, status}) => {
                          ProcessErrors(scope, data, status,
                            null, { hdr: 'Error!',
                                msg: 'Call to ' + url +
@@ -92,7 +92,7 @@
                               $state.go('adHocJobStdout', {id: data.id});
                           }
                      })
-                     .error(function (data, status) {
+                     .catch(({data, status}) => {
                          ProcessErrors(scope, data, status, {
                              hdr: 'Error!',
                              msg: 'Failed to launch adhoc command. POST ' +
@@ -148,7 +148,7 @@
                          scope.$emit('StartAdhocRun');
                      }
                  })
-                 .error(function (data, status) {
+                 .catch(({data, status}) => {
                      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                      msg: 'Failed to get job template details. GET returned status: ' + status });
                  });

@@ -211,7 +211,7 @@ export default ['$scope', '$rootScope',
                                 }
                             });
          			})
-          			.error(function(res, status){
+          			.catch(({res, status}) => {
                         ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
                         msg: 'Call failed. Return status: '+ status});
                     });

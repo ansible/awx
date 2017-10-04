@@ -261,7 +261,7 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
           Rest.options()
               .then(({data}) => {
                   deferred.resolve(data);
-              }).error(function(msg, code) {
+              }).catch(({msg, code}) => {
                   deferred.reject(msg, code);
               });
 
@@ -276,7 +276,7 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
           Rest.options()
               .then(({data}) => {
                   deferred.resolve(data);
-              }).error(function(msg, code) {
+              }).catch(({msg, code}) => {
                   deferred.reject(msg, code);
               });
 

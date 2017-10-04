@@ -59,7 +59,7 @@ export default
                     'alert-danger');
                 }
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                 msg: 'Failed to lookup project ' + url + ' GET returned: ' + status });
             });

@@ -155,7 +155,7 @@
                                 sync_playbook_select2();
                                 Wait('stop');
                             })
-                            .error(function (data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                     msg: 'Failed to get playbook list for ' + url + '. GET returned status: ' + status });
                             });
@@ -190,7 +190,7 @@
                                 Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                             }
                         })
-                        .error(function (data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                         });

@@ -31,7 +31,7 @@
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             post: function(host){
@@ -40,7 +40,7 @@
                 Rest.setUrl(this.url);
                 return Rest.post(host)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             put: function(host){
@@ -49,7 +49,7 @@
                 Rest.setUrl(this.url);
                 return Rest.put(host)
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             },
             delete: function(id){
@@ -58,7 +58,7 @@
                 Rest.setUrl(this.url);
                 return Rest.destroy()
                     .then(this.then.bind(this))
-                    .error(this.error.bind(this))
+                    .catch(this.catch.bind(this))
                     .finally(Wait('stop'));
             }
         };
