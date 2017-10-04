@@ -240,7 +240,10 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         another attribute to use.
         """
         key = self.conf.get(conf_key, default_attribute)
-        value = attributes[key][0] if key in attributes else None
+        value = attributes[key] if key in attributes else None
+        # In certain implementations (like https://pagure.io/ipsilon) this value is a string, not a list
+        if isinstance(value, (list, tuple)):
+            value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
             logger.warn("Could not map user detail '%s' from SAML attribute '%s'; "
                         "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
