@@ -2139,6 +2139,9 @@ class RunAdHocCommand(BaseTask):
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         if ad_hoc_command.extra_vars_dict:
+            if ad_hoc_command.extra_vars_dict.get('ansible_connection') == 'local':
+                raise ValueError(_("unable to use the `local` connection plugin with ad hoc commands"))
+
             args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
 
         args.extend(['-m', ad_hoc_command.module_name])
