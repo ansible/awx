@@ -270,6 +270,8 @@ You will need the following installed on the host where AWX will be deployed:
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-py](https://github.com/docker/docker-py) Python module
 
+Note: After installing Docker, the Docker service must be started. 
+
 ### Pre-build steps
 
 #### Deploying to a remote host
@@ -354,8 +356,6 @@ AWX requires access to a PostgreSQL database, and by default, one will be create
 If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information.
 
 ### Start the build
-
-Note: The Docker service must be started and running.
 
 If you are not pushing images to a Docker registry, start the build by running the following:
 
