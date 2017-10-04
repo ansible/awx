@@ -95,6 +95,15 @@ def test_update_kwargs_survey_invalid_default(survey_spec_factory):
 
 
 @pytest.mark.survey
+def test_display_survey_spec_encrypts_default(survey_spec_factory):
+    spec = survey_spec_factory('var2')
+    spec['spec'][0]['type'] = 'password'
+    spec['spec'][0]['default'] = 'some-default'
+    jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
+    assert jt.display_survey_spec()['spec'][0]['default'] == '$encrypted$'
+
+
+@pytest.mark.survey
 @pytest.mark.parametrize("question_type,default,min,max,expect_use,expect_value", [
     ("text",           "",       0, 0,  True, ''),      # default used
     ("text",           "",       1, 0,  False, 'N/A'),  # value less than min length
