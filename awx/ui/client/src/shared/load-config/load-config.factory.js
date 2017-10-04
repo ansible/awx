@@ -25,16 +25,16 @@ export default
                 url: '/api/',
             })
                 .then(function({data}) {
-                    if({data}.custom_logo) {
+                    if(data.custom_logo) {
                         configSettings.custom_logo = true;
-                        $rootScope.custom_logo = {data}.custom_logo;
+                        $rootScope.custom_logo = data.custom_logo;
                     } else {
                         configSettings.custom_logo = false;
                     }
 
-                    if({data}.custom_login_info) {
-                        configSettings.custom_login_info = {data}.custom_login_info;
-                        $rootScope.custom_login_info = {data}.custom_login_info;
+                    if(data.custom_login_info) {
+                        configSettings.custom_login_info = data.custom_login_info;
+                        $rootScope.custom_login_info = data.custom_login_info;
                     } else {
                         configSettings.custom_login_info = false;
                     }
