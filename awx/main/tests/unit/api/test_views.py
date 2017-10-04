@@ -7,7 +7,6 @@ from collections import namedtuple
 from awx.api.views import (
     ApiVersionRootView,
     JobTemplateLabelList,
-    JobTemplateSurveySpec,
     InventoryInventorySourcesUpdate,
     InventoryHostsList,
     HostInsights,
@@ -78,19 +77,6 @@ class TestJobTemplateLabelList:
 
             super(JobTemplateLabelList, view).unattach(mock_request, None, None)
             assert mixin_unattach.called_with(mock_request, None, None)
-
-
-class TestJobTemplateSurveySpec(object):
-    @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
-    def test_get_password_type(self, mocker, mock_response_new):
-        JobTemplate = namedtuple('JobTemplate', 'survey_spec')
-        obj = JobTemplate(survey_spec={'spec':[{'type': 'password', 'default': 'my_default'}]})
-        with mocker.patch.object(JobTemplateSurveySpec, 'get_object', return_value=obj):
-            view = JobTemplateSurveySpec()
-            response = view.get(mocker.MagicMock())
-            assert response == mock_response_new
-            # which there was a better way to do this!
-            assert response.call_args[0][1]['spec'][0]['default'] == '$encrypted$'
 
 
 class TestInventoryInventorySourcesUpdate:

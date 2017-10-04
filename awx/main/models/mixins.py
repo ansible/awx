@@ -240,6 +240,17 @@ class SurveyJobTemplateMixin(models.Model):
             errors += self._survey_element_validation(survey_element, data)
         return errors
 
+    def display_survey_spec(self):
+        '''
+        Hide encrypted default passwords in survey specs
+        '''
+        survey_spec = self.survey_spec.copy() if self.survey_spec else {}
+        for field in survey_spec.get('spec', []):
+            if field.get('type') == 'password':
+                if 'default' in field and field['default']:
+                    field['default'] = '$encrypted$'
+        return survey_spec
+
 
 class SurveyJobMixin(models.Model):
     class Meta:
