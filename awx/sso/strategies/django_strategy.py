@@ -1,6 +1,10 @@
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 
+# Django
+from django.conf import settings
+
+# Python social auth
 from social.strategies.django_strategy import DjangoStrategy
 
 
@@ -9,8 +13,9 @@ class AWXDjangoStrategy(DjangoStrategy):
        fixes and updates from social-app-django
 
        TODO: Revert back to using the default DjangoStrategy after
-       we upgrade to social-core / social-app-django. We will also
-       want to ensure we update the SOCIAL_AUTH_STRATEGY setting.
+       we upgrade to social-core / social-app-django and upgrade Django
+       to 1.9 and above. We will also want to ensure we update the
+       SOCIAL_AUTH_STRATEGY setting.
     """
 
     def request_port(self):
@@ -24,4 +29,7 @@ class AWXDjangoStrategy(DjangoStrategy):
             try:
                 return host_parts[1]
             except IndexError:
-                return self.request.META['SERVER_PORT']
+                if settings.USE_X_FORWARDED_PORT and 'HTTP_X_FORWARDED_PORT' in self.request.META:
+                    return self.request.META['HTTP_X_FORWARDED_PORT']
+                else:
+                    return self.request.META['SERVER_PORT']
