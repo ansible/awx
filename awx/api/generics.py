@@ -37,9 +37,10 @@ from awx.api.metadata import SublistAttachDetatchMetadata
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
+           'SubListDestroyAPIView',
            'SubListCreateAttachDetachAPIView', 'RetrieveAPIView',
            'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
-           'RetrieveUpdateDestroyAPIView', 'DestroyAPIView',
+           'RetrieveUpdateDestroyAPIView',
            'SubDetailAPIView',
            'ResourceAccessList',
            'ParentMixin',
@@ -440,6 +441,41 @@ class SubListAPIView(ParentMixin, ListAPIView):
         return qs & sublist_qs
 
 
+class DestroyAPIView(generics.DestroyAPIView):
+
+    def has_delete_permission(self, obj):
+        return self.request.user.can_access(self.model, 'delete', obj)
+
+    def perform_destroy(self, instance, check_permission=True):
+        if check_permission and not self.has_delete_permission(instance):
+            raise PermissionDenied()
+        super(DestroyAPIView, self).perform_destroy(instance)
+
+
+class SubListDestroyAPIView(DestroyAPIView, SubListAPIView):
+    """
+    Concrete view for deleting everything related by `relationship`.
+    """
+    check_sub_obj_permission = True
+
+    def destroy(self, request, *args, **kwargs):
+        instance_list = self.get_queryset()
+        if (not self.check_sub_obj_permission and
+                not request.user.can_access(self.parent_model, 'delete', self.get_parent_object())):
+            raise PermissionDenied()
+        self.perform_list_destroy(instance_list)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_list_destroy(self, instance_list):
+        if self.check_sub_obj_permission:
+            # Check permissions for all before deleting, avoiding half-deleted lists
+            for instance in instance_list:
+                if self.has_delete_permission(instance):
+                    raise PermissionDenied()
+        for instance in instance_list:
+            self.perform_destroy(instance, check_permission=False)
+
+
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects
     # associated with the parent object.
@@ -678,22 +714,11 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
         pass
 
 
-class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
-
-    def destroy(self, request, *args, **kwargs):
-        # somewhat lame that delete has to call it's own permissions check
-        obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
-            raise PermissionDenied()
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
+class RetrieveDestroyAPIView(RetrieveAPIView, DestroyAPIView):
     pass
 
 
-class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
+class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
     pass
 
 

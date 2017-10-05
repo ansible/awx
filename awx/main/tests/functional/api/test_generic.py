@@ -60,3 +60,34 @@ def test_proxy_ip_whitelist(get, patch, admin):
         REMOTE_HOST='my.proxy.example.org',
         HTTP_X_FROM_THE_LOAD_BALANCER='some-actual-ip')
     assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
+
+
+@pytest.mark.django_db
+class TestDeleteViews:
+    def test_sublist_delete_permission_check(self, inventory_source, host, rando, delete):
+        inventory_source.hosts.add(host)
+        inventory_source.inventory.read_role.members.add(rando)
+        delete(
+            reverse(
+                'api:inventory_source_hosts_list',
+                kwargs={'version': 'v2', 'pk': inventory_source.pk}
+            ), user=rando, expect=403
+        )
+
+    def test_sublist_delete_functionality(self, inventory_source, host, rando, delete):
+        inventory_source.hosts.add(host)
+        inventory_source.inventory.admin_role.members.add(rando)
+        delete(
+            reverse(
+                'api:inventory_source_hosts_list',
+                kwargs={'version': 'v2', 'pk': inventory_source.pk}
+            ), user=rando, expect=204
+        )
+        assert inventory_source.hosts.count() == 0
+
+    def test_destroy_permission_check(self, job_factory, system_auditor, delete):
+        job = job_factory()
+        resp = delete(
+            job.get_absolute_url(), user=system_auditor
+        )
+        assert resp.status_code == 403
