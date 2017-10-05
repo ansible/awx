@@ -24,7 +24,7 @@ angular.module('inventoryScripts', [
             let stateDefinitions = stateDefinitionsProvider.$get();
 
             $stateProvider.state({
-                name: 'inventoryScripts',
+                name: 'inventoryScripts.**',
                 url: '/inventory_script',
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'inventoryScripts',

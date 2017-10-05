@@ -175,12 +175,12 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings) {
+            $filter, SocketService, AppStrings, $transitions) {
 
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
@@ -243,9 +243,7 @@ angular
 
                 $rootScope.crumbCache = [];
 
-                $rootScope.$on("$stateChangeStart", function (event, next) {
-                    // let current_title = $rootScope.$state.current.ncyBreadcrumbLabel || "";
-                    // $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${current_title}`;
+                $transitions.onStart({}, function(trans) {
                     // Remove any lingering intervals
                     // except on jobResults.* states
                     var jobResultStates = [
@@ -256,10 +254,10 @@ angular
                         'jobResult.host-events',
                         'jobResult.host-event.stdout'
                     ];
-                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, next.name) ) {
+                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, trans.to().name) ) {
                         window.clearInterval($rootScope.jobResultInterval);
                     }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, trans.to().name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 
@@ -298,19 +296,19 @@ angular
                     }
 
                     if (Authorization.isUserLoggedIn() === false) {
-                        if (next.name !== "signIn") {
+                        if (trans.to().name !== "signIn") {
                             $state.go('signIn');
                         }
                     } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
-                        if (next.name !== "signIn") {
+                        if (trans.to().name !== "signIn") {
                             $state.go('signIn');
                         }
                     } else {
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                        if (trans.to().name && (trans.to().name !== "signIn"  && trans.to().name !== "signOut" && trans.to().name !== "license")) {
                             ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
                                 CheckLicense.test(event);
@@ -320,20 +318,21 @@ angular
                     activateTab();
                 });
 
-                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                // $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                $transitions.onSuccess({}, function(trans) {
 
-                    if(toState === fromState) {
+                    if(trans.to() === trans.from()) {
                         // check to see if something other than a search param has changed
                         let toParamsWithoutSearchKeys = {};
                         let fromParamsWithoutSearchKeys = {};
-                        for (let key in toParams) {
-                            if (toParams.hasOwnProperty(key) && !/_search/.test(key)) {
-                                toParamsWithoutSearchKeys[key] = toParams[key];
+                        for (let key in trans.$to().params) {
+                            if (trans.$to().params.hasOwnProperty(key) && !/_search/.test(key)) {
+                                toParamsWithoutSearchKeys[key] = trans.$to().params[key];
                             }
                         }
-                        for (let key in fromParams) {
-                            if (fromParams.hasOwnProperty(key) && !/_search/.test(key)) {
-                                fromParamsWithoutSearchKeys[key] = fromParams[key];
+                        for (let key in trans.$from().params) {
+                            if (trans.$from().params.hasOwnProperty(key) && !/_search/.test(key)) {
+                                fromParamsWithoutSearchKeys[key] = trans.$from().params[key];
                             }
                         }
 
@@ -345,8 +344,8 @@ angular
                         document.body.scrollTop = document.documentElement.scrollTop = 0;
                     }
 
-                    if (fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')) {
-                        $rootScope.licenseMissing = toParams.licenseMissing;
+                    if (trans.from().name === 'license' && trans.$to().params.hasOwnProperty('licenseMissing')) {
+                        $rootScope.licenseMissing = trans.$to().params.licenseMissing;
                     }
                     var list, id;
                     // broadcast event change if editing crud object

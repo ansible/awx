@@ -51,7 +51,7 @@ angular.module('instanceGroups', [CapacityBar.name])
             }
 
             $stateProvider.state({
-                name: 'instanceGroups',
+                name: 'instanceGroups.**',
                 url: '/instance_groups',
                 lazyLoad: () => generateInstanceGroupsStates()
             });

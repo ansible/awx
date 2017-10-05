@@ -32,7 +32,7 @@ angular.module('Organizations', [
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
             $stateProvider.state({
-                name: 'organizations',
+                name: 'organizations.**',
                 url: '/organizations',
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'organizations', // top-most node in the generated tree

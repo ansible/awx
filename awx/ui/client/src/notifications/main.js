@@ -36,7 +36,7 @@ angular.module('notifications', [
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
             $stateProvider.state({
-                name: 'notifications',
+                name: 'notifications.**',
                 url: '/notification_templates',
                 ncyBreadcrumb: {
                     label: N_("NOTIFICATIONS")

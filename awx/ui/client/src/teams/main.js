@@ -25,7 +25,7 @@ angular.module('Teams', [])
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
             $stateProvider.state({
-                name: 'teams',
+                name: 'teams.**',
                 url: '/teams',
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'teams',

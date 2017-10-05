@@ -104,7 +104,7 @@ angular.module('host', [
             };
 
             $stateProvider.state({
-                name: 'hosts',
+                name: 'hosts.**',
                 url: '/hosts',
                 lazyLoad: () => generateHostStates()
             });

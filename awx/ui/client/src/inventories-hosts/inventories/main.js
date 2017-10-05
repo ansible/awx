@@ -349,7 +349,7 @@ angular.module('inventory', [
             }
 
             $stateProvider.state({
-                name: 'inventories',
+                name: 'inventories.**',
                 url: '/inventories',
                 lazyLoad: () => generateInventoryStates()
             });

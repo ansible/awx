@@ -892,7 +892,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
             }
 
             stateTree = {
-                name: 'templates',
+                name: 'templates.**',
                 url: '/templates',
                 lazyLoad: () => generateStateTree()
             };
