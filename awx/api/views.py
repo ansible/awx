@@ -69,7 +69,7 @@ from awx.conf.license import get_license, feature_enabled, feature_exists, Licen
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.main.utils import (
-    callback_filter_out_ansible_extra_vars,
+    extract_ansible_vars,
     decrypt_field,
 )
 from awx.main.utils.filters import SmartFilter
@@ -3160,7 +3160,8 @@ class JobTemplateCallback(GenericAPIView):
         # Everything is fine; actually create the job.
         kv = {"limit": limit, "launch_type": 'callback'}
         if extra_vars is not None and job_template.ask_variables_on_launch:
-            kv['extra_vars'] = callback_filter_out_ansible_extra_vars(extra_vars)
+            extra_vars_redacted, removed = extract_ansible_vars(extra_vars)
+            kv['extra_vars'] = extra_vars_redacted
         with transaction.atomic():
             job = job_template.create_job(**kv)
 
