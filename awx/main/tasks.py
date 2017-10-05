@@ -56,7 +56,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
-                            get_type_for_model)
+                            get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -2139,6 +2139,12 @@ class RunAdHocCommand(BaseTask):
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         if ad_hoc_command.extra_vars_dict:
+            redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
+            if removed_vars:
+                raise ValueError(_(
+                    "unable to use {} variables with ad hoc commands"
+                ).format(",".format(removed_vars)))
+
             args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
 
         args.extend(['-m', ad_hoc_command.module_name])

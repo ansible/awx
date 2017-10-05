@@ -45,7 +45,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
-    has_model_field_prefetched)
+    has_model_field_prefetched, extract_ansible_vars)
 from awx.main.utils.filters import SmartFilter
 
 from awx.main.validators import vars_validate_or_raise
@@ -2758,6 +2758,14 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         if 'name' in ret:
             ret['name'] = obj.module_name
         return ret
+
+    def validate_extra_vars(self, value):
+        redacted_extra_vars, removed_vars = extract_ansible_vars(value)
+        if removed_vars:
+            raise serializers.ValidationError(_(
+                "Variables {} are prohibited from use in ad hoc commands."
+            ).format(",".join(removed_vars)))
+        return vars_validate_or_raise(value)
 
 
 class AdHocCommandCancelSerializer(AdHocCommandSerializer):
