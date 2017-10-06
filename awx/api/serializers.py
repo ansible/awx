@@ -343,7 +343,9 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
-                    if field == 'credential_type_id' and fk == 'credential' and self.version < 2:  # TODO: remove version check in 3.3
+                    if (
+                            self.version < 2 and field == 'credential_type_id' and
+                            fk in ['credential', 'vault_credential']):  # TODO: remove version check in 3.3
                         continue
 
                     fval = getattr(fkval, field, None)
