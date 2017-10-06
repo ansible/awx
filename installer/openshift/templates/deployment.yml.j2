@@ -41,18 +41,40 @@ spec:
             - name: AWX_ADMIN_PASSWORD
               value: {{ default_admin_password|default('password') }}
         - name: awx-rabbit
-          image: rabbitmq:3
+          image: ansible/awx_rabbitmq:latest
+          imagePullPolicy: Always
           env:
+            # For consupmption by rabbitmq-env.conf
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: ERLANG_COOKIE
+              value: "test"
             - name: RABBITMQ_ERLANG_COOKIE
-              value: secretb
+              value: "secretb"
             - name: RABBITMQ_NODENAME
-              value: rabbitmq
+              value: "rabbit@$(MY_POD_IP)"
+            - name: AUTOCLUSTER_TYPE
+              value: "etcd"
+            - name: AUTOCLUSTER_DELAY
+              value: "60"
+            - name: ETCD_HOST
+              value: "etcd"
+            - name: AUTOCLUSTER_CLEANUP
+              value: "true"
+            - name: CLEANUP_WARN_ONLY
+              value: "true"
             - name: RABBITMQ_DEFAULT_USER
               value: awx
             - name: RABBITMQ_DEFAULT_PASS
               value: abcdefg
             - name: RABBITMQ_DEFAULT_VHOST
               value: awx
+            - name: RABBITMQ_CONFIG_FILE
+              value: /etc/rabbitmq/rabbitmq
         - name: awx-memcached
           image: memcached
       volumes:
