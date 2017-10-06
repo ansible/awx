@@ -818,6 +818,7 @@ class OutputEventFilter(object):
     def __init__(self, fileobj=None, event_callback=None, raw_callback=None):
         self._fileobj = fileobj
         self._event_callback = event_callback
+        self._event_ct = 0
         self._raw_callback = raw_callback
         self._counter = 1
         self._start_line = 0
@@ -872,6 +873,7 @@ class OutputEventFilter(object):
             self._start_line += n_lines
             if self._event_callback:
                 self._event_callback(event_data)
+                self._event_ct += 1
 
         if next_event_data.get('uuid', None):
             self._current_event_data = next_event_data
