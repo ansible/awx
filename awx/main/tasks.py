@@ -2142,8 +2142,8 @@ class RunAdHocCommand(BaseTask):
             redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_(
-                    "unable to use {} variables with ad hoc commands"
-                ).format(",".format(removed_vars)))
+                    "{} are prohibited from use in ad hoc commands."
+                ).format(", ".join(removed_vars)))
 
             args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
 
