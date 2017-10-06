@@ -2763,8 +2763,8 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         redacted_extra_vars, removed_vars = extract_ansible_vars(value)
         if removed_vars:
             raise serializers.ValidationError(_(
-                "Variables {} are prohibited from use in ad hoc commands."
-            ).format(",".join(removed_vars)))
+                "{} are prohibited from use in ad hoc commands."
+            ).format(", ".join(removed_vars)))
         return vars_validate_or_raise(value)
 
 
