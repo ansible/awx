@@ -13,7 +13,7 @@ from awx.main.access import (
     InventoryUpdateAccess,
     CustomInventoryScriptAccess,
     ScheduleAccess,
-    StateConflict
+    ActiveJobConflict
 )
 
 
@@ -21,7 +21,7 @@ from awx.main.access import (
 def test_running_job_protection(inventory, admin_user):
     AdHocCommand.objects.create(inventory=inventory, status='running')
     access = InventoryAccess(admin_user)
-    with pytest.raises(StateConflict):
+    with pytest.raises(ActiveJobConflict):
         access.can_delete(inventory)
 
 
