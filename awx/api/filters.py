@@ -165,7 +165,13 @@ class FieldLookupBackend(BaseFilterBackend):
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
         elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
-            return self.to_python_related(value)
+            try:
+                return self.to_python_related(value)
+            except ValueError:
+                raise ParseError(_('Invalid {field_name} id: {field_id}').format(
+                    field_name=getattr(field, 'name', 'related field'),
+                    field_id=value)
+                )
         else:
             return field.to_python(value)
 
