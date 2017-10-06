@@ -430,7 +430,7 @@ class IsolatedManager(object):
             except (KeyError, IndexError):
                 task_result = {}
             if 'capacity' in task_result:
-                cls.update_capacity(instance, awx_application_version)
+                cls.update_capacity(instance, task_result, awx_application_version)
             elif instance.capacity == 0:
                 logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
                     instance.hostname))
