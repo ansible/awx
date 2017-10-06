@@ -3989,7 +3989,7 @@ class BaseJobEventsList(SubListAPIView):
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
         return super(BaseJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 
