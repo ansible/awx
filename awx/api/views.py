@@ -57,7 +57,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications
+from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TokenGetAuthentication
@@ -146,6 +146,29 @@ class UnifiedJobDeletionMixin(object):
             raise PermissionDenied(detail=_("Cannot delete running job resource."))
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class InstanceGroupMembershipMixin(object):
+    '''
+    Manages signaling celery to reload its queue configuration on Instance Group membership changes
+    '''
+    def attach(self, request, *args, **kwargs):
+        response = super(InstanceGroupMembershipMixin, self).attach(request, *args, **kwargs)
+        if status.is_success(response.status_code):
+            handle_ha_toplogy_changes.apply_async()
+        return response
+
+    def unattach(self, request, *args, **kwargs):
+        response = super(InstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
+        if status.is_success(response.status_code):
+            handle_ha_toplogy_changes.apply_async()
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        response = super(InstanceGroupMembershipMixin, self).destroy(request, *args, **kwargs)
+        if status.is_success(response.status_code):
+            handle_ha_toplogy_changes.apply_async()
+        return response
 
 
 class ApiRootView(APIView):
@@ -548,7 +571,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
         return qs
 
 
-class InstanceInstanceGroupsList(SubListAPIView):
+class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
 
     view_name = _("Instance's Instance Groups")
     model = InstanceGroup
@@ -558,7 +581,7 @@ class InstanceInstanceGroupsList(SubListAPIView):
     relationship = 'rampart_groups'
 
 
-class InstanceGroupList(ListAPIView):
+class InstanceGroupList(ListCreateAPIView):
 
     view_name = _("Instance Groups")
     model = InstanceGroup
@@ -566,7 +589,7 @@ class InstanceGroupList(ListAPIView):
     new_in_320 = True
 
 
-class InstanceGroupDetail(RetrieveAPIView):
+class InstanceGroupDetail(InstanceGroupMembershipMixin, RetrieveDestroyAPIView):
 
     view_name = _("Instance Group Detail")
     model = InstanceGroup
@@ -584,7 +607,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     new_in_320 = True
 
 
-class InstanceGroupInstanceList(SubListAPIView):
+class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetachAPIView):
 
     view_name = _("Instance Group's Instances")
     model = Instance

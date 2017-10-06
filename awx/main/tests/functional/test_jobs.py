@@ -1,7 +1,4 @@
-from awx.main.models import (
-    Job,
-    Instance
-)
+from awx.main.models import Job, Instance
 from django.test.utils import override_settings
 import pytest
 

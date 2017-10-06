@@ -93,11 +93,6 @@ class InstanceManager(models.Manager):
         """Return count of active Tower nodes for licensing."""
         return self.all().count()
 
-    def total_capacity(self):
-        sumval = self.filter(modified__gte=now() - timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
-                     .aggregate(total_capacity=Sum('capacity'))['total_capacity']
-        return max(50, sumval)
-
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"

@@ -424,6 +424,18 @@ class InstanceAccess(BaseAccess):
         return Instance.objects.filter(
             rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
 
+
+    def can_attach(self, obj, sub_obj, relationship, data,
+                   skip_sub_obj_read_check=False):
+        if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
+            return self.user.is_superuser
+        return super(InstanceAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
+            return self.user.is_superuser
+        return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+
     def can_add(self, data):
         return False
 
@@ -444,13 +456,13 @@ class InstanceGroupAccess(BaseAccess):
             organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
 
     def can_add(self, data):
-        return False
+        return self.user.is_superuser
 
     def can_change(self, obj, data):
-        return False
+        return self.user.is_superuser
 
     def can_delete(self, obj):
-        return False
+        return self.user.is_superuser
 
 
 class UserAccess(BaseAccess):

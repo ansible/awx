@@ -66,7 +66,9 @@ spec:
             - name: AUTOCLUSTER_CLEANUP
               value: "true"
             - name: CLEANUP_WARN_ONLY
-              value: "true"
+              value: "false"
+            - name: CLEANUP_INTERVAL
+              value: "30"
             - name: RABBITMQ_DEFAULT_USER
               value: awx
             - name: RABBITMQ_DEFAULT_PASS
@@ -99,6 +101,23 @@ spec:
   ports:
     - name: http
       port: 8052
+  selector:
+    name: awx-web-deploy
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awx-rmq-mgmt
+  namespace: {{ awx_openshift_project }}
+  labels:
+    name: awx-rmq-mgmt
+spec:
+  type: ClusterIP
+  ports:
+    - name: rmqmgmt
+      port: 15672
+      targetPort: 15672
   selector:
     name: awx-web-deploy
 ---
