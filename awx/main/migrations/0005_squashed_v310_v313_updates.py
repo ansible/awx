@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
 
     replaces = [
         (b'main', '0035_v310_remove_tower_settings'),
-        (b'main', '0036_v311_insights'),
     ]
 
     operations = [

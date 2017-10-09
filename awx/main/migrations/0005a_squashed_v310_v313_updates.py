@@ -11,14 +11,18 @@ class Migration(migrations.Migration):
     ]
 
     replaces = [
-        (b'main', '0037_v313_instance_version'),
+        (b'main', '0036_v311_insights'),
     ]
 
     operations = [
-        # Remove Tower settings, these settings are now in separate awx.conf app.
-        migrations.AddField(
-            model_name='instance',
-            name='version',
-            field=models.CharField(max_length=24, blank=True),
+        migrations.AlterField(
+            model_name='project',
+            name='scm_type',
+            field=models.CharField(default=b'', choices=[(b'', 'Manual'), (b'git', 'Git'), (b'hg', 'Mercurial'), (b'svn', 'Subversion'), (b'insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+        ),
+        migrations.AlterField(
+            model_name='projectupdate',
+            name='scm_type',
+            field=models.CharField(default=b'', choices=[(b'', 'Manual'), (b'git', 'Git'), (b'hg', 'Mercurial'), (b'svn', 'Subversion'), (b'insights', 'Red Hat Insights')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
         ),
     ]
