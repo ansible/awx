@@ -2900,16 +2900,19 @@ class JobTemplateSurveySpec(GenericAPIView):
 
             if survey_item["type"] == "password" and "default" in survey_item:
                 if not isinstance(survey_item['default'], six.string_types):
-                    return Response(
-                        _("Value %s for '%s' expected to be a string." % (
-                            survey_item["default"], survey_item["variable"]
-                        )),
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                    return Response(dict(error=_(
+                        "Value {question_default} for '{variable_name}' expected to be a string."
+                    ).format(
+                        question_default=survey_item["default"], variable_name=survey_item["variable"])
+                    ), status=status.HTTP_400_BAD_REQUEST)
                 elif survey_item["default"].startswith('$encrypted$'):
                     if not obj.survey_spec:
-                        return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))),
-                                        status=status.HTTP_400_BAD_REQUEST)
+                        return Response(dict(error=_(
+                            "$encrypted$ is reserved keyword for password questions and may not "
+                            "be used as a default for '{variable_name}' in survey question {question_position}."
+                        ).format(
+                            variable_name=survey_item["variable"], question_position=str(idx))
+                        ), status=status.HTTP_400_BAD_REQUEST)
                     else:
                         old_spec = obj.survey_spec
                         for old_item in old_spec['spec']:
