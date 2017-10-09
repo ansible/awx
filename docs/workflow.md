@@ -48,6 +48,10 @@ Workflow job summary:
 
 Starting from Tower 3.2, Workflow jobs support simultaneous job runs just like that of ordinary jobs. It is controlled by `allow_simultaneous` field of underlying workflow job template. By default, simultaneous workflow job runs are disabled and users should be prudent in enabling this functionality. Because the performance boost of simultaneous workflow runs will only manifest when a large portion of jobs contained by a workflow allow simultaneous runs. Otherwise it is expected to have some long-running workflow jobs since its spawned jobs can be in pending state for a long time.
 
+Before Tower 3.3, the 'failed' status of workflow job is not defined. Starting from 3.3 we define a finished workflow job to fail, if at least one of the conditions below satisfies:
+* At least one node runs into states `canceled` or `error`.
+* At least one leaf node runs into states `failed`, but no child node is spawned to run (no error handler).
+
 ### Workflow Copy and Relaunch
 Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be mostly identical to the original, except for `name` field which will be appended a text to indicate it's a copy.
 

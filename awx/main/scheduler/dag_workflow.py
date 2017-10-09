@@ -62,6 +62,7 @@ class WorkflowDAG(SimpleDAG):
     def is_workflow_done(self):
         root_nodes = self.get_root_nodes()
         nodes = root_nodes
+        is_failed = False
 
         for index, n in enumerate(nodes):
             obj = n['node_object']
@@ -69,24 +70,29 @@ class WorkflowDAG(SimpleDAG):
 
             if obj.unified_job_template is None:
                 continue
-            if not job:
-                return False
-            # Job is about to run or is running. Hold our horses and wait for
-            # the job to finish. We can't proceed down the graph path until we
-            # have the job result.
-            elif job.status in ['canceled', 'error']:
-                continue
-            elif job.status not in ['failed', 'successful']:
-                return False
-            elif job.status == 'failed':
-                children_failed = self.get_dependencies(obj, 'failure_nodes')
-                children_always = self.get_dependencies(obj, 'always_nodes')
-                children_all = children_failed + children_always
-                nodes.extend(children_all)
-            elif job.status == 'successful':
-                children_success = self.get_dependencies(obj, 'success_nodes')
-                children_always = self.get_dependencies(obj, 'always_nodes')
-                children_all = children_success + children_always
-                nodes.extend(children_all)
-        return True
+            elif not job:
+                return False, False
 
+            children_success = self.get_dependencies(obj, 'success_nodes')
+            children_failed = self.get_dependencies(obj, 'failure_nodes')
+            children_always = self.get_dependencies(obj, 'always_nodes')
+            if not is_failed and job.status != 'successful':
+                children_all = children_success + children_failed + children_always
+                for child in children_all:
+                    if child['node_object'].job:
+                        break
+                else:
+                    is_failed = True if children_all else job.status in ['failed', 'canceled', 'error']
+
+            if job.status in ['canceled', 'error']:
+                continue
+            elif job.status == 'failed':
+                nodes.extend(children_failed + children_always)
+            elif job.status == 'successful':
+                nodes.extend(children_success + children_always)
+            else:
+                # Job is about to run or is running. Hold our horses and wait for
+                # the job to finish. We can't proceed down the graph path until we
+                # have the job result.
+                return False, False
+        return True, is_failed
