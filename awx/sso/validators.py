@@ -47,7 +47,7 @@ def validate_ldap_filter(value, with_user=False):
         dn_value = value.replace('%(user)s', 'USER')
     else:
         dn_value = value
-    if re.match(r'^\([A-Za-z0-9]+?=[^()]+?\)$', dn_value):
+    if re.match(r'^\([A-Za-z0-9-]+?=[^()]+?\)$', dn_value):
         return
     elif re.match(r'^\([&|!]\(.*?\)\)$', dn_value):
         try:

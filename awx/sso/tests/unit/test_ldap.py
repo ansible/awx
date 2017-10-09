@@ -1,6 +1,7 @@
 import ldap
 
 from awx.sso.backends import LDAPSettings
+from awx.sso.validators import validate_ldap_filter
 
 
 def test_ldap_default_settings(mocker):
@@ -19,3 +20,7 @@ def test_ldap_default_network_timeout(mocker):
             ldap.OPT_REFERRALS: 0,
             ldap.OPT_NETWORK_TIMEOUT: 30
         }
+
+
+def test_ldap_filter_validator():
+    validate_ldap_filter('(test-uid=%(user)s)', with_user=True)
