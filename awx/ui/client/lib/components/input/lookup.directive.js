@@ -12,7 +12,7 @@ function atInputLookupLink (scope, element, attrs, controllers) {
     inputController.init(scope, element, formController);
 }
 
-function AtInputLookupController (baseInputController, $q, $state, $stateParams) {
+function AtInputLookupController (baseInputController, $q, $state) {
     let vm = this || {};
 
     let scope;
@@ -75,13 +75,14 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
 
     vm.resetDebounce = () => {
         clearTimeout(vm.debounce);
-        vm.searchAfterDebounce(); 
+        vm.searchAfterDebounce();
     };
 
     vm.search = () => {
         scope.state._touched = true;
 
         if (scope.state._displayValue === '' && !scope.state._required) {
+            scope.state._value = null;
             return vm.check({ isValid: true });
         }
 
@@ -116,8 +117,7 @@ function AtInputLookupController (baseInputController, $q, $state, $stateParams)
 AtInputLookupController.$inject = [
     'BaseInputController',
     '$q',
-    '$state',
-    '$stateParams'
+    '$state'
 ];
 
 function atInputLookup (pathService) {

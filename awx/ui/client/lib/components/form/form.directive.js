@@ -32,7 +32,7 @@ function AtFormController (eventService, strings) {
         vm.setListeners();
     };
 
-    vm.register = (category, component, el) => { 
+    vm.register = (category, component, el) => {
         component.category = category;
         component.form = vm.state;
 
@@ -66,7 +66,7 @@ function AtFormController (eventService, strings) {
         let data = vm.components
             .filter(component => component.category === 'input')
             .reduce((values, component) => {
-                if (!component.state._value) {
+                if (component.state._value === undefined) {
                     return values;
                 }
 
