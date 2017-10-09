@@ -52,3 +52,14 @@ register(
     category_slug='ui',
     feature_required='rebranding',
 )
+
+register(
+    'MAX_UI_JOB_EVENTS',
+    field_class=fields.IntegerField,
+    min_value=100,
+    label=_('Max Job Events Retreived by UI'),
+    help_text=_('Maximum number of job events for the UI to retreive within a '
+                'single request.'),
+    category=_('UI'),
+    category_slug='ui',
+)
