@@ -1299,8 +1299,11 @@ class ProjectUpdateView(RetrieveAPIView):
             if not project_update:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
+                data = OrderedDict()
+                data['project_update'] = project_update.id
+                data.update(ProjectUpdateSerializer(project_update, context=self.get_serializer_context()).to_representation(project_update))
                 headers = {'Location': project_update.get_absolute_url(request=request)}
-                return Response({'project_update': project_update.id},
+                return Response(data,
                                 headers=headers,
                                 status=status.HTTP_202_ACCEPTED)
         else:
@@ -2512,10 +2515,14 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
         successes = 0
         failures = 0
         for inventory_source in inventory.inventory_sources.exclude(source=''):
-            details = {'inventory_source': inventory_source.pk, 'status': None}
+            details = OrderedDict()
+            details['inventory_source'] = inventory_source.pk
+            details['status'] = None
             if inventory_source.can_update:
+                update = inventory_source.update()
+                details.update(InventoryUpdateSerializer(update, context=self.get_serializer_context()).to_representation(update))
                 details['status'] = 'started'
-                details['inventory_update'] = inventory_source.update().id
+                details['inventory_update'] = update.id
                 successes += 1
             else:
                 if not details.get('status'):
@@ -2656,8 +2663,10 @@ class InventorySourceUpdateView(RetrieveAPIView):
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 headers = {'Location': update.get_absolute_url(request=request)}
-                return Response(dict(inventory_update=update.id),
-                                status=status.HTTP_202_ACCEPTED, headers=headers)
+                data = OrderedDict()
+                data['inventory_update'] = update.id
+                data.update(InventoryUpdateSerializer(update, context=self.get_serializer_context()).to_representation(update))
+                return Response(data, status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
@@ -2733,7 +2742,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
     always_allow_superuser = False
 
 
-class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
+class JobTemplateLaunch(RetrieveAPIView):
 
     model = JobTemplate
     metadata_class = JobTypeMetadata
@@ -2818,9 +2827,9 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             data = OrderedDict()
+            data['job'] = new_job.id
             data['ignored_fields'] = ignored_fields
             data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-            data['job'] = new_job.id
             return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -3442,9 +3451,9 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         new_job.signal_start()
 
         data = OrderedDict()
+        data['workflow_job'] = new_job.id
         data['ignored_fields'] = ignored_fields
         data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        data['workflow_job'] = new_job.id
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -3676,7 +3685,9 @@ class SystemJobTemplateLaunch(GenericAPIView):
 
         new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
         new_job.signal_start()
-        data = dict(system_job=new_job.id)
+        data = OrderedDict()
+        data['system_job'] = new_job.id
+        data.update(SystemJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -3852,7 +3863,7 @@ class JobCancel(RetrieveAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
 
 
-class JobRelaunch(RetrieveAPIView, GenericAPIView):
+class JobRelaunch(RetrieveAPIView):
 
     model = Job
     serializer_class = JobRelaunchSerializer
@@ -4481,8 +4492,11 @@ class NotificationTemplateTest(GenericAPIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
             send_notifications.delay([notification.id])
+            data = OrderedDict()
+            data['notification'] = notification.id
+            data.update(NotificationSerializer(notification, context=self.get_serializer_context()).to_representation(notification))
             headers = {'Location': notification.get_absolute_url(request=request)}
-            return Response({"notification": notification.id},
+            return Response(data,
                             headers=headers,
                             status=status.HTTP_202_ACCEPTED)
 
