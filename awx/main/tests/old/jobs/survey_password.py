@@ -107,7 +107,8 @@ TEST_SINGLE_PASSWORDS = [
     },
     {
         'description': 'Many instances, also with newline',
-        'text': 'I think %s is very very fast. If I ran %s for 4 hours how many hours would I run?.\nTrick question. %s for 4 hours would result in running for 4 hours' % (PASSWORD, PASSWORD, PASSWORD),
+        'text': 'I think %s is very very fast. If I ran %s for 4 hours how many hours would I '
+                'run?.\nTrick question. %s for 4 hours would result in running for 4 hours' % (PASSWORD, PASSWORD, PASSWORD),
         'passwords': [PASSWORD],
         'occurances': 3,
     },

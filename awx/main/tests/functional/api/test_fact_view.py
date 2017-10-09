@@ -104,7 +104,8 @@ def test_content(hosts, fact_scans, get, user, fact_ansible_json, monkeypatch_js
     (fact_known, response) = setup_common(hosts, fact_scans, get, user)
 
     assert fact_known.host_id == response.data['host']
-    assert fact_ansible_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], unicode) else response.data['facts']) # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
+    # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
+    assert fact_ansible_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], unicode) else response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert fact_known.module == response.data['module']
 
@@ -115,7 +116,8 @@ def _test_search_by_module(hosts, fact_scans, get, user, fact_json, module_name)
     }
     (fact_known, response) = setup_common(hosts, fact_scans, get, user, module_name=module_name, get_params=params)
 
-    assert fact_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], unicode) else response.data['facts']) # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
+    # TODO: Just make response.data['facts'] when we're only dealing with postgres, or if jsonfields ever fixes this bug
+    assert fact_json == (json.loads(response.data['facts']) if isinstance(response.data['facts'], unicode) else response.data['facts'])
     assert timestamp_apiformat(fact_known.timestamp) == response.data['timestamp']
     assert module_name == response.data['module']
 
@@ -138,7 +140,10 @@ def test_search_by_timestamp_and_module(hosts, fact_scans, get, user, fact_packa
     epoch = timezone.now()
     module_name = 'packages'
 
-    (fact_known, response) = setup_common(hosts, fact_scans, get, user, module_name=module_name, epoch=epoch, get_params=dict(module=module_name, datetime=epoch))
+    (fact_known, response) = setup_common(
+        hosts, fact_scans, get, user, module_name=module_name, epoch=epoch,
+        get_params=dict(module=module_name, datetime=epoch)
+    )
 
     assert fact_known.id == response.data['id']
 

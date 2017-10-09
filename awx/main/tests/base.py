@@ -440,7 +440,9 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         self.assertFalse(response.status_code == 500 and expect != 500,
                          'Failed (500): %s' % force_text(response.content))
         if expect is not None:
-            assert response.status_code == expect, u"expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, force_text(response.content))
+            assert response.status_code == expect, u"expected status %s, got %s for url=%s as auth=%s: %s" % (
+                expect, response.status_code, url, auth, force_text(response.content)
+            )
         if method_name == 'head':
             self.assertFalse(response.content)
         if return_response_object:

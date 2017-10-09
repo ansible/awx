@@ -81,7 +81,8 @@ def ws_receive(message):
                     if access_cls is not None:
                         user_access = access_cls(user)
                         if not user_access.get_queryset().filter(pk=oid).exists():
-                            message.reply_channel.send({"text": json.dumps({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
+                            message.reply_channel.send({"text": json.dumps(
+                                {"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
                             continue
                     current_groups.add(name)
                     Group(name).add(message.reply_channel)

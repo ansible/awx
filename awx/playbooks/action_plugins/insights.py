@@ -51,7 +51,10 @@ class ActionModule(ActionBase):
 
         if res.status_code != 200:
             result['failed'] = True
-            result['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(url, res.status_code, res.content)
+            result['msg'] = (
+                'Expected {} to return a status code of 200 but returned status '
+                'code "{}" instead with content "{}".'.format(url, res.status_code, res.content)
+            )
             return result
 
         if 'ETag' in res.headers:
@@ -71,7 +74,10 @@ class ActionModule(ActionBase):
             res = session.get(url, timeout=120)
             if res.status_code != 200:
                 result['failed'] = True
-                result['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(url, res.status_code, res.content)
+                result['msg'] = (
+                    'Expected {} to return a status code of 200 but returned status '
+                    'code "{}" instead with content "{}".'.format(url, res.status_code, res.content)
+                )
                 return result
             self.save_playbook(proj_path, item, res.content)
 
