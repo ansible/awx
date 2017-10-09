@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0005_squashed_v310_v313_updates'),
+        ('main', '0005a_squashed_v310_v313_updates'),
     ]
 
     replaces = [
