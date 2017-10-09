@@ -840,7 +840,7 @@ def rackspace(cls):
                 'type': 'string',
                 'help_text': ('A comma separated list of regions for the servers. If omitted then all regions are searched.')
             }],
-            'required': ['username', 'password', project']
+            'required': ['username', 'password', 'project']
         }
     )
 
