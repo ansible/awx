@@ -1,10 +1,10 @@
-export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigService',
-    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, configService) {
+export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigService', '$transitions',
+    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, configService, $transitions) {
 
         let path,
             defaults,
             queryset,
-            stateChangeSuccessListener;
+            transitionSuccessListener;
 
         configService.getConfig()
             .then(config => init(config));
@@ -62,17 +62,17 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 return true;
             }
 
-            if(stateChangeSuccessListener) {
-                stateChangeSuccessListener();
+            if(transitionSuccessListener) {
+                transitionSuccessListener();
             }
 
-            stateChangeSuccessListener = $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+            transitionSuccessListener = $transitions.onSuccess({}, function(trans) {
                 // State has changed - check to see if this is a param change
-                if(fromState.name === toState.name) {
-                    if(!compareParams(fromParams[`${$scope.iterator}_search`], toParams[`${$scope.iterator}_search`])) {
+                if(trans.from().name === trans.to().name) {
+                    if(!compareParams(trans.params('from')[`${$scope.iterator}_search`], trans.params('to')[`${$scope.iterator}_search`])) {
                         // Params are not the same - we need to update the search.  This should only happen when the user
                         // hits the forward/back navigation buttons in their browser.
-                        queryset = toParams[`${$scope.iterator}_search`];
+                        queryset = trans.params('to')[`${$scope.iterator}_search`];
                         qs.search(path, queryset).then((res) => {
                             $scope.dataset = res.data;
                             $scope.collection = res.data.results;
@@ -84,7 +84,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 }
             });
 
-            $scope.$on('$destroy', stateChangeSuccessListener);
+            $scope.$on('$destroy', transitionSuccessListener);
 
             $scope.$watch('disableSearch', function(disableSearch){
                 if(disableSearch) {

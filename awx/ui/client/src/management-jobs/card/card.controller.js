@@ -9,11 +9,11 @@ export default
     [   'Wait',  'CreateDialog', 'GetBasePath' ,
         'Rest' ,
         'ProcessErrors', '$rootScope', '$state',
-        '$scope', 'CreateSelect2', 'i18n',
+        '$scope', 'CreateSelect2', 'i18n', '$transitions',
         function( Wait, CreateDialog, GetBasePath,
             Rest, ProcessErrors,
             $rootScope, $state, $scope,
-            CreateSelect2, i18n) {
+            CreateSelect2, i18n, $transitions) {
 
                 var defaultUrl = GetBasePath('system_job_templates') + "?order_by=name";
 
@@ -263,15 +263,15 @@ export default
                     });
                 };
 
-                var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-                     if(toState.name === "managementJobsList") {
+                var cleanUpStateChangeListener = $transitions.onSuccess({}, function(trans) {
+                     if(trans.to().name === "managementJobsList") {
                          // We are on the management job list view - nothing needs to be highlighted
                          delete $scope.activeCard;
                          delete $scope.cardAction;
                      }
-                     else if(toState.name === "managementJobsList.notifications") {
+                     else if(trans.to().name === "managementJobsList.notifications") {
                          // We are on the notifications view - update the active card and the action
-                         $scope.activeCard = parseInt(toParams.management_id);
+                         $scope.activeCard = parseInt(trans.params('to').management_id);
                          $scope.cardAction = "notifications";
                      }
                 });

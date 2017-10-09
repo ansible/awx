@@ -749,7 +749,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
  *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will
  *  default placement to the left and delay to the config setting.
  */
-.directive('awToolTip', [function() {
+.directive('awToolTip', ['$transitions', function($transitions) {
     return {
         link: function(scope, element, attrs) {
             var delay = { show: 200, hide: 0 },
@@ -783,7 +783,8 @@ function(ConfigurationUtils, i18n, $rootScope) {
                     // Un-bind - we don't want a bunch of listeners firing
                     stateChangeWatcher();
                 }
-                stateChangeWatcher = scope.$on('$stateChangeStart', function() {
+
+                stateChangeWatcher = $transitions.onStart({}, function() {
                     // Go ahead and force the tooltip setTimeout to expire (if it hasn't already fired)
                     $(element).tooltip('hide');
                     // Clean up any existing tooltips including this one

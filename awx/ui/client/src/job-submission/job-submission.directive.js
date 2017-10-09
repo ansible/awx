@@ -6,8 +6,8 @@
 
 import jobSubmissionController from './job-submission.controller';
 
-export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions', 'i18n', 'credentialTypesLookup',
-    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions, i18n, credentialTypesLookup) {
+export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseTypeChange', 'GetSurveyQuestions', 'i18n', 'credentialTypesLookup', '$transitions',
+    function(templateUrl, CreateDialog, Wait, CreateSelect2, ParseTypeChange, GetSurveyQuestions, i18n, credentialTypesLookup, $transitions) {
     return {
         scope: {
             submitJobId: '=',
@@ -130,7 +130,7 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
                 }
             };
 
-            scope.$on("$stateChangeStart", function() {
+            $transitions.onStart({}, function() {
                 scope.$evalAsync(function( scope ) {
                     scope.clearDialog();
                 });

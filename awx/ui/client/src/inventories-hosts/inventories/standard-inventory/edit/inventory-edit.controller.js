@@ -14,7 +14,8 @@ function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData,
-    CreateSelect2, InstanceGroupsService, InstanceGroupsData, CanRemediate) {
+    CreateSelect2, InstanceGroupsService, InstanceGroupsData, CanRemediate,
+    $transitions) {
 
     // Inject dynamic view
     let defaultUrl = GetBasePath('inventory'),
@@ -40,8 +41,8 @@ function InventoriesEdit($scope, $location,
         $scope.instance_groups = InstanceGroupsData;
         $scope.canRemediate = CanRemediate;
 
-        $rootScope.$on('$stateChangeSuccess', function(event, toState) {
-            if(toState.name === 'inventories.edit') {
+        $transitions.onSuccess({}, function(trans) {
+            if(trans.to().name === 'inventories.edit') {
                 ParseTypeChange({
                     scope: $scope,
                     variable: 'inventory_variables',
@@ -118,5 +119,6 @@ export default ['$scope', '$location',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2',
-    'InstanceGroupsService', 'InstanceGroupsData', 'CanRemediate', InventoriesEdit,
+    'InstanceGroupsService', 'InstanceGroupsData', 'CanRemediate',
+    '$transitions', InventoriesEdit,
 ];

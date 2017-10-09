@@ -1,10 +1,10 @@
 const templateUrl = require('~components/layout/layout.partial.html');
 
-function AtLayoutController ($scope, strings) {
+function AtLayoutController ($scope, strings, $transitions) {
     const vm = this || {};
 
-    $scope.$on('$stateChangeSuccess', (event, next) => {
-        vm.currentState = next.name;
+    $transitions.onSuccess({}, (transition) => {
+        vm.currentState = transition.to().name;
     });
 
     $scope.$watch('$root.current_user', (val) => {
@@ -34,7 +34,7 @@ function AtLayoutController ($scope, strings) {
     };
 }
 
-AtLayoutController.$inject = ['$scope', 'ComponentsStrings'];
+AtLayoutController.$inject = ['$scope', 'ComponentsStrings', '$transitions'];
 
 function atLayout () {
     return {

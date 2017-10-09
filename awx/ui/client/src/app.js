@@ -273,9 +273,9 @@ angular
                         $(this).remove();
                     });
 
-                    if (next.name !== "templates.editWorkflowJobTemplate.workflowMaker" &&
-                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.inventory" &&
-                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.credential") {
+                    if (trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker" &&
+                        trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker.inventory" &&
+                        trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker.credential") {
                             $('.ui-dialog-content').each(function() {
                                 $(this).dialog('close');
                             });
@@ -318,21 +318,20 @@ angular
                     activateTab();
                 });
 
-                // $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
                 $transitions.onSuccess({}, function(trans) {
 
                     if(trans.to() === trans.from()) {
                         // check to see if something other than a search param has changed
                         let toParamsWithoutSearchKeys = {};
                         let fromParamsWithoutSearchKeys = {};
-                        for (let key in trans.$to().params) {
-                            if (trans.$to().params.hasOwnProperty(key) && !/_search/.test(key)) {
-                                toParamsWithoutSearchKeys[key] = trans.$to().params[key];
+                        for (let key in trans.params('to')) {
+                            if (trans.params('to').hasOwnProperty(key) && !/_search/.test(key)) {
+                                toParamsWithoutSearchKeys[key] = trans.params('to')[key];
                             }
                         }
-                        for (let key in trans.$from().params) {
-                            if (trans.$from().params.hasOwnProperty(key) && !/_search/.test(key)) {
-                                fromParamsWithoutSearchKeys[key] = trans.$from().params[key];
+                        for (let key in trans.params('from')) {
+                            if (trans.params('from').hasOwnProperty(key) && !/_search/.test(key)) {
+                                fromParamsWithoutSearchKeys[key] = trans.params('from')[key];
                             }
                         }
 
@@ -344,8 +343,8 @@ angular
                         document.body.scrollTop = document.documentElement.scrollTop = 0;
                     }
 
-                    if (trans.from().name === 'license' && trans.$to().params.hasOwnProperty('licenseMissing')) {
-                        $rootScope.licenseMissing = trans.$to().params.licenseMissing;
+                    if (trans.from().name === 'license' && trans.params('to').hasOwnProperty('licenseMissing')) {
+                        $rootScope.licenseMissing = trans.params('to').licenseMissing;
                     }
                     var list, id;
                     // broadcast event change if editing crud object

@@ -7,9 +7,11 @@
 export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
     'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData', 'inventoryData',
+    '$transitions',
     function($scope, NestedHostsListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData, inventoryData) {
+    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData, inventoryData,
+    $transitions) {
 
     let list = NestedHostsListDefinition;
 
@@ -46,10 +48,10 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
             setJobStatus();
         });
 
-        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toParams && toParams.host_search) {
+        $transitions.onSuccess({}, function(trans) {
+            if(trans.params('to') && trans.params('to').host_search) {
                 let hasMoreThanDefaultKeys = false;
-                angular.forEach(toParams.host_search, function(value, key) {
+                angular.forEach(trans.params('to').host_search, function(value, key) {
                     if(key !== 'order_by' && key !== 'page_size') {
                         hasMoreThanDefaultKeys = true;
                     }
