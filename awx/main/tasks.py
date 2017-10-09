@@ -1644,6 +1644,7 @@ class RunInventoryUpdate(BaseTask):
                                   project_name=credential.project)
             if credential.domain not in (None, ''):
                 openstack_auth['domain_name'] = credential.domain
+            profile = inventory_update.source_vars_dict.get('profile')
             private_state = inventory_update.source_vars_dict.get('private', True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
@@ -1653,15 +1654,34 @@ class RunInventoryUpdate(BaseTask):
             if not cache.get('path', ''):
                 cache_path = tempfile.mkdtemp(prefix='openstack_cache', dir=kwargs.get('private_data_dir', None))
                 cache['path'] = cache_path
-            openstack_data = {
-                'clouds': {
-                    'devstack': {
-                        'private': private_state,
-                        'auth': openstack_auth,
+            if profile.lower() == 'rackspace':
+                region_name = inventory_update.source_vars_dict.get('region_name')
+                openstack_data = {
+                    'clouds': {
+                        'rax': {
+                            'profile': 'rackspace',
+#                            'private': private_state,
+                            'auth': {
+                                'username': openstack_auth.get('username'),
+                                'password': openstack_auth.get('password'),
+                                'project_id': openstack_auth.get('project_name'),
+                            },
+                            'region_name': region_name,
+                        },
                     },
-                },
-                'cache': cache,
-            }
+                    'cache': cache,
+                }
+            else:
+                #devstack 
+                openstack_data = {
+                    'clouds': {
+                        'devstack': {
+                            'private': private_state,
+                            'auth': openstack_auth,
+                        },
+                    },
+                    'cache': cache,
+                }
             ansible_variables = {
                 'use_hostnames': True,
                 'expand_hostvars': False,
