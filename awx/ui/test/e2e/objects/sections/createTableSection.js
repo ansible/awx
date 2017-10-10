@@ -26,32 +26,51 @@ const header = {
     }]
 };
 
-module.exports = ({ elements, sections, commands }) => ({
-    selector: 'table',
-    sections: {
-        header,
-        dynamicSection
-    },
-    commands: [{
-        findRowByText (text) {
-            return this.section.dynamicSection.create({
-                elements,
-                sections,
-                commands,
-                name: `row[${text}]`,
-                locateStrategy: 'xpath',
-                selector: `.//tbody/tr/td//*[normalize-space(text())='${text}']/ancestor::tr`
-            });
+const createTableSection = ({ elements, sections, commands }) => {
+    const tableSection = {
+        selector: 'table',
+        sections: {
+            header,
+            dynamicSection
         },
-        waitForRowCount (count) {
-            const countReached = `tbody tr:nth-of-type(${count})`;
-            this.waitForElementPresent(countReached);
+        commands: [{
+            findRowByText (text) {
+                return this.section.dynamicSection.create({
+                    elements,
+                    sections,
+                    commands,
+                    name: `row[${text}]`,
+                    locateStrategy: 'xpath',
+                    selector: `.//tbody/tr/td//*[normalize-space(text())='${text}']/ancestor::tr`
+                });
+            },
+            findRowByIndex (index) {
+                return this.section.dynamicSection.create({
+                    elements,
+                    sections,
+                    commands,
+                    name: `row[${index}]`,
+                    locateStrategy: 'xpath',
+                    selector: `.//tbody/tr[${index}]`
+                });
+            },
+            clickRowByIndex (index) {
+                this.findRowByIndex(index).click('@self');
+                return this;
+            },
+            waitForRowCount (count) {
+                const countReached = this.findRowByIndex(count);
+                countReached.waitForElementVisible('@self', 10000);
 
-            const countExceeded = `tbody tr:nth-of-type(${count + 1})`;
-            this.waitForElementNotPresent(countExceeded);
+                const countExceeded = this.findRowByIndex(count + 1);
+                countExceeded.waitForElementNotPresent('@self', 10000);
 
-            return this;
-        }
-    }]
-});
+                return this;
+            }
+        }]
+    };
 
+    return tableSection;
+};
+
+module.exports = createTableSection;
