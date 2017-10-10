@@ -1,6 +1,7 @@
 # Python
 import logging
 import urlparse
+from collections import OrderedDict
 
 # Django
 from django.core.validators import URLValidator
@@ -98,5 +99,7 @@ class KeyValueField(DictField):
         ret = super(KeyValueField, self).to_internal_value(data)
         for value in data.values():
             if not isinstance(value, six.string_types + six.integer_types + (float,)):
+                if isinstance(value, OrderedDict):
+                    value = dict(value)
                 self.fail('invalid_child', input=value)
         return ret
