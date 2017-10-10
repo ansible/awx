@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: Import Vault Variables
+      include_vars: smoke-vars.yml
+      no_log: true
+
+    - name: Display Vault Message
+      debug:
+        msg: '{{ vault_message }}'

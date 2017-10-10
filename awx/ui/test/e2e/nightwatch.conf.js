@@ -22,6 +22,11 @@ module.exports = {
                 browserName: 'chrome'
             }
         },
+        smoke: {
+            disable_colors: true,
+            skip_testcases_on_fail: true,
+            filter: 'smoke.js'
+        },
         debug: {
             selenium_port: 9515,
             selenium_host: 'localhost',
