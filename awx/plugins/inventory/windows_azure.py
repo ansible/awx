@@ -14,6 +14,7 @@ installed.
 
 Adapted from the ansible Linode plugin by Dan Slimmon.
 '''
+from __future__ import print_function
 
 # (c) 2013, John Whitbeck
 #

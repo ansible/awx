@@ -185,6 +185,7 @@ Company: Ansible by Red Hat
 
 Version: 1.0.0
 '''
+from __future__ import print_function
 
 import argparse
 import ConfigParser

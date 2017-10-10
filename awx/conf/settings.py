@@ -186,7 +186,7 @@ def get_cache_value(value):
         value = SETTING_CACHE_NONE
     elif isinstance(value, (list, tuple)) and len(value) == 0:
         value = SETTING_CACHE_EMPTY_LIST
-    elif isinstance(value, (dict,)) and len(value) == 0:
+    elif isinstance(value, dict) and len(value) == 0:
         value = SETTING_CACHE_EMPTY_DICT
     return value
 
@@ -272,7 +272,7 @@ class SettingsWrapper(UserSettingsHolder):
                 setting_ids[setting.key] = setting.id
                 try:
                     value = decrypt_field(setting, 'value')
-                except ValueError, e:
+                except ValueError as e:
                     #TODO: Remove in Tower 3.3
                     logger.debug('encountered error decrypting field: %s - attempting fallback to old', e)
                     value = old_decrypt_field(setting, 'value')

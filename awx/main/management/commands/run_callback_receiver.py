@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 

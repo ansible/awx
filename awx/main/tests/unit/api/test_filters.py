@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import pytest
 
 from rest_framework.exceptions import PermissionDenied, ParseError

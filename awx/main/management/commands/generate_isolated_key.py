@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 import datetime
@@ -17,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         if getattr(settings, 'AWX_ISOLATED_PRIVATE_KEY', False):
-            print settings.AWX_ISOLATED_PUBLIC_KEY
+            print(settings.AWX_ISOLATED_PUBLIC_KEY)
             return
 
         key = rsa.generate_private_key(
@@ -41,4 +42,4 @@ class Command(BaseCommand):
             ) + " generated-by-awx@%s" % datetime.datetime.utcnow().isoformat()
         )
         pemfile.save()
-        print pemfile.value
+        print(pemfile.value)

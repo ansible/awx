@@ -12,6 +12,7 @@ from pyparsing import (
 import django
 
 from awx.main.utils.common import get_search_fields
+from functools import reduce
 
 __all__ = ['SmartFilter']
 

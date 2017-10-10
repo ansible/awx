@@ -102,6 +102,7 @@ variable named:
 Security groups are comma-separated in 'ec2_security_group_ids' and
 'ec2_security_group_names'.
 '''
+from __future__ import print_function
 
 # (c) 2012, Peter Sankauskas
 #

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Python
+from __future__ import print_function
 import difflib
 import glob
 import os

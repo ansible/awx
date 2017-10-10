@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -336,11 +337,11 @@ class RunJobTest(BaseJobExecutionTest):
                          has_roles=False):
         job_events = job.job_events.all()
         if False and async:
-            print
+            print()
             qs = self.super_django_user.get_queryset(JobEvent)
             for je in qs.filter(job=job):
                 print(je.get_event_display2())
-                print(je.event, je, je.failed)
+                print((je.event, je, je.failed))
                 print(je.event_data)
         for job_event in job_events:
             unicode(job_event)  # For test coverage.

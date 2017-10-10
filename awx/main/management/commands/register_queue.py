@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2017 Ansible Tower by Red Hat
 # All Rights Reserved.
 import sys
