@@ -41,7 +41,8 @@ def main():
     total_mem_value = out.split()[7]
     if int(total_mem_value) <= 2048:
         cap = 50
-    cap = 50 + ((int(total_mem_value) / 1024) - 2) * 75
+    else:
+        cap = 50 + ((int(total_mem_value) / 1024) - 2) * 75
 
     # Module never results in a change
     module.exit_json(changed=False, capacity=cap, version=version)
