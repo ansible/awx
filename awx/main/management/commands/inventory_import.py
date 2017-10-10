@@ -603,27 +603,20 @@ class Command(NoArgsCommand):
 
     def _update_inventory(self):
         '''
-        Update/overwrite variables from "all" group.  If importing from a
-        cloud source attached to a specific group, variables will be set on
-        the base group, otherwise they will be set on the whole inventory.
+        Update inventory variables from "all" group.
         '''
-        # FIXME: figure out how "all" variables are handled in the new inventory source system
+        # TODO: We disable variable overwrite here in case user-defined inventory variables get
+        # mangled. But we still need to figure out a better way of processing multiple inventory
+        # update variables mixing with each other.
         all_obj = self.inventory
-        all_name = 'inventory'
         db_variables = all_obj.variables_dict
-        if self.overwrite_vars:
-            db_variables = self.all_group.variables
-        else:
-            db_variables.update(self.all_group.variables)
+        db_variables.update(self.all_group.variables)
         if db_variables != all_obj.variables_dict:
             all_obj.variables = json.dumps(db_variables)
             all_obj.save(update_fields=['variables'])
-            if self.overwrite_vars:
-                logger.info('%s variables replaced from "all" group', all_name.capitalize())
-            else:
-                logger.info('%s variables updated from "all" group', all_name.capitalize())
+            logger.info('Inventory variables updated from "all" group')
         else:
-            logger.info('%s variables unmodified', all_name.capitalize())
+            logger.info('Inventory variables unmodified')
 
     def _create_update_groups(self):
         '''
