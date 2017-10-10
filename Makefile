@@ -23,7 +23,7 @@ COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
-CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
+CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)

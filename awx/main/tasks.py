@@ -26,7 +26,7 @@ except Exception:
 
 # Celery
 from celery import Task, shared_task
-from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, beat_init
+from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, celeryd_after_setup
 
 # Django
 from django.conf import settings
@@ -168,7 +168,6 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
                 .format(instance.hostname, removed_queues, added_queues))
 
 
-@beat_init.connect
 @celeryd_init.connect
 def handle_update_celery_routes(sender=None, conf=None, **kwargs):
     conf = conf if conf else sender.app.conf
@@ -177,6 +176,13 @@ def handle_update_celery_routes(sender=None, conf=None, **kwargs):
     added_routes = update_celery_worker_routes(instance, conf)
     logger.info("Workers on tower node '{}' added routes {} all routes are now {}"
                 .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
+
+
+@celeryd_after_setup.connect
+def handle_update_celery_hostname(sender, instance, **kwargs):
+    tower_instance = Instance.objects.me()
+    instance.hostname = 'celery@{}'.format(tower_instance.hostname)
+    logger.warn("Set hostname to {}".format(instance.hostname))
 
 
 @shared_task(queue='tower', base=LogErrorsTask)
