@@ -270,6 +270,8 @@ You will need the following installed on the host where AWX will be deployed:
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-py](https://github.com/docker/docker-py) Python module
 
+Note: After installing Docker, the Docker service must be started. 
+
 ### Pre-build steps
 
 #### Deploying to a remote host
