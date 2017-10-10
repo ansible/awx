@@ -43,20 +43,27 @@ function requestWithCache (method, resource) {
  * supported by the API.
  *
  * @arg {Object} params - An object of keys and values to to format and
- * to the URL as a query string. Refer to the API documentation for the 
+ * to the URL as a query string. Refer to the API documentation for the
  * resource in use for specifics.
  * @arg {Object} config - Configuration specific to the UI to accommodate
  * common use cases.
  *
- * @yields {boolean} - Indicating a match has been found. If so, the results 
+ * @yields {boolean} - Indicating a match has been found. If so, the results
  * are set on the model.
  */
-function search (params, config) {
+function search (params = {}, config = {}) {
     let req = {
         method: 'GET',
-        url: this.path,
-        params
+        url: this.path
     };
+
+    if (typeof params === 'string') {
+        req.url = `?params`;
+    } else if (Array.isArray(params)) {
+        req.url += `?${params.join('&')}`;
+    } else {
+        req.params = params;
+    }
 
     return $http(req)
         .then(({ data }) => {
