@@ -271,7 +271,7 @@ def __run__(private_data_dir):
 
 
 if __name__ == '__main__':
-    __version__ = '3.2.0'
+    __version__ = '3.2.2'
     try:
         import awx
         __version__ = awx.__version__
