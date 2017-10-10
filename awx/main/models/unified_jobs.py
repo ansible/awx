@@ -879,6 +879,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def handle_extra_data(self, extra_data):
         if hasattr(self, 'extra_vars') and extra_data:
+            extra_data_dict = {}
             try:
                 extra_data_dict = parse_yaml_or_json(extra_data, silent_failure=False)
             except Exception as e:
