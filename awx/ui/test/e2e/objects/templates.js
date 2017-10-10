@@ -1,13 +1,13 @@
-import actions from './sections/actions.js';
-import breadcrumb from './sections/breadcrumb.js';
-import createFormSection from './sections/createFormSection.js';
-import createTableSection from './sections/createTableSection.js';
-import header from './sections/header.js';
-import lookupModal from './sections/lookupModal.js';
-import navigation from './sections/navigation.js';
-import pagination from './sections/pagination.js';
-import permissions from './sections/permissions.js';
-import search from './sections/search.js';
+import actions from './sections/actions';
+import breadcrumb from './sections/breadcrumb';
+import createFormSection from './sections/createFormSection';
+import createTableSection from './sections/createTableSection';
+import header from './sections/header';
+import lookupModal from './sections/lookupModal';
+import navigation from './sections/navigation';
+import pagination from './sections/pagination';
+import permissions from './sections/permissions';
+import search from './sections/search';
 
 const details = createFormSection({
     selector: 'form',
@@ -24,7 +24,7 @@ const details = createFormSection({
 });
 
 module.exports = {
-    url() {
+    url () {
         return `${this.api.globals.launch_url}/#/templates`;
     },
     sections: {

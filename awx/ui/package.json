@@ -21,12 +21,12 @@
     "languages": "grunt nggettext_compile",
     "build-release": "npm run production",
     "pretest": "",
-    "test": "karma start karma.conf.js",
+    "test": "karma start test/spec/karma.spec.js",
     "jshint": "grunt jshint:source --no-color",
     "test:ci": "npm run test -- --single-run --reporter junit,dots --browsers=PhantomJS",
-    "e2e": "./client/test/e2e/runner.js --config ./client/test/e2e/nightwatch.conf.js",
-    "component-test": "karma start client/test/unit/karma.conf.js",
-    "lint": "eslint -c .eslintrc.js .",
+    "e2e": "./test/e2e/runner.js --config ./test/e2e/nightwatch.conf.js",
+    "unit": "karma start test/unit/karma.unit.js",
+    "lint": "eslint .",
     "dev": "webpack --config build/webpack.development.js --progress",
     "watch": "webpack-dev-server --config build/webpack.watch.js --progress",
     "production": "webpack --config build/webpack.production.js"
@@ -47,6 +47,7 @@
     "eslint-config-airbnb-base": "^12.0.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-loader": "^1.9.0",
+    "eslint-plugin-disable": "^0.3.0",
     "eslint-plugin-import": "^2.7.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "grunt": "^1.0.1",
@@ -84,8 +85,10 @@
     "phantomjs-prebuilt": "^2.1.12",
     "time-grunt": "^1.4.0",
     "uglifyjs-webpack-plugin": "^0.4.6",
+    "uuid": "^3.1.0",
     "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.7.1"
+    "webpack-dev-server": "^2.7.1",
+    "webpack-merge": "^4.1.0"
   },
   "dependencies": {
     "angular": "~1.4.14",

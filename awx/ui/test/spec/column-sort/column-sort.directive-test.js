@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Directive: column-sort', () =>{
+xdescribe('Directive: column-sort', () =>{
 
     let $scope, template, $compile, QuerySet, GetBasePath;
 

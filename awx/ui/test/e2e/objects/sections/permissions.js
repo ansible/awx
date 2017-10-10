@@ -1,8 +1,7 @@
-import actions from './actions.js';
-import createTableSection from './createTableSection.js';
-import pagination from './pagination.js';
-import search from './search.js';
-
+import actions from './actions';
+import createTableSection from './createTableSection';
+import pagination from './pagination';
+import search from './search';
 
 const permissions = {
     selector: 'div[ui-view="related"]',
@@ -25,6 +24,5 @@ const permissions = {
         })
     }
 };
-
 
 module.exports = permissions;

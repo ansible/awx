@@ -1,9 +1,7 @@
 import { merge } from 'lodash';
 
-
 const translated = "translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')";
 const normalized = `normalize-space(${translated})`;
-
 
 const inputContainerElements = {
     lookup: 'button > i[class="fa fa-search"]',
@@ -39,7 +37,6 @@ const inputContainerElements = {
     }
 };
 
-
 const legacyContainerElements = merge({}, inputContainerElements, {
     prompt: {
         locateStrategy: 'xpath',
@@ -49,22 +46,21 @@ const legacyContainerElements = merge({}, inputContainerElements, {
     popover: ':root div[id^="popover"]',
 });
 
-
-const generateInputSelectors = function(label, containerElements) {
+const generateInputSelectors = (label, containerElements) => {
     // descend until span with matching text attribute is encountered
-    let span = `.//span[text()="${label}"]`;
+    const span = `.//span[text()="${label}"]`;
     // recurse upward until div with form-group in class attribute is encountered
-    let container = `${span}/ancestor::div[contains(@class, 'form-group')]`;
+    const container = `${span}/ancestor::div[contains(@class, 'form-group')]`;
     // descend until element with form-control in class attribute is encountered
-    let input = `${container}//*[contains(@class, 'form-control')]`;
+    const input = `${container}//*[contains(@class, 'form-control')]`;
 
-    let inputContainer = {
+    const inputContainer = {
         locateStrategy: 'xpath',
         selector: container,
         elements: containerElements
     };
 
-    let inputElement = {
+    const inputElement = {
         locateStrategy: 'xpath',
         selector: input
     };
@@ -72,15 +68,14 @@ const generateInputSelectors = function(label, containerElements) {
     return { inputElement, inputContainer };
 };
 
+function checkAllFieldsDisabled () {
+    const client = this.client.api;
 
-const checkAllFieldsDisabled = function() {
-    let client = this.client.api;
-
-    let selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
+    const selectors = this.props.formElementSelectors ? this.props.formElementSelectors : [
         '.at-Input'
     ];
 
-    selectors.forEach(function(selector) {
+    selectors.forEach(selector => {
         client.elements('css selector', selector, inputs => {
             inputs.value.map(o => o.ELEMENT).forEach(id => {
                 client.elementIdAttribute(id, 'disabled', ({ value }) => {
@@ -89,36 +84,36 @@ const checkAllFieldsDisabled = function() {
             });
         });
     });
-};
-
+}
 
 const generatorOptions = {
     default: inputContainerElements,
     legacy: legacyContainerElements
 };
 
+const createFormSection = ({ selector, labels, strategy, props }) => {
+    const options = generatorOptions[strategy || 'default'];
 
-const createFormSection = function({ selector, labels, strategy, props }) {
-    let options = generatorOptions[strategy || 'default'];
-
-    let formSection = {
+    const formSection = {
+        props,
         selector,
         sections: {},
         elements: {},
-        commands: [{
-            checkAllFieldsDisabled: checkAllFieldsDisabled
-        }],
-        props: props
+        commands: [{ checkAllFieldsDisabled }]
     };
 
-    for (let key in labels) {
-        let label = labels[key];
-
-        let { inputElement, inputContainer } = generateInputSelectors(label, options);
-
-        formSection.elements[key] = inputElement;
-        formSection.sections[key] = inputContainer;
+    if (!labels) {
+        return formSection;
     }
+
+    Object.keys(labels)
+        .forEach(key => {
+            const label = labels[key];
+            const { inputElement, inputContainer } = generateInputSelectors(label, options);
+
+            formSection.elements[key] = inputElement;
+            formSection.sections[key] = inputContainer;
+        });
 
     return formSection;
 };

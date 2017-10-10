@@ -1,20 +1,17 @@
-exports.command = function(callback) {
-    let self = this;
-    this.timeoutsAsyncScript(this.globals.asyncHookTimeout, function() {
-        this.executeAsync(function(done) {
-            if(angular && angular.getTestability) {
+exports.command = function waitForAngular (callback) {
+    this.timeoutsAsyncScript(this.globals.asyncHookTimeout, () => {
+        this.executeAsync(done => {
+            if (angular && angular.getTestability) {
                 angular.getTestability(document.body).whenStable(done);
-            }
-            else {
+            } else {
                 done();
             }
-        },
-        [],
-        function(result) {
-            if(typeof(callback) === "function") {
-                callback.call(self, result);
+        }, [], result => {
+            if (typeof callback === 'function') {
+                callback.call(this, result);
             }
         });
     });
+
     return this;
 };

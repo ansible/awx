@@ -6,8 +6,7 @@ import {
     awxURL,
     awxUsername,
     awxPassword
-} from './settings.js';
-
+} from './settings';
 
 let authenticated;
 
@@ -20,29 +19,22 @@ const session = axios.create({
     })
 });
 
-
-const endpoint = function(location) {
-
-    if (location.indexOf('/api/v') === 0) {
-        return location;
-    }
-
-    if (location.indexOf('://') > 0) {
+const getEndpoint = location => {
+    if (location.indexOf('/api/v') === 0 || location.indexOf('://') > 0) {
         return location;
     }
 
     return `${awxURL}/api/v2${location}`;
 };
 
-
-const authenticate = function() {
+const authenticate = () => {
     if (authenticated) {
         return Promise.resolve();
     }
 
-    let uri = endpoint('/authtoken/');
+    const uri = getEndpoint('/authtoken/');
 
-    let credentials = {
+    const credentials = {
         username: awxUsername,
         password: awxPassword
     };
@@ -50,48 +42,34 @@ const authenticate = function() {
     return session.post(uri, credentials).then(res => {
         session.defaults.headers.Authorization = `Token ${res.data.token}`;
         authenticated = true;
-        return res
+
+        return res;
     });
 };
 
+const request = (method, location, data) => {
+    const uri = getEndpoint(location);
+    const action = session[method.toLowerCase()];
 
-const request = function(method, location, data) {
-    let uri = endpoint(location);
-    let action = session[method.toLowerCase()];
-    
-    return authenticate().then(() => action(uri, data)).then(res => {
-        console.log([
-            res.config.method.toUpperCase(),
-            uri,
-            res.status,
-            res.statusText
-        ].join(' '));
+    return authenticate()
+        .then(() => action(uri, data))
+        .then(res => {
+            console.log([ // eslint-disable-line no-console
+                res.config.method.toUpperCase(),
+                uri,
+                res.status,
+                res.statusText
+            ].join(' '));
 
-        return res; 
-    });
+            return res;
+        });
 };
 
-
-const get = function(endpoint, data) {
-    return request('GET', endpoint, data);
-};
-
-const options = function(endpoint) {
-    return request('OPTIONS', endpoint);
-};
-
-const post = function(endpoint, data) {
-    return request('POST', endpoint, data);
-};
-
-const patch = function(endpoint, data) {
-    return request('PATCH', endpoint, data)
-};
-
-const put = function(endpoint, data) {
-    return request('PUT', endpoint, data);
-};
-
+const get = (endpoint, data) => request('GET', endpoint, data);
+const options = endpoint => request('OPTIONS', endpoint);
+const post = (endpoint, data) => request('POST', endpoint, data);
+const patch = (endpoint, data) => request('PATCH', endpoint, data);
+const put = (endpoint, data) => request('PUT', endpoint, data);
 
 module.exports = {
     get,

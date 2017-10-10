@@ -1,9 +1,8 @@
 import uuid from 'uuid';
 
+const testID = uuid().substr(0, 8);
 
-let testID = uuid().substr(0,8);
-
-let store = {
+const store = {
     organization: {
         name: `org-${testID}`
     },
@@ -13,18 +12,17 @@ let store = {
 };
 
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentials = client.page.credentials();
 
         client.login();
         client.waitForAngular();
 
-        client.inject([store, 'OrganizationModel'], (store, model) => {
-            return new model().http.post(store.organization);
-        },
-        ({ data }) => {
-            store.organization = data;
-        });
+        client.inject(
+            [store, 'OrganizationModel'],
+            (_store_, Model) => new Model().http.post(_store_.organization),
+            ({ data }) => { store.organization = data; }
+        );
 
         credentials.section.navigation
             .waitForElementVisible('@credentials')
@@ -44,9 +42,9 @@ module.exports = {
             .setValue('@organization', store.organization.name)
             .setValue('@type', 'Amazon Web Services', done);
     },
-    'expected fields are visible and enabled': function(client) {
+    'expected fields are visible and enabled': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details.expect.element('@name').visible;
         details.expect.element('@description').visible;
@@ -64,20 +62,23 @@ module.exports = {
         details.section.aws.expect.element('@secretKey').enabled;
         details.section.aws.expect.element('@securityToken').enabled;
     },
-    'required fields display \'*\'': function(client) {
+    'required fields display \'*\'': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
         const required = [
             details.section.name,
             details.section.type,
             details.section.aws.section.accessKey,
             details.section.aws.section.secretKey
-        ]
-        required.map(s => s.expect.element('@label').text.to.contain('*'));
+        ];
+
+        required.forEach(s => {
+            s.expect.element('@label').text.to.contain('*');
+        });
     },
-    'save button becomes enabled after providing required fields': function(client) {
+    'save button becomes enabled after providing required fields': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details
             .clearAndSelectType('Amazon Web Services')
@@ -88,10 +89,10 @@ module.exports = {
         details.section.aws.setValue('@secretKey', 'AAAAAAAAAAAAA');
         details.expect.element('@save').enabled;
     },
-   'create aws credential': function(client) {
+    'create aws credential': client => {
         const credentials = client.page.credentials();
-        const add = credentials.section.add;
-        const edit = credentials.section.edit;
+        const { add } = credentials.section;
+        const { edit } = credentials.section;
 
         add.section.details
             .clearAndSelectType('Amazon Web Services')
@@ -110,16 +111,16 @@ module.exports = {
 
         edit.expect.element('@title').text.equal(store.credential.name);
     },
-    'edit details panel remains open after saving': function(client) {
+    'edit details panel remains open after saving': client => {
         const credentials = client.page.credentials();
 
         credentials.section.edit.expect.section('@details').visible;
     },
-    'credential is searchable after saving': function(client) {
+    'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
 
-        const search = credentials.section.list.section.search;
-        const table = credentials.section.list.section.table;
+        const { search } = credentials.section.list.section;
+        const { table } = credentials.section.list.section;
 
         search
             .waitForElementVisible('@input')

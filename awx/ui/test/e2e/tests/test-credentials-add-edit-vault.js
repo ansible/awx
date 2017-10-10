@@ -1,31 +1,28 @@
 import uuid from 'uuid';
 
-
-let testID = uuid().substr(0,8);
-
-let store = {
+const testID = uuid().substr(0, 8);
+const store = {
     organization: {
         name: `org-${testID}`
     },
     credential: {
         name: `cred-${testID}`
-    },
+    }
 };
 
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         client.login();
         client.waitForAngular();
 
-        client.inject([store, 'OrganizationModel'], (store, model) => {
-            return new model().http.post(store.organization);
-        },
-        ({ data }) => {
-            store.organization = data;
-        });
+        client.inject(
+            [store, 'OrganizationModel'],
+            (_store_, Model) => new Model().http.post(_store_.organization),
+            ({ data }) => { store.organization = data; }
+        );
 
         credentials.section.navigation
             .waitForElementVisible('@credentials')
@@ -45,9 +42,9 @@ module.exports = {
             .setValue('@organization', store.organization.name)
             .setValue('@type', 'Vault', done);
     },
-    'expected fields are visible and enabled': function(client) {
+    'expected fields are visible and enabled': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details.expect.element('@name').visible;
         details.expect.element('@description').visible;
@@ -61,19 +58,20 @@ module.exports = {
         details.expect.element('@type').enabled;
         details.section.vault.expect.element('@vaultPassword').enabled;
     },
-    'required fields display \'*\'': function(client) {
+    'required fields display \'*\'': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
         const required = [
             details.section.name,
             details.section.type,
             details.section.vault.section.vaultPassword,
-        ]
+        ];
+
         required.map(s => s.expect.element('@label').text.to.contain('*'));
     },
-    'save button becomes enabled after providing required fields': function(client) {
+    'save button becomes enabled after providing required fields': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details
             .clearAndSelectType('Vault')
@@ -83,9 +81,9 @@ module.exports = {
         details.section.vault.setValue('@vaultPassword', 'ch@ng3m3');
         details.expect.element('@save').enabled;
     },
-    'vault password field is disabled when prompt on launch is selected': function(client) {
+    'vault password field is disabled when prompt on launch is selected': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details
             .clearAndSelectType('Vault')
@@ -95,10 +93,10 @@ module.exports = {
         details.section.vault.section.vaultPassword.click('@prompt');
         details.section.vault.expect.element('@vaultPassword').not.enabled;
     },
-   'create vault credential': function(client) {
+    'create vault credential': client => {
         const credentials = client.page.credentials();
-        const add = credentials.section.add;
-        const edit = credentials.section.edit;
+        const { add } = credentials.section;
+        const { edit } = credentials.section;
 
         add.section.details
             .clearAndSelectType('Vault')
@@ -115,12 +113,12 @@ module.exports = {
 
         edit.expect.element('@title').text.equal(store.credential.name);
     },
-    'edit details panel remains open after saving': function(client) {
+    'edit details panel remains open after saving': client => {
         const credentials = client.page.credentials();
 
         credentials.section.edit.expect.section('@details').visible;
     },
-    'credential is searchable after saving': function(client) {
+    'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
         const row = '#credentials_table tbody tr';
 

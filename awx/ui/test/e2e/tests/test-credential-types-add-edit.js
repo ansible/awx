@@ -1,5 +1,5 @@
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentialTypes = client.page.credentialTypes();
 
         client.login();
@@ -13,9 +13,9 @@ module.exports = {
         credentialTypes.section.add
             .waitForElementVisible('@title', done);
     },
-    'expected fields are present and enabled': function(client) {
+    'expected fields are present and enabled': client => {
         const credentialTypes = client.page.credentialTypes();
-        const details = credentialTypes.section.add.section.details;
+        const { details } = credentialTypes.section.add.section;
 
         details.expect.element('@name').visible;
         details.expect.element('@description').visible;

@@ -1,11 +1,10 @@
-import actions from './sections/actions.js';
-import breadcrumb from './sections/breadcrumb.js';
-import createFormSection from './sections/createFormSection.js';
-import createTableSection from './sections/createTableSection.js';
-import header from './sections/header.js';
-import search from './sections/search.js';
-import pagination from './sections/pagination.js';
-
+import actions from './sections/actions';
+import breadcrumb from './sections/breadcrumb';
+import createFormSection from './sections/createFormSection';
+import createTableSection from './sections/createTableSection';
+import header from './sections/header';
+import search from './sections/search';
+import pagination from './sections/pagination';
 
 const addEditPanel = {
     selector: 'div[ui-view="form"]',
@@ -16,16 +15,15 @@ const addEditPanel = {
         details: createFormSection({
             selector: '#credential_type_form',
             labels: {
-                name: "Name",
-                description: "Description",
-                inputConfiguration: "Input Configuration",
-                injectorConfiguration: "Injector Configuration"
+                name: 'Name',
+                description: 'Description',
+                inputConfiguration: 'Input Configuration',
+                injectorConfiguration: 'Injector Configuration'
             },
             strategy: 'legacy'
         })
     }
 };
-
 
 const listPanel = {
     selector: 'div[ui-view="list"]',
@@ -50,10 +48,9 @@ const listPanel = {
     }
 };
 
-
 module.exports = {
-    url() {
-        return `${this.api.globals.launch_url}/#/credential_types`
+    url () {
+        return `${this.api.globals.launch_url}/#/credential_types`;
     },
     sections: {
         header,

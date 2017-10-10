@@ -10,7 +10,6 @@ const AWX_E2E_TIMEOUT_LONG = process.env.AWX_E2E_TIMEOUT_LONG || 10000;
 const AWX_E2E_TIMEOUT_ASYNC = process.env.AWX_E2E_TIMEOUT_ASYNC || 30000;
 const AWX_E2E_WORKERS = process.env.AWX_E2E_WORKERS || 0;
 
-
 module.exports = {
     awxURL: AWX_E2E_URL,
     awxUsername: AWX_E2E_USERNAME,

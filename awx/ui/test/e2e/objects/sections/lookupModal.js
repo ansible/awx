@@ -1,7 +1,6 @@
-import createTableSection from './createTableSection.js';
-import pagination from './pagination.js';
-import search from './search.js';
-
+import createTableSection from './createTableSection';
+import pagination from './pagination';
+import search from './search';
 
 const lookupModal = {
     selector: '#form-modal',

@@ -1,5 +1,5 @@
 module.exports = {
-    beforeEach: function(client, done) {
+    beforeEach: (client, done) => {
         const credentials = client.useCss().page.credentials();
 
         client.login();
@@ -10,7 +10,7 @@ module.exports = {
             .waitForElementVisible('div.spinny')
             .waitForElementNotVisible('div.spinny', done);
     },
-    'activity link is visible and takes user to activity stream': function(client) {
+    'activity link is visible and takes user to activity stream': client => {
         const credentials = client.page.credentials();
         const activityStream = client.page.activityStream();
 

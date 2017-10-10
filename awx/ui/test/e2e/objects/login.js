@@ -1,6 +1,6 @@
 module.exports = {
-    url() {
-	return `${this.api.globals.launch_url}/#/login`
+    url () {
+        return `${this.api.globals.launch_url}/#/login`;
     },
     elements: {
         username: '#login-username',

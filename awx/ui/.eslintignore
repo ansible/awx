@@ -1,6 +1,7 @@
-webpack.*.js
 Gruntfile.js
 karma.*.js
+webpack.*.js
+nightwatch.*.js
 
 etc
 coverage
@@ -9,12 +10,10 @@ node_modules
 po
 static
 templates
-tests
-client/**/*.js
-test
 
-!client/lib/components/**/*.js
-!client/lib/models/**/*.js
-!client/lib/services/**/*.js
-!client/features/**/*.js
+client/src/**/*.js
+client/assets/**/*.js
+test/spec/**/*.js
+
 !client/src/app.start.js
+!client/src/vendor.js

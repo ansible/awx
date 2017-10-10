@@ -1,5 +1,4 @@
-import dynamicSection from './dynamicSection.js';
-
+import dynamicSection from './dynamicSection';
 
 const header = {
     selector: 'thead',
@@ -7,7 +6,7 @@ const header = {
         dynamicSection
     },
     commands: [{
-        findColumnByText(text) {
+        findColumnByText (text) {
             return this.section.dynamicSection.create({
                 name: `column[${text}]`,
                 locateStrategy: 'xpath',
@@ -17,7 +16,7 @@ const header = {
                         locateStrategy: 'xpath',
                         selector: './/*[contains(@class, "fa-sort")]'
                     },
-                   sorted: {
+                    sorted: {
                         locateStrategy: 'xpath',
                         selector: './/*[contains(@class, "fa-sort-")]'
                     },
@@ -27,37 +26,32 @@ const header = {
     }]
 };
 
-
-const createTableSection = function({ elements, sections, commands }) {
-    return {
-        selector: 'table',
-        sections: {
-            header,
-            dynamicSection
+module.exports = ({ elements, sections, commands }) => ({
+    selector: 'table',
+    sections: {
+        header,
+        dynamicSection
+    },
+    commands: [{
+        findRowByText (text) {
+            return this.section.dynamicSection.create({
+                elements,
+                sections,
+                commands,
+                name: `row[${text}]`,
+                locateStrategy: 'xpath',
+                selector: `.//tbody/tr/td//*[normalize-space(text())='${text}']/ancestor::tr`
+            });
         },
-        commands: [{
-            findRowByText(text) {
-                return this.section.dynamicSection.create({
-                    elements,
-                    sections,
-                    commands,
-                    name: `row[${text}]`,
-                    locateStrategy: 'xpath',
-                    selector: `.//tbody/tr/td//*[normalize-space(text())='${text}']/ancestor::tr`
-                });
-            },
-            waitForRowCount(count) {
-                let countReached = `tbody tr:nth-of-type(${count})`;
-                this.waitForElementPresent(countReached);
+        waitForRowCount (count) {
+            const countReached = `tbody tr:nth-of-type(${count})`;
+            this.waitForElementPresent(countReached);
 
-                let countExceeded = `tbody tr:nth-of-type(${count + 1})`;
-                this.waitForElementNotPresent(countExceeded);
+            const countExceeded = `tbody tr:nth-of-type(${count + 1})`;
+            this.waitForElementNotPresent(countExceeded);
 
-                return this;
-            }
-        }]
-    };
-};
+            return this;
+        }
+    }]
+});
 
-
-module.exports = createTableSection;

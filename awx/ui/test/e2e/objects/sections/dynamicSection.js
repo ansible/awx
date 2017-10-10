@@ -1,10 +1,10 @@
 const dynamicSection = {
     selector: '.',
     commands: [{
-        create({ name, locateStrategy, selector, elements, sections, commands }) {
-            let Section = this.constructor;
+        create ({ name, locateStrategy, selector, elements, sections, commands }) {
+            const Section = this.constructor;
 
-            let options = Object.assign(Object.create(this), {
+            const options = Object.assign(Object.create(this), {
                 name,
                 locateStrategy,
                 elements,

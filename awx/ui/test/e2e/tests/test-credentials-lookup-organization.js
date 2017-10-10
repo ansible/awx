@@ -1,7 +1,7 @@
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         client.login();
         client.waitForAngular();
@@ -20,12 +20,11 @@ module.exports = {
 
         details
             .waitForElementVisible('@save', done);
-
     },
-    'open the lookup modal': function(client) {
+    'open the lookup modal': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
-        const lookupModal = credentials.section.lookupModal;
+        const { details } = credentials.section.add.section;
+        const { lookupModal } = credentials.section;
 
         details.expect.element('@organization').visible;
         details.expect.element('@organization').enabled;
@@ -37,15 +36,15 @@ module.exports = {
 
         credentials.expect.section('@lookupModal').present;
 
-        let expected = 'SELECT ORGANIZATION';
+        const expected = 'SELECT ORGANIZATION';
         lookupModal.expect.element('@title').visible;
         lookupModal.expect.element('@title').text.equal(expected);
     },
-    'select button is disabled until item is selected': function(client) {
+    'select button is disabled until item is selected': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
-        const lookupModal = credentials.section.lookupModal;
-        const table = lookupModal.section.table;
+        const { details } = credentials.section.add.section;
+        const { lookupModal } = credentials.section;
+        const { table } = lookupModal.section;
 
         details.section.organization.expect.element('@lookup').visible;
         details.section.organization.expect.element('@lookup').enabled;
@@ -70,12 +69,12 @@ module.exports = {
         lookupModal.expect.element('@select').visible;
         lookupModal.expect.element('@select').enabled;
     },
-    'sort and unsort the table by name with an item selected': function(client) {
+    'sort and unsort the table by name with an item selected': client => {
         const credentials = client.page.credentials();
-        const lookupModal = credentials.section.lookupModal;
-        const table = lookupModal.section.table;
+        const { lookupModal } = credentials.section;
+        const { table } = lookupModal.section;
 
-        let column = table.section.header.findColumnByText('Name');
+        const column = table.section.header.findColumnByText('Name');
 
         column.expect.element('@self').visible;
         column.expect.element('@sortable').visible;
@@ -100,11 +99,11 @@ module.exports = {
         table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
         table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
     },
-    'use the pagination controls with an item selected': function(client) {
+    'use the pagination controls with an item selected': client => {
         const credentials = client.page.credentials();
-        const lookupModal = credentials.section.lookupModal;
-        const table = lookupModal.section.table;
-        const pagination = lookupModal.section.pagination;
+        const { lookupModal } = credentials.section;
+        const { table } = lookupModal.section;
+        const { pagination } = lookupModal.section;
 
         pagination.click('@next');
         credentials.waitForElementVisible('div.spinny');

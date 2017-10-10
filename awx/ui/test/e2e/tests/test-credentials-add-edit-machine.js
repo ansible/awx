@@ -1,9 +1,8 @@
 import uuid from 'uuid';
 
+const testID = uuid().substr(0, 8);
 
-let testID = uuid().substr(0,8);
-
-let store = {
+const store = {
     organization: {
         name: `org-${testID}`
     },
@@ -13,19 +12,18 @@ let store = {
 };
 
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         client.login();
         client.waitForAngular();
 
-        client.inject([store, 'OrganizationModel'], (store, model) => {
-            return new model().http.post(store.organization);
-        },
-        ({ data }) => {
-            store.organization = data;
-        });
+        client.inject(
+            [store, 'OrganizationModel'],
+            (_store_, Model) => new Model().http.post(_store_.organization),
+            ({ data }) => { store.organization = data; }
+        );
 
         credentials.section.navigation
             .waitForElementVisible('@credentials')
@@ -41,9 +39,9 @@ module.exports = {
 
         details.waitForElementVisible('@save', done);
     },
-    'common fields are visible and enabled': function(client) {
+    'common fields are visible and enabled': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details.expect.element('@name').visible;
         details.expect.element('@description').visible;
@@ -55,16 +53,16 @@ module.exports = {
         details.expect.element('@organization').enabled;
         details.expect.element('@type').enabled;
     },
-    'required common fields display \'*\'': function(client) {
+    'required common fields display \'*\'': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details.section.name.expect.element('@label').text.to.contain('*');
         details.section.type.expect.element('@label').text.to.contain('*');
     },
-    'save button becomes enabled after providing required fields': function(client) {
+    'save button becomes enabled after providing required fields': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         details.expect.element('@save').not.enabled;
 
@@ -75,10 +73,10 @@ module.exports = {
 
         details.expect.element('@save').enabled;
     },
-    'machine credential fields are visible after choosing type': function(client) {
+    'machine credential fields are visible after choosing type': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
-        const machine = details.section.machine;
+        const { details } = credentials.section.add.section;
+        const { machine } = details.section;
 
         machine.expect.element('@username').visible;
         machine.expect.element('@password').visible;
@@ -87,10 +85,10 @@ module.exports = {
         machine.expect.element('@sshKeyData').visible;
         machine.expect.element('@sshKeyUnlock').visible;
     },
-    'error displayed for invalid ssh key data': function(client) {
+    'error displayed for invalid ssh key data': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
-        const sshKeyData = details.section.machine.section.sshKeyData;
+        const { details } = credentials.section.add.section;
+        const { sshKeyData } = details.section.machine.section;
 
         details
             .clearAndSelectType('Machine')
@@ -106,10 +104,10 @@ module.exports = {
         details.section.machine.clearValue('@sshKeyData');
         sshKeyData.expect.element('@error').not.present;
     },
-    'error displayed for unencrypted ssh key with passphrase': function(client) {
+    'error displayed for unencrypted ssh key with passphrase': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
-        const sshKeyUnlock = details.section.machine.section.sshKeyUnlock;
+        const { details } = credentials.section.add.section;
+        const { sshKeyUnlock } = details.section.machine.section;
 
         details
             .clearAndSelectType('Machine')
@@ -130,11 +128,11 @@ module.exports = {
 
         details.section.machine.clearValue('@sshKeyUnlock');
         sshKeyUnlock.expect.element('@error').not.present;
-   },
-   'create machine credential': function(client) {
+    },
+    'create machine credential': client => {
         const credentials = client.page.credentials();
-        const add = credentials.section.add;
-        const edit = credentials.section.edit;
+        const { add } = credentials.section;
+        const { edit } = credentials.section;
 
         add.section.details
             .clearAndSelectType('Machine')
@@ -161,12 +159,12 @@ module.exports = {
 
         edit.expect.element('@title').text.equal(store.credential.name);
     },
-    'edit details panel remains open after saving': function(client) {
+    'edit details panel remains open after saving': client => {
         const credentials = client.page.credentials();
 
         credentials.section.edit.expect.section('@details').visible;
     },
-    'credential is searchable after saving': function(client) {
+    'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
         const row = '#credentials_table tbody tr';
 

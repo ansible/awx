@@ -1,7 +1,7 @@
 module.exports = {
-    before: function(client, done) {
+    before: (client, done) => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         client.login();
         client.waitForAngular();
@@ -19,11 +19,11 @@ module.exports = {
             .click('@add');
 
         details
-            .waitForElementVisible('@save', done)
+            .waitForElementVisible('@save', done);
     },
-    'open the lookup modal': function(client) {
+    'open the lookup modal': client => {
         const credentials = client.page.credentials();
-        const details = credentials.section.add.section.details;
+        const { details } = credentials.section.add.section;
 
         const modal = 'div[class="modal-body"]';
         const title = 'div[class^="Form-title"]';
@@ -38,7 +38,7 @@ module.exports = {
 
         client.expect.element(modal).present;
 
-        let expected = 'SELECT CREDENTIAL TYPE';
+        const expected = 'SELECT CREDENTIAL TYPE';
         client.expect.element(title).visible;
         client.expect.element(title).text.equal(expected);
 

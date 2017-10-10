@@ -1,7 +1,2 @@
-// Import angular and angular-mocks to the global scope
-import 'angular-mocks';
+import './components';
 
-// Import tests
-import './layout.spec';
-import './side-nav.spec';
-import './side-nav-item.spec';
