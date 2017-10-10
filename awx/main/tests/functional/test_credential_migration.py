@@ -270,22 +270,6 @@ def test_gce_migration():
 
 
 @pytest.mark.django_db
-def test_azure_classic_migration():
-    cred = Credential(name='My Credential')
-    with migrate(cred, 'azure'):
-        cred.__dict__.update({
-            'username': 'bob',
-            'ssh_key_data': EXAMPLE_PRIVATE_KEY
-        })
-
-    assert cred.credential_type.name == 'Microsoft Azure Classic (deprecated)'
-    assert cred.inputs['username'] == 'bob'
-    assert cred.inputs['ssh_key_data'].startswith('$encrypted$')
-    assert decrypt_field(cred, 'ssh_key_data') == EXAMPLE_PRIVATE_KEY
-    assert Credential.objects.count() == 1
-
-
-@pytest.mark.django_db
 def test_azure_rm_migration():
     cred = Credential(name='My Credential')
     with migrate(cred, 'azure_rm'):

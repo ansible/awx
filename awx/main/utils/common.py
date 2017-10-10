@@ -35,7 +35,7 @@ from django.apps import apps
 
 logger = logging.getLogger('awx.main.utils')
 
-__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
+__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
            'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class',
            'copy_m2m_relationships' ,'cache_list_capabilities', 'to_python_boolean',
@@ -45,7 +45,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'callback_filter_out_ansible_extra_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ']
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -108,21 +108,46 @@ class RequireDebugTrueOrTest(logging.Filter):
         return settings.DEBUG or 'test' in sys.argv
 
 
-def memoize(ttl=60, cache_key=None, cache_name='default'):
+class IllegalArgumentError(ValueError):
+    pass
+
+
+def memoize(ttl=60, cache_key=None, track_function=False):
     '''
     Decorator to wrap a function and cache its result.
     '''
-    from django.core.cache import caches
+    from django.core.cache import cache
+
 
     def _memoizer(f, *args, **kwargs):
-        cache = caches[cache_name]
-        key = cache_key or slugify('%s %r %r' % (f.__name__, args, kwargs))
-        value = cache.get(key)
-        if value is None:
-            value = f(*args, **kwargs)
-            cache.set(key, value, ttl)
+        if cache_key and track_function:
+            raise IllegalArgumentError("Can not specify cache_key when track_function is True")
+
+        if track_function:
+            cache_dict_key = slugify('%r %r' % (args, kwargs))
+            key = slugify("%s" % f.__name__)
+            cache_dict = cache.get(key) or dict()
+            if cache_dict_key not in cache_dict:
+                value = f(*args, **kwargs)
+                cache_dict[cache_dict_key] = value
+                cache.set(key, cache_dict, ttl)
+            else:
+                value = cache_dict[cache_dict_key]
+        else:
+            key = cache_key or slugify('%s %r %r' % (f.__name__, args, kwargs))
+            value = cache.get(key)
+            if value is None:
+                value = f(*args, **kwargs)
+                cache.set(key, value, ttl)
+
         return value
     return decorator(_memoizer)
+
+
+def memoize_delete(function_name):
+    from django.core.cache import cache
+
+    return cache.delete(function_name)
 
 
 @memoize()

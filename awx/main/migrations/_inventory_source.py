@@ -51,3 +51,12 @@ def remove_inventory_source_with_no_inventory_link(apps, schema_editor):
     InventorySource = apps.get_model('main', 'InventorySource')
     logger.debug("Removing all InventorySource that have no link to an Inventory from database.")
     InventorySource.objects.filter(Q(inventory__organization=None) & Q(deprecated_group__inventory=None)).delete()
+
+
+def remove_azure_inventory_sources(apps, schema_editor):
+    '''Azure inventory sources are not supported since 3.2, remove them.
+    '''
+    InventorySource = apps.get_model('main', 'InventorySource')
+    logger.debug("Removing all Azure InventorySource from database.")
+    InventorySource.objects.filter(source='azure').delete()
+

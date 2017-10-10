@@ -33,7 +33,7 @@ from celery.signals import celeryd_init, worker_process_init, worker_shutdown
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, OperationalError
+from django.db import transaction, DatabaseError, IntegrityError
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -455,12 +455,12 @@ def delete_inventory(self, inventory_id, user_id):
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
             logger.debug('Deleted inventory %s as user %s.' % (inventory_id, user_id))
-        except OperationalError:
-            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
-            self.retry(countdown=10)
         except Inventory.DoesNotExist:
             logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
+        except DatabaseError:
+            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
+            self.retry(countdown=10)
 
 
 def with_path_cleanup(f):
@@ -769,7 +769,10 @@ class BaseTask(LogErrorsTask):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='running')
+        execution_node = settings.CLUSTER_HOST_ID
+        if isolated_host is not None:
+            execution_node = isolated_host
+        instance = self.update_model(pk, status='running', execution_node=execution_node)
 
         instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
@@ -856,12 +859,7 @@ class BaseTask(LogErrorsTask):
                 pexpect_timeout=getattr(settings, 'PEXPECT_TIMEOUT', 5),
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
             )
-            execution_node = settings.CLUSTER_HOST_ID
-            if isolated_host is not None:
-                execution_node = isolated_host
-            instance = self.update_model(instance.pk, status='running',
-                                         execution_node=execution_node,
-                                         output_replacements=output_replacements)
+            instance = self.update_model(instance.pk, output_replacements=output_replacements)
             if isolated_host:
                 manager_instance = isolated_manager.IsolatedManager(
                     args, cwd, env, stdout_handle, ssh_key_path, **_kw
@@ -1057,9 +1055,6 @@ class RunJob(BaseTask):
                 env['GCE_EMAIL'] = cloud_cred.username
                 env['GCE_PROJECT'] = cloud_cred.project
                 env['GCE_PEM_FILE_PATH'] = cred_files.get(cloud_cred, '')
-            elif cloud_cred and cloud_cred.kind == 'azure':
-                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
-                env['AZURE_CERT_PATH'] = cred_files.get(cloud_cred, '')
             elif cloud_cred and cloud_cred.kind == 'azure_rm':
                 if len(cloud_cred.client) and len(cloud_cred.tenant):
                     env['AZURE_CLIENT_ID'] = cloud_cred.client
@@ -1630,8 +1625,8 @@ class RunInventoryUpdate(BaseTask):
         If no private data is needed, return None.
         """
         private_data = {'credentials': {}}
-        # If this is Microsoft Azure or GCE, return the RSA key
-        if inventory_update.source in ('azure', 'gce'):
+        # If this is GCE, return the RSA key
+        if inventory_update.source == 'gce':
             credential = inventory_update.credential
             private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
             return private_data
@@ -1719,7 +1714,7 @@ class RunInventoryUpdate(BaseTask):
             section = 'vmware'
             cp.add_section(section)
             cp.set('vmware', 'cache_max_age', 0)
-
+            cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
             cp.set('vmware', 'username', credential.username)
             cp.set('vmware', 'password', decrypt_field(credential, 'password'))
             cp.set('vmware', 'server', credential.host)
@@ -1793,7 +1788,7 @@ class RunInventoryUpdate(BaseTask):
             cp.set(section, 'group_by_resource_group', 'yes')
             cp.set(section, 'group_by_location', 'yes')
             cp.set(section, 'group_by_tag', 'yes')
-            if inventory_update.source_regions:
+            if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
                 cp.set(
                     section, 'locations',
                     ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
@@ -1861,9 +1856,6 @@ class RunInventoryUpdate(BaseTask):
             env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'vmware':
             env['VMWARE_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'azure':
-            env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
-            env['AZURE_CERT_PATH'] = cloud_credential
         elif inventory_update.source == 'azure_rm':
             if len(passwords.get('source_client', '')) and \
                len(passwords.get('source_tenant', '')):

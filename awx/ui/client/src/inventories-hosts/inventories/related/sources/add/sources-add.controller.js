@@ -251,7 +251,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 scope: $scope,
                 field: 'source_regions',
                 variable: 'azure_regions',
-                choice_name: 'azure_region_choices',
+                choice_name: 'azure_rm_region_choices',
                 options: inventorySourcesOptions
             });
 

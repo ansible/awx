@@ -35,3 +35,13 @@ def test_inv_src_rename(inventory_source_factory):
     inv_src01.refresh_from_db()
     # inv-is-t1 is generated in the inventory_source_factory
     assert inv_src01.name == 't1 - inv-is-t1 - 0'
+
+
+@pytest.mark.django_db
+def test_azure_inv_src_removal(inventory_source):
+    inventory_source.source = 'azure'
+    inventory_source.save()
+
+    assert InventorySource.objects.filter(pk=inventory_source.pk).exists()
+    invsrc.remove_azure_inventory_sources(apps, None)
+    assert not InventorySource.objects.filter(pk=inventory_source.pk).exists()

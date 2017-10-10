@@ -55,6 +55,13 @@ class Command(BaseCommand):
             help=_('Skip commenting out settings in files.'),
         )
         parser.add_argument(
+            '--comment-only',
+            action='store_true',
+            dest='comment_only',
+            default=False,
+            help=_('Skip migrating and only comment out settings in files.'),
+        )
+        parser.add_argument(
             '--backup-suffix',
             dest='backup_suffix',
             default=now().strftime('.%Y%m%d%H%M%S'),
@@ -67,6 +74,7 @@ class Command(BaseCommand):
         self.dry_run = bool(options.get('dry_run', False))
         self.skip_errors = bool(options.get('skip_errors', False))
         self.no_comment = bool(options.get('no_comment', False))
+        self.comment_only = bool(options.get('comment_only', False))
         self.backup_suffix = options.get('backup_suffix', '')
         self.categories = options.get('category', None) or ['all']
         self.style.HEADING = self.style.MIGRATE_HEADING
@@ -103,7 +111,7 @@ class Command(BaseCommand):
     def _get_settings_file_patterns(self):
         if MODE == 'development':
             return [
-                '/etc/tower/settings.py', 
+                '/etc/tower/settings.py',
                 '/etc/tower/conf.d/*.py',
                 os.path.join(os.path.dirname(__file__), '..', '..', '..', 'settings', 'local_*.py')
             ]
@@ -360,14 +368,15 @@ class Command(BaseCommand):
                 if filename:
                     self._display_diff_summary(filename, lines_added, lines_removed)
 
-    def _migrate_settings(self, registered_settings):
-        patterns = self._get_settings_file_patterns()
-
-        # Determine which settings need to be commented/migrated.
+    def _discover_settings(self, registered_settings):
         if self.verbosity >= 1:
             self.stdout.write(self.style.HEADING('Discovering settings to be migrated and commented:'))
+
+        # Determine which settings need to be commented/migrated.
         to_migrate = collections.OrderedDict()
         to_comment = collections.OrderedDict()
+        patterns = self._get_settings_file_patterns()
+
         for name in registered_settings:
             comment_error, migrate_error = None, None
             files_to_comment = []
@@ -398,8 +407,9 @@ class Command(BaseCommand):
             self._display_tbd(name, files_to_comment, migrate_value, comment_error, migrate_error)
         if self.verbosity == 1 and not to_migrate and not to_comment:
             self.stdout.write('  No settings found to migrate or comment!')
+        return (to_migrate, to_comment)
 
-        # Now migrate those settings to the database.
+    def _migrate(self, to_migrate):
         if self.verbosity >= 1:
             if self.dry_run:
                 self.stdout.write(self.style.HEADING('Migrating settings to database (dry-run):'))
@@ -407,6 +417,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.HEADING('Migrating settings to database:'))
             if not to_migrate:
                 self.stdout.write('  No settings to migrate!')
+
+        # Now migrate those settings to the database.
         for name, db_value in to_migrate.items():
             display_value = json.dumps(db_value, indent=4)
             setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
@@ -422,7 +434,7 @@ class Command(BaseCommand):
                     setting.save(update_fields=['value'])
             self._display_migrate(name, action, display_value)
 
-        # Now comment settings in settings files.
+    def _comment(self, to_comment):
         if self.verbosity >= 1:
             if bool(self.dry_run or self.no_comment):
                 self.stdout.write(self.style.HEADING('Commenting settings in files (dry-run):'))
@@ -430,6 +442,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.HEADING('Commenting settings in files:'))
             if not to_comment:
                 self.stdout.write('  No settings to comment!')
+
+        # Now comment settings in settings files.
         if to_comment:
             to_comment_patterns = []
             license_file_to_comment = None
@@ -457,3 +471,10 @@ class Command(BaseCommand):
                 if custom_logo_file_to_comment:
                     diffs.extend(self._comment_custom_logo_file(dry_run=False))
             self._display_comment(diffs)
+
+    def _migrate_settings(self, registered_settings):
+        to_migrate, to_comment = self._discover_settings(registered_settings)
+
+        if not bool(self.comment_only):
+            self._migrate(to_migrate)
+        self._comment(to_comment)

@@ -5,8 +5,8 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', 'Alert', '$rootScope',
-function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath, Alert, $rootScope) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', 'Alert', '$rootScope', 'i18n',
+function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath, Alert, $rootScope, i18n) {
     var val = {
         // the playbook_on_stats event returns the count data in a weird format.
         // format to what we need!
@@ -90,9 +90,9 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
         },
         deleteJob: function(job) {
             Prompt({
-                hdr: 'Delete Job',
+                hdr: i18n._("Delete Job"),
                 body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to delete the job below?
+                        ${i18n._("Are you sure you want to delete the job below?")}
                     </div>
                     <div class='Prompt-bodyTarget'>
                         #${job.id} ${$filter('sanitize')(job.name)}
@@ -116,7 +116,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                             });
                         });
                 },
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
         },
         cancelJob: function(job) {
@@ -139,9 +139,9 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
             };
 
             Prompt({
-                hdr: 'Cancel Job',
-                body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to cancel the job below?
+                hdr: i18n._('Cancel Job'),
+                body: `<div class='Prompt-bodyQuery' translate>
+                        ${i18n._("Are you sure you want to cancel the job below?")}
                     </div>
                     <div class='Prompt-bodyTarget'>
                         #${job.id} ${$filter('sanitize')(job.name)}
@@ -163,7 +163,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                             }
                         });
                 },
-                actionText: 'PROCEED'
+                actionText: i18n._('PROCEED')
             });
         },
         relaunchJob: function(scope) {

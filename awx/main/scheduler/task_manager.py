@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 import logging
 import uuid
+import json
 from sets import Set
 
 # Django
@@ -37,6 +38,7 @@ from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main import tasks as awx_tasks
+from awx.main.utils import decrypt_field
 
 # Celery
 from celery.task.control import inspect
@@ -97,7 +99,7 @@ class TaskManager():
                                          ~Q(polymorphic_ctype_id=workflow_ctype_id))
         for j in jobs:
             if j.execution_node:
-                execution_nodes.setdefault(j.execution_node, [j]).append(j)
+                execution_nodes.setdefault(j.execution_node, []).append(j)
             else:
                 waiting_jobs.append(j)
         return (execution_nodes, waiting_jobs)
@@ -142,10 +144,10 @@ class TaskManager():
                 active_tasks = set()
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
 
-            # celery worker name is of the form celery@myhost.com
-            queue_name = queue.split('@')
-            queue_name = queue_name[1 if len(queue_name) > 1 else 0]
-            queues[queue_name] = active_tasks
+                # celery worker name is of the form celery@myhost.com
+                queue_name = queue.split('@')
+                queue_name = queue_name[1 if len(queue_name) > 1 else 0]
+                queues[queue_name] = active_tasks
         else:
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return (None, None)
@@ -390,17 +392,22 @@ class TaskManager():
                         dependencies.append(latest_project_update)
 
             # Inventory created 2 seconds behind job
-            if task.launch_type != 'callback':
-                for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
-                    if not inventory_source.update_on_launch:
-                        continue
-                    latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-                    if self.should_update_inventory_source(task, latest_inventory_update):
-                        inventory_task = self.create_inventory_update(task, inventory_source)
-                        dependencies.append(inventory_task)
-                    else:
-                        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-                            dependencies.append(latest_inventory_update)
+            try:
+                start_args = json.loads(decrypt_field(task, field_name="start_args"))
+            except ValueError:
+                start_args = dict()
+            for inventory_source in [invsrc for invsrc in self.all_inventory_sources if invsrc.inventory == task.inventory]:
+                if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
+                    continue
+                if not inventory_source.update_on_launch:
+                    continue
+                latest_inventory_update = self.get_latest_inventory_update(inventory_source)
+                if self.should_update_inventory_source(task, latest_inventory_update):
+                    inventory_task = self.create_inventory_update(task, inventory_source)
+                    dependencies.append(inventory_task)
+                else:
+                    if latest_inventory_update.status in ['waiting', 'pending', 'running']:
+                        dependencies.append(latest_inventory_update)
 
             if len(dependencies) > 0:
                 self.capture_chain_failure_dependencies(task, dependencies)
@@ -527,7 +534,9 @@ class TaskManager():
                  - instance is unknown to tower, system is improperly configured
                  - instance is reported as down, then fail all jobs on the node
                  - instance is an isolated node, then check running tasks
-                    among all allowed controller nodes for management process
+                   among all allowed controller nodes for management process
+                 - valid healthy instance not included in celery task list
+                   probably a netsplit case, leave it alone
                 '''
                 instance = Instance.objects.filter(hostname=node).first()
 

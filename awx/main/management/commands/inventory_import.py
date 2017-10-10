@@ -185,10 +185,20 @@ class AnsibleInventoryLoader(object):
             data.setdefault('_meta', {})
             data['_meta'].setdefault('hostvars', {})
             logger.warning('Re-calling script for hostvars individually.')
-            for group_name, group_dict in data.iteritems():
+            for group_name, group_data in data.iteritems():
                 if group_name == '_meta':
                     continue
-                for hostname in group_dict.get('hosts', []):
+
+                if isinstance(group_data, dict):
+                    group_host_list = group_data.get('hosts', [])
+                elif isinstance(group_data, list):
+                    group_host_list = group_data
+                else:
+                    logger.warning('Group data for "%s" is not a dict or list',
+                                   group_name)
+                    group_host_list = []
+
+                for hostname in group_host_list:
                     logger.debug('Obtaining hostvars for %s' % hostname.encode('utf-8'))
                     hostdata = self.command_to_json(
                         base_args + ['--host', hostname.encode("utf-8")]
@@ -196,7 +206,7 @@ class AnsibleInventoryLoader(object):
                     if isinstance(hostdata, dict):
                         data['_meta']['hostvars'][hostname] = hostdata
                     else:
-                        self.logger.warning(
+                        logger.warning(
                             'Expected dict of vars for host "%s" when '
                             'calling with `--host`, got %s instead',
                             k, str(type(data))
@@ -218,7 +228,6 @@ def load_inventory_source(source, group_filter_re=None,
     '''
     # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
     # good naming conventions
-    source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
     source = source.replace('vmware.py', 'vmware_inventory.py')
     if not os.path.exists(source):
@@ -504,6 +513,12 @@ class Command(NoArgsCommand):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for group_pk in groups_qs.filter(name__in=group_names).values_list('pk', flat=True):
                 del_group_pks.discard(group_pk)
+        if self.inventory_source.deprecated_group_id in del_group_pks:  # TODO: remove in 3.3
+            logger.warning(
+                'Group "%s" from v1 API is not deleted by overwrite',
+                self.inventory_source.deprecated_group.name
+            )
+            del_group_pks.discard(self.inventory_source.deprecated_group_id)
         # Now delete all remaining groups in batches.
         all_del_pks = sorted(list(del_group_pks))
         for offset in xrange(0, len(all_del_pks), self._batch_size):
@@ -532,6 +547,12 @@ class Command(NoArgsCommand):
         group_host_count = 0
         db_groups = self.inventory_source.groups
         for db_group in db_groups.all():
+            if self.inventory_source.deprecated_group_id == db_group.id:  # TODO: remove in 3.3
+                logger.info(
+                    'Group "%s" from v1 API child group/host connections preserved',
+                    db_group.name
+                )
+                continue
             # Delete child group relationships not present in imported data.
             db_children = db_group.children
             db_children_name_pk_map = dict(db_children.values_list('name', 'pk'))

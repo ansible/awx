@@ -193,7 +193,25 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                             params = _.merge(params, searchWithoutKey(term), combineSameSearches);
                         }
                         else {
-                            params = _.merge(params, qs.encodeParam({term: term, searchTerm: true, singleSearchParam: $scope.singleSearchParam ? $scope.singleSearchParam : false}), combineSameSearches);
+                            let root = termParts[0].split(".")[0].replace(/^-/, '');
+                            if(_.has($scope.models[$scope.list.name].base, root) || root === "ansible_facts") {
+                                if(_.has($scope.models[$scope.list.name].base[root], "type") && $scope.models[$scope.list.name].base[root].type === 'field'){
+                                    // Intent is to land here for searching on the base model.
+                                    params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true, singleSearchParam: $scope.singleSearchParam ? $scope.singleSearchParam : false}), combineSameSearches);
+                                }
+                                else {
+                                    // Intent is to land here when performing ansible_facts searches
+                                    params = _.merge(params, qs.encodeParam({term: term, searchTerm: true, singleSearchParam: $scope.singleSearchParam ? $scope.singleSearchParam : false}), combineSameSearches);
+                                }
+                            }
+                            else if(_.contains($scope.models[$scope.list.name].related, root)) {
+                                // Intent is to land here for related searches
+                                params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true, singleSearchParam: $scope.singleSearchParam ? $scope.singleSearchParam : false}), combineSameSearches);
+                            }
+                            // Its not a search term or a related search term - treat it as a string
+                            else {
+                                params = _.merge(params, searchWithoutKey(term), combineSameSearches);
+                            }
                         }
                     }
 

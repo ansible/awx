@@ -132,7 +132,7 @@ return {
             type: 'select',
             ngOptions: 'source.label for source in source_region_choices track by source.value',
             multiSelect: true,
-            ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure' || source.value == 'azure_rm')",
+            ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure_rm')",
             dataTitle: i18n._('Source Regions'),
             dataPlacement: 'right',
             awPopOver: "<p>" + i18n._("Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose") +
@@ -328,7 +328,7 @@ return {
                 label: i18n._('Overwrite'),
                 type: 'checkbox',
                 ngShow: "source.value !== '' && source.value !== null",
-                awPopOver: "<p>" + i18n._("If checked, all child groups and hosts not found on the external source will be deleted from the local inventory.") + '</p><p>' +
+                awPopOver: "<p>" + i18n._("If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory.") + '</p><p>' +
                             i18n._("When not checked, local child hosts and groups not found on the external source will remain untouched by the inventory update process.") + "</p>",
                 dataTitle: i18n._('Overwrite'),
                 dataContainer: 'body',

@@ -25,7 +25,13 @@ export default
                 $cookies.remove('token');
                 $cookies.remove('token_expires');
                 $cookies.remove('userLoggedIn');
-                $cookies.put('token', token);
+
+                if (token && !(/^"[a-f0-9]+"$/ig.test(token))) {
+                    $cookies.put('token', `"${token}"`);
+                } else {
+                    $cookies.put('token', token);
+                }
+
                 $cookies.put('token_expires', expires);
                 $cookies.put('userLoggedIn', true);
                 $cookies.put('sessionExpired', false);
@@ -45,7 +51,13 @@ export default
             },
 
             getToken: function () {
-                return ($rootScope.token) ? $rootScope.token : $cookies.get('token');
+                if ($rootScope.token) {
+                    return $rootScope.token;
+                }
+
+                let token = $cookies.get('token');
+
+                return token ? token.replace(/"/g, '') : undefined;
             },
 
             retrieveToken: function (username, password) {
@@ -101,7 +113,7 @@ export default
                         $rootScope.lastPath = '/home';
                     }
                     x = Store('sessionTime');
-                    if ($rootScope.current_user) {
+                    if ($rootScope.current_user && x && x[$rootScope.current_user.id]) {
                         x[$rootScope.current_user.id].loggedIn = false;
                     }
                     Store('sessionTime', x);

@@ -3087,6 +3087,8 @@ class JobTemplateCallback(GenericAPIView):
                     matches.update(host_mappings[host_name])
             except socket.gaierror:
                 pass
+            except UnicodeError:
+                pass
         return matches
 
     def get(self, request, *args, **kwargs):

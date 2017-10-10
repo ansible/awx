@@ -18,7 +18,7 @@ export default
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService', 'availableLabels',
-        'canGetProject', 'canGetInventory', 'jobTemplateData', 'ParseVariableString',
+        'projectGetPermissionDenied', 'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
@@ -26,7 +26,7 @@ export default
             ParseTypeChange, Wait, selectedLabels, i18n,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService, availableLabels,
-            canGetProject, canGetInventory, jobTemplateData, ParseVariableString
+            projectGetPermissionDenied, inventoryGetPermissionDenied, jobTemplateData, ParseVariableString
         ) {
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -360,7 +360,7 @@ export default
                     MultiCredentialService.loadCredentials(jobTemplateData)
                         .then(([selectedCredentials, credTypes, credTypeOptions,
                             credTags, credentialGetPermissionDenied]) => {
-                                $scope.canGetAllRelatedResources = canGetProject && canGetInventory && !credentialGetPermissionDenied ? true : false;
+                                $scope.canGetAllRelatedResources = !projectGetPermissionDenied && !inventoryGetPermissionDenied && !credentialGetPermissionDenied ? true : false;
                                 $scope.selectedCredentials = selectedCredentials;
                                 $scope.credential_types = credTypes;
                                 $scope.credentialTypeOptions = credTypeOptions;

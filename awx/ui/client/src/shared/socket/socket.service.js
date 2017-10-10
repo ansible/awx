@@ -27,15 +27,13 @@ export default
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
 
                     $log.debug('Socket connecting to: ' + url);
-
                     self.socket = new ReconnectingWebSocket(url, null, {
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10                    });
 
                     self.socket.onopen = function () {
-                        $log.debug("Websocket connection opened.");
+                        $log.debug("Websocket connection opened. Socket readyState: " + self.socket.readyState);
                         socketPromise.resolve();
-                        console.log('promise resolved, and readyState: '+ self.readyState);
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -118,7 +116,6 @@ export default
                 if(this.socket){
                     this.socket.close();
                     delete this.socket;
-                    console.log("Socket deleted: "+this.socket);
                 }
             },
             subscribe: function(state){
@@ -187,13 +184,14 @@ export default
                 // Function used for sending objects to the API over the
                 // websocket.
                 var self = this;
-                $log.debug('Sent to Websocket Server: ' + data);
                 socketPromise.promise.then(function(){
-                    console.log("socket readyState at emit: " + self.socket.readyState);
-                    // if(self.socket.readyState === 0){
-                    //     self.subscribe(self.getLast());
-                    // }
-                    if(self.socket.readyState === 1){
+                    if(self.socket.readyState === 0){
+                        $log.debug('Unable to send message, waiting 500ms to resend. Socket readyState: ' + self.socket.readyState);
+                        setTimeout(function(){
+                            self.subscribe(self.getLast());
+                        }, 500);
+                    }
+                    else if(self.socket.readyState === 1){
                         self.socket.send(data, function () {
                             var args = arguments;
                             self.scope.$apply(function () {
@@ -202,6 +200,7 @@ export default
                                 }
                             });
                         });
+                        $log.debug('Sent to Websocket Server: ' + data);
                     }
                 });
             },

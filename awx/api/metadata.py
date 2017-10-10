@@ -89,7 +89,7 @@ class Metadata(metadata.SimpleMetadata):
         # Special handling of inventory source_region choices that vary based on
         # selected inventory source.
         if field.field_name == 'source_regions':
-            for cp in ('azure', 'ec2', 'gce'):
+            for cp in ('azure_rm', 'ec2', 'gce'):
                 get_regions = getattr(InventorySource, 'get_%s_region_choices' % cp)
                 field_info['%s_region_choices' % cp] = get_regions()
 

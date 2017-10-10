@@ -36,7 +36,7 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                         page_size: 5
                     };
 
-                    qs.search(GetBasePath('instance_groups'), $scope.instance_groups_queryset)
+                    qs.search(GetBasePath('instance_groups'), $scope.instance_group_queryset)
                         .then(res => {
                             $scope.instance_group_dataset = res.data;
                             $scope.instance_groups = $scope.instance_group_dataset.results;
