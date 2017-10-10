@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const merge = require('webpack-merge');
 
 const base = require('./webpack.base');
 
@@ -6,4 +6,4 @@ const development = {
     devtool: 'source-map'
 };
 
-module.exports = _.merge(base, development);
+module.exports = merge(base, development);

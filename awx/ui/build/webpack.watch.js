@@ -2,6 +2,8 @@ const path = require('path');
 
 const _ = require('lodash');
 const webpack = require('webpack');
+const merge = require('webpack-merge');
+const nodeObjectHash = require('node-object-hash');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 
@@ -33,9 +35,7 @@ const watch = {
         new HardSourceWebpackPlugin({
             cacheDirectory: 'node_modules/.cache/hard-source/[confighash]',
             recordsPath: 'node_modules/.cache/hard-source/[confighash]/records.json',
-            configHash: config => {
-                return require('node-object-hash')({ sort: false }).hash(config);
-            },
+            configHash: config => nodeObjectHash({ sort: false }).hash(config),
             environmentHash: {
                 root: process.cwd(),
                 directories: ['node_modules'],
@@ -68,7 +68,4 @@ const watch = {
     }
 };
 
-watch.module.rules = development.module.rules.concat(watch.module.rules);
-watch.plugins = development.plugins.concat(watch.plugins);
-
-module.exports = _.merge(development, watch);
+module.exports = merge(development, watch);
