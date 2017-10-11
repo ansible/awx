@@ -886,6 +886,12 @@ class BaseTask(LogErrorsTask):
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
+                # If stdout_handle was wrapped with event filter, log data
+                if hasattr(stdout_handle, '_event_ct'):
+                    logger.info('%s finished running, producing %s events.',
+                                instance.log_format, stdout_handle._event_ct)
+                else:
+                    logger.info('%s finished running', instance.log_format)
             except Exception:
                 pass
 
