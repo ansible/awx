@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
@@ -96,6 +97,8 @@ def test_ldap_settings(get, put, patch, delete, admin):
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com ldap://ldap2.example.com'}, expect=200)
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com,ldap://ldap2.example.com'}, expect=200)
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com, ldap://ldap2.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_BIND_DN': 'cn=Manager,dc=example,dc=com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_BIND_DN': u'cn=暴力膜,dc=大新闻,dc=真的粉丝'}, expect=200)
 
 
 @pytest.mark.parametrize('setting', [
