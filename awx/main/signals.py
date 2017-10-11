@@ -45,12 +45,7 @@ def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
     if created:
-        event_serialized = JobEventSerializer(instance).data
-        event_serialized['id'] = instance.id
-        event_serialized["created"] = event_serialized["created"].isoformat()
-        event_serialized["modified"] = event_serialized["modified"].isoformat()
-        event_serialized["event_name"] = instance.event
-        event_serialized["group_name"] = "job_events"
+        event_serialized = JobEventWebSocketSerializer(instance).data
         emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
 
 
@@ -58,12 +53,7 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
     if created:
-        event_serialized = AdHocCommandEventSerializer(instance).data
-        event_serialized['id'] = instance.id
-        event_serialized["created"] = event_serialized["created"].isoformat()
-        event_serialized["modified"] = event_serialized["modified"].isoformat()
-        event_serialized["event_name"] = instance.event
-        event_serialized["group_name"] = "ad_hoc_command_events"
+        event_serialized = AdHocCommandEventWebSocketSerializer(instance).data
         emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
 
 
