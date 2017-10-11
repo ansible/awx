@@ -11,9 +11,6 @@ import urllib
 from collections import OrderedDict
 from dateutil import rrule
 
-# PyYAML
-import yaml
-
 # Django
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -1312,6 +1309,9 @@ class HostSerializer(BaseSerializerWithVariables):
             raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
         return value
 
+    def validate_variables(self, value):
+        return vars_validate_or_raise(value)
+
     def validate(self, attrs):
         name = force_text(attrs.get('name', self.instance and self.instance.name or ''))
         host, port = self._get_host_port_from_name(name)
@@ -1319,19 +1319,9 @@ class HostSerializer(BaseSerializerWithVariables):
         if port:
             attrs['name'] = host
             variables = force_text(attrs.get('variables', self.instance and self.instance.variables or ''))
-            try:
-                vars_dict = json.loads(variables.strip() or '{}')
-                vars_dict['ansible_ssh_port'] = port
-                attrs['variables'] = json.dumps(vars_dict)
-            except (ValueError, TypeError):
-                try:
-                    vars_dict = yaml.safe_load(variables)
-                    if vars_dict is None:
-                        vars_dict = {}
-                    vars_dict['ansible_ssh_port'] = port
-                    attrs['variables'] = yaml.dump(vars_dict)
-                except (yaml.YAMLError, TypeError):
-                    raise serializers.ValidationError({'variables': _('Must be valid JSON or YAML.')})
+            vars_dict = parse_yaml_or_json(variables)
+            vars_dict['ansible_ssh_port'] = port
+            attrs['variables'] = json.dumps(vars_dict)
 
         return super(HostSerializer, self).validate(attrs)
 
@@ -3286,18 +3276,12 @@ class JobLaunchSerializer(BaseSerializer):
 
         extra_vars = attrs.get('extra_vars', {})
 
-        if isinstance(extra_vars, basestring):
-            try:
-                extra_vars = json.loads(extra_vars)
-            except (ValueError, TypeError):
-                try:
-                    extra_vars = yaml.safe_load(extra_vars)
-                    assert isinstance(extra_vars, dict)
-                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = _('Must be valid JSON or YAML.')
-
-        if not isinstance(extra_vars, dict):
-            extra_vars = {}
+        try:
+            extra_vars = parse_yaml_or_json(extra_vars, silent_failure=False)
+        except:
+            # Log exception, in case of yet-unknown parsing failures
+            logger.exception('extra_vars parsing error on Job Template launch.')
+            errors['extra_vars'] = _('Must be valid JSON or YAML.')
 
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)
@@ -3371,18 +3355,12 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
         extra_vars = attrs.get('extra_vars', {})
 
-        if isinstance(extra_vars, basestring):
-            try:
-                extra_vars = json.loads(extra_vars)
-            except (ValueError, TypeError):
-                try:
-                    extra_vars = yaml.safe_load(extra_vars)
-                    assert isinstance(extra_vars, dict)
-                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = _('Must be valid JSON or YAML.')
-
-        if not isinstance(extra_vars, dict):
-            extra_vars = {}
+        try:
+            extra_vars = parse_yaml_or_json(extra_vars, silent_failure=False)
+        except:
+            # Log exception, in case of yet-unknown parsing failures
+            logger.exception('extra_vars parsing error on Workflow JT launch.')
+            errors['extra_vars'] = _('Must be valid JSON or YAML.')
 
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)

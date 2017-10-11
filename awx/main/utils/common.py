@@ -582,21 +582,32 @@ def cache_list_capabilities(page, prefetch_list, model, user):
                 obj.capabilities_cache[display_method] = True
 
 
-def parse_yaml_or_json(vars_str):
+def parse_yaml_or_json(vars_str, silent_failure=True):
     '''
-    Attempt to parse a string with variables, and if attempt fails,
-    return an empty dictionary.
+    Attempt to parse a string of variables.
+    First, with JSON parser, if that fails, then with PyYAML.
+    If both attempts fail, return an empty dictionary if `silent_failure`
+    is True, re-raise the last error if `silent_failure` if False.
     '''
     if isinstance(vars_str, dict):
         return vars_str
+    elif isinstance(vars_str, basestring) and vars_str == '""':
+        return {}
+
     try:
         vars_dict = json.loads(vars_str)
-    except (ValueError, TypeError):
+        assert isinstance(vars_dict, dict)
+    except (ValueError, TypeError, AssertionError):
         try:
             vars_dict = yaml.safe_load(vars_str)
+            # Can be None if '---'
+            if vars_dict is None:
+                return {}
             assert isinstance(vars_dict, dict)
         except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-            vars_dict = {}
+            if silent_failure:
+                return {}
+            raise
     return vars_dict
 
 

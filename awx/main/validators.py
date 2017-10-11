@@ -4,8 +4,6 @@
 # Python
 import base64
 import re
-import yaml
-import json
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -13,6 +11,9 @@ from django.core.exceptions import ValidationError
 
 # REST framework
 from rest_framework.serializers import ValidationError as RestValidationError
+
+# AWX
+from awx.main.utils import parse_yaml_or_json
 
 
 def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
@@ -179,21 +180,9 @@ def vars_validate_or_raise(vars_str):
     job templates, inventories, or hosts are either an acceptable
     blank string, or are valid JSON or YAML dict
     """
-    if isinstance(vars_str, dict) or (isinstance(vars_str, basestring) and vars_str == '""'):
+    try:
+        parse_yaml_or_json(vars_str, silent_failure=False)
         return vars_str
-
-    try:
-        r = json.loads((vars_str or '').strip() or '{}')
-        if isinstance(r, dict):
-            return vars_str
-    except ValueError:
-        pass
-    try:
-        r = yaml.safe_load(vars_str)
-        # Can be None if '---'
-        if isinstance(r, dict) or r is None:
-            return vars_str
-    except yaml.YAMLError:
-        pass
-    raise RestValidationError(_('Must be valid JSON or YAML.'))
+    except:
+        raise RestValidationError(_('Must be valid JSON or YAML.'))
 

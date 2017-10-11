@@ -1,13 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-# Python
-import json
-import shlex
-
-# PyYAML
-import yaml
-
 # Django
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -21,7 +14,7 @@ from taggit.managers import TaggableManager
 from crum import get_current_user
 
 # AWX
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, parse_yaml_or_json
 
 __all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
@@ -80,26 +73,7 @@ class VarsDictProperty(object):
         if hasattr(v, 'items'):
             return v
         v = v.encode('utf-8')
-        d = None
-        try:
-            d = json.loads(v.strip() or '{}')
-        except ValueError:
-            pass
-        if d is None:
-            try:
-                d = yaml.safe_load(v)
-                # This can happen if the whole file is commented out
-                if d is None:
-                    d = {}
-            except yaml.YAMLError:
-                pass
-        if d is None and self.key_value:
-            d = {}
-            for kv in [x.decode('utf-8') for x in shlex.split(v, posix=True)]:
-                if '=' in kv:
-                    k, v = kv.split('=', 1)
-                    d[k] = v
-        return d if hasattr(d, 'items') else {}
+        return parse_yaml_or_json(v)
 
     def __set__(self, obj, value):
         raise AttributeError('readonly property')
