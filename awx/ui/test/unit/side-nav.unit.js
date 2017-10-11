@@ -3,7 +3,7 @@ describe('Components | Side Nav', () => {
     let $rootScope;
     let element;
     let scope;
-    let windowMock = {
+    const windowMock = {
         innerWidth: 500
     };
 
@@ -11,7 +11,7 @@ describe('Components | Side Nav', () => {
         angular.mock.module('gettext');
         angular.mock.module('I18N');
         angular.mock.module('ui.router');
-        angular.mock.module('at.lib.services')
+        angular.mock.module('at.lib.services');
         angular.mock.module('at.lib.components', ($provide) => {
             $provide.value('$window', windowMock);
         });
@@ -22,7 +22,7 @@ describe('Components | Side Nav', () => {
         $rootScope = _$rootScope_;
         scope = $rootScope.$new();
 
-        element = angular.element("<at-layout><at-side-nav></at-side-nav><at-layout>");
+        element = angular.element('<at-layout><at-side-nav></at-side-nav><at-layout>');
         element = $compile(element)(scope);
         scope.$digest();
     }));
@@ -59,8 +59,8 @@ describe('Components | Side Nav', () => {
         it('isExpanded should be false after state change event', () => {
             sideNavCtrl.isExpanded = true;
 
-            let current = {
-                'name': 'dashboard'
+            const current = {
+                name: 'dashboard'
             };
             $rootScope.$broadcast('$stateChangeSuccess', current);
             scope.$digest();

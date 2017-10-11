@@ -3,7 +3,6 @@ describe('Components | Layout', () => {
     let $rootScope;
     let element;
     let scope;
-    let i18n;
 
     beforeEach(() => {
         angular.mock.module('gettext');
@@ -26,19 +25,19 @@ describe('Components | Layout', () => {
     describe('AtLayoutController', () => {
         let controller;
 
-        beforeEach(()=> {
+        beforeEach(() => {
             controller = element.controller('atLayout');
         });
 
         it('$scope.$on($stateChangeSuccess) should assign toState name to currentState', () => {
-            let next = {'name': 'dashboard'};
+            const next = { name: 'dashboard' };
             $rootScope.$broadcast('$stateChangeSuccess', next);
             expect(controller.currentState).toBe('dashboard');
         });
 
         describe('$root.current_user watcher should assign value to ', () => {
             beforeEach(() => {
-                let val = {
+                const val = {
                     username: 'admin',
                     id: 1
                 };
@@ -89,11 +88,10 @@ describe('Components | Layout', () => {
                 expect(controller.currentUserId).toBeTruthy();
                 expect(controller.currentUserId).toBe(1);
             });
-
         });
 
         describe('$root.socketStatus watcher should assign newStatus to', () => {
-            let statuses = ['connecting', 'error', 'ok'];
+            const statuses = ['connecting', 'error', 'ok'];
 
             it('socketState', () => {
                 _.forEach(statuses, (status) => {
@@ -128,7 +126,7 @@ describe('Components | Layout', () => {
         describe('getString()', () => {
             it('calls ComponentsStrings get() method', angular.mock.inject((_ComponentsStrings_) => {
                 spyOn(_ComponentsStrings_, 'get');
-                controller.getString('VIEW_DOCS')
+                controller.getString('VIEW_DOCS');
                 expect(_ComponentsStrings_.get).toHaveBeenCalled();
             }));
 
@@ -137,7 +135,7 @@ describe('Components | Layout', () => {
             });
 
             it('should return layout string', () => {
-                let layoutStrings = {
+                const layoutStrings = {
                     CURRENT_USER_LABEL: 'Logged in as',
                     VIEW_DOCS: 'View Documentation',
                     LOGOUT: 'Logout',
@@ -149,8 +147,8 @@ describe('Components | Layout', () => {
             });
 
             it('should return default string', () => {
-                let defaultStrings = {
-                    BRAND_NAME: "AWX"
+                const defaultStrings = {
+                    BRAND_NAME: 'AWX'
                 };
 
                 _.forEach(defaultStrings, (value, key) => {

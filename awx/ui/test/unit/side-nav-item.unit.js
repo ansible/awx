@@ -8,8 +8,8 @@ describe('Components | Side Nav Item', () => {
         angular.mock.module('gettext');
         angular.mock.module('I18N');
         angular.mock.module('ui.router');
-        angular.mock.module('at.lib.services')
-        angular.mock.module('at.lib.components')
+        angular.mock.module('at.lib.services');
+        angular.mock.module('at.lib.components');
     });
 
     beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {
@@ -24,7 +24,6 @@ describe('Components | Side Nav Item', () => {
     }));
 
     describe('Side Nav Item Controller', () => {
-        let LayoutCtrl;
         let SideNavItem;
         let SideNavItemCtrl;
 
@@ -34,12 +33,12 @@ describe('Components | Side Nav Item', () => {
         });
 
         it('layoutVm.currentState watcher should assign isRoute', () => {
-            let current = {'name': 'dashboard'};
+            let current = { name: 'dashboard' };
             $rootScope.$broadcast('$stateChangeSuccess', current);
             scope.$digest();
             expect(SideNavItemCtrl.isRoute).toBe(true);
 
-            current = {'name': 'inventories'};
+            current = { name: 'inventories' };
             $rootScope.$broadcast('$stateChangeSuccess', current);
             scope.$digest();
             expect(SideNavItemCtrl.isRoute).toBe(false);
