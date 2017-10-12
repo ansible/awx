@@ -292,6 +292,10 @@ def cluster_node_heartbeat(self):
             other_inst.save(update_fields=['capacity'])
             logger.error("Host {} last checked in at {}, marked as lost.".format(
                 other_inst.hostname, other_inst.modified))
+            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                deprovision_hostname = other_inst.hostname
+                other_inst.delete()
+                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
         except DatabaseError as e:
             if 'did not affect any rows' in str(e):
                 logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))

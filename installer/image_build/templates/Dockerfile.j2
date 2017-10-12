@@ -22,6 +22,7 @@ ADD requirements/requirements_ansible.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
 ADD ansible.repo /etc/yum.repos.d/ansible.repo
+ADD config-watcher /usr/bin/config-watcher
 ADD RPM-GPG-KEY-ansible-release /etc/pki/rpm-gpg/RPM-GPG-KEY-ansible-release
 # OS Dependencies
 WORKDIR /tmp
@@ -50,7 +51,7 @@ ADD supervisor.conf /supervisor.conf
 ADD supervisor_task.conf /supervisor_task.conf
 ADD launch_awx.sh /usr/bin/launch_awx.sh
 ADD launch_awx_task.sh /usr/bin/launch_awx_task.sh
-RUN chmod +rx /usr/bin/launch_awx.sh && chmod +rx /usr/bin/launch_awx_task.sh
+RUN chmod +rx /usr/bin/launch_awx.sh && chmod +rx /usr/bin/launch_awx_task.sh && chmod +rx /usr/bin/config-watcher
 ADD settings.py /etc/tower/settings.py
 RUN chmod g+w /etc/passwd
 RUN chmod -R 777 /var/log/nginx && chmod -R 777 /var/lib/nginx

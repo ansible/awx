@@ -163,6 +163,12 @@
     dest: "{{ docker_base_path }}/requirements"
   delegate_to: localhost
 
+- name: Stage config watcher
+  copy:
+    src: ../tools/scripts/config-watcher
+    dest: "{{ docker_base_path }}/config-watcher"
+  delegate_to: localhost
+
 - name: Stage Makefile
   copy:
     src: ../Makefile

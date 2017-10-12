@@ -641,6 +641,9 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 # Time at which an HA node is considered active
 AWX_ACTIVE_NODE_TIME = 7200
 
+# Automatically remove nodes that have missed their heartbeats after some time
+AWX_AUTO_DEPROVISION_INSTANCES = False
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
