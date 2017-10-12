@@ -85,8 +85,10 @@
 
     - name: Set full image path for Registry
       set_fact:
-        awx_web_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-        awx_task_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+        awx_web_docker_actual_image: >-
+          {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}
+        awx_task_docker_actual_image: >-
+          {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}
       when: docker_registry is defined
 
     - name: Set full image path for local install
