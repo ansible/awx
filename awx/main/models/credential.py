@@ -59,6 +59,7 @@ class V1Credential(object):
         ('gce', 'Google Compute Engine'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
+        ('rackspace', 'Rackspace'),
         ('insights', 'Insights'),
     ]
     FIELDS = {
@@ -808,6 +809,37 @@ def openstack(cls):
                               'common scenarios.')
             }],
             'required': ['username', 'password', 'host', 'project']
+        }
+    )
+
+
+@CredentialType.default
+def rackspace(cls):
+    return cls(
+        kind='cloud',
+        name='Rackspace',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'project',
+                'label': 'Account number',
+                'type': 'string',
+            }, {
+                'id': 'regions',
+                'label': 'Regions',
+                'type': 'string',
+                'help_text': ('A comma separated list of regions for the servers. If omitted then all regions are searched.')
+            }],
+            'required': ['username', 'password', 'project']
         }
     )
 

@@ -1,20 +1,20 @@
 clouds:
   mordred:
-    cloud: hp
+    profile: hp
     auth:
       username: mordred@example.com
       password: my-wonderful-password
       project_name: mordred-tenant
     region_name: region-b.geo-1
   monty:
-    cloud: hp
+    profile: hp
     auth:
       username: monty.taylor@example.com
       password: another-wonderful-password
       project_name: monty.taylor@example.com-default-tenant
     region_name: region-b.geo-1
   rax:
-    cloud: rackspace
+    profile: rackspace
     auth:
       username: example
       password: spectacular-password
