@@ -219,12 +219,12 @@ class TaskManager():
                 workflow_job.save()
                 dag.cancel_node_jobs()
                 connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
-            elif dag.is_workflow_done():
+            else:
+                is_done, has_failed = dag.is_workflow_done()
+                if not is_done:
+                    continue
                 result.append(workflow_job.id)
-                if workflow_job._has_failed():
-                    workflow_job.status = 'failed'
-                else:
-                    workflow_job.status = 'successful'
+                workflow_job.status = 'failed' if has_failed else 'successful'
                 workflow_job.save()
                 connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
         return result
@@ -363,7 +363,7 @@ class TaskManager():
             return False
 
         '''
-        If the latest project update has a created time == job_created_time-1 
+        If the latest project update has a created time == job_created_time-1
         then consider the project update found. This is so we don't enter an infinite loop
         of updating the project when cache timeout is 0.
         '''
@@ -515,7 +515,7 @@ class TaskManager():
             return None
 
         '''
-        Only consider failing tasks on instances for which we obtained a task 
+        Only consider failing tasks on instances for which we obtained a task
         list from celery for.
         '''
         running_tasks, waiting_tasks = self.get_running_tasks()

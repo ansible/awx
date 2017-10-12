@@ -468,9 +468,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def _get_unified_job_template_class(cls):
         return WorkflowJobTemplate
 
-    def _has_failed(self):
-        return False
-
     def socketio_emit_data(self):
         return {}
 

@@ -4,7 +4,7 @@ import pytest
 
 # AWX
 from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTemplateNode, WorkflowJobTemplate
-from awx.main.models.jobs import Job
+from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 
@@ -15,9 +15,28 @@ from django.core.exceptions import ValidationError
 
 @pytest.mark.django_db
 class TestWorkflowDAGFunctional(TransactionTestCase):
-    def workflow_job(self):
+    def workflow_job(self, states=['new', 'new', 'new', 'new', 'new']):
+        """
+        Workflow topology:
+               node[0]
+                /\
+              s/  \f
+              /    \
+           node[1] node[3]
+             /       \
+           s/         \f
+           /           \
+        node[2]       node[4]
+        """
         wfj = WorkflowJob.objects.create()
-        nodes = [WorkflowJobNode.objects.create(workflow_job=wfj) for i in range(0, 5)]
+        jt = JobTemplate.objects.create(name='test-jt')
+        nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 5)]
+        for node, state in zip(nodes, states):
+            if state:
+                node.job = jt.create_job()
+                node.job.status = state
+                node.job.save()
+                node.save()
         nodes[0].success_nodes.add(nodes[1])
         nodes[1].success_nodes.add(nodes[2])
         nodes[0].failure_nodes.add(nodes[3])
@@ -34,6 +53,41 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         wfj = self.workflow_job()
         with self.assertNumQueries(4):
             dag._init_graph(wfj)
+
+    def test_workflow_done(self):
+        wfj = self.workflow_job(states=['failed', None, None, 'successful', None])
+        dag = WorkflowDAG(workflow_job=wfj)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertTrue(is_done)
+        self.assertFalse(has_failed)
+
+    def test_workflow_fails_for_unfinished_node(self):
+        wfj = self.workflow_job(states=['error', None, None, None, None])
+        dag = WorkflowDAG(workflow_job=wfj)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertTrue(is_done)
+        self.assertTrue(has_failed)
+
+    def test_workflow_fails_for_no_error_handler(self):
+        wfj = self.workflow_job(states=['successful', 'failed', None, None, None])
+        dag = WorkflowDAG(workflow_job=wfj)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertTrue(is_done)
+        self.assertTrue(has_failed)
+
+    def test_workflow_fails_leaf(self):
+        wfj = self.workflow_job(states=['successful', 'successful', 'failed', None, None])
+        dag = WorkflowDAG(workflow_job=wfj)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertTrue(is_done)
+        self.assertTrue(has_failed)
+
+    def test_workflow_not_finished(self):
+        wfj = self.workflow_job(states=['new', None, None, None, None])
+        dag = WorkflowDAG(workflow_job=wfj)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertFalse(is_done)
+        self.assertFalse(has_failed)
 
 
 @pytest.mark.django_db
@@ -164,37 +218,3 @@ class TestWorkflowJobTemplate:
             wfjt2.validate_unique()
         wfjt2 = WorkflowJobTemplate(name='foo', organization=None)
         wfjt2.validate_unique()
-
-
-@pytest.mark.django_db
-class TestWorkflowJobFailure:
-    """
-    Tests to re-implement if workflow failure status is introduced in
-    a future Tower version.
-    """
-    @pytest.fixture
-    def wfj(self):
-        return WorkflowJob.objects.create(name='test-wf-job')
-
-    def test_workflow_not_failed_unran_job(self, wfj):
-        """
-        Test that an un-ran node will not mark workflow job as failed
-        """
-        WorkflowJobNode.objects.create(workflow_job=wfj)
-        assert not wfj._has_failed()
-
-    def test_workflow_not_failed_successful_job(self, wfj):
-        """
-        Test that a sucessful node will not mark workflow job as failed
-        """
-        job = Job.objects.create(name='test-job', status='successful')
-        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
-        assert not wfj._has_failed()
-
-    def test_workflow_not_failed_failed_job_but_okay(self, wfj):
-        """
-        Test that a failed node will not mark workflow job as failed
-        """
-        job = Job.objects.create(name='test-job', status='failed')
-        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
-        assert not wfj._has_failed()
