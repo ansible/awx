@@ -28,6 +28,11 @@ function InventoryHostsStrings (BaseString) {
             MISSING_PERMISSIONS: t.s('You do not have sufficient permissions to edit the host filter.')
         }
     };
+
+    ns.smartinventorybutton = {
+        DISABLED_INSTRUCTIONS: "Please enter at least one search term to create a new Smart Inventory.",
+        ENABLED_INSTRUCTIONS: "Create a new Smart Inventory from search results."
+    };
 }
 
 InventoryHostsStrings.$inject = ['BaseStringService'];

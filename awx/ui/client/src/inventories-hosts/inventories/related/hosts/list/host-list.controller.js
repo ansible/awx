@@ -7,10 +7,10 @@
 // import HostsService from './../hosts/host.service';
 export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', 'i18n',
+    'HostsService', 'SetStatus', 'canAdd', 'i18n', 'InventoryHostsStrings',
     function($scope, ListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, i18n) {
+    HostsService, SetStatus, canAdd, i18n, InventoryHostsStrings) {
 
     let list = ListDefinition;
 
@@ -19,6 +19,7 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
     function init(){
         $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
+        $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
 
         // Search init
         $scope.list = list;
@@ -45,14 +46,16 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
             if(toParams && toParams.host_search) {
                 let hasMoreThanDefaultKeys = false;
                 angular.forEach(toParams.host_search, function(value, key) {
-                    if(key !== 'order_by' && key !== 'page_size') {
+                    if(key !== 'order_by' && key !== 'page_size' && key !== 'page') {
                         hasMoreThanDefaultKeys = true;
                     }
                 });
                 $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+                $scope.smartInventoryButtonTooltip = hasMoreThanDefaultKeys ? InventoryHostsStrings.get('smartinventorybutton.ENABLED_INSTRUCTIONS') : InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
             else {
                 $scope.enableSmartInventoryButton = false;
+                $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
         });
 

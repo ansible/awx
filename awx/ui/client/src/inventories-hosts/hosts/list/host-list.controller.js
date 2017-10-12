@@ -7,7 +7,7 @@
 
 function HostsList($scope, HostsList, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd) {
+    HostsService, SetStatus, canAdd, InventoryHostsStrings) {
 
     let list = HostsList;
 
@@ -16,6 +16,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     function init(){
         $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
+        $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
 
         // Search init
         $scope.list = list;
@@ -37,14 +38,16 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
             if(toParams && toParams.host_search) {
                 let hasMoreThanDefaultKeys = false;
                 angular.forEach(toParams.host_search, function(value, key) {
-                    if(key !== 'order_by' && key !== 'page_size') {
+                    if(key !== 'order_by' && key !== 'page_size' && key !== 'page') {
                         hasMoreThanDefaultKeys = true;
                     }
                 });
                 $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+                $scope.smartInventoryButtonTooltip = hasMoreThanDefaultKeys ? InventoryHostsStrings.get('smartinventorybutton.ENABLED_INSTRUCTIONS') : InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
             else {
                 $scope.enableSmartInventoryButton = false;
+                $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
         });
 
@@ -114,5 +117,5 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
 export default ['$scope', 'HostsList', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', HostsList
+    'HostsService', 'SetStatus', 'canAdd', 'InventoryHostsStrings', HostsList
 ];
