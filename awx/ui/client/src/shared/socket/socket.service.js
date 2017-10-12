@@ -34,6 +34,7 @@ export default
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened. Socket readyState: " + self.socket.readyState);
                         socketPromise.resolve();
+                        console.log('promise resolved, and readyState: '+ self.readyState);
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -116,6 +117,7 @@ export default
                 if(this.socket){
                     this.socket.close();
                     delete this.socket;
+                    console.log("Socket deleted: "+this.socket);
                 }
             },
             subscribe: function(state){

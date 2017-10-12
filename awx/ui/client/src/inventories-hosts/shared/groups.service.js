@@ -23,8 +23,8 @@ export default
                 this.url = GetBasePath('groups') + '?' + this.stringifyParams(params);
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             post: function(group){
@@ -32,8 +32,8 @@ export default
                 this.url = GetBasePath('groups');
                 Rest.setUrl(this.url);
                 return Rest.post(group)
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             put: function(group){
@@ -41,8 +41,8 @@ export default
                 this.url = GetBasePath('groups') + group.id;
                 Rest.setUrl(this.url);
                 return Rest.put(group)
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             delete: function(id){
@@ -50,8 +50,8 @@ export default
                 this.url = GetBasePath('groups') + id;
                 Rest.setUrl(this.url);
                 return Rest.destroy()
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             getCredential: function(id){
@@ -59,8 +59,8 @@ export default
                 this.url = GetBasePath('credentials') + id;
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             getInventorySource: function(params){
@@ -68,8 +68,8 @@ export default
                 this.url = GetBasePath('inventory_sources') + '?' + this.stringifyParams(params);
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             putInventorySource: function(params, url){
@@ -77,8 +77,8 @@ export default
                 this.url = url;
                 Rest.setUrl(this.url);
                 return Rest.put(params)
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             // these relationship setters could be consolidated, but verbosity makes the operation feel more clear @ controller level
@@ -87,8 +87,8 @@ export default
                 this.url = GetBasePath('groups') + target + '/children/';
                 Rest.setUrl(this.url);
                 return Rest.post(group)
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             disassociateGroup: function(group, parent){
@@ -96,8 +96,8 @@ export default
                 this.url = GetBasePath('groups') + parent + '/children/';
                 Rest.setUrl(this.url);
                 return Rest.post({id: group, disassociate: 1})
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             associateHost: function(host, target){
@@ -105,8 +105,8 @@ export default
                 this.url = GetBasePath('groups') + target + '/hosts/';
                 Rest.setUrl(this.url);
                 return Rest.post(host)
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             disassociateHost: function(host, group){
@@ -114,8 +114,8 @@ export default
                 this.url = GetBasePath('groups') + group + '/hosts/';
                 Rest.setUrl(this.url);
                 return Rest.post({id: host, disassociate: 1})
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             promote: function(group, inventory){
@@ -123,8 +123,8 @@ export default
                 this.url = GetBasePath('inventory') + inventory + '/groups/';
                 Rest.setUrl(this.url);
                 return Rest.post({id: group, disassociate: 1})
-                    .then(this.then.bind(this))
-                    .catch(this.catch.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             }
         };

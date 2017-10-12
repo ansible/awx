@@ -84,17 +84,17 @@ export default ['$scope', '$rootScope',
         $scope.copyTemplate = function(id) {
             Wait('start');
  			TemplateCopyService.get(id)
- 			.success(function(res){
- 					TemplateCopyService.set(res)
-                    .success(function(res){
-                        Wait('stop');
-                        if(res.type && res.type === 'job_template') {
-                            $state.go('templates.editJobTemplate', {job_template_id: res.id}, {reload: true});
-                        }
-                    });
+ 			.then((data) => {
+                    TemplateCopyService.set(data.results)
+                .then((results) => {
+                    Wait('stop');
+                    if(results.type && results.type === 'job_template') {
+                        $state.go('templates.editJobTemplate', {job_template_id: results.id}, {reload: true});
+                    }
+                });
  			})
-  			.catch(({res, status}) => {
-                ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+  			.catch(({data, status}) => {
+                ProcessErrors($rootScope, data, status, null, {hdr: 'Error!',
                 msg: 'Call failed. Return status: '+ status});
             });
 

@@ -322,8 +322,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             } else {
                 params.source = null;
             }
-            SourcesService.post(params).then(function(res){
-                let inventory_source_id = res.data.id;
+            SourcesService.post(params).then((response) => {
+                let inventory_source_id = response.data.id;
                 $state.go('^.edit', {inventory_source_id: inventory_source_id}, {reload: true});
             });
         };

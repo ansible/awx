@@ -179,26 +179,26 @@ export default
 
                     if ($scope.has_other_prompts) {
                         Rest.options()
-                        .success(options => {
+                        .then(options => {
                             if ($scope.ask_job_type_on_launch) {
-                                let choices = getChoices(options, 'actions.POST.job_type.choices');
+                                let choices = getChoices(options.data, 'actions.POST.job_type.choices');
                                 let initialValue = _.get(data, 'defaults.job_type');
                                 let initialChoice = getChoiceFromValue(choices, initialValue);
                                 $scope.other_prompt_data.job_type_options = choices;
                                 $scope.other_prompt_data.job_type = initialChoice;
                             }
                             if ($scope.ask_verbosity_on_launch) {
-                                let choices = getChoices(options, 'actions.POST.verbosity.choices');
+                                let choices = getChoices(options.data, 'actions.POST.verbosity.choices');
                                 let initialValue = _.get(data, 'defaults.verbosity');
                                 let initialChoice = getChoiceFromValue(choices, initialValue);
                                 $scope.other_prompt_data.verbosity_options = choices;
                                 $scope.other_prompt_data.verbosity = initialChoice;
                             }
                         })
-                        .error((err, status) => {
-                            ProcessErrors($scope, err, status, null, {
+                        .catch((error) => {
+                            ProcessErrors($scope, error.data, error.status, null, {
                                 hdr: 'Error!',
-                                msg: `Failed to get ${launch_url}. OPTIONS status: ${status}`
+                                msg: `Failed to get ${launch_url}. OPTIONS status: ${error.status}`
                             });
                         });
                     }
@@ -260,7 +260,8 @@ export default
                             // Go out and get the credential types
                             Rest.setUrl(GetBasePath('credential_types'));
                             Rest.get()
-                            .success(function (credentialTypeData) {
+                            .then( (response) => {
+                                let credentialTypeData = response.data;
                                 let credential_types = {};
                                 $scope.credentialTypeOptions = [];
                                 credentialTypeData.results.forEach((credentialType => {
@@ -273,6 +274,9 @@ export default
                                     }
                                 }));
                                 $scope.credential_types = credential_types;
+                            })
+                            .catch( (error) => {
+                                console.log(error);
                             });
 
                             // Figure out which step the user needs to start on
@@ -296,7 +300,8 @@ export default
                             // Go out and get some of the job details like inv, cred, name
                             Rest.setUrl(GetBasePath('jobs') + $scope.submitJobId);
                             Rest.get()
-                            .success(function (jobResultData) {
+                            .then( (response) => {
+                                let jobResultData = response.data;
                                 $scope.job_template_data = {
                                     name: jobResultData.name
                                 };

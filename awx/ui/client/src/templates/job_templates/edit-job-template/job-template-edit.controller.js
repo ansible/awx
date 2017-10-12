@@ -98,7 +98,8 @@ export default
                                         jobTemplateLoadFinished();
                                     }
                                 })
-                                .error(function (ret,status_code) {
+                                .catch( (error) => {
+                                    console.log(error);
                                     if (status_code === 403) {
                                         /* user doesn't have access to see the project, no big deal. */
                                         $scope.disablePlaybookBecausePermissionDenied = true;
@@ -142,7 +143,10 @@ export default
                             $q.all(promises)
                                 .then(function(){
                                     Wait('stop');
-                                });
+                                })
+                                .catch( (error) => {
+                                    console.log(error);
+                                })
                         }
                     }
                 });
@@ -423,7 +427,6 @@ export default
 
                             $scope.$emit('jobTemplateLoaded', master);
                         });
-
                 }
             });
 

@@ -21,13 +21,11 @@ export default {
     },
     resolve: {
         inventorySourceData: ['$stateParams', 'SourcesService', function($stateParams, SourcesService) {
-            return SourcesService.get({id: $stateParams.inventory_source_id }).then(res => res.data.results[0]);
+            return SourcesService.get({id: $stateParams.inventory_source_id }).then(response => response.data.results[0]);
         }],
         inventorySourcesOptions: ['InventoriesService', '$stateParams', function(InventoriesService, $stateParams) {
             return InventoriesService.inventorySourcesOptions($stateParams.inventory_id)
-                .then(function(res) {
-                    return res.data;
-                });
+                .then((response) => response.data);
         }]
     }
 };

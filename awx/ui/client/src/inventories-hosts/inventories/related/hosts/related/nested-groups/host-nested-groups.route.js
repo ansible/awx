@@ -58,9 +58,7 @@ export default {
         ],
         host: ['$stateParams', 'HostsService', function($stateParams, HostsService) {
             if($stateParams.host_id){
-                return HostsService.get({ id: $stateParams.host_id }).then(function(res) {
-                    return res.data.results[0];
-                });
+                return HostsService.get({ id: $stateParams.host_id }).then((res) => res.data.results[0]);
             }
         }],
         inventoryData: ['InventoriesService', '$stateParams', 'host', function(InventoriesService, $stateParams, host) {

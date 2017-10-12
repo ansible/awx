@@ -239,8 +239,8 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
             url = url + id + '/job_events/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
-                .then(({data}) => {
-                    return data;
+                .then((response) => {
+                    return response;
                 })
                 .catch(({data, status}) => {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
