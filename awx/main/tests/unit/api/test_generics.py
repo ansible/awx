@@ -87,7 +87,10 @@ class TestSubListCreateAttachDetachAPIView:
         assert ret == mock_response_new
         serializer.create.assert_called_with(mock_request, None, None)
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
-        mock_response_new.assert_called_with(Response, create_return_value.data, status=status.HTTP_201_CREATED, headers={'Location': create_return_value['Location']})
+        mock_response_new.assert_called_with(
+            Response, create_return_value.data, status=status.HTTP_201_CREATED,
+            headers={'Location': create_return_value['Location']}
+        )
 
     def test_attach_associate_only(self, mocker, get_object_or_400, parent_relationship_factory, mock_response_new):
         (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')

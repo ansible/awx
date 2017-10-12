@@ -71,7 +71,8 @@ class TaskManager():
 
     def get_tasks(self, status_list=('pending', 'waiting', 'running')):
         jobs = [j for j in Job.objects.filter(status__in=status_list).prefetch_related('instance_group')]
-        inventory_updates_qs = InventoryUpdate.objects.filter(status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
+        inventory_updates_qs = InventoryUpdate.objects.filter(
+            status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
         inventory_updates = [i for i in inventory_updates_qs]
         project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         system_jobs = [s for s in SystemJob.objects.filter(status__in=status_list).prefetch_related('instance_group')]

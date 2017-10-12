@@ -89,7 +89,9 @@ class ServiceScanService(BaseService):
         # RH sysvinit
         elif chkconfig_path is not None:
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
-            p = re.compile('(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
+            p = re.compile(
+                '(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+'
+                '[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
             rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
             # Check for special cases where stdout does not fit pattern
             match_any = False

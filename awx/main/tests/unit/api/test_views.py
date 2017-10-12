@@ -156,7 +156,10 @@ class TestHostInsights():
         mocker.patch.object(view, '_get_insights', return_value=Response(500, 'mock 500 err msg'))
 
         (msg, code) = view.get_insights('https://myexample.com/whocares/me/', 'ignore', 'ignore')
-        assert msg['error'] == 'Failed to gather reports and maintenance plans from Insights API at URL https://myexample.com/whocares/me/. Server responded with 500 status code and message mock 500 err msg'
+        assert msg['error'] == (
+            'Failed to gather reports and maintenance plans from Insights API at URL'
+            ' https://myexample.com/whocares/me/. Server responded with 500 status code '
+            'and message mock 500 err msg')
 
     def test_get_insights_401(self, patch_parent, mocker):
         view = HostInsights()

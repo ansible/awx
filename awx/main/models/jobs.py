@@ -160,7 +160,9 @@ class JobOptions(BaseModel):
     )
     use_fact_cache = models.BooleanField(
         default=False,
-        help_text=_("If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible."),
+        help_text=_(
+            "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting "
+            "facts at the end of a playbook run to the database and caching facts for use by Ansible."),
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
@@ -439,14 +441,20 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # TODO: Currently there is no org fk on project so this will need to be added once that is
         #       available after the rbac pr
         base_notification_templates = NotificationTemplate.objects
-        error_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
-        success_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
-        any_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_any__in=[self, self.project]))
+        error_notification_templates = list(base_notification_templates.filter(
+            unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
+        success_notification_templates = list(base_notification_templates.filter(
+            unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
+        any_notification_templates = list(base_notification_templates.filter(
+            unifiedjobtemplate_notification_templates_for_any__in=[self, self.project]))
         # Get Organization NotificationTemplates
         if self.project is not None and self.project.organization is not None:
-            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_errors=self.project.organization)))
-            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.project.organization)))
-            any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_errors=self.project.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_success=self.project.organization)))
+            any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(
+                organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
 

@@ -268,7 +268,8 @@ register(
     field_class=fields.IntegerField,
     min_value=0,
     label=_('Job Event Standard Output Maximum Display Size'),
-    help_text=_(u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'),
+    help_text=_(
+        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'),
     category=_('Jobs'),
     category_slug='jobs',
 )

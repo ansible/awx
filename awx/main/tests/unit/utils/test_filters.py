@@ -68,7 +68,11 @@ class TestSmartFilterQueryFromString():
         ('(a=b and c=d)', Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})),
         ('a=b or c=d', Q(**{u"a": u"b"}) | Q(**{u"c": u"d"})),
         ('(a=b and c=d) or (e=f)', (Q(**{u"a": u"b"}) & Q(**{u"c": u"d"})) | (Q(**{u"e": u"f"}))),
-        ('a=b or a=d or a=e or a=z and b=h and b=i and b=j and b=k', Q(**{u"a": u"b"}) | Q(**{u"a": u"d"}) | Q(**{u"a": u"e"}) | Q(**{u"a": u"z"}) & Q(**{u"b": u"h"}) & Q(**{u"b": u"i"}) & Q(**{u"b": u"j"}) & Q(**{u"b": u"k"}))
+        (
+            'a=b or a=d or a=e or a=z and b=h and b=i and b=j and b=k',
+            Q(**{u"a": u"b"}) | Q(**{u"a": u"d"}) | Q(**{u"a": u"e"}) | Q(**{u"a": u"z"}) &
+            Q(**{u"b": u"h"}) & Q(**{u"b": u"i"}) & Q(**{u"b": u"j"}) & Q(**{u"b": u"k"})
+        )
     ])
     def test_boolean_parenthesis(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
@@ -86,7 +90,10 @@ class TestSmartFilterQueryFromString():
         ('ansible_facts__a__b__c[]__d__e="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": u"foobar"}}]}}}})),
         ('ansible_facts__a__b__c[]__d__e[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
         ('ansible_facts__a__b__c[]__d__e__f[]="foobar"', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}})),
-        ('(ansible_facts__a__b__c[]__d__e__f[]="foobar") and (ansible_facts__a__b__c[]__d__e[]="foobar")', Q(**{ u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}}) & Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
+        (
+            '(ansible_facts__a__b__c[]__d__e__f[]="foobar") and (ansible_facts__a__b__c[]__d__e[]="foobar")',
+            Q(**{ u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": {u"f": [u"foobar"]}}}]}}}}) &
+            Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [{u"d": {u"e": [u"foobar"]}}]}}}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])

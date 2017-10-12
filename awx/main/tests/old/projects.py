@@ -522,55 +522,145 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
             # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
             # - ssh://[user@]host.xz[:port]/path/to/repo.git/
-            ('git', 'ssh://host.xz/path/to/repo.git/', None, 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ssh://host.xz:1022/path/to/repo.git', None, 'ssh://testuser@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
-            ('git', 'ssh://user@host.xz/path/to/repo.git/', None, 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ssh://user@host.xz:1022/path/to/repo.git', None, 'ssh://testuser@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
-            ('git', 'ssh://user:pass@host.xz/path/to/repo.git/', None, 'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ssh://user:pass@host.xz:1022/path/to/repo.git', None, 'ssh://testuser:pass@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            (
+                'git', 'ssh://host.xz/path/to/repo.git/', None,
+                'ssh://testuser@host.xz/path/to/repo.git/',
+                'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ssh://host.xz:1022/path/to/repo.git', None,
+                'ssh://testuser@host.xz:1022/path/to/repo.git',
+                'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            (
+                'git', 'ssh://user@host.xz/path/to/repo.git/', None,
+                'ssh://testuser@host.xz/path/to/repo.git/',
+                'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ssh://user@host.xz:1022/path/to/repo.git', None,
+                'ssh://testuser@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            (
+                'git', 'ssh://user:pass@host.xz/path/to/repo.git/', None,
+                'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ssh://user:pass@host.xz:1022/path/to/repo.git', None,
+                'ssh://testuser:pass@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
             # - git://host.xz[:port]/path/to/repo.git/ (doesn't really support authentication)
-            ('git', 'git://host.xz/path/to/repo.git/', None, 'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'git://host.xz:9418/path/to/repo.git', None, 'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
-            ('git', 'git://user@host.xz/path/to/repo.git/', None, 'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'git://user@host.xz:9418/path/to/repo.git', None, 'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
+            (
+                'git', 'git://host.xz/path/to/repo.git/', None,
+                'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'git://host.xz:9418/path/to/repo.git', None,
+                'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
+            (
+                'git', 'git://user@host.xz/path/to/repo.git/', None,
+                'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'git://user@host.xz:9418/path/to/repo.git', None,
+                'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
             # - http[s]://host.xz[:port]/path/to/repo.git/
-            ('git', 'http://host.xz/path/to/repo.git/', None, 'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'http://host.xz:8080/path/to/repo.git', None, 'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
-            ('git', 'http://user@host.xz/path/to/repo.git/', None, 'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'http://user@host.xz:8080/path/to/repo.git', None, 'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
-            ('git', 'http://user:pass@host.xz/path/to/repo.git/', None, 'http://testuser:pass@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'http://user:pass@host.xz:8080/path/to/repo.git', None, 'http://testuser:pass@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
-            ('git', 'https://host.xz/path/to/repo.git/', None, 'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'https://host.xz:8443/path/to/repo.git', None, 'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
-            ('git', 'https://user@host.xz/path/to/repo.git/', None, 'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'https://user@host.xz:8443/path/to/repo.git', None, 'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
-            ('git', 'https://user:pass@host.xz/path/to/repo.git/', None, 'https://testuser:pass@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'https://user:pass@host.xz:8443/path/to/repo.git', None, 'https://testuser:pass@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            (
+                'git', 'http://host.xz/path/to/repo.git/', None,
+                'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'http://host.xz:8080/path/to/repo.git', None,
+                'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            (
+                'git', 'http://user@host.xz/path/to/repo.git/', None,
+                'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'http://user@host.xz:8080/path/to/repo.git', None,
+                'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            (
+                'git', 'http://user:pass@host.xz/path/to/repo.git/', None,
+                'http://testuser:pass@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'http://user:pass@host.xz:8080/path/to/repo.git', None,
+                'http://testuser:pass@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            (
+                'git', 'https://host.xz/path/to/repo.git/', None,
+                'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'https://host.xz:8443/path/to/repo.git', None,
+                'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            (
+                'git', 'https://user@host.xz/path/to/repo.git/', None,
+                'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'https://user@host.xz:8443/path/to/repo.git', None,
+                'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            (
+                'git', 'https://user:pass@host.xz/path/to/repo.git/', None,
+                'https://testuser:pass@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'https://user:pass@host.xz:8443/path/to/repo.git', None,
+                'https://testuser:pass@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
             # - ftp[s]://host.xz[:port]/path/to/repo.git/
-            ('git', 'ftp://host.xz/path/to/repo.git/', None, 'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftp://host.xz:8021/path/to/repo.git', None, 'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
-            ('git', 'ftp://user@host.xz/path/to/repo.git/', None, 'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftp://user@host.xz:8021/path/to/repo.git', None, 'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
-            ('git', 'ftp://user:pass@host.xz/path/to/repo.git/', None, 'ftp://testuser:pass@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftp://user:pass@host.xz:8021/path/to/repo.git', None, 'ftp://testuser:pass@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
-            ('git', 'ftps://host.xz/path/to/repo.git/', None, 'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftps://host.xz:8990/path/to/repo.git', None, 'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
-            ('git', 'ftps://user@host.xz/path/to/repo.git/', None, 'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftps://user@host.xz:8990/path/to/repo.git', None, 'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
-            ('git', 'ftps://user:pass@host.xz/path/to/repo.git/', None, 'ftps://testuser:pass@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'ftps://user:pass@host.xz:8990/path/to/repo.git', None, 'ftps://testuser:pass@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            (
+                'git', 'ftp://host.xz/path/to/repo.git/', None,
+                'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftp://host.xz:8021/path/to/repo.git', None,
+                'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            (
+                'git', 'ftp://user@host.xz/path/to/repo.git/', None,
+                'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftp://user@host.xz:8021/path/to/repo.git', None,
+                'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            (
+                'git', 'ftp://user:pass@host.xz/path/to/repo.git/', None,
+                'ftp://testuser:pass@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftp://user:pass@host.xz:8021/path/to/repo.git', None,
+                'ftp://testuser:pass@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            (
+                'git', 'ftps://host.xz/path/to/repo.git/', None,
+                'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftps://host.xz:8990/path/to/repo.git', None,
+                'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            (
+                'git', 'ftps://user@host.xz/path/to/repo.git/', None,
+                'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftps://user@host.xz:8990/path/to/repo.git', None,
+                'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            (
+                'git', 'ftps://user:pass@host.xz/path/to/repo.git/', None,
+                'ftps://testuser:pass@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'ftps://user:pass@host.xz:8990/path/to/repo.git', None,
+                'ftps://testuser:pass@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
             # - rsync://host.xz/path/to/repo.git/
-            ('git', 'rsync://host.xz/path/to/repo.git/', ValueError, ValueError, ValueError),
+            (
+                'git', 'rsync://host.xz/path/to/repo.git/', ValueError, ValueError, ValueError),
             # - [user@]host.xz:path/to/repo.git/ (SCP style)
-            ('git', 'host.xz:path/to/repo.git/', 'git+ssh://host.xz/path/to/repo.git/', 'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'user@host.xz:path/to/repo.git/', 'git+ssh://user@host.xz/path/to/repo.git/', 'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'user:pass@host.xz:path/to/repo.git/', 'git+ssh://user:pass@host.xz/path/to/repo.git/', 'git+ssh://testuser:pass@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'host.xz:~/path/to/repo.git/', 'git+ssh://host.xz/~/path/to/repo.git/', 'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
-            ('git', 'user@host.xz:~/path/to/repo.git/', 'git+ssh://user@host.xz/~/path/to/repo.git/', 'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
-            ('git', 'user:pass@host.xz:~/path/to/repo.git/', 'git+ssh://user:pass@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:pass@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
-            ('git', 'host.xz:/path/to/repo.git/', 'git+ssh://host.xz//path/to/repo.git/', 'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
-            ('git', 'user@host.xz:/path/to/repo.git/', 'git+ssh://user@host.xz//path/to/repo.git/', 'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
-            ('git', 'user:pass@host.xz:/path/to/repo.git/', 'git+ssh://user:pass@host.xz//path/to/repo.git/', 'git+ssh://testuser:pass@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
+            (
+                'git', 'host.xz:path/to/repo.git/', 'git+ssh://host.xz/path/to/repo.git/',
+                'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'user@host.xz:path/to/repo.git/', 'git+ssh://user@host.xz/path/to/repo.git/',
+                'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'user:pass@host.xz:path/to/repo.git/', 'git+ssh://user:pass@host.xz/path/to/repo.git/',
+                'git+ssh://testuser:pass@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            (
+                'git', 'host.xz:~/path/to/repo.git/', 'git+ssh://host.xz/~/path/to/repo.git/',
+                'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            (
+                'git', 'user@host.xz:~/path/to/repo.git/', 'git+ssh://user@host.xz/~/path/to/repo.git/',
+                'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            (
+                'git', 'user:pass@host.xz:~/path/to/repo.git/', 'git+ssh://user:pass@host.xz/~/path/to/repo.git/',
+                'git+ssh://testuser:pass@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            (
+                'git', 'host.xz:/path/to/repo.git/', 'git+ssh://host.xz//path/to/repo.git/',
+                'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
+            (
+                'git', 'user@host.xz:/path/to/repo.git/', 'git+ssh://user@host.xz//path/to/repo.git/',
+                'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
+            (
+                'git', 'user:pass@host.xz:/path/to/repo.git/', 'git+ssh://user:pass@host.xz//path/to/repo.git/',
+                'git+ssh://testuser:pass@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
             # - /path/to/repo.git/ (local file)
             ('git', '/path/to/repo.git', ValueError, ValueError, ValueError),
             ('git', 'path/to/repo.git', ValueError,  ValueError, ValueError),
@@ -601,45 +691,115 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('hg', 'file:///path/to/repo#rev', ValueError, ValueError, ValueError),
             ('hg', 'file://localhost/path/to/repo/#rev', ValueError, ValueError, ValueError),
             # - http://[user[:pass]@]host[:port]/[path][#revision]
-            ('hg', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('hg', 'http://user@host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'http://user@host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('hg', 'http://user:pass@host.xz/path/to/repo/', None, 'http://testuser:pass@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'http://user:pass@host.xz:8080/path/to/repo', None, 'http://testuser:pass@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('hg', 'http://host.xz/path/to/repo/#rev', None, 'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'http://host.xz:8080/path/to/repo#rev', None, 'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
-            ('hg', 'http://user@host.xz/path/to/repo/#rev', None, 'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'http://user@host.xz:8080/path/to/repo#rev', None, 'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
-            ('hg', 'http://user:pass@host.xz/path/to/repo/#rev', None, 'http://testuser:pass@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'http://user:pass@host.xz:8080/path/to/repo#rev', None, 'http://testuser:pass@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            (
+                'hg', 'http://host.xz/path/to/repo/', None,
+                'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'http://host.xz:8080/path/to/repo', None,
+                'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'hg', 'http://user@host.xz/path/to/repo/', None,
+                'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'http://user@host.xz:8080/path/to/repo', None,
+                'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'hg', 'http://user:pass@host.xz/path/to/repo/', None, 'http://testuser:pass@host.xz/path/to/repo/',
+                'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'http://user:pass@host.xz:8080/path/to/repo', None,
+                'http://testuser:pass@host.xz:8080/path/to/repo',
+                'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'hg', 'http://host.xz/path/to/repo/#rev', None,
+                'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'http://host.xz:8080/path/to/repo#rev', None,
+                'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            (
+                'hg', 'http://user@host.xz/path/to/repo/#rev', None,
+                'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'http://user@host.xz:8080/path/to/repo#rev', None,
+                'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            (
+                'hg', 'http://user:pass@host.xz/path/to/repo/#rev', None,
+                'http://testuser:pass@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'http://user:pass@host.xz:8080/path/to/repo#rev', None,
+                'http://testuser:pass@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
             # - https://[user[:pass]@]host[:port]/[path][#revision]
-            ('hg', 'https://host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'https://host.xz:8443/path/to/repo', None, 'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
-            ('hg', 'https://user@host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'https://user@host.xz:8443/path/to/repo', None, 'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
-            ('hg', 'https://user:pass@host.xz/path/to/repo/', None, 'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('hg', 'https://user:pass@host.xz:8443/path/to/repo', None, 'https://testuser:pass@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
-            ('hg', 'https://host.xz/path/to/repo/#rev', None, 'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'https://host.xz:8443/path/to/repo#rev', None, 'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
-            ('hg', 'https://user@host.xz/path/to/repo/#rev', None, 'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'https://user@host.xz:8443/path/to/repo#rev', None, 'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
-            ('hg', 'https://user:pass@host.xz/path/to/repo/#rev', None, 'https://testuser:pass@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
-            ('hg', 'https://user:pass@host.xz:8443/path/to/repo#rev', None, 'https://testuser:pass@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            (
+                'hg', 'https://host.xz/path/to/repo/', None,
+                'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'https://host.xz:8443/path/to/repo', None,
+                'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            (
+                'hg', 'https://user@host.xz/path/to/repo/', None,
+                'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'https://user@host.xz:8443/path/to/repo', None,
+                'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            (
+                'hg', 'https://user:pass@host.xz/path/to/repo/', None,
+                'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'hg', 'https://user:pass@host.xz:8443/path/to/repo', None,
+                'https://testuser:pass@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            (
+                'hg', 'https://host.xz/path/to/repo/#rev', None,
+                'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'https://host.xz:8443/path/to/repo#rev', None,
+                'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            (
+                'hg', 'https://user@host.xz/path/to/repo/#rev', None,
+                'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'https://user@host.xz:8443/path/to/repo#rev', None,
+                'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            (
+                'hg', 'https://user:pass@host.xz/path/to/repo/#rev', None,
+                'https://testuser:pass@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'https://user:pass@host.xz:8443/path/to/repo#rev', None,
+                'https://testuser:pass@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
             # - ssh://[user@]host[:port]/[path][#revision]
             # Password is always stripped out for hg when using SSH.
             ('hg', 'ssh://host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
             ('hg', 'ssh://host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
             ('hg', 'ssh://user@host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
             ('hg', 'ssh://user@host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
-            ('hg', 'ssh://user:pass@host.xz/path/to/repo/', 'ssh://user@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
-            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo', 'ssh://user@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
-            ('hg', 'ssh://host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
-            ('hg', 'ssh://host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
-            ('hg', 'ssh://user@host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
-            ('hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
-            ('hg', 'ssh://user:pass@host.xz/path/to/repo/#rev', 'ssh://user@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
-            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', 'ssh://user@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
+            (
+                'hg', 'ssh://user:pass@host.xz/path/to/repo/',
+                'ssh://user@host.xz/path/to/repo/',
+                'ssh://testuser@host.xz/path/to/repo/',
+                'ssh://testuser@host.xz/path/to/repo/'),
+            (
+                'hg', 'ssh://user:pass@host.xz:1022/path/to/repo',
+                'ssh://user@host.xz:1022/path/to/repo',
+                'ssh://testuser@host.xz:1022/path/to/repo',
+                'ssh://testuser@host.xz:1022/path/to/repo'),
+            (
+                'hg', 'ssh://host.xz/path/to/repo/#rev', None,
+                'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'ssh://host.xz:1022/path/to/repo#rev', None,
+                'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
+            (
+                'hg', 'ssh://user@host.xz/path/to/repo/#rev', None,
+                'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None,
+                'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
+            (
+                'hg', 'ssh://user:pass@host.xz/path/to/repo/#rev',
+                'ssh://user@host.xz/path/to/repo/#rev',
+                'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            (
+                'hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', 'ssh://user@host.xz:1022/path/to/repo#rev',
+                'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
             # Special case for bitbucket URLs:
             ('hg', 'ssh://hg@bitbucket.org/foo/bar', None, ValueError, ValueError),
             ('hg', 'ssh://hg@altssh.bitbucket.org:443/foo/bar', None, ValueError, ValueError),
@@ -651,33 +811,81 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('svn', 'file:///path/to/repo', ValueError, ValueError, ValueError),
             ('svn', 'file://localhost/path/to/repo/', ValueError, ValueError, ValueError),
             # - http://     Access via WebDAV protocol to Subversion-aware Apache server
-            ('svn', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('svn', 'http://user@host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'http://user@host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('svn', 'http://user:pass@host.xz/path/to/repo/', None, 'http://testuser:pass@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'http://user:pass@host.xz:8080/path/to/repo', None, 'http://testuser:pass@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'http://host.xz/path/to/repo/', None,
+                'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'http://host.xz:8080/path/to/repo', None,
+                'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'http://user@host.xz/path/to/repo/', None,
+                'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'http://user@host.xz:8080/path/to/repo', None,
+                'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'http://user:pass@host.xz/path/to/repo/', None,
+                'http://testuser:pass@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'http://user:pass@host.xz:8080/path/to/repo', None,
+                'http://testuser:pass@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
             # - https://    Same as http://, but with SSL encryption
-            ('svn', 'https://host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'https://host.xz:8080/path/to/repo', None, 'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('svn', 'https://user@host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'https://user@host.xz:8080/path/to/repo', None, 'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
-            ('svn', 'https://user:pass@host.xz/path/to/repo/', None, 'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'https://user:pass@host.xz:8080/path/to/repo', None, 'https://testuser:pass@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'https://host.xz/path/to/repo/', None,
+                'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'https://host.xz:8080/path/to/repo', None,
+                'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'https://user@host.xz/path/to/repo/', None,
+                'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'https://user@host.xz:8080/path/to/repo', None,
+                'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            (
+                'svn', 'https://user:pass@host.xz/path/to/repo/', None,
+                'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'https://user:pass@host.xz:8080/path/to/repo', None,
+                'https://testuser:pass@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
             # - svn://      Access via custom protocol to an svnserve server
-            ('svn', 'svn://host.xz/path/to/repo/', None, 'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn://host.xz:3690/path/to/repo', None, 'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
-            ('svn', 'svn://user@host.xz/path/to/repo/', None, 'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn://user@host.xz:3690/path/to/repo', None, 'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
-            ('svn', 'svn://user:pass@host.xz/path/to/repo/', None, 'svn://testuser:pass@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn://user:pass@host.xz:3690/path/to/repo', None, 'svn://testuser:pass@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            (
+                'svn', 'svn://host.xz/path/to/repo/', None,
+                'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn://host.xz:3690/path/to/repo', None, 
+                'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            (
+                'svn', 'svn://user@host.xz/path/to/repo/', None,
+                'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn://user@host.xz:3690/path/to/repo', None,
+                'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            (
+                'svn', 'svn://user:pass@host.xz/path/to/repo/', None,
+                'svn://testuser:pass@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn://user:pass@host.xz:3690/path/to/repo', None,
+                'svn://testuser:pass@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
             # - svn+ssh://  Same as svn://, but through an SSH tunnel
-            ('svn', 'svn+ssh://host.xz/path/to/repo/', None, 'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn+ssh://host.xz:1022/path/to/repo', None, 'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
-            ('svn', 'svn+ssh://user@host.xz/path/to/repo/', None, 'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn+ssh://user@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
-            ('svn', 'svn+ssh://user:pass@host.xz/path/to/repo/', None, 'svn+ssh://testuser:pass@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
-            ('svn', 'svn+ssh://user:pass@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser:pass@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            (
+                'svn', 'svn+ssh://host.xz/path/to/repo/', None,
+                'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn+ssh://host.xz:1022/path/to/repo', None,
+                'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            (
+                'svn', 'svn+ssh://user@host.xz/path/to/repo/', None,
+                'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn+ssh://user@host.xz:1022/path/to/repo', None,
+                'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            (
+                'svn', 'svn+ssh://user:pass@host.xz/path/to/repo/', None,
+                'svn+ssh://testuser:pass@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            (
+                'svn', 'svn+ssh://user:pass@host.xz:1022/path/to/repo', None,
+                'svn+ssh://testuser:pass@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
         ]
 
         # Some invalid URLs.
