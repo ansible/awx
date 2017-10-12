@@ -341,7 +341,6 @@
                     Rest.post(data)
                         .then(({data}) => {
 
-                            Wait('stop');
                             if (data.related && data.related.callback) {
                                 Alert('Callback URL',
                                     `Host callbacks are enabled for this template. The callback URL is:

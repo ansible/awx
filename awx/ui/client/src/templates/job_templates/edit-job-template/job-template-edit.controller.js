@@ -496,7 +496,7 @@ export default
                 $scope.removeTemplateSaveSuccess();
             }
             $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
-                Wait('stop');
+
                 if (data.related &&
                     data.related.callback) {
                     Alert('Callback URL',
@@ -606,6 +606,7 @@ export default
                         }
                         $q.all(defers)
                             .then(function() {
+                                Wait('stop');
                                 saveCompleted();
                             });
                     });
