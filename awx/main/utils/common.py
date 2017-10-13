@@ -582,12 +582,25 @@ def cache_list_capabilities(page, prefetch_list, model, user):
                 obj.capabilities_cache[display_method] = True
 
 
+def validate_vars_type(vars_obj):
+    if not isinstance(vars_obj, dict):
+        vars_type = type(vars_obj)
+        if hasattr(vars_type, '__name__'):
+            data_type = vars_type.__name__
+        else:
+            data_type = str(vars_type)
+        raise AssertionError(
+            _('Input type `{data_type}` is not a dictionary').format(
+                data_type=data_type)
+        )
+
+
 def parse_yaml_or_json(vars_str, silent_failure=True):
     '''
     Attempt to parse a string of variables.
     First, with JSON parser, if that fails, then with PyYAML.
     If both attempts fail, return an empty dictionary if `silent_failure`
-    is True, re-raise the last error if `silent_failure` if False.
+    is True, re-raise combination error if `silent_failure` if False.
     '''
     if isinstance(vars_str, dict):
         return vars_str
@@ -596,18 +609,21 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
 
     try:
         vars_dict = json.loads(vars_str)
-        assert isinstance(vars_dict, dict)
-    except (ValueError, TypeError, AssertionError):
+        validate_vars_type(vars_dict)
+    except (ValueError, TypeError, AssertionError) as json_err:
         try:
             vars_dict = yaml.safe_load(vars_str)
             # Can be None if '---'
             if vars_dict is None:
                 return {}
-            assert isinstance(vars_dict, dict)
-        except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+            validate_vars_type(vars_dict)
+        except (yaml.YAMLError, TypeError, AttributeError, AssertionError) as yaml_err:
             if silent_failure:
                 return {}
-            raise
+            raise ParseError(_(
+                'Cannot parse as JSON (error: {json_error}) or '
+                'YAML (error: {yaml_error}).').format(
+                    json_error=str(json_err), yaml_error=str(yaml_err)))
     return vars_dict
 
 

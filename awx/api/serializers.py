@@ -25,7 +25,7 @@ from django.utils.timezone import now
 from django.utils.functional import cached_property
 
 # Django REST Framework
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied, ParseError
 from rest_framework import fields
 from rest_framework import serializers
 from rest_framework import validators
@@ -3278,10 +3278,9 @@ class JobLaunchSerializer(BaseSerializer):
 
         try:
             extra_vars = parse_yaml_or_json(extra_vars, silent_failure=False)
-        except:
-            # Log exception, in case of yet-unknown parsing failures
-            logger.exception('extra_vars parsing error on Job Template launch.')
-            errors['extra_vars'] = _('Must be valid JSON or YAML.')
+        except ParseError as e:
+            # Catch known user variable formatting errors
+            errors['extra_vars'] = str(e)
 
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)
@@ -3357,10 +3356,9 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
         try:
             extra_vars = parse_yaml_or_json(extra_vars, silent_failure=False)
-        except:
-            # Log exception, in case of yet-unknown parsing failures
-            logger.exception('extra_vars parsing error on Workflow JT launch.')
-            errors['extra_vars'] = _('Must be valid JSON or YAML.')
+        except ParseError as e:
+            # Catch known user variable formatting errors
+            errors['extra_vars'] = str(e)
 
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)

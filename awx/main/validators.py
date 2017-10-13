@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 
 # REST framework
 from rest_framework.serializers import ValidationError as RestValidationError
+from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.main.utils import parse_yaml_or_json
@@ -183,6 +184,6 @@ def vars_validate_or_raise(vars_str):
     try:
         parse_yaml_or_json(vars_str, silent_failure=False)
         return vars_str
-    except:
-        raise RestValidationError(_('Must be valid JSON or YAML.'))
+    except ParseError as e:
+        raise RestValidationError(str(e))
 
