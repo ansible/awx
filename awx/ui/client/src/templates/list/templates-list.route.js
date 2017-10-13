@@ -26,7 +26,7 @@ export default {
             value: {
                 type: 'workflow_job_template,job_template'
             },
-            dynamic: true
+            dynamic: false
         }
     },
     searchPrefix: 'template',

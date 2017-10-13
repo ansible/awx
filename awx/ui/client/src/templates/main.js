@@ -368,8 +368,8 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 inventory__isnull: false,
                                 credential__isnull: false
                             },
-                            squash: true,
-                            dynamic: true
+                            squash: false,
+                            dynamic: false
                         },
                         project_search: {
                             value: {
@@ -377,7 +377,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 order_by: 'name'
                             },
                             squash: true,
-                            dynamic: true
+                            dynamic: false
                         },
                         inventory_source_search: {
                             value: {
@@ -386,7 +386,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 order_by: 'name'
                             },
                             squash: true,
-                            dynamic: true
+                            dynamic: false
                         }
                     },
                     views: {
@@ -775,7 +775,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 page_size: '5'
                             },
                             squash: true,
-                            dynamic: true
+                            dynamic: false
                         }
                     },
                     ncyBreadcrumb: {
@@ -830,7 +830,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 page_size: '5'
                             },
                             squash: true,
-                            dynamic: true
+                            dynamic: false
                         }
                     },
                     ncyBreadcrumb: {

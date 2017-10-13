@@ -3,10 +3,10 @@ global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {};
 // ui-router debugging
-if ($ENV['route-debug']){
-    let trace = angular.module('ui.router').trace;
-    trace.enable();
-}
+// if ($ENV['route-debug']){
+    // let trace = angular.module('ui.router').trace;
+    // trace.enable();
+// }
 
 var urlPrefix;
 
@@ -175,13 +175,13 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions', '$trace',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings, $transitions) {
-
+            $filter, SocketService, AppStrings, $transitions, $trace) {
+            $trace.enable();
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;

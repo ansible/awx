@@ -11,6 +11,7 @@ export default {
     searchPrefix: 'job',
     name: 'jobs',
     url: '/jobs',
+    reloadOnSearch: true,
     ncyBreadcrumb: {
         label: N_("JOBS")
     },
@@ -20,8 +21,8 @@ export default {
                 not__launch_type: 'sync',
                 order_by: '-finished'
             },
-            dynamic: true,
-            squash: ''
+            dynamic: false,
+            squash: false
         }
     },
     data: {

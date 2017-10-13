@@ -31,7 +31,7 @@ export default {
     params: {
         job_event_search: {
             value: defaultParams,
-            dynamic: true,
+            dynamic: false,
             squash: ''
         }
     },
