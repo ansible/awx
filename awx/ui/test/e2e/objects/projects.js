@@ -50,7 +50,7 @@ module.exports = {
             }
         },
         list: {
-            selector: 'div[ui-view="list"]',
+            selector: '.Panel',
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',

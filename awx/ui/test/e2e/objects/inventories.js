@@ -20,6 +20,11 @@ const standardInvDetails = createFormSection({
             '#inventory_form .ui-spinner-input',
             '#inventory_form .ScheduleToggle-switch'
         ]
+    },
+    labels: {
+        name: 'Name',
+        description: 'Description',
+        organization: 'Organization'
     }
 });
 
@@ -83,7 +88,7 @@ module.exports = {
             }
         },
         list: {
-            selector: 'div[ui-view="list"]',
+            selector: '.Panel',
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',
@@ -109,5 +114,19 @@ module.exports = {
     elements: {
         cancel: 'button[class*="Form-cancelButton"]',
         save: 'button[class*="Form-saveButton"]'
-    }
+    },
+    commands: [{
+        selectAdd (name) {
+            this.api.waitForElementVisible('button span[class="List-dropdownCarat"]');
+            this.expect.element('button span[class="List-dropdownCarat"]').enabled;
+            this.api.click('button span[class="List-dropdownCarat"]');
+
+            this.api.useXpath();
+            this.api.waitForElementVisible(`.//a[normalize-space(text())="${name}"]`);
+            this.api.click(`//a[normalize-space(text())="${name}"]`);
+            this.api.useCss();
+
+            return this;
+        }
+    }]
 };

@@ -8,7 +8,8 @@ const lookupModal = {
         close: 'i[class="fa fa-times-circle"]',
         title: 'div[class^="Form-title"]',
         select: 'button[class*="save"]',
-        cancel: 'button[class*="cancel"]'
+        cancel: 'button[class*="cancel"]',
+        save: 'button[class*="save"]'
     },
     sections: {
         search,

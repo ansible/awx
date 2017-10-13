@@ -15,6 +15,10 @@ const details = createFormSection({
             '#organization_form .Form-lookupButton',
             '#organization_form #InstanceGroups'
         ]
+    },
+    labels: {
+        name: 'Name',
+        description: 'Description'
     }
 });
 
