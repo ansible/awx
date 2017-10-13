@@ -3138,6 +3138,26 @@ class JobEventSerializer(BaseSerializer):
         return ret
 
 
+class JobEventWebSocketSerializer(JobEventSerializer):
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    event_name = serializers.CharField(source='event')
+    group_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = JobEvent
+        fields = ('*', 'event_name', 'group_name',)
+
+    def get_created(self, obj):
+        return obj.created.isoformat()
+
+    def get_modified(self, obj):
+        return obj.modified.isoformat()
+
+    def get_group_name(self, obj):
+        return 'job_events'
+
+
 class AdHocCommandEventSerializer(BaseSerializer):
 
     event_display = serializers.CharField(source='get_event_display', read_only=True)
@@ -3175,6 +3195,26 @@ class AdHocCommandEventSerializer(BaseSerializer):
                     set_count += 1
             ret['stdout'] += u'\u001b[0m' * (set_count - reset_count)
         return ret
+
+
+class AdHocCommandEventWebSocketSerializer(AdHocCommandEventSerializer):
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    event_name = serializers.CharField(source='event')
+    group_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AdHocCommandEvent
+        fields = ('*', 'event_name', 'group_name',)
+
+    def get_created(self, obj):
+        return obj.created.isoformat()
+
+    def get_modified(self, obj):
+        return obj.modified.isoformat()
+
+    def get_group_name(self, obj):
+        return 'ad_hoc_command_events'
 
 
 class JobLaunchSerializer(BaseSerializer):
