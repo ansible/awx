@@ -126,9 +126,14 @@ class TestInventoryInventorySourcesUpdate:
         mock_request.user.can_access.return_value = can_access
 
         with mocker.patch.object(InventoryInventorySourcesUpdate, 'get_object', return_value=obj):
-            view = InventoryInventorySourcesUpdate()
-            response = view.post(mock_request)
-            assert response.data == expected
+            with mocker.patch.object(InventoryInventorySourcesUpdate, 'get_serializer_context', return_value=None):
+                with mocker.patch('awx.api.views.InventoryUpdateSerializer') as serializer_class:
+                    serializer = serializer_class.return_value
+                    serializer.to_representation.return_value = {}
+
+                    view = InventoryInventorySourcesUpdate()
+                    response = view.post(mock_request)
+                    assert response.data == expected
 
 
 class TestHostInsights():
