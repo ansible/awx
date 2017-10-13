@@ -271,12 +271,8 @@ def __run__(private_data_dir):
 
 
 if __name__ == '__main__':
-    __version__ = '3.2.0'
-    try:
-        import awx
-        __version__ = awx.__version__
-    except ImportError:
-        pass  # in devel, `awx` isn't an installed package
+    import awx
+    __version__ = awx.__version__
     parser = argparse.ArgumentParser(description='manage a daemonized, isolated ansible playbook')
     parser.add_argument('--version', action='version', version=__version__ + '-isolated')
     parser.add_argument('command', choices=['start', 'stop', 'is-alive'])
