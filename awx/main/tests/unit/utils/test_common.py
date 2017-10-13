@@ -5,8 +5,12 @@
 import os
 import pytest
 from uuid import uuid4
+import json
+import yaml
 
 from django.core.cache import cache
+
+from rest_framework.exceptions import ParseError
 
 from awx.main.utils import common
 
@@ -36,6 +40,42 @@ def clear_cache():
 ])
 def test_parse_yaml_or_json(input_, output):
     assert common.parse_yaml_or_json(input_) == output
+
+
+class TestParserExceptions:
+
+    @staticmethod
+    def json_error(data):
+        try:
+            json.loads(data)
+            return None
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def yaml_error(data):
+        try:
+            yaml.load(data)
+            return None
+        except Exception as e:
+            return str(e)
+
+    def test_invalid_JSON_and_YAML(self):
+        data = "{key:val"
+        with pytest.raises(ParseError) as exc:
+            common.parse_yaml_or_json(data, silent_failure=False)
+        message = str(exc.value)
+        assert "Cannot parse as" in message
+        assert self.json_error(data) in message
+        assert self.yaml_error(data) in message
+
+    def test_invalid_vars_type(self):
+        data = "[1, 2, 3]"
+        with pytest.raises(ParseError) as exc:
+            common.parse_yaml_or_json(data, silent_failure=False)
+        message = str(exc.value)
+        assert "Cannot parse as" in message
+        assert "Input type `list` is not a dictionary" in message
 
 
 def test_set_environ():
