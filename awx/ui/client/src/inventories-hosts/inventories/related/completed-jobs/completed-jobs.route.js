@@ -11,7 +11,7 @@ export default {
                 or__inventoryupdate__inventory_source__inventory:"",
                 order_by: "-id"
             },
-            dynamic: false,
+            dyanmic: true,
             squash:""
         }
     },

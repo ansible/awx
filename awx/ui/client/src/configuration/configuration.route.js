@@ -20,7 +20,7 @@
      params: {
          currentTab: {
              value: 'auth',
-             dynamic: false,
+             dyanmic: true,
              isOptional: true
          }
 

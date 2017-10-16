@@ -15,7 +15,7 @@ export default {
                 order_by: '-finished',
                 not__launch_type: 'sync'
             },
-            dynamic: false
+            dyanmic: true
         },
         instance_group_id: null
     },

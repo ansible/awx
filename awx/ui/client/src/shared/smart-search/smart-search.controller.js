@@ -122,7 +122,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             // but will register new $stateParams[$scope.iterator + '_search'] terms
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {reload:true});
+                    [$scope.iterator + '_search']: queryset });
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {
@@ -246,7 +246,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     }
                 });
 
-                queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
+                queryset = _.merge({}, queryset, params, (objectValue, sourceValue, key, object) => {
                     if (object[key] && object[key] !== sourceValue){
                         if(_.isArray(object[key])) {
                             // Add the new value to the array and return
@@ -287,8 +287,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
                 if(!$scope.querySet) {
-                    $state.go('.', {
-                        [$scope.iterator + '_search']: queryset }, { reload:true }).then(function(){
+                    $state.go('.', {[$scope.iterator + '_search']:queryset }).then(function(){
                             // ISSUE: same as above in $scope.remove.  For some reason deleting the page
                             // from the queryset works for all lists except lists in modals.
                             delete $stateParams[$scope.iterator + '_search'].page;
@@ -379,7 +378,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             removeFromQuerySet(queryset);
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {reload:true}).then(function(){
+                    [$scope.iterator + '_search']: queryset }).then(function(){
                         // ISSUE: for some reason deleting a tag from a list in a modal does not
                         // remove the param from $stateParams.  Here we'll manually check to make sure
                         // that that happened and remove it if it didn't.
@@ -403,7 +402,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             delete cleared.page;
             queryset = cleared;
             if(!$scope.querySet) {
-                $state.go('.', {[$scope.iterator + '_search']: queryset}, {reload:true});
+                $state.go('.', {[$scope.iterator + '_search']: queryset});
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {

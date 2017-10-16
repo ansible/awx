@@ -369,7 +369,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 credential__isnull: false
                             },
                             squash: false,
-                            dynamic: false
+                            dyanmic: true
                         },
                         project_search: {
                             value: {
@@ -377,7 +377,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 order_by: 'name'
                             },
                             squash: true,
-                            dynamic: false
+                            dyanmic: true
                         },
                         inventory_source_search: {
                             value: {
@@ -386,7 +386,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 order_by: 'name'
                             },
                             squash: true,
-                            dynamic: false
+                            dyanmic: true
                         }
                     },
                     views: {
@@ -775,7 +775,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 page_size: '5'
                             },
                             squash: true,
-                            dynamic: false
+                            dyanmic: true
                         }
                     },
                     ncyBreadcrumb: {
@@ -830,7 +830,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 page_size: '5'
                             },
                             squash: true,
-                            dynamic: false
+                            dyanmic: true
                         }
                     },
                     ncyBreadcrumb: {

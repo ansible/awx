@@ -2,11 +2,6 @@
 global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {};
-// ui-router debugging
-// if ($ENV['route-debug']){
-    // let trace = angular.module('ui.router').trace;
-    // trace.enable();
-// }
 
 var urlPrefix;
 
@@ -130,20 +125,20 @@ angular
             timeout: 4000
         });
     }])
-    .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
-        '$urlMatcherFactoryProvider',
-        function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider) {
-            $urlMatcherFactoryProvider.strictMode(false);
+    .config(['$breadcrumbProvider', 'QuerySetProvider',
+        '$urlServiceProvider',
+        function($breadcrumbProvider, QuerySet,
+            $urlServiceProvider) {
+            $urlServiceProvider.config.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
-            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
-            $urlRouterProvider.otherwise('/home');
+            $urlServiceProvider.rules.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
+            $urlServiceProvider.rules.otherwise('/home');
 
-            $urlMatcherFactoryProvider.type('queryset', {
+            $urlServiceProvider.config.type('queryset', {
                 // encoding
                 // from {operator__key1__comparator=value, ... }
                 // to "_search=operator:key:compator=value& ... "
@@ -175,13 +170,13 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions', '$trace',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings, $transitions, $trace) {
-            $trace.enable();
+            $filter, SocketService, AppStrings, $transitions) {
+                
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;

@@ -10,7 +10,7 @@ export default {
                 page_size: '5'
             },
             squash: true,
-            dynamic: false
+            dyanmic: true
         }
     },
     ncyBreadcrumb: {
