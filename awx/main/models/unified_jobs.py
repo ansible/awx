@@ -734,7 +734,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 pass
         super(UnifiedJob, self).delete()
 
-    def copy_unified_job(self):
+    def copy_unified_job(self, limit=None):
         '''
         Returns saved object, including related fields.
         Create a copy of this unified job for the purpose of relaunch
@@ -746,6 +746,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         fields = unified_jt_class._get_unified_job_field_names() + [parent_field_name]
         unified_job = copy_model_by_class(self, unified_job_class, fields, {})
         unified_job.launch_type = 'relaunch'
+        if limit:
+            unified_job.limit = limit
         unified_job.save()
 
         # Labels coppied here

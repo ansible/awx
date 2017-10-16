@@ -37,6 +37,7 @@ from polymorphic.models import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
@@ -2642,9 +2643,19 @@ class JobCancelSerializer(JobSerializer):
 class JobRelaunchSerializer(JobSerializer):
 
     passwords_needed_to_start = serializers.SerializerMethodField()
+    retry_counts = serializers.SerializerMethodField()
+    hosts = serializers.ChoiceField(
+        required=False, allow_null=True, default='all',
+        choices=[
+            ('all', _('No change to job limit')),
+            ('failed', _('All failed and unreachable hosts')),
+            ('unreachable', _('Unreachable hosts'))
+        ],
+        write_only=True
+    )
 
     class Meta:
-        fields = ('passwords_needed_to_start',)
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts',)
 
     def to_internal_value(self, data):
         obj = self.context.get('obj')
@@ -2666,6 +2677,14 @@ class JobRelaunchSerializer(JobSerializer):
             return obj.passwords_needed_to_start
         return ''
 
+    def get_retry_counts(self, obj):
+        if obj.status in ACTIVE_STATES:
+            return _('Relaunch by host status not available until job finishes running.')
+        data = OrderedDict([])
+        for status in self.fields['hosts'].choices.keys():
+            data[status] = obj.retry_qs(status).count()
+        return data
+
     def validate_passwords_needed_to_start(self, value):
         obj = self.context.get('obj')
         data = self.context.get('data')
@@ -2685,6 +2704,7 @@ class JobRelaunchSerializer(JobSerializer):
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None or obj.inventory.pending_deletion:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))
+        attrs.pop('hosts', None)
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 

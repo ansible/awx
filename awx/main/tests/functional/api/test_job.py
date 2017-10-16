@@ -37,3 +37,31 @@ def test_job_relaunch_permission_denied_response(
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields' in r.data['detail']
     assert 'do not have permission' in r.data['detail']
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("status,hosts", [
+    ('all', 'host1,host2,host3'),
+    ('failed', 'host3'),
+])
+def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credential, admin_user, status, hosts):
+    h1 = inventory.hosts.create(name='host1')  # no-op
+    h2 = inventory.hosts.create(name='host2')  # changed host
+    h3 = inventory.hosts.create(name='host3')  # failed host
+    jt = JobTemplate.objects.create(
+        name='testjt', inventory=inventory,
+        project=project, credential=machine_credential
+    )
+    job = jt.create_unified_job(_eager_fields={'status': 'failed', 'limit': 'host1,host2,host3'})
+    job.job_events.create(event='playbook_on_stats')
+    job.job_host_summaries.create(host=h1, failed=False, ok=1, changed=0, failures=0, host_name=h1.name)
+    job.job_host_summaries.create(host=h2, failed=False, ok=0, changed=1, failures=0, host_name=h2.name)
+    job.job_host_summaries.create(host=h3, failed=False, ok=0, changed=0, failures=1, host_name=h3.name)
+
+    r = post(
+        url=reverse('api:job_relaunch', kwargs={'pk':job.pk}),
+        data={'hosts': status},
+        user=admin_user,
+        expect=201
+    )
+    assert r.data.get('limit') == hosts

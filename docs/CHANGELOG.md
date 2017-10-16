@@ -53,3 +53,4 @@
   `deprovision_node` -> `deprovision_instance`, and `instance_group_remove` -> `remove_from_queue`,
   which backward compatibility support for 3.1 use pattern
   [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]
+* Allow relaunching jobs on a subset of hosts, by status.[[#219](https://github.com/ansible/awx/issues/219)]

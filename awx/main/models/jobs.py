@@ -23,6 +23,9 @@ from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
+# REST Framework
+from rest_framework.exceptions import ParseError
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
@@ -588,9 +591,32 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return self.passwords_needed_to_start
 
     def _get_hosts(self, **kwargs):
-        from awx.main.models.inventory import Host
+        Host = JobHostSummary._meta.get_field('host').related_model
         kwargs['job_host_summaries__job__pk'] = self.pk
         return Host.objects.filter(**kwargs)
+
+    def retry_qs(self, status):
+        '''
+        Returns Host queryset that will be used to produce the `limit`
+        field in a retry on a subset of hosts
+        '''
+        kwargs = {}
+        if status == 'all':
+            pass
+        elif status == 'failed':
+            # Special case for parity with Ansible .retry files
+            kwargs['job_host_summaries__failed'] = True
+        elif status in ['ok', 'changed', 'unreachable']:
+            if status == 'unreachable':
+                status_field = 'dark'
+            else:
+                status_field = status
+            kwargs['job_host_summaries__{}__gt'.format(status_field)] = 0
+        else:
+            raise ParseError(_(
+                '{status_value} is not a valid status option.'
+            ).format(status_value=status))
+        return self._get_hosts(**kwargs)
 
     @property
     def task_impact(self):
