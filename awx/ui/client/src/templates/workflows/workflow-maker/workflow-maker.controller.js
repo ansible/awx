@@ -31,9 +31,9 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
              showTypeOptions: false
          };
 
-         $scope.editRequests = [];
-         $scope.associateRequests = [];
-         $scope.disassociateRequests = [];
+        $scope.editRequests = [];
+        $scope.associateRequests = [];
+        $scope.disassociateRequests = [];
 
         $scope.showKey = false;
         $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
@@ -940,9 +940,9 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             });
         };
 
-        $scope.$on('WorkflowDialogReady', function(){
-            $scope.modalOpen = true;
-        });
+        $scope.zoomToFitChart = function() {
+            $scope.$broadcast('zoomToFitChart');
+        };
 
         init();
 
