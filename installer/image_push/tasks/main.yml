@@ -1,0 +1,40 @@
+---
+- name: Remove local images to ensure proper push behavior
+  block:
+    - name: Remove web image
+      docker_image:
+        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+        tag: "{{ awx_version }}"
+        state: absent
+
+    - name: Remove task image
+      docker_image:
+        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+        tag: "{{ awx_version }}"
+        state: absent
+  delegate_to: localhost
+  when: docker_remove_local_images
+
+- name: Tag and Push Container Images
+  block:
+    - name: Tag and push web image to registry
+      docker_image:
+        name: "{{ awx_web_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+        tag: "{{ awx_version }}"
+        push: yes
+
+    - name: Tag and push task image to registry
+      docker_image:
+        name: "{{ awx_task_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+        tag: "{{ awx_version }}"
+        push: yes
+  delegate_to: localhost
+
+- name: Set full image path for Registry
+  set_fact:
+    awx_web_docker_actual_image: >-
+      {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}
+    awx_task_docker_actual_image: >-
+      {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}
