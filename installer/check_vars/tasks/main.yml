@@ -1,7 +1,7 @@
 # main.yml
 ---
-- include: check_openshift.yml
+- include_tasks: check_openshift.yml
   when: openshift_host is defined and openshift_host != ''
 
-- include: check_docker.yml
+- include_tasks: check_docker.yml
   when: openshift_host is not defined or openshift_host == ''
