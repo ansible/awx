@@ -104,12 +104,14 @@ export default ['i18n', function(i18n) {
             smart_inventory: {
                 mode: 'all',
                 ngClick: "smartInventory()",
-                awToolTip: i18n._("Create a new Smart Inventory from search results."),
+                awToolTip: "{{ smartInventoryButtonTooltip }}",
+                dataTipWatch: 'smartInventoryButtonTooltip',
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: i18n._('SMART INVENTORY'),
                 ngShow: 'canAdd && (hosts.length > 0 || !(searchTags | isEmpty))',
                 dataPlacement: "top",
-                ngDisabled: '!enableSmartInventoryButton'
+                ngDisabled: '!enableSmartInventoryButton',
+                showTipWhenDisabled: true
             }
         }
     };
