@@ -1375,6 +1375,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('cloudforms', 'username') == 'bob'
             assert config.get('cloudforms', 'password') == 'secret'
             assert config.get('cloudforms', 'ssl_verify') == 'false'
+
+            cache_path = config.get('cache', 'path')
+            assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
+            assert os.path.isdir(cache_path)
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
