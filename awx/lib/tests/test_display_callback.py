@@ -1,3 +1,8 @@
+# Copyright (c) 2017 Ansible by Red Hat
+# All Rights Reserved
+
+from __future__ import absolute_import
+
 from collections import OrderedDict
 import json
 import mock
