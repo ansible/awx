@@ -155,3 +155,19 @@ def test_memoize_parameter_error():
     with pytest.raises(common.IllegalArgumentError):
         fn()
 
+
+def test_args_to_command_kwargs():
+    example_command = [
+        "awx-manage", "inventory_import", "--inventory-id", "6",
+        "--overwrite", "--enabled-var", "guest.gueststate",
+        "--enabled-value", "running", "--group-filter", "^.+$",
+        "--host-filter", "^.+$", "--exclude-empty-groups",
+        "--instance-id-var", "config.instanceuuid",
+        "--source", "/var/lib/awx/vmware.py",
+        "-v1"
+    ]
+    kwargs = common.command_args_to_kwargs(example_command)
+    assert kwargs['enabled_value'] == 'running'
+    assert kwargs['exclude_empty_groups'] == True
+    assert kwargs['verbosity'] == 1
+

@@ -18,6 +18,7 @@ import contextlib
 import tempfile
 import six
 import psutil
+from collections import deque
 
 # Decorator
 from decorator import decorator
@@ -45,7 +46,8 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'callback_filter_out_ansible_extra_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',
+           'command_args_to_kwargs']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -772,6 +774,32 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         new_args.extend(['--chdir', cwd])
     new_args.extend(args)
     return new_args
+
+
+def command_args_to_kwargs(arg_list):
+    '''
+    For an awx-manage command, this converts an arg list into a kwargs
+    dict, which can be used through the Django `call_command` interface
+    '''
+    args = deque(arg_list)
+    kwargs = {}
+    while args:
+        raw_key = args.popleft()
+        if raw_key == 'awx-manage' or not raw_key.startswith('-'):
+            continue
+        key = raw_key.strip('-').replace('-', '_')
+        if (not args) or args[0].startswith('-'):
+            verb_m = re.match(r'^v(?P<level>[0-3])$', key)
+            if verb_m:
+                # handle unique verbosity syntax
+                kwargs['verbosity'] = int(verb_m.group('level'))
+                continue
+            # Flag, not option, give as True kwarg
+            kwargs[key] = True
+            continue
+        value = args.popleft()
+        kwargs[key] = value
+    return kwargs
 
 
 def get_pk_from_dict(_dict, key):

@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import re
+import sys
 import shutil
 import stat
 import tempfile
@@ -40,6 +41,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
 
 # Django-CRUM
 from crum import impersonate
@@ -56,7 +58,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
-                            get_type_for_model)
+                            get_type_for_model, command_args_to_kwargs)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -848,6 +850,24 @@ class BaseTask(LogErrorsTask):
                 status, rc = manager_instance.run(instance, isolated_host,
                                                   kwargs['private_data_dir'],
                                                   kwargs.get('proot_temp_dir'))
+            elif hasattr(self, 'management_command'):
+                try:
+                    old_env = os.environ.copy()
+                    for k, v in env.items():
+                        os.environ[k] = v
+                    import_logger = logging.getLogger('awx.main.commands.inventory_import')
+                    old_stdout = import_logger.handlers[0].stream
+                    import_logger.handlers[0].stream = stdout_handle
+                    call_command(self.management_command, **command_args_to_kwargs(args))
+                    status = 'successful'
+                    rc = 0
+                except Exception as e:
+                    status = 'failed'
+                    rc = 1
+                    raise
+                finally:
+                    import_logger.handlers[0].stream = old_stdout
+                    os.environ = old_env
             else:
                 status, rc = run.run_pexpect(
                     args, cwd, env, stdout_handle, **_kw
@@ -1587,6 +1607,7 @@ class RunInventoryUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_inventory_update'
     model = InventoryUpdate
+    management_command = 'inventory_import'
 
     def build_private_data(self, inventory_update, **kwargs):
         """
