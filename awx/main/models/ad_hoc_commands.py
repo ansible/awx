@@ -3,8 +3,6 @@
 
 # Python
 import datetime
-import hashlib
-import hmac
 import logging
 from urlparse import urljoin
 
@@ -155,13 +153,6 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
-
-    @property
-    def task_auth_token(self):
-        '''Return temporary auth token used for task requests via API.'''
-        if self.status == 'running':
-            h = hmac.new(settings.SECRET_KEY, self.created.isoformat(), digestmod=hashlib.sha1)
-            return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
     def notification_templates(self):

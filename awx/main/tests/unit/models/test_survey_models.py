@@ -1,5 +1,7 @@
-import pytest
 import json
+import tempfile
+
+import pytest
 
 from awx.main.tasks import RunJob
 from awx.main.models import (
@@ -16,7 +18,8 @@ def job(mocker):
         'extra_vars_dict': {"secret_key": "my_password"},
         'pk': 1, 'job_template.pk': 1, 'job_template.name': '',
         'created_by.pk': 1, 'created_by.username': 'admin',
-        'launch_type': 'manual'})
+        'launch_type': 'manual',
+        'inventory.get_script_data.return_value': {}})
     ret.project = mocker.MagicMock(scm_revision='asdf1234')
     return ret
 
@@ -62,7 +65,7 @@ def test_survey_passwords_not_in_extra_vars():
 
 def test_job_safe_args_redacted_passwords(job):
     """Verify that safe_args hides passwords in the job extra_vars"""
-    kwargs = {'ansible_version': '2.1'}
+    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
     run_job = RunJob()
     safe_args = run_job.build_safe_args(job, **kwargs)
     ev_index = safe_args.index('-e') + 1
@@ -71,7 +74,7 @@ def test_job_safe_args_redacted_passwords(job):
 
 
 def test_job_args_unredacted_passwords(job):
-    kwargs = {'ansible_version': '2.1'}
+    kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
     run_job = RunJob()
     args = run_job.build_args(job, **kwargs)
     ev_index = args.index('-e') + 1

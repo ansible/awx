@@ -179,6 +179,10 @@ class TestJobExecution:
 
     TASK_CLS = tasks.RunJob
     EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
+    INVENTORY_DATA = {
+        "all": {"hosts": ["localhost"]},
+        "_meta": {"localhost": {"ansible_connection": "local"}}
+    }
 
     def setup_method(self, method):
         if not os.path.exists(settings.PROJECTS_ROOT):
@@ -196,7 +200,11 @@ class TestJobExecution:
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
-            mock.patch.object(Job, 'inventory', mock.Mock(pk=1, spec_set=['pk'])),
+            mock.patch.object(Job, 'inventory', mock.Mock(
+                pk=1,
+                get_script_data=lambda *args, **kw: self.INVENTORY_DATA,
+                spec_set=['pk', 'get_script_data']
+            )),
             mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect)
         ]
         for p in self.patches:
@@ -309,7 +317,6 @@ class TestIsolatedExecution(TestJobExecution):
     REMOTE_HOST = 'some-isolated-host'
 
     def test_with_ssh_credentials(self):
-        mock_get = mock.Mock()
         ssh = CredentialType.defaults['ssh']()
         credential = Credential(
             pk=1,
@@ -325,7 +332,6 @@ class TestIsolatedExecution(TestJobExecution):
 
         private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
-        inventory = json.dumps({"all": {"hosts": ["localhost"]}})
 
         def _mock_job_artifacts(*args, **kw):
             artifacts = os.path.join(private_data, 'artifacts')
@@ -341,16 +347,7 @@ class TestIsolatedExecution(TestJobExecution):
                         f.write(data)
             return ('successful', 0)
         self.run_pexpect.side_effect = _mock_job_artifacts
-
-        with mock.patch('time.sleep'):
-            with mock.patch('requests.get') as mock_get:
-                mock_get.return_value = mock.Mock(content=inventory)
-                self.task.run(self.pk, self.REMOTE_HOST)
-                assert mock_get.call_count == 1
-                assert mock.call(
-                    'http://127.0.0.1:8013/api/v1/inventories/1/script/?hostvars=1',
-                    auth=mock.ANY
-                ) in mock_get.call_args_list
+        self.task.run(self.pk, self.REMOTE_HOST)
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
         assert ' '.join(playbook_run[0]).startswith(' '.join([
