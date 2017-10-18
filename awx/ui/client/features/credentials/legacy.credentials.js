@@ -108,7 +108,7 @@ function LegacyCredentialsService () {
                     page_size: '20',
                     order_by: 'username'
                 },
-                dyanmic: true,
+                dynamic: true,
                 squash: ''
             }
         },
@@ -185,14 +185,14 @@ function LegacyCredentialsService () {
                     page_size: 5,
                     is_superuser: false
                 },
-                dyanmic: true
+                dynamic: true
             },
             team_search: {
                 value: {
                     order_by: 'name',
                     page_size: 5
                 },
-                dyanmic: true
+                dynamic: true
             }
         },
         ncyBreadcrumb: {
@@ -240,7 +240,7 @@ function LegacyCredentialsService () {
                     order_by: 'name',
                     role_level: 'admin_role'
                 },
-                dyanmic: true,
+                dynamic: true,
                 squash: ''
             }
         },
@@ -279,7 +279,7 @@ function LegacyCredentialsService () {
                     page_size: 5,
                     order_by: 'name'
                 },
-                dyanmic: true,
+                dynamic: true,
                 squash: ''
             }
         },

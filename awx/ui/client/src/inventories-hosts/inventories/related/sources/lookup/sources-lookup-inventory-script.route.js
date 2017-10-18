@@ -6,7 +6,7 @@ export default {
                 order_by: "name",
                 role_level: "admin_role",
             },
-            dyanmic: true,
+            dynamic: true,
             squash: ""
         }
     },

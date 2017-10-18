@@ -257,27 +257,27 @@ function($injector, $stateExtender, $log, i18n) {
                     params: {
                         project_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         },
                         job_template_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         },
                         workflow_template_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         },
                         inventory_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         },
                         credential_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         },
                         organization_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
-                            dyanmic: true
+                            dynamic: true
                         }
                     },
                     ncyBreadcrumb:{
@@ -398,11 +398,11 @@ function($injector, $stateExtender, $log, i18n) {
                     params: {
                         user_search: {
                             value: { order_by: 'username', page_size: '5', is_superuser: false },
-                            dyanmic: true,
+                            dynamic: true,
                         },
                         team_search: {
                             value: { order_by: 'name', page_size: '5' },
-                            dyanmic: true
+                            dynamic: true
                         }
                     },
                     views: {
@@ -570,7 +570,7 @@ function($injector, $stateExtender, $log, i18n) {
                     params: {
                         user_search: {
                             value: { order_by: 'username', page_size: '5' },
-                            dyanmic: true,
+                            dynamic: true,
                         }
                     },
                     views: {

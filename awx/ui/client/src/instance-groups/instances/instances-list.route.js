@@ -15,7 +15,7 @@ export default {
                 page_size: '20',
                 order_by: 'hostname'
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     views: {

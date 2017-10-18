@@ -15,7 +15,7 @@ export default {
                 order_by: '-finished',
                 created_by: null
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     data: {

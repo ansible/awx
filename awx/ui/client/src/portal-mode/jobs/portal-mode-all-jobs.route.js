@@ -14,7 +14,7 @@ export default {
                 page_size: '20',
                 order_by: '-finished'
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     data: {

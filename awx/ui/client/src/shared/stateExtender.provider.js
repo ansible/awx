@@ -30,7 +30,7 @@ export default function($stateProvider) {
                                     page_size: "20",
                                     order_by: "name"
                                 },
-                                dyanmic: true,
+                                dynamic: true,
                                 squash: false
                             }
                         }

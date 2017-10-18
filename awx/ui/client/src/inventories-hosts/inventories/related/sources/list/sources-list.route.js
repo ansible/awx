@@ -10,7 +10,7 @@ export default {
                 order_by: "name",
                 not__source: ""
             },
-            dyanmic: true,
+            dynamic: true,
             squash: ""
         }
     },

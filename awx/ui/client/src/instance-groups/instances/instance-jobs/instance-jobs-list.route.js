@@ -15,7 +15,7 @@ export default {
                 order_by: '-finished',
                 not__launch_type: 'sync'
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     views: {

@@ -34,7 +34,7 @@ export default [{
             value: {
                 order_by: 'username'
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     ncyBreadcrumb: {
@@ -239,7 +239,7 @@ export default [{
                 or__inventory__organization: null,
                 page_size: 20
             },
-            dyanmic: true
+            dynamic: true
         }
     },
     data: {
@@ -297,14 +297,14 @@ export default [{
             value: {
                 order_by: 'username'
             },
-            dyanmic: true
+            dynamic: true
         },
         add_user_search: {
             value: {
                 order_by: 'username',
                 page_size: '5',
             },
-            dyanmic: true,
+            dynamic: true,
             squash: true
         }
     },

@@ -318,7 +318,7 @@ export default
                             next_run__isnull: 'false',
                             order_by: 'unified_job_template__polymorphic_ctype__model'
                         },
-                        dyanmic: true
+                        dynamic: true
                     }
                 },
                 data: {
