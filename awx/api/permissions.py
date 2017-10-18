@@ -52,14 +52,18 @@ class ModelAccessPermission(permissions.BasePermission):
                 if not check_user_access(request.user, view.model, 'add', {view.parent_key: parent_obj}):
                     return False
             return True
-        elif getattr(view, 'is_job_start', False):
+        elif hasattr(view, 'obj_permission_type'):
+            # Generic object-centric view permission check without object not needed
             if not obj:
                 return True
-            return check_user_access(request.user, view.model, 'start', obj)
-        elif getattr(view, 'is_job_cancel', False):
-            if not obj:
-                return True
-            return check_user_access(request.user, view.model, 'cancel', obj)
+            # Permission check that happens when get_object() is called
+            extra_kwargs = {}
+            if view.obj_permission_type == 'admin':
+                extra_kwargs['data'] = {}
+            return check_user_access(
+                request.user, view.model, view.obj_permission_type, obj,
+                **extra_kwargs
+            )
         else:
             if obj:
                 return True

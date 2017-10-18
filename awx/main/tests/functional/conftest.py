@@ -528,6 +528,18 @@ def _request(verb):
             middleware.process_response(request, response)
         if expect:
             if response.status_code != expect:
+                data_copy = response.data.copy()
+                try:
+                    # Make translated strings printable
+                    for key, value in response.data.items():
+                        if isinstance(value, list):
+                            response.data[key] = []
+                            for item in value:
+                                response.data[key].append(str(value))
+                        else:
+                            response.data[key] = str(value)
+                except Exception:
+                    response.data = data_copy
                 print(response.data)
             assert response.status_code == expect
         response.render()

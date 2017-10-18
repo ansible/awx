@@ -1327,8 +1327,8 @@ class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class ProjectUpdateCancel(RetrieveAPIView):
 
     model = ProjectUpdate
+    obj_permission_type = 'cancel'
     serializer_class = ProjectUpdateCancelSerializer
-    is_job_cancel = True
     new_in_13 = True
 
     def post(self, request, *args, **kwargs):
@@ -2440,9 +2440,9 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
     view_name = _('Inventory Sources Update')
 
     model = Inventory
+    obj_permission_type = 'start'
     serializer_class = InventorySourceUpdateSerializer
     permission_classes = (InventoryInventorySourcesUpdatePermission,)
-    is_job_start = True
     new_in_320 = True
 
     def retrieve(self, request, *args, **kwargs):
@@ -2596,8 +2596,8 @@ class InventorySourceUpdatesList(SubListAPIView):
 class InventorySourceUpdateView(RetrieveAPIView):
 
     model = InventorySource
+    obj_permission_type = 'start'
     serializer_class = InventorySourceUpdateSerializer
-    is_job_start = True
     new_in_14 = True
 
     def post(self, request, *args, **kwargs):
@@ -2638,8 +2638,8 @@ class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class InventoryUpdateCancel(RetrieveAPIView):
 
     model = InventoryUpdate
+    obj_permission_type = 'cancel'
     serializer_class = InventoryUpdateCancelSerializer
-    is_job_cancel = True
     new_in_14 = True
 
     def post(self, request, *args, **kwargs):
@@ -2690,9 +2690,9 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 class JobTemplateLaunch(RetrieveAPIView):
 
     model = JobTemplate
+    obj_permission_type = 'start'
     metadata_class = JobTypeMetadata
     serializer_class = JobLaunchSerializer
-    is_job_start = True
     always_allow_superuser = False
 
     def update_raw_data(self, data):
@@ -2793,6 +2793,7 @@ class JobTemplateSchedulesList(SubListCreateAPIView):
 class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
+    obj_permission_type = 'admin'
     serializer_class = EmptySerializer
     new_in_210 = True
 
@@ -3364,9 +3365,9 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
 
 
     model = WorkflowJobTemplate
+    obj_permission_type = 'start'
     serializer_class = WorkflowJobLaunchSerializer
     new_in_310 = True
-    is_job_start = True
     always_allow_superuser = False
 
     def update_raw_data(self, data):
@@ -3384,8 +3385,6 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         serializer = self.serializer_class(instance=obj, data=request.data)
         if not serializer.is_valid():
@@ -3406,8 +3405,8 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
 class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
 
     model = WorkflowJob
+    obj_permission_type = 'start'
     serializer_class = EmptySerializer
-    is_job_start = True
     new_in_310 = True
 
     def check_object_permissions(self, request, obj):
@@ -3564,8 +3563,8 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
 class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
 
     model = WorkflowJob
+    obj_permission_type = 'cancel'
     serializer_class = WorkflowJobCancelSerializer
-    is_job_cancel = True
     new_in_310 = True
 
     def post(self, request, *args, **kwargs):
@@ -3619,8 +3618,8 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
+    obj_permission_type = 'start'
     serializer_class = EmptySerializer
-    is_job_start = True
     new_in_210 = True
 
     def get(self, request, *args, **kwargs):
@@ -3759,8 +3758,8 @@ class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 class JobStart(GenericAPIView):
 
     model = Job
+    obj_permission_type = 'start'
     serializer_class = EmptySerializer
-    is_job_start = True
     deprecated = True
 
     def v2_not_allowed(self):
@@ -3797,8 +3796,8 @@ class JobStart(GenericAPIView):
 class JobCancel(RetrieveAPIView):
 
     model = Job
+    obj_permission_type = 'cancel'
     serializer_class = JobCancelSerializer
-    is_job_cancel = True
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -3812,8 +3811,8 @@ class JobCancel(RetrieveAPIView):
 class JobRelaunch(RetrieveAPIView):
 
     model = Job
+    obj_permission_type = 'start'
     serializer_class = JobRelaunchSerializer
-    is_job_start = True
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -4053,8 +4052,8 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class AdHocCommandCancel(RetrieveAPIView):
 
     model = AdHocCommand
+    obj_permission_type = 'cancel'
     serializer_class = AdHocCommandCancelSerializer
-    is_job_cancel = True
     new_in_220 = True
 
     def post(self, request, *args, **kwargs):
@@ -4069,8 +4068,8 @@ class AdHocCommandCancel(RetrieveAPIView):
 class AdHocCommandRelaunch(GenericAPIView):
 
     model = AdHocCommand
+    obj_permission_type = 'start'
     serializer_class = AdHocCommandRelaunchSerializer
-    is_job_start = True
     new_in_220 = True
 
     # FIXME: Figure out why OPTIONS request still shows all fields.
@@ -4204,8 +4203,8 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class SystemJobCancel(RetrieveAPIView):
 
     model = SystemJob
+    obj_permission_type = 'cancel'
     serializer_class = SystemJobCancelSerializer
-    is_job_cancel = True
     new_in_210 = True
 
     def post(self, request, *args, **kwargs):
@@ -4426,9 +4425,9 @@ class NotificationTemplateTest(GenericAPIView):
 
     view_name = _('Notification Template Test')
     model = NotificationTemplate
+    obj_permission_type = 'start'
     serializer_class = EmptySerializer
     new_in_300 = True
-    is_job_start = True
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
