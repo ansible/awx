@@ -703,6 +703,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/log/supervisor
     '''
     from django.conf import settings
+    cwd = os.path.realpath(cwd)
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/']
     hide_paths = [settings.AWX_PROOT_BASE_PATH]
     if not kwargs.get('isolated'):
