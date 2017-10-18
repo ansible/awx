@@ -29,7 +29,7 @@ class AWXDjangoStrategy(DjangoStrategy):
             try:
                 return host_parts[1]
             except IndexError:
-                if settings.USE_X_FORWARDED_PORT and 'HTTP_X_FORWARDED_PORT' in self.request.META:
+                if getattr(settings, 'USE_X_FORWARDED_PORT', False) and 'HTTP_X_FORWARDED_PORT' in self.request.META:
                     return self.request.META['HTTP_X_FORWARDED_PORT']
                 else:
                     return self.request.META['SERVER_PORT']
