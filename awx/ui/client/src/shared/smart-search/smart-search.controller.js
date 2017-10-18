@@ -375,10 +375,11 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     removed = searchWithoutKey(termParts[termParts.length-1]);
                 }
             }
-            removeFromQuerySet(queryset);
+            let cleared = _.cloneDeep(queryset);
+            removeFromQuerySet(cleared);
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }).then(function(){
+                    [$scope.iterator + '_search']: cleared }).then(function(){
                         // ISSUE: for some reason deleting a tag from a list in a modal does not
                         // remove the param from $stateParams.  Here we'll manually check to make sure
                         // that that happened and remove it if it didn't.
