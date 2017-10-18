@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
-    <title ng-bind="tabTitle"></title>
     <script>var $basePath = '{{ STATIC_URL }}'</script>
     <% htmlWebpackPlugin.files.css.forEach(file => {%>
         <link href="{{ STATIC_URL }}<%= file %>" rel="stylesheet" />

@@ -200,7 +200,7 @@ angular
             $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME}`;
             $rootScope.$watch('$state.current.ncyBreadcrumbLabel', function(title) {
                 title = (title) ? "| " + title : "";
-                $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
+                document.title = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
             });
 
             function activateTab() {
