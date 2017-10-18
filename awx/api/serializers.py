@@ -1010,6 +1010,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_error = self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:project_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',
@@ -1157,6 +1158,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.insights_credential:
             res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
@@ -1513,6 +1515,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
             object_roles = self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_script_copy', kwargs={'pk': obj.pk}),
         ))
 
         if obj.organization:
@@ -2062,6 +2065,7 @@ class CredentialSerializer(BaseSerializer):
             object_roles = self.reverse('api:credential_object_roles_list', kwargs={'pk': obj.pk}),
             owner_users = self.reverse('api:credential_owner_users_list', kwargs={'pk': obj.pk}),
             owner_teams = self.reverse('api:credential_owner_teams_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:credential_copy', kwargs={'pk': obj.pk}),
         ))
 
         # TODO: remove when API v1 is removed
@@ -2481,6 +2485,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
@@ -3439,6 +3444,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         res.update(dict(
             test = self.reverse('api:notification_template_test', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:notification_template_notification_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:notification_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})

@@ -1,6 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
+import uuid
+
 # Django
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -246,6 +249,8 @@ class PrimordialModel(CreatedModifiedModel):
         editable=False,
         on_delete=models.SET_NULL,
     )
+    self_uuid = models.UUIDField(null=True, default=uuid.uuid4, editable=False)
+    parent_uuid = models.UUIDField(null=True, editable=False)
 
     tags = TaggableManager(blank=True)
 

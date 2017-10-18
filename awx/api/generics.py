@@ -44,7 +44,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ResourceAccessList',
            'ParentMixin',
            'DeleteLastUnattachLabelMixin',
-           'SubListAttachDetachAPIView',]
+           'SubListAttachDetachAPIView',
+           'CopyAPIView']
 
 logger = logging.getLogger('awx.api.generics')
 analytics_logger = logging.getLogger('awx.analytics.performance')
@@ -712,3 +713,31 @@ class ResourceAccessList(ParentMixin, ListAPIView):
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
         return User.objects.filter(roles__in=list(ancestors)).distinct()
+
+
+class CopyAPIView(ListAPIView):
+    new_in_330 = True
+    new_in_api_v2 = True
+
+    def list(self, request, *args, **kwargs):
+        '''Monkey-patching DRF upstream implimentation.
+        '''
+        obj = self.get_object()
+        queryset = self.model.objects.filter(parent_uuid__isnull=False, parent_uuid=obj.self_uuid)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # TODO: Permission check
+        from awx.main.tasks import copy_model_obj
+        connection.on_commit(lambda: copy_model_obj.delay(self.model.__module__,
+                                                          self.model.__name__,
+                                                          obj.pk, request.user.pk))
+        return Response(status=status.HTTP_204_NO_CONTENT)

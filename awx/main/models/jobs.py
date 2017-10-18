@@ -232,6 +232,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
     '''
+    FIELDS_TO_PRESERVE = ['labels', 'instance_groups', 'inventory', 'project', 'credential', 'vault_credential', 'extra_credentials']
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
 
     class Meta:

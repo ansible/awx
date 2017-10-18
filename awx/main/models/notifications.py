@@ -41,6 +41,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
                           ('irc', _('IRC'), IrcBackend)]
     NOTIFICATION_TYPE_CHOICES = [(x[0], x[1]) for x in NOTIFICATION_TYPES]
     CLASS_FOR_NOTIFICATION_TYPE = dict([(x[0], x[2]) for x in NOTIFICATION_TYPES])
+    FIELDS_TO_PRESERVE = ['organization']
 
     class Meta:
         app_label = 'main'

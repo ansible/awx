@@ -201,6 +201,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     If used with sudo, a sudo password should be set if required.
     '''
 
+    FIELDS_TO_PRESERVE = ['credential_type', 'organization']
+
     class Meta:
         app_label = 'main'
         ordering = ('name',)

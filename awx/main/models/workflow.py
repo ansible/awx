@@ -168,6 +168,11 @@ class WorkflowNodeBase(CreatedModifiedModel):
 
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
+    FIELDS_TO_PRESERVE = [
+        'unified_job_template', 'inventory', 'credential', 'workflow_job_template',
+        'success_nodes', 'failure_nodes', 'always_nodes'
+    ]
+
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
         related_name='workflow_job_template_nodes',
@@ -329,6 +334,7 @@ class WorkflowJobOptions(BaseModel):
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+    FIELDS_TO_PRESERVE = ['labels', 'instance_groups', 'workflow_job_template_nodes', 'organization']
 
     class Meta:
         app_label = 'main'
