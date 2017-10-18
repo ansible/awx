@@ -59,7 +59,7 @@ from social.backends.utils import load_backends
 from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
+from awx.api.authentication import TokenGetAuthentication
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
@@ -2371,80 +2371,23 @@ class InventoryScriptView(RetrieveAPIView):
 
     model = Inventory
     serializer_class = InventoryScriptSerializer
-    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (TaskPermission,)
     filter_backends = ()
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
         hostname = request.query_params.get('host', '')
-        hostvars = bool(request.query_params.get('hostvars', ''))
         show_all = bool(request.query_params.get('all', ''))
-        if show_all:
-            hosts_q = dict()
-        else:
-            hosts_q = dict(enabled=True)
         if hostname:
-            host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
-            data = host.variables_dict
-        else:
-            data = dict()
-            if obj.variables_dict:
-                all_group = data.setdefault('all', dict())
-                all_group['vars'] = obj.variables_dict
-            if obj.kind == 'smart':
-                if len(obj.hosts.all()) == 0:
-                    return Response({})
-                else:
-                    all_group = data.setdefault('all', dict())
-                    smart_hosts_qs = obj.hosts.all()
-                    smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
-                    all_group['hosts'] = smart_hosts
-            else:
-                # Add hosts without a group to the all group.
-                groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q)
-                groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
-                if groupless_hosts:
-                    all_group = data.setdefault('all', dict())
-                    all_group['hosts'] = groupless_hosts
-
-                # Build in-memory mapping of groups and their hosts.
-                group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
-                if 'enabled' in hosts_q:
-                    group_hosts_kw['host__enabled'] = hosts_q['enabled']
-                group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-                group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
-                group_hosts_map = {}
-                for group_id, host_id, host_name in group_hosts_qs:
-                    group_hostnames = group_hosts_map.setdefault(group_id, [])
-                    group_hostnames.append(host_name)
-
-                # Build in-memory mapping of groups and their children.
-                group_parents_qs = Group.parents.through.objects.filter(
-                    from_group__inventory_id=obj.id,
-                    to_group__inventory_id=obj.id,
-                )
-                group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
-                group_children_map = {}
-                for from_group_id, from_group_name, to_group_id in group_parents_qs:
-                    group_children = group_children_map.setdefault(to_group_id, [])
-                    group_children.append(from_group_name)
-
-                # Now use in-memory maps to build up group info.
-                for group in obj.groups.all():
-                    group_info = dict()
-                    group_info['hosts'] = group_hosts_map.get(group.id, [])
-                    group_info['children'] = group_children_map.get(group.id, [])
-                    group_info['vars'] = group.variables_dict
-                    data[group.name] = group_info
-
-            if hostvars:
-                data.setdefault('_meta', dict())
-                data['_meta'].setdefault('hostvars', dict())
-                for host in obj.hosts.filter(**hosts_q):
-                    data['_meta']['hostvars'][host.name] = host.variables_dict
-
-        return Response(data)
+            hosts_q = dict(name=hostname)
+            if not show_all:
+                hosts_q['enabled'] = True
+            host = get_object_or_404(obj.hosts, **hosts_q)
+            return Response(host.variables_dict)
+        return Response(obj.get_script_data(
+            hostvars=bool(request.query_params.get('hostvars', '')),
+            show_all=show_all
+        ))
 
 
 class InventoryTreeView(RetrieveAPIView):

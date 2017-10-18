@@ -17,7 +17,7 @@ from rest_framework import exceptions
 from rest_framework import HTTP_HEADER_ENCODING
 
 # AWX
-from awx.main.models import UnifiedJob, AuthToken
+from awx.main.models import AuthToken
 
 logger = logging.getLogger('awx.api.authentication')
 
@@ -137,29 +137,3 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         if not settings.AUTH_BASIC_ENABLED:
             return
         return super(LoggedBasicAuthentication, self).authenticate_header(request)
-
-
-class TaskAuthentication(authentication.BaseAuthentication):
-    '''
-    Custom authentication used for views accessed by the inventory and callback
-    scripts when running a task.
-    '''
-
-    model = None
-
-    def authenticate(self, request):
-        auth = authentication.get_authorization_header(request).split()
-        if len(auth) != 2 or auth[0].lower() != 'token' or '-' not in auth[1]:
-            return None
-        pk, key = auth[1].split('-', 1)
-        try:
-            unified_job = UnifiedJob.objects.get(pk=pk, status='running')
-        except UnifiedJob.DoesNotExist:
-            return None
-        token = unified_job.task_auth_token
-        if auth[1] != token:
-            raise exceptions.AuthenticationFailed(_('Invalid task token'))
-        return (None, token)
-
-    def authenticate_header(self, request):
-        return 'Token'

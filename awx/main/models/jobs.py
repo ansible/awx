@@ -3,8 +3,6 @@
 
 # Python
 import datetime
-import hashlib
-import hmac
 import logging
 import time
 import json
@@ -531,13 +529,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
-
-    @property
-    def task_auth_token(self):
-        '''Return temporary auth token used for task requests via API.'''
-        if self.status == 'running':
-            h = hmac.new(settings.SECRET_KEY, self.created.isoformat(), digestmod=hashlib.sha1)
-            return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
     def ask_diff_mode_on_launch(self):

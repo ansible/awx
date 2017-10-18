@@ -7,7 +7,6 @@ from collections import OrderedDict
 import ConfigParser
 import cStringIO
 import functools
-import imp
 import json
 import logging
 import os
@@ -661,7 +660,7 @@ class BaseTask(LogErrorsTask):
         urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
         safe_env = dict(env)
         for k,v in safe_env.items():
-            if k in ('REST_API_URL', 'AWS_ACCESS_KEY_ID'):
+            if k == 'AWS_ACCESS_KEY_ID':
                 continue
             elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
@@ -678,31 +677,13 @@ class BaseTask(LogErrorsTask):
         return False
 
     def build_inventory(self, instance, **kwargs):
-        plugin = self.get_path_to('..', 'plugins', 'inventory', 'awxrest.py')
-        if kwargs.get('isolated') is True:
-            # For isolated jobs, we have to interact w/ the REST API from the
-            # controlling node and ship the static JSON inventory to the
-            # isolated host (because the isolated host itself can't reach the
-            # REST API to fetch the inventory).
-            path = os.path.join(kwargs['private_data_dir'], 'inventory')
-            if os.path.exists(path):
-                return path
-            awxrest = imp.load_source('awxrest', plugin)
+        path = os.path.join(kwargs['private_data_dir'], 'inventory')
+        if not os.path.exists(path):
             with open(path, 'w') as f:
-                buff = cStringIO.StringIO()
-                awxrest.InventoryScript(**{
-                    'base_url': settings.INTERNAL_API_URL,
-                    'authtoken': instance.task_auth_token or '',
-                    'inventory_id': str(instance.inventory.pk),
-                    'list': True,
-                    'hostvars': True,
-                }).run(buff)
-                json_data = buff.getvalue().strip()
-                f.write("#! /usr/bin/env python\nprint '''%s'''\n" % json_data)
+                json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
+                f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint """%s"""\n' % json_data)
                 os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
-            return path
-        else:
-            return plugin
+        return path
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -1020,8 +1001,6 @@ class RunJob(BaseTask):
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
-            env['REST_API_URL'] = settings.INTERNAL_API_URL
-            env['REST_API_TOKEN'] = job.task_auth_token or ''
             env['TOWER_HOST'] = settings.TOWER_URL_BASE
             env['AWX_HOST'] = settings.TOWER_URL_BASE
             env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
@@ -2070,8 +2049,6 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
-        env['REST_API_URL'] = settings.INTERNAL_API_URL
-        env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
