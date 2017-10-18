@@ -1,4 +1,4 @@
-const templateUrl = require('~components/layout/layout.partial.html');
+const templateUrl = require('~features/layout/layout.partial.html');
 
 function AtLayoutController ($scope, strings) {
     const vm = this || {};
