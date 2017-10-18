@@ -191,25 +191,6 @@ class TestWorkflowJobTemplate:
         assert (test_view.is_valid_relation(nodes[2], node_assoc_1) ==
                 {'Error': 'Cannot associate failure_nodes when always_nodes have been associated.'})
 
-    def test_wfjt_copy(self, wfjt, job_template, inventory, admin_user):
-        old_nodes = wfjt.workflow_job_template_nodes.all()
-        node1 = old_nodes[1]
-        node1.unified_job_template = job_template
-        node1.save()
-        node2 = old_nodes[2]
-        node2.inventory = inventory
-        node2.save()
-        new_wfjt = wfjt.user_copy(admin_user)
-        for fd in ['description', 'survey_spec', 'survey_enabled', 'extra_vars']:
-            assert getattr(wfjt, fd) == getattr(new_wfjt, fd)
-        assert new_wfjt.organization == wfjt.organization
-        assert len(new_wfjt.workflow_job_template_nodes.all()) == 3
-        nodes = new_wfjt.workflow_job_template_nodes.all()
-        assert nodes[0].success_nodes.all()[0] == nodes[1]
-        assert nodes[1].failure_nodes.all()[0] == nodes[2]
-        assert nodes[1].unified_job_template == job_template
-        assert nodes[2].inventory == inventory
-
     def test_wfjt_unique_together_with_org(self, organization):
         wfjt1 = WorkflowJobTemplate(name='foo', organization=organization)
         wfjt1.save()

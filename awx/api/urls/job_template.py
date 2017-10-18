@@ -19,6 +19,7 @@ from awx.api.views import (
     JobTemplateAccessList,
     JobTemplateObjectRolesList,
     JobTemplateLabelList,
+    JobTemplateCopy,
 )
 
 
@@ -41,6 +42,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/access_list/$', JobTemplateAccessList.as_view(), name='job_template_access_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', JobTemplateObjectRolesList.as_view(), name='job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$', JobTemplateLabelList.as_view(), name='job_template_label_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$', JobTemplateCopy.as_view(), name='job_template_copy'),
 ]
 
 __all__ = ['urls']
