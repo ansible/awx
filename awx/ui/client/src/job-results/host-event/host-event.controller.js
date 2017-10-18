@@ -112,7 +112,7 @@
                 minWidth: 600
             });
             $('.modal-dialog').draggable({
-                cancel: '.CodeMirror'
+                cancel: '.HostEvent-view--container'
             });
 
             function resize(){
