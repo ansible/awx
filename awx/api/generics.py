@@ -5,6 +5,7 @@
 import inspect
 import logging
 import time
+import six
 
 # Django
 from django.conf import settings
@@ -26,6 +27,10 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
+from rest_framework.permissions import AllowAny
+
+# cryptography
+from cryptography.fernet import InvalidToken
 
 # AWX
 from awx.api.filters import FieldLookupBackend
@@ -33,9 +38,9 @@ from awx.main.models import *  # noqa
 from awx.main.access import access_registry
 from awx.main.utils import * # noqa
 from awx.main.utils.db import get_all_field_names
-from awx.api.serializers import ResourceAccessListElementSerializer
+from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning, get_request_version
-from awx.api.metadata import SublistAttachDetatchMetadata
+from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
@@ -47,7 +52,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ResourceAccessList',
            'ParentMixin',
            'DeleteLastUnattachLabelMixin',
-           'SubListAttachDetachAPIView',]
+           'SubListAttachDetachAPIView',
+           'CopyAPIView']
 
 logger = logging.getLogger('awx.api.generics')
 analytics_logger = logging.getLogger('awx.analytics.performance')
@@ -747,3 +753,152 @@ class ResourceAccessList(ParentMixin, ListAPIView):
         for r in roles:
             ancestors.update(set(r.ancestors.all()))
         return User.objects.filter(roles__in=list(ancestors)).distinct()
+
+
+def trigger_delayed_deep_copy(*args, **kwargs):
+    from awx.main.tasks import deep_copy_model_obj
+    connection.on_commit(lambda: deep_copy_model_obj.delay(*args, **kwargs))
+
+
+class CopyAPIView(GenericAPIView):
+
+    serializer_class = CopySerializer
+    permission_classes = (AllowAny,)
+    copy_return_serializer_class = None
+    new_in_330 = True
+    new_in_api_v2 = True
+
+    def _get_copy_return_serializer(self, *args, **kwargs):
+        if not self.copy_return_serializer_class:
+            return self.get_serializer(*args, **kwargs)
+        serializer_class_store = self.serializer_class
+        self.serializer_class = self.copy_return_serializer_class
+        ret = self.get_serializer(*args, **kwargs)
+        self.serializer_class = serializer_class_store
+        return ret
+
+    @staticmethod
+    def _decrypt_model_field_if_needed(obj, field_name, field_val):
+        if field_name in getattr(type(obj), 'REENCRYPTION_BLACKLIST_AT_COPY', []):
+            return field_val
+        if isinstance(field_val, dict):
+            for sub_field in field_val:
+                if isinstance(sub_field, six.string_types) \
+                        and isinstance(field_val[sub_field], six.string_types):
+                    try:
+                        field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
+                    except InvalidToken:
+                        # Catching the corner case with v1 credential fields
+                        field_val[sub_field] = decrypt_field(obj, sub_field)
+        elif isinstance(field_val, six.string_types):
+            field_val = decrypt_field(obj, field_name)
+        return field_val
+
+    def _build_create_dict(self, obj):
+        ret = {}
+        if self.copy_return_serializer_class:
+            all_fields = Metadata().get_serializer_info(
+                self._get_copy_return_serializer(), method='POST'
+            )
+            for field_name, field_info in all_fields.items():
+                if not hasattr(obj, field_name) or field_info.get('read_only', True):
+                    continue
+                ret[field_name] = CopyAPIView._decrypt_model_field_if_needed(
+                    obj, field_name, getattr(obj, field_name)
+                )
+        return ret
+
+    @staticmethod
+    def copy_model_obj(old_parent, new_parent, model, obj, creater, copy_name='', create_kwargs=None):
+        fields_to_preserve = set(getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []))
+        fields_to_discard = set(getattr(model, 'FIELDS_TO_DISCARD_AT_COPY', []))
+        m2m_to_preserve = {}
+        o2m_to_preserve = {}
+        create_kwargs = create_kwargs or {}
+        for field_name in fields_to_discard:
+            create_kwargs.pop(field_name, None)
+        for field in model._meta.get_fields():
+            try:
+                field_val = getattr(obj, field.name)
+            except AttributeError:
+                continue
+            # Adjust copy blacklist fields here.
+            if field.name in fields_to_discard or field.name in [
+                'id', 'pk', 'polymorphic_ctype', 'unifiedjobtemplate_ptr', 'created_by', 'modified_by'
+            ] or field.name.endswith('_role'):
+                create_kwargs.pop(field.name, None)
+                continue
+            if field.one_to_many:
+                if field.name in fields_to_preserve:
+                    o2m_to_preserve[field.name] = field_val
+            elif field.many_to_many:
+                if field.name in fields_to_preserve and not old_parent:
+                    m2m_to_preserve[field.name] = field_val
+            elif field.many_to_one and not field_val:
+                create_kwargs.pop(field.name, None)
+            elif field.many_to_one and field_val == old_parent:
+                create_kwargs[field.name] = new_parent
+            elif field.name == 'name' and not old_parent:
+                create_kwargs[field.name] = copy_name or field_val + ' copy'
+            elif field.name in fields_to_preserve:
+                create_kwargs[field.name] = CopyAPIView._decrypt_model_field_if_needed(
+                    obj, field.name, field_val
+                )
+        new_obj = model.objects.create(**create_kwargs)
+        # Need to save separatedly because Djang-crum get_current_user would
+        # not work properly in non-request-response-cycle context.
+        new_obj.created_by = creater
+        new_obj.save()
+        for m2m in m2m_to_preserve:
+            for related_obj in m2m_to_preserve[m2m].all():
+                getattr(new_obj, m2m).add(related_obj)
+        if not old_parent:
+            sub_objects = []
+            for o2m in o2m_to_preserve:
+                for sub_obj in o2m_to_preserve[o2m].all():
+                    sub_model = type(sub_obj)
+                    sub_objects.append((sub_model.__module__, sub_model.__name__, sub_obj.pk))
+            return new_obj, sub_objects
+        ret = {obj: new_obj}
+        for o2m in o2m_to_preserve:
+            for sub_obj in o2m_to_preserve[o2m].all():
+                ret.update(CopyAPIView.copy_model_obj(obj, new_obj, type(sub_obj), sub_obj, creater))
+        return ret
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        create_kwargs = self._build_create_dict(obj)
+        for key in create_kwargs:
+            create_kwargs[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
+        return Response({'can_copy': request.user.can_access(self.model, 'add', create_kwargs)})
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        create_kwargs = self._build_create_dict(obj)
+        create_kwargs_check = {}
+        for key in create_kwargs:
+            create_kwargs_check[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
+        if not request.user.can_access(self.model, 'add', create_kwargs_check):
+            raise PermissionDenied()
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        new_obj, sub_objs = CopyAPIView.copy_model_obj(
+            None, None, self.model, obj, request.user, create_kwargs=create_kwargs,
+            copy_name=serializer.validated_data.get('name', '')
+        )
+        if hasattr(new_obj, 'admin_role') and request.user not in new_obj.admin_role:
+            new_obj.admin_role.members.add(request.user)
+        if sub_objs:
+            permission_check_func = None
+            if hasattr(type(self), 'deep_copy_permission_check_func'):
+                permission_check_func = (
+                    type(self).__module__, type(self).__name__, 'deep_copy_permission_check_func'
+                )
+            trigger_delayed_deep_copy(
+                self.model.__module__, self.model.__name__,
+                obj.pk, new_obj.pk, request.user.pk, sub_objs,
+                permission_check_func=permission_check_func
+            )
+        serializer = self._get_copy_return_serializer(new_obj)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -19,10 +19,11 @@ from awx.api.views import (
     ProjectNotificationTemplatesSuccessList,
     ProjectObjectRolesList,
     ProjectAccessList,
+    ProjectCopy,
 )
 
 
-urls = [ 
+urls = [
     url(r'^$', ProjectList.as_view(), name='project_list'),
     url(r'^(?P<pk>[0-9]+)/$', ProjectDetail.as_view(), name='project_detail'),
     url(r'^(?P<pk>[0-9]+)/playbooks/$', ProjectPlaybooks.as_view(), name='project_playbooks'),
@@ -39,6 +40,7 @@ urls = [
         name='project_notification_templates_success_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', ProjectObjectRolesList.as_view(), name='project_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$', ProjectAccessList.as_view(), name='project_access_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$', ProjectCopy.as_view(), name='project_copy'),
 ]
 
 __all__ = ['urls']
