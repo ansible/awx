@@ -48,6 +48,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     an inventory source contains lists and hosts.
     '''
 
+    FIELDS_TO_PRESERVE = ['hosts', 'groups', 'insights_credential', 'organization', 'instance_groups']
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
@@ -423,6 +424,8 @@ class Host(CommonModelNameNotUnique):
     A managed node
     '''
 
+    FIELDS_TO_PRESERVE = ['groups', 'inventory']
+
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
@@ -609,6 +612,8 @@ class Group(CommonModelNameNotUnique):
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
     '''
+
+    FIELDS_TO_PRESERVE = ['inventory', 'children', 'parents', 'hosts', 'inventory_sources']
 
     class Meta:
         app_label = 'main'
@@ -1221,6 +1226,7 @@ class InventorySourceOptions(BaseModel):
 class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'inventory')]
+    FIELDS_TO_PRESERVE = ['labels', 'instance_groups', 'source_script', 'credential', 'inventory', 'source_project']
 
     class Meta:
         app_label = 'main'
@@ -1549,6 +1555,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
+
+    FIELDS_TO_PRESERVE = ['organization']
 
     class Meta:
         app_label = 'main'

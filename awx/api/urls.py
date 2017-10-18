@@ -61,6 +61,7 @@ project_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$',         'project_notification_templates_success_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'project_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'project_access_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'project_copy'),
 )
 
 project_update_urls = patterns('awx.api.views',
@@ -102,6 +103,7 @@ inventory_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'inventory_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/instance_groups/$',           'inventory_instance_groups_list'),
     #url(r'^(?P<pk>[0-9]+)/single_fact/$',                'inventory_single_fact_view'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'inventory_copy'),
 )
 
 host_urls = patterns('awx.api.views',
@@ -165,6 +167,7 @@ inventory_script_urls = patterns('awx.api.views',
     url(r'^$',                                          'inventory_script_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_script_detail'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'inventory_script_object_roles_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'inventory_script_copy'),
 )
 
 credential_type_urls = patterns('awx.api.views',
@@ -182,6 +185,7 @@ credential_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'credential_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/owner_users/$',               'credential_owner_users_list'),
     url(r'^(?P<pk>[0-9]+)/owner_teams/$',               'credential_owner_teams_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'credential_copy'),
     # See also credentials resources on users/teams.
 )
 
@@ -210,6 +214,7 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'job_template_access_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$',              'job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$',                    'job_template_label_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'job_template_copy'),
 )
 
 job_urls = patterns('awx.api.views',
@@ -306,6 +311,7 @@ notification_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'notification_template_detail'),
     url(r'^(?P<pk>[0-9]+)/test/$',                      'notification_template_test'),
     url(r'^(?P<pk>[0-9]+)/notifications/$',             'notification_template_notification_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$',                      'notification_template_copy'),
 )
 
 notification_urls = patterns('awx.api.views',

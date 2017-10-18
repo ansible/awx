@@ -1380,6 +1380,12 @@ class ProjectObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class ProjectCopy(CopyAPIView):
+
+    model = Project
+    serializer_class = ProjectSerializer
+
+
 class UserList(ListCreateAPIView):
 
     model = User
@@ -1761,6 +1767,12 @@ class CredentialObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class CredentialCopy(CopyAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+
+
 class InventoryScriptList(ListCreateAPIView):
 
     model = CustomInventoryScript
@@ -1796,6 +1808,12 @@ class InventoryScriptObjectRolesList(SubListAPIView):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+
+class InventoryScriptCopy(CopyAPIView):
+
+    model = CustomInventoryScript
+    serializer_class = CustomInventoryScriptSerializer
 
 
 class InventoryList(ListCreateAPIView):
@@ -1923,6 +1941,12 @@ class InventoryJobTemplateList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(inventory=parent)
+
+
+class InventoryCopy(CopyAPIView):
+
+    model = Inventory
+    serializer_class = InventorySerializer
 
 
 class HostList(ListCreateAPIView):
@@ -3222,6 +3246,12 @@ class JobTemplateObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class JobTemplateCopy(CopyAPIView):
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+
+
 class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
 
     model = WorkflowJobNode
@@ -4511,6 +4541,12 @@ class NotificationTemplateNotificationList(SubListAPIView):
     relationship = 'notifications'
     parent_key = 'notification_template'
     new_in_300 = True
+
+
+class NotificationTemplateCopy(CopyAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
 
 
 class NotificationList(ListAPIView):

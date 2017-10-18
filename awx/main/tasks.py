@@ -8,6 +8,7 @@ import ConfigParser
 import cStringIO
 import functools
 import imp
+import importlib
 import json
 import logging
 import os
@@ -34,6 +35,7 @@ from celery.signals import celeryd_init, worker_process_init, worker_shutdown
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
+from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -2234,3 +2236,80 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+
+
+def _do_copy_model_obj(old_parent, new_parent, model, obj, creater):
+    if not obj.self_uuid:
+        obj.self_uuid = uuid.uuid4()
+        obj.save()
+    fields_to_preserve = set(getattr(model, 'FIELDS_TO_PRESERVE', []))
+    create_kwargs = {'parent_uuid': obj.self_uuid}
+    m2m_to_preserve = {}
+    o2m_to_preserve = {}
+    for field in model._meta.get_fields():
+        try:
+            field_val = getattr(obj, field.name)
+        except AttributeError:
+            continue
+        if field.name in ['id', 'pk', 'self_uuid', 'parent_uuid']:
+            continue
+        elif field.one_to_many:
+            if field.name in fields_to_preserve and not old_parent:
+                o2m_to_preserve[field.name] = field_val
+        elif field.many_to_many:
+            if field.name in fields_to_preserve and not old_parent:
+                m2m_to_preserve[field.name] = field_val
+        elif field.many_to_one:
+            if field_val == old_parent and old_parent:
+                create_kwargs[field.name] = new_parent
+            elif field.name in fields_to_preserve and not old_parent or not field.null:
+                create_kwargs[field.name] = field_val
+            else:
+                create_kwargs[field.name] = None
+        elif field.name == 'name':
+            create_kwargs[field.name] = field_val + ' copy'
+        else:
+            create_kwargs[field.name] = field_val
+    new_obj = model.objects.create(**create_kwargs)
+    for m2m in m2m_to_preserve:
+        for related_obj in m2m_to_preserve[m2m].all():
+            getattr(new_obj, m2m).add(related_obj)
+    ret = {obj: new_obj}
+    for o2m in o2m_to_preserve:
+        for sub_obj in o2m_to_preserve[o2m].all():
+            ret.update(_do_copy_model_obj(obj, new_obj, type(sub_obj), sub_obj, creater))
+    return ret
+
+
+def _reconstruct_relationships(copy_mapping):
+    for old_obj, new_obj in copy_mapping.items():
+        model = type(old_obj)
+        for field_name in getattr(model, 'FIELDS_TO_PRESERVE', []):
+            field = model._meta.get_field(field_name)
+            if isinstance(field, ForeignKey):
+                if getattr(new_obj, field_name, None):
+                    continue
+                related_obj = getattr(old_obj, field_name)
+                related_obj = copy_mapping.get(related_obj, related_obj)
+                setattr(new_obj, field_name, related_obj)
+            else:
+                for related_obj in getattr(old_obj, field_name).all():
+                    getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
+        new_obj.save()
+
+
+@task(bind=True, queue='tower', base=LogErrorsTask)
+def copy_model_obj(self, model_module, model_name, obj_pk, user_pk):
+    model = getattr(importlib.import_module(model_module), model_name, None)
+    if model is None:
+        return
+    try:
+        obj = model.objects.get(pk=obj_pk)
+        creater = User.objects.get(pk=user_pk)
+    except ObjectDoesNotExist:
+        logger.warning("Object or user no longer exists.")
+        return
+    with transaction.atomic():
+        copy_mapping = _do_copy_model_obj(None, None, model, obj, creater)
+        copy_mapping.pop(obj, None)
+        _reconstruct_relationships(copy_mapping)
