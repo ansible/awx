@@ -176,7 +176,7 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                     name: 'scm_update_on_launch',
                     label: i18n._('Update on Launch'),
                     type: 'checkbox',
-                    awPopOver: '<p>' + i18n._('Each time a job runs using this project, perform an update to the local repository prior to starting the job.') + '</p>',
+                    awPopOver: '<p>' + i18n._('Each time a job runs using this project, update the revision of the project prior to starting the job.') + '</p>',
                     dataTitle: i18n._('SCM Update'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
