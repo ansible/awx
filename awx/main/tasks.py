@@ -678,19 +678,11 @@ class BaseTask(LogErrorsTask):
 
     def build_inventory(self, instance, **kwargs):
         path = os.path.join(kwargs['private_data_dir'], 'inventory')
-        if not os.path.exists(path):
-            with open(path, 'w') as f:
-                json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
-                f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint """%s"""\n' % json_data)
-                os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
-            return path
-        else:
-            # work around an inventory caching bug in Ansible 2.4.0
-            # see: https://github.com/ansible/ansible/pull/30817
-            # see: https://github.com/ansible/awx/issues/246
-            inventory_script = tempfile.mktemp(suffix='.awxrest.py', dir=kwargs['private_data_dir'])
-            shutil.copy(plugin, inventory_script)
-            return inventory_script
+        with open(path, 'w') as f:
+            json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
+            f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint """%s"""\n' % json_data)
+            os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
+        return path
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
