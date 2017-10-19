@@ -1041,6 +1041,10 @@ def ovirt4(cls):
             'required': ['host', 'username', 'password'],
         },
         injectors={
+            # The duplication here is intentional; the ovirt4 inventory plugin
+            # writes a .ini file for authentication, while the ansible modules for
+            # ovirt4 use a separate authentication process that support
+            # environment variables; by injecting both, we support both
             'file': {
                 'template': '\n'.join([
                     '[ovirt]',
@@ -1050,7 +1054,10 @@ def ovirt4(cls):
                     '{% if ca_file %}ovirt_ca_file={{ca_file}}{% endif %}'])
             },
             'env': {
-                'OVIRT_INI_PATH': '{{tower.filename}}'
+                'OVIRT_INI_PATH': '{{tower.filename}}',
+                'OVIRT_URL': '{{host}}',
+                'OVIRT_USERNAME': '{{username}}',
+                'OVIRT_PASSWORD': '{{password}}'
             }
         },
     )
