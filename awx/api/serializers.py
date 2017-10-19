@@ -1523,7 +1523,8 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
-        fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
+        fields = ('*', 'source', 'source_path', 'source_script', 'source_vars',
+                  'credential', 'vault_credential',
                   'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
                   'timeout', 'verbosity')
 
@@ -1534,6 +1535,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                                              kwargs={'pk': obj.credential.pk})
         if obj.source_script:
             res['source_script'] = self.reverse('api:inventory_script_detail', kwargs={'pk': obj.source_script.pk})
+        if obj.vault_credential:
+            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential_id})
         return res
 
     def validate_source_vars(self, value):

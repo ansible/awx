@@ -1806,7 +1806,18 @@ class RunInventoryUpdate(BaseTask):
             for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
                 k = 'source_%s' % passkey
                 passwords[k] = decrypt_field(credential, passkey)
+        if inventory_update.vault_credential_id:
+            vault_cred = inventory_update.vault_credential
+            field = 'vault_password'
+            value = kwargs.get(field, decrypt_field(vault_cred, field))
+            if value not in ('', 'ASK'):
+                passwords[field] = value
         return passwords
+
+    def get_password_prompts(self):
+        d = super(RunInventoryUpdate, self).get_password_prompts()
+        d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
+        return d
 
     def build_env(self, inventory_update, **kwargs):
         """Build environment dictionary for inventory import.
@@ -1942,6 +1953,11 @@ class RunInventoryUpdate(BaseTask):
         args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')
+
+        # Support prompting for a vault password.
+        if 'vault_password' in kwargs.get('passwords', {}):
+            args.append('--ask-vault-pass')
+
         return args
 
     def get_stdout_handle(self, instance):

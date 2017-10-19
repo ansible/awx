@@ -1064,6 +1064,14 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+    vault_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_as_vault_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     source_regions = models.CharField(
         max_length=1024,
         blank=True,
@@ -1210,6 +1218,14 @@ class InventorySourceOptions(BaseModel):
             ))
         return cred
 
+    def clean_vault_credential(self):
+        cred = self.vault_credential
+        if cred and cred.kind != 'vault':
+            raise ValidationError(
+                _('You must provide a Vault credential.'),
+            )
+        return cred
+
     def clean_source_regions(self):
         regions = self.source_regions
 
@@ -1338,7 +1354,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
-                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                'credential', 'vault_credential',
+                'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
                 'timeout', 'verbosity', 'launch_type', 'source_project_update',]
 
     def save(self, *args, **kwargs):
