@@ -15,6 +15,14 @@ class TaskCancel(AwxTaskError):
         self.rc = rc
 
 
+class TaskTimedout(AwxTaskError):
+    """The job was timed-out by its expecter"""
+    def __init__(self, task, rc):
+        super(TaskCancel, self).__init__(
+            task, message="{} timed out (rc={})".format(task.log_format, rc))
+        self.rc = rc
+
+
 class TaskError(AwxTaskError):
     """Userspace error (non-zero exit code) in run_pexpect subprocess"""
     def __init__(self, task, rc):
