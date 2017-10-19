@@ -93,7 +93,7 @@
                           }
                      })
                      .error(function (data, status) {
-                         ProcessErrors(scope, data, status, {
+                         ProcessErrors(scope, data, status, null, {
                              hdr: 'Error!',
                              msg: 'Failed to launch adhoc command. POST ' +
                                  'returned status: ' + status });
