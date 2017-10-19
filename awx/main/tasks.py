@@ -11,7 +11,6 @@ import json
 import logging
 import os
 import re
-import sys
 import shutil
 import stat
 import tempfile

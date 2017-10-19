@@ -18,7 +18,6 @@ import contextlib
 import tempfile
 import six
 import psutil
-from collections import deque
 
 # Decorator
 from decorator import decorator
@@ -46,7 +45,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'callback_filter_out_ansible_extra_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError']
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
 
 
 def get_object_or_400(klass, *args, **kwargs):

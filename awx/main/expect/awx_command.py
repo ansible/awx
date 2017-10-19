@@ -1,5 +1,6 @@
 import logging
 import time
+import sys
 
 # AWX
 from awx.main.utils.common import set_environ
@@ -20,7 +21,7 @@ class CallbackHandler(logging.Handler):
     than the handler that writes to the logfile, allowing for faster canceling.
     '''
 
-    def __init__(self, task, cancelled_callback, job_timeout, level=0):
+    def __init__(self, cancelled_callback, job_timeout, level=0):
         self.cancelled_callback = cancelled_callback
         self.job_timeout = job_timeout
         self.job_start = time.time()
@@ -39,6 +40,18 @@ class CallbackHandler(logging.Handler):
             raise TaskTimedout(None, 1)
 
         pass  # Nope, not actually emiting a log message
+
+
+class StdoutRedirect:
+    def __init__(self, new_handle):
+        self.new_handle = new_handle
+
+    def __enter__(self):
+        self.old_handle = sys.stdout
+        sys.stdout = self.new_handle
+
+    def __exit__(self, type, value, traceback):
+        sys.stdout = self.old_handle
 
 
 def run_command(args, cwd, env, logfile,
@@ -72,13 +85,10 @@ def run_command(args, cwd, env, logfile,
     '''
     command_name = args[1]
 
-    callback_handler = CallbackHandler(task, cancelled_callback, job_timeout)
-
-    # Equip logger for stdout_handle and cancelled_callback
+    # Equip logger for cancelled_callback
+    callback_handler = CallbackHandler(cancelled_callback, job_timeout)
     cmd_logger = logging.getLogger('awx.main.management.commands.{}'.format(command_name))
     cmd_logger.addHandler(callback_handler)
-    old_stdout = cmd_logger.handlers[0].stream
-    import_logger.handlers[0].stream = stdout_handle
 
     # turn args into kwargs
     command = load_command_class(get_commands()[command_name], command_name)
@@ -87,20 +97,22 @@ def run_command(args, cwd, env, logfile,
     options = vars(options)
 
     try:
-        with set_environ(**env):
+        with set_environ(**env), StdoutRedirect(logfile):
             call_command(command_name, **options)
-    except TaskCancel as exc:
-        pass
-    except TaskTimedout as exc:
+    except TaskCancel:
+        return 'canceled', 1
+    except TaskTimedout:
         extra_update_fields['job_explanation'] = "Job terminated due to timeout"
         return 'error', 1
-    except Exception as exc:
+    except Exception:
         if isinstance(extra_update_fields, dict):
             extra_update_fields['job_explanation'] = (
-                "System error during job execution, check system logs"
-            )
+                "System error during job execution, check system logs")
         return 'error', 1
     finally:
-        cmd_logger.handlers[0].stream = old_stdout
+        # Remove the callback handler
+        cmd_logger.handlers = [
+            h for h in cmd_logger.handlers if not isinstance(h, CallbackHandler)
+        ]
 
-    return 'successful', child.exitstatus
+    return 'successful', 0

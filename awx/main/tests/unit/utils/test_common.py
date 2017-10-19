@@ -154,3 +154,4 @@ def test_memoize_parameter_error():
 
     with pytest.raises(common.IllegalArgumentError):
         fn()
+
