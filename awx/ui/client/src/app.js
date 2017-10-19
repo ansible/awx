@@ -2,11 +2,6 @@
 global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
 global.$ENV = {};
-// ui-router debugging
-if ($ENV['route-debug']){
-    let trace = angular.module('ui.router').trace;
-    trace.enable();
-}
 
 var urlPrefix;
 
@@ -71,8 +66,6 @@ angular
         'ngToast',
         'gettext',
         'Timezones',
-        'ui.router',
-        'ui.router.state.events',
         'lrInfiniteScroll',
 
         about.name,
@@ -132,20 +125,20 @@ angular
             timeout: 4000
         });
     }])
-    .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
-        '$urlMatcherFactoryProvider',
-        function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider) {
-            $urlMatcherFactoryProvider.strictMode(false);
+    .config(['$breadcrumbProvider', 'QuerySetProvider',
+        '$urlServiceProvider',
+        function($breadcrumbProvider, QuerySet,
+            $urlServiceProvider) {
+            $urlServiceProvider.config.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
             });
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
-            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
-            $urlRouterProvider.otherwise('/home');
+            $urlServiceProvider.rules.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
+            $urlServiceProvider.rules.otherwise('/home');
 
-            $urlMatcherFactoryProvider.type('queryset', {
+            $urlServiceProvider.config.type('queryset', {
                 // encoding
                 // from {operator__key1__comparator=value, ... }
                 // to "_search=operator:key:compator=value& ... "
@@ -177,13 +170,13 @@ angular
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'AppStrings',
+        'FeaturesService', '$filter', 'SocketService', 'AppStrings', '$transitions',
         function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, AppStrings) {
-
+            $filter, SocketService, AppStrings, $transitions) {
+                
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;
@@ -207,7 +200,7 @@ angular
             $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME}`;
             $rootScope.$watch('$state.current.ncyBreadcrumbLabel', function(title) {
                 title = (title) ? "| " + title : "";
-                $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
+                document.title = `Ansible ${$rootScope.BRAND_NAME} ${title}`;
             });
 
             function activateTab() {
@@ -245,9 +238,7 @@ angular
 
                 $rootScope.crumbCache = [];
 
-                $rootScope.$on("$stateChangeStart", function (event, next) {
-                    // let current_title = $rootScope.$state.current.ncyBreadcrumbLabel || "";
-                    // $rootScope.tabTitle = `Ansible ${$rootScope.BRAND_NAME} ${current_title}`;
+                $transitions.onStart({}, function(trans) {
                     // Remove any lingering intervals
                     // except on jobResults.* states
                     var jobResultStates = [
@@ -258,10 +249,10 @@ angular
                         'jobResult.host-events',
                         'jobResult.host-event.stdout'
                     ];
-                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, next.name) ) {
+                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, trans.to().name) ) {
                         window.clearInterval($rootScope.jobResultInterval);
                     }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, trans.to().name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 
@@ -277,9 +268,9 @@ angular
                         $(this).remove();
                     });
 
-                    if (next.name !== "templates.editWorkflowJobTemplate.workflowMaker" &&
-                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.inventory" &&
-                        next.name !== "templates.editWorkflowJobTemplate.workflowMaker.credential") {
+                    if (trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker" &&
+                        trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker.inventory" &&
+                        trans.to().name !== "templates.editWorkflowJobTemplate.workflowMaker.credential") {
                             $('.ui-dialog-content').each(function() {
                                 $(this).dialog('close');
                             });
@@ -300,19 +291,19 @@ angular
                     }
 
                     if (Authorization.isUserLoggedIn() === false) {
-                        if (next.name !== "signIn") {
+                        if (trans.to().name !== "signIn") {
                             $state.go('signIn');
                         }
                     } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
                       // gets here on timeout
-                        if (next.name !== "signIn") {
+                        if (trans.to().name !== "signIn") {
                             $state.go('signIn');
                         }
                     } else {
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                        if (trans.to().name && (trans.to().name !== "signIn"  && trans.to().name !== "signOut" && trans.to().name !== "license")) {
                             ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
                                 CheckLicense.test(event);
@@ -322,33 +313,33 @@ angular
                     activateTab();
                 });
 
-                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                $transitions.onSuccess({}, function(trans) {
 
-                    if(toState === fromState) {
+                    if(trans.to() === trans.from()) {
                         // check to see if something other than a search param has changed
                         let toParamsWithoutSearchKeys = {};
                         let fromParamsWithoutSearchKeys = {};
-                        for (let key in toParams) {
-                            if (toParams.hasOwnProperty(key) && !/_search/.test(key)) {
-                                toParamsWithoutSearchKeys[key] = toParams[key];
+                        for (let key in trans.params('to')) {
+                            if (trans.params('to').hasOwnProperty(key) && !/_search/.test(key)) {
+                                toParamsWithoutSearchKeys[key] = trans.params('to')[key];
                             }
                         }
-                        for (let key in fromParams) {
-                            if (fromParams.hasOwnProperty(key) && !/_search/.test(key)) {
-                                fromParamsWithoutSearchKeys[key] = fromParams[key];
+                        for (let key in trans.params('from')) {
+                            if (trans.params('from').hasOwnProperty(key) && !/_search/.test(key)) {
+                                fromParamsWithoutSearchKeys[key] = trans.params('from')[key];
                             }
                         }
 
                         if(!_.isEqual(toParamsWithoutSearchKeys, fromParamsWithoutSearchKeys)) {
-                            document.body.scrollTop = document.documentElement.scrollTop = 0;
+                            document.querySelector('.at-Layout-main').scrollTop = 0;
                         }
                     }
                     else {
-                        document.body.scrollTop = document.documentElement.scrollTop = 0;
+                        document.querySelector('.at-Layout-main').scrollTop = 0;
                     }
 
-                    if (fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')) {
-                        $rootScope.licenseMissing = toParams.licenseMissing;
+                    if (trans.from().name === 'license' && trans.params('to').hasOwnProperty('licenseMissing')) {
+                        $rootScope.licenseMissing = trans.params('to').licenseMissing;
                     }
                     var list, id;
                     // broadcast event change if editing crud object

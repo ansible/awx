@@ -1,4 +1,4 @@
-export default ['$rootScope', function($rootScope) {
+export default ['$rootScope', '$transitions', function($rootScope, $transitions) {
     return {
         restrict: 'E',
         scope: {
@@ -9,7 +9,7 @@ export default ['$rootScope', function($rootScope) {
 
             scope.maxPanels = parseInt(scope.maxPanels);
 
-            $rootScope.$on('$stateChangeSuccess', function() {
+            $transitions.onSuccess({}, function() {
                 let panels = angular.element('#' + scope.panelContainer).find('.Panel');
 
                 if(panels.length > scope.maxPanels) {

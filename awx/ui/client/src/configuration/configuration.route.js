@@ -28,7 +28,6 @@
      ncyBreadcrumb: {
          label: N_("EDIT CONFIGURATION")
      },
-     controller: ConfigurationController,
      resolve: {
          configDataResolve: ['ConfigurationService', function(ConfigurationService){
              return ConfigurationService.getConfigurationOptions();

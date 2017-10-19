@@ -31,7 +31,7 @@ export default function($stateProvider) {
                                     order_by: "name"
                                 },
                                 dynamic: true,
-                                squash: ''
+                                squash: false
                             }
                         }
                     };

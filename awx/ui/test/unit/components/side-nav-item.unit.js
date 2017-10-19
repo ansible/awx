@@ -32,7 +32,7 @@ describe('Components | Side Nav Item', () => {
             SideNavItemCtrl = SideNavItem.controller('atSideNavItem');
         });
 
-        it('layoutVm.currentState watcher should assign isRoute', () => {
+        xit('layoutVm.currentState watcher should assign isRoute', () => {
             let current = { name: 'dashboard' };
             $rootScope.$broadcast('$stateChangeSuccess', current);
             scope.$digest();

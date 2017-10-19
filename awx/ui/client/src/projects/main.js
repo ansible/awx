@@ -48,7 +48,7 @@ angular.module('Projects', [])
             // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
             // see: stateDefinition.factory for usage documentation
             $stateProvider.state({
-                name: 'projects',
+                name: 'projects.**',
                 url: '/projects',
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'projects', // top-most node in the generated tree (will replace this state definition)

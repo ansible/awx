@@ -6,8 +6,10 @@
 
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
     'ParseTypeChange', 'GroupsService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'groupData', '$rootScope',
+    '$transitions',
     function($state, $stateParams, $scope, ParseVariableString, rbacUiControlService, ToJSON,
-        ParseTypeChange, GroupsService, GetChoices, GetBasePath, CreateSelect2, groupData, $rootScope) {
+        ParseTypeChange, GroupsService, GetChoices, GetBasePath, CreateSelect2, groupData, $rootScope,
+        $transitions) {
 
         init();
 
@@ -30,8 +32,8 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbac
             $scope.parseType = 'yaml';
             $scope.envParseType = 'yaml';
 
-            $rootScope.$on('$stateChangeSuccess', function(event, toState) {
-                if(toState.name === 'inventories.edit.groups.edit') {
+            $transitions.onSuccess({}, function(trans) {
+                if(trans.to().name === 'inventories.edit.groups.edit') {
                     ParseTypeChange({
                         scope: $scope,
                         field_id: 'group_group_variables',

@@ -7,7 +7,7 @@ import { N_ } from '../i18n';
 export default {
     name: 'portalMode',
     url: '/portal?{job_template_search:queryset}',
-    abstract: true,
+    reloadOnSearch: true,
     ncyBreadcrumb: {
         label: N_('MY VIEW')
     },

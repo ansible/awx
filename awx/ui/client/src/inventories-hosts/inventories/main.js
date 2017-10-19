@@ -349,8 +349,9 @@ angular.module('inventory', [
             }
 
             $stateProvider.state({
-                name: 'inventories',
+                name: 'inventories.**',
                 url: '/inventories',
+                reloadOnSearch: true,
                 lazyLoad: () => generateInventoryStates()
             });
         }

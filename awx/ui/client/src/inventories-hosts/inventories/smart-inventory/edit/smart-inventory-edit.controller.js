@@ -8,7 +8,7 @@ function SmartInventoryEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, resourceData,
-    $rootScope, InstanceGroupsService, InstanceGroupsData) {
+    $rootScope, InstanceGroupsService, InstanceGroupsData, $transitions) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -37,8 +37,8 @@ function SmartInventoryEdit($scope, $location,
 
         $scope.parseType = 'yaml';
 
-        $rootScope.$on('$stateChangeSuccess', function(event, toState) {
-            if(toState.name === 'inventories.editSmartInventory') {
+        $transitions.onSuccess({}, function(trans) {
+            if(trans.to().name === 'inventories.editSmartInventory') {
                 ParseTypeChange({
                     scope: $scope,
                     variable: 'smartinventory_variables',
@@ -109,5 +109,5 @@ export default [ '$scope', '$location',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', 'resourceData',
-    '$rootScope', 'InstanceGroupsService', 'InstanceGroupsData', SmartInventoryEdit
+    '$rootScope', 'InstanceGroupsService', 'InstanceGroupsData', '$transitions', SmartInventoryEdit
 ];

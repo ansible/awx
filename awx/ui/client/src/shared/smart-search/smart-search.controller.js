@@ -1,10 +1,10 @@
-export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigService',
-    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, configService) {
+export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n', 'ConfigService', '$transitions',
+    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n, configService, $transitions) {
 
         let path,
             defaults,
             queryset,
-            stateChangeSuccessListener;
+            transitionSuccessListener;
 
         configService.getConfig()
             .then(config => init(config));
@@ -62,17 +62,17 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 return true;
             }
 
-            if(stateChangeSuccessListener) {
-                stateChangeSuccessListener();
+            if(transitionSuccessListener) {
+                transitionSuccessListener();
             }
 
-            stateChangeSuccessListener = $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+            transitionSuccessListener = $transitions.onSuccess({}, function(trans) {
                 // State has changed - check to see if this is a param change
-                if(fromState.name === toState.name) {
-                    if(!compareParams(fromParams[`${$scope.iterator}_search`], toParams[`${$scope.iterator}_search`])) {
+                if(trans.from().name === trans.to().name) {
+                    if(!compareParams(trans.params('from')[`${$scope.iterator}_search`], trans.params('to')[`${$scope.iterator}_search`])) {
                         // Params are not the same - we need to update the search.  This should only happen when the user
                         // hits the forward/back navigation buttons in their browser.
-                        queryset = toParams[`${$scope.iterator}_search`];
+                        queryset = trans.params('to')[`${$scope.iterator}_search`];
                         qs.search(path, queryset).then((res) => {
                             $scope.dataset = res.data;
                             $scope.collection = res.data.results;
@@ -84,7 +84,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 }
             });
 
-            $scope.$on('$destroy', stateChangeSuccessListener);
+            $scope.$on('$destroy', transitionSuccessListener);
 
             $scope.$watch('disableSearch', function(disableSearch){
                 if(disableSearch) {
@@ -122,7 +122,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             // but will register new $stateParams[$scope.iterator + '_search'] terms
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {notify: false});
+                    [$scope.iterator + '_search']: queryset });
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {
@@ -246,7 +246,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     }
                 });
 
-                queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
+                queryset = _.merge({}, queryset, params, (objectValue, sourceValue, key, object) => {
                     if (object[key] && object[key] !== sourceValue){
                         if(_.isArray(object[key])) {
                             // Add the new value to the array and return
@@ -287,8 +287,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
                 if(!$scope.querySet) {
-                    $state.go('.', {
-                        [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                    $state.go('.', {[$scope.iterator + '_search']:queryset }).then(function(){
                             // ISSUE: same as above in $scope.remove.  For some reason deleting the page
                             // from the queryset works for all lists except lists in modals.
                             delete $stateParams[$scope.iterator + '_search'].page;
@@ -376,10 +375,11 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     removed = searchWithoutKey(termParts[termParts.length-1]);
                 }
             }
-            removeFromQuerySet(queryset);
+            let cleared = _.cloneDeep(queryset);
+            removeFromQuerySet(cleared);
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                    [$scope.iterator + '_search']: cleared }).then(function(){
                         // ISSUE: for some reason deleting a tag from a list in a modal does not
                         // remove the param from $stateParams.  Here we'll manually check to make sure
                         // that that happened and remove it if it didn't.
@@ -403,7 +403,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
             delete cleared.page;
             queryset = cleared;
             if(!$scope.querySet) {
-                $state.go('.', {[$scope.iterator + '_search']: queryset}, {notify: false});
+                $state.go('.', {[$scope.iterator + '_search']: queryset});
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {

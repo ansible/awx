@@ -24,7 +24,7 @@ angular.module('credentialTypes', [
             let stateDefinitions = stateDefinitionsProvider.$get();
 
             $stateProvider.state({
-                name: 'credentialTypes',
+                name: 'credentialTypes.**',
                 url: '/credential_type',
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'credentialTypes',

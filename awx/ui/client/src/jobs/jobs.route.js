@@ -21,7 +21,7 @@ export default {
                 order_by: '-finished'
             },
             dynamic: true,
-            squash: ''
+            squash: false
         }
     },
     data: {

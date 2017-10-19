@@ -7,11 +7,11 @@
     ['$scope', '$rootScope', '$state', '$stateParams', 'GroupList', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
     'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd',
-    'InventoryHostsStrings',
+    'InventoryHostsStrings', '$transitions',
     function($scope, $rootScope, $state, $stateParams, GroupList, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
         GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd,
-        InventoryHostsStrings){
+        InventoryHostsStrings, $transitions){
 
         let list = GroupList;
 
@@ -173,9 +173,9 @@
             CancelSourceUpdate({ scope: $scope, id: id });
         };
 
-        var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-             if (toState.name === "inventories.edit.groups.edit") {
-                 $scope.rowBeingEdited = toParams.group_id;
+        var cleanUpStateChangeListener = $transitions.onSuccess({}, function(trans) {
+             if (trans.to().name === "inventories.edit.groups.edit") {
+                 $scope.rowBeingEdited = trans.params('to').group_id;
                  $scope.listBeingEdited = "groups";
              }
              else {

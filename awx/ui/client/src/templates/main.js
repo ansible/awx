@@ -368,7 +368,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                 inventory__isnull: false,
                                 credential__isnull: false
                             },
-                            squash: true,
+                            squash: false,
                             dynamic: true
                         },
                         project_search: {
@@ -892,7 +892,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
             }
 
             stateTree = {
-                name: 'templates',
+                name: 'templates.**',
                 url: '/templates',
                 lazyLoad: () => generateStateTree()
             };

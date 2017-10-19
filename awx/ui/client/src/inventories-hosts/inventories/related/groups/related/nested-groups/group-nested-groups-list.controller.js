@@ -7,9 +7,11 @@
     ['$scope', '$rootScope', '$state', '$stateParams', 'NestedGroupListDefinition', 'InventoryUpdate',
     'GroupsService', 'CancelSourceUpdate', 'rbacUiControlService', 'GetBasePath',
     'GetHostsStatusMsg', 'Dataset', 'Find', 'QuerySet', 'inventoryData', 'canAdd', 'groupData', 'ProcessErrors',
+    '$transitions',
     function($scope, $rootScope, $state, $stateParams, NestedGroupListDefinition, InventoryUpdate,
         GroupsService, CancelSourceUpdate, rbacUiControlService, GetBasePath,
-        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors){
+        GetHostsStatusMsg, Dataset, Find, qs, inventoryData, canAdd, groupData, ProcessErrors,
+        $transitions){
 
         let list = NestedGroupListDefinition;
 
@@ -132,9 +134,9 @@
             $state.go('inventories.edit.groups.edit.nested_groups', {group_id: id});
         };
 
-        var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-             if (toState.name === "inventories.edit.groups.edit.nested_groups.edit") {
-                 $scope.rowBeingEdited = toParams.group_id;
+        var cleanUpStateChangeListener = $transitions.onSuccess({}, function(trans) {
+             if (trans.to().name === "inventories.edit.groups.edit.nested_groups.edit") {
+                 $scope.rowBeingEdited = trans.params('to').group_id;
                  $scope.listBeingEdited = "groups";
              }
              else {

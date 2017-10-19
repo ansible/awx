@@ -7,7 +7,7 @@
 
 function HostsList($scope, HostsList, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd) {
+    HostsService, SetStatus, canAdd, $transitions) {
 
     let list = HostsList;
 
@@ -33,10 +33,10 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
             setJobStatus();
         });
 
-        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
-            if(toParams && toParams.host_search) {
+        $transitions.onSuccess({}, function(trans) {
+            if(trans.params('to') && trans.params('to').host_search) {
                 let hasMoreThanDefaultKeys = false;
-                angular.forEach(toParams.host_search, function(value, key) {
+                angular.forEach(trans.params('to').host_search, function(value, key) {
                     if(key !== 'order_by' && key !== 'page_size') {
                         hasMoreThanDefaultKeys = true;
                     }
@@ -114,5 +114,5 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
 export default ['$scope', 'HostsList', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', HostsList
+    'HostsService', 'SetStatus', 'canAdd', '$transitions', HostsList
 ];
