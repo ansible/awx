@@ -42,7 +42,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter',
-           'callback_filter_out_ansible_extra_vars', 'get_search_fields', 'get_system_task_capacity',
+           'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
@@ -904,13 +904,18 @@ class OutputEventFilter(object):
             self._current_event_data = None
 
 
-def callback_filter_out_ansible_extra_vars(extra_vars):
-    extra_vars_redacted = {}
+def is_ansible_variable(key):
+    return key.startswith('ansible_')
+
+
+def extract_ansible_vars(extra_vars):
     extra_vars = parse_yaml_or_json(extra_vars)
-    for key, value in extra_vars.iteritems():
-        if not key.startswith('ansible_'):
-            extra_vars_redacted[key] = value
-    return extra_vars_redacted
+    ansible_vars = set([])
+    for key in extra_vars.keys():
+        if is_ansible_variable(key):
+            extra_vars.pop(key)
+            ansible_vars.add(key)
+    return (extra_vars, ansible_vars)
 
 
 def get_search_fields(model):

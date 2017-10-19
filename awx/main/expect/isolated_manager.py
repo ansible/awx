@@ -9,6 +9,7 @@ import stat
 import tempfile
 import time
 import logging
+from distutils.version import LooseVersion as Version
 
 from django.conf import settings
 
@@ -370,7 +371,24 @@ class IsolatedManager(object):
             logger.warning('Isolated job {} cleanup error, output:\n{}'.format(self.instance.id, output))
 
     @classmethod
-    def health_check(cls, instance_qs):
+    def update_capacity(cls, instance, task_result, awx_application_version):
+        instance.version = task_result['version']
+
+        isolated_version = instance.version.split("-", 1)[0]
+        cluster_version = awx_application_version.split("-", 1)[0]
+
+        if Version(cluster_version) > Version(isolated_version):
+            err_template = "Isolated instance {} reports version {}, cluster node is at {}, setting capacity to zero."
+            logger.error(err_template.format(instance.hostname, instance.version, awx_application_version))
+            instance.capacity = 0
+        else:
+            if instance.capacity == 0 and task_result['capacity']:
+                logger.warning('Isolated instance {} has re-joined.'.format(instance.hostname))
+            instance.capacity = int(task_result['capacity'])
+        instance.save(update_fields=['capacity', 'version', 'modified'])
+
+    @classmethod
+    def health_check(cls, instance_qs, awx_application_version):
         '''
         :param instance_qs:         List of Django objects representing the
                                     isolated instances to manage
@@ -412,11 +430,7 @@ class IsolatedManager(object):
             except (KeyError, IndexError):
                 task_result = {}
             if 'capacity' in task_result:
-                instance.version = task_result['version']
-                if instance.capacity == 0 and task_result['capacity']:
-                    logger.warning('Isolated instance {} has re-joined.'.format(instance.hostname))
-                instance.capacity = int(task_result['capacity'])
-                instance.save(update_fields=['capacity', 'version', 'modified'])
+                cls.update_capacity(instance, task_result, awx_application_version)
             elif instance.capacity == 0:
                 logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
                     instance.hostname))

@@ -155,3 +155,12 @@ def test_memoize_parameter_error():
     with pytest.raises(common.IllegalArgumentError):
         fn()
 
+
+def test_extract_ansible_vars():
+    my_dict = {
+        "foobar": "baz",
+        "ansible_connetion_setting": "1928"
+    }
+    redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
+    assert var_list == set(['ansible_connetion_setting'])
+    assert redacted == {"foobar": "baz"}

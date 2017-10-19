@@ -117,6 +117,28 @@ class TestIsolatedManagementTask:
         inst.save()
         return inst
 
+    @pytest.fixture
+    def old_version(self, control_group):
+        ig = InstanceGroup.objects.create(name='thepentagon', controller=control_group)
+        inst = ig.instances.create(hostname='isolated-old', capacity=103)
+        inst.save()
+        return inst
+
+    def test_old_version(self, control_instance, old_version):
+        update_capacity = isolated_manager.IsolatedManager.update_capacity
+
+        assert old_version.capacity == 103
+        with mock.patch('awx.main.tasks.settings', MockSettings()):
+            # Isolated node is reporting an older version than the cluster
+            # instance that issued the health check, set capacity to zero.
+            update_capacity(old_version, {'version': '1.0.0'}, '3.0.0')
+            assert old_version.capacity == 0
+
+            # Upgrade was completed, health check playbook now reports matching
+            # version, make sure capacity is set.
+            update_capacity(old_version, {'version': '5.0.0-things', 'capacity':103}, '5.0.0-stuff')
+            assert old_version.capacity == 103
+
     def test_takes_action(self, control_instance, needs_updating):
         original_isolated_instance = needs_updating.instances.all().first()
         with mock.patch('awx.main.tasks.settings', MockSettings()):

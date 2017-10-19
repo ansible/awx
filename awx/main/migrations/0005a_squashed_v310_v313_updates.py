@@ -7,23 +7,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0004_squashed_v310_release'),
+        ('main', '0005_squashed_v310_v313_updates'),
     ]
 
     replaces = [
-        (b'main', '0035_v310_remove_tower_settings'),
+        (b'main', '0036_v311_insights'),
     ]
 
     operations = [
-        # Remove Tower settings, these settings are now in separate awx.conf app.
-        migrations.RemoveField(
-            model_name='towersettings',
-            name='user',
-        ),
-        migrations.DeleteModel(
-            name='TowerSettings',
-        ),
-
         migrations.AlterField(
             model_name='project',
             name='scm_type',

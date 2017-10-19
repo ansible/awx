@@ -56,7 +56,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
-                            get_type_for_model)
+                            get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -283,7 +283,7 @@ def awx_isolated_heartbeat(self):
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
         logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
-        isolated_manager.IsolatedManager.health_check(isolated_instance_qs)
+        isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask)
@@ -683,7 +683,14 @@ class BaseTask(LogErrorsTask):
                 json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
                 f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint """%s"""\n' % json_data)
                 os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
-        return path
+            return path
+        else:
+            # work around an inventory caching bug in Ansible 2.4.0
+            # see: https://github.com/ansible/ansible/pull/30817
+            # see: https://github.com/ansible/awx/issues/246
+            inventory_script = tempfile.mktemp(suffix='.awxrest.py', dir=kwargs['private_data_dir'])
+            shutil.copy(plugin, inventory_script)
+            return inventory_script
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -2108,6 +2115,12 @@ class RunAdHocCommand(BaseTask):
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         if ad_hoc_command.extra_vars_dict:
+            redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
+            if removed_vars:
+                raise ValueError(_(
+                    "{} are prohibited from use in ad hoc commands."
+                ).format(", ".join(removed_vars)))
+
             args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
 
         args.extend(['-m', ad_hoc_command.module_name])

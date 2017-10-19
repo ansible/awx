@@ -34,7 +34,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model
+    get_type_for_model, parse_yaml_or_json
 )
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -878,21 +878,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return []
 
     def handle_extra_data(self, extra_data):
-        if hasattr(self, 'extra_vars'):
-            extra_vars = {}
-            if isinstance(extra_data, dict):
-                extra_vars = extra_data
-            elif extra_data is None:
-                return
-            else:
-                if extra_data == "":
-                    return
-                try:
-                    extra_vars = json.loads(extra_data)
-                except Exception as e:
-                    logger.warn("Exception deserializing extra vars: " + str(e))
+        if hasattr(self, 'extra_vars') and extra_data:
+            extra_data_dict = {}
+            try:
+                extra_data_dict = parse_yaml_or_json(extra_data, silent_failure=False)
+            except Exception as e:
+                logger.warn("Exception deserializing extra vars: " + str(e))
             evars = self.extra_vars_dict
-            evars.update(extra_vars)
+            evars.update(extra_data_dict)
             self.update_fields(extra_vars=json.dumps(evars))
 
     @property

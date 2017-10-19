@@ -1,3 +1,5 @@
+import tempfile
+import pytest
 import json
 import tempfile
 
@@ -73,7 +75,7 @@ def test_job_safe_args_redacted_passwords(job):
     assert extra_vars['secret_key'] == '$encrypted$'
 
 
-def test_job_args_unredacted_passwords(job):
+def test_job_args_unredacted_passwords(job, tmpdir_factory):
     kwargs = {'ansible_version': '2.1', 'private_data_dir': tempfile.mkdtemp()}
     run_job = RunJob()
     args = run_job.build_args(job, **kwargs)
