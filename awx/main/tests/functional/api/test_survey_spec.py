@@ -37,6 +37,22 @@ def test_survey_spec_view_denied(job_template_with_survey, get, admin_user):
 @mock.patch('awx.main.access.BaseAccess.check_license', mock_no_surveys)
 @pytest.mark.django_db
 @pytest.mark.survey
+@pytest.mark.parametrize("role_field,expected_status_code", [
+    ('admin_role', 200),
+    ('execute_role', 403),
+    ('read_role', 403)
+])
+def test_survey_edit_access(job_template, survey_spec_factory, rando, post, role_field, expected_status_code):
+    survey_input_data = survey_spec_factory('new_question')
+    role = getattr(job_template, role_field)
+    role.members.add(rando)
+    post(reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+         user=rando, data=survey_input_data, expect=expected_status_code)
+
+
+@mock.patch('awx.main.access.BaseAccess.check_license', mock_no_surveys)
+@pytest.mark.django_db
+@pytest.mark.survey
 def test_deny_enabling_survey(deploy_jobtemplate, patch, admin_user):
     response = patch(url=deploy_jobtemplate.get_absolute_url(),
                      data=dict(survey_enabled=True), user=admin_user, expect=402)
