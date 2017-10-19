@@ -22,7 +22,8 @@ export default
                         if (data.actions.POST) {
                             canAddVal.resolve({canAdd: true, options: data});
                         } else {
-                            canAddVal.resolve({canAdd: false})                        }
+                            canAddVal.resolve({canAdd: false});
+                        }
                         Wait("stop");
                     });
 

@@ -116,7 +116,7 @@
 
              function retrieveStatus(id) {
                  setTimeout(function() {
-                     var url = GetBasePath('notifications') + id;
+                     let url = GetBasePath('notifications') + id;
                      Rest.setUrl(url);
                      Rest.get()
                          .then(function(res) {
@@ -142,9 +142,12 @@
                              }
 
                          })
-                         .catch( (error) => {
-                             console.log(error);
-                         })
+                         .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get ' + url + '. GET status: ' + status
+                            });
+                        });
                  }, 5000);
              }
          };

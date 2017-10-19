@@ -99,8 +99,7 @@ export default
                                     }
                                 })
                                 .catch( (error) => {
-                                    console.log(error);
-                                    if (status_code === 403) {
+                                    if (error.status_code === 403) {
                                         /* user doesn't have access to see the project, no big deal. */
                                         $scope.disablePlaybookBecausePermissionDenied = true;
                                     } else {
@@ -144,9 +143,12 @@ export default
                                 .then(function(){
                                     Wait('stop');
                                 })
-                                .catch( (error) => {
-                                    console.log(error);
-                                })
+                                .catch(({data, status}) => {
+                                    ProcessErrors($scope, data, status, null, {
+                                        hdr: 'Error!',
+                                        msg: 'Call failed. Returned status: ' + status
+                                    });
+                                });
                         }
                     }
                 });

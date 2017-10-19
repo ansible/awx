@@ -210,13 +210,15 @@ export default ['$scope', '$rootScope',
                                     $state.go('templates.editJobTemplate', {job_template_id: results.id}, {reload: true});
                                 }
                             })
-                            .catch((error)=> {
-                                console.log(error);
-                            })
+                            .catch(({data, status}) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: 'Error!',
+                                    msg: 'Call failed. Return status: ' + status
+                                });
+                            });
                         })
-          			.catch((error) => {
-                        console.log(error);
-                        ProcessErrors($rootScope, error, status, null, {hdr: 'Error!',
+          			.catch(({data, status}) => {
+                        ProcessErrors($rootScope, data, status, null, {hdr: 'Error!',
                         msg: 'Call failed. Return status: '+ status});
                     });
                 }
