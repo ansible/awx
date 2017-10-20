@@ -1866,6 +1866,20 @@ class RunInventoryUpdate(BaseTask):
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+            if inventory_update.plugin_path:
+                if inventory_update.plugin_path.startswith('@'):
+                    if inventory_update.source != 'scm':
+                        raise Exception('Direct paths to inventory plugins only usable with SCM sources.')
+                    plugin_path = os.path.join(kwargs.get('private_data_dir', ''), inventory_update.plugin_path[1:])
+                    env['ANSIBLE_INVENTORY_PLUGINS'] = os.path.dirname(plugin_path)
+                    plugin_name = os.path.basename(plugin_path).split('.')[0]
+                    env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
+                    logger.debug('Using custom inventory plugin {} for {}.'.format(
+                        plugin_name, inventory_update.log_format))
+                else:
+                    env['ANSIBLE_INVENTORY_ENABLED'] = inventory_update.plugin_path
+                    logger.debug('Using inventory plugin {} for {}.'.format(
+                        inventory_update.plugin_path, inventory_update.log_format))
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
         # add private_data_files

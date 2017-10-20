@@ -1043,6 +1043,14 @@ class InventorySourceOptions(BaseModel):
         max_length=1024,
         blank=True,
         default='',
+        help_text=_('Relative path of inventory in source control.'),
+    )
+    plugin_path = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Inventory plugin to use for import, use leading @ to get '
+                    'from relative path in source control.'),
     )
     source_script = models.ForeignKey(
         'CustomInventoryScript',
@@ -1337,7 +1345,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
+        return ['name', 'description', 'source', 'source_path', 'plugin_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
                 'timeout', 'verbosity', 'launch_type', 'source_project_update',]
 
