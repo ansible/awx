@@ -46,7 +46,7 @@ export default
                         if (row.checked) {
                             row.success_class = 'success';
                         } else {
-                            row.checked = true;
+                            row.checked = 1;
                             row.success_class = '';
                         }
                         $scope.$emit('inventorySelected', row);

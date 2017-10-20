@@ -44,7 +44,7 @@ export default ['templateUrl', function(templateUrl) {
                 if($scope.currentSelection && $scope.currentSelection.id) {
                     $scope[list.name].forEach(function(row) {
                         if (row.id === $scope.currentSelection.id) {
-                            row.checked = true;
+                            row.checked = 1;
                         }
                     });
                 }
@@ -71,7 +71,7 @@ export default ['templateUrl', function(templateUrl) {
                         if (row.checked) {
                             row.success_class = 'success';
                         } else {
-                            row.checked = true;
+                            row.checked = 1;
                             row.success_class = '';
                         }
                         $scope.currentSelection = {
