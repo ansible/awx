@@ -1,5 +1,8 @@
 ---
 - name: Remove local images to ensure proper push behavior
+  # TODO: this code will not be necessary if and when docker_image can be configured to push if the image
+  # Already exists locally
+  # Pull request: https://github.com/ansible/ansible/pull/31863
   block:
     - name: Remove web image
       docker_image:
@@ -13,7 +16,7 @@
         tag: "{{ awx_version }}"
         state: absent
   delegate_to: localhost
-  when: docker_remove_local_images
+  when: docker_remove_local_images|default(False)
 
 - name: Tag and Push Container Images
   block:
