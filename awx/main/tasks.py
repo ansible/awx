@@ -1758,6 +1758,11 @@ class RunInventoryUpdate(BaseTask):
             section = 'cache'
             cp.add_section(section)
             cp.set(section, 'max_age', "0")
+            cache_path = tempfile.mkdtemp(
+                prefix='cloudforms_cache',
+                dir=kwargs.get('private_data_dir', None)
+            )
+            cp.set(section, 'path', cache_path)
 
         elif inventory_update.source == 'azure_rm':
             section = 'azure'
