@@ -2648,8 +2648,7 @@ class JobRelaunchSerializer(JobSerializer):
         required=False, allow_null=True, default='all',
         choices=[
             ('all', _('No change to job limit')),
-            ('failed', _('All failed and unreachable hosts')),
-            ('unreachable', _('Unreachable hosts'))
+            ('failed', _('All failed and unreachable hosts'))
         ],
         write_only=True
     )
