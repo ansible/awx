@@ -1,3 +1,7 @@
+# This is where the AWX will be deployed to
+# To deploy to a remote host instead of localhost, comment out the localhost line and
+# uncomment the following line and replace it with an appopriate hostname
+# awx-remote-server
 localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python"
 
 [all:vars]
