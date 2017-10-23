@@ -160,7 +160,7 @@ def get_ansible_version():
                                 stdout=subprocess.PIPE)
         result = proc.communicate()[0]
         return result.split('\n')[0].replace('ansible', '').strip()
-    except:
+    except Exception:
         return 'unknown'
 
 
@@ -174,7 +174,7 @@ def get_ssh_version():
                                 stderr=subprocess.PIPE)
         result = proc.communicate()[1]
         return result.split(" ")[0].split("_")[1]
-    except:
+    except Exception:
         return 'unknown'
 
 
@@ -186,7 +186,7 @@ def get_awx_version():
     try:
         import pkg_resources
         return pkg_resources.require('awx')[0].version
-    except:
+    except Exception:
         return __version__
 
 

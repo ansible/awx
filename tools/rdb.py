@@ -158,7 +158,7 @@ class CustomPdb(Rdb):
         try:
             socket.gethostbyname('docker.for.mac.localhost')
             host = 'docker.for.mac.localhost'
-        except:
+        except Exception:
             host = os.popen('ip route').read().split(' ')[2]
         sock, port = Rdb.get_avail_port(self, *args, **kwargs)
         socket.socket(socket.AF_INET, socket.SOCK_DGRAM).sendto(
@@ -217,7 +217,7 @@ def telnet(port):
 
     try:
         s.connect(('0.0.0.0', port))
-    except:
+    except Exception:
         print 'unable to connect'
         return
     print 'connected to 0.0.0.0:%d' % port

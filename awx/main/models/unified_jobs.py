@@ -810,7 +810,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def result_stdout_size(self):
         try:
             return os.stat(self.result_stdout_file).st_size
-        except:
+        except Exception:
             return len(self.result_stdout)
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
@@ -1072,7 +1072,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     update_fields.append('job_explanation')
                 instance.save(update_fields=update_fields)
                 self.websocket_emit_status("canceled")
-        except: # FIXME: Log this exception!
+        except Exception: # FIXME: Log this exception!
             if settings.DEBUG:
                 raise
 

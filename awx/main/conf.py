@@ -105,7 +105,7 @@ def _load_default_license_from_file():
             license_data = json.load(open(license_file))
             logger.debug('Read license data from "%s".', license_file)
             return license_data
-    except:
+    except Exception:
         logger.warning('Could not read license from "%s".', license_file, exc_info=True)
     return {}
 
