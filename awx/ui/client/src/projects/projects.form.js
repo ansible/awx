@@ -10,7 +10,8 @@
  * @description This form is for adding/editing projects
 */
 
-export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
+export default ['i18n', 'NotificationsList', 'TemplateList',
+ function(i18n, NotificationsList, TemplateList) {
     return function() {
     var projectsFormObj = {
         addTitle: i18n._('NEW PROJECT'),
@@ -220,6 +221,9 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
         },
 
         related: {
+            templates: {
+                include: "TemplateList",
+            },
             permissions: {
                 name: 'permissions',
                 awToolTip: i18n._('Please save before assigning permissions.'),
@@ -275,6 +279,11 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
     var itm;
 
     for (itm in projectsFormObj.related) {
+        if (projectsFormObj.related[itm].include === "TemplateList") {
+            projectsFormObj.related[itm] = _.clone(TemplateList);
+            projectsFormObj.related[itm].title = i18n._('Job Templates');
+            projectsFormObj.related[itm].skipGenerator = true;
+        }
         if (projectsFormObj.related[itm].include === "NotificationsList") {
             projectsFormObj.related[itm] = NotificationsList;
             projectsFormObj.related[itm].generateList = true;   // tell form generator to call list generator and inject a list

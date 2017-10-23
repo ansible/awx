@@ -44,7 +44,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
 
                 addJobTemplate = stateDefinitions.generateTree({
                     name: 'templates.addJobTemplate',
-                    url: '/add_job_template?inventory_id&credential_id',
+                    url: '/add_job_template?inventory_id&credential_id&project_id',
                     modes: ['add'],
                     form: 'JobTemplateForm',
                     controllers: {
@@ -69,14 +69,28 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                                             });
                                     }
                             }],
-                            Project: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($stateParams, Rest, GetBasePath, ProcessErrors){
-                                    if($stateParams.credential_id){
-                                        let path = `${GetBasePath('projects')}?credential__id=${Number($stateParams.credential_id)}`;
+                            Project: ['Rest', 'GetBasePath', 'ProcessErrors', '$transition$',
+                                function(Rest, GetBasePath, ProcessErrors, $transition$){
+                                    if($transition$.params().credential_id){
+                                        let path = `${GetBasePath('projects')}?credential__id=${Number($transition$.params().credential_id)}`;
                                         Rest.setUrl(path);
                                         return Rest.get().
                                             then(function(data){
                                                 return data.data.results[0];
+                                            }).catch(function(response) {
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get project info. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
+                                    }
+                                    else if($transition$.params().project_id){
+                                        let path = `${GetBasePath('projects')}${$transition$.params().project_id}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get().
+                                            then(function(data){
+                                                return data.data;
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
                                                     hdr: 'Error!',
