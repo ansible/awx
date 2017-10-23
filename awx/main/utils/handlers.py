@@ -152,7 +152,7 @@ class BaseHandler(logging.Handler):
             return self._format_and_send_record(record)
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception:
             self.handleError(record)
 
     def _get_host(self, scheme='', hostname_only=False):

@@ -359,7 +359,7 @@ class ApiV1ConfigView(APIView):
         try:
             settings.LICENSE = {}
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except:
+        except Exception:
             # FIX: Log
             return Response({"error": _("Failed to remove license (%s)") % has_error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -3200,7 +3200,7 @@ class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDes
         try:
             obj = self.get_object()
             data.update(obj.char_prompts)
-        except:
+        except Exception:
             pass
         return super(WorkflowJobTemplateNodeDetail, self).update_raw_data(data)
 

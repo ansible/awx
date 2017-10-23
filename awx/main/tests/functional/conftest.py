@@ -437,7 +437,7 @@ def group_factory(inventory):
     def g(name):
         try:
             return Group.objects.get(name=name, inventory=inventory)
-        except:
+        except Exception:
             return Group.objects.create(inventory=inventory, name=name)
     return g
 
@@ -478,7 +478,7 @@ def inventory_source_factory(inventory_factory):
             source = 'file'
         try:
             return inventory.inventory_sources.get(name=name)
-        except:
+        except Exception:
             return inventory.inventory_sources.create(name=name, source=source)
     return invsrc
 

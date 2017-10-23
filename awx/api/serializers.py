@@ -3775,7 +3775,7 @@ class ActivityStreamSerializer(BaseSerializer):
     def get_object_association(self, obj):
         try:
             return obj.object_relationship_type.split(".")[-1].split("_")[1]
-        except:
+        except Exception:
             pass
         return ""
 

@@ -23,7 +23,7 @@ import yaml
 import fcntl
 try:
     import psutil
-except:
+except Exception:
     psutil = None
 
 # Celery
@@ -104,7 +104,7 @@ def celery_startup(conf=None, **kwargs):
             from awx.main.signals import disable_activity_stream
             with disable_activity_stream():
                 sch.save()
-        except:
+        except Exception:
             logger.exception("Failed to rebuild schedule {}.".format(sch))
 
 
@@ -113,7 +113,7 @@ def task_set_logger_pre_run(*args, **kwargs):
     try:
         cache.close()
         configure_external_logger(settings, is_startup=False)
-    except:
+    except Exception:
         # General exception because LogErrorsTask not used with celery signals
         logger.exception('Encountered error on initial log configuration.')
 
@@ -126,7 +126,7 @@ def inform_cluster_of_shutdown(*args, **kwargs):
         this_inst.save(update_fields=['capacity', 'modified'])
         logger.warning('Normal shutdown signal for instance {}, '
                        'removed self from capacity pool.'.format(this_inst.hostname))
-    except:
+    except Exception:
         # General exception because LogErrorsTask not used with celery signals
         logger.exception('Encountered problem with normal shutdown signal.')
 
@@ -321,7 +321,7 @@ def _send_notification_templates(instance, status_str):
         raise ValueError(_("status_str must be either succeeded or failed"))
     try:
         notification_templates = instance.get_notification_templates()
-    except:
+    except Exception:
         logger.warn("No notification template defined for emitting notification")
         notification_templates = None
     if notification_templates:
@@ -443,7 +443,7 @@ def delete_inventory(self, inventory_id, user_id):
     else:
         try:
             user = User.objects.get(id=user_id)
-        except:
+        except Exception:
             user = None
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
@@ -877,7 +877,7 @@ class BaseTask(LogErrorsTask):
                                      **extra_update_fields)
         try:
             self.final_run_hook(instance, status, **kwargs)
-        except:
+        except Exception:
             logger.exception('%s Final run hook errored.', instance.log_format)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
