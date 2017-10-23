@@ -16,7 +16,7 @@ class argv_placeholder(object):
     def __del__(self):
         try:
             argv_ready(sys.argv)
-        except:
+        except Exception:
             pass
 
 
