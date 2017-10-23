@@ -51,7 +51,7 @@ from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError, TaskCancel, TaskError
 from awx.main.queue import CallbackQueueDispatcher
-from awx.main.expect import run, isolated_manager
+from awx.main.expect import run, awx_command, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
@@ -484,6 +484,7 @@ class BaseTask(LogErrorsTask):
     name = None
     model = None
     abstract = True
+    is_management_command = False
     cleanup_paths = []
     proot_show_paths = []
 
@@ -847,6 +848,10 @@ class BaseTask(LogErrorsTask):
                 status, rc = manager_instance.run(instance, isolated_host,
                                                   kwargs['private_data_dir'],
                                                   kwargs.get('proot_temp_dir'))
+            elif self.is_management_command:
+                status, rc = awx_command.run_command(
+                    args, cwd, env, stdout_handle, **_kw
+                )
             else:
                 status, rc = run.run_pexpect(
                     args, cwd, env, stdout_handle, **_kw
@@ -1586,6 +1591,7 @@ class RunInventoryUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_inventory_update'
     model = InventoryUpdate
+    is_management_command = True
 
     def build_private_data(self, inventory_update, **kwargs):
         """
