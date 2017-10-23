@@ -94,7 +94,7 @@ angular.module('ModalDialog', ['Utilities'])
             ww = $(document).width();
             wh = $(document).height();
             x = (width > ww) ? ww - 10 : width;
-            y = (height > wh) ? wh - 10 : height;
+            y = height === "auto" ? "auto" : ((height > wh) ? wh - 10 : height);
 
             // Create the modal
             $('#' + id).dialog({
