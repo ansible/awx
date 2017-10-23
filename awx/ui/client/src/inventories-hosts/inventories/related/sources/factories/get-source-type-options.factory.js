@@ -8,7 +8,7 @@ export default
                 scope[variable] = [];
                 Rest.setUrl(GetBasePath('inventory_sources'));
                 Rest.options()
-                .success(function (data) {
+                .then(({data}) => {
                     var i, choices = data.actions.GET.source.choices;
                     for (i = 0; i < choices.length; i++) {
                         if (choices[i][0] !== 'file' && choices[i][0] !== "") {
@@ -21,7 +21,7 @@ export default
                     scope.cloudCredentialRequired = false;
                     scope.$emit('sourceTypeOptionsReady');
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                   msg: 'Failed to retrieve options for inventory_sources.source. OPTIONS status: ' + status
                     });

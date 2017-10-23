@@ -139,7 +139,7 @@ export default
 
                     Rest.setUrl(url);
                     Rest.post(job_launch_data)
-                    .success(function(data) {
+                    .then(({data}) => {
                         Wait('stop');
                         var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
                         if(base !== 'portal' && Empty(data.system_job) || (base === 'home')){
@@ -188,7 +188,7 @@ export default
                             $state.go('.', null, {reload: true});
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         let template_id = scope.job_template_id;
                         template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
                         ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
@@ -200,7 +200,7 @@ export default
                 var getExtraVars = function() {
                     Rest.setUrl(vars_url);
                     Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         if(!Empty(data.extra_vars)){
                             data.extra_vars = ToJSON('yaml',  data.extra_vars, false);
                             $.each(data.extra_vars, function(key,value){
@@ -209,7 +209,7 @@ export default
                         }
                         buildData();
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, { hdr: i18n._('Error!'),
                         msg: i18n._('Failed to retrieve job template extra variables.')  });
                     });

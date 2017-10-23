@@ -19,7 +19,7 @@ export default {
     },
     resolve: {
         groupData: ['$stateParams', 'GroupsService', function($stateParams, GroupsService) {
-            return GroupsService.get({ id: $stateParams.group_id }).then(res => res.data.results[0]);
+            return GroupsService.get({ id: $stateParams.group_id }).then(response => response.data.results[0]);
         }]
     }
 };

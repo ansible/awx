@@ -139,7 +139,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
     scope.removeAuthorizationGetUser = scope.$on('AuthorizationGetUser', function() {
         // Get all the profile/access info regarding the logged in user
         Authorization.getUser()
-            .success(function (data) {
+            .then(({data}) => {
                 Authorization.setUserInfo(data);
                 Timer.init().then(function(timer){
                     $rootScope.sessionTimer = timer;
@@ -149,7 +149,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
                     scope.$emit('AuthorizationGetLicense');
                 });
             })
-            .error(function (data, status) {
+            .catch(({data, status}) => {
                 Authorization.logout().then( () => {
                     Wait('stop');
                     Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);

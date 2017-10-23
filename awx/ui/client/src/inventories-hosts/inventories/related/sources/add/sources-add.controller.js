@@ -36,13 +36,13 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         $scope.inventory_files = data;
                         $scope.inventory_files.push("/ (project root)");
                         sync_inventory_file_select2();
                         Wait('stop');
                     })
-                    .error(function () {
+                    .catch(() => {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
                     });
@@ -322,8 +322,8 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             } else {
                 params.source = null;
             }
-            SourcesService.post(params).then(function(res){
-                let inventory_source_id = res.data.id;
+            SourcesService.post(params).then((response) => {
+                let inventory_source_id = response.data.id;
                 $state.go('^.edit', {inventory_source_id: inventory_source_id}, {reload: true});
             });
         };

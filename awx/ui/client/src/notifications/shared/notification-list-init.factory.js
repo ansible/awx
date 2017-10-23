@@ -26,7 +26,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
 
         Rest.setUrl($rootScope.current_user.related.admin_of_organizations);
         Rest.get()
-            .success(function(data) {
+            .then(({data}) => {
                 scope.current_user_admin_orgs = data.results.map(i => i.name);
             });
 
@@ -71,10 +71,10 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                     var notifier_url = url + id + column;
                     Rest.setUrl(notifier_url);
                     Rest.get()
-                        .success( function(data, i, j, obj) {
-                            var type = (obj.url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
-                            if (data.results) {
-                                    _.forEach(data.results, function(result){
+                        .then(function(response) {
+                            var type = (url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
+                            if (response.data.results) {
+                                    _.forEach(response.data.results, function(result){
                                         _.forEach(scope.notifications, function(notification){
                                             if(notification.id === result.id){
                                                 notification[type] = true;
@@ -86,7 +86,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                                 Wait('stop');
                             }
                         })
-                        .error( function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to update notification ' + data.id + ' PUT returned: ' + status });
                         });

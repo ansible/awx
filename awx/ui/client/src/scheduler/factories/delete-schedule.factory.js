@@ -22,7 +22,7 @@ export default
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function () {
+                    .then(() => {
                         $('#prompt-modal').modal('hide');
                         scope.$emit(callback, id);
 
@@ -40,7 +40,7 @@ export default
                             $state.go('.', reloadListStateParams, {reload: true});
                         }
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         try {
                             $('#prompt-modal').modal('hide');
                         }

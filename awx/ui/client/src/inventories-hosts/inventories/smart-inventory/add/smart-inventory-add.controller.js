@@ -60,7 +60,7 @@ function SmartInventoryAdd($scope, $location,
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
-                .success(function(data) {
+                .then(({data}) => {
                     const inventory_id = data.id,
                         instance_group_url = data.related.instance_groups;
 
@@ -77,7 +77,7 @@ function SmartInventoryAdd($scope, $location,
                             });
                         });
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new inventory. Post returned status: ' + status

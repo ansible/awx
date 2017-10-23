@@ -19,7 +19,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             $scope.team_id = id;
             Rest.setUrl(defaultUrl);
             Wait('start');
-            Rest.get(defaultUrl).success(function(data) {
+            Rest.get(defaultUrl).then(({data}) => {
                 setScopeFields(data);
                 $scope.organization_name = data.summary_fields.organization.name;
 
@@ -74,10 +74,10 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             if ($scope[form.name + '_form'].$valid) {
                 var data = processNewData(form.fields);
                 Rest.setUrl(defaultUrl);
-                Rest.put(data).success(function() {
+                Rest.put(data).then(() => {
                         $state.go($state.current, null, { reload: true });
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Failed to retrieve user: ' +

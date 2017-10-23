@@ -9,7 +9,7 @@ export default
             if (!Empty(credential)) {
                 Rest.setUrl(GetBasePath('credentials')+credential);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     credentialTypesLookup()
                         .then(kinds => {
                             if(data.credential_type === kinds.Machine && data.inputs){
@@ -30,7 +30,7 @@ export default
                         });
 
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                     msg: 'Failed to get job template details. GET returned status: ' + status });
                 });

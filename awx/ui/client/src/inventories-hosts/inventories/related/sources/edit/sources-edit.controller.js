@@ -116,7 +116,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         $scope.inventory_files = data;
                         $scope.inventory_files.push("/ (project root)");
 
@@ -131,7 +131,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                         sync_inventory_file_select2();
                         Wait('stop');
                     })
-                    .error(function () {
+                    .catch(() => {
                         Alert('Cannot get inventory files', 'Unable to retrieve the list of inventory files for this project.', 'alert-info');
                         Wait('stop');
                     });

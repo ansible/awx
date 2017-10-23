@@ -35,7 +35,7 @@ export default
                 Rest.setUrl(url);
                 if (mode === 'add') {
                     Rest.post(schedule)
-                        .success(function(){
+                        .then(() => {
                             if (callback) {
                                 scope.$emit(callback);
                             }
@@ -43,14 +43,14 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error(function(data, status){
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'POST to ' + url + ' returned: ' + status });
                         });
                 }
                 else {
                     Rest.put(schedule)
-                        .success(function(){
+                        .then(() => {
                             if (callback) {
                                 scope.$emit(callback, schedule);
                             }
@@ -58,7 +58,7 @@ export default
                                 Wait('stop');
                             }
                         })
-                        .error(function(data, status){
+                        .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'POST to ' + url + ' returned: ' + status });
                         });

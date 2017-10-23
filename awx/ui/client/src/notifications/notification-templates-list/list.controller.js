@@ -116,7 +116,7 @@
 
              function retrieveStatus(id) {
                  setTimeout(function() {
-                     var url = GetBasePath('notifications') + id;
+                     let url = GetBasePath('notifications') + id;
                      Rest.setUrl(url);
                      Rest.get()
                          .then(function(res) {
@@ -141,7 +141,13 @@
                                  });
                              }
 
-                         });
+                         })
+                         .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get ' + url + '. GET status: ' + status
+                            });
+                        });
                  }, 5000);
              }
          };
@@ -164,7 +170,7 @@
                  var url = defaultUrl + id + '/';
                  Rest.setUrl(url);
                  Rest.destroy()
-                     .success(function() {
+                     .then(() => {
 
                          let reloadListStateParams = null;
 
@@ -180,7 +186,7 @@
                          }
                          Wait('stop');
                      })
-                     .error(function(data, status) {
+                     .catch(({data, status}) => {
                          ProcessErrors($scope, data, status, null, {
                              hdr: 'Error!',
                              msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

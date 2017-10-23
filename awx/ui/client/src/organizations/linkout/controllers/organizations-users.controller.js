@@ -23,7 +23,7 @@ export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
 
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     $scope.organization_name = data.name;
                     $scope.name = data.name;
                     $scope.org_id = data.id;
@@ -50,10 +50,10 @@ export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
                 Rest.post({
                         id: id,
                         disassociate: true
-                    }).success(function() {
+                    }).then(() => {
                         $state.go('.', null, { reload: true });
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

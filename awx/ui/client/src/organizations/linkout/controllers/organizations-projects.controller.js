@@ -99,7 +99,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
         // Go out and get the organization
         Rest.setUrl(orgBase + $stateParams.organization_id);
         Rest.get()
-            .success(function(data) {
+            .then(({data}) => {
                 $scope.organization_name = data.name;
                 $scope.name = data.name;
                 $scope.org_id = data.id;
@@ -205,10 +205,10 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                 // Refresh what we have in memory to insure we're accessing the most recent status record
                 Rest.setUrl(project.url);
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         $scope.$emit('GoTojobResults', data);
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Project lookup failed. GET returned: ' + status
@@ -224,11 +224,11 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
             // Cancel the project update process
             Rest.setUrl(url);
             Rest.post()
-                .success(function() {
+                .then(() => {
                     Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task manager.', 'alert-info');
                     $scope.refresh();
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
                 });
         });
@@ -241,7 +241,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
             var url = data.related.cancel;
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     if (data.can_cancel) {
                         $scope.$emit('Cancel_Update', url);
                     } else {
@@ -249,7 +249,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                             'Click the <em>Refresh</em> button to view the latest status.</div>', 'alert-info', null, null, null, null, true);
                     }
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
                 });
         });
@@ -257,14 +257,14 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
         $scope.cancelUpdate = function(id, name) {
             Rest.setUrl(GetBasePath("projects") + id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     if (data.related.current_update) {
                         Rest.setUrl(data.related.current_update);
                         Rest.get()
-                            .success(function(data) {
+                            .then(({data}) => {
                                 $scope.$emit('Check_Cancel', data);
                             })
-                            .error(function(data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors($scope, data, status, null, {
                                     hdr: 'Error!',
                                     msg: 'Call to ' + data.related.current_update + ' failed. GET status: ' + status
@@ -275,7 +275,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                             'button to view the latest status.</div>', 'alert-info', undefined, undefined, undefined, undefined, true);
                     }
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: 'Error!',
                         msg: 'Call to get project failed. GET status: ' + status

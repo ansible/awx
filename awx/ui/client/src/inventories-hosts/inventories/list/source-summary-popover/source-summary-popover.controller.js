@@ -6,10 +6,10 @@ export default [ '$scope', 'Wait', 'Empty', 'Rest', 'ProcessErrors', '$state',
                 Wait('start');
                 Rest.setUrl($scope.inventory.related.inventory_sources + '?order_by=-last_job_run&page_size=5');
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         $scope.generateTable(data, event);
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
                             msg: 'Call to ' + $scope.inventory.related.inventory_sources + ' failed. GET returned status: ' + status
                         });

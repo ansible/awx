@@ -21,10 +21,10 @@ export default
 					var data = license;
 					data.eula_accepted = eula;
 					return Rest.post(JSON.stringify(data))
-						.success(function(res){
-							return res;
+						.then((response) =>{
+							return response.data;
 						})
-						.error(function(res, status){
+						.catch(({res, status}) => {
 	                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
 	                        msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
 	                    });

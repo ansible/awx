@@ -47,7 +47,7 @@
                     let path = GetBasePath('inventory') + $stateParams.inventory_id + '/inventory_sources';
 
                     qs.search(path, $state.params[`${list.iterator}_search`])
-                    .then(function(searchResponse) {
+                    .then((searchResponse)=> {
                         $scope[`${list.iterator}_dataset`] = searchResponse.data;
                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
                         _.forEach($scope[list.name], buildStatusIndicators);

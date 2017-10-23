@@ -22,6 +22,16 @@ function AtTruncateController (strings) {
         vm.truncatedString = string.substring(0, maxlength);
     };
 
+    vm.copyToClipboard = () => {
+        vm.tooltip.popover.text = vm.strings.get('truncate.COPIED');
+
+        const textarea = el[0].getElementsByClassName('at-Truncate-textarea')[0];
+        textarea.value = string;
+        textarea.select();
+
+        document.execCommand('copy');
+    };
+
     vm.tooltip = {
         popover: {
             text: vm.strings.get('truncate.DEFAULT'),
@@ -31,16 +41,6 @@ function AtTruncateController (strings) {
             resetOnExit: true,
             click: vm.copyToClipboard
         }
-    };
-
-    vm.copyToClipboard = () => {
-        vm.tooltip.popover.text = vm.strings.get('truncate.COPIED');
-
-        const textarea = el[0].getElementsByClassName('at-Truncate-textarea')[0];
-        textarea.value = string;
-        textarea.select();
-
-        document.execCommand('copy');
     };
 }
 

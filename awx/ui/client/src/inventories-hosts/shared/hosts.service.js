@@ -30,8 +30,8 @@
                 this.url = GetBasePath('hosts') + '?' + this.stringifyParams(params);
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             post: function(host){
@@ -39,8 +39,8 @@
                 this.url = GetBasePath('hosts');
                 Rest.setUrl(this.url);
                 return Rest.post(host)
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             put: function(host){
@@ -48,8 +48,8 @@
                 this.url = GetBasePath('hosts') + host.id;
                 Rest.setUrl(this.url);
                 return Rest.put(host)
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             delete: function(id){
@@ -57,8 +57,8 @@
                 this.url = GetBasePath('hosts') + id;
                 Rest.setUrl(this.url);
                 return Rest.destroy()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             }
         };

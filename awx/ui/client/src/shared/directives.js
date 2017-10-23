@@ -556,7 +556,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
 
                 Rest.setUrl(`${basePath}` + query);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     if (data.count === 1) {
                         scope[modelKey] = data.results[0].name;
                         scope[modelName] = data.results[0].id;

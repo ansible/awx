@@ -81,10 +81,10 @@ export default
                         Rest.setUrl(GetBasePath('workflow_job_templates') + id + '/survey_spec/');
                     }
                     return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                    .success(function () {
+                    .then(() => {
 
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to add new survey. POST returned status: ' + status });
                     });
@@ -98,10 +98,10 @@ export default
                         Rest.setUrl(GetBasePath('workflow_job_templates') + id+ '/');
                     }
                     return Rest.patch({"survey_enabled": scope.survey_enabled})
-                    .success(function () {
+                    .then(() => {
 
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, form, {
                             hdr: 'Error!',
                             msg: 'Failed to save survey_enabled: GET status: ' + status

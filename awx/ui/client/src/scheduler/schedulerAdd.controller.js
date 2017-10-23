@@ -27,7 +27,7 @@ export default ['$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
-     * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars 
+     * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars
      * in that case.
      *
      * Because this same problem exists in the edit mode and because there's no inheritence, this

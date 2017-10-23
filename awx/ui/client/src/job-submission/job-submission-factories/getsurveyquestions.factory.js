@@ -20,7 +20,7 @@ export default
 
                 Rest.setUrl(survey_url);
                 Rest.get()
-                .success(function (data) {
+                .then(({data}) => {
                     if(!Empty(data)){
                         scope.survey_name = data.name;
                         scope.survey_description = data.description;
@@ -74,7 +74,7 @@ export default
                         return;
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors(scope, data, status, { hdr: 'Error!',
                     msg: 'Failed to retrieve organization: ' + $stateParams.id + '. GET status: ' + status });
                 });

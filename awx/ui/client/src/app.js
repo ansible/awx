@@ -114,6 +114,9 @@ angular
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
+    .config(['$locationProvider', function($locationProvider) {
+        $locationProvider.hashPrefix('');
+    }])
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled($ENV['ng-debug'] || false);
     }])
@@ -176,7 +179,7 @@ angular
             LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
             $filter, SocketService, AppStrings, $transitions) {
-                
+
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
                 return $state.current.name.search(stateName) > 0;

@@ -59,11 +59,11 @@ export default ['Rest', 'Wait',
                     organization: $scope.organization,
                     script: $scope.script
                 })
-                .success(function() {
+                .then(() => {
                     $state.go('inventoryScripts', null, { reload: true });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new inventory script. PUT returned status: ' + status

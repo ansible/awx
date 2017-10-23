@@ -18,7 +18,7 @@ export default {
                 let ansibleFactsUrl = GetBasePath('hosts') + $stateParams.host_id + '/ansible_facts';
                 Rest.setUrl(ansibleFactsUrl);
                 return Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         return data;
                     });
             }

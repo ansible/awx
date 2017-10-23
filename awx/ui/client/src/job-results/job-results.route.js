@@ -76,7 +76,7 @@ export default {
                 Rest.setUrl(jobData.related.job_events +
                     "?event=playbook_on_stats");
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if(!data.results[0]){
                             defer.resolve({val: {
                                 ok: 0,
@@ -94,7 +94,7 @@ export default {
                                 countFinished: true});
                         }
                     })
-                    .error(function() {
+                    .catch(() => {
                         defer.resolve({val: {
                             ok: 0,
                             skipped: 0,
@@ -131,7 +131,7 @@ export default {
             var getNext = function(data, arr, resolve) {
                 Rest.setUrl(data.next);
                 Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         if (data.next) {
                             getNext(data, arr.concat(data.results), resolve);
                         } else {
@@ -145,7 +145,7 @@ export default {
 
             Rest.setUrl(GetBasePath('jobs') + $stateParams.id + '/labels/');
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     if (data.next) {
                         getNext(data, data.results, seeMoreResolve);
                     } else {

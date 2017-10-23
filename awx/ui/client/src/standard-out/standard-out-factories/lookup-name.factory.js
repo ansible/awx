@@ -13,7 +13,7 @@
                  callback = params.callback;
              Rest.setUrl(url);
              Rest.get()
-                 .success(function(data) {
+                 .then(({data}) => {
                      if (scope_var === 'inventory_source') {
                          scope.inventory = data.inventory;
                      }
@@ -25,7 +25,7 @@
                         scope.$emit(callback, data);
                      }
                  })
-                 .error(function(data, status) {
+                 .catch(({data, status}) => {
                      if (status === 403 && params.ignore_403) {
                          return;
                      }

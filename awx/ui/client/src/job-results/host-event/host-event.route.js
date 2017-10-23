@@ -19,8 +19,7 @@ var hostEventModal = {
         hostEvent: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
             return jobResultsService.getRelatedJobEvents($stateParams.id, {
                 id: $stateParams.eventId
-            }).then(function(res) {
-                return res.data.results[0]; });
+            }).then((response) =>  response.data.results[0]);
         }]
     },
     onExit: function() {

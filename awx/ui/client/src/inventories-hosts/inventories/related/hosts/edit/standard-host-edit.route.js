@@ -19,9 +19,7 @@ export default {
     },
     resolve: {
         host: ['$stateParams', 'HostsService', function($stateParams, HostsService) {
-            return HostsService.get({ id: $stateParams.host_id }).then(function(res) {
-                return res.data.results[0];
-            });
+            return HostsService.get({ id: $stateParams.host_id }).then((response) => response.data.results[0]);
         }]
     }
 };

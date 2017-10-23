@@ -25,8 +25,8 @@
                 this.url = GetBasePath('inventory') + id;
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             getBreadcrumbs: function(groups){
@@ -36,8 +36,8 @@
                 }).join('');
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this))
                     .finally(Wait('stop'));
             },
             rootHostsUrl: function(id){
@@ -60,22 +60,22 @@
                 this.url = GetBasePath('inventory') + inventoryId + '/inventory_sources';
                 Rest.setUrl(this.url);
                 return Rest.options()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this));
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this));
             },
             updateInventorySourcesGet: function(inventoryId) {
                 this.url = GetBasePath('inventory') + inventoryId + '/update_inventory_sources';
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this));
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this));
             },
             getHost: function(inventoryId, hostId) {
                 this.url = GetBasePath('inventory') + inventoryId + '/hosts?id=' + hostId;
                 Rest.setUrl(this.url);
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this));
+                    .then(this.success.bind(this))
+                    .catch(this.error.bind(this));
             }
         };
     }];

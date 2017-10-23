@@ -24,7 +24,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         function init() {
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
-                .success(function(data) {
+                .then(({data}) => {
                     if (!data.actions.POST) {
                         $state.go("^");
                         Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
@@ -48,10 +48,10 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
 
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     $scope.organization_name = data.name;
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: `Failed to retrieve organization. GET status: ${status}`
@@ -213,11 +213,11 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
             Wait('start');
             Rest.setUrl(url);
             Rest.post(params)
-                .success(function() {
+                .then(() => {
                     $state.go('notifications', {}, { reload: true });
                     Wait('stop');
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to add new notifier. POST returned status: ' + status

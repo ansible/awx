@@ -60,7 +60,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
 
                         let reloadListStateParams = null;
 
@@ -75,7 +75,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                             $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

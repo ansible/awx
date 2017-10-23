@@ -14,7 +14,7 @@ export default
                     if(Authorization.getUserInfo('is_superuser') !== true) {
                         Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id + '/admin_of_organizations');
                         Rest.get({ params: { id: params.organization } })
-                            .success(function(data) {
+                            .then(({data}) => {
                                 if(data.count && data.count > 0) {
                                     deferred.resolve(true);
                                 }

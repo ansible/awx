@@ -79,7 +79,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
         // of stdout jobs.
         Rest.setUrl(GetBasePath('base') + jobType + '/' + job_id + '/');
         Rest.get()
-            .success(function(data) {
+            .then(({data}) => {
                 $scope.job = data;
                 $scope.job_template_name = data.name;
                 $scope.created_by = data.summary_fields.created_by;
@@ -211,7 +211,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                     }
                 }
             })
-            .error(function(data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                     msg: 'Failed to retrieve job: ' + job_id + '. GET returned: ' + status });
             });

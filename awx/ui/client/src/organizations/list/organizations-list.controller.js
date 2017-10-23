@@ -93,7 +93,7 @@ export default ['$stateParams', '$scope', '$rootScope',
             Rest.setUrl($scope.current_url);
             Rest.get()
                 .success((data) => $scope.organizations = data.results)
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: 'Error!',
                         msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
@@ -143,7 +143,7 @@ export default ['$stateParams', '$scope', '$rootScope',
                 var url = defaultUrl + id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
 
                         let reloadListStateParams = null;
@@ -159,7 +159,7 @@ export default ['$stateParams', '$scope', '$rootScope',
                             $state.go('.', reloadListStateParams, { reload: true });
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status

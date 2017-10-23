@@ -39,7 +39,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
         Wait('start');
         Rest.setUrl(url);
         Rest.post(params)
-            .success( function(data) {
+            .then(({data}) => {
                 if (callback) {
                     scope.$emit(callback, data.id);
                     notifier[column] = !notifier[column];
@@ -47,7 +47,7 @@ export default ['Wait', 'ProcessErrors', 'Rest',
                 // Hide the working spinner
                 Wait('stop');
             })
-            .error( function(data, status) {
+            .catch(({data, status}) => {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                     msg: 'Failed to update notification ' + data.id + ' PUT returned: ' + status });
             });

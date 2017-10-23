@@ -51,7 +51,7 @@ export default
                 url = GetBasePath("credentials");
                 Rest.setUrl(url);
                 Rest.post(data)
-                .success(function (data) {
+                .then(({data}) => {
                     scope.addedItem = data.id;
 
                     Wait('stop');
@@ -63,7 +63,7 @@ export default
                         ReturnToCaller(1);
                     }
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     // TODO: hopefully this conditional error handling will to away in a future versions.  The reason why we cannot
                     // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
@@ -83,11 +83,11 @@ export default
                 url = GetBasePath('credentials') + scope.id + '/';
                 Rest.setUrl(url);
                 Rest.put(data)
-                .success(function () {
+                .then(() => {
                     Wait('stop');
                     $state.go($state.current, {}, {reload: true});
                 })
-                .error(function (data, status) {
+                .catch(({data, status}) => {
                     Wait('stop');
                     ProcessErrors(scope, data, status, form, {
                         hdr: i18n._('Error!'),

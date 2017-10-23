@@ -30,7 +30,7 @@ export default ['$scope', '$stateParams', 'OrgTeamList', 'Rest', 'OrgTeamsDatase
 
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
 
                     $scope.organization_name = data.name;
                     $scope.name = data.name;

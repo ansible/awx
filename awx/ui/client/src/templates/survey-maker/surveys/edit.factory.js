@@ -31,7 +31,7 @@ export default
                 // Get the existing record
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                             if(!Empty(data)){
                                 ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
                                 scope.survey_name = data.name;
@@ -45,7 +45,7 @@ export default
                             }
 
                         })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null,  { hdr: 'Error!',
                             msg: 'Failed to retrieve survey. GET returned status: ' + status });
                     });

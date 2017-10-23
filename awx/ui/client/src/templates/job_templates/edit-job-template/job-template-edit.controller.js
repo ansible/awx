@@ -81,7 +81,7 @@ export default
                             Wait('start');
                             Rest.setUrl(url);
                             promises.push(Rest.get()
-                                .success(function (data) {
+                                .then(({data}) => {
                                     $scope.disablePlaybookBecausePermissionDenied = false;
                                     $scope.playbook_options = [];
                                     var playbookNotFound = true;
@@ -98,8 +98,8 @@ export default
                                         jobTemplateLoadFinished();
                                     }
                                 })
-                                .error(function (ret,status_code) {
-                                    if (status_code === 403) {
+                                .catch( (error) => {
+                                    if (error.status_code === 403) {
                                         /* user doesn't have access to see the project, no big deal. */
                                         $scope.disablePlaybookBecausePermissionDenied = true;
                                     } else {
@@ -112,7 +112,7 @@ export default
 
                             Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                             promises.push(Rest.get()
-                                .success(function (data) {
+                                .then(({data}) => {
                                     var msg;
                                     switch (data.status) {
                                     case 'failed':
@@ -130,7 +130,7 @@ export default
                                         Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                                     }
                                 })
-                                .error(function (data, status) {
+                                .catch(({data, status}) => {
                                     if (status === 403) {
                                         /* User doesn't have read access to the project, no problem. */
                                     } else {
@@ -142,6 +142,12 @@ export default
                             $q.all(promises)
                                 .then(function(){
                                     Wait('stop');
+                                })
+                                .catch(({data, status}) => {
+                                    ProcessErrors($scope, data, status, null, {
+                                        hdr: 'Error!',
+                                        msg: 'Call failed. Returned status: ' + status
+                                    });
                                 });
                         }
                     }
@@ -423,7 +429,6 @@ export default
 
                             $scope.$emit('jobTemplateLoaded', master);
                         });
-
                 }
             });
 
@@ -539,7 +544,7 @@ export default
                 var getNext = function(data, arr, resolve) {
                     Rest.setUrl(data.next);
                     Rest.get()
-                        .success(function (data) {
+                        .then(({data}) => {
                             if (data.next) {
                                 getNext(data, arr.concat(data.results), resolve);
                             } else {
@@ -551,7 +556,7 @@ export default
                 Rest.setUrl(data.related.labels);
 
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if (data.next) {
                             getNext(data, data.results, associatedLabelsDefer);
                         } else {
@@ -578,7 +583,7 @@ export default
 
                 Rest.setUrl(GetBasePath("organizations"));
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         orgDefer.resolve(data.results[0].id);
                     });
 
@@ -722,10 +727,10 @@ export default
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.put(data)
-                        .success(function (data) {
+                        .then(({data}) => {
                             $scope.$emit('templateSaveSuccess', data);
                         })
-                        .error(function (data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to update job template. PUT returned status: ' + status });
                         });

@@ -21,7 +21,7 @@ export default
                     var getNext = function(data, arr, resolve) {
                         Rest.setUrl(data.next);
                         Rest.get()
-                            .success(function (data) {
+                            .then(({data}) => {
                                 if (data.next) {
                                     getNext(data, arr.concat(data.results), resolve);
                                 } else {
@@ -34,7 +34,7 @@ export default
                         var seeMoreResolve = $q.defer();
                         Rest.setUrl(scope[scope.$parent.list.iterator].related.labels);
                         Rest.get()
-                            .success(function(data) {
+                            .then(({data}) => {
                                 if (data.next) {
                                     getNext(data, data.results, seeMoreResolve);
                                 } else {
@@ -71,11 +71,11 @@ export default
                             if(url) {
                                 Rest.setUrl(url);
                                 Rest.post({"disassociate": true, "id": label.id})
-                                    .success(function () {
+                                    .then(() => {
                                         Wait('stop');
                                         $state.go('.', null, {reload: true});
                                     })
-                                    .error(function (data, status) {
+                                    .catch(({data, status}) => {
                                         Wait('stop');
                                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                             msg: 'Could not disassociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });

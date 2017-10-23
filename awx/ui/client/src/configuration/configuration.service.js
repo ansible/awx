@@ -15,7 +15,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
 
                 Rest.setUrl(url);
                 Rest.options()
-                    .success(function(data) {
+                    .then(({data}) => {
                         // Compare GET actions with PUT actions and flag discrepancies
                         // for disabling in the UI
                         var getActions = data.actions.GET;
@@ -35,7 +35,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
 
                         deferred.resolve(returnData);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 
@@ -47,10 +47,10 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
 
                 Rest.setUrl(url);
                 Rest.patch(body)
-                    .success(function(data) {
+                    .then(({data}) => {
                         deferred.resolve(data);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 
@@ -61,10 +61,10 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                 var deferred = $q.defer();
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         deferred.resolve(data);
                     })
-                    .error(function(error) {
+                    .catch(({error}) => {
                         deferred.reject(error);
                     });
 

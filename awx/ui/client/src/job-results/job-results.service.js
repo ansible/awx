@@ -73,11 +73,11 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
 
             Rest.setUrl(url);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
                     val.resolve({results: data.results,
                         next: data.next});
                 })
-                .error(function(obj, status) {
+                .catch(({obj, status}) => {
                     ProcessErrors(null, obj, status, null, {
                         hdr: 'Error!',
                         msg: `Could not get job events.
@@ -101,12 +101,12 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                     Wait('start');
                     Rest.setUrl(job.url);
                     Rest.destroy()
-                        .success(function() {
+                        .then(() => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             $state.go('jobs');
                         })
-                        .error(function(obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             ProcessErrors(null, obj, status, null, {
@@ -123,11 +123,11 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
             var doCancel = function() {
                 Rest.setUrl(job.url + 'cancel');
                 Rest.post({})
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(obj, status) {
+                    .catch(({obj, status}) => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         ProcessErrors(null, obj, status, null, {
@@ -150,7 +150,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                     Wait('start');
                     Rest.setUrl(job.url + 'cancel');
                     Rest.get()
-                        .success(function(data) {
+                        .then(({data}) => {
                             if (data.can_cancel === true) {
                                 doCancel();
                             } else {
@@ -239,10 +239,10 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
             url = url + id + '/job_events/?' + this.stringifyParams(params);
             Rest.setUrl(url);
             return Rest.get()
-                .success(function(data){
-                    return data;
+                .then((response) => {
+                    return response;
                 })
-                .error(function(data, status) {
+                .catch(({data, status}) => {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });

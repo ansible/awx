@@ -61,7 +61,7 @@ export default
                     ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
                         let path = `${GetBasePath('job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
-                        return Rest.get(path).then((res) => res.data);
+                        return Rest.get(path).then(response => response.data);
                     }],
                     UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
                         function(Rest, GetBasePath, $stateParams, $q) {
@@ -152,7 +152,7 @@ export default
                     ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
                         let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
-                        return Rest.get(path).then((res) => res.data);
+                        return Rest.get(path).then(response => response.data);
                     }],
                     UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
                         function(Rest, GetBasePath, $stateParams, $q) {
@@ -242,7 +242,7 @@ export default
                     ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
                         let path = `${GetBasePath('projects')}${$stateParams.id}`;
                         Rest.setUrl(path);
-                        return Rest.get(path).then((res) => res.data);
+                        return Rest.get(path).then(response => response.data);
                     }],
                     UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
                         function(Rest, GetBasePath, $stateParams, $q) {

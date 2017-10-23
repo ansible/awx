@@ -42,7 +42,7 @@
                 Rest.setUrl(url);
                 if (action_label === 'cancel') {
                     Rest.post()
-                        .success(function () {
+                        .then(() => {
                             $('#prompt-modal').modal('hide');
                             if (callback) {
                                 scope.$emit(callback, action_label);
@@ -52,7 +52,7 @@
                                 Wait('stop');
                             }
                         })
-                        .error(function(obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             if (status === 403) {
@@ -64,7 +64,7 @@
                         });
                 } else {
                     Rest.destroy()
-                        .success(function () {
+                        .then(() => {
                             $('#prompt-modal').modal('hide');
                             if (callback) {
                                 scope.$emit(callback, action_label);
@@ -81,7 +81,7 @@
                                 Wait('stop');
                             }
                         })
-                        .error(function (obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             if (status === 403) {
@@ -119,7 +119,7 @@
             if (action_label === 'cancel') {
                 Rest.setUrl(url);
                 Rest.get()
-                    .success(function(data) {
+                    .then(({data}) => {
                         if (data.can_cancel) {
                             scope.$emit('CancelJob');
                         }
@@ -127,7 +127,7 @@
                             scope.$emit('CancelNotAllowed');
                         }
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             ' failed. GET returned: ' + status });
                     });

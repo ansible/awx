@@ -20,11 +20,11 @@ export default
                 var getManagementJobs = function(){
                     Rest.setUrl(defaultUrl);
                     Rest.get()
-                        .success(function(data){
+                        .then(({data}) => {
                             $scope.mgmtCards = data.results;
                             Wait('stop');
                         })
-                        .error(function(data, status){
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, null, {hdr: i18n._('Error!'),
                             msg: i18n.sprintf(i18n._('Call to %s failed. Return status: %d'), (defaultUrl === undefined) ? "undefined" : defaultUrl, status )});
                         });
@@ -128,13 +128,13 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .then(({data}) => {
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
                                             $("#configure-dialog").dialog('close');
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
-                                        .error(function(data, status) {
+                                        .catch(({data, status}) => {
                                             let template_id = scope.job_template_id;
                                             template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
                                             ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
@@ -218,13 +218,13 @@ export default
 
                                     Rest.setUrl(defaultUrl);
                                     Rest.post(data)
-                                        .success(function(data) {
+                                        .then(({data}) => {
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-dialog").dialog('close');
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
-                                        .error(function(data, status) {
+                                        .catch(({data, status}) => {
                                             let template_id = scope.job_template_id;
                                             template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
                                             ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),

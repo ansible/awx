@@ -45,12 +45,12 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                     Wait('start');
                     Rest.setUrl(workflow.url);
                     Rest.destroy()
-                        .success(function() {
+                        .then(() => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             $state.go('jobs');
                         })
-                        .error(function(obj, status) {
+                        .catch(({obj, status}) => {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
                             ProcessErrors(null, obj, status, null, {
@@ -67,11 +67,11 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
             var doCancel = function() {
                 Rest.setUrl(workflow.url + 'cancel');
                 Rest.post({})
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                     })
-                    .error(function(obj, status) {
+                    .catch(({obj, status}) => {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         ProcessErrors(null, obj, status, null, {
@@ -94,7 +94,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                     Wait('start');
                     Rest.setUrl(workflow.url + 'cancel');
                     Rest.get()
-                        .success(function(data) {
+                        .then(({data}) => {
                             if (data.can_cancel === true) {
                                 doCancel();
                             } else {

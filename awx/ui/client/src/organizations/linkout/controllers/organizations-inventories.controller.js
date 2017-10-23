@@ -28,7 +28,7 @@ export default ['$scope', '$rootScope', '$location',
             $rootScope.flashMessage = null;
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()
-                .success(function(data) {
+                .then(({data}) => {
 
                     $scope.organization_name = data.name;
                     $scope.name = data.name;
@@ -194,10 +194,10 @@ export default ['$scope', '$rootScope', '$location',
                     Wait('start');
                     Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
                     Rest.get()
-                        .success(function(data) {
+                        .then(({data}) => {
                             $scope.$emit('GroupSummaryReady', event, inventory, data);
                         })
-                        .error(function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, null, {
                                 hdr: 'Error!',
                                 msg: 'Call to ' + inventory.related.inventory_sources + ' failed. GET returned status: ' + status
@@ -218,10 +218,10 @@ export default ['$scope', '$rootScope', '$location',
                     url += "&order_by=-finished&page_size=5";
                     Rest.setUrl(url);
                     Rest.get()
-                        .success(function(data) {
+                        .then(({data}) => {
                             $scope.$emit('HostSummaryReady', event, data);
                         })
-                        .error(function(data, status) {
+                        .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, null, {
                                 hdr: 'Error!',
                                 msg: 'Call to ' + url + ' failed. GET returned: ' + status

@@ -59,10 +59,10 @@
                  Wait('start');
                  Rest.setUrl(GetBasePath('ad_hoc_commands') + new_job_id + '/');
                  Rest.destroy()
-                     .success(function() {
+                     .then(() => {
                          Wait('stop');
                      })
-                     .error(function (data, status) {
+                     .catch(({data, status}) => {
                          ProcessErrors(scope, data, status,
                            null, { hdr: 'Error!',
                                msg: 'Call to ' + url +
@@ -86,13 +86,13 @@
                  // Re-launch the adhoc job
                  Rest.setUrl(url);
                  Rest.post(postData)
-                     .success(function (data) {
+                     .then(({data}) => {
                           Wait('stop');
                           if($location.path().replace(/^\//, '').split('/')[0] !== 'jobs') {
                               $state.go('adHocJobStdout', {id: data.id});
                           }
                      })
-                     .error(function (data, status) {
+                     .catch(({data, status}) => {
                          ProcessErrors(scope, data, status, {
                              hdr: 'Error!',
                              msg: 'Failed to launch adhoc command. POST ' +
@@ -133,7 +133,7 @@
              url = GetBasePath('ad_hoc_commands') + id + '/relaunch/';
              Rest.setUrl(url);
              Rest.get()
-                 .success(function (data) {
+                 .then(({data}) => {
                      new_job_id = data.id;
 
                      scope.passwords_needed_to_start = data.passwords_needed_to_start;
@@ -148,7 +148,7 @@
                          scope.$emit('StartAdhocRun');
                      }
                  })
-                 .error(function (data, status) {
+                 .catch(({data, status}) => {
                      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                      msg: 'Failed to get job template details. GET returned status: ' + status });
                  });

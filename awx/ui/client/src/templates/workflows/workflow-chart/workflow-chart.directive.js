@@ -894,7 +894,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     goToJobResults(res.results[0].type);
                                 }
                             })
-                            .error(function (data, status) {
+                            .catch(({data, status}) => {
                                 ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Unable to get job: ' + status });
                             });
                         }

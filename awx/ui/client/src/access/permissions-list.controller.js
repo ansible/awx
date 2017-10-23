@@ -21,11 +21,11 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post({ "disassociate": true, "id": Number(userId) })
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
@@ -54,11 +54,11 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post({ "disassociate": true, "id": teamId })
-                    .success(function() {
+                    .then(() => {
                         Wait('stop');
                         $state.go('.', null, {reload: true});
                     })
-                    .error(function(data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
                             hdr: 'Error!',
                             msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status

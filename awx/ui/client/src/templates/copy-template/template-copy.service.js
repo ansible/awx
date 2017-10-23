@@ -12,11 +12,9 @@
                 var defaultUrl = GetBasePath('job_templates') + '?id=' + id;
                 Rest.setUrl(defaultUrl);
                 return Rest.get()
-                    .success(function(res){
-                        return res;
-                    })
-                    .error(function(res, status){
-                        ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+                    .then(response => response)
+                    .catch((error) => {
+                        ProcessErrors($rootScope, error.response, error.status, null, {hdr: 'Error!',
                         msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
                     });
             },
@@ -25,28 +23,28 @@
                 return Rest.get();
             },
             copySurvey: function(source, target){
-                return this.getSurvey(source.related.survey_spec).success( (data) => {
+                return this.getSurvey(source.related.survey_spec).then( (response) => {
                     Rest.setUrl(target.related.survey_spec);
-                    return Rest.post(data);
+                    return Rest.post(response.data);
                 });
             },
-            set: function(data){
+            set: function(results){
                 var defaultUrl = GetBasePath('job_templates');
                 var self = this;
                 Rest.setUrl(defaultUrl);
-                var name = this.buildName(data.results[0].name);
-                data.results[0].name = name + ' @ ' + moment().format('h:mm:ss a'); // 2:49:11 pm
-                return Rest.post(data.results[0])
-                    .success(function(job_template_res){
+                var name = this.buildName(results[0].name);
+                results[0].name = name + ' @ ' + moment().format('h:mm:ss a'); // 2:49:11 pm
+                return Rest.post(results[0])
+                    .then((response) => {
                         // also copy any associated survey_spec
-                        if (data.results[0].summary_fields.survey){
-                            return self.copySurvey(data.results[0], job_template_res).success( () => job_template_res);
+                        if (results[0].summary_fields.survey){
+                            return self.copySurvey(results[0], response.data).then( () => response.data);
                         }
-                        else{
-                            return job_template_res;
+                        else {
+                            return response.data;
                         }
                     })
-                    .error(function(res, status){
+                    .catch(({res, status}) => {
                         ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
                         msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
                     });

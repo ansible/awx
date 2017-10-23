@@ -13,13 +13,13 @@ export default
                     Wait('start');
                     Rest.setUrl(inventory_source.url);
                     Rest.get()
-                    .success(function (data) {
+                    .then(({data}) => {
                         // Get the ID from the correct summary field
                         var update_id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
 
                         $state.go('inventorySyncStdout', {id: update_id});
                     })
-                    .error(function (data, status) {
+                    .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                       msg: 'Failed to retrieve inventory source: ' + inventory_source.url +
                                           ' GET returned status: ' + status });
