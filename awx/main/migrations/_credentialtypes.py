@@ -176,3 +176,13 @@ def migrate_job_credentials(apps, schema_editor):
 
 def create_ovirt4_credtype(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
+
+
+def add_azure_cloud_environment_field(apps, schema_editor):
+    azure_rm_credtype = CredentialType.defaults.get('azure_rm', None)
+    if azure_rm_credtype:
+        azure_rm_credtype = azure_rm_credtype()
+        azure_rm_credtype.pk = CredentialType.objects.get(
+            kind='cloud', name='Microsoft Azure Resource Manager'
+        ).pk
+        azure_rm_credtype.save()
