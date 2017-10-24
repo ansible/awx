@@ -1,7 +1,7 @@
-finite_state_machine_id: 89
+finite_state_machine_id: 11
 name: src/time
 states:
-- id: 3
+- id: 1
   label: Present
   x: 256
   y: 123
@@ -9,14 +9,11 @@ states:
   label: Start
   x: 245
   y: -161
-- id: 1
+- id: 3
   label: Past
   x: -115
   y: 129
 transitions:
-- from_state: Past
-  label: onMessage
-  to_state: Present
 - from_state: Past
   label: onRedo
   to_state: Present
@@ -29,9 +26,6 @@ transitions:
 - from_state: Start
   label: start
   to_state: Present
-- from_state: Present
-  label: onMessage
-  to_state: Past
 - from_state: Present
   label: onUndo
   to_state: Past
