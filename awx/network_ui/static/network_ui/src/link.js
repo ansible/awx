@@ -52,6 +52,7 @@ _Ready.prototype.onNewLink = function (controller, msg_type, message) {
     controller.changeState(Selecting);
     controller.next_controller.handle_message(msg_type, message);
 };
+_Ready.prototype.onNewLink.transitions = ['Selecting'];
 
 
 
@@ -60,6 +61,7 @@ _Start.prototype.start = function (controller) {
     controller.changeState(Ready);
 
 };
+_Start.prototype.start.transitions = ['Ready'];
 
 
 
@@ -68,6 +70,7 @@ _Connected.prototype.start = function (controller) {
     controller.scope.clear_selections();
     controller.changeState(Ready);
 };
+_Connected.prototype.start.transitions = ['Ready'];
 
 
 _Connecting.prototype.onMouseDown = function () {
@@ -121,6 +124,7 @@ _Connecting.prototype.onMouseUp = function (controller) {
         controller.changeState(Ready);
     }
 };
+_Connecting.prototype.onMouseUp.transitions = ['Ready', 'Connected'];
 
 
 _Selecting.prototype.onMouseDown = function () {
@@ -135,4 +139,5 @@ _Selecting.prototype.onMouseUp = function (controller) {
         controller.changeState(Connecting);
     }
 };
+_Selecting.prototype.onMouseUp.transitions = ['Connecting'];
 
