@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pytest
 import mock
 
@@ -234,6 +235,51 @@ def test_create_inventory_smart_inventory_sources(post, get, inventory, admin_us
 
     assert getattr(smart_inventory, 'kind') == 'smart'
     assert jdata['count'] == 0
+
+
+@pytest.mark.django_db
+def test_urlencode_host_filter(post, admin_user, organization):
+    """
+    Host filters saved on the model must correspond to the same result
+    as when that host_filter is used in the URL as a querystring.
+    That means that it must be url-encoded patterns like %22 for quotes
+    must be escaped as the string is saved to the model.
+
+    Expected host filter in this test would match a host such as:
+    inventory.hosts.create(
+        ansible_facts={"ansible_distribution_version": "7.4"}
+    )
+    """
+    # Create smart inventory with host filter that corresponds to querystring
+    post(
+        reverse('api:inventory_list'),
+        data={
+            'name': 'smart inventory', 'kind': 'smart',
+            'organization': organization.pk,
+            'host_filter': 'ansible_facts__ansible_distribution_version=%227.4%22'
+        },
+        user=admin_user,
+        expect=201
+    )
+    # Assert that the saved version of host filter has escaped ""
+    si = Inventory.objects.get(name='smart inventory')
+    assert si.host_filter == 'ansible_facts__ansible_distribution_version="7.4"'
+
+
+@pytest.mark.django_db
+def test_host_filter_unicode(post, admin_user, organization):
+    post(
+        reverse('api:inventory_list'),
+        data={
+            'name': 'smart inventory', 'kind': 'smart',
+            'organization': organization.pk,
+            'host_filter': u'ansible_facts__ansible_distribution=レッドハット'
+        },
+        user=admin_user,
+        expect=201
+    )
+    si = Inventory.objects.get(name='smart inventory')
+    assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [

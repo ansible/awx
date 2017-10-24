@@ -6,6 +6,7 @@ import copy
 import json
 import re
 import six
+import urllib
 
 from jinja2 import Environment, StrictUndefined
 from jinja2.exceptions import UndefinedError
@@ -352,6 +353,7 @@ class SmartFilterField(models.TextField):
         # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
         if not value:
             return None
+        value = urllib.unquote(value)
         try:
             SmartFilter().query_from_string(value)
         except RuntimeError, e:
