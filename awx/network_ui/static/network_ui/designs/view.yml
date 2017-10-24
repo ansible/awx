@@ -1,38 +1,36 @@
-app: view
-panX: 1
-panY: -67
-scaleXY: 1
+finite_state_machine_id: 15
+name: view
 states:
-- label: Start
-  size: 100
+- id: 1
+  label: Start
   x: 498
   y: 175
-- label: Ready
-  size: 100
+- id: 2
+  label: Ready
   x: 506
   y: 395
-- label: Scale
-  size: 100
+- id: 3
+  label: Scale
   x: 310
   y: 626
-- label: Pan
-  size: 100
+- id: 4
+  label: Pan
   x: 741
   y: 631
-- label: Pressed
-  size: 100
+- id: 5
+  label: Pressed
   x: 739
   y: 392
 transitions:
+- from_state: Scale
+  label: onMouseWheel
+  to_state: Ready
 - from_state: Start
   label: start
   to_state: Ready
 - from_state: Ready
   label: onMouseWheel
   to_state: Scale
-- from_state: Scale
-  label: onTimeout
-  to_state: Ready
 - from_state: Ready
   label: onMouseDown
   to_state: Pressed
