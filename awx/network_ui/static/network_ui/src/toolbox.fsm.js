@@ -101,7 +101,7 @@ _Selected.prototype.onMouseUp = function (controller) {
     toolbox.selected_item = null;
     controller.changeState(Ready);
 };
-_Selected.prototype.onMouseUp.transitions = ['Move'];
+_Selected.prototype.onMouseUp.transitions = ['Ready'];
 
 
 _Selecting.prototype.onMouseDown = function (controller) {
@@ -133,7 +133,7 @@ _Selecting.prototype.onMouseDown = function (controller) {
     }
 
 };
-_Selecting.prototype.onMouseDown.transitions = ['Selected'];
+_Selecting.prototype.onMouseDown.transitions = ['Selected', 'Ready'];
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -182,7 +182,7 @@ _Scrolling.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.changeState(Ready);
 
 };
-_Scrolling.prototype.start.transitions = ['Ready'];
+_Scrolling.prototype.onMouseWheel.transitions = ['Ready'];
 
 
 
