@@ -17,7 +17,7 @@ states:
   y: 491
 transitions:
 - from_state: Start
-  label: ''
+  label: start
   to_state: Ready
 - from_state: Ready
   label: onMouseDown

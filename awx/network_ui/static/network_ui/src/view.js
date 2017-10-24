@@ -52,6 +52,7 @@ _Ready.prototype.onMouseDown = function (controller) {
     controller.changeState(Pressed);
 
 };
+_Ready.prototype.onMouseDown.transitions = ['Pressed'];
 
 _Ready.prototype.onTouchStart = function (controller, msg_type, event) {
 
@@ -79,12 +80,14 @@ _Ready.prototype.onTouchStart = function (controller, msg_type, event) {
         controller.changeState(Pressed);
     }
 };
+_Ready.prototype.onTouchStart.transitions = ['Pressed'];
 
 _Ready.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
     controller.changeState(Scale);
     controller.handle_message(msg_type, $event);
 };
+_Ready.prototype.onMouseWheel.transitions = ['Scale'];
 
 
 _Start.prototype.start = function (controller) {
@@ -92,6 +95,7 @@ _Start.prototype.start = function (controller) {
     controller.changeState(Ready);
 
 };
+_Start.prototype.start.transitions = ['Ready'];
 
 _Scale.prototype.onMouseWheel = function (controller, msg_type, message) {
       var delta = message[1];
