@@ -132,7 +132,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 }
 
                 if(params.singleSearchParam) {
-                    return {[params.singleSearchParam]: encodeURIComponent(paramString + "=" + valueString)};
+                    return {[params.singleSearchParam]: paramString + "=" + valueString};
                 }
                 else {
                     return {[paramString] : encodeURIComponent(valueString)};
