@@ -27,7 +27,6 @@ export default
                     // scope.$emit('CancelJob');
                     // scope.$destroy();
                 },
-                icon: "fa-times",
                 "class": "btn btn-default",
                 "id": "password-cancel-button"
             },{
@@ -36,7 +35,6 @@ export default
                     scope.$emit(callback);
                     $('#password-modal').dialog('close');
                 },
-                icon: "fa-check",
                 "class": "btn btn-primary",
                 "id": "password-accept-button"
             }];
@@ -46,7 +44,7 @@ export default
                 scope: scope,
                 buttons: buttons,
                 width: 620,
-                height: 700, //(scope.passwords.length > 1) ? 700 : 500,
+                height: "auto",
                 minWidth: 500,
                 title: 'Launch Configuration',
                 callback: 'DialogReady',
