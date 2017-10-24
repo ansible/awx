@@ -132,6 +132,15 @@ export default
                 else {
                     return;
                 }
+            },
+            deleteHosts(id) {
+                Wait('start');
+                this.url = GetBasePath('inventory_sources') + id + '/hosts/';
+                Rest.setUrl(this.url);
+                return Rest.destroy()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this))
+                    .finally(Wait('stop'));
             }
         };
     }];

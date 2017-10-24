@@ -9,12 +9,12 @@
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
     'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
-    'canAdd', 'hasSyncableSources', 'i18n',
+    'canAdd', 'hasSyncableSources', 'i18n', 'ProcessErrors',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources, i18n){
+        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources, i18n, ProcessErrors){
 
         let list = SourcesListDefinition;
         var inventory_source;
@@ -121,20 +121,42 @@
             var action = function(){
                 delete $rootScope.promptActionBtnClass;
                 Wait('start');
-                SourcesService.delete(inventory_source.id).then(() => {
-                    $('#prompt-modal').modal('hide');
-                    let reloadListStateParams = null;
+                SourcesService.deleteHosts(inventory_source.id).then(() => {
+                    SourcesService.delete(inventory_source.id).then(() => {
+                        $('#prompt-modal').modal('hide');
+                        let reloadListStateParams = null;
 
-                    if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
-                        reloadListStateParams = _.cloneDeep($state.params);
-                        reloadListStateParams.inventory_source_search.page = (parseInt(reloadListStateParams.inventory_source_search.page)-1).toString();
-                    }
-                    if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
-                        $state.go('^', reloadListStateParams, {reload: true});
-                    } else {
-                        $state.go('.', reloadListStateParams, {reload: true});
-                    }
+                        if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
+                            reloadListStateParams = _.cloneDeep($state.params);
+                            reloadListStateParams.inventory_source_search.page = (parseInt(reloadListStateParams.inventory_source_search.page)-1).toString();
+                        }
+                        if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
+                            $state.go('^', reloadListStateParams, {reload: true});
+                        } else {
+                            $state.go('.', reloadListStateParams, {reload: true});
+                        }
+                        Wait('stop');
+                    })
+                    .catch(({data, status}) => {
+                        $('#prompt-modal').modal('hide');
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null,
+                            {
+                                hdr: i18n._('Error!'),
+                                msg: i18n._('There was an error deleting inventory source. Returned status: ') +
+                                    status
+                            });
+                    });
+                })
+                .catch(({data, status}) => {
+                    $('#prompt-modal').modal('hide');
                     Wait('stop');
+                    ProcessErrors($scope, data, status, null,
+                        {
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('There was an error deleting inventory source hosts. Returned status: ') +
+                                status
+                        });
                 });
             };
             // Prompt depends on having $rootScope.promptActionBtnClass available...
