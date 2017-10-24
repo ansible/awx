@@ -1,49 +1,62 @@
-finite_state_machine_id: 120
+finite_state_machine_id: 14
 name: toolbox
 states:
-- id: 6
-  label: Dropping
-  x: 1197
-  y: 427
-- id: 4
-  label: Selected
-  x: 889
-  y: 713
 - id: 2
+  label: Selected
+  x: 1180
+  y: 959
+- id: 6
+  label: Move
+  x: 1409
+  y: 741
+- id: 3
   label: Ready
   x: 892
   y: 429
-- id: 3
+- id: 4
   label: Scrolling
   x: 567
   y: 431
-- id: 1
+- id: 5
   label: Start
   x: 892
   y: 216
-- id: 5
-  label: Move
-  x: 1197
-  y: 708
+- id: 7
+  label: Selecting
+  x: 888
+  y: 710
+- id: 1
+  label: Dropping
+  x: 1358
+  y: 431
 transitions:
-- from_state: Start
-  label: start
-  to_state: Ready
-- from_state: Move
-  label: onMouseUp
-  to_state: Dropping
-- from_state: Dropping
-  label: start
-  to_state: Ready
-- from_state: Ready
+- from_state: Selecting
   label: onMouseDown
   to_state: Selected
-- from_state: Ready
-  label: onMouseWheel
-  to_state: Scrolling
-- from_state: Scrolling
-  label: start
-  to_state: Ready
 - from_state: Selected
   label: onMouseMove
   to_state: Move
+- from_state: Selecting
+  label: onMouseDown
+  to_state: Ready
+- from_state: Selected
+  label: onMouseUp
+  to_state: Ready
+- from_state: Dropping
+  label: start
+  to_state: Ready
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Scrolling
+  label: onMouseWheel
+  to_state: Ready
+- from_state: Ready
+  label: onMouseWheel
+  to_state: Scrolling
+- from_state: Ready
+  label: onMouseDown
+  to_state: Selecting
+- from_state: Move
+  label: onMouseUp
+  to_state: Dropping

@@ -18,19 +18,7 @@ import yaml
 logger = logging.getLogger('transform_fsm')
 
 
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-    parsed_args = docopt(__doc__, args)
-    if parsed_args['--debug']:
-        logging.basicConfig(level=logging.DEBUG)
-    elif parsed_args['--verbose']:
-        logging.basicConfig(level=logging.INFO)
-    else:
-        logging.basicConfig(level=logging.WARNING)
-
-    with open(parsed_args['<input>']) as f:
-        data = yaml.load(f.read())
+def transform_fsm(data):
 
     state_map = dict()
 
@@ -49,6 +37,24 @@ def main(args=None):
 
     for state in data['states']:
         state['functions'] = sorted(state['functions'].items())
+
+    return data
+
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    parsed_args = docopt(__doc__, args)
+    if parsed_args['--debug']:
+        logging.basicConfig(level=logging.DEBUG)
+    elif parsed_args['--verbose']:
+        logging.basicConfig(level=logging.INFO)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+
+    with open(parsed_args['<input>']) as f:
+        data = yaml.load(f.read())
+
+    data = transform_fsm(data)
 
     with open(parsed_args['<output>'], 'w') as f:
         f.write(yaml.safe_dump(data, default_flow_style=False))
