@@ -64,6 +64,7 @@ class V1Credential(object):
         ('openstack', 'OpenStack'),
         ('ovirt4', 'oVirt4'),
         ('insights', 'Insights'),
+        ('tower', 'Ansible Tower'),
     ]
     FIELDS = {
         'kind': models.CharField(
@@ -1058,6 +1059,40 @@ def ovirt4(cls):
                 'OVIRT_URL': '{{host}}',
                 'OVIRT_USERNAME': '{{username}}',
                 'OVIRT_PASSWORD': '{{password}}'
+            }
+        },
+    )
+
+
+@CredentialType.default
+def tower(cls):
+    return cls(
+        kind='cloud',
+        name='Ansible Tower',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'Ansible Tower Hostname',
+                'type': 'string',
+                'help_text': ('The Ansible Tower base URL to authenticate with.')
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['host', 'username', 'password'],
+        },
+        injectors={
+            'env': {
+                'TOWER_HOSTNAME': '{{host}}',
+                'TOWER_USERNAME': '{{username}}',
+                'TOWER_PASSWORD': '{{password}}'
             }
         },
     )
