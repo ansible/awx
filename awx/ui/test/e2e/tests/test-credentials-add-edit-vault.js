@@ -1,6 +1,9 @@
 import uuid from 'uuid';
 
+import { AWX_E2E_TIMEOUT_LONG } from '../settings';
+
 const testID = uuid().substr(0, 8);
+
 const store = {
     organization: {
         name: `org-${testID}`
@@ -123,7 +126,7 @@ module.exports = {
         const row = '#credentials_table tbody tr';
 
         credentials.section.list.section.search
-            .waitForElementVisible('@input', client.globals.longWait)
+            .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)
             .setValue('@input', `name:${store.credential.name}`)
             .click('@searchButton');
 
