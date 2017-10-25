@@ -7,17 +7,26 @@ docker exec -i tools_awx_1 sh <<-EOSH
   make --directory=/awx_devel DATA_GEN_PRESET=e2e bulk_data
 EOSH
 
-# run with with a live browser
-npm --prefix awx/ui run e2e -- --env=debug
+# run all of the tests with a live browser
+npm --prefix awx/ui run e2e
+
+# run a subset of the tests
+npm --prefix awx/ui run e2e -- --filter="test-credentials*"
 
 # setup a local webdriver cluster for test development
 docker-compose \
-  -f awx/ui/client/test/e2e/cluster/docker-compose.yml \
-  -f awx/ui/client/test/e2e/cluster/devel-override.yml \
-  up --scale chrome=2 --scale firefox=0
+  -f awx/ui/test/e2e/cluster/docker-compose.yml \
+  -f awx/ui/test/e2e/cluster/docker-compose.devel-override.yml \
+  up --scale chrome=2 hub chrome
 
-# run headlessly with multiple workers on the cluster
-AWX_E2E_LAUNCH_URL='https://awx:8043' AWX_E2E_WORKERS=2 npm --prefix awx/ui run e2e
+# run headlessly on the cluster
+AWX_E2E_LAUNCH_URL='https://awx:8043' npm --prefix awx/ui run e2e -- --env=cluster
+
+# run with multiple workers
+AWX_E2E_LAUNCH_URL='https://awx:8043' AWX_E2E_CLUSTER_WORKERS=2 \
+  npm --prefix awx/ui run e2e -- --env=cluster --filter="test-*"
 ```
 
-**Note:** Unless overridden in [settings](settings.js), tests will run against `localhost:8043`.
+**Note:**
+- Unless overridden in [settings](settings.js), tests will run against `localhost:8043`.
+- Use `npm --prefix awx/ui run e2e -- --help` to see additional usage information for the test runner.

@@ -1,6 +1,12 @@
 import { EventEmitter } from 'events';
 import { inherits } from 'util';
 
+import {
+    AWX_E2E_USERNAME,
+    AWX_E2E_PASSWORD,
+    AWX_E2E_TIMEOUT_LONG
+} from '../settings';
+
 function Login () {
     EventEmitter.call(this);
 }
@@ -8,14 +14,14 @@ function Login () {
 inherits(Login, EventEmitter);
 
 Login.prototype.command = function command (username, password) {
-    username = username || this.api.globals.awxUsername;
-    password = password || this.api.globals.awxPassword;
+    username = username || AWX_E2E_USERNAME;
+    password = password || AWX_E2E_PASSWORD;
 
     const loginPage = this.api.page.login();
 
     loginPage
         .navigate()
-        .waitForElementVisible('@submit', this.api.globals.longWait)
+        .waitForElementVisible('@submit', AWX_E2E_TIMEOUT_LONG)
         .waitForElementNotVisible('div.spinny')
         .setValue('@username', username)
         .setValue('@password', password)

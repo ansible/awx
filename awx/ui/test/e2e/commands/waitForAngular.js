@@ -1,5 +1,7 @@
+import { AWX_E2E_TIMEOUT_ASYNC } from '../settings';
+
 exports.command = function waitForAngular (callback) {
-    this.timeoutsAsyncScript(this.globals.asyncHookTimeout, () => {
+    this.timeoutsAsyncScript(AWX_E2E_TIMEOUT_ASYNC, () => {
         this.executeAsync(done => {
             if (angular && angular.getTestability) {
                 angular.getTestability(document.body).whenStable(done);

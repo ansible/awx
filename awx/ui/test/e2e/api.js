@@ -3,15 +3,15 @@ import https from 'https';
 import axios from 'axios';
 
 import {
-    awxURL,
-    awxUsername,
-    awxPassword
+    AWX_E2E_URL,
+    AWX_E2E_USERNAME,
+    AWX_E2E_PASSWORD
 } from './settings';
 
 let authenticated;
 
 const session = axios.create({
-    baseURL: awxURL,
+    baseURL: AWX_E2E_URL,
     xsrfHeaderName: 'X-CSRFToken',
     xsrfCookieName: 'csrftoken',
     httpsAgent: new https.Agent({
@@ -24,7 +24,7 @@ const getEndpoint = location => {
         return location;
     }
 
-    return `${awxURL}/api/v2${location}`;
+    return `${AWX_E2E_URL}/api/v2${location}`;
 };
 
 const authenticate = () => {
@@ -35,8 +35,8 @@ const authenticate = () => {
     const uri = getEndpoint('/authtoken/');
 
     const credentials = {
-        username: awxUsername,
-        password: awxPassword
+        username: AWX_E2E_USERNAME,
+        password: AWX_E2E_PASSWORD
     };
 
     return session.post(uri, credentials).then(res => {

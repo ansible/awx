@@ -4,7 +4,7 @@ services:
   hub:
     image: selenium/hub
     ports:
-      - '4444:4444'
+      - 4444:4444
   chrome:
     image: selenium/node-chrome
     links:
@@ -21,3 +21,17 @@ services:
     environment:
       HUB_PORT_4444_TCP_ADDR: hub
       HUB_PORT_4444_TCP_PORT: 4444
+  e2e:
+    image: awx_e2e
+    build:
+      context: ../../../../../
+      dockerfile: awx/ui/test/e2e/cluster/Dockerfile
+    depends_on:
+      - chrome
+    links:
+      - hub
+    volumes:
+      - ..:/awx/awx/ui/test/e2e
+    environment:
+      AWX_E2E_CLUSTER_HOST: hub
+      AWX_E2E_CLUSTER_PORT: 4444
