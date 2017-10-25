@@ -221,9 +221,6 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
         },
 
         related: {
-            templates: {
-                include: "TemplateList",
-            },
             permissions: {
                 name: 'permissions',
                 awToolTip: i18n._('Please save before assigning permissions.'),
@@ -271,7 +268,10 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             },
             notifications: {
                 include: "NotificationsList",
-            }
+            },
+            templates: {
+                include: "TemplateList",
+            },
         }
 
     };
