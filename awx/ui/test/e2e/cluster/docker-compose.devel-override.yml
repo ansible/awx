@@ -1,0 +1,18 @@
+---
+version: '2'
+networks:
+  default:
+    external:
+      name: tools_default
+services:
+  chrome:
+    external_links:
+      - tools_awx_1:awx
+  firefox:
+    external_links:
+      - tools_awx_1:awx
+  e2e:
+    external_links:
+      - tools_awx_1:awx
+    environment:
+      AWX_E2E_URL: https://awx:8043
