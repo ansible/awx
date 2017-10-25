@@ -144,7 +144,7 @@ return {
         instance_filters: {
             label: i18n._("Instance Filters"),
             type: 'text',
-            ngShow: "source && (source.value == 'ec2' || source.value == 'vmware')",
+            ngShow: "source && (source.value == 'ec2' || source.value == 'vmware' || source.value == 'tower')",
             dataTitle: i18n._('Instance Filters'),
             dataPlacement: 'right',
             awPopOverWatch: 'instanceFilterPopOver',
