@@ -1912,6 +1912,8 @@ class RunInventoryUpdate(BaseTask):
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+        elif inventory_update.source == 'tower':
+            env['TOWER_INVENTORY'] = inventory_update.instance_filters
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
         # add private_data_files

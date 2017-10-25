@@ -833,6 +833,16 @@ OVIRT4_EXCLUDE_EMPTY_GROUPS = True
 OVIRT4_INSTANCE_ID_VAR = 'id'
 
 # ---------------------
+# ----- Tower     -----
+# ---------------------
+TOWER_ENABLED_VAR = 'status'
+TOWER_ENABLED_VALUE = 'enabled'
+TOWER_GROUP_FILTER = r'^.+$'
+TOWER_HOST_FILTER = r'^.+$'
+TOWER_EXCLUDE_EMPTY_GROUPS = True
+TOWER_INSTANCE_ID_VAR = 'id'
+
+# ---------------------
 # ----- Foreman -----
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'

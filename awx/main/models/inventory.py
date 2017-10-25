@@ -1203,7 +1203,7 @@ class InventorySourceOptions(BaseModel):
                 raise ValidationError(_('Invalid filter expression: %(filter)s') %
                                       {'filter': ', '.join(invalid_filters)})
             return instance_filters
-        elif self.source == 'vmware':
+        elif self.source in ('vmware', 'tower'):
             return instance_filters
         else:
             return ''

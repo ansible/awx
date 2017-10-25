@@ -54,7 +54,7 @@ def parse_configuration():
     host_name = os.environ.get("TOWER_HOSTNAME", None)
     username = os.environ.get("TOWER_USERNAME", None)
     password = os.environ.get("TOWER_PASSWORD", None)
-    ignore_ssl = os.environ.get("TOWER_IGNORE_SSL", "0").lower() in ("1", "yes", "true")
+    ignore_ssl = os.environ.get("TOWER_IGNORE_SSL", "1").lower() in ("1", "yes", "true")
     inventory = os.environ.get("TOWER_INVENTORY", None)
 
     errors = []

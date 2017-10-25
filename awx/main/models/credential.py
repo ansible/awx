@@ -1092,7 +1092,7 @@ def tower(cls):
             'env': {
                 'TOWER_HOSTNAME': '{{host}}',
                 'TOWER_USERNAME': '{{username}}',
-                'TOWER_PASSWORD': '{{password}}'
+                'TOWER_PASSWORD': '{{password}}',
             }
         },
     )
