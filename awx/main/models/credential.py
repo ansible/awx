@@ -249,10 +249,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     ])
 
     def __getattr__(self, item):
-        if item in V1Credential.FIELDS:
-            return self.inputs.get(item, V1Credential.FIELDS[item].default)
-        elif item in self.inputs:
-            return self.inputs[item]
+        if item != 'inputs':
+            if item in V1Credential.FIELDS:
+                return self.inputs.get(item, V1Credential.FIELDS[item].default)
+            elif item in self.inputs:
+                return self.inputs[item]
         raise AttributeError(item)
 
     def __setattr__(self, item, value):
