@@ -56,6 +56,7 @@ def parse_configuration():
     password = os.environ.get("TOWER_PASSWORD", None)
     ignore_ssl = os.environ.get("TOWER_IGNORE_SSL", "1").lower() in ("1", "yes", "true")
     inventory = os.environ.get("TOWER_INVENTORY", None)
+    license_type = os.environ.get("TOWER_LICENSE_TYPE", "enterprise")
 
     errors = []
     if not host_name:
@@ -74,14 +75,30 @@ def parse_configuration():
                 tower_user=username,
                 tower_pass=password,
                 tower_inventory=inventory,
+                tower_license_type=license_type,
                 ignore_ssl=ignore_ssl)
 
 
-def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, ignore_ssl=False):
+def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_type, ignore_ssl=False):
     if not re.match('(?:http|https)://', tower_host):
         tower_host = "https://{}".format(tower_host)
-    inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1&towervars=1".format(inventory))
+    inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1&towervars=1&all=1".format(inventory.replace('/', '')))
+    config_url = urljoin(tower_host, "/api/v2/config/")
     try:
+        if license_type != "open":
+            config_response = requests.get(config_url,
+                                           auth=HTTPBasicAuth(tower_user, tower_pass),
+                                           verify=not ignore_ssl)
+            if config_response.ok:
+                source_type = config_response.json()['license_info']['license_type']
+                if not source_type == license_type:
+                    print("Tower server licenses must match: source: {} local: {}".format(source_type,
+                                                                                          license_type))
+                    sys.exit(1)
+            else:
+                print("Failed to validate the license of the remote Tower: {}".format(config_response.data))
+                sys.exit(1)
+
         response = requests.get(inventory_url,
                                 auth=HTTPBasicAuth(tower_user, tower_pass),
                                 verify=not ignore_ssl)
@@ -101,6 +118,7 @@ def main():
                                            config['tower_user'],
                                            config['tower_pass'],
                                            config['tower_inventory'],
+                                           config['tower_license_type'],
                                            ignore_ssl=config['ignore_ssl'])
     print(
         json.dumps(

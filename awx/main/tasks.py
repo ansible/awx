@@ -1914,6 +1914,7 @@ class RunInventoryUpdate(BaseTask):
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'tower':
             env['TOWER_INVENTORY'] = inventory_update.instance_filters
+            env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
         # add private_data_files

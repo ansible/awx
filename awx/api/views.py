@@ -2443,7 +2443,7 @@ class InventoryScriptView(RetrieveAPIView):
                 for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
                     if towervars:
-                        tower_dict = dict(remote_tower_enabled=host.enabled,
+                        tower_dict = dict(remote_tower_enabled=str(host.enabled).lower(),
                                           remote_tower_id=host.id)
                         data['_meta']['hostvars'][host.name].update(tower_dict)
 
