@@ -33,6 +33,7 @@ export default {
         ListDefinition: ['TemplateList', '$transition$', (TemplateList, $transition$) => {
             let id = $transition$.params().project_id;
             TemplateList.actions.add.ngClick = `$state.go('templates.addJobTemplate', {project_id: ${id}})`;
+            TemplateList.basePath = 'job_templates';
             return TemplateList;
         }],
         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
