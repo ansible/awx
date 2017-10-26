@@ -86,20 +86,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     };
 
     $scope.smartInventory = function() {
-        // Gather up search terms and pass them to the add smart inventory form
-        let stateParamsCopy = angular.copy($state.params.host_search);
-        let defaults = _.find($state.$current.path, (step) => {
-            if(step && step.params && step.params.hasOwnProperty(`host_search`)){
-                return step.params.hasOwnProperty(`host_search`);
-            }
-        }).params[`host_search`].config.value;
-
-        // Strip defaults out of the state params copy
-        angular.forEach(Object.keys(defaults), function(value) {
-            delete stateParamsCopy[value];
-        });
-
-        $state.go('inventories.addSmartInventory', {hostfilter: JSON.stringify(stateParamsCopy)});
+        $state.go('inventories.addSmartInventory', {hostfilter: JSON.stringify({"host_filter":`${$state.params.host_search.host_filter}`})});
     };
 
     $scope.editInventory = function(host) {
