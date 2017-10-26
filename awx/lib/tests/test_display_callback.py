@@ -28,9 +28,9 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
                                   'ANSIBLE_CALLBACK_PLUGINS': PLUGINS}):
     from ansible.cli.playbook import PlaybookCLI
     from ansible.executor.playbook_executor import PlaybookExecutor
-    from ansible.inventory import Inventory
+    from ansible.inventory.manager import InventoryManager
     from ansible.parsing.dataloader import DataLoader
-    from ansible.vars import VariableManager
+    from ansible.vars.manager import VariableManager
 
     # Add awx/lib to sys.path so we can use the plugin
     path = os.path.abspath(os.path.join(PLUGINS, '..', '..'))
@@ -67,9 +67,8 @@ def executor(tmpdir_factory, request):
     cli.parse()
     options = cli.parser.parse_args(['-v'])[0]
     loader = DataLoader()
-    variable_manager = VariableManager()
-    inventory = Inventory(loader=loader, variable_manager=variable_manager,
-                          host_list=['localhost'])
+    variable_manager = VariableManager(loader=loader)
+    inventory = InventoryManager(loader=loader, sources='localhost,')
     variable_manager.set_inventory(inventory)
 
     return PlaybookExecutor(playbooks=playbook_files, inventory=inventory,
