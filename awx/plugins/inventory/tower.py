@@ -51,7 +51,7 @@ def parse_configuration():
         help='Return all hosts known to Tower given a particular inventory',
     )
     parser.parse_args()
-    host_name = os.environ.get("TOWER_HOSTNAME", None)
+    host_name = os.environ.get("TOWER_HOST", None)
     username = os.environ.get("TOWER_USERNAME", None)
     password = os.environ.get("TOWER_PASSWORD", None)
     ignore_ssl = os.environ.get("TOWER_IGNORE_SSL", "1").lower() in ("1", "yes", "true")
@@ -60,7 +60,7 @@ def parse_configuration():
 
     errors = []
     if not host_name:
-        errors.append("Missing TOWER_HOSTNAME in environment")
+        errors.append("Missing TOWER_HOST in environment")
     if not username:
         errors.append("Missing TOWER_USERNAME in environment")
     if not password:

@@ -1090,7 +1090,7 @@ def tower(cls):
         },
         injectors={
             'env': {
-                'TOWER_HOSTNAME': '{{host}}',
+                'TOWER_HOST': '{{host}}',
                 'TOWER_USERNAME': '{{username}}',
                 'TOWER_PASSWORD': '{{password}}',
             }
