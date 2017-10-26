@@ -184,6 +184,8 @@ class BaseAccess(object):
     '''
 
     model = None
+    select_related = ()
+    prefetch_related = ()
 
     def __init__(self, user, save_messages=False):
         self.user = user
@@ -193,9 +195,22 @@ class BaseAccess(object):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
+            qs = self.model.objects.all()
         else:
-            return self.model.objects.none()
+            qs = self.filtered_queryset()
+
+        # Apply queryset optimizations
+        if self.select_related:
+            qs = qs.select_related(*self.select_related)
+        if self.prefetch_related:
+            qs = qs.prefetch_related(*self.prefetch_related)
+
+        return qs
+
+    def filtered_queryset(self):
+        # Override in subclasses
+        # filter objects according to user's read access
+        return self.model.objects.none()
 
     def can_read(self, obj):
         return bool(obj and self.get_queryset().filter(pk=obj.pk).exists())
@@ -404,14 +419,11 @@ class BaseAccess(object):
 class InstanceAccess(BaseAccess):
 
     model = Instance
+    prefetch_related = ('rampart_groups',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = Instance.objects.all().distinct()
-        else:
-            qs = Instance.objects.filter(
-                rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
-        return qs.prefetch_related('rampart_groups')
+    def filtered_queryset(self):
+        return Instance.objects.filter(
+            rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
 
     def can_add(self, data):
         return False
@@ -426,14 +438,11 @@ class InstanceAccess(BaseAccess):
 class InstanceGroupAccess(BaseAccess):
 
     model = InstanceGroup
+    prefetch_related = ('instances',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = InstanceGroup.objects.all()
-        else:
-            qs = InstanceGroup.objects.filter(
-                organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
-        return qs.prefetch_related('instances')
+    def filtered_queryset(self):
+        return InstanceGroup.objects.filter(
+            organization__in=Organization.accessible_pk_qs(self.user, 'admin_role'))
 
     def can_add(self, data):
         return False
@@ -459,12 +468,10 @@ class UserAccess(BaseAccess):
     '''
 
     model = User
+    prefetch_related = ('profile',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = User.objects.all()
-
-        elif settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+    def filtered_queryset(self):
+        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
                 (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
             qs = User.objects.all()
         else:
@@ -479,7 +486,7 @@ class UserAccess(BaseAccess):
                     pk__in=Role.objects.filter(singleton_name__in = [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
                 )
             ).distinct()
-        return qs.prefetch_related('profile')
+        return qs
 
 
     def can_add(self, data):
@@ -547,10 +554,10 @@ class OrganizationAccess(BaseAccess):
     '''
 
     model = Organization
+    prefetch_related = ('created_by', 'modified_by',)
 
-    def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.prefetch_related('created_by', 'modified_by').all()
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_change(self, obj, data):
@@ -607,10 +614,10 @@ class InventoryAccess(BaseAccess):
     '''
 
     model = Inventory
+    select_related = ('created_by', 'modified_by', 'organization',)
 
-    def get_queryset(self, allowed=None, ad_hoc=None):
-        qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by', 'organization').all()
+    def filtered_queryset(self, allowed=None, ad_hoc=None):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_read(self, obj):
@@ -690,15 +697,12 @@ class HostAccess(BaseAccess):
     '''
 
     model = Host
+    select_related = ('created_by', 'modified_by', 'inventory',
+                      'last_job__job_template', 'last_job_host_summary__job',)
+    prefetch_related = ('groups',)
 
-    def get_queryset(self):
-        inv_qs = Inventory.accessible_objects(self.user, 'read_role')
-        qs = self.model.objects.filter(inventory__in=inv_qs)
-        qs = qs.select_related('created_by', 'modified_by', 'inventory',
-                               'last_job__job_template',
-                               'last_job_host_summary__job')
-        qs =qs.prefetch_related('groups').all()
-        return qs
+    def filtered_queryset(self):
+        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_read(self, obj):
         return obj and self.user in obj.inventory.read_role
@@ -750,11 +754,11 @@ class GroupAccess(BaseAccess):
     '''
 
     model = Group
+    select_related = ('created_by', 'modified_by', 'inventory',)
+    prefetch_related = ('parents', 'children',)
 
-    def get_queryset(self):
-        qs = Group.objects.filter(inventory__in=Inventory.accessible_objects(self.user, 'read_role'))
-        qs = qs.select_related('created_by', 'modified_by', 'inventory')
-        return qs.prefetch_related('parents', 'children').all()
+    def filtered_queryset(self):
+        return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_read(self, obj):
         return obj and self.user in obj.inventory.read_role
@@ -817,12 +821,10 @@ class InventorySourceAccess(BaseAccess):
     '''
 
     model = InventorySource
+    select_related = ('created_by', 'modified_by', 'inventory',)
 
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        qs = qs.select_related('created_by', 'modified_by', 'inventory')
-        inventory_ids = self.user.get_queryset(Inventory)
-        return qs.filter(Q(inventory_id__in=inventory_ids))
+    def filtered_queryset(self):
+        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_read(self, obj):
         if obj and obj.inventory:
@@ -877,16 +879,11 @@ class InventoryUpdateAccess(BaseAccess):
     '''
 
     model = InventoryUpdate
+    select_related = ('created_by', 'modified_by', 'inventory_source__inventory',)
+    prefetch_related = ('unified_job_template', 'instance_group',)
 
-    def get_queryset(self):
-        qs = InventoryUpdate.objects.distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'inventory_source__inventory')
-        qs = qs.prefetch_related(
-            'unified_job_template',
-            'instance_group'
-        )
-        inventory_sources_qs = self.user.get_queryset(InventorySource)
-        return qs.filter(inventory_source__in=inventory_sources_qs)
+    def filtered_queryset(self):
+        return qs.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
@@ -931,7 +928,7 @@ class CredentialTypeAccess(BaseAccess):
             return False
         return super(CredentialTypeAccess, self).get_method_capability(method, obj, parent_obj)
 
-    def get_queryset(self):
+    def filtered_queryset(self):
         return self.model.objects.all()
 
 
@@ -952,17 +949,12 @@ class CredentialAccess(BaseAccess):
     '''
 
     model = Credential
+    select_related = ('created_by', 'modified_by',)
+    prefetch_related = ('admin_role', 'use_role', 'read_role',
+                        'admin_role__parents', 'admin_role__members',)
 
-    def get_queryset(self):
-        """Return the queryset for credentials, based on what the user is
-        permitted to see.
-        """
-        qs = self.model.accessible_objects(self.user, 'read_role')
-        qs = qs.select_related('created_by', 'modified_by')
-        qs = qs.prefetch_related(
-            'admin_role', 'use_role', 'read_role',
-            'admin_role__parents', 'admin_role__members')
-        return qs
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_read(self, obj):
@@ -1013,10 +1005,10 @@ class TeamAccess(BaseAccess):
     '''
 
     model = Team
+    select_related = ('created_by', 'modified_by', 'organization',)
 
-    def get_queryset(self):
-        qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by', 'organization').all()
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_add(self, data):
@@ -1079,12 +1071,10 @@ class ProjectAccess(BaseAccess):
     '''
 
     model = Project
+    select_related = ('modified_by', 'credential', 'current_job', 'last_job',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
-        qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('modified_by', 'credential', 'current_job', 'last_job').all()
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_add(self, data):
@@ -1125,20 +1115,13 @@ class ProjectUpdateAccess(BaseAccess):
     '''
 
     model = ProjectUpdate
+    select_related = ('created_by', 'modified_by', 'project',)
+    prefetch_related = ('unified_job_template', 'instance_group',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.filter(
-                project__in=Project.accessible_pk_qs(self.user, 'read_role')
-            )
-        qs = qs.select_related('created_by', 'modified_by', 'project')
-        qs = qs.prefetch_related(
-            'unified_job_template',
-            'instance_group'
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            project__in=Project.accessible_pk_qs(self.user, 'read_role')
         )
-        return qs
 
     @check_superuser
     def can_cancel(self, obj):
@@ -1165,14 +1148,11 @@ class JobTemplateAccess(BaseAccess):
     '''
 
     model = JobTemplate
+    select_related = ('created_by', 'modified_by', 'inventory', 'project',
+                      'credential', 'next_schedule',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
-                                 'credential', 'next_schedule').all()
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     def can_add(self, data):
         '''
@@ -1335,18 +1315,16 @@ class JobAccess(BaseAccess):
     '''
 
     model = Job
+    select_related = ('created_by', 'modified_by', 'job_template', 'inventory',
+                      'project', 'credential', 'job_template',)
+    prefetch_related = (
+        'unified_job_template',
+        'instance_group',
+        Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+    )
 
-    def get_queryset(self):
+    def filtered_queryset(self):
         qs = self.model.objects
-        qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
-                               'project', 'credential', 'job_template')
-        qs = qs.prefetch_related(
-            'unified_job_template',
-            'instance_group',
-            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
-        )
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
 
         qs_jt = qs.filter(
             job_template__in=JobTemplate.accessible_objects(self.user, 'read_role')
@@ -1553,17 +1531,13 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
       beyond the standard admin access to its WFJT
     '''
     model = WorkflowJobTemplateNode
+    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',
+                        'unified_job_template',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.filter(
-                workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
-                    self.user, 'read_role'))
-        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes',
-                                 'unified_job_template')
-        return qs
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                self.user, 'read_role'))
 
     def can_use_prompted_resources(self, data):
         return (
@@ -1636,17 +1610,13 @@ class WorkflowJobNodeAccess(BaseAccess):
     Deletion must happen as a cascade delete from the workflow job.
     '''
     model = WorkflowJobNode
+    select_related = ('unified_job_template', 'job',)
+    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.filter(
-                workflow_job__workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
-                    self.user, 'read_role'))
-        qs = qs.select_related('unified_job_template', 'job')
-        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
-        return qs
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            workflow_job__workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                self.user, 'read_role'))
 
     @check_superuser
     def can_add(self, data):
@@ -1671,14 +1641,11 @@ class WorkflowJobTemplateAccess(BaseAccess):
     '''
 
     model = WorkflowJobTemplate
+    select_related = ('created_by', 'modified_by', 'next_schedule',
+                      'admin_role', 'execute_role', 'read_role',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by', 'next_schedule',
-                                 'admin_role', 'execute_role', 'read_role').all()
+    def filtered_queryset(self):
+        return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
     def can_read(self, obj):
@@ -1775,15 +1742,12 @@ class WorkflowJobAccess(BaseAccess):
        I can also cancel it if I started it
     '''
     model = WorkflowJob
+    select_related = ('created_by', 'modified_by',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = WorkflowJob.objects.filter(
-                workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
-                    self.user, 'read_role'))
-        return qs.select_related('created_by', 'modified_by')
+    def filtered_queryset(self):
+        return WorkflowJob.objects.filter(
+            workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                self.user, 'read_role'))
 
     def can_add(self, data):
         # Old add-start system for launching jobs is being depreciated, and
@@ -1853,16 +1817,10 @@ class AdHocCommandAccess(BaseAccess):
     - I have read access to the inventory
     '''
     model = AdHocCommand
+    select_related = ('created_by', 'modified_by', 'inventory', 'credential',)
 
-    def get_queryset(self):
-        qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'modified_by', 'inventory',
-                               'credential')
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
-
-        inventory_qs = Inventory.accessible_objects(self.user, 'read_role')
-        return qs.filter(inventory__in=inventory_qs)
+    def filtered_queryset(self):
+        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_add(self, data, validate_license=True):
         if not data:  # So the browseable API will work
@@ -1938,15 +1896,12 @@ class JobHostSummaryAccess(BaseAccess):
     '''
 
     model = JobHostSummary
+    select_related = ('job', 'job__job_template', 'host',)
 
-    def get_queryset(self):
-        qs = self.model.objects
-        qs = qs.select_related('job', 'job__job_template', 'host')
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
+    def filtered_queryset(self):
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
-        return qs.filter(job__in=job_qs, host__in=host_qs)
+        return self.model.objects.filter(job__in=job_qs, host__in=host_qs)
 
     def can_add(self, data):
         return False
@@ -1964,15 +1919,10 @@ class JobEventAccess(BaseAccess):
     '''
 
     model = JobEvent
+    prefetch_related = ('hosts', 'children', 'job__job_template', 'host',)
 
-    def get_queryset(self):
-        qs = self.model.objects
-        qs = qs.prefetch_related('hosts', 'children', 'job__job_template', 'host')
-
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
-
-        return qs.filter(
+    def filtered_queryset(self):
+        return self.model.objects.filter(
             Q(host__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role')) |
             Q(job__job_template__in=JobTemplate.accessible_pk_qs(self.user, 'read_role')))
 
@@ -1994,40 +1944,38 @@ class UnifiedJobTemplateAccess(BaseAccess):
     '''
 
     model = UnifiedJobTemplate
+    select_related = (
+        'created_by',
+        'modified_by',
+        'next_schedule',
+    )
+    # prefetch last/current jobs so we get the real instance
+    prefetch_related = (
+        'last_job',
+        'current_job',
+        Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+    )
+
+    # WISH - sure would be nice if the following worked, but it does not.
+    # In the future, as django and polymorphic libs are upgraded, try again.
+
+    #qs = qs.prefetch_related(
+    #    'project',
+    #    'inventory',
+    #    'credential',
+    #    'credential__credential_type',
+    #)
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
+            Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
+                Inventory, self.user, 'read_role')))
 
     def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.filter(
-                Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
-                Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
-                    Inventory, self.user, 'read_role')))
-        qs = qs.exclude(inventorysource__source="")
-
-        qs = qs.select_related(
-            'created_by',
-            'modified_by',
-            'next_schedule',
-        )
-        # prefetch last/current jobs so we get the real instance
-        qs = qs.prefetch_related(
-            'last_job',
-            'current_job',
-            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
-        )
-
-        # WISH - sure would be nice if the following worked, but it does not.
-        # In the future, as django and polymorphic libs are upgraded, try again.
-
-        #qs = qs.prefetch_related(
-        #    'project',
-        #    'inventory',
-        #    'credential',
-        #    'credential__credential_type',
-        #)
-
-        return qs.all()
+        # TODO: remove after the depreciation of v1 API
+        qs = super(UnifiedJobTemplateAccess, self).get_queryset()
+        return qs.exclude(inventorysource__source="")
 
     def can_start(self, obj, validate_license=True):
         access_class = access_registry[obj.__class__]
@@ -2042,50 +1990,46 @@ class UnifiedJobAccess(BaseAccess):
     '''
 
     model = UnifiedJob
+    prefetch_related = (
+        'created_by',
+        'modified_by',
+        'unified_job_node__workflow_job',
+        'unified_job_template',
+        'instance_group',
+        Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+    )
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
-            org_auditor_qs = Organization.objects.filter(
-                Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
-            qs = self.model.objects.filter(
-                Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
-                Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs) |
-                Q(adhoccommand__inventory__id__in=inv_pk_qs) |
-                Q(job__inventory__organization__in=org_auditor_qs) |
-                Q(job__project__organization__in=org_auditor_qs)
-            )
-        qs = qs.prefetch_related(
-            'created_by',
-            'modified_by',
-            'unified_job_node__workflow_job',
-            'unified_job_template',
-            'instance_group',
-            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
+    # WISH - sure would be nice if the following worked, but it does not.
+    # In the future, as django and polymorphic libs are upgraded, try again.
+
+    #qs = qs.prefetch_related(
+    #    'project',
+    #    'inventory',
+    #    'credential',
+    #    'credential__credential_type',
+    #    'job_template',
+    #    'inventory_source',
+    #    'project___credential',
+    #    'inventory_source___credential',
+    #    'inventory_source___inventory',
+    #    'job_template__inventory',
+    #    'job_template__project',
+    #    'job_template__credential',
+    #)
+
+    def filtered_queryset(self):
+        inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
+        org_auditor_qs = Organization.objects.filter(
+            Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+        qs = self.model.objects.filter(
+            Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
+            Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs) |
+            Q(adhoccommand__inventory__id__in=inv_pk_qs) |
+            Q(job__inventory__organization__in=org_auditor_qs) |
+            Q(job__project__organization__in=org_auditor_qs)
         )
-
-        # WISH - sure would be nice if the following worked, but it does not.
-        # In the future, as django and polymorphic libs are upgraded, try again.
-
-        #qs = qs.prefetch_related(
-        #    'project',
-        #    'inventory',
-        #    'credential',
-        #    'credential__credential_type',
-        #    'job_template',
-        #    'inventory_source',
-        #    'project___credential',
-        #    'inventory_source___credential',
-        #    'inventory_source___inventory',
-        #    'job_template__inventory',
-        #    'job_template__project',
-        #    'job_template__credential',
-        #)
         # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
-        qs = qs.defer('result_stdout_text')
-        return qs.all()
+        return qs.defer('result_stdout_text')
 
 
 class ScheduleAccess(BaseAccess):
@@ -2094,13 +2038,11 @@ class ScheduleAccess(BaseAccess):
     '''
 
     model = Schedule
+    select_related = ('created_by', 'modified_by',)
+    prefetch_related = ('unified_job_template',)
 
-    def get_queryset(self):
+    def filtered_queryset(self):
         qs = self.model.objects.all()
-        qs = qs.select_related('created_by', 'modified_by')
-        qs = qs.prefetch_related('unified_job_template')
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
 
         unified_pk_qs = UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')
         inv_src_qs = InventorySource.objects.filter(inventory_id=Inventory._accessible_pk_qs(Inventory, self.user, 'read_role'))
@@ -2140,10 +2082,7 @@ class NotificationTemplateAccess(BaseAccess):
     '''
     model = NotificationTemplate
 
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs
+    def filtered_queryset(self):
         return self.model.objects.filter(
             Q(organization__in=self.user.admin_of_organizations) |
             Q(organization__in=self.user.auditor_of_organizations)
@@ -2188,11 +2127,9 @@ class NotificationAccess(BaseAccess):
     I can see/use a notification if I have permission to
     '''
     model = Notification
+    prefetch_related = ('notification_template',)
 
-    def get_queryset(self):
-        qs = self.model.objects.prefetch_related('notification_template')
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
+    def filtered_queryset(self):
         return self.model.objects.filter(
             Q(notification_template__organization__in=self.user.admin_of_organizations) |
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
@@ -2210,16 +2147,12 @@ class LabelAccess(BaseAccess):
     I can see/use a Label if I have permission to associated organization
     '''
     model = Label
+    prefetch_related = ('modified_by', 'created_by', 'organization',)
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.all().filter(
-                organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
-            )
-        qs = qs.prefetch_related('modified_by', 'created_by', 'organization')
-        return qs
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
+        )
 
     @check_superuser
     def can_read(self, obj):
@@ -2248,8 +2181,14 @@ class ActivityStreamAccess(BaseAccess):
     '''
 
     model = ActivityStream
+    prefetch_related = ('organization', 'user', 'inventory', 'host', 'group',
+                        'inventory_update', 'credential', 'credential_type', 'team',
+                        'ad_hoc_command',
+                        'notification_template', 'notification', 'label', 'role', 'actor',
+                        'schedule', 'custom_inventory_script', 'unified_job_template',
+                        'workflow_job_template_node',)
 
-    def get_queryset(self):
+    def filtered_queryset(self):
         '''
         The full set is returned if the user is:
          - System Administrator
@@ -2271,19 +2210,11 @@ class ActivityStreamAccess(BaseAccess):
          - custom inventory scripts
         '''
         qs = self.model.objects.all()
-        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group',
-                                 'inventory_update', 'credential', 'credential_type', 'team',
-                                 'ad_hoc_command',
-                                 'notification_template', 'notification', 'label', 'role', 'actor',
-                                 'schedule', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template_node')
         # FIXME: the following fields will be attached to the wrong object
         # if they are included in prefetch_related because of
         # https://github.com/django-polymorphic/django-polymorphic/issues/68
         # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
         # 'inventory_source', 'workflow_job_template'
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return qs.all()
 
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
         credential_set = Credential.accessible_objects(self.user, 'read_role')
@@ -2335,9 +2266,7 @@ class CustomInventoryScriptAccess(BaseAccess):
 
     model = CustomInventoryScript
 
-    def get_queryset(self):
-        if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.distinct().all()
+    def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role').all()
 
     @check_superuser
