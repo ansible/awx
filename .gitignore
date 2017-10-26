@@ -49,7 +49,7 @@ __pycache__
 /.istanbul.yml
 **/node_modules/**
 /tmp
-npm-debug.log
+**/npm-debug.log*
 
 # UI build flag files
 awx/ui/.deps_built
