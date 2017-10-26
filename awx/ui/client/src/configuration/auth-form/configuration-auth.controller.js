@@ -205,7 +205,8 @@ export default [
                    scope: $scope.$parent,
                    variable: name,
                    parse_variable: 'parseType',
-                   field_id: form.formDef.name + '_' + name
+                   field_id: form.formDef.name + '_' + name,
+                   readOnly: $scope.$parent.configDataResolve[name] && $scope.$parent.configDataResolve[name].disabled ? true : false
                  });
                  $scope.parseTypeChange('parseType', name);
             }
