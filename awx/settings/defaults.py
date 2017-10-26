@@ -835,12 +835,12 @@ OVIRT4_INSTANCE_ID_VAR = 'id'
 # ---------------------
 # ----- Tower     -----
 # ---------------------
-TOWER_ENABLED_VAR = 'status'
-TOWER_ENABLED_VALUE = 'enabled'
+TOWER_ENABLED_VAR = 'remote_tower_enabled'
+TOWER_ENABLED_VALUE = 'true'
 TOWER_GROUP_FILTER = r'^.+$'
 TOWER_HOST_FILTER = r'^.+$'
 TOWER_EXCLUDE_EMPTY_GROUPS = True
-TOWER_INSTANCE_ID_VAR = 'id'
+TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 
 # ---------------------
 # ----- Foreman -----

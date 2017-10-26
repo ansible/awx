@@ -2377,6 +2377,7 @@ class InventoryScriptView(RetrieveAPIView):
         obj = self.get_object()
         hostname = request.query_params.get('host', '')
         hostvars = bool(request.query_params.get('hostvars', ''))
+        towervars = bool(request.query_params.get('towervars', ''))
         show_all = bool(request.query_params.get('all', ''))
         if show_all:
             hosts_q = dict()
@@ -2441,6 +2442,10 @@ class InventoryScriptView(RetrieveAPIView):
                 data['_meta'].setdefault('hostvars', dict())
                 for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
+                    if towervars:
+                        tower_dict = dict(remote_tower_enabled=host.enabled,
+                                          remote_tower_id=host.id)
+                        data['_meta']['hostvars'][host.name].update(tower_dict)
 
         return Response(data)
 

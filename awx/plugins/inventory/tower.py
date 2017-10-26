@@ -80,7 +80,7 @@ def parse_configuration():
 def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, ignore_ssl=False):
     if not re.match('(?:http|https)://', tower_host):
         tower_host = "https://{}".format(tower_host)
-    inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1".format(inventory))
+    inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1&towervars=1".format(inventory))
     try:
         response = requests.get(inventory_url,
                                 auth=HTTPBasicAuth(tower_user, tower_pass),
