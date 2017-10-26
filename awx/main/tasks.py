@@ -1890,6 +1890,9 @@ class RunInventoryUpdate(BaseTask):
                 env['AZURE_AD_USER'] = passwords.get('source_username', '')
                 env['AZURE_PASSWORD'] = passwords.get('source_password', '')
             env['AZURE_INI_PATH'] = cloud_credential
+            if inventory_update.credential and \
+                    inventory_update.credential.inputs.get('cloud_environment', None):
+                env['AZURE_CLOUD_ENVIRONMENT'] = inventory_update.credential.inputs['cloud_environment']
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')

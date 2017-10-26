@@ -977,6 +977,12 @@ def azure_rm(cls):
                 'id': 'tenant',
                 'label': 'Tenant ID',
                 'type': 'string'
+            }, {
+                'id': 'cloud_environment',
+                'label': 'Azure Cloud Environment',
+                'type': 'string',
+                'help_text': ('Environment variable AZURE_CLOUD_ENVIRONMENT when'
+                              ' using Azure GovCloud or Azure stack.')
             }],
             'required': ['subscription'],
         }
