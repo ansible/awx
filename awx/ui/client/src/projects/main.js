@@ -13,6 +13,7 @@ import { N_ } from '../i18n';
 import GetProjectPath from './factories/get-project-path.factory';
 import GetProjectIcon from './factories/get-project-icon.factory';
 import GetProjectToolTip from './factories/get-project-tool-tip.factory';
+import ProjectsTemplatesRoute from './projects-templates.route';
 
 export default
 angular.module('Projects', [])
@@ -24,9 +25,10 @@ angular.module('Projects', [])
     .factory('GetProjectToolTip', GetProjectToolTip)
     .factory('ProjectList', ProjectList)
     .factory('ProjectsForm', ProjectsForm)
-    .config(['$stateProvider', 'stateDefinitionsProvider',
-        function($stateProvider, stateDefinitionsProvider) {
+    .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
+        function($stateProvider, stateDefinitionsProvider,$stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
+            let stateExtender = $stateExtenderProvider.$get();
             var projectResolve = {
                     CredentialTypes: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
                     (Rest, $stateParams, GetBasePath, ProcessErrors) => {
@@ -45,12 +47,9 @@ angular.module('Projects', [])
                     }
                 ]
             };
-            // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
-            // see: stateDefinition.factory for usage documentation
-            $stateProvider.state({
-                name: 'projects.**',
-                url: '/projects',
-                lazyLoad: () => stateDefinitions.generateTree({
+
+            function generateStateTree() {
+                let projectTree = stateDefinitions.generateTree({
                     parent: 'projects', // top-most node in the generated tree (will replace this state definition)
                     modes: ['add', 'edit'],
                     list: 'ProjectList',
@@ -76,7 +75,25 @@ angular.module('Projects', [])
                         add: projectResolve,
                         edit: projectResolve
                     }
-                })
-            });
+                });
+
+                return Promise.all([
+                    projectTree
+                ]).then((generated) => {
+                    return {
+                        states: _.reduce(generated, (result, definition) => {
+                            return result.concat(definition.states);
+                        }, [
+                            stateExtender.buildDefinition(ProjectsTemplatesRoute),
+                        ])
+                    };
+                });
+            }
+            let stateTree = {
+                name: 'projects.**',
+                url: '/projects',
+                lazyLoad: () => generateStateTree()
+            };
+            $stateProvider.state(stateTree);
         }
     ]);

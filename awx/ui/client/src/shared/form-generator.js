@@ -1950,29 +1950,31 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 if (collection.fieldActions) {
                     html += "<td class=\"List-actionsContainer\"><div class=\"List-tableCell List-actionButtonCell actions\">";
                     for (act in collection.fieldActions) {
-                        fAction = collection.fieldActions[act];
-                        html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
-                        html += (fAction.awToolTip) ? 'aw-tool-tip="' + fAction.awToolTip + '"' : '';
-                        html += (fAction.dataPlacement) ? 'data-placement="' + fAction.dataPlacement + '"' : '';
-                        html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                        html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
-                        html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
-                        html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
-                        html += " class=\"List-actionButton ";
-                        html += (act === 'delete') ? "List-actionButton--delete" : "";
-                        html += "\"";
+                        if (act !== 'columnClass') {
+                            fAction = collection.fieldActions[act];
+                            html += "<button id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
+                            html += (fAction.awToolTip) ? 'aw-tool-tip="' + fAction.awToolTip + '"' : '';
+                            html += (fAction.dataPlacement) ? 'data-placement="' + fAction.dataPlacement + '"' : '';
+                            html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                            html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
+                            html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
+                            html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
+                            html += " class=\"List-actionButton ";
+                            html += (act === 'delete') ? "List-actionButton--delete" : "";
+                            html += "\"";
 
-                        html += ">";
-                        if (fAction.iconClass) {
-                            html += "<i class=\"" + fAction.iconClass + "\"></i>";
-                        } else {
-                            html += SelectIcon({
-                                action: act
-                            });
+                            html += ">";
+                            if (fAction.iconClass) {
+                                html += "<i class=\"" + fAction.iconClass + "\"></i>";
+                            } else {
+                                html += SelectIcon({
+                                    action: act
+                                });
+                            }
+                            // html += SelectIcon({ action: act });
+                            //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
+                            html += "</button>";
                         }
-                        // html += SelectIcon({ action: act });
-                        //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
-                        html += "</button>";
                     }
                     html += "</div></td>";
                     html += "</tr>\n";
