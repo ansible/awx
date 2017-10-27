@@ -30,6 +30,7 @@
     "component-dev": "./node_modules/.bin/karma start client/test/karma.conf.js --auto-watch --no-single-run"
   },
   "optionalDependencies": {
+    "fsevents": "*",
     "browser-sync": "^2.14.0",
     "grunt-browser-sync": "^2.2.0",
     "grunt-contrib-watch": "^1.0.0",
@@ -88,7 +89,7 @@
   "dependencies": {
     "angular": "~1.4.14",
     "angular-breadcrumb": "github:ansible/angular-breadcrumb#0.4.1",
-    "angular-codemirror": "github:ansible/angular-codemirror#1.0.4",
+    "angular-codemirror": "github:ansible/angular-codemirror#release_3.2.2",
     "angular-cookies": "~1.4.14",
     "angular-drag-and-drop-lists": "github:ansible/angular-drag-and-drop-lists#1.4.0",
     "angular-duration-format": "^1.0.1",
@@ -97,8 +98,8 @@
     "angular-moment": "^0.10.1",
     "angular-resource": "~1.4.14",
     "angular-sanitize": "~1.4.14",
-    "angular-scheduler": "github:ansible/angular-scheduler#0.1.1",
-    "angular-tz-extensions": "github:ansible/angular-tz-extensions#0.3.13",
+    "angular-scheduler": "github:ansible/angular-scheduler#release_3.2.2",
+    "angular-tz-extensions": "github:ansible/angular-tz-extensions#release_3.2.2",
     "angular-ui-router": "1.0.0-beta.3",
     "bootstrap": "^3.1.1",
     "bootstrap-datepicker": "^1.4.0",
