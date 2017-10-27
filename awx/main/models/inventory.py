@@ -873,6 +873,7 @@ class InventorySourceOptions(BaseModel):
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
         ('ovirt4', _('oVirt4')),
+        ('tower', _('Ansible Tower')),
         ('custom', _('Custom Script')),
     ]
 
@@ -1126,6 +1127,11 @@ class InventorySourceOptions(BaseModel):
         """No region supprt"""
         return [('all', 'All')]
 
+    @classmethod
+    def get_tower_region_choices(self):
+        """No region supprt"""
+        return [('all', 'All')]
+
     def clean_credential(self):
         if not self.source:
             return None
@@ -1197,7 +1203,7 @@ class InventorySourceOptions(BaseModel):
                 raise ValidationError(_('Invalid filter expression: %(filter)s') %
                                       {'filter': ', '.join(invalid_filters)})
             return instance_filters
-        elif self.source == 'vmware':
+        elif self.source in ('vmware', 'tower'):
             return instance_filters
         else:
             return ''

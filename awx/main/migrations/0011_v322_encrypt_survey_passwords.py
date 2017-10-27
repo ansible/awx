@@ -9,7 +9,7 @@ from awx.main.migrations import _reencrypt as reencrypt
 class Migration(ActivityStreamDisabledMigration):
 
     dependencies = [
-        ('main', '0010_v322_add_support_for_ovirt4_inventory'),
+        ('main', '0010_v322_add_ovirt4_tower_inventory'),
     ]
 
     operations = [
