@@ -54,3 +54,7 @@
   which backward compatibility support for 3.1 use pattern
   [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]
 * Allow relaunching jobs on a subset of hosts, by status.[[#219](https://github.com/ansible/awx/issues/219)]
+* Added `ask_variables_on_launch` to workflow JTs. Block creation of schedules
+  when variables not allowed are given. Block job launch for same cases.
+  [[#497](https://github.com/ansible/awx/issues/497)]
+  [[#478](https://github.com/ansible/awx/issues/478)]

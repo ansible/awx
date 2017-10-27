@@ -535,7 +535,7 @@ def _request(verb):
                         if isinstance(value, list):
                             response.data[key] = []
                             for item in value:
-                                response.data[key].append(str(value))
+                                response.data[key].append(str(item))
                         else:
                             response.data[key] = str(value)
                 except Exception:

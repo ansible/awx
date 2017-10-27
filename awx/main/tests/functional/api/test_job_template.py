@@ -490,14 +490,10 @@ def test_launch_with_extra_credentials_not_allowed(get, post, organization_facto
             credential=machine_credential.pk,
             extra_credentials=[credential.pk, net_credential.pk]
         ),
-        objs.superusers.admin
+        objs.superusers.admin, expect=400
     )
-    assert 'credential' in resp.data['ignored_fields'].keys()
-    assert 'extra_credentials' in resp.data['ignored_fields'].keys()
-    job_pk = resp.data.get('id')
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
+    assert 'credential' in resp.data
+    assert 'extra_credentials' in resp.data
 
 
 @pytest.mark.django_db

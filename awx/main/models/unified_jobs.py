@@ -385,6 +385,30 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         copy_m2m_relationships(self, unified_jt, fields)
         return unified_jt
 
+    def accept_or_ignore_variables(self, data, errors=None):
+        '''
+        If subclasses accept any `variables` or `extra_vars`, they should
+        define _accept_or_ignore_variables to place those variables in the accepted dict,
+        according to the acceptance rules of the template.
+        '''
+        if errors is None:
+            errors = []
+        if not isinstance(data, dict):
+            errors.append(
+                _('Variables must be a dictionary, received {vars_type} instead.'.format(
+                    vars_type=type(data))))
+            return ({}, data, errors)
+        elif hasattr(self, '_accept_or_ignore_variables'):
+            # SurveyJobTemplateMixin cannot override any methods because of
+            # resolution order, forced by how metaclass processes fields,
+            # thus the need for hasattr check
+            return self._accept_or_ignore_variables(data, errors)
+        elif data:
+            errors.append(
+                _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(
+                    list_of_keys=', '.join(data.keys()))))
+        return ({}, data, errors)
+
 
 class UnifiedJobTypeStringMixin(object):
     @classmethod

@@ -212,8 +212,8 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
     obj.survey_enabled = True
     obj.save()
     response = post(reverse('api:job_template_launch', kwargs={'pk':obj.pk}),
-                    dict(extra_vars=dict(survey_var=7)), admin_user, expect=201)
-    assert 'survey_var' in response.data['ignored_fields']['extra_vars']
+                    dict(extra_vars=dict(survey_var=7)), admin_user, expect=400)
+    assert 'survey_var' in response.data['extra_vars'][0]
 
 
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
