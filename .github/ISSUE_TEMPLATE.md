@@ -14,13 +14,11 @@
 <!-- Briefly describe the problem. -->
 
 ##### ENVIRONMENT
-<!--
 * AWX version: X.Y.Z
 * AWX install method: openshift, minishift, docker on linux, docker for mac, boot2docker
 * Ansible version:  X.Y.Z
 * Operating System:
 * Web Browser:
--->
 
 ##### STEPS TO REPRODUCE
 
