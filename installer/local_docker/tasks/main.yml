@@ -65,29 +65,9 @@
         timeout: 300
       when: ansible_connection != "local" and docker_registry is not defined
 
-    - name: Tag and push web image to registry
-      docker_image:
-        name: "{{ awx_web_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-        tag: "{{ awx_version }}"
-        push: yes
-      when: docker_registry is defined
-      delegate_to: localhost
-
-    - name: Tag and push task image to registry
-      docker_image:
-        name: "{{ awx_task_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
-        tag: "{{ awx_version }}"
-        push: yes
-      when: docker_registry is defined
-      delegate_to: localhost
-
-    - name: Set full image path for Registry
-      set_fact:
-        awx_web_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-        awx_task_docker_actual_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
-      when: docker_registry is defined
+    - include_role:
+        name: image_push
+      when: docker_registry is defined and dockerhub_base is not defined
 
     - name: Set full image path for local install
       set_fact:
