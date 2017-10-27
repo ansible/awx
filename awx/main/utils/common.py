@@ -24,6 +24,7 @@ from decorator import decorator
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 
@@ -506,6 +507,8 @@ def get_model_for_type(type):
         ct_type = get_type_for_model(ct_model)
         if type == ct_type:
             return ct_model
+    else:
+        raise DatabaseError('"{}" is not a valid AWX model.'.format(type))
 
 
 def cache_list_capabilities(page, prefetch_list, model, user):
