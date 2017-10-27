@@ -1925,7 +1925,17 @@ class InventoryJobTemplateList(SubListAPIView):
         return qs.filter(inventory=parent)
 
 
-class HostList(ListCreateAPIView):
+class HostRelatedSearchMixin(object):
+
+    @property
+    def related_search_fields(self):
+        # Edge-case handle: https://github.com/ansible/ansible-tower/issues/7712
+        ret = super(HostRelatedSearchMixin, self).related_search_fields
+        ret.append('ansible_facts')
+        return ret
+
+
+class HostList(HostRelatedSearchMixin, ListCreateAPIView):
 
     always_allow_superuser = False
     model = Host
@@ -1962,7 +1972,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
     new_in_api_v2 = True
 
 
-class InventoryHostsList(SubListCreateAttachDetachAPIView):
+class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
 
     model = Host
     serializer_class = HostSerializer
@@ -2230,7 +2240,9 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
+class GroupHostsList(HostRelatedSearchMixin,
+                     ControlledByScmMixin,
+                     SubListCreateAttachDetachAPIView):
     ''' the list of hosts directly below a group '''
 
     model = Host
@@ -2257,7 +2269,7 @@ class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
 
-class GroupAllHostsList(SubListAPIView):
+class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
 
     model = Host
@@ -2621,7 +2633,7 @@ class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificatio
     relationship = 'notification_templates_success'
 
 
-class InventorySourceHostsList(SubListDestroyAPIView):
+class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
 
     model = Host
     serializer_class = HostSerializer
@@ -3977,7 +3989,7 @@ class JobEventChildrenList(SubListAPIView):
     view_name = _('Job Event Children List')
 
 
-class JobEventHostsList(SubListAPIView):
+class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
 
     model = Host
     serializer_class = HostSerializer
