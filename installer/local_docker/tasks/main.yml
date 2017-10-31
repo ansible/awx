@@ -214,3 +214,5 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key_id|default('') }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key|default('') }}"
