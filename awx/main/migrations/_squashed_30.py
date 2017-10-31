@@ -16,7 +16,7 @@ def update_dashed_host_variables(apps, schema_editor):
         host.save()
 
 
-SQUASHED_300 = {
+SQUASHED_30 = {
     '0029_v302_add_ask_skip_tags': [
         # add ask skip tags
         migrations.AddField(
@@ -57,4 +57,4 @@ SQUASHED_300 = {
 }
 
 
-__all__ = ['SQUASHED_300']
+__all__ = ['SQUASHED_30']
