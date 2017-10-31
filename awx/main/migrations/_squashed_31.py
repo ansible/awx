@@ -3,7 +3,7 @@ from django.db import (
     models,
 )
 
-SQUASHED_310 = {
+SQUASHED_31 = {
     '0035_v310_remove_tower_settings': [
         # Remove Tower settings, these settings are now in separate awx.conf app.
         migrations.RemoveField(
@@ -47,4 +47,4 @@ SQUASHED_310 = {
     ],
 }
 
-__all__ = ['SQUASHED_310']
+__all__ = ['SQUASHED_31']

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 import _squashed
-from _squashed_310 import SQUASHED_310
+from _squashed_31 import SQUASHED_31
 
 
 class Migration(migrations.Migration):
@@ -12,5 +12,5 @@ class Migration(migrations.Migration):
         ('main', '0004_squashed_v310_release'),
     ]
 
-    replaces = _squashed.replaces(SQUASHED_310)
-    operations = _squashed.operations(SQUASHED_310)
+    replaces = _squashed.replaces(SQUASHED_31)
+    operations = _squashed.operations(SQUASHED_31)
