@@ -1523,7 +1523,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
-        fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
+        fields = ('*', 'source', 'source_path', 'plugin_path', 'source_script', 'source_vars', 'credential',
                   'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
                   'timeout', 'verbosity')
 
