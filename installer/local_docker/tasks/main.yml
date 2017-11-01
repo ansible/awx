@@ -94,6 +94,7 @@
       POSTGRES_USER: "{{ pg_username }}"
       POSTGRES_PASSWORD: "{{ pg_password }}"
       POSTGRES_DB: "{{ pg_database }}"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
   when: pg_hostname is not defined or pg_hostname == ''
   register: postgres_container_activate
 
