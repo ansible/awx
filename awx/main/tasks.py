@@ -680,7 +680,7 @@ class BaseTask(LogErrorsTask):
         path = os.path.join(kwargs['private_data_dir'], 'inventory')
         with open(path, 'w') as f:
             json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
-            f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint """%s"""\n' % json_data)
+            f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
             os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
         return path
 
