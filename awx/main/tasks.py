@@ -56,7 +56,7 @@ from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
-                            parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
+                            ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
@@ -306,8 +306,19 @@ def awx_periodic_scheduler(self):
         if template.cache_timeout_blocked:
             logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
             continue
-        new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        can_start = new_unified_job.signal_start(extra_vars=parse_yaml_or_json(schedule.extra_data))
+        try:
+            prompts = schedule.get_job_kwargs()
+            new_unified_job = schedule.unified_job_template.create_unified_job(
+                _eager_fields=dict(
+                    launch_type='scheduled',
+                    schedule=schedule
+                ),
+                **prompts
+            )
+            can_start = new_unified_job.signal_start()
+        except Exception:
+            logger.exception('Error spawning scheduled job.')
+            continue
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
@@ -1226,8 +1237,8 @@ class RunJob(BaseTask):
                 pu_ig = pu_ig.controller
                 pu_en = settings.CLUSTER_HOST_ID
             local_project_sync = job.project.create_project_update(
-                launch_type="sync",
                 _eager_fields=dict(
+                    launch_type="sync",
                     job_type='run',
                     status='running',
                     instance_group = pu_ig,
@@ -1485,8 +1496,8 @@ class RunProjectUpdate(BaseTask):
                                 'another update is already active.'.format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
-                    launch_type='scm',
                     _eager_fields=dict(
+                        launch_type='scm',
                         status='running',
                         instance_group=project_update.instance_group,
                         execution_node=project_update.execution_node,
@@ -1969,8 +1980,8 @@ class RunInventoryUpdate(BaseTask):
         if (inventory_update.source=='scm' and inventory_update.launch_type!='scm' and source_project):
             request_id = '' if self.request.id is None else self.request.id
             local_project_sync = source_project.create_project_update(
-                launch_type="sync",
                 _eager_fields=dict(
+                    launch_type="sync",
                     job_type='run',
                     status='running',
                     execution_node=inventory_update.execution_node,

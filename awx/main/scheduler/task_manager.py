@@ -196,7 +196,7 @@ class TaskManager():
                 spawn_node.job = job
                 spawn_node.save()
                 if job._resources_sufficient_for_launch():
-                    can_start = job.signal_start(**kv)
+                    can_start = job.signal_start()
                     if not can_start:
                         job.job_explanation = _("Job spawned from workflow could not start because it "
                                                 "was not in the right state or required manual credentials")
@@ -285,7 +285,8 @@ class TaskManager():
         map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task), running_tasks)
 
     def create_project_update(self, task):
-        project_task = Project.objects.get(id=task.project_id).create_project_update(launch_type='dependency')
+        project_task = Project.objects.get(id=task.project_id).create_project_update(
+            _eager_fields=dict(launch_type='dependency'))
 
         # Project created 1 seconds behind
         project_task.created = task.created - timedelta(seconds=1)
@@ -294,7 +295,8 @@ class TaskManager():
         return project_task
 
     def create_inventory_update(self, task, inventory_source_task):
-        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(launch_type='dependency')
+        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(
+            _eager_fields=dict(launch_type='dependency'))
 
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'

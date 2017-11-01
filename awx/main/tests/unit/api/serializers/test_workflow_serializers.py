@@ -5,7 +5,6 @@ import mock
 # AWX
 from awx.api.serializers import (
     WorkflowJobTemplateSerializer,
-    WorkflowNodeBaseSerializer,
     WorkflowJobTemplateNodeSerializer,
     WorkflowJobNodeSerializer,
 )
@@ -54,7 +53,7 @@ class TestWorkflowNodeBaseSerializerGetRelated():
         return WorkflowJobTemplateNode(pk=1)
 
     def test_workflow_unified_job_template_present(self, get_related_mock_and_run, workflow_job_template_node_related):
-        related = get_related_mock_and_run(WorkflowNodeBaseSerializer, workflow_job_template_node_related)
+        related = get_related_mock_and_run(WorkflowJobTemplateNodeSerializer, workflow_job_template_node_related)
         assert 'unified_job_template' in related
         assert related['unified_job_template'] == '/api/v2/%s/%d/' % ('job_templates', workflow_job_template_node_related.unified_job_template.pk)
 
@@ -63,7 +62,7 @@ class TestWorkflowNodeBaseSerializerGetRelated():
         assert 'unified_job_template' not in related
 
 
-@mock.patch('awx.api.serializers.WorkflowNodeBaseSerializer.get_related', lambda x,y: {})
+@mock.patch('awx.api.serializers.BaseSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobTemplateNodeSerializerGetRelated():
     @pytest.fixture
     def workflow_job_template_node(self):
@@ -92,6 +91,9 @@ class TestWorkflowJobTemplateNodeSerializerGetRelated():
         'always_nodes',
     ])
     def test_get_related(self, test_get_related, workflow_job_template_node, related_resource_name):
+        serializer = WorkflowJobTemplateNodeSerializer()
+        print serializer.get_related(workflow_job_template_node)
+        # import pdb; pdb.set_trace()
         test_get_related(WorkflowJobTemplateNodeSerializer,
                          workflow_job_template_node,
                          'workflow_job_template_nodes',
@@ -139,17 +141,19 @@ class TestWorkflowJobTemplateNodeSerializerCharPrompts():
     def test_change_single_field(self, WFJT_serializer):
         "Test that a single prompt field can be changed without affecting other fields"
         internal_value = WFJT_serializer.to_internal_value({'job_type': 'check'})
-        assert internal_value['char_prompts']['job_type'] == 'check'
-        assert internal_value['char_prompts']['limit'] == 'webservers'
+        assert internal_value['job_type'] == 'check'
+        WFJT_serializer.instance.job_type = 'check'
+        assert WFJT_serializer.instance.limit == 'webservers'
 
     def test_null_single_field(self, WFJT_serializer):
         "Test that a single prompt field can be removed without affecting other fields"
         internal_value = WFJT_serializer.to_internal_value({'job_type': None})
-        assert 'job_type' not in internal_value['char_prompts']
-        assert internal_value['char_prompts']['limit'] == 'webservers'
+        assert internal_value['job_type'] is None
+        WFJT_serializer.instance.job_type = None
+        assert WFJT_serializer.instance.limit == 'webservers'
 
 
-@mock.patch('awx.api.serializers.WorkflowNodeBaseSerializer.get_related', lambda x,y: {})
+@mock.patch('awx.api.serializers.WorkflowJobTemplateNodeSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobNodeSerializerGetRelated():
     @pytest.fixture
     def workflow_job_node(self):

@@ -6,6 +6,7 @@ from copy import copy
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models.base import prevent_search
@@ -13,7 +14,7 @@ from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
 from awx.main.utils import parse_yaml_or_json
-from awx.main.fields import JSONField
+from awx.main.fields import JSONField, AskForField
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
@@ -92,6 +93,11 @@ class SurveyJobTemplateMixin(models.Model):
         blank=True,
         default={},
     ))
+    ask_variables_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='extra_vars'
+    )
 
     def survey_password_variables(self):
         vars = []
@@ -227,17 +233,44 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                    choice_list))
         return errors
 
-    def survey_variable_validation(self, data):
-        errors = []
-        if not self.survey_enabled:
-            return errors
-        if 'name' not in self.survey_spec:
-            errors.append("'name' missing from survey spec.")
-        if 'description' not in self.survey_spec:
-            errors.append("'description' missing from survey spec.")
-        for survey_element in self.survey_spec.get("spec", []):
-            errors += self._survey_element_validation(survey_element, data)
-        return errors
+    def _accept_or_ignore_variables(self, data, errors=None):
+        survey_is_enabled = (self.survey_enabled and self.survey_spec)
+        extra_vars = data.copy()
+        if errors is None:
+            errors = {}
+        rejected = {}
+        accepted = {}
+
+        if survey_is_enabled:
+            # Check for data violation of survey rules
+            survey_errors = []
+            for survey_element in self.survey_spec.get("spec", []):
+                element_errors = self._survey_element_validation(survey_element, data)
+                key = survey_element.get('variable', None)
+
+                if element_errors:
+                    survey_errors += element_errors
+                    if key is not None and key in extra_vars:
+                        rejected[key] = extra_vars.pop(key)
+                else:
+                    accepted[key] = extra_vars.pop(key)
+            if survey_errors:
+                errors['variables_needed_to_start'] = survey_errors
+
+        if self.ask_variables_on_launch:
+            # We can accept all variables
+            accepted.update(extra_vars)
+            extra_vars = {}
+
+        if extra_vars:
+            # Leftover extra_vars, keys provided that are not allowed
+            rejected.update(extra_vars)
+            # ignored variables does not block manual launch
+            if not getattr(self, '_is_manual_launch', False):
+                errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch.').format(
+                    list_of_keys=', '.join(extra_vars.keys()))]
+
+        return (accepted, rejected, errors)
 
 
 class SurveyJobMixin(models.Model):

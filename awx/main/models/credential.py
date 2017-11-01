@@ -369,6 +369,23 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 field_val[k] = '$encrypted$'
         return field_val
 
+    def unique_hash(self):
+        '''
+        Credential exclusivity is not defined solely by the related
+        credential type (due to vault), so this produces a hash
+        that can be used to evaluate exclusivity
+        '''
+        if self.kind == 'vault' and self.inputs.get('id', None):
+            return '{}_{}'.format(self.credential_type_id, self.inputs.get('id'))
+        return str(self.credential_type_id)
+
+    @staticmethod
+    def unique_dict(cred_qs):
+        ret = {}
+        for cred in cred_qs:
+            ret[cred.unique_hash()] = cred
+        return ret
+
 
 class CredentialType(CommonModelNameNotUnique):
     '''

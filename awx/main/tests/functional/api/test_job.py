@@ -33,7 +33,7 @@ def test_job_relaunch_permission_denied_response(
     assert r.data['summary_fields']['user_capabilities']['start']
 
     # Job has prompted extra_credential, launch denied w/ message
-    job.credentials.add(net_credential)
+    job.launch_config.credentials.add(net_credential)
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields' in r.data['detail']
     assert 'do not have permission' in r.data['detail']

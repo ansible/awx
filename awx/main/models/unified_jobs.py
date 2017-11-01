@@ -21,6 +21,9 @@ from django.utils.encoding import smart_text
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
+# REST Framework
+from rest_framework.exceptions import ParseError
+
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
@@ -29,16 +32,16 @@ from django_celery_results.models import TaskResult
 
 # AWX
 from awx.main.models.base import * # noqa
-from awx.main.models.schedules import Schedule
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model, parse_yaml_or_json
+    get_type_for_model, parse_yaml_or_json,
+    cached_subclassproperty
 )
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import JSONField
+from awx.main.fields import JSONField, AskForField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -251,6 +254,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         return self.last_job_run
 
     def update_computed_fields(self):
+        Schedule = self._meta.get_field('schedules').related_model
         related_schedules = Schedule.objects.filter(enabled=True, unified_job_template=self, next_run__isnull=False).order_by('-next_run')
         if related_schedules.exists():
             self.next_schedule = related_schedules[0]
@@ -340,11 +344,16 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
+        original_passwords = kwargs.pop('survey_passwords', {})
+        eager_fields = kwargs.pop('_eager_fields', None)
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
+        unallowed_fields = set(kwargs.keys()) - set(fields)
+        if unallowed_fields:
+            raise Exception('Fields {} are not allowed as overrides.'.format(unallowed_fields))
+
         unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
 
-        eager_fields = kwargs.get('_eager_fields', None)
         if eager_fields:
             for fd, val in eager_fields.items():
                 setattr(unified_job, fd, val)
@@ -357,17 +366,47 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
             password_list = self.survey_password_variables()
             hide_password_dict = getattr(unified_job, 'survey_passwords', {})
+            hide_password_dict.update(original_passwords)
             for password in password_list:
                 hide_password_dict[password] = REPLACE_STR
             unified_job.survey_passwords = hide_password_dict
 
         unified_job.save()
 
-        # Labels and extra credentials copied here
+        # Labels and credentials copied here
+        if kwargs.get('credentials'):
+            Credential = UnifiedJob._meta.get_field('credentials').related_model
+            cred_dict = Credential.unique_dict(self.credentials.all())
+            prompted_dict = Credential.unique_dict(kwargs['credentials'])
+            # combine prompted credentials with JT
+            cred_dict.update(prompted_dict)
+            kwargs['credentials'] = [cred for cred in cred_dict.values()]
+
         from awx.main.signals import disable_activity_stream
         with disable_activity_stream():
             copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
+
+        if 'extra_vars' in kwargs:
+            unified_job.handle_extra_data(kwargs['extra_vars'])
+
+        if not getattr(self, '_deprecated_credential_launch', False):
+            # Create record of provided prompts for relaunch and rescheduling
+            unified_job.create_config_from_prompts(kwargs)
+
         return unified_job
+
+    @cached_subclassproperty
+    def ask_mapping(cls):
+        mapping = {}
+        for field in cls._meta.fields:
+            if not isinstance(field, AskForField):
+                continue
+            if field.allows_field == '__default__':
+                allows_field = field.name[len('ask_'):-len('_on_launch')]
+            else:
+                allows_field = field.allows_field
+            mapping[allows_field] = field.name
+        return mapping
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
@@ -388,6 +427,37 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_jt.save()
         copy_m2m_relationships(self, unified_jt, fields)
         return unified_jt
+
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
+        '''
+        Override in subclass if template accepts _any_ prompted params
+        '''
+        return ({}, kwargs, {"all": ["Fields {} are not allowed on launch.".format(kwargs.keys())]})
+
+    def accept_or_ignore_variables(self, data, errors=None):
+        '''
+        If subclasses accept any `variables` or `extra_vars`, they should
+        define _accept_or_ignore_variables to place those variables in the accepted dict,
+        according to the acceptance rules of the template.
+        '''
+        if errors is None:
+            errors = {}
+        if not isinstance(data, dict):
+            try:
+                data = parse_yaml_or_json(data, silent_failure=False)
+            except ParseError as exc:
+                errors['extra_vars'] = [str(exc)]
+                return ({}, data, errors)
+        if hasattr(self, '_accept_or_ignore_variables'):
+            # SurveyJobTemplateMixin cannot override any methods because of
+            # resolution order, forced by how metaclass processes fields,
+            # thus the need for hasattr check
+            return self._accept_or_ignore_variables(data, errors)
+        elif data:
+            errors['extra_vars'] = [
+                _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(
+                    list_of_keys=', '.join(data.keys())))]
+        return ({}, data, errors)
 
 
 class UnifiedJobTypeStringMixin(object):
@@ -750,17 +820,63 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         unified_job_class = self.__class__
         unified_jt_class = self._get_unified_job_template_class()
         parent_field_name = unified_job_class._get_parent_field_name()
-
         fields = unified_jt_class._get_unified_job_field_names() + [parent_field_name]
-        unified_job = copy_model_by_class(self, unified_job_class, fields, {})
-        unified_job.launch_type = 'relaunch'
+
+        create_data = {"launch_type": "relaunch"}
         if limit:
-            unified_job.limit = limit
-        unified_job.save()
+            create_data["limit"] = limit
+
+        prompts = self.launch_prompts()
+        if self.unified_job_template and prompts:
+            prompts['_eager_fields'] = create_data
+            unified_job = self.unified_job_template.create_unified_job(**prompts)
+        else:
+            unified_job = copy_model_by_class(self, unified_job_class, fields, {})
+            for fd, val in create_data.items():
+                setattr(unified_job, fd, val)
+            unified_job.save()
 
         # Labels coppied here
         copy_m2m_relationships(self, unified_job, fields)
         return unified_job
+
+    def launch_prompts(self):
+        '''
+        Return dictionary of prompts job was launched with
+        returns None if unknown
+        '''
+        JobLaunchConfig = self._meta.get_field('launch_config').related_model
+        try:
+            config = self.launch_config
+            return config.prompts_dict()
+        except JobLaunchConfig.DoesNotExist:
+            return None
+
+    def create_config_from_prompts(self, kwargs):
+        '''
+        Create a launch configuration entry for this job, given prompts
+        returns None if it can not be created
+        '''
+        if self.unified_job_template is None:
+            return None
+        JobLaunchConfig = self._meta.get_field('launch_config').related_model
+        config = JobLaunchConfig(job=self)
+        for field_name, value in kwargs.items():
+            if (field_name not in self.unified_job_template.ask_mapping and field_name != 'survey_passwords'):
+                raise Exception('Unrecognized launch config field {}.'.format(field_name))
+            if field_name == 'credentials':
+                continue
+            key = field_name
+            if key == 'extra_vars':
+                key = 'extra_data'
+            setattr(config, key, value)
+        config.save()
+
+        job_creds = (set(kwargs.get('credentials', [])) -
+                     set(self.unified_job_template.credentials.all()))
+        if job_creds:
+            config.credentials.add(*job_creds)
+        return config
 
     def result_stdout_raw_handle(self, attempt=0):
         """Return a file-like object containing the standard out of the
@@ -909,6 +1025,19 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return bool(self.status in ('new', 'waiting'))
 
     @property
+    def can_schedule(self):
+        if getattr(self, 'passwords_needed_to_start', None):
+            return False
+        JobLaunchConfig = self._meta.get_field('launch_config').related_model
+        try:
+            self.launch_config
+            if self.unified_job_template is None:
+                return False
+            return True
+        except JobLaunchConfig.DoesNotExist:
+            return False
+
+    @property
     def task_impact(self):
         raise NotImplementedError # Implement in subclass.
 
@@ -1025,8 +1154,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        if 'extra_vars' in kwargs:
-            self.handle_extra_data(kwargs['extra_vars'])
 
         # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):

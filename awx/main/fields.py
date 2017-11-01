@@ -761,3 +761,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
                         code='invalid',
                         params={'value': value},
                     )
+
+
+class AskForField(models.BooleanField):
+    """
+    Denotes whether to prompt on launch for another field on the same template
+    """
+    def __init__(self, allows_field='__default__', **kwargs):
+        super(AskForField, self).__init__(**kwargs)
+        self.allows_field = allows_field

@@ -69,7 +69,7 @@ class TestJobRelaunchAccess:
         )
         new_cred.save()
         new_inv = Inventory.objects.create(name='new-inv', organization=organization)
-        return jt.create_unified_job(credentials=[new_cred.pk], inventory=new_inv)
+        return jt.create_unified_job(credentials=[new_cred], inventory=new_inv)
 
     def test_normal_relaunch_via_job_template(self, job_no_prompts, rando):
         "Has JT execute_role, job unchanged relative to JT"
@@ -89,12 +89,15 @@ class TestJobRelaunchAccess:
         job_with_prompts.inventory.use_role.members.add(rando)
         assert rando.can_access(Job, 'start', job_with_prompts)
 
-    def test_no_relaunch_after_limit_change(self, job_no_prompts, rando):
-        "State of the job contradicts the JT state - deny relaunch"
-        job_no_prompts.job_template.execute_role.members.add(rando)
-        job_no_prompts.limit = 'webservers'
-        job_no_prompts.save()
-        assert not rando.can_access(Job, 'start', job_no_prompts)
+    def test_no_relaunch_after_limit_change(self, inventory, machine_credential, rando):
+        "State of the job contradicts the JT state - deny relaunch based on JT execute"
+        jt = JobTemplate.objects.create(name='test-job_template', inventory=inventory, ask_limit_on_launch=True)
+        jt.credentials.add(machine_credential)
+        job_with_prompts = jt.create_unified_job(limit='webservers')
+        jt.ask_limit_on_launch = False
+        jt.save()
+        jt.execute_role.members.add(rando)
+        assert not rando.can_access(Job, 'start', job_with_prompts)
 
     def test_can_relaunch_if_limit_was_prompt(self, job_with_prompts, rando):
         "Job state differs from JT, but only on prompted fields - allow relaunch"

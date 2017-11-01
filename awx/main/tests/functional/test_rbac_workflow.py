@@ -59,6 +59,16 @@ class TestWorkflowJobTemplateNodeAccess:
         access = WorkflowJobTemplateNodeAccess(org_admin)
         assert not access.can_change(wfjt_node, {'job_type': 'scan'})
 
+    def test_access_to_edit_non_JT(self, rando, workflow_job_template, organization, project):
+        workflow_job_template.admin_role.members.add(rando)
+        node = workflow_job_template.workflow_job_template_nodes.create(
+            unified_job_template=project
+        )
+        assert not WorkflowJobTemplateNodeAccess(rando).can_change(node, {'limit': ''})
+
+        project.update_role.members.add(rando)
+        assert WorkflowJobTemplateNodeAccess(rando).can_change(node, {'limit': ''})
+
     def test_add_JT_no_start_perm(self, wfjt, job_template, rando):
         wfjt.admin_role.members.add(rando)
         access = WorkflowJobTemplateNodeAccess(rando)

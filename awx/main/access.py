@@ -341,8 +341,7 @@ class BaseAccess(object):
             # Actions not possible for reason unrelated to RBAC
             # Cannot copy with validation errors, or update a manual group/project
             if display_method == 'copy' and isinstance(obj, JobTemplate):
-                validation_errors, resources_needed_to_start = obj.resource_validation_data()
-                if validation_errors:
+                if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue
             elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)):
@@ -1150,6 +1149,7 @@ class JobTemplateAccess(BaseAccess):
     model = JobTemplate
     select_related = ('created_by', 'modified_by', 'inventory', 'project',
                       'next_schedule',)
+    prefetch_related = ('credentials__credential_type',)
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -1189,8 +1189,7 @@ class JobTemplateAccess(BaseAccess):
 
         # If credentials is provided, the user should have use access to them.
         for pk in data.get('credentials', []):
-            if self.user not in get_object_or_400(Credential, pk=pk).use_role:
-                return False
+            raise Exception('Credentials must be attached through association method.')
 
         # If an inventory is provided, the user should have use access.
         inventory = get_value(Inventory, 'inventory')
@@ -1317,6 +1316,7 @@ class JobAccess(BaseAccess):
     prefetch_related = (
         'unified_job_template',
         'instance_group',
+        'credentials__credential_type',
         Prefetch('labels', queryset=Label.objects.all().order_by('name')),
     )
 
@@ -1396,60 +1396,42 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
-        inventory_access = obj.inventory and self.user in obj.inventory.use_role
-        job_credentials = set(obj.credentials.all())
+        # Obtain prompts used to start original job
+        JobLaunchConfig = obj._meta.get_field('launch_config').related_model
+        try:
+            config = obj.launch_config
+        except JobLaunchConfig.DoesNotExist:
+            config = None
 
-        # Check if JT execute access (and related prompts) is sufficient
+        # Check if JT execute access (and related prompts) are sufficient
         if obj.job_template is not None:
-            prompts_access = True
-            job_fields = {}
-            jt_credentials = set(obj.job_template.credentials.all())
-            for fd in obj.job_template._ask_for_vars_dict():
-                if fd == 'credentials':
-                    job_fields[fd] = job_credentials
-                job_fields[fd] = getattr(obj, fd)
-            accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
-            # Check if job fields are not allowed by current _on_launch settings
-            for fd in ignored_fields:
-                if fd == 'extra_vars':
-                    continue  # we cannot yet validate validity of prompted extra_vars
-                elif fd == 'credentials':
-                    if job_credentials != jt_credentials:
-                        # Job has credentials that are not promptable
-                        prompts_access = False
-                        break
-                elif job_fields[fd] != getattr(obj.job_template, fd):
-                    # Job has field that is not promptable
-                    prompts_access = False
-                    break
-            # For those fields that are allowed by prompting, but differ
-            # from JT, assure that user has explicit access to them
-            if prompts_access:
-                if obj.inventory != obj.job_template.inventory and not inventory_access:
-                    prompts_access = False
-                if prompts_access and job_credentials != jt_credentials:
-                    for cred in job_credentials:
-                        if self.user not in cred.use_role:
-                            prompts_access = False
-                            break
-            if prompts_access and self.user in obj.job_template.execute_role:
+            if config is None:
+                prompts_access = False
+            else:
+                prompts_access = (
+                    JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
+                    not config.has_unprompted(obj.job_template)
+                )
+            jt_access = self.user in obj.job_template.execute_role
+            if prompts_access and jt_access:
                 return True
+            elif not jt_access:
+                return False
 
         org_access = obj.inventory and self.user in obj.inventory.organization.admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
+        credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
 
         # job can be relaunched if user could make an equivalent JT
-        ret = inventory_access and credential_access and (org_access or project_access)
+        ret = org_access and credential_access and project_access
         if not ret and self.save_messages:
             if not obj.job_template:
                 pretext = _('Job has been orphaned from its job template.')
-            elif prompts_access:
-                self.messages['detail'] = _('You do not have execute permission to related job template.')
-                return False
+            elif config is None:
+                pretext = _('Job was launched with unknown prompted fields.')
             else:
                 pretext = _('Job was launched with prompted fields.')
-            if inventory_access and credential_access:
+            if credential_access:
                 self.messages['detail'] = '{} {}'.format(pretext, _(' Organization level permissions required.'))
             else:
                 self.messages['detail'] = '{} {}'.format(pretext, _(' You do not have permission to related resources.'))
@@ -1495,6 +1477,74 @@ class SystemJobAccess(BaseAccess):
         return False # no relaunching of system jobs
 
 
+class JobLaunchConfigAccess(BaseAccess):
+    '''
+    Launch configs must have permissions checked for
+     - relaunching
+     - rescheduling
+
+    In order to create a new object with a copy of this launch config, I need:
+     - use access to related inventory (if present)
+     - use role to many-related credentials (if any present)
+    '''
+    model = JobLaunchConfig
+    select_related = ('job')
+    prefetch_related = ('credentials', 'inventory')
+
+    def _unusable_creds_exist(self, qs):
+        return qs.exclude(
+            pk__in=Credential._accessible_pk_qs(Credential, self.user, 'use_role')
+        ).exists()
+
+    def has_credentials_access(self, obj):
+        # user has access if no related credentials exist that the user lacks use role for
+        return not self._unusable_creds_exist(obj.credentials)
+
+    @check_superuser
+    def can_add(self, data, template=None):
+        # This is a special case, we don't check related many-to-many elsewhere
+        # launch RBAC checks use this
+        if 'credentials' in data and data['credentials'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                prompted_cred_qs = data['reference_obj'].credentials.all()
+            else:
+                # If given model objects, only use the primary key from them
+                cred_pks = [cred.pk for cred in data['credentials']]
+                if template:
+                    for cred in template.credentials.all():
+                        if cred.pk in cred_pks:
+                            cred_pks.remove(cred.pk)
+                prompted_cred_qs = Credential.objects.filter(pk__in=cred_pks)
+            if self._unusable_creds_exist(prompted_cred_qs):
+                return False
+        return self.check_related('inventory', Inventory, data, role_field='use_role')
+
+    @check_superuser
+    def can_use(self, obj):
+        return (
+            self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True) and
+            self.has_credentials_access(obj)
+        )
+
+    def can_change(self, obj, data):
+        return self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role')
+
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, Credential) and relationship == 'credentials':
+            return self.user in sub_obj.use_role
+        else:
+            raise NotImplemented('Only credentials can be attached to launch configurations.')
+
+    def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, Credential) and relationship == 'credentials':
+            if skip_sub_obj_read_check:
+                return True
+            else:
+                return self.user in sub_obj.read_role
+        else:
+            raise NotImplemented('Only credentials can be attached to launch configurations.')
+
+
 class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
     I can see/use a WorkflowJobTemplateNode if I have read permission
@@ -1503,13 +1553,13 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     In order to add a node, I need:
      - admin access to parent WFJT
      - execute access to the unified job template being used
-     - access to any credential or inventory provided as the prompted fields
+     - access prompted fields via. launch config access
 
     In order to do anything to a node, I need admin access to its WFJT
 
     In order to edit fields on a node, I need:
      - execute access to the unified job template of the node
-     - access to BOTH credential and inventory post-change, if present
+     - access to prompted fields
 
     In order to delete a node, I only need the admin access its WFJT
 
@@ -1518,17 +1568,12 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
     model = WorkflowJobTemplateNode
     prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',
-                        'unified_job_template',)
+                        'unified_job_template', 'credentials',)
 
     def filtered_queryset(self):
         return self.model.objects.filter(
             workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
                 self.user, 'read_role'))
-
-    def can_use_prompted_resources(self, data):
-        return (
-            self.check_related('credential', Credential, data, role_field='use_role') and
-            self.check_related('inventory', Inventory, data, role_field='use_role'))
 
     @check_superuser
     def can_add(self, data):
@@ -1537,7 +1582,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         return (
             self.check_related('workflow_job_template', WorkflowJobTemplate, data, mandatory=True) and
             self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role') and
-            self.can_use_prompted_resources(data))
+            JobLaunchConfigAccess(self.user).can_add(data))
 
     def wfjt_admin(self, obj):
         if not obj.workflow_job_template:
@@ -1547,26 +1592,20 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
 
     def ujt_execute(self, obj):
         if not obj.unified_job_template:
-            return self.wfjt_admin(obj)
-        else:
-            return self.user in obj.unified_job_template.execute_role and self.wfjt_admin(obj)
+            return True
+        return self.check_related('unified_job_template', UnifiedJobTemplate, {}, obj=obj,
+                                  role_field='execute_role', mandatory=True)
 
     def can_change(self, obj, data):
         if not data:
             return True
 
-        if not self.ujt_execute(obj):
-            # should not be able to edit the prompts if lacking access to UJT
-            return False
-
-        if 'credential' in data or 'inventory' in data:
-            new_data = data
-            if 'credential' not in data:
-                new_data['credential'] = self.credential
-            if 'inventory' not in data:
-                new_data['inventory'] = self.inventory
-            return self.can_use_prompted_resources(new_data)
-        return True
+        # should not be able to edit the prompts if lacking access to UJT or WFJT
+        return (
+            self.ujt_execute(obj) and
+            self.wfjt_admin(obj) and
+            JobLaunchConfigAccess(self.user).can_change(obj, data)
+        )
 
     def can_delete(self, obj):
         return self.wfjt_admin(obj)
@@ -1579,10 +1618,35 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         return True
 
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
-        return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+        if not self.wfjt_admin(obj):
+            return False
+        if relationship == 'credentials':
+            # Need permission to related template to attach a credential
+            if not self.ujt_execute(obj):
+                return False
+            return JobLaunchConfigAccess(self.user).can_attach(
+                obj, sub_obj, relationship, data,
+                skip_sub_obj_read_check=skip_sub_obj_read_check
+            )
+        elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
+            return self.check_same_WFJT(obj, sub_obj)
+        else:
+            raise NotImplemented('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
-        return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+        if not self.wfjt_admin(obj):
+            return False
+        if relationship == 'credentials':
+            if not self.ujt_execute(obj):
+                return False
+            return JobLaunchConfigAccess(self.user).can_unattach(
+                obj, sub_obj, relationship, data,
+                skip_sub_obj_read_check=skip_sub_obj_read_check
+            )
+        elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
+            return self.check_same_WFJT(obj, sub_obj)
+        else:
+            raise NotImplemented('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
 
 class WorkflowJobNodeAccess(BaseAccess):
@@ -1597,7 +1661,8 @@ class WorkflowJobNodeAccess(BaseAccess):
     '''
     model = WorkflowJobNode
     select_related = ('unified_job_template', 'job',)
-    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',)
+    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes',
+                        'credentials',)
 
     def filtered_queryset(self):
         return self.model.objects.filter(
@@ -1610,8 +1675,7 @@ class WorkflowJobNodeAccess(BaseAccess):
             return False
         return (
             self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role') and
-            self.check_related('credential', Credential, data, role_field='use_role') and
-            self.check_related('inventory', Inventory, data, role_field='use_role'))
+            JobLaunchConfigAccess(self.user).can_add(data))
 
     def can_change(self, obj, data):
         return False
@@ -1949,8 +2013,6 @@ class UnifiedJobTemplateAccess(BaseAccess):
     #qs = qs.prefetch_related(
     #    'project',
     #    'inventory',
-    #    'credential',
-    #    'credential__credential_type',
     #)
 
     def filtered_queryset(self):
@@ -1993,8 +2055,6 @@ class UnifiedJobAccess(BaseAccess):
     #qs = qs.prefetch_related(
     #    'project',
     #    'inventory',
-    #    'credential',
-    #    'credential__credential_type',
     #    'job_template',
     #    'inventory_source',
     #    'project___credential',
@@ -2002,7 +2062,6 @@ class UnifiedJobAccess(BaseAccess):
     #    'inventory_source___inventory',
     #    'job_template__inventory',
     #    'job_template__project',
-    #    'job_template__credential',
     #)
 
     def filtered_queryset(self):
@@ -2027,7 +2086,7 @@ class ScheduleAccess(BaseAccess):
 
     model = Schedule
     select_related = ('created_by', 'modified_by',)
-    prefetch_related = ('unified_job_template',)
+    prefetch_related = ('unified_job_template', 'credentials',)
 
     def filtered_queryset(self):
         qs = self.model.objects.all()
@@ -2039,19 +2098,15 @@ class ScheduleAccess(BaseAccess):
             Q(unified_job_template_id__in=inv_src_qs.values_list('pk', flat=True)))
 
     @check_superuser
-    def can_read(self, obj):
-        if obj and obj.unified_job_template:
-            job_class = obj.unified_job_template
-            return self.user.can_access(type(job_class), 'read', obj.unified_job_template)
-        else:
-            return False
-
-    @check_superuser
     def can_add(self, data):
+        if not JobLaunchConfigAccess(self.user).can_add(data):
+            return False
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
+        if not JobLaunchConfigAccess(self.user).can_change(obj, data):
+            return False
         if self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True):
             return True
         # Users with execute role can modify the schedules they created
@@ -2059,9 +2114,20 @@ class ScheduleAccess(BaseAccess):
             obj.created_by == self.user and
             self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True))
 
-
     def can_delete(self, obj):
         return self.can_change(obj, {})
+
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        return JobLaunchConfigAccess(self.user).can_attach(
+            obj, sub_obj, relationship, data,
+            skip_sub_obj_read_check=skip_sub_obj_read_check
+        )
+
+    def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        return JobLaunchConfigAccess(self.user).can_unattach(
+            obj, sub_obj, relationship, data,
+            skip_sub_obj_read_check=skip_sub_obj_read_check
+        )
 
 
 class NotificationTemplateAccess(BaseAccess):
