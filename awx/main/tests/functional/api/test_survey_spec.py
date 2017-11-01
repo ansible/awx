@@ -8,6 +8,7 @@ from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.activity_stream import ActivityStream
 from awx.conf.license import LicenseForbids
 from awx.main.access import JobTemplateAccess
+from awx.main.utils.common import get_type_for_model
 
 
 def mock_no_surveys(self, add_host=False, feature=None, check_expiration=True):
@@ -42,12 +43,15 @@ def test_survey_spec_view_denied(job_template_with_survey, get, admin_user):
     ('execute_role', 403),
     ('read_role', 403)
 ])
-def test_survey_edit_access(job_template, survey_spec_factory, rando, post, role_field, expected_status_code):
+def test_survey_edit_access(job_template, workflow_job_template, survey_spec_factory, rando, post,
+                            role_field, expected_status_code):
     survey_input_data = survey_spec_factory('new_question')
-    role = getattr(job_template, role_field)
-    role.members.add(rando)
-    post(reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
-         user=rando, data=survey_input_data, expect=expected_status_code)
+    for template in (job_template, workflow_job_template):
+        role = getattr(template, role_field)
+        role.members.add(rando)
+        post(reverse('api:{}_survey_spec'.format(get_type_for_model(template.__class__)),
+             kwargs={'pk': template.id}),
+             user=rando, data=survey_input_data, expect=expected_status_code)
 
 
 @mock.patch('awx.main.access.BaseAccess.check_license', mock_no_surveys)

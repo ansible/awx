@@ -2880,7 +2880,6 @@ class JobTemplateSurveySpec(GenericAPIView):
 class WorkflowJobTemplateSurveySpec(WorkflowsEnforcementMixin, JobTemplateSurveySpec):
 
     model = WorkflowJobTemplate
-    parent_model = WorkflowJobTemplate
     new_in_310 = True
 
 
