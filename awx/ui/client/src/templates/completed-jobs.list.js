@@ -32,12 +32,12 @@ export default ['i18n', function(i18n) {
                 dataTitle: "{{ completed_job.status_popover_title }}",
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
-                ngClick:"viewjobResults(completed_job)",
+                uiSref: '{{completed_job.linkToDetails}}',
                 nosort: true
             },
             id: {
                 label: 'ID',
-                ngClick:"viewjobResults(completed_job)",
+                uiSref: '{{completed_job.linkToDetails}}',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ completed_job.status_tip }}",
                 dataPlacement: 'top'
@@ -45,7 +45,7 @@ export default ['i18n', function(i18n) {
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
-                ngClick: "viewjobResults(completed_job)",
+                uiSref: '{{completed_job.linkToDetails}}',
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
             },

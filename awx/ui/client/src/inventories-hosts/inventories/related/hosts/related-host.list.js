@@ -54,7 +54,7 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Hosts'),
-                ngClick: "editHost(host)",
+                uiSref: ".edit({inventory_id: host.inventory_id,host_id: host.id})",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",

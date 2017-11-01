@@ -64,12 +64,12 @@
                             </td>
                             <td class="List-tableCell name-column InventoryManage-breakWord col-lg-6 col-md-8 col-sm-8 col-xs-7">
                                 <div class="host-name">
-                                    <a href="" ng-click="editHost(host.id)">{{host.name }}</a>
+                                    <a ui-sref="hosts.edit({host_id:host.id})">{{host.name }}</a>
                                 </div>
                             </td>
                             <td class="List-tableCell inventory_name-column col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis">
                                 <div class="host-name">
-                                    <a href="" ng-click="editInventory(host)">{{host.inventory_name }}</a>
+                                    <a href="#/inventories/inventory/{{host.inventory}}">{{host.inventory_name}}</a>
                                 </div>
                             </td>
                             <td class="List-actionsContainer">

@@ -42,7 +42,8 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name,
                             scm_type: list.fields.scm_type
                         };
-                        list.fields.name.ngClick = 'linkoutResource("project", project)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = "#/projects/{{project.id}}";
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
@@ -51,7 +52,8 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name,
                             organization: list.fields.organization
                         };
-                        list.fields.name.ngClick = 'linkoutResource("inventory", inventory)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = '{{inventory.linkToDetails}}';
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
@@ -62,7 +64,8 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name
                         };
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.name.ngClick = 'linkoutResource("job_template", job_template)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = "#/templates/job_template/{{job_template.id}}";
                         break;
                     case 'workflow_templates':
                         list.name = 'workflow_job_templates';
@@ -71,20 +74,23 @@ export default ['$compile', 'i18n', 'generateList',
                             name: list.fields.name
                         };
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.name.ngClick = 'linkoutResource("workflow_job_template", workflow_job_template)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = "#/templates/workflow_job_template/{{workflow_template.id}}";
                         break;
                     case 'credentials':
                         list.fields = {
                             name: list.fields.name
                         };
-                        list.fields.name.ngClick = 'linkoutResource("credential", credential)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = "#/credentials/{{credential.id}}";
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         break;
                     case 'organizations':
                         list.fields = {
                             name: list.fields.name
                         };
-                        list.fields.name.ngClick = 'linkoutResource("organization", organization)';
+                        delete list.fields.name.ngClick;
+                        list.fields.name.ngHref = "#/organizations/{{organization.id}}";
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         break;
                 }
@@ -116,6 +122,24 @@ export default ['$compile', 'i18n', 'generateList',
                 scope.$watchCollection('collection', function(selected){
                     scope[`${list.iterator}_dataset`] = scope.collection;
                     scope[list.name] = _.values(scope.collection);
+                });
+
+                scope.$watch(list.name, function(){
+                    if(scope.list.name === 'inventories') {
+                        if (scope[list.name] !== undefined) {
+                            scope[list.name].forEach(function(item, item_idx) {
+                                var itm = scope[list.name][item_idx];
+
+                                if(itm.kind && itm.kind === "smart") {
+                                    itm.linkToDetails = `#/inventories/smart/${itm.id}`;
+                                }
+                                else {
+                                    itm.linkToDetails = `#/inventories/inventory/${itm.id}`;
+                                }
+
+                            });
+                        }
+                    }
                 });
 
                 scope.removeSelection = function(resource, type){

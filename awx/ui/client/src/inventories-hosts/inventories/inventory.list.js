@@ -49,7 +49,7 @@ export default ['i18n', function(i18n) {
                 modalColumnClass: 'col-md-12',
                 awToolTip: "{{ inventory.description | sanitize }}",
                 awTipPlacement: "top",
-                ngClick: 'editInventory(inventory)'
+                uiSref: '{{inventory.linkToDetails}}'
             },
             kind: {
                 label: i18n._('Type'),

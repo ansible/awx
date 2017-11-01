@@ -67,6 +67,8 @@ function InventoriesList($scope,
         }
 
         inventory.kind_label = inventory.kind === '' ? 'Inventory' : (inventory.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
+
+        inventory.linkToDetails = (inventory.kind && inventory.kind === 'smart') ? `inventories.editSmartInventory({smartinventory_id:${inventory.id}})` : `inventories.edit({inventory_id:${inventory.id}})`;
     }
 
     $scope.editInventory = function (inventory) {

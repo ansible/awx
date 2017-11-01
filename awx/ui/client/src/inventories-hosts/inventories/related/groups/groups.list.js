@@ -31,7 +31,7 @@
             name: {
                 label: i18n._('Groups'),
                 key: true,
-                ngClick: "goToGroupGroups(group.id)",
+                uiSref: "inventories.edit.groups.edit({group_id:group.id})",
                 columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
                 class: 'InventoryManage-breakWord',
             }

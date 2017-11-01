@@ -28,12 +28,11 @@ export default ['i18n', function(i18n) {
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewjobResults(job)",
+                uiSref: '{{job.linkToDetails}}',
                 nosort: true
             },
             id: {
                 label: 'ID',
-                ngClick:"viewjobResults(job)",
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ job.status_tip }}",
                 dataPlacement: 'top',
@@ -42,7 +41,7 @@ export default ['i18n', function(i18n) {
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
-                ngClick: "viewjobResults(job)",
+                uiSref: '{{job.linkToDetails}}',
                 badgePlacement: 'right',
                 badgeCustom: true,
                 badgeIcon: `<a href="{{ job.workflow_result_link }}"
