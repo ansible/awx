@@ -495,12 +495,14 @@ ui: clean-ui ui-devel
 
 ui-test-ci: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:ci
+	$(NPM_BIN) --prefix awx/ui run unit
 
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
 jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
+	$(NPM_BIN) run --prefix awx/ui lint
 
 # END UI TASKS
 # --------------------------------------
