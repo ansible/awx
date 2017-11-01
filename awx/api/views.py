@@ -3834,7 +3834,26 @@ class JobRelaunch(RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        new_job = obj.copy_unified_job()
+        copy_kwargs = {}
+        retry_hosts = request.data.get('hosts', None)
+        if retry_hosts and retry_hosts != 'all':
+            if obj.status in ACTIVE_STATES:
+                return Response({'hosts': _(
+                    'Wait until job finishes before retrying on {status_value} hosts.'
+                ).format(status_value=retry_hosts)}, status=status.HTTP_400_BAD_REQUEST)
+            host_qs = obj.retry_qs(retry_hosts)
+            if not obj.job_events.filter(event='playbook_on_stats').exists():
+                return Response({'hosts': _(
+                    'Cannot retry on {status_value} hosts, playbook stats not available.'
+                ).format(status_value=retry_hosts)}, status=status.HTTP_400_BAD_REQUEST)
+            retry_host_list = host_qs.values_list('name', flat=True)
+            if len(retry_host_list) == 0:
+                return Response({'hosts': _(
+                    'Cannot relaunch because previous job had 0 {status_value} hosts.'
+                ).format(status_value=retry_hosts)}, status=status.HTTP_400_BAD_REQUEST)
+            copy_kwargs['limit'] = ','.join(retry_host_list)
+
+        new_job = obj.copy_unified_job(**copy_kwargs)
         result = new_job.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
