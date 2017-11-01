@@ -338,6 +338,7 @@ register(
     category_slug='ldap',
     placeholder=collections.OrderedDict([
         ('is_superuser', 'CN=Domain Admins,CN=Users,DC=example,DC=com'),
+        ('is_system_auditor', 'CN=Domain Auditors,CN=Users,DC=example,DC=com'),
     ]),
     feature_required='ldap',
 )
