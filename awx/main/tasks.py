@@ -1039,8 +1039,6 @@ class RunJob(BaseTask):
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['REST_API_URL'] = settings.INTERNAL_API_URL
             env['REST_API_TOKEN'] = job.task_auth_token or ''
-            env['TOWER_HOST'] = settings.TOWER_URL_BASE
-            env['AWX_HOST'] = settings.TOWER_URL_BASE
             env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
             env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
