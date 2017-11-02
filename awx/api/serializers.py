@@ -38,6 +38,7 @@ from polymorphic.models import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.models.prompts import ask_mapping
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
@@ -3289,10 +3290,8 @@ class JobLaunchSerializer(BaseSerializer):
         return False
 
     def get_defaults(self, obj):
-        ask_for_vars_dict = obj._ask_for_vars_dict()
-        ask_for_vars_dict['vault_credential'] = False
         defaults_dict = {}
-        for field in ask_for_vars_dict:
+        for field in ask_mapping.keys():
             if field in ('inventory', 'credential', 'vault_credential'):
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
@@ -3320,7 +3319,7 @@ class JobLaunchSerializer(BaseSerializer):
         data = self.context.get('data')
 
         for field in obj.resources_needed_to_start:
-            if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
+            if not (attrs.get(field, False) and getattr(obj, ask_mapping[field], False)):
                 errors[field] = _("Job Template '%s' is missing or undefined.") % field
 
         if obj.inventory and obj.inventory.pending_deletion is True:

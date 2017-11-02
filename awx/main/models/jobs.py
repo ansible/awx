@@ -28,7 +28,11 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel, CreatedModifiedModel,
+    prevent_search, VarsDictProperty
+)
+from awx.main.models.prompts import PromptedFields, AskPromptedFields, ask_mapping
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -53,7 +57,7 @@ system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
 
-class JobOptions(BaseModel):
+class JobOptions(PromptedFields):
     '''
     Common options for job templates and jobs.
     '''
@@ -61,23 +65,6 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    diff_mode = models.BooleanField(
-        default=False,
-        help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
-    )
-    job_type = models.CharField(
-        max_length=64,
-        choices=JOB_TYPE_CHOICES,
-        default='run',
-    )
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
     project = models.ForeignKey(
         'Project',
         related_name='%(class)ss',
@@ -90,14 +77,6 @@ class JobOptions(BaseModel):
         max_length=1024,
         default='',
         blank=True,
-    )
-    credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
     )
     vault_credential = models.ForeignKey(
         'Credential',
@@ -115,33 +94,9 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    limit = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
-    verbosity = models.PositiveIntegerField(
-        choices=VERBOSITY_CHOICES,
-        blank=True,
-        default=0,
-    )
-    extra_vars = prevent_search(models.TextField(
-        blank=True,
-        default='',
-    ))
-    job_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
     force_handlers = models.BooleanField(
         blank=True,
         default=False,
-    )
-    skip_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
     )
     start_at_task = models.CharField(
         max_length=1024,
@@ -228,7 +183,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
+class JobTemplate(UnifiedJobTemplate, AskPromptedFields, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -243,42 +198,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         max_length=1024,
         blank=True,
         default='',
-    )
-    ask_diff_mode_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_variables_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_limit_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_tags_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_skip_tags_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_job_type_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_verbosity_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_inventory_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
-    ask_credential_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
     )
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
@@ -362,41 +281,25 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # that of job template launch, so prompting_needed should
         # not block a provisioning callback from creating/launching jobs.
         if callback_extra_vars is None:
-            for value in self._ask_for_vars_dict().values():
-                if value:
+            for ask_field_name in set(ask_mapping.values()):
+                if getattr(self, ask_field_name):
                     prompting_needed = True
+                    break
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
                 not variables_needed)
-
-    def _ask_for_vars_dict(self):
-        return dict(
-            diff_mode=self.ask_diff_mode_on_launch,
-            extra_vars=self.ask_variables_on_launch,
-            limit=self.ask_limit_on_launch,
-            job_tags=self.ask_tags_on_launch,
-            skip_tags=self.ask_skip_tags_on_launch,
-            job_type=self.ask_job_type_on_launch,
-            verbosity=self.ask_verbosity_on_launch,
-            inventory=self.ask_inventory_on_launch,
-            credential=self.ask_credential_on_launch,
-            vault_credential=self.ask_credential_on_launch,
-            extra_credentials=self.ask_credential_on_launch,
-        )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
         # Sort the runtime fields allowed and disallowed by job template
         ignored_fields = {}
         prompted_fields = {}
 
-        ask_for_vars_dict = self._ask_for_vars_dict()
-
-        for field in ask_for_vars_dict:
+        for field in ask_mapping.keys():
             if field in kwargs:
                 if field == 'extra_vars':
                     prompted_fields[field] = {}
                     ignored_fields[field] = {}
-                if ask_for_vars_dict[field]:
+                if getattr(self, ask_mapping[field]):
                     prompted_fields[field] = kwargs[field]
                 else:
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
