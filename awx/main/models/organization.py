@@ -11,6 +11,7 @@ import uuid
 from django.conf import settings
 from django.db import models, connection
 from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
@@ -24,7 +25,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.models.mixins import ResourceMixin
 
-__all__ = ['Organization', 'Team', 'Profile', 'AuthToken']
+__all__ = ['Organization', 'Team', 'Profile', 'AuthToken', 'UserSessionMembership']
 
 
 class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
@@ -245,6 +246,42 @@ class AuthToken(BaseModel):
 
     def __unicode__(self):
         return self.key
+
+
+class UserSessionMembership(BaseModel):
+    '''
+    A lookup table for session membership given user.
+    '''
+
+    class Meta:
+        app_label = 'main'
+
+    user = models.ForeignKey(
+        'auth.User', related_name='+', blank=False, null=False, on_delete=models.CASCADE
+    )
+    session = models.OneToOneField(
+        Session, related_name='+', blank=False, null=False, on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(default=None, editable=False)
+
+    @staticmethod
+    def get_memberships_over_limit(user, now=None):
+        if settings.SESSIONS_PER_USER == -1:
+            return []
+        if now is None:
+            now = tz_now()
+        query_set = UserSessionMembership.objects\
+            .select_related('session')\
+            .filter(user=user)\
+            .order_by('-created')
+        non_expire_memberships = [x for x in query_set if x.session.expire_date > now]
+        return non_expire_memberships[settings.SESSIONS_PER_USER:]
+
+    @staticmethod
+    def clear_session_for_user(user):
+        query_set = UserSessionMembership.objects.select_related('session').filter(user=user)
+        sessions_to_delete = [obj.session.pk for obj in query_set]
+        Session.objects.filter(pk__in=sessions_to_delete).delete()
 
 
 # Add get_absolute_url method to User model if not present.

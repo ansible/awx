@@ -187,6 +187,15 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
+# Seconds before sessions expire.
+# Note: This setting may be overridden by database settings.
+SESSION_COOKIE_AGE = 1209600
+
+# Maximum number of per-user valid, concurrent sessions.
+# -1 is unlimited
+# Note: This setting may be overridden by database settings.
+SESSIONS_PER_USER = -1
+
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
 
@@ -273,9 +282,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'awx.api.authentication.TokenAuthentication',
+        'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'awx.api.permissions.ModelAccessPermission',

@@ -4,6 +4,10 @@
 from __future__ import absolute_import, unicode_literals
 from django.conf.urls import include, url
 
+from awx.api.generics import (
+    LoggedLoginView,
+    LoggedLogoutView,
+)
 from awx.api.views import (
     ApiRootView,
     ApiV1RootView,
@@ -119,5 +123,12 @@ app_name = 'api'
 urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),
-    url(r'^(?P<version>(v1|v2))/', include(v1_urls))
+    url(r'^(?P<version>(v1|v2))/', include(v1_urls)),
+    url(r'^login/$', LoggedLoginView.as_view(
+        template_name='rest_framework/login.html',
+        extra_context={'inside_login_context': True}
+    ), name='login'),
+    url(r'^logout/$', LoggedLogoutView.as_view(
+        next_page='/api/', redirect_field_name='next'
+    ), name='logout'),
 ]
