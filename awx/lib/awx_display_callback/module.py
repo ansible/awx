@@ -220,12 +220,8 @@ class BaseCallbackModule(CallbackBase):
     def v2_playbook_on_task_start(self, task, is_conditional):
         # FIXME: Flag task path output as vv.
         task_uuid = str(task._uuid)
-        if task_uuid in self.task_uuids:
-            # FIXME: When this task UUID repeats, it means the play is using the
-            # free strategy, so different hosts may be running different tasks
-            # within a play.
-            return
-        self.task_uuids.add(task_uuid)
+        if task_uuid not in self.task_uuids:
+            self.task_uuids.add(task_uuid)
         self.set_task(task)
         event_data = dict(
             task=task,

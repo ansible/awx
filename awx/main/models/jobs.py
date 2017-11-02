@@ -882,7 +882,7 @@ class JobEvent(CreatedModifiedModel):
     #     - playbook_on_include (only v2 - only used for handlers?)
     #     - playbook_on_setup (not used for v2)
     #       - runner_on*
-    #     - playbook_on_task_start (once for each task within a play)
+    #     - playbook_on_task_start (once for each task within a play, except when using free or serial strategy, then maybe many)
     #       - runner_on_failed
     #       - runner_on_ok
     #       - runner_on_error (not used for v2)
