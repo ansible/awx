@@ -4,6 +4,7 @@ import atLibModels from '~models';
 
 import atFeaturesApplications from '~features/applications';
 import atFeaturesCredentials from '~features/credentials';
+import atFeaturesOutput from '~features/output';
 import atFeaturesTemplates from '~features/templates';
 import atFeaturesUsers from '~features/users';
 import atFeaturesJobs from '~features/jobs';
@@ -18,7 +19,9 @@ angular.module(MODULE_NAME, [
     atFeaturesCredentials,
     atFeaturesTemplates,
     atFeaturesUsers,
-    atFeaturesJobs
+    atFeaturesJobs,
+    atFeaturesOutput,
+    atFeaturesTemplates
 ]);
 
 export default MODULE_NAME;
