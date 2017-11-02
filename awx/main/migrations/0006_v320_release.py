@@ -6,7 +6,12 @@ from __future__ import unicode_literals
 from psycopg2.extensions import AsIs
 
 # Django
-from django.db import migrations, models
+from django.db import (
+    connection,
+    migrations,
+    models,
+    OperationalError
+)
 from django.conf import settings
 import taggit.managers
 
@@ -15,15 +20,23 @@ import awx.main.fields
 from awx.main.models import Host
 
 
+def replaces():
+    squashed = ['0005a_squashed_v310_v313_updates', '0005b_squashed_v310_v313_updates']
+    try:
+        recorder = migrations.recorder.MigrationRecorder(connection)
+        result = recorder.migration_qs.filter(app='main').filter(name__in=squashed).all()
+        return [('main', m.name) for m in result]
+    except OperationalError:
+        return []
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
         ('main', '0005_squashed_v310_v313_updates'),
     ]
 
-    replaces = [
-        ('main', '0005a_squashed_v310_v313_updates'),
-    ]
+    replaces = replaces()
 
     operations = [
         # Release UJT unique_together constraint

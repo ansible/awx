@@ -22,11 +22,14 @@ def squash_data(squashed):
     return squashed_keys, key_index
 
 
-def current_migration():
+def current_migration(exclude_squashed=True):
     '''Get the latest migration non-squashed migration'''
     try:
         recorder = migrations.recorder.MigrationRecorder(connection)
-        return recorder.migration_qs.filter(app='main').exclude(name__contains='squashed').latest('id')
+        migration_qs = recorder.migration_qs.filter(app='main')
+        if exclude_squashed:
+            migration_qs = migration_qs.exclude(name__contains='squashed')
+        return migration_qs.latest('id')
     except (recorder.Migration.DoesNotExist, OperationalError):
         return None
 
