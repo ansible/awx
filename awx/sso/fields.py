@@ -109,6 +109,7 @@ class LDAPServerURIField(fields.URLField):
 
     def __init__(self, **kwargs):
         kwargs.setdefault('schemes', ('ldap', 'ldaps'))
+        kwargs.setdefault('allow_plain_hostname', True)
         super(LDAPServerURIField, self).__init__(**kwargs)
 
     def run_validators(self, value):
