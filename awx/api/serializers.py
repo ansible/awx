@@ -10,6 +10,11 @@ import six
 import urllib
 from collections import OrderedDict
 from dateutil import rrule
+from datetime import timedelta
+
+# OAuth
+from oauthlib.common import generate_token
+from oauth2_provider.settings import oauth2_settings
 
 # Django
 from django.conf import settings
@@ -68,6 +73,7 @@ DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modifie
 SUMMARIZABLE_FK_FIELDS = {
     'organization': DEFAULT_SUMMARY_FIELDS,
     'user': ('id', 'username', 'first_name', 'last_name'),
+    'application': ('id', 'name', 'client_id'),
     'team': DEFAULT_SUMMARY_FIELDS,
     'inventory': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
                                            'total_hosts',
@@ -412,6 +418,16 @@ class BaseSerializer(serializers.ModelSerializer):
         elif hasattr(obj, 'modified'):
             return obj.modified
         return None
+
+    def get_extra_kwargs(self):
+        extra_kwargs = super(BaseSerializer, self).get_extra_kwargs()
+        if self.instance:
+            read_only_on_update_fields = getattr(self.Meta, 'read_only_on_update_fields', tuple())
+            for field_name in read_only_on_update_fields:
+                kwargs = extra_kwargs.get(field_name, {})
+                kwargs['read_only'] = True
+                extra_kwargs[field_name] = kwargs
+        return extra_kwargs
 
     def build_standard_field(self, field_name, model_field):
         # DRF 3.3 serializers.py::build_standard_field() -> utils/field_mapping.py::get_field_kwargs() short circuits
@@ -828,6 +844,7 @@ class UserSerializer(BaseSerializer):
         if new_password:
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
+            UserSessionMembership.clear_session_for_user(obj)
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
@@ -907,6 +924,113 @@ class UserSerializer(BaseSerializer):
 
     def validate_is_superuser(self, value):
         return self._validate_ldap_managed_field(value, 'is_superuser')
+
+
+class OauthApplicationSerializer(BaseSerializer):
+
+    class Meta:
+        model = Application
+        fields = (
+            '*', '-description', 'user', 'client_id', 'client_secret', 'client_type',
+            'redirect_uris',  'authorization_grant_type', 'skip_authorization',
+        )
+        read_only_fields = ('client_id', 'client_secret')
+        read_only_on_update_fields = ('user', 'authorization_grant_type')
+        extra_kwargs = {
+            'user': {'allow_null': False, 'required': True},
+            'authorization_grant_type': {'allow_null': False}
+        }
+
+    def get_modified(self, obj):
+        if obj is None:
+            return None
+        return obj.updated
+
+    def get_related(self, obj):
+        ret = super(OauthApplicationSerializer, self).get_related(obj)
+        if obj.user:
+            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
+        ret['tokens'] = self.reverse(
+            'api:user_me_oauth_application_token_list', kwargs={'pk': obj.pk}
+        )
+        ret['activity_stream'] = self.reverse(
+            'api:user_me_oauth_application_activity_stream_list', kwargs={'pk': obj.pk}
+        )
+        return ret
+
+    def _summary_field_tokens(self, obj):
+        token_list = [{'id': x.pk, 'token': x.token} for x in obj.accesstoken_set.all()[:10]]
+        if has_model_field_prefetched(obj, 'accesstoken_set'):
+            token_count = len(obj.accesstoken_set.all())
+        else:
+            if len(token_list) < 10:
+                token_count = len(token_list)
+            else:
+                token_count = obj.accesstoken_set.count()
+        return {'count': token_count, 'results': token_list}
+
+    def get_summary_fields(self, obj):
+        ret = super(OauthApplicationSerializer, self).get_summary_fields(obj)
+        ret['tokens'] = self._summary_field_tokens(obj)
+        return ret
+
+
+class OauthTokenSerializer(BaseSerializer):
+
+    refresh_token = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccessToken
+        fields = (
+            '*', '-name', '-description', 'user', 'token', 'refresh_token',
+            'application', 'expires', 'scope',
+        )
+        read_only_fields = ('user', 'token', 'expires')
+        read_only_on_update_fields = ('application',)
+        extra_kwargs = {
+            'application': {'allow_null': False}
+        }
+
+    def get_modified(self, obj):
+        if obj is None:
+            return None
+        return obj.updated
+
+    def get_related(self, obj):
+        ret = super(OauthTokenSerializer, self).get_related(obj)
+        if obj.user:
+            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
+        if obj.application:
+            ret['application'] = self.reverse(
+                'api:user_me_oauth_application_detail', kwargs={'pk': obj.application.pk}
+            )
+        ret['activity_stream'] = self.reverse(
+            'api:user_me_oauth_token_activity_stream_list', kwargs={'pk': obj.pk}
+        )
+        return ret
+
+    def get_refresh_token(self, obj):
+        try:
+            return getattr(obj.refresh_token, 'token', '')
+        except ObjectDoesNotExist:
+            return ''
+
+    def create(self, validated_data):
+        validated_data['token'] = generate_token()
+        validated_data['expires'] = now() + timedelta(
+            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+        )
+        obj = super(OauthTokenSerializer, self).create(validated_data)
+        if obj.application and obj.application.user:
+            obj.user = obj.application.user
+        obj.save()
+        RefreshToken.objects.create(
+            user=obj.application.user if obj.application and obj.application.user else None,
+            token=generate_token(),
+            application=obj.application if obj.application else None,
+            access_token=obj
+        )
+        return obj
 
 
 class OrganizationSerializer(BaseSerializer):
@@ -3949,7 +4073,8 @@ class ActivityStreamSerializer(BaseSerializer):
         field_list += [
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
-            ('notification', ('id', 'status', 'notification_type', 'notification_template_id'))
+            ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
+            ('access_token', ('id', 'token'))
         ]
         return field_list
 
@@ -4006,6 +4131,14 @@ class ActivityStreamSerializer(BaseSerializer):
                     id_list.append(getattr(thisItem, 'id', None))
                     if fk == 'custom_inventory_script':
                         rel[fk].append(self.reverse('api:inventory_script_detail', kwargs={'pk': thisItem.id}))
+                    elif fk == 'application':
+                        rel[fk].append(self.reverse(
+                            'api:user_me_oauth_application_detail', kwargs={'pk': thisItem.pk}
+                        ))
+                    elif fk == 'access_token':
+                        rel[fk].append(self.reverse(
+                            'api:user_me_oauth_token_detail', kwargs={'pk': thisItem.pk}
+                        ))
                     else:
                         rel[fk].append(self.reverse('api:' + fk + '_detail', kwargs={'pk': thisItem.id}))
 

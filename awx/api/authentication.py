@@ -16,6 +16,9 @@ from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework import HTTP_HEADER_ENCODING
 
+# Django OAuth Toolkit
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication
+
 # AWX
 from awx.main.models import AuthToken
 
@@ -137,3 +140,28 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         if not settings.AUTH_BASIC_ENABLED:
             return
         return super(LoggedBasicAuthentication, self).authenticate_header(request)
+
+
+class SessionAuthentication(authentication.SessionAuthentication):
+
+    def authenticate_header(self, request):
+        return 'Session'
+
+    def enforce_csrf(self, request):
+        return None
+
+
+class LoggedOAuth2Authentication(OAuth2Authentication):
+
+    def authenticate(self, request):
+        ret = super(LoggedOAuth2Authentication, self).authenticate(request)
+        if ret:
+            user, token = ret
+            username = user.username if user else '<none>'
+            logger.debug(smart_text(
+                u"User {} performed a {} to {} through the API using OAuth token {}".format(
+                    username, request.method, request.path, user
+                )
+            ))
+            setattr(user, 'oauth_scopes', [x for x in token.scope.split() if x])
+        return ret

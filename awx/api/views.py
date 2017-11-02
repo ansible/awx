@@ -65,7 +65,7 @@ from awx.api.authentication import TokenGetAuthentication
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.versioning import reverse, get_request_version
+from awx.api.versioning import reverse, get_request_version, drf_reverse
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
@@ -169,6 +169,22 @@ class ApiRootView(APIView):
         if feature_enabled('rebranding'):
             data['custom_logo'] = settings.CUSTOM_LOGO
             data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
+        data['oauth'] = drf_reverse('api:oauth_authorization_root_view')
+        return Response(data)
+
+
+class ApiOAuthAuthorizationRootView(APIView):
+
+    authentication_classes = []
+    permission_classes = (AllowAny,)
+    view_name = _("API OAuth Authorization Root")
+    versioning_class = None
+
+    def get(self, request, format=None):
+        data = OrderedDict()
+        data['authorize'] = drf_reverse('api:authorize')
+        data['token'] = drf_reverse('api:token')
+        data['revoke_token'] = drf_reverse('api:revoke-token')
         return Response(data)
 
 
@@ -187,6 +203,8 @@ class ApiVersionRootView(APIView):
         data['config'] = reverse('api:api_v1_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)
+        if get_request_version(request) > 1:
+            data['oauth'] = reverse('api:user_me_oauth_root_view', request=request)
         data['dashboard'] = reverse('api:dashboard_view', request=request)
         data['organizations'] = reverse('api:organization_list', request=request)
         data['users'] = reverse('api:user_list', request=request)
@@ -1454,6 +1472,76 @@ class UserMeList(ListAPIView):
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
+
+
+class UserMeOauthRootView(APIView):
+
+    view_name = _("OAuth Root")
+
+    def get(self, request, format=None):
+        data = OrderedDict()
+        data['applications'] = reverse('api:user_me_oauth_application_list', request=request)
+        data['tokens'] = reverse('api:user_me_oauth_token_list', request=request)
+        return Response(data)
+
+
+class UserMeOauthApplicationList(ListCreateAPIView):
+
+    view_name = _("OAuth Applications")
+
+    model = Application
+    serializer_class = OauthApplicationSerializer
+
+
+class UserMeOauthApplicationDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("OAuth Application Detail")
+
+    model = Application
+    serializer_class = OauthApplicationSerializer
+
+
+class UserMeOauthApplicationTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth Application Tokens")
+
+    model = AccessToken
+    serializer_class = OauthTokenSerializer
+    parent_model = Application
+    relationship = 'accesstoken_set'
+    parent_key = 'application'
+
+
+class UserMeOauthApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Application
+    relationship = 'activitystream_set'
+
+
+class UserMeOauthTokenList(ListCreateAPIView):
+
+    view_name = _("OAuth Tokens")
+
+    model = AccessToken
+    serializer_class = OauthTokenSerializer
+
+
+class UserMeOauthTokenDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("OAuth Token Detail")
+
+    model = AccessToken
+    serializer_class = OauthTokenSerializer
+
+
+class UserMeOauthTokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = AccessToken
+    relationship = 'activitystream_set'
 
 
 class UserTeamsList(ListAPIView):

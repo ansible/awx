@@ -23,6 +23,7 @@ from awx.main.models.fact import * # noqa
 from awx.main.models.label import * # noqa
 from awx.main.models.workflow import * # noqa
 from awx.main.models.channels import * # noqa
+from awx.api.versioning import reverse
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
@@ -112,6 +113,24 @@ def user_is_in_enterprise_category(user, category):
 
 User.add_to_class('is_in_enterprise_category', user_is_in_enterprise_category)
 
+
+from oauth2_provider.models import Application, Grant, AccessToken, RefreshToken # noqa
+
+
+def oauth_application_get_absolute_url(self, request=None):
+    return reverse('api:user_me_oauth_application_detail', kwargs={'pk': self.pk}, request=request)
+
+
+Application.add_to_class('get_absolute_url', oauth_application_get_absolute_url)
+
+
+def oauth_token_get_absolute_url(self, request=None):
+    return reverse('api:user_me_oauth_token_detail', kwargs={'pk': self.pk}, request=request)
+
+
+AccessToken.add_to_class('get_absolute_url', oauth_token_get_absolute_url)
+
+
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
 
@@ -142,6 +161,8 @@ activity_stream_registrar.connect(User)
 activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
+activity_stream_registrar.connect(Application)
+activity_stream_registrar.connect(AccessToken)
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))

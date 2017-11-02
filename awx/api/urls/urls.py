@@ -4,6 +4,10 @@
 from __future__ import absolute_import, unicode_literals
 from django.conf.urls import include, url
 
+from awx.api.generics import (
+    LoggedLoginView,
+    LoggedLogoutView,
+)
 from awx.api.views import (
     ApiRootView,
     ApiV1RootView,
@@ -57,6 +61,8 @@ from .schedule import urls as schedule_urls
 from .activity_stream import urls as activity_stream_urls
 from .instance import urls as instance_urls
 from .instance_group import urls as instance_group_urls
+from .user_oauth import urls as user_oauth_urls
+from .oauth import urls as oauth_urls
 
 
 v1_urls = [
@@ -113,11 +119,20 @@ v2_urls = [
     url(r'^jobs/(?P<pk>[0-9]+)/credentials/$', JobCredentialsList.as_view(), name='job_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/extra_credentials/$', JobTemplateExtraCredentialsList.as_view(), name='job_template_extra_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/credentials/$', JobTemplateCredentialsList.as_view(), name='job_template_credentials_list'),
+    url(r'^me/oauth/', include(user_oauth_urls))
 ]
 
 app_name = 'api'
 urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),
-    url(r'^(?P<version>(v1|v2))/', include(v1_urls))
+    url(r'^(?P<version>(v1|v2))/', include(v1_urls)),
+    url(r'^login/$', LoggedLoginView.as_view(
+        template_name='rest_framework/login.html',
+        extra_context={'inside_login_context': True}
+    ), name='login'),
+    url(r'^logout/$', LoggedLogoutView.as_view(
+        next_page='/api/', redirect_field_name='next'
+    ), name='logout'),
+    url(r'^o/', include(oauth_urls))
 ]

@@ -109,6 +109,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
+LOGIN_URL = '/api/login/'
+
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should not be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
@@ -187,6 +189,15 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
+# Seconds before sessions expire.
+# Note: This setting may be overridden by database settings.
+SESSION_COOKIE_AGE = 1209600
+
+# Maximum number of per-user valid, concurrent sessions.
+# -1 is unlimited
+# Note: This setting may be overridden by database settings.
+SESSIONS_PER_USER = -1
+
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
 
@@ -252,6 +263,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'oauth2_provider',
     'rest_framework',
     'django_extensions',
     'django_celery_results',
@@ -274,9 +286,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'awx.api.authentication.TokenAuthentication',
+        'awx.api.authentication.LoggedOAuth2Authentication',
+        'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'awx.api.permissions.ModelAccessPermission',
@@ -315,6 +327,11 @@ AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+# Django OAuth Toolkit settings
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
+OAUTH2_PROVIDER = {}
 
 # LDAP server (default to None to skip using LDAP authentication).
 # Note: This setting may be overridden by database settings.

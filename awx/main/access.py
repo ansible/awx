@@ -17,6 +17,9 @@ from django.core.exceptions import ObjectDoesNotExist
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
 
+# Django OAuth Toolkit
+from oauth2_provider.models import Application, AccessToken
+
 # AWX
 from awx.main.utils import (
     get_object_or_400,
@@ -117,6 +120,8 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     Return True if user can perform action against model_class with the
     provided parameters.
     '''
+    if 'write' not in getattr(user, 'oauth_scopes', ['write']) and action != 'read':
+        return False
     access_class = access_registry[model_class]
     access_instance = access_class(user)
     access_method = getattr(access_instance, 'can_%s' % action)
@@ -538,6 +543,73 @@ class UserAccess(BaseAccess):
             role_access = RoleAccess(self.user)
             return role_access.can_unattach(sub_obj, obj, 'members', *args, **kwargs)
         return super(UserAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+
+
+class OauthApplicationAccess(BaseAccess):
+    '''
+    I can read, change or delete OAuth applications when:
+     - I am a superuser.
+     - I am the admin of the organization of the user of the application.
+     - I am the user of the application.
+    I can create OAuth applications when:
+     - I am a superuser.
+     - I am the admin of the organization of the user of the application.
+    '''
+
+    model = Application
+    select_related = ('user',)
+
+    def filtered_queryset(self):
+        accessible_users = User.objects.filter(
+            pk__in=self.user.admin_of_organizations.values('member_role__members')
+        ) | User.objects.filter(pk=self.user.pk)
+        return self.model.objects.filter(user__in=accessible_users)
+
+    def can_change(self, obj, data):
+        return self.can_read(obj)
+
+    def can_delete(self, obj):
+        return self.can_read(obj)
+
+    def can_add(self, data):
+        if self.user.is_superuser:
+            return True
+        user = get_object_from_data('user', User, data)
+        if not user:
+            return False
+        return set(self.user.admin_of_organizations.all()) & set(user.organizations.all())
+
+
+class OauthTokenAccess(BaseAccess):
+    '''
+    I can read, change or delete an OAuth token when:
+     - I am a superuser.
+     - I am the admin of the organization of the user of the token.
+     - I am the user of the token.
+    I can create an OAuth token when:
+     - I have the read permission of the related application.
+    '''
+
+    model = AccessToken
+    select_related = ('user', 'application')
+
+    def filtered_queryset(self):
+        accessible_users = User.objects.filter(
+            pk__in=self.user.admin_of_organizations.values('member_role__members')
+        ) | User.objects.filter(pk=self.user.pk)
+        return self.model.objects.filter(user__in=accessible_users)
+
+    def can_change(self, obj, data):
+        return self.can_read(obj)
+
+    def can_delete(self, obj):
+        return self.can_read(obj)
+
+    def can_add(self, data):
+        app = get_object_from_data('application', Application, data)
+        if not app:
+            return False
+        return OauthApplicationAccess(self.user).can_read(app)
 
 
 class OrganizationAccess(BaseAccess):
