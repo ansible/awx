@@ -8,6 +8,9 @@ import django.db.models.deletion
 import awx.main.models.workflow
 import awx.main.fields
 
+import _squashed
+from _squashed_30 import SQUASHED_30
+
 
 class Migration(migrations.Migration):
 
@@ -15,11 +18,11 @@ class Migration(migrations.Migration):
         ('main', '0003_squashed_v300_v303_updates'),
     ]
 
-    replaces = [
+    replaces = _squashed.replaces(SQUASHED_30) + [
         (b'main', '0034_v310_release'),
     ]
 
-    operations = [
+    operations = _squashed.operations(SQUASHED_30) + [
         # Create ChannelGroup table
         migrations.CreateModel(
             name='ChannelGroup',
