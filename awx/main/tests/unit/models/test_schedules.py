@@ -66,3 +66,13 @@ def test_invalid__clean_extra_data_system_jobs(extra_data):
 
     assert json.dumps(str(e.value)) == json.dumps(str([u'days must be a positive integer.']))
 
+
+def test_unallowed_system_job_data():
+    sjt = SystemJobTemplate()
+    accepted, ignored, errors = sjt._accept_or_ignore_variables({
+        'days': 34,
+        'foobar': 'baz'
+    }, [])
+    assert 'foobar' in ignored
+    assert 'days' in accepted
+

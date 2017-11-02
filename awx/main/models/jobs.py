@@ -1408,6 +1408,24 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
+    def _accept_or_ignore_variables(self, data, errors):
+        '''
+        Unlike other templates, like project updates and inventory sources,
+        system job templates can accept a limited number of fields
+        used as options for the management commands.
+        '''
+        rejected = {}
+        allowed_vars = set(['days', 'older_than', 'granularity'])
+        given_vars = set(data.keys())
+        unallowed_vars = given_vars - (allowed_vars & given_vars)
+        if unallowed_vars:
+            errors.append(_('Variables {list_of_keys} are not allowed for system jobs.').format(
+                list_of_keys=', '.join(unallowed_vars)))
+            for key in unallowed_vars:
+                rejected[key] = data.pop(key)
+
+        return (data, rejected, errors)
+
 
 class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
