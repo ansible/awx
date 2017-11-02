@@ -243,12 +243,13 @@ class TestJobExecution:
             verbosity=3
         )
 
-        # mock the job.extra_credentials M2M relation so we can avoid DB access
-        job._extra_credentials = []
-        patch = mock.patch.object(Job, 'extra_credentials', mock.Mock(
-            all=lambda: job._extra_credentials,
-            add=job._extra_credentials.append,
-            spec_set=['all', 'add']
+        # mock the job.credentials M2M relation so we can avoid DB access
+        job._credentials = []
+        patch = mock.patch.object(UnifiedJob, 'credentials', mock.Mock(
+            all=lambda: job._credentials,
+            add=job._credentials.append,
+            filter=mock.Mock(return_value=job._credentials),
+            spec_set=['all', 'add', 'filter']
         ))
         self.patches.append(patch)
         patch.start()
@@ -328,7 +329,7 @@ class TestIsolatedExecution(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.credential = credential
+        self.instance.credentials.add(credential)
 
         private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
@@ -370,7 +371,7 @@ class TestIsolatedExecution(TestJobExecution):
             credential_type=ssh,
             inputs = {'username': 'bob',}
         )
-        self.instance.credential = credential
+        self.instance.credentials.add(credential)
 
         private_data = tempfile.mkdtemp(prefix='awx_')
         self.task.build_private_data_dir = mock.Mock(return_value=private_data)
@@ -414,7 +415,7 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', field: 'secret'}
         )
         credential.inputs[field] = encrypt_field(credential, field)
-        self.instance.credential = credential
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -434,7 +435,7 @@ class TestJobCredentials(TestJobExecution):
             inputs={'vault_password': 'vault-me'}
         )
         credential.inputs['vault_password'] = encrypt_field(credential, 'vault_password')
-        self.instance.vault_credential = credential
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -457,7 +458,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        self.instance.credential = credential
+        self.instance.credentials.add(credential)
 
         def run_pexpect_side_effect(private_data, *args, **kwargs):
             args, cwd, env, stdout = args
@@ -485,7 +486,7 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', 'password': 'secret'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -505,7 +506,7 @@ class TestJobCredentials(TestJobExecution):
         )
         for key in ('password', 'security_token'):
             credential.inputs[key] = encrypt_field(credential, key)
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -528,7 +529,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -554,7 +555,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['secret'] = encrypt_field(credential, 'secret')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         self.task.run(self.pk)
 
@@ -579,7 +580,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         self.task.run(self.pk)
 
@@ -599,7 +600,7 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'username': 'bob', 'password': 'secret', 'host': 'https://example.org'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -623,7 +624,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -658,7 +659,7 @@ class TestJobCredentials(TestJobExecution):
         )
         for field in ('password', 'ssh_key_data', 'authorize_password'):
             credential.inputs[field] = encrypt_field(credential, field)
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -695,7 +696,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         with pytest.raises(Exception):
             self.task.run(self.pk)
 
@@ -722,7 +723,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -754,7 +755,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -785,7 +786,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -819,7 +820,7 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'password': 'SUPER-SECRET-123'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -852,7 +853,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -884,7 +885,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -915,7 +916,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs={'turbo_button': True}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -951,7 +952,7 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'password': 'SUPER-SECRET-123'}
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         assert self.run_pexpect.call_count == 1
@@ -987,7 +988,7 @@ class TestJobCredentials(TestJobExecution):
             credential_type=some_cloud,
             inputs = {'api_token': 'ABC123'}
         )
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
         self.task.run(self.pk)
 
         def run_pexpect_side_effect(*args, **kwargs):
@@ -1010,7 +1011,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         gce_credential.inputs['ssh_key_data'] = encrypt_field(gce_credential, 'ssh_key_data')
-        self.instance.extra_credentials.add(gce_credential)
+        self.instance.credentials.add(gce_credential)
 
         azure_rm = CredentialType.defaults['azure_rm']()
         azure_rm_credential = Credential(
@@ -1023,7 +1024,7 @@ class TestJobCredentials(TestJobExecution):
             }
         )
         azure_rm_credential.inputs['secret'] = encrypt_field(azure_rm_credential, 'secret')
-        self.instance.extra_credentials.add(azure_rm_credential)
+        self.instance.credentials.add(azure_rm_credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args

@@ -54,6 +54,8 @@ from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, Ver
 
 logger = logging.getLogger('awx.api.serializers')
 
+DEPRECATED = 'This resource has been deprecated and will be removed in a future release'
+
 # Fields that should be summarized regardless of object type.
 DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modified_by')#, 'type')
 
@@ -537,6 +539,13 @@ class BaseSerializer(serializers.ModelSerializer):
     def reverse(self, *args, **kwargs):
         kwargs['request'] = self.context.get('request')
         return reverse(*args, **kwargs)
+
+    @property
+    def is_detail_view(self):
+        if 'view' in self.context:
+            if 'pk' in self.context['view'].kwargs:
+                return True
+        return False
 
 
 class EmptySerializer(serializers.Serializer):
@@ -2286,8 +2295,8 @@ class V1JobOptionsSerializer(BaseSerializer):
         fields = ('*', 'cloud_credential', 'network_credential')
 
     V1_FIELDS = {
-        'cloud_credential': models.PositiveIntegerField(blank=True, null=True, default=None),
-        'network_credential': models.PositiveIntegerField(blank=True, null=True, default=None)
+        'cloud_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
+        'network_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
     }
 
     def build_field(self, field_name, info, model_class, nested_depth):
@@ -2297,20 +2306,41 @@ class V1JobOptionsSerializer(BaseSerializer):
         return super(V1JobOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
 
 
+@six.add_metaclass(BaseSerializerMetaclass)
+class LegacyCredentialFields(BaseSerializer):
+
+    class Meta:
+        model = Credential
+        fields = ('*', 'credential', 'vault_credential')
+
+    LEGACY_FIELDS = {
+        'credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
+        'vault_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
+    }
+
+    def build_field(self, field_name, info, model_class, nested_depth):
+        if field_name in self.LEGACY_FIELDS:
+            return self.build_standard_field(field_name,
+                                             self.LEGACY_FIELDS[field_name])
+        return super(LegacyCredentialFields, self).build_field(field_name, info, model_class, nested_depth)
+
+
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
-                  'credential', 'vault_credential', 'forks', 'limit',
-                  'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task', 'timeout', 'use_fact_cache',)
+                  'forks', 'limit', 'verbosity', 'extra_vars', 'job_tags',
+                  'force_handlers', 'skip_tags', 'start_at_task', 'timeout',
+                  'use_fact_cache',)
 
     def get_fields(self):
         fields = super(JobOptionsSerializer, self).get_fields()
 
         # TODO: remove when API v1 is removed
-        if self.version == 1 and 'credential' in self.Meta.fields:
+        if self.version == 1:
             fields.update(V1JobOptionsSerializer().get_fields())
+
+        fields.update(LegacyCredentialFields().get_fields())
         return fields
 
     def get_related(self, obj):
@@ -2321,17 +2351,22 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         if obj.project:
             res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
         if obj.credential:
-            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential})
         if obj.vault_credential:
-            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential.pk})
+            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential})
         if self.version > 1:
             if isinstance(obj, UnifiedJobTemplate):
                 res['extra_credentials'] = self.reverse(
                     'api:job_template_extra_credentials_list',
                     kwargs={'pk': obj.pk}
                 )
+                res['credentials'] = self.reverse(
+                    'api:job_template_credentials_list',
+                    kwargs={'pk': obj.pk}
+                )
             elif isinstance(obj, UnifiedJob):
                 res['extra_credentials'] = self.reverse('api:job_extra_credentials_list', kwargs={'pk': obj.pk})
+                res['credentials'] = self.reverse('api:job_credentials_list', kwargs={'pk': obj.pk})
         else:
             cloud_cred = obj.cloud_credential
             if cloud_cred:
@@ -2352,64 +2387,67 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             ret['project'] = None
             if 'playbook' in ret:
                 ret['playbook'] = ''
-        if 'credential' in ret and not obj.credential:
-            ret['credential'] = None
-        if 'vault_credential' in ret and not obj.vault_credential:
-            ret['vault_credential'] = None
-        if self.version == 1 and 'credential' in self.Meta.fields:
+        ret['credential'] = obj.credential
+        ret['vault_credential'] = obj.vault_credential
+        if self.version == 1:
             ret['cloud_credential'] = obj.cloud_credential
             ret['network_credential'] = obj.network_credential
         return ret
 
     def create(self, validated_data):
         deprecated_fields = {}
-        for key in ('cloud_credential', 'network_credential'):
+        for key in ('credential', 'vault_credential', 'cloud_credential', 'network_credential'):
             if key in validated_data:
                 deprecated_fields[key] = validated_data.pop(key)
         obj = super(JobOptionsSerializer, self).create(validated_data)
-        if self.version == 1 and deprecated_fields:  # TODO: remove in 3.3
+        if deprecated_fields:  # TODO: remove in 3.3
             self._update_deprecated_fields(deprecated_fields, obj)
         return obj
 
     def update(self, obj, validated_data):
         deprecated_fields = {}
-        for key in ('cloud_credential', 'network_credential'):
+        for key in ('credential', 'vault_credential', 'cloud_credential', 'network_credential'):
             if key in validated_data:
                 deprecated_fields[key] = validated_data.pop(key)
         obj = super(JobOptionsSerializer, self).update(obj, validated_data)
-        if self.version == 1 and deprecated_fields:  # TODO: remove in 3.3
+        if deprecated_fields:  # TODO: remove in 3.3
             self._update_deprecated_fields(deprecated_fields, obj)
         return obj
 
     def _update_deprecated_fields(self, fields, obj):
         for key, existing in (
+            ('credential', obj.credentials.filter(credential_type__kind='ssh')),
+            ('vault_credential', obj.credentials.filter(credential_type__kind='vault')),
             ('cloud_credential', obj.cloud_credentials),
             ('network_credential', obj.network_credentials),
         ):
             if key in fields:
                 for cred in existing:
-                    obj.extra_credentials.remove(cred)
+                    obj.credentials.remove(cred)
                 if fields[key]:
-                    obj.extra_credentials.add(fields[key])
+                    obj.credentials.add(fields[key])
         obj.save()
 
     def validate(self, attrs):
         v1_credentials = {}
         view = self.context.get('view', None)
-        if self.version == 1:  # TODO: remove in 3.3
-            for attr, kind, error in (
-                ('cloud_credential', 'cloud', _('You must provide a cloud credential.')),
-                ('network_credential', 'net', _('You must provide a network credential.'))
-            ):
-                if attr in attrs:
-                    v1_credentials[attr] = None
-                    pk = attrs.pop(attr)
-                    if pk:
-                        cred = v1_credentials[attr] = Credential.objects.get(pk=pk)
-                        if cred.credential_type.kind != kind:
-                            raise serializers.ValidationError({attr: error})
-                        if (not view) or (not view.request) or (view.request.user not in cred.use_role):
-                            raise PermissionDenied()
+        for attr, kind, error in (
+            ('cloud_credential', 'cloud', _('You must provide a cloud credential.')),
+            ('network_credential', 'net', _('You must provide a network credential.')),
+            ('credential', 'ssh', _('You must provide an SSH credential.')),
+            ('vault_credential', 'vault', _('You must provide a vault credential.')),
+        ):
+            if kind in ('cloud', 'net') and self.version > 1:
+                continue  # cloud and net deprecated creds are v1 only
+            if attr in attrs:
+                v1_credentials[attr] = None
+                pk = attrs.pop(attr)
+                if pk:
+                    cred = v1_credentials[attr] = Credential.objects.get(pk=pk)
+                    if cred.credential_type.kind != kind:
+                        raise serializers.ValidationError({attr: error})
+                    if view and view.request and view.request.user not in cred.use_role:
+                        raise PermissionDenied()
 
         if 'project' in self.fields and 'playbook' in self.fields:
             project = attrs.get('project', self.instance and self.instance.project or None)
@@ -2492,19 +2530,11 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
         inventory = get_field_from_model_or_attrs('inventory')
-        credential = get_field_from_model_or_attrs('credential')
-        vault_credential = get_field_from_model_or_attrs('vault_credential')
         project = get_field_from_model_or_attrs('project')
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
-        elif all([
-            credential is None,
-            vault_credential is None,
-            not get_field_from_model_or_attrs('ask_credential_on_launch'),
-        ]):
-            raise serializers.ValidationError({'credential': prompting_error_message})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
 
@@ -2515,17 +2545,27 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
-        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+        if self.is_detail_view:
+            all_creds = []
             extra_creds = []
-            for cred in obj.extra_credentials.all():
-                extra_creds.append({
+            for cred in obj.credentials.all():
+                summarized_cred = {
                     'id': cred.pk,
                     'name': cred.name,
                     'description': cred.description,
                     'kind': cred.kind,
                     'credential_type_id': cred.credential_type_id
-                })
-            summary_fields['extra_credentials'] = extra_creds
+                }
+                all_creds.append(summarized_cred)
+                if cred.credential_type.kind in ('cloud', 'net'):
+                    extra_creds.append(summarized_cred)
+                elif cred.credential_type.kind == 'ssh':
+                    summary_fields['credential'] = summarized_cred
+                elif cred.credential_type.kind == 'vault':
+                    summary_fields['vault_credential'] = summarized_cred
+            if self.version > 1:
+                summary_fields['extra_credentials'] = extra_creds
+                summary_fields['credentials'] = all_creds
         return summary_fields
 
 
@@ -2618,17 +2658,27 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobSerializer, self).get_summary_fields(obj)
-        if 'pk' in self.context['view'].kwargs and self.version > 1:  # TODO: remove version check in 3.3
+        if self.is_detail_view:  # TODO: remove version check in 3.3
+            all_creds = []
             extra_creds = []
-            for cred in obj.extra_credentials.all():
-                extra_creds.append({
+            for cred in obj.credentials.all():
+                summarized_cred = {
                     'id': cred.pk,
                     'name': cred.name,
                     'description': cred.description,
                     'kind': cred.kind,
                     'credential_type_id': cred.credential_type_id
-                })
-            summary_fields['extra_credentials'] = extra_creds
+                }
+                all_creds.append(summarized_cred)
+                if cred.credential_type.kind in ('cloud', 'net'):
+                    extra_creds.append(summarized_cred)
+                elif cred.credential_type.kind == 'ssh':
+                    summary_fields['credential'] = summarized_cred
+                elif cred.credential_type.kind == 'vault':
+                    summary_fields['vault_credential'] = summarized_cred
+            if self.version > 1:
+                summary_fields['extra_credentials'] = extra_creds
+                summary_fields['credentials'] = all_creds
         return summary_fields
 
 
@@ -3250,7 +3300,7 @@ class JobLaunchSerializer(BaseSerializer):
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
-                  'credential', 'extra_credentials', 'ask_variables_on_launch', 'ask_tags_on_launch',
+                  'credentials', 'ask_variables_on_launch', 'ask_tags_on_launch',
                   'ask_diff_mode_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_verbosity_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start', 'credential_needed_to_start',
@@ -3260,8 +3310,7 @@ class JobLaunchSerializer(BaseSerializer):
             'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch',
             'ask_inventory_on_launch', 'ask_credential_on_launch',)
         extra_kwargs = {
-            'credential': {'write_only': True,},
-            'extra_credentials': {'write_only': True, 'default': [], 'allow_empty': True},
+            'credentials': {'write_only': True, 'default': [], 'allow_empty': True},
             'limit': {'write_only': True,},
             'job_tags': {'write_only': True,},
             'skip_tags': {'write_only': True,},
@@ -3270,15 +3319,8 @@ class JobLaunchSerializer(BaseSerializer):
             'verbosity': {'write_only': True,}
         }
 
-    # TODO: remove in 3.3
-    def get_fields(self):
-        ret = super(JobLaunchSerializer, self).get_fields()
-        if self.version == 1:
-            ret.pop('extra_credentials')
-        return ret
-
     def get_credential_needed_to_start(self, obj):
-        return not (obj and obj.credential)
+        return False
 
     def get_inventory_needed_to_start(self, obj):
         return not (obj and obj.inventory)
@@ -3293,11 +3335,15 @@ class JobLaunchSerializer(BaseSerializer):
         ask_for_vars_dict['vault_credential'] = False
         defaults_dict = {}
         for field in ask_for_vars_dict:
-            if field in ('inventory', 'credential', 'vault_credential'):
+            if field == 'inventory':
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
                     id=getattrd(obj, '%s.pk' % field, None))
-            elif field == 'extra_credentials':
+            elif field in ('credential', 'vault_credential', 'extra_credentials'):
+                # don't prefill legacy defaults; encourage API users to specify
+                # credentials at launch time using the new `credentials` key
+                pass
+            elif field == 'credentials':
                 if self.version > 1:
                     defaults_dict[field] = [
                         dict(
@@ -3305,7 +3351,7 @@ class JobLaunchSerializer(BaseSerializer):
                             name=cred.name,
                             credential_type=cred.credential_type.pk
                         )
-                        for cred in obj.extra_credentials.all()
+                        for cred in obj.credentials.all()
                     ]
             else:
                 defaults_dict[field] = getattr(obj, field)
@@ -3326,23 +3372,7 @@ class JobLaunchSerializer(BaseSerializer):
         if obj.inventory and obj.inventory.pending_deletion is True:
             errors['inventory'] = _("The inventory associated with this Job Template is being deleted.")
 
-        if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
-            credential = obj.credential
-        else:
-            credential = attrs.get('credential', None)
-
-        # fill passwords dict with request data passwords
-        for cred in (credential, obj.vault_credential):
-            if cred and cred.passwords_needed:
-                passwords = self.context.get('passwords')
-                try:
-                    for p in cred.passwords_needed:
-                        passwords[p] = data[p]
-                except KeyError:
-                    errors.setdefault('passwords_needed_to_start', []).extend(cred.passwords_needed)
-
         extra_vars = attrs.get('extra_vars', {})
-
         try:
             extra_vars = parse_yaml_or_json(extra_vars, silent_failure=False)
         except ParseError as e:
@@ -3354,14 +3384,15 @@ class JobLaunchSerializer(BaseSerializer):
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
 
-        extra_cred_kinds = []
-        for cred in data.get('extra_credentials', []):
+        # Prohibit credential assign of the same CredentialType.kind
+        # Note: when multi-vault is supported, we'll have to carve out an
+        # exception to this logic
+        distinct_cred_kinds = []
+        for cred in data.get('credentials', []):
             cred = Credential.objects.get(id=cred)
-            if cred.credential_type.pk in extra_cred_kinds:
-                errors['extra_credentials'] = _('Cannot assign multiple %s credentials.' % cred.credential_type.name)
-            if cred.credential_type.kind not in ('net', 'cloud'):
-                errors['extra_credentials'] = _('Extra credentials must be network or cloud.')
-            extra_cred_kinds.append(cred.credential_type.pk)
+            if cred.credential_type.pk in distinct_cred_kinds:
+                errors['credentials'] = _('Cannot assign multiple %s credentials.' % cred.credential_type.name)
+            distinct_cred_kinds.append(cred.credential_type.pk)
 
         # Special prohibited cases for scan jobs
         errors.update(obj._extra_job_type_errors(data))
@@ -3375,9 +3406,8 @@ class JobLaunchSerializer(BaseSerializer):
         JT_job_tags = obj.job_tags
         JT_skip_tags = obj.skip_tags
         JT_inventory = obj.inventory
-        JT_credential = obj.credential
         JT_verbosity = obj.verbosity
-        extra_credentials = attrs.pop('extra_credentials', None)
+        credentials = attrs.pop('credentials', None)
         attrs = super(JobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = JT_extra_vars
         obj.limit = JT_limit
@@ -3385,10 +3415,29 @@ class JobLaunchSerializer(BaseSerializer):
         obj.skip_tags = JT_skip_tags
         obj.job_tags = JT_job_tags
         obj.inventory = JT_inventory
-        obj.credential = JT_credential
         obj.verbosity = JT_verbosity
-        if extra_credentials is not None:
-            attrs['extra_credentials'] = extra_credentials
+        if credentials is not None:
+            attrs['credentials'] = credentials
+
+        # if the POST includes a list of credentials, verify that they don't
+        # require launch-time passwords
+        # if the POST *does not* include a list of credentials, fall back to
+        # checking the credentials on the JobTemplate
+        credentials = attrs['credentials'] if 'credentials' in data else obj.credentials.all()
+        passwords_needed = []
+        for cred in credentials:
+            if cred.passwords_needed:
+                passwords = self.context.get('passwords')
+                try:
+                    for p in cred.passwords_needed:
+                        passwords[p] = data[p]
+                except KeyError:
+                    passwords_needed.extend(cred.passwords_needed)
+        if len(passwords_needed):
+            raise serializers.ValidationError({
+                'passwords_needed_to_start': passwords_needed
+            })
+
         return attrs
 
 

@@ -10,4 +10,5 @@
 {% if new_in_300 %}> _Added in Ansible Tower 3.0.0_{% endif %}
 {% if new_in_310 %}> _New in Ansible Tower 3.1.0_{% endif %}
 {% if new_in_320 %}> _New in Ansible Tower 3.2.0_{% endif %}
+{% if new_in_330 %}> _New in Ansible Tower 3.3.0_{% endif %}
 {% endif %}

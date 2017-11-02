@@ -30,7 +30,7 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
     post(reverse('api:job_template_list'), {
         'name': 'Some name',
         'project': project.id,
-        'credential': machine_credential.id,
+        'credentials': [machine_credential.id],
         'inventory': inventory.id,
         'playbook': 'helloworld.yml',
     }, alice, expect=expect)
@@ -184,7 +184,7 @@ def test_detach_extra_credential(get, post, organization_factory, job_template_f
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.extra_credentials.add(credential)
+    jt.credentials.add(credential)
     jt.save()
 
     url = reverse('api:job_template_extra_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
@@ -222,8 +222,8 @@ def test_v1_extra_credentials_detail(get, organization_factory, job_template_fac
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.extra_credentials.add(credential)
-    jt.extra_credentials.add(net_credential)
+    jt.credentials.add(credential)
+    jt.credentials.add(net_credential)
     jt.save()
 
     url = reverse('api:job_template_detail', kwargs={'version': 'v1', 'pk': jt.pk})
@@ -272,8 +272,8 @@ def test_filter_by_v1(get, organization_factory, job_template_factory, credentia
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.extra_credentials.add(credential)
-    jt.extra_credentials.add(net_credential)
+    jt.credentials.add(credential)
+    jt.credentials.add(net_credential)
     jt.save()
 
     for query in (
@@ -312,7 +312,7 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
     patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), {
         'name': 'Some name',
         'project': objs.project.id,
-        'credential': objs.credential.id,
+        'credentials': [objs.credential.id],
         'inventory': objs.inventory.id,
         'playbook': 'alt-helloworld.yml',
     }, alice, expect=expect)
@@ -459,8 +459,7 @@ def test_launch_with_extra_credentials(get, post, organization_factory,
     resp = post(
         reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
         dict(
-            credential=machine_credential.pk,
-            extra_credentials=[credential.pk, net_credential.pk]
+            credentials=[machine_credential.pk, credential.pk, net_credential.pk]
         ),
         objs.superusers.admin, expect=201
     )
@@ -480,81 +479,22 @@ def test_launch_with_extra_credentials_not_allowed(get, post, organization_facto
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.credential = machine_credential
+    jt.credentials.add(machine_credential)
     jt.ask_credential_on_launch = False
     jt.save()
 
     resp = post(
         reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
         dict(
-            credential=machine_credential.pk,
-            extra_credentials=[credential.pk, net_credential.pk]
+            credentials=[machine_credential.pk, credential.pk, net_credential.pk]
         ),
         objs.superusers.admin
     )
-    assert 'credential' in resp.data['ignored_fields'].keys()
-    assert 'extra_credentials' in resp.data['ignored_fields'].keys()
+    assert 'credentials' in resp.data['ignored_fields'].keys()
     job_pk = resp.data.get('id')
 
     resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
     assert resp.data.get('count') == 0
-
-
-@pytest.mark.django_db
-def test_launch_with_extra_credentials_from_jt(get, post, organization_factory,
-                                               job_template_factory, machine_credential,
-                                               credential, net_credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-    jt.ask_credential_on_launch = True
-    jt.extra_credentials.add(credential)
-    jt.extra_credentials.add(net_credential)
-    jt.save()
-
-    resp = post(
-        reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
-        dict(
-            credential=machine_credential.pk
-        ),
-        objs.superusers.admin, expect=201
-    )
-    job_pk = resp.data.get('id')
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 2
-
-    resp = get(reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 2
-
-
-@pytest.mark.django_db
-def test_launch_with_empty_extra_credentials(get, post, organization_factory,
-                                             job_template_factory, machine_credential,
-                                             credential, net_credential):
-    objs = organization_factory("org", superusers=['admin'])
-    jt = job_template_factory("jt", organization=objs.organization,
-                              inventory='test_inv', project='test_proj').job_template
-    jt.ask_credential_on_launch = True
-    jt.extra_credentials.add(credential)
-    jt.extra_credentials.add(net_credential)
-    jt.save()
-
-    resp = post(
-        reverse('api:job_template_launch', kwargs={'pk': jt.pk}),
-        dict(
-            credential=machine_credential.pk,
-            extra_credentials=[],
-        ),
-        objs.superusers.admin, expect=201
-    )
-    job_pk = resp.data.get('id')
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
-
-    resp = get(reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 2
 
 
 @pytest.mark.django_db

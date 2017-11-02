@@ -194,18 +194,18 @@ class TestWorkflowJobNodeJobKWARGS:
             extra_vars={'a': 84}, **self.kwargs_base)
 
     def test_char_prompts_and_res_node_prompts(self, job_node_with_prompts):
+        # TBD: properly handle multicred credential assignment
         expect_kwargs = dict(
             inventory=job_node_with_prompts.inventory.pk,
-            credential=job_node_with_prompts.credential.pk,
             **example_prompts)
         expect_kwargs.update(self.kwargs_base)
         assert job_node_with_prompts.get_job_kwargs() == expect_kwargs
 
     def test_reject_some_node_prompts(self, job_node_with_prompts):
+        # TBD: properly handle multicred credential assignment
         job_node_with_prompts.unified_job_template.ask_inventory_on_launch = False
         job_node_with_prompts.unified_job_template.ask_job_type_on_launch = False
         expect_kwargs = dict(inventory=job_node_with_prompts.inventory.pk,
-                             credential=job_node_with_prompts.credential.pk,
                              **example_prompts)
         expect_kwargs.update(self.kwargs_base)
         expect_kwargs.pop('inventory')
@@ -239,6 +239,5 @@ class TestWorkflowWarnings:
         job_node_with_prompts.unified_job_template.ask_job_type_on_launch = False
         assert 'ignored' in job_node_with_prompts.get_prompts_warnings()
         assert 'job_type' in job_node_with_prompts.get_prompts_warnings()['ignored']
-        assert 'credential' in job_node_with_prompts.get_prompts_warnings()['ignored']
-        assert len(job_node_with_prompts.get_prompts_warnings()['ignored']) == 2
+        assert len(job_node_with_prompts.get_prompts_warnings()['ignored']) == 1
 

@@ -1149,7 +1149,7 @@ class JobTemplateAccess(BaseAccess):
 
     model = JobTemplate
     select_related = ('created_by', 'modified_by', 'inventory', 'project',
-                      'credential', 'next_schedule',)
+                      'next_schedule',)
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -1187,13 +1187,10 @@ class JobTemplateAccess(BaseAccess):
                 else:
                     return None
 
-        # If a credential is provided, the user should have use access to it.
-        if not self.check_related('credential', Credential, data, role_field='use_role'):
-            return False
-
-        # If a vault credential is provided, the user should have use access to it.
-        if not self.check_related('vault_credential', Credential, data, role_field='use_role'):
-            return False
+        # If credentials is provided, the user should have use access to them.
+        for pk in data.get('credentials', []):
+            if self.user not in get_object_or_400(Credential, pk=pk).use_role:
+                return False
 
         # If an inventory is provided, the user should have use access.
         inventory = get_value(Inventory, 'inventory')
@@ -1239,7 +1236,7 @@ class JobTemplateAccess(BaseAccess):
                     self.check_license(feature='surveys')
                 return True
 
-            for required_field in ('credential', 'inventory', 'project', 'vault_credential'):
+            for required_field in ('inventory', 'project'):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
@@ -1288,7 +1285,7 @@ class JobTemplateAccess(BaseAccess):
             if not obj.project.organization:
                 return False
             return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.project.organization.admin_role
-        if relationship == 'extra_credentials' and isinstance(sub_obj, Credential):
+        if relationship == 'credentials' and isinstance(sub_obj, Credential):
             return self.user in obj.admin_role and self.user in sub_obj.use_role
         return super(JobTemplateAccess, self).can_attach(
             obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
@@ -1297,7 +1294,7 @@ class JobTemplateAccess(BaseAccess):
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
-        if relationship == 'extra_credentials' and isinstance(sub_obj, Credential):
+        if relationship == 'credentials' and isinstance(sub_obj, Credential):
             return self.user in obj.admin_role
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
@@ -1316,7 +1313,7 @@ class JobAccess(BaseAccess):
 
     model = Job
     select_related = ('created_by', 'modified_by', 'job_template', 'inventory',
-                      'project', 'credential', 'job_template',)
+                      'project', 'job_template',)
     prefetch_related = (
         'unified_job_template',
         'instance_group',
@@ -1399,29 +1396,27 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
+        credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
         inventory_access = obj.inventory and self.user in obj.inventory.use_role
-        credential_access = obj.credential and self.user in obj.credential.use_role
-        job_extra_credentials = set(obj.extra_credentials.all())
-        if job_extra_credentials:
-            credential_access = False
+        job_credentials = set(obj.credentials.all())
 
         # Check if JT execute access (and related prompts) is sufficient
         if obj.job_template is not None:
             prompts_access = True
             job_fields = {}
-            jt_extra_credentials = set(obj.job_template.extra_credentials.all())
+            jt_credentials = set(obj.job_template.credentials.all())
             for fd in obj.job_template._ask_for_vars_dict():
-                if fd == 'extra_credentials':
-                    job_fields[fd] = job_extra_credentials
+                if fd == 'credentials':
+                    job_fields[fd] = job_credentials
                 job_fields[fd] = getattr(obj, fd)
             accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
             # Check if job fields are not allowed by current _on_launch settings
             for fd in ignored_fields:
                 if fd == 'extra_vars':
                     continue  # we cannot yet validate validity of prompted extra_vars
-                elif fd == 'extra_credentials':
-                    if job_extra_credentials != jt_extra_credentials:
-                        # Job has extra_credentials that are not promptable
+                elif fd == 'credentials':
+                    if job_credentials != jt_credentials:
+                        # Job has credentials that are not promptable
                         prompts_access = False
                         break
                 elif job_fields[fd] != getattr(obj.job_template, fd):
@@ -1431,18 +1426,15 @@ class JobAccess(BaseAccess):
             # For those fields that are allowed by prompting, but differ
             # from JT, assure that user has explicit access to them
             if prompts_access:
-                if obj.credential != obj.job_template.credential and not credential_access:
-                    prompts_access = False
                 if obj.inventory != obj.job_template.inventory and not inventory_access:
                     prompts_access = False
-                if prompts_access and job_extra_credentials != jt_extra_credentials:
-                    for cred in job_extra_credentials:
+                if prompts_access and job_credentials != jt_credentials:
+                    for cred in job_credentials:
                         if self.user not in cred.use_role:
                             prompts_access = False
                             break
             if prompts_access and self.user in obj.job_template.execute_role:
                 return True
-
 
         org_access = obj.inventory and self.user in obj.inventory.organization.admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role

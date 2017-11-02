@@ -81,26 +81,26 @@ def user():
 
 @pytest.fixture
 def check_jobtemplate(project, inventory, credential):
-    return \
-        JobTemplate.objects.create(
-            job_type='check',
-            project=project,
-            inventory=inventory,
-            credential=credential,
-            name='check-job-template'
-        )
+    jt = JobTemplate.objects.create(
+        job_type='check',
+        project=project,
+        inventory=inventory,
+        name='check-job-template'
+    )
+    jt.credentials.add(credential)
+    return jt
 
 
 @pytest.fixture
 def deploy_jobtemplate(project, inventory, credential):
-    return \
-        JobTemplate.objects.create(
-            job_type='run',
-            project=project,
-            inventory=inventory,
-            credential=credential,
-            name='deploy-job-template'
-        )
+    jt = JobTemplate.objects.create(
+        job_type='run',
+        project=project,
+        inventory=inventory,
+        name='deploy-job-template'
+    )
+    jt.credentials.add(credential)
+    return jt
 
 
 @pytest.fixture

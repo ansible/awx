@@ -13,7 +13,7 @@ import sys
 import logging
 import requests
 from base64 import b64encode
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 
 # Django
 from django.conf import settings
@@ -2669,7 +2669,7 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     capabilities_prefetch = [
         'admin', 'execute',
-        {'copy': ['project.use', 'inventory.use', 'credential.use', 'vault_credential.use']}
+        {'copy': ['project.use', 'inventory.use']}
     ]
 
     def post(self, request, *args, **kwargs):
@@ -2711,15 +2711,13 @@ class JobTemplateLaunch(RetrieveAPIView):
                 data['extra_vars'] = extra_vars
             ask_for_vars_dict = obj._ask_for_vars_dict()
             ask_for_vars_dict.pop('extra_vars')
-            if get_request_version(self.request) == 1:  # TODO: remove in 3.3
-                ask_for_vars_dict.pop('extra_credentials')
             for field in ask_for_vars_dict:
                 if not ask_for_vars_dict[field]:
                     data.pop(field, None)
-                elif field == 'inventory' or field == 'credential':
+                elif field == 'inventory':
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
-                elif field == 'extra_credentials':
-                    data[field] = [cred.id for cred in obj.extra_credentials.all()]
+                elif field == 'credentials':
+                    data[field] = [cred.id for cred in obj.credentials.all()]
                 else:
                     data[field] = getattr(obj, field)
         return data
@@ -2733,12 +2731,55 @@ class JobTemplateLaunch(RetrieveAPIView):
             if fd not in request.data and id_fd in request.data:
                 request.data[fd] = request.data[id_fd]
 
-        if get_request_version(self.request) == 1 and 'extra_credentials' in request.data:  # TODO: remove in 3.3
+        # This block causes `extra_credentials` to _always_ be ignored for
+        # the launch endpoint if we're accessing `/api/v1/`
+        if get_request_version(self.request) == 1 and 'extra_credentials' in request.data:
             if hasattr(request.data, '_mutable') and not request.data._mutable:
                 request.data._mutable = True
             extra_creds = request.data.pop('extra_credentials', None)
             if extra_creds is not None:
                 ignored_fields['extra_credentials'] = extra_creds
+
+        # Automatically convert legacy launch credential arguments into a list of `.credentials`
+        if 'credentials' in request.data and (
+            'credential' in request.data or
+            'vault_credential' in request.data or
+            'extra_credentials' in request.data
+        ):
+            return Response(dict(
+                error=_("'credentials' cannot be used in combination with 'credential', 'vault_credential', or 'extra_credentials'.")),  # noqa
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if (
+            'credential' in request.data or
+            'vault_credential' in request.data or
+            'extra_credentials' in request.data
+        ):
+            # make a list of the current credentials
+            existing_credentials = obj.credentials.all()
+            new_credentials = []
+            for key, conditional in (
+                ('credential', lambda cred: cred.credential_type.kind != 'ssh'),
+                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault'),
+                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'))
+            ):
+                if key in request.data:
+                    # if a specific deprecated key is specified, remove all
+                    # credentials of _that_ type from the list of current
+                    # credentials
+                    existing_credentials = filter(conditional, existing_credentials)
+                    prompted_value = request.data.pop(key)
+
+                    # add the deprecated credential specified in the request
+                    if not isinstance(prompted_value, Iterable):
+                        prompted_value = [prompted_value]
+                    new_credentials.extend(prompted_value)
+
+            # combine the list of "new" and the filtered list of "old"
+            new_credentials.extend([cred.pk for cred in existing_credentials])
+            if new_credentials:
+                request.data['credentials'] = new_credentials
 
         passwords = {}
         serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
@@ -2749,17 +2790,14 @@ class JobTemplateLaunch(RetrieveAPIView):
         prompted_fields = _accepted_or_ignored[0]
         ignored_fields.update(_accepted_or_ignored[1])
 
-        for fd, model in (
-                ('credential', Credential),
-                ('vault_credential', Credential),
-                ('inventory', Inventory)):
-            if fd in prompted_fields and prompted_fields[fd] != getattrd(obj, '{}.pk'.format(fd), None):
-                new_res = get_object_or_400(model, pk=get_pk_from_dict(prompted_fields, fd))
-                use_role = getattr(new_res, 'use_role')
-                if request.user not in use_role:
-                    raise PermissionDenied()
+        fd = 'inventory'
+        if fd in prompted_fields and prompted_fields[fd] != getattrd(obj, '{}.pk'.format(fd), None):
+            new_res = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, fd))
+            use_role = getattr(new_res, 'use_role')
+            if request.user not in use_role:
+                raise PermissionDenied()
 
-        for cred in prompted_fields.get('extra_credentials', []):
+        for cred in prompted_fields.get('credentials', []):
             new_credential = get_object_or_400(Credential, pk=cred)
             if request.user not in new_credential.use_role:
                 raise PermissionDenied()
@@ -2920,17 +2958,17 @@ class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIVi
     new_in_300 = True
 
 
-class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
+class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = JobTemplate
-    relationship = 'extra_credentials'
-    new_in_320 = True
+    relationship = 'credentials'
+    new_in_330 = True
     new_in_api_v2 = True
 
     def get_queryset(self):
-        # Return the full list of extra_credentials
+        # Return the full list of credentials
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         sublist_qs = getattrd(parent, self.relationship)
@@ -2941,15 +2979,29 @@ class JobTemplateExtraCredentialsList(SubListCreateAttachDetachAPIView):
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
-        current_extra_types = [
-            cred.credential_type.pk for cred in parent.extra_credentials.all()
-        ]
+        current_extra_types = [cred.credential_type.pk for cred in parent.credentials.all()]
         if sub.credential_type.pk in current_extra_types:
             return {'error': _('Cannot assign multiple %s credentials.' % sub.credential_type.name)}
 
-        if sub.credential_type.kind not in ('net', 'cloud'):
+        return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
+
+
+class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
+
+    deprecated = True
+    new_in_320 = True
+    new_in_330 = False
+
+    def get_queryset(self):
+        sublist_qs = super(JobTemplateExtraCredentialsList, self).get_queryset()
+        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        return sublist_qs
+
+    def is_valid_relation(self, parent, sub, created=False):
+        valid = super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
+        if sub.credential_type.kind not in ('cloud', 'net'):
             return {'error': _('Extra credentials must be network or cloud.')}
-        return super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
+        return valid
 
 
 class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
@@ -3720,14 +3772,26 @@ class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
         return super(JobDetail, self).update(request, *args, **kwargs)
 
 
-class JobExtraCredentialsList(SubListAPIView):
+class JobCredentialsList(SubListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
     parent_model = Job
-    relationship = 'extra_credentials'
-    new_in_320 = True
+    relationship = 'credentials'
     new_in_api_v2 = True
+    new_in_330 = True
+
+
+class JobExtraCredentialsList(JobCredentialsList):
+
+    deprecated = True
+    new_in_320 = True
+    new_in_330 = False
+
+    def get_queryset(self):
+        sublist_qs = super(JobExtraCredentialsList, self).get_queryset()
+        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        return sublist_qs
 
 
 class JobLabelList(SubListAPIView):
@@ -4252,7 +4316,6 @@ class UnifiedJobTemplateList(ListAPIView):
     capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'jobtemplate.credential.use', 'jobtemplate.vault_credential.use',
                   'workflowjobtemplate.organization.admin']}
     ]
 
