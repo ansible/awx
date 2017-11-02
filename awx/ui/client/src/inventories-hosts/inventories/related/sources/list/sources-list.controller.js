@@ -117,25 +117,39 @@
             $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
-            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the inventory source below from the inventory?') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
+            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the inventory source below from the inventory? Groups and hosts associated with this inventory source will be deleted as well.') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
             var action = function(){
-                delete $rootScope.promptActionBtnClass;
+                $rootScope.promptActionBtnClass = "Modal-errorButton--sourcesDelete";
                 Wait('start');
                 SourcesService.deleteHosts(inventory_source.id).then(() => {
-                    SourcesService.delete(inventory_source.id).then(() => {
-                        $('#prompt-modal').modal('hide');
-                        let reloadListStateParams = null;
+                    Wait('start');
+                    SourcesService.deleteGroups(inventory_source.id).then(() => {
+                        Wait('start');
+                        SourcesService.delete(inventory_source.id).then(() => {
+                            $('#prompt-modal').modal('hide');
+                            let reloadListStateParams = null;
 
-                        if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
-                            reloadListStateParams = _.cloneDeep($state.params);
-                            reloadListStateParams.inventory_source_search.page = (parseInt(reloadListStateParams.inventory_source_search.page)-1).toString();
-                        }
-                        if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
-                            $state.go('^', reloadListStateParams, {reload: true});
-                        } else {
-                            $state.go('.', reloadListStateParams, {reload: true});
-                        }
-                        Wait('stop');
+                            if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
+                                reloadListStateParams = _.cloneDeep($state.params);
+                                reloadListStateParams.inventory_source_search.page = (parseInt(reloadListStateParams.inventory_source_search.page)-1).toString();
+                            }
+                            if (parseInt($state.params.inventory_source_id) === inventory_source.id) {
+                                $state.go('^', reloadListStateParams, {reload: true});
+                            } else {
+                                $state.go('.', reloadListStateParams, {reload: true});
+                            }
+                            Wait('stop');
+                        })
+                        .catch(({data, status}) => {
+                            $('#prompt-modal').modal('hide');
+                            Wait('stop');
+                            ProcessErrors($scope, data, status, null,
+                                {
+                                    hdr: i18n._('Error!'),
+                                    msg: i18n._('There was an error deleting inventory source. Returned status: ') +
+                                        status
+                                });
+                        });
                     })
                     .catch(({data, status}) => {
                         $('#prompt-modal').modal('hide');
@@ -143,7 +157,7 @@
                         ProcessErrors($scope, data, status, null,
                             {
                                 hdr: i18n._('Error!'),
-                                msg: i18n._('There was an error deleting inventory source. Returned status: ') +
+                                msg: i18n._('There was an error deleting inventory source groups. Returned status: ') +
                                     status
                             });
                     });
