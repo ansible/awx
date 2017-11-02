@@ -66,6 +66,8 @@ class ActivityStream(models.Model):
     label = models.ManyToManyField("Label", blank=True)
     role = models.ManyToManyField("Role", blank=True)
     instance_group = models.ManyToManyField("InstanceGroup", blank=True)
+    application = models.ManyToManyField("oauth2_provider.Application", blank=True)
+    access_token = models.ManyToManyField("oauth2_provider.AccessToken", blank=True)
 
     setting = JSONField(blank=True)
 

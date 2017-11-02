@@ -1,0 +1,52 @@
+{# Partial copy of login_base.html from rest_framework with AWX change. #}
+{% extends 'rest_framework/api.html' %}
+{% load i18n staticfiles %}
+
+{% block breadcrumbs %}
+{% endblock %}
+
+{% block content %}
+<div class="well" style="width: 320px; margin-left: auto; margin-right: auto">
+  <div class="row-fluid">
+
+    <form action="{% url 'api:login' %}" role="form" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value={% if request.GET.next %}"{{ request.GET.next }}"{% else %}"{% url 'api:api_root_view' %}"{% endif %} />
+      <div class="clearfix control-group {% if form.username.errors %}error{% endif %}"
+          id="div_id_username">
+        <div class="form-group">
+          <label for="id_username">Username:</label>
+          <input type="text" name="username" maxlength="100"
+              autocapitalize="off"
+              autocorrect="off" class="form-control textinput textInput"
+              id="id_username" required autofocus
+              {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
+            {% if form.username.errors %}
+            <p class="text-error">{{ form.username.errors|striptags }}</p>
+            {% endif %}
+        </div>
+      </div>
+      <div class="clearfix control-group {% if form.password.errors %}error{% endif %}"
+          id="div_id_password">
+        <div class="form-group">
+          <label for="id_password">Password:</label>
+          <input type="password" name="password" maxlength="100" autocapitalize="off"
+              autocorrect="off" class="form-control textinput textInput" id="id_password" required>
+            {% if form.password.errors %}
+            <p class="text-error">{{ form.password.errors|striptags }}</p>
+            {% endif %}
+        </div>
+      </div>
+      {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}
+        <div class="text-error" style="border: none; color: red">{{ error }}</div>
+      {% endfor %}
+      {% endif %}
+      <div class="form-actions-no-box">
+        <button type="submit" class="btn btn-primary js-tooltip" title="Log in">LOG IN</button>
+      </div>
+    </form>
+
+  </div><!-- /.row-fluid -->
+</div><!-- /.well -->
+{% endblock %}
