@@ -12,7 +12,7 @@ module.exports = config => {
         colors: true,
         frameworks: ['jasmine'],
         browsers: ['PhantomJS'],
-        reporters: ['progress'],
+        reporters: ['progress', 'junit'],
         files: [
             path.join(SRC_PATH, 'vendor.js'),
             path.join(SRC_PATH, 'app.js'),
@@ -22,6 +22,7 @@ module.exports = config => {
         plugins: [
             'karma-webpack',
             'karma-jasmine',
+            'karma-junit-reporter',
             'karma-phantomjs-launcher',
             'karma-html2js-preprocessor'
         ],
@@ -34,6 +35,11 @@ module.exports = config => {
         webpack: webpackConfig,
         webpackMiddleware: {
             noInfo: 'errors-only'
+        },
+        junitReporter: {
+            outputDir: 'reports',
+            outputFile: 'results.unit.xml',
+            useBrowserName: false
         }
     });
 };
