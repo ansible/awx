@@ -19,15 +19,35 @@ export default ['templateUrl', function(templateUrl) {
 
                 element.find('.modal-body').append(clone);
 
-                scope.init();
+                scope.init(element);
 
             });
             $('#form-modal').modal('show');
         },
-        controller: ['$scope', '$state', function($scope, $state) {
+        controller: ['$scope', '$state', 'EventService', function($scope, $state, eventService) {
+            let listeners, modal;
 
-            $scope.init = function() {
+            function clickIsOutsideModal(e) {
+                const m = modal.getBoundingClientRect();
+                const cx = e.clientX;
+                const cy = e.clientY;
+
+                if (cx < m.left || cx > m.right || cy > m.bottom || cy < m.top) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            function clickToHide(event) {
+                if (clickIsOutsideModal(event)) {
+                    $scope.cancelForm();
+                }
+            }
+
+            $scope.init = function(el) {
                 let list = $scope.list;
+                [modal] = el.find('.modal-dialog');
                 if($state.params.selected) {
                     let selection = $scope[list.name].find(({id}) => id === parseInt($state.params.selected));
                     $scope.currentSelection = _.pick(selection, 'id', 'name');
@@ -37,6 +57,10 @@ export default ['templateUrl', function(templateUrl) {
                 });
 
                 $scope.modalTitle = list.iterator.replace(/_/g, ' ');
+
+                listeners = eventService.addListeners([
+                    [window, 'click', clickToHide]
+                ]);
             };
 
             function selectRowIfPresent(){
@@ -51,6 +75,7 @@ export default ['templateUrl', function(templateUrl) {
             }
 
             $scope.saveForm = function() {
+                eventService.remove(listeners);
                 let list = $scope.list;
                 if($scope.currentSelection.name !== null) {
                     $scope.$parent[`${list.iterator}_name`] = $scope.currentSelection.name;
@@ -60,6 +85,7 @@ export default ['templateUrl', function(templateUrl) {
             };
 
             $scope.cancelForm = function() {
+                eventService.remove(listeners);
                 $state.go('^');
             };
 
