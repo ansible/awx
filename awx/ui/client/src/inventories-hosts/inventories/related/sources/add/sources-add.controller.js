@@ -200,7 +200,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 $scope.instanceFilterPopOver = i18n._("Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail.");
             }
             if( _.get($scope, 'source') === 'tower' || _.get($scope.source, 'value') === 'tower') {
-                $scope.instanceFilterPopOver = i18n._("Provide the name or id of the remote Tower inventory to be imported.");
+                $scope.instanceFilterPopOver = i18n._("Provide the named URL encoded name or id of the remote Tower inventory to be imported.");
             }
             CreateSelect2({
                 element: '#inventory_source_group_by',
