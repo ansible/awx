@@ -125,13 +125,16 @@ def job_node_no_prompts(workflow_job_unit, jt_ask):
 @pytest.fixture
 def job_node_with_prompts(job_node_no_prompts):
     job_node_no_prompts.char_prompts = example_prompts
-    job_node_no_prompts.inventory = Inventory(name='example-inv')
+    job_node_no_prompts.inventory = Inventory(name='example-inv', id=45)
+    job_node_no_prompts.inventory_id = 45
     ssh_type = CredentialType.defaults['ssh']()
     job_node_no_prompts.credential = Credential(
+        id=43,
         name='example-inv',
         credential_type=ssh_type,
         inputs={'username': 'asdf', 'password': 'asdf'}
     )
+    job_node_with_prompts.credential_id = 43
     return job_node_no_prompts
 
 
@@ -151,6 +154,13 @@ def wfjt_node_with_prompts(wfjt_node_no_prompts):
         inputs={'username': 'asdf', 'password': 'asdf'}
     )
     return wfjt_node_no_prompts
+
+
+def test_node_getter_and_setters():
+    node = WorkflowJobTemplateNode()
+    node.job_type = 'check'
+    assert node.char_prompts['job_type'] == 'check'
+    assert node.job_type == 'check'
 
 
 class TestWorkflowJobCreate:
