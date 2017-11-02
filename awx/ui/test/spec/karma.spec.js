@@ -5,20 +5,13 @@ const NODE_MODULES = path.resolve(__dirname, '../../node_modules');
 
 const webpackConfig = require('./webpack.spec');
 
-module.exports = function(config) {
+module.exports = config => {
     config.set({
         autoWatch: true,
         colors: true,
         browsers: ['Chrome', 'Firefox'],
-        coverageReporter: {
-            reporters: [
-                { type: 'html', subdir: 'html' },
-            ]
-        },
-        frameworks: [
-            'jasmine',
-        ],
-        reporters: ['progress', 'coverage', 'junit'],
+        frameworks: ['jasmine'],
+        reporters: ['progress', 'junit'],
         files:[
             path.join(SRC_PATH, '**/*.html'),
             path.join(SRC_PATH, 'vendor.js'),
@@ -37,8 +30,8 @@ module.exports = function(config) {
             noInfo: true
         },
         junitReporter: {
-            outputDir: 'coverage',
-            outputFile: 'ui-unit-test-results.xml',
+            outputDir: 'reports',
+            outputFile: 'results.spec.xml',
             useBrowserName: false
         }
     });

@@ -83,7 +83,9 @@ I18N_FLAG_FILE = .i18n_built
 clean-ui:
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
-	rm -rf awx/ui/coverage/
+	rm -rf awx/ui/test/unit/reports/
+	rm -rf awx/ui/test/spec/reports/
+	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
