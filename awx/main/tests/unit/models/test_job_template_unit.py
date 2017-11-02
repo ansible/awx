@@ -1,6 +1,12 @@
 import pytest
 import json
 
+# Django
+from django.db import models
+
+# AWX
+from awx.main.models.jobs import JobTemplate, ask_mapping
+
 
 def test_missing_project_error(job_template_factory):
     objects = job_template_factory(
@@ -143,3 +149,16 @@ def test_job_template_can_start_with_callback_extra_vars_provided(job_template_f
     obj = objects.job_template
     obj.ask_variables_on_launch = True
     assert obj.can_start_without_user_input(callback_extra_vars='{"foo": "bar"}') is True
+
+
+def test_ask_mapping_integrity():
+    error_text = (
+        'Programming Error: field {} is marked as a promptable field, '
+        'but JobTemplate model lacks expected corresponding Boolean {} field '
+        'to enable its prompting.'
+    )
+    field_names = [field.name for field in JobTemplate._meta.fields]
+    for field_name, ask_field_name in ask_mapping.items():
+        assert ask_field_name in field_names, error_text.format(field_name, ask_field_name)
+        field = JobTemplate._meta.get_field(ask_field_name)
+        assert isinstance(field, models.BooleanField), error_text.format(field_name, ask_field_name)

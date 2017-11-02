@@ -23,6 +23,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
+from awx.main.models.jobs import JobTemplate, LaunchTimeConfig
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
@@ -32,10 +33,8 @@ from urlparse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
-CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit']
 
-
-class WorkflowNodeBase(CreatedModifiedModel):
+class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
     class Meta:
         abstract = True
         app_label = 'main'
@@ -66,7 +65,8 @@ class WorkflowNodeBase(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    # Prompting-related fields
+    # Prompting-related ForeignKey fields
+    # TODO: upgrade these to the LaunchTimeConfig model after credential changes land
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
@@ -83,44 +83,13 @@ class WorkflowNodeBase(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    char_prompts = JSONField(
-        blank=True,
-        default={}
-    )
-
-    def prompts_dict(self):
-        data = {}
-        if self.inventory:
-            data['inventory'] = self.inventory.pk
-        if self.credential:
-            data['credential'] = self.credential.pk
-        for fd in CHAR_PROMPTS_LIST:
-            if fd in self.char_prompts:
-                data[fd] = self.char_prompts[fd]
-        return data
-
-    @property
-    def job_type(self):
-        return self.char_prompts.get('job_type', None)
-
-    @property
-    def job_tags(self):
-        return self.char_prompts.get('job_tags', None)
-
-    @property
-    def skip_tags(self):
-        return self.char_prompts.get('skip_tags', None)
-
-    @property
-    def limit(self):
-        return self.char_prompts.get('limit', None)
 
     def get_prompts_warnings(self):
         ujt_obj = self.unified_job_template
         if ujt_obj is None:
             return {}
         prompts_dict = self.prompts_dict()
-        if not hasattr(ujt_obj, '_ask_for_vars_dict'):
+        if not isinstance(ujt_obj, JobTemplate):
             if prompts_dict:
                 return {'ignored': {'all': 'Cannot use prompts on unified_job_template that is not type of job template'}}
             else:
@@ -237,7 +206,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         # reject/accept prompted fields
         data = {}
         ujt_obj = self.unified_job_template
-        if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
+        if ujt_obj and isinstance(ujt_obj, JobTemplate):
             accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
             for fd in ujt_obj._extra_job_type_errors(accepted_fields):
                 accepted_fields.pop(fd)

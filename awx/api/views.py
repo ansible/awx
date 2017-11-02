@@ -80,6 +80,7 @@ from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.models.jobs import ask_mapping
 from awx.main.scheduler.tasks import run_job_complete
 
 logger = logging.getLogger('awx.api.views')
@@ -2708,12 +2709,12 @@ class JobTemplateLaunch(RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
-            ask_for_vars_dict = obj._ask_for_vars_dict()
-            ask_for_vars_dict.pop('extra_vars')
+            modified_ask_mapping = ask_mapping.copy()
+            modified_ask_mapping.pop('extra_vars')
             if get_request_version(self.request) == 1:  # TODO: remove in 3.3
-                ask_for_vars_dict.pop('extra_credentials')
-            for field in ask_for_vars_dict:
-                if not ask_for_vars_dict[field]:
+                modified_ask_mapping.pop('extra_credentials')
+            for field in modified_ask_mapping.keys():
+                if not getattr(obj, modified_ask_mapping[field]):
                     data.pop(field, None)
                 elif field == 'inventory' or field == 'credential':
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)

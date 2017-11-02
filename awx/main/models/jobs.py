@@ -53,7 +53,138 @@ system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
 
-class JobOptions(BaseModel):
+
+def mark_ask(field, ask_alias=None):
+    '''
+    Sets a marker on a field to denote its corresponding `ask_xxxx_on_launch`
+    on templates that enable prompting for it
+    '''
+    if ask_alias is not None:
+        field._ask_var = ask_alias
+    else:
+        field._ask_var = '__default__'
+    return field
+
+
+
+class JobPromptsOptions(BaseModel):
+    '''
+    Common job templates, jobs, WFJT / WJ nodes, Schedules, and saved launch configs.
+    '''
+
+    class Meta:
+        abstract = True
+
+    extra_vars = mark_ask(prevent_search(models.TextField(
+        blank=True,
+        default='',
+    )), ask_alias='variables')
+    diff_mode = mark_ask(models.BooleanField(
+        default=False,
+        help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
+    ))
+    job_type = mark_ask(models.CharField(
+        max_length=64,
+        choices=JOB_TYPE_CHOICES,
+        default='run',
+    ))
+    inventory = mark_ask(models.ForeignKey(
+        'Inventory',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    ))
+    # TODO: apply `mark_ask` to many-related `credentials` when merged with other branch
+    credential = mark_ask(models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    ))
+    limit = mark_ask(models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    ))
+    verbosity = mark_ask(models.PositiveIntegerField(
+        choices=VERBOSITY_CHOICES,
+        blank=True,
+        default=0,
+    ))
+    job_tags = mark_ask(models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    ), ask_alias='tags')
+    skip_tags = mark_ask(models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    ))
+
+
+ask_mapping = {}
+for field in JobPromptsOptions._meta.fields:
+    if field._ask_var == '__default__':
+        field._ask_var = 'ask_{}_on_launch'.format(field.name)
+    else:
+        field._ask_var = 'ask_{}_on_launch'.format(field._ask_var)
+    ask_mapping[field.name] = field._ask_var
+
+
+# Special cases TODO: re-disposition these after credential changes land
+ask_mapping['vault_credential'] = 'ask_credential_on_launch'
+ask_mapping['extra_credentials'] = 'ask_credential_on_launch'
+
+
+class LaunchTimeConfig(BaseModel):
+    class Meta:
+        abstract = True
+
+    char_prompts = JSONField(
+        blank=True,
+        default={}
+    )
+
+    def prompts_dict(self):
+        data = {}
+        field_names = [field.name for field in self._meta.fields]
+        for fd in ask_mapping.keys():
+            if fd in field_names:
+                # ForeignKey fields are maintained directly on model
+                fd_val = getattr(self, '{}_id'.format(fd))
+                if fd_val is not None:
+                    data[fd] = fd_val
+            elif fd in self.char_prompts:
+                data[fd] = self.char_prompts[fd]
+        return data
+
+
+# Add on aliases for the non-related-model fields
+class extracted_field(object):
+    """
+    Interface for psuedo-property stored in `char_prompts` dict
+    """
+    def __init__(self, field_name):
+        self.field_name = field_name
+
+    def __get__(self, instance, type=None):
+        return instance.char_prompts.get(self.field_name, None)
+
+    def __set__(self, instance, value):
+        instance.char_prompts[self.field_name] = value
+
+
+for field in JobPromptsOptions._meta.fields:
+    if hasattr(field, '_ask_var') and (not isinstance(field, (models.ForeignKey, models.ManyToManyField))):
+        setattr(LaunchTimeConfig, field.name, extracted_field(field.name))
+
+
+class JobOptions(JobPromptsOptions):
     '''
     Common options for job templates and jobs.
     '''
@@ -61,23 +192,6 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    diff_mode = models.BooleanField(
-        default=False,
-        help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
-    )
-    job_type = models.CharField(
-        max_length=64,
-        choices=JOB_TYPE_CHOICES,
-        default='run',
-    )
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
     project = models.ForeignKey(
         'Project',
         related_name='%(class)ss',
@@ -90,14 +204,6 @@ class JobOptions(BaseModel):
         max_length=1024,
         default='',
         blank=True,
-    )
-    credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
     )
     vault_credential = models.ForeignKey(
         'Credential',
@@ -115,33 +221,9 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    limit = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
-    verbosity = models.PositiveIntegerField(
-        choices=VERBOSITY_CHOICES,
-        blank=True,
-        default=0,
-    )
-    extra_vars = prevent_search(models.TextField(
-        blank=True,
-        default='',
-    ))
-    job_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
     force_handlers = models.BooleanField(
         blank=True,
         default=False,
-    )
-    skip_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
     )
     start_at_task = models.CharField(
         max_length=1024,
@@ -362,41 +444,25 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # that of job template launch, so prompting_needed should
         # not block a provisioning callback from creating/launching jobs.
         if callback_extra_vars is None:
-            for value in self._ask_for_vars_dict().values():
-                if value:
+            for ask_field_name in set(ask_mapping.values()):
+                if getattr(self, ask_field_name):
                     prompting_needed = True
+                    break
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
                 not variables_needed)
-
-    def _ask_for_vars_dict(self):
-        return dict(
-            diff_mode=self.ask_diff_mode_on_launch,
-            extra_vars=self.ask_variables_on_launch,
-            limit=self.ask_limit_on_launch,
-            job_tags=self.ask_tags_on_launch,
-            skip_tags=self.ask_skip_tags_on_launch,
-            job_type=self.ask_job_type_on_launch,
-            verbosity=self.ask_verbosity_on_launch,
-            inventory=self.ask_inventory_on_launch,
-            credential=self.ask_credential_on_launch,
-            vault_credential=self.ask_credential_on_launch,
-            extra_credentials=self.ask_credential_on_launch,
-        )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
         # Sort the runtime fields allowed and disallowed by job template
         ignored_fields = {}
         prompted_fields = {}
 
-        ask_for_vars_dict = self._ask_for_vars_dict()
-
-        for field in ask_for_vars_dict:
+        for field, ask_field_name in ask_mapping.items():
             if field in kwargs:
                 if field == 'extra_vars':
                     prompted_fields[field] = {}
                     ignored_fields[field] = {}
-                if ask_for_vars_dict[field]:
+                if getattr(self, ask_field_name):
                     prompted_fields[field] = kwargs[field]
                 else:
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
