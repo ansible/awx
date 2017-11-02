@@ -8,8 +8,12 @@ from channels.handler import AsgiRequest
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.contrib.auth.models import User
+from django.contrib.auth import SESSION_KEY
+from django.contrib.sessions.models import Session
 from awx.main.models.organization import AuthToken
 
 
@@ -39,6 +43,19 @@ def ws_connect(message):
                 connect_text['user'] = auth_token.user_id
         except AuthToken.DoesNotExist:
             logger.error("auth_token provided was invalid.")
+    else:
+        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None)
+        if session_key:
+            try:
+                session = Session.objects.get(session_key=session_key)
+                user = session.get_decoded().get(SESSION_KEY, None)
+                if user and session.expire_date > timezone.now():
+                    user = User.objects.get(pk=user)
+                    message.channel_session['user_id'] = user.pk
+                    connect_text['accept'] = True
+                    connect_text['user'] = user.pk
+            except ObjectDoesNotExist:
+                logger.error("Session provided does not exist or invalid.")
     message.reply_channel.send({"text": json.dumps(connect_text)})
 
 

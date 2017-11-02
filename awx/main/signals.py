@@ -11,6 +11,9 @@ import json
 from django.conf import settings
 from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
+from django.contrib.auth import SESSION_KEY
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
 # Django-CRUM
 from crum import get_current_request, get_current_user
@@ -18,6 +21,7 @@ from crum.signals import current_user_getter
 
 # AWX
 from awx.main.models import * # noqa
+from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
@@ -548,3 +552,24 @@ def delete_inventory_for_org(sender, instance, **kwargs):
             inventory.schedule_deletion(user_id=getattr(user, 'id', None))
         except RuntimeError, e:
             logger.debug(e)
+
+
+@receiver(post_save, sender=Session)
+def save_user_session_membership(sender, **kwargs):
+    session = kwargs.get('instance', None)
+    if not session:
+        return
+    user = session.get_decoded().get(SESSION_KEY, None)
+    if not user:
+        return
+    user = User.objects.get(pk=user)
+    if UserSessionMembership.objects.filter(user=user, session=session).exists():
+        return
+    UserSessionMembership.objects.create(user=user, session=session, created=timezone.now())
+    for membership in UserSessionMembership.get_memberships_over_limit(user):
+        emit_channel_notification(
+            'control-limit_reached',
+            dict(group_name='control',
+                 reason=unicode(_('limit_reached')),
+                 session_key=membership.session.session_key)
+        )

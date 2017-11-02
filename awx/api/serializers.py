@@ -3894,6 +3894,26 @@ class AuthTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(_('Must include "username" and "password".'))
 
 
+class UserSessionSerializer(serializers.Serializer):
+
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user:
+                attrs['user'] = user
+                return attrs
+            else:
+                raise serializers.ValidationError(_('Unable to login with provided credentials.'))
+        else:
+            raise serializers.ValidationError(_('Must include "username" and "password".'))
+
+
 class FactVersionSerializer(BaseFactSerializer):
 
     class Meta:

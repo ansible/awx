@@ -518,6 +518,9 @@ def _request(verb):
 
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         request = getattr(APIRequestFactory(), verb)(url, **kwargs)
+        if isinstance(kwargs.get('cookies', None), dict):
+            for key, value in kwargs['cookies'].items():
+                request.COOKIES[key] = value
         if middleware:
             middleware.process_request(request)
         if user:

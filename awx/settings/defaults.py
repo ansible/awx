@@ -271,7 +271,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'awx.api.authentication.TokenAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'awx.api.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'awx.api.permissions.ModelAccessPermission',

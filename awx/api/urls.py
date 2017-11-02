@@ -411,6 +411,7 @@ v2_urls = patterns('awx.api.views',
     url(r'^hosts/(?P<pk>[0-9]+)/ansible_facts/$',             'host_ansible_facts_detail'),
     url(r'^jobs/(?P<pk>[0-9]+)/extra_credentials/$',          'job_extra_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/extra_credentials/$', 'job_template_extra_credentials_list'),
+    url(r'^user_session/$', 'user_session_view'),
 )
 
 urlpatterns = patterns('awx.api.views',

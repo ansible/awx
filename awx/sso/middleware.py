@@ -9,6 +9,7 @@ import six
 
 # Django
 from django.contrib.auth import login, logout
+from django.utils.functional import LazyObject, empty
 from django.shortcuts import redirect
 from django.utils.timezone import now
 
@@ -36,15 +37,10 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
         if not request.path.startswith('/sso/') and 'migrations_notran' not in request.path:
 
-            # If token isn't present but we still have a user logged in via Django
-            # sessions, log them out.
-            if not token_key and request.user and request.user.is_authenticated():
-                logout(request)
-
             # If a token is present, make sure it matches a valid one in the
             # database, and log the user via Django session if necessary.
             # Otherwise, log the user out via Django sessions.
-            elif token_key:
+            if token_key:
 
                 try:
                     auth_token = AuthToken.objects.filter(key=token_key, expires__gt=now())[0]
@@ -60,6 +56,16 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
                     auth_token.refresh()
 
                 if auth_token and request.user and request.user.is_authenticated():
+                    request.session.pop('social_auth_error', None)
+                    request.session.pop('social_auth_last_backend', None)
+            else:
+                if request.user and request.user.is_authenticated():
+                    # The rest of the code base rely hevily on type/inheritance checks,
+                    # LazyObject sent from Django auth middleware can be buggy if not
+                    # converted back to its original object.
+                    if isinstance(request.user, LazyObject) and \
+                            request.user._wrapped and request.user._wrapped != empty:
+                        request.user = request.user._wrapped
                     request.session.pop('social_auth_error', None)
                     request.session.pop('social_auth_last_backend', None)
 
