@@ -9,9 +9,6 @@ from django.db import migrations, models
 from django.conf import settings
 import awx.main.fields
 
-import _squashed
-from _squashed_30 import SQUASHED_30
-
 
 class Migration(migrations.Migration):
     replaces = [(b'main', '0020_v300_labels_changes'),
@@ -22,8 +19,7 @@ class Migration(migrations.Migration):
                 (b'main', '0025_v300_update_rbac_parents'),
                 (b'main', '0026_v300_credential_unique'),
                 (b'main', '0027_v300_team_migrations'),
-                (b'main', '0028_v300_org_team_cascade')] + _squashed.replaces(SQUASHED_30)
-
+                (b'main', '0028_v300_org_team_cascade')]
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -120,4 +116,4 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(related_name='teams', to='main.Organization'),
             preserve_default=False,
         ),
-    ] + _squashed.operations(SQUASHED_30)
+    ]
