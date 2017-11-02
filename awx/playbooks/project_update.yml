@@ -1,16 +1,18 @@
 ---
-
 # The following variables will be set by the runner of this playbook:
 # project_path: PROJECTS_DIR/_local_path_
-# scm_type: git|hg|svn
+# scm_type: git|hg|svn|insights
 # scm_url: https://server/repo
-# scm_branch: HEAD
+# insights_url: Insights service URL (from configuration)
+# scm_branch: branch/tag/revision (HEAD if unset)
 # scm_clean: true/false
 # scm_delete_on_update: true/false
-# scm_username: username (only for svn)
-# scm_password: password (only for svn)
-# scm_accept_hostkey: true/false (only for git)
+# scm_full_checkout: true (if for a job template run), false (if retrieving revision)
+# scm_username: username (only for svn/insights)
+# scm_password: password (only for svn/insights)
+# scm_accept_hostkey: true/false (only for git, set automatically)
 # scm_revision: current revision in tower
+# scm_revision_output: where to store gathered revision (temporary file)
 
 - hosts: all
   connection: local
@@ -24,7 +26,7 @@
       when: scm_delete_on_update|default('')
 
     - block:
-      - name: update project using git and accept hostkey
+      - name: update project using git
         git:
           dest: "{{project_path|quote}}"
           repo: "{{scm_url}}"
@@ -59,7 +61,7 @@
       when: scm_type == 'hg'
 
     - block:
-      - name: update project using svn with auth
+      - name: update project using svn
         subversion:
           dest: "{{project_path|quote}}"
           repo: "{{scm_url|quote}}"
@@ -98,7 +100,6 @@
           scm_version: "{{results.version}}"
         when: results is defined
       when: scm_type == 'insights'
-
 
     - block:
       - name: detect requirements.yml
