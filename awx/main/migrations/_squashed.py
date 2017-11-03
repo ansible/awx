@@ -3,6 +3,7 @@ from django.db import (
     connection,
     migrations,
     OperationalError,
+    ProgrammingError,
 )
 
 
@@ -30,7 +31,7 @@ def current_migration(exclude_squashed=True):
         if exclude_squashed:
             migration_qs = migration_qs.exclude(name__contains='squashed')
         return migration_qs.latest('id')
-    except (recorder.Migration.DoesNotExist, OperationalError):
+    except (recorder.Migration.DoesNotExist, OperationalError, ProgrammingError):
         return None
 
 
