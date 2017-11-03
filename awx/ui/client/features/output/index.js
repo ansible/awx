@@ -17,9 +17,20 @@ function JobsRun ($stateExtender, strings) {
             activityStreamTarget: 'jobs'
         },
         views: {
-            templateUrl: indexTemplate,
-            controller: IndexController,
-            controllerAs: 'vm'
+            '@': {
+                templateUrl: indexTemplate,
+                controller: IndexController,
+                controllerAs: 'vm'
+            }
+        },
+        resolve: {
+            resolved: ['JobsModel', Jobs => {
+                const jobs = new Jobs();
+
+                return {
+                    models: { jobs }
+                };
+            }]
         }
     });
 }
