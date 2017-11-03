@@ -10,7 +10,8 @@ from django.db import (
     connection,
     migrations,
     models,
-    OperationalError
+    OperationalError,
+    ProgrammingError
 )
 from django.conf import settings
 import taggit.managers
@@ -26,7 +27,7 @@ def replaces():
         recorder = migrations.recorder.MigrationRecorder(connection)
         result = recorder.migration_qs.filter(app='main').filter(name__in=squashed).all()
         return [('main', m.name) for m in result]
-    except OperationalError:
+    except (OperationalError, ProgrammingError):
         return []
 
 
