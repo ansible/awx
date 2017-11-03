@@ -117,16 +117,34 @@
             $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
-            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the inventory source below from the inventory? Groups and hosts associated with this inventory source will be deleted as well.') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
+            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Confirm that you want to permanently delete the inventory source below from the inventory. Deleting this inventory source also deletes its associated groups and hosts.') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
             var action = function(){
                 $rootScope.promptActionBtnClass = "Modal-errorButton--sourcesDelete";
                 Wait('start');
-                SourcesService.deleteHosts(inventory_source.id).then(() => {
-                    Wait('start');
-                    SourcesService.deleteGroups(inventory_source.id).then(() => {
-                        Wait('start');
+                let hostDelete = SourcesService.deleteHosts(inventory_source.id).catch(({data, status}) => {
+                    $('#prompt-modal').modal('hide');
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null,
+                        {
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('There was an error deleting inventory source hosts. Returned status: ') +
+                                status
+                        });
+                });
+                let groupDelete = SourcesService.deleteGroups(inventory_source.id).catch(({data, status}) => {
+                    $('#prompt-modal').modal('hide');
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null,
+                        {
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('There was an error deleting inventory source groups. Returned status: ') +
+                                status
+                        });
+                });
+                Promise.all([hostDelete, groupDelete]).then(() => {
                         SourcesService.delete(inventory_source.id).then(() => {
                             $('#prompt-modal').modal('hide');
+                            delete $rootScope.promptActionBtnClass;
                             let reloadListStateParams = null;
 
                             if($scope.inventory_sources.length === 1 && $state.params.inventory_source_search && !_.isEmpty($state.params.inventory_source_search.page) && $state.params.inventory_source_search.page !== '1') {
@@ -150,28 +168,7 @@
                                         status
                                 });
                         });
-                    })
-                    .catch(({data, status}) => {
-                        $('#prompt-modal').modal('hide');
-                        Wait('stop');
-                        ProcessErrors($scope, data, status, null,
-                            {
-                                hdr: i18n._('Error!'),
-                                msg: i18n._('There was an error deleting inventory source groups. Returned status: ') +
-                                    status
-                            });
                     });
-                })
-                .catch(({data, status}) => {
-                    $('#prompt-modal').modal('hide');
-                    Wait('stop');
-                    ProcessErrors($scope, data, status, null,
-                        {
-                            hdr: i18n._('Error!'),
-                            msg: i18n._('There was an error deleting inventory source hosts. Returned status: ') +
-                                status
-                        });
-                });
             };
             // Prompt depends on having $rootScope.promptActionBtnClass available...
             Prompt({
