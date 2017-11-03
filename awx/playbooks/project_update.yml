@@ -135,7 +135,7 @@
       command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
       args:
         chdir: "{{project_path|quote}}/roles"
-      when: doesRequirementsExist.stat.exists and scm_full_checkout|bool
+      when: doesRequirementsExist.stat.exists and # scm_full_checkout|bool
 
       # format provided by ansible is ["Revision: 12345", "URL: ..."]
     - name: parse subversion version string properly
