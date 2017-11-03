@@ -70,14 +70,9 @@ register(
     label=_('Remote Host Headers'),
     help_text=_('HTTP headers and meta keys to search to determine remote host '
                 'name or IP. Add additional items to this list, such as '
-                '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy.\n\n'
-                'Note: The headers will be searched in order and the first '
-                'found remote host name or IP will be used.\n\n'
-                'In the below example 8.8.8.7 would be the chosen IP address.\n'
-                'X-Forwarded-For: 8.8.8.7, 192.168.2.1, 127.0.0.1\n'
-                'Host: 127.0.0.1\n'
-                'REMOTE_HOST_HEADERS = [\'HTTP_X_FORWARDED_FOR\', '
-                '\'REMOTE_ADDR\', \'REMOTE_HOST\']'),
+                '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
+                'See the "Proxy Support" section of the Adminstrator guide for'
+                'more details.'),
     category=_('System'),
     category_slug='system',
 )
@@ -88,9 +83,7 @@ register(
     label=_('Proxy IP Whitelist'),
     help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
                 "to whitelist the proxy IP addresses from which Tower should trust "
-                "custom REMOTE_HOST_HEADERS header values\n"
-                "REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']\n"
-                "PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']\n"
+                "custom REMOTE_HOST_HEADERS header values. "
                 "If this setting is an empty list (the default), the headers specified by "
                 "REMOTE_HOST_HEADERS will be trusted unconditionally')"),
     category=_('System'),
