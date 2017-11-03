@@ -1357,12 +1357,6 @@ class JobAccess(BaseAccess):
                     return True
         return False
 
-    @check_superuser
-    def can_read(self, obj):
-        if obj.job_template and self.user in obj.job_template.read_role:
-            return True
-        return self.org_access(obj, role_types=['auditor_role', 'admin_role'])
-
     def can_add(self, data, validate_license=True):
         if validate_license:
             self.check_license()
