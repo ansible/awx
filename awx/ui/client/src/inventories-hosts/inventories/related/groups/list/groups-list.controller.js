@@ -141,9 +141,11 @@
                             } else {
                                 $state.go($state.current, reloadListStateParams, {reload: true});
                             }
-                            $('#group-delete-modal').modal('hide');
-                            $('body').removeClass('modal-open');
-                            $('.modal-backdrop').remove();
+                            setTimeout(function(){
+                                $('#group-delete-modal').modal('hide');
+                                $('body').removeClass('modal-open');
+                                $('.modal-backdrop').remove();
+                            }, 1000);
                         });
                     break;
                 default:
@@ -153,9 +155,11 @@
                         } else {
                             $state.go($state.current, reloadListStateParams, {reload: true});
                         }
-                        $('#group-delete-modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
+                        setTimeout(function(){
+                            $('#group-delete-modal').modal('hide');
+                            $('body').removeClass('modal-open');
+                            $('.modal-backdrop').remove();
+                        }, 1000);
                     });
             }
         };
