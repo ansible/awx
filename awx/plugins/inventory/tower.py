@@ -108,6 +108,8 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
         reason = json_reason.get('detail', 'Retrieving Tower Inventory Failed')
     except requests.ConnectionError, e:
         reason = "Connection to remote host failed: {}".format(e)
+    except json.JSONDecodeError, e:
+        reason = "Failed to parse json from host: {}".format(e)
     print(reason)
     sys.exit(1)
 
