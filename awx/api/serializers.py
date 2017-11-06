@@ -3010,7 +3010,18 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
                 "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
-        return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        r = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        # Verify that fields do not violate template's prompting rules
+        mock_obj = self.Meta.model()
+        if self.instance:
+            for field in self.instance._meta.fields:
+                setattr(mock_obj, field.name, getattr(self.instance, field.name))
+        for field_name, value in attrs.items():
+            setattr(mock_obj, field_name, value)
+        accepted, rejected, errors = ujt_obj._accept_or_ignore_job_kwargs(**mock_obj.prompts_dict())
+        if errors:
+            raise serializers.ValidationError(errors)
+        return r
 
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
