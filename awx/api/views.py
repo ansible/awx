@@ -3184,7 +3184,7 @@ class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
 class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     new_in_310 = True
 
 
@@ -3194,21 +3194,11 @@ class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDes
     serializer_class = WorkflowJobTemplateNodeDetailSerializer
     new_in_310 = True
 
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        try:
-            obj = self.get_object()
-            data.update(obj.char_prompts)
-        except Exception:
-            pass
-        return super(WorkflowJobTemplateNodeDetail, self).update_raw_data(data)
-
 
 class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     always_allow_superuser = True
     parent_model = WorkflowJobTemplateNode
     relationship = ''
@@ -3432,16 +3422,11 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
 class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
     new_in_310 = True
-
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
     def get_queryset(self):
         return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')

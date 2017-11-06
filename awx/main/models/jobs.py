@@ -142,6 +142,10 @@ ask_mapping['extra_credentials'] = 'ask_credential_on_launch'
 
 
 class LaunchTimeConfig(BaseModel):
+    '''
+    Common model for all objects that save details of a saved launch config
+    WFJT / WJ nodes, schedules, and job launch configs (not all implemented yet)
+    '''
     class Meta:
         abstract = True
 
@@ -176,7 +180,10 @@ class extracted_field(object):
         return instance.char_prompts.get(self.field_name, None)
 
     def __set__(self, instance, value):
-        instance.char_prompts[self.field_name] = value
+        if value is None:
+            instance.char_prompts.pop(self.field_name, None)
+        else:
+            instance.char_prompts[self.field_name] = value
 
 
 for field in JobPromptsOptions._meta.fields:

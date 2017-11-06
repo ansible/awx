@@ -135,14 +135,16 @@ class TestWorkflowJobTemplateNodeSerializerCharPrompts():
     def test_change_single_field(self, WFJT_serializer):
         "Test that a single prompt field can be changed without affecting other fields"
         internal_value = WFJT_serializer.to_internal_value({'job_type': 'check'})
-        assert internal_value['char_prompts']['job_type'] == 'check'
-        assert internal_value['char_prompts']['limit'] == 'webservers'
+        assert internal_value['job_type'] == 'check'
+        WFJT_serializer.instance.job_type = 'check'
+        assert WFJT_serializer.instance.limit == 'webservers'
 
     def test_null_single_field(self, WFJT_serializer):
         "Test that a single prompt field can be removed without affecting other fields"
         internal_value = WFJT_serializer.to_internal_value({'job_type': None})
-        assert 'job_type' not in internal_value['char_prompts']
-        assert internal_value['char_prompts']['limit'] == 'webservers'
+        assert internal_value['job_type'] is None
+        WFJT_serializer.instance.job_type = None
+        assert WFJT_serializer.instance.limit == 'webservers'
 
 
 @mock.patch('awx.api.serializers.WorkflowNodeBaseSerializer.get_related', lambda x,y: {})
