@@ -75,6 +75,18 @@ export default [
                 }
                 buildTooltips(itm);
 
+                if (!$state.is('jobs.schedules')){
+                    if($state.current.name.endsWith('.add')) {
+                        itm.linkToDetails = `^.edit({schedule_id:schedule.id})`;
+                    }
+                    else if($state.current.name.endsWith('.edit')) {
+                        itm.linkToDetails = `.({schedule_id:schedule.id})`;
+                    }
+                    else {
+                        itm.linkToDetails = `.edit({schedule_id:schedule.id})`;
+                    }
+                }
+
             });
         }
 

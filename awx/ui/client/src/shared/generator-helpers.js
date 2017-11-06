@@ -598,7 +598,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     }
 
                     // Start the Link
-                    if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
+                    if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.uiSref || field.awToolTip || field.awPopOver) &&
                         options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
                         if(field.noLink === true){
                             // provide an override here in case we want key=true for sorting purposes but don't want links -- see: portal mode,

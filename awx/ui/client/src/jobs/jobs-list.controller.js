@@ -48,6 +48,27 @@
             $scope[list.name].forEach(function(item, item_idx) {
                 var itm = $scope[list.name][item_idx];
 
+                switch (item.type) {
+                    case 'job':
+                        item.linkToDetails = `jobResult({id: ${item.id}})`;
+                        break;
+                    case 'ad_hoc_command':
+                        item.linkToDetails = `adHocJobStdout({id: ${item.id}})`;
+                        break;
+                    case 'system_job':
+                        item.linkToDetails = `managementJobStdout({id: ${item.id}})`;
+                        break;
+                    case 'project_update':
+                        item.linkToDetails = `scmUpdateStdout({id: ${item.id}})`;
+                        break;
+                    case 'inventory_update':
+                        item.linkToDetails = `inventorySyncStdout({id: ${item.id}})`;
+                        break;
+                    case 'workflow_job':
+                        item.linkToDetails = `workflowResults({id: ${item.id}})`;
+                        break;
+                }
+
                 if(item.summary_fields && item.summary_fields.source_workflow_job &&
                     item.summary_fields.source_workflow_job.id){
                         item.workflow_result_link = `/#/workflows/${item.summary_fields.source_workflow_job.id}`;

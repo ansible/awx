@@ -52,10 +52,11 @@
                     ng-repeat="card in orgCards track by card.id">
                     <div class="OrgCards-header">
                         <h3 class="OrgCards-label"
-                            ng-click="editOrganization(card.id)"
                             aw-tool-tip="{{ (card.description || '') | sanitize }}"
                             aw-tip-placement="top">
-                            {{ card.name }}
+                            <a ui-sref="organizations.edit({organization_id:card.id})">
+                                {{ card.name }}
+                            </a>
                         </h3>
                         <div class="OrgCards-actionItems">
                             <button class="OrgCards-actionItem
