@@ -32,7 +32,6 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 uiSref: "{{schedule.linkToDetails}}",
-                // ngClick: "editSchedule(schedule)",
                 columnClass: "col-md-3 col-sm-3 col-xs-6"
             },
             dtstart: {
