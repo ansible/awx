@@ -38,6 +38,7 @@ from polymorphic.models import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.models.jobs import ask_mapping
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
@@ -442,10 +443,6 @@ class BaseSerializer(serializers.ModelSerializer):
                 field_class = ChoiceNullField
             else:
                 field_class = CharNullField
-
-        # Update verbosity choices from settings (for job templates, jobs, ad hoc commands).
-        if field_name == 'verbosity' and 'choices' in field_kwargs:
-            field_kwargs['choices'] = getattr(settings, 'VERBOSITY_CHOICES', field_kwargs['choices'])
 
         # Update the message used for the unique validator to use capitalized
         # verbose name; keeps unique message the same as with DRF 2.x.
@@ -2925,10 +2922,14 @@ class WorkflowJobCancelSerializer(WorkflowJobSerializer):
 
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
-    job_type = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None,
+                                       choices=JOB_TYPE_CHOICES)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    diff_mode = serializers.NullBooleanField(required=False, default=None)
+    verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None,
+                                        choices=VERBOSITY_CHOICES)
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -2936,20 +2937,14 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     class Meta:
         fields = ('*', '-name', '-description', 'id', 'url', 'related',
                   'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
-                  'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags')
+                  'inventory', 'credential',
+                  'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags', 'diff_mode', 'verbosity')
 
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
         return res
-
-    def validate(self, attrs):
-        # char_prompts go through different validation, so remove them here
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
-            if fd in attrs:
-                attrs.pop(fd)
-        return super(WorkflowNodeBaseSerializer, self).validate(attrs)
 
 
 class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
@@ -2966,40 +2961,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
             res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail', kwargs={'pk': obj.workflow_job_template.pk})
         return res
 
-    def to_internal_value(self, data):
-        internal_value = super(WorkflowNodeBaseSerializer, self).to_internal_value(data)
-        view = self.context.get('view', None)
-        request_method = None
-        if view and view.request:
-            request_method = view.request.method
-        if request_method in ['PATCH']:
-            obj = self.instance
-            char_prompts = copy.copy(obj.char_prompts)
-            char_prompts.update(self.extract_char_prompts(data))
-        else:
-            char_prompts = self.extract_char_prompts(data)
-        for fd in copy.copy(char_prompts):
-            if char_prompts[fd] is None:
-                char_prompts.pop(fd)
-        internal_value['char_prompts'] = char_prompts
-        return internal_value
-
-    def extract_char_prompts(self, data):
-        char_prompts = {}
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
-            # Accept null values, if given
-            if fd in data:
-                char_prompts[fd] = data[fd]
-        return char_prompts
-
     def validate(self, attrs):
-        if 'char_prompts' in attrs:
-            if 'job_type' in attrs['char_prompts']:
-                job_types = [t for t, v in JOB_TYPE_CHOICES]
-                if attrs['char_prompts']['job_type'] not in job_types:
-                    raise serializers.ValidationError({
-                        "job_type": _("%(job_type)s is not a valid job type. The choices are %(choices)s.") % {
-                            'job_type': attrs['char_prompts']['job_type'], 'choices': job_types}})
         if self.instance is None and ('workflow_job_template' not in attrs or
                                       attrs['workflow_job_template'] is None):
             raise serializers.ValidationError({
@@ -3051,10 +3013,6 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
-
-
-class WorkflowJobTemplateNodeListSerializer(WorkflowJobTemplateNodeSerializer):
-    pass
 
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
@@ -3289,10 +3247,8 @@ class JobLaunchSerializer(BaseSerializer):
         return False
 
     def get_defaults(self, obj):
-        ask_for_vars_dict = obj._ask_for_vars_dict()
-        ask_for_vars_dict['vault_credential'] = False
         defaults_dict = {}
-        for field in ask_for_vars_dict:
+        for field in ask_mapping.keys():
             if field in ('inventory', 'credential', 'vault_credential'):
                 defaults_dict[field] = dict(
                     name=getattrd(obj, '%s.name' % field, None),
@@ -3320,7 +3276,7 @@ class JobLaunchSerializer(BaseSerializer):
         data = self.context.get('data')
 
         for field in obj.resources_needed_to_start:
-            if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
+            if not (attrs.get(field, False) and getattr(obj, ask_mapping[field], False)):
                 errors[field] = _("Job Template '%s' is missing or undefined.") % field
 
         if obj.inventory and obj.inventory.pending_deletion is True:
