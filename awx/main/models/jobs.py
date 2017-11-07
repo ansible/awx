@@ -1424,6 +1424,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
+        if 'days' in data:
+            try:
+                if type(data['days']) is bool:
+                    raise ValueError
+                if float(data['days']) != int(data['days']):
+                    raise ValueError
+                days = int(data['days'])
+                if days < 0:
+                    raise ValueError
+            except ValueError:
+                errors.append(_("days must be a positive integer."))
+                rejected['days'] = data.pop('days')
+
         return (data, rejected, errors)
 
 

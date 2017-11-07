@@ -21,6 +21,9 @@ from django.utils.encoding import smart_text
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
+# REST Framework
+from rest_framework.exceptions import ParseError
+
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
@@ -394,11 +397,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         if errors is None:
             errors = []
         if not isinstance(data, dict):
-            errors.append(
-                _('Variables must be a dictionary, received {vars_type} instead.'.format(
-                    vars_type=type(data))))
-            return ({}, data, errors)
-        elif hasattr(self, '_accept_or_ignore_variables'):
+            try:
+                data = parse_yaml_or_json(data, silent_failure=False)
+            except ParseError as exc:
+                errors.append(str(exc))
+                return ({}, data, errors)
+        if hasattr(self, '_accept_or_ignore_variables'):
             # SurveyJobTemplateMixin cannot override any methods because of
             # resolution order, forced by how metaclass processes fields,
             # thus the need for hasattr check
