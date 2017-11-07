@@ -2847,7 +2847,8 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',)
+        fields = ('*', 'extra_vars', 'organization', 'survey_enabled', 'allow_simultaneous',
+                  'ask_variables_on_launch',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
@@ -3009,7 +3010,18 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
                 "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
-        return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        r = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        # Verify that fields do not violate template's prompting rules
+        mock_obj = self.Meta.model()
+        if self.instance:
+            for field in self.instance._meta.fields:
+                setattr(mock_obj, field.name, getattr(self.instance, field.name))
+        for field_name, value in attrs.items():
+            setattr(mock_obj, field_name, value)
+        accepted, rejected, errors = ujt_obj._accept_or_ignore_job_kwargs(**mock_obj.prompts_dict())
+        if errors:
+            raise serializers.ValidationError(errors)
+        return r
 
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
@@ -3315,9 +3327,10 @@ class JobLaunchSerializer(BaseSerializer):
         return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
-        errors = {}
         obj = self.context.get('obj')
         data = self.context.get('data')
+
+        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(**data)
 
         for field in obj.resources_needed_to_start:
             if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
@@ -3349,10 +3362,14 @@ class JobLaunchSerializer(BaseSerializer):
             # Catch known user variable formatting errors
             errors['extra_vars'] = str(e)
 
-        if self.get_survey_enabled(obj):
-            validation_errors = obj.survey_variable_validation(extra_vars)
-            if validation_errors:
-                errors['variables_needed_to_start'] = validation_errors
+        # TODO: Response field kept around for backward compatibility,
+        # remove when schema change permitted
+        if obj.survey_enabled and obj.survey_spec:
+            survey_errors = []
+            for survey_element in obj.survey_spec.get("spec", []):
+                survey_errors += obj._survey_element_validation(survey_element, data)
+            if survey_errors:
+                errors['variables_needed_to_start'] = survey_errors
 
         extra_cred_kinds = []
         for cred in data.get('extra_credentials', []):
@@ -3416,8 +3433,9 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
-        errors = {}
         obj = self.instance
+
+        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(**attrs)
 
         extra_vars = attrs.get('extra_vars', {})
 
@@ -3427,10 +3445,13 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             # Catch known user variable formatting errors
             errors['extra_vars'] = str(e)
 
-        if self.get_survey_enabled(obj):
-            validation_errors = obj.survey_variable_validation(extra_vars)
-            if validation_errors:
-                errors['variables_needed_to_start'] = validation_errors
+        # TODO: Response field kept around for backward compatibility,
+        # remove when schema change permitted
+        if obj.survey_enabled and obj.survey_spec:
+            for survey_element in obj.survey_spec.get("spec", []):
+                survey_errors += obj._survey_element_validation(survey_element, data)
+            if survey_errors:
+                errors['variables_needed_to_start'] = survey_errors
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -3596,9 +3617,9 @@ class ScheduleSerializer(BaseSerializer):
                 ujt = attrs['unified_job_template']
             elif self.instance:
                 ujt = self.instance.unified_job_template
-            if ujt and isinstance(ujt, (Project, InventorySource)):
-                raise serializers.ValidationError({'extra_data': _(
-                    'Projects and inventory updates cannot accept extra variables.')})
+            accepted, rejected, errors = ujt.accept_or_ignore_variables(extra_data)
+            if errors:
+                raise serializers.ValidationError({'extra_data': errors})
         return super(ScheduleSerializer, self).validate(attrs)
 
     # We reject rrules if:

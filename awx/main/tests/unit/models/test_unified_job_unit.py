@@ -3,10 +3,19 @@ import mock
 
 from awx.main.models import (
     UnifiedJob,
+    UnifiedJobTemplate,
     WorkflowJob,
     WorkflowJobNode,
     Job
 )
+
+
+def test_incorrectly_formatted_variables():
+    bad_data = '{"bar":"foo'
+    accepted, ignored, errors = UnifiedJobTemplate().accept_or_ignore_variables(bad_data)
+    assert not accepted
+    assert ignored == bad_data
+    assert 'Cannot parse as JSON' in str(errors[0])
 
 
 def test_unified_job_workflow_attributes():

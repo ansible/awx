@@ -248,10 +248,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_variables_on_launch = models.BooleanField(
-        blank=True,
-        default=False,
-    )
     ask_limit_on_launch = models.BooleanField(
         blank=True,
         default=False,
@@ -385,33 +381,27 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
-        # Sort the runtime fields allowed and disallowed by job template
-        ignored_fields = {}
-        prompted_fields = {}
+        prompted_fields, ignored_fields, vars_errors = self._accept_or_ignore_extra_vars(**kwargs)
 
         ask_for_vars_dict = self._ask_for_vars_dict()
+        ask_for_vars_dict.pop('extra_vars')
 
+        errors_dict = {}
+        if vars_errors:
+            errors_dict['extra_vars'] = vars_errors
+
+        # Handle all the other fields that follow the simple prompting rule
         for field in ask_for_vars_dict:
-            if field in kwargs:
-                if field == 'extra_vars':
-                    prompted_fields[field] = {}
-                    ignored_fields[field] = {}
-                if ask_for_vars_dict[field]:
-                    prompted_fields[field] = kwargs[field]
-                else:
-                    if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
-                        # Accept vars defined in the survey and no others
-                        survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-                        extra_vars = parse_yaml_or_json(kwargs[field])
-                        for key in extra_vars:
-                            if key in survey_vars:
-                                prompted_fields[field][key] = extra_vars[key]
-                            else:
-                                ignored_fields[field][key] = extra_vars[key]
-                    else:
-                        ignored_fields[field] = kwargs[field]
+            # TODO: move logic about null fields on JT to here
+            if field not in kwargs:
+                continue
+            if ask_for_vars_dict[field]:
+                prompted_fields[field] = kwargs[field]
+            else:
+                ignored_fields[field] = kwargs[field]
+                errors_dict[field] = _('Field is not configured to prompt on launch.').format(field_name=field)
 
-        return prompted_fields, ignored_fields
+        return prompted_fields, ignored_fields, errors_dict
 
     def _extra_job_type_errors(self, data):
         """
@@ -1417,6 +1407,37 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         return dict(error=list(error_notification_templates),
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
+
+    def _accept_or_ignore_variables(self, data, errors):
+        '''
+        Unlike other templates, like project updates and inventory sources,
+        system job templates can accept a limited number of fields
+        used as options for the management commands.
+        '''
+        rejected = {}
+        allowed_vars = set(['days', 'older_than', 'granularity'])
+        given_vars = set(data.keys())
+        unallowed_vars = given_vars - (allowed_vars & given_vars)
+        if unallowed_vars:
+            errors.append(_('Variables {list_of_keys} are not allowed for system jobs.').format(
+                list_of_keys=', '.join(unallowed_vars)))
+            for key in unallowed_vars:
+                rejected[key] = data.pop(key)
+
+        if 'days' in data:
+            try:
+                if type(data['days']) is bool:
+                    raise ValueError
+                if float(data['days']) != int(data['days']):
+                    raise ValueError
+                days = int(data['days'])
+                if days < 0:
+                    raise ValueError
+            except ValueError:
+                errors.append(_("days must be a positive integer."))
+                rejected['days'] = data.pop('days')
+
+        return (data, rejected, errors)
 
 
 class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):

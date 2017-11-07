@@ -21,6 +21,9 @@ from django.utils.encoding import smart_text
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 
+# REST Framework
+from rest_framework.exceptions import ParseError
+
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
@@ -384,6 +387,31 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_jt.save()
         copy_m2m_relationships(self, unified_jt, fields)
         return unified_jt
+
+    def accept_or_ignore_variables(self, data, errors=None):
+        '''
+        If subclasses accept any `variables` or `extra_vars`, they should
+        define _accept_or_ignore_variables to place those variables in the accepted dict,
+        according to the acceptance rules of the template.
+        '''
+        if errors is None:
+            errors = []
+        if not isinstance(data, dict):
+            try:
+                data = parse_yaml_or_json(data, silent_failure=False)
+            except ParseError as exc:
+                errors.append(str(exc))
+                return ({}, data, errors)
+        if hasattr(self, '_accept_or_ignore_variables'):
+            # SurveyJobTemplateMixin cannot override any methods because of
+            # resolution order, forced by how metaclass processes fields,
+            # thus the need for hasattr check
+            return self._accept_or_ignore_variables(data, errors)
+        elif data:
+            errors.append(
+                _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(
+                    list_of_keys=', '.join(data.keys()))))
+        return ({}, data, errors)
 
 
 class UnifiedJobTypeStringMixin(object):

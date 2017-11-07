@@ -1,6 +1,7 @@
 import mock
 import pytest
 import yaml
+import json
 
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
@@ -86,27 +87,20 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
-        with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
-                            runtime_data, admin_user, expect=201)
-            assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{}},)
+        response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
+                        runtime_data, admin_user, expect=400)
+        # Assert no job is created
+        assert not JobTemplate.create_unified_job.called
+        assert not mock_job.signal_start.called
 
-    # Check that job is serialized correctly
-    job_id = response.data['job']
-    assert job_id == 968
-
-    # If job is created with no arguments, it will inherit JT attributes
-    mock_job.signal_start.assert_called_once()
-
-    # Check that response tells us what things were ignored
-    assert 'job_launch_var' in response.data['ignored_fields']['extra_vars']
-    assert 'job_type' in response.data['ignored_fields']
-    assert 'limit' in response.data['ignored_fields']
-    assert 'inventory' in response.data['ignored_fields']
-    assert 'credential' in response.data['ignored_fields']
-    assert 'job_tags' in response.data['ignored_fields']
-    assert 'skip_tags' in response.data['ignored_fields']
+    # Check that response tells us what things were rejected
+    assert 'job_launch_var' in response.data['extra_vars'][0]
+    assert 'job_type' in response.data
+    assert 'limit' in response.data
+    assert 'inventory' in response.data
+    assert 'credential' in response.data
+    assert 'job_tags' in response.data
+    assert 'skip_tags' in response.data
 
 
 @pytest.mark.django_db
@@ -121,7 +115,8 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
             response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                             runtime_data, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
+            runtime_data['extra_vars'] = json.loads(runtime_data['extra_vars'])
+            JobTemplate.create_unified_job.assert_called_with(**runtime_data)
 
     job_id = response.data['job']
     assert job_id == 968
@@ -167,6 +162,7 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
             response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
                             runtime_data, rando, expect=201)
             assert JobTemplate.create_unified_job.called
+            runtime_data['extra_vars'] = json.loads(runtime_data['extra_vars'])
             assert JobTemplate.create_unified_job.call_args == (runtime_data,)
 
     job_id = response.data['job']
@@ -256,6 +252,7 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
     deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.ask_variables_on_launch = True
     deploy_jobtemplate.save()
 
     kv = dict(extra_vars={"job_launch_var": 4}, credential=machine_credential.id)
@@ -340,7 +337,7 @@ def test_job_launch_with_only_vault_credential(vault_credential, deploy_jobtempl
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     assert job_obj.vault_credential.pk == vault_credential.pk
@@ -357,7 +354,7 @@ def test_job_launch_with_vault_credential_ask_for_machine(vault_credential, depl
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
     assert job_obj.credential is None
     assert job_obj.vault_credential.pk == vault_credential.pk
@@ -376,7 +373,7 @@ def test_job_launch_with_vault_credential_and_prompted_machine_cred(machine_cred
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
     assert job_obj.credential.pk == machine_credential.pk
     assert job_obj.vault_credential.pk == vault_credential.pk
@@ -392,7 +389,7 @@ def test_job_launch_JT_with_default_vault_credential(machine_credential, vault_c
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**{})
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     assert job_obj.vault_credential.pk == vault_credential.pk
@@ -485,7 +482,7 @@ def test_job_launch_JT_with_extra_credentials(machine_credential, credential, ne
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     extra_creds = job_obj.extra_credentials.all()
@@ -509,16 +506,14 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
                 response = post(
                     reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
-                    admin_user, expect=201)
-                assert JobTemplate.create_unified_job.called
-                assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{'survey_var': 4}},)
+                    admin_user, expect=400)
+                assert not JobTemplate.create_unified_job.called
+                assert not JobTemplate.create_unified_job.call_args == ({'extra_vars':{'survey_var': 4}},)
 
-
-    job_id = response.data['job']
-    assert job_id == 968
-
-    # Check that the survey variable is accepted and the job variable isn't
-    mock_job.signal_start.assert_called_once()
+    assert 'job_launch_var' in response.data['extra_vars'][0]
+    assert 'not allowed on launch' in response.data['extra_vars'][0]
+    assert 'value missing' in response.data['variables_needed_to_start'][0]
+    assert 'survey_var' in response.data['variables_needed_to_start'][0]
 
 
 @pytest.mark.django_db

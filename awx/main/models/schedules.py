@@ -5,14 +5,12 @@ import re
 import logging
 import datetime
 import dateutil.rrule
-import json
 
 # Django
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware, get_default_timezone
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
@@ -96,40 +94,6 @@ class Schedule(CommonModel):
         blank=True,
         default={}
     )
-
-    # extra_data is actually a string with a JSON payload in it. This
-    # is technically OK because a string is a valid JSON. One day we will
-    # enforce non-string JSON.
-    def _clean_extra_data_system_jobs(self):
-        extra_data = self.extra_data
-        if not isinstance(extra_data, dict):
-            try:
-                extra_data = json.loads(self.extra_data)
-            except Exception:
-                raise ValidationError(_("Expected JSON"))
-
-        if extra_data and 'days' in extra_data:
-            try:
-                if type(extra_data['days']) is bool:
-                    raise ValueError
-                if float(extra_data['days']) != int(extra_data['days']):
-                    raise ValueError
-                days = int(extra_data['days'])
-                if days < 0:
-                    raise ValueError
-            except ValueError:
-                raise ValidationError(_("days must be a positive integer."))
-        return self.extra_data
-
-    def clean_extra_data(self):
-        if not self.unified_job_template:
-            return self.extra_data
-
-        # Compare class by string name because it's hard to import SystemJobTemplate
-        if type(self.unified_job_template).__name__ is not 'SystemJobTemplate':
-            return self.extra_data
-
-        return self._clean_extra_data_system_jobs()
 
     def __unicode__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)

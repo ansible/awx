@@ -3,10 +3,12 @@
 
 # Python
 #import urlparse
+import logging
 
 # Django
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 #from django import settings as tower_settings
 
 # AWX
@@ -24,7 +26,6 @@ from awx.main.models.rbac import (
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.redact import REPLACE_STR
-from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 from copy import copy
@@ -33,6 +34,8 @@ from urlparse import urljoin
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
 CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit']
+
+logger = logging.getLogger('awx.main.models.workflow')
 
 
 class WorkflowNodeBase(CreatedModifiedModel):
@@ -126,7 +129,7 @@ class WorkflowNodeBase(CreatedModifiedModel):
             else:
                 return {}
 
-        accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
+        accepted_fields, ignored_fields, prompts_errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
 
         ignored_dict = {}
         for fd in ignored_fields:
@@ -238,7 +241,13 @@ class WorkflowJobNode(WorkflowNodeBase):
         data = {}
         ujt_obj = self.unified_job_template
         if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
-            accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
+            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
+            if errors:
+                logger.info(_('Bad launch configuration starting template {template_pk} as part of '
+                              'workflow {workflow_pk}. Errors:\n{error_text}').format(
+                                  template_pk=ujt_obj.pk,
+                                  workflow_pk=self.pk,
+                                  error_text=errors))
             for fd in ujt_obj._extra_job_type_errors(accepted_fields):
                 accepted_fields.pop(fd)
             data.update(accepted_fields)  # missing fields are handled in the scheduler
@@ -370,7 +379,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
         base_list.remove('labels')
         return (base_list +
-                ['survey_spec', 'survey_enabled', 'organization'])
+                ['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization'])
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -398,24 +407,22 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
-    def _accept_or_ignore_job_kwargs(self, extra_vars=None, **kwargs):
-        # Only accept allowed survey variables
-        ignored_fields = {}
-        prompted_fields = {}
-        prompted_fields['extra_vars'] = {}
-        ignored_fields['extra_vars'] = {}
-        extra_vars = parse_yaml_or_json(extra_vars)
-        if self.survey_enabled and self.survey_spec:
-            survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-            for key in extra_vars:
-                if key in survey_vars:
-                    prompted_fields['extra_vars'][key] = extra_vars[key]
-                else:
-                    ignored_fields['extra_vars'][key] = extra_vars[key]
-        else:
-            prompted_fields['extra_vars'] = extra_vars
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
+        prompted_fields, ignored_fields, vars_errors = self._accept_or_ignore_extra_vars(**kwargs)
 
-        return prompted_fields, ignored_fields
+        errors_dict = {}
+        if vars_errors:
+            errors_dict['extra_vars'] = vars_errors
+
+        # WFJTs do not behave like JTs, it can not accept inventory, credential, etc.
+        bad_kwargs = kwargs.copy()
+        bad_kwargs.pop('extra_vars')
+        if bad_kwargs:
+            ignored_fields.update(bad_kwargs)
+            for field in bad_kwargs:
+                errors_dict[field] = _('Field is not allowed for use in workflows.')
+
+        return prompted_fields, ignored_fields, errors_dict
 
     def can_start_without_user_input(self):
         '''Return whether WFJT can be launched without survey passwords.'''
