@@ -17,7 +17,7 @@ var time = require('./time.js');
 var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
-var svg_crowbar = require('../vendor/svg-crowbar.js');
+var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
 var NetworkUIController = function($scope, $document, $location, $window, $http) {
@@ -26,7 +26,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   var i = 0;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -77,13 +77,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   $scope.last_event = null;
   $scope.cursor = {'x':100, 'y': 100, 'hidden': false};
 
-  $scope.debug = {'hidden': true};
+  $scope.debug = {'hidden': false};
   $scope.hide_buttons = false;
   $scope.hide_links = false;
   $scope.hide_interfaces = false;
   $scope.hide_groups = false;
   $scope.graph = {'width': window.innerWidth,
-                  'right_column': window.innerWidth - 300,
+                  'right_column': 300,
                   'height': window.innerHeight};
   $scope.device_id_seq = util.natural_numbers(0);
   $scope.link_id_seq = util.natural_numbers(0);
@@ -208,15 +208,28 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     };
 
     $scope.updateScaledXY = function() {
+        if (isNaN($scope.mouseX) ||
+            isNaN($scope.mouseY) ||
+            isNaN($scope.panX) ||
+            isNaN($scope.panY) ||
+            isNaN($scope.current_scale)) {
+            return;
+        }
         $scope.scaledX = ($scope.mouseX - $scope.panX) / $scope.current_scale;
         $scope.scaledY = ($scope.mouseY - $scope.panY) / $scope.current_scale;
         $scope.view_port.x = - $scope.panX / $scope.current_scale;
         $scope.view_port.y = - $scope.panY / $scope.current_scale;
         $scope.view_port.width = $scope.graph.width / $scope.current_scale;
         $scope.view_port.height = $scope.graph.height / $scope.current_scale;
+
     };
 
     $scope.updatePanAndScale = function() {
+        if (isNaN($scope.panX) ||
+            isNaN($scope.panY) ||
+            isNaN($scope.current_scale)) {
+            return;
+        }
         var g = document.getElementById('frame_g');
         g.setAttribute('transform','translate(' + $scope.panX + ',' + $scope.panY + ') scale(' + $scope.current_scale + ')');
     };
@@ -337,7 +350,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
 
     // Event Handlers
 
+    $scope.normalize_mouse_event = function ($event) {
+        $event.x = $event.pageX;
+        $event.y = $event.pageY;
+    };
+
     $scope.onMouseDown = function ($event) {
+      $scope.normalize_mouse_event($event);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
@@ -348,6 +367,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     };
 
     $scope.onMouseUp = function ($event) {
+      $scope.normalize_mouse_event($event);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
@@ -358,6 +378,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     };
 
     $scope.onMouseLeave = function ($event) {
+      $scope.normalize_mouse_event($event);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
@@ -367,6 +388,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     };
 
     $scope.onMouseMove = function ($event) {
+      $scope.normalize_mouse_event($event);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
@@ -383,6 +405,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     };
 
     $scope.onMouseOver = function ($event) {
+      $scope.normalize_mouse_event($event);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
@@ -393,7 +416,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
 
     $scope.onMouseEnter = $scope.onMouseOver;
 
-    $scope.onMouseWheel = function ($event, delta, deltaX, deltaY) {
+    $scope.onMouseWheel = function ($event) {
+      var delta = $event.originalEvent.wheelDelta;
+      var deltaX = $event.originalEvent.wheelDeltaX;
+      var deltaY = $event.originalEvent.wheelDeltaY;
+      console.log([$event, delta, deltaX, deltaY]);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
       }
@@ -1462,7 +1489,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
 	angular.element($window).bind('resize', function(){
 
 		$scope.graph.width = $window.innerWidth;
-	  	$scope.graph.right_column = $window.innerWidth - 300;
+	  	$scope.graph.right_column = 300;
 	  	$scope.graph.height = $window.innerHeight;
 
         $scope.update_size();
