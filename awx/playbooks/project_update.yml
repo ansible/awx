@@ -26,6 +26,22 @@
       when: scm_delete_on_update|default('')
 
     - block:
+      - name: check repo using git
+        git:
+          dest: "{{project_path|quote}}"
+          repo: "{{scm_url}}"
+          version: "{{scm_branch|quote}}"
+          force: "{{scm_clean}}"
+          update: false
+          clone: false
+        register: repo_check
+        when: scm_full_checkout|default('')
+        ignore_errors: true
+
+      - name: break if already checked out
+        meta: end_play
+        when: scm_full_checkout|default('') and repo_check|succeeded and repo_check.before == scm_branch
+
       - name: update project using git
         git:
           dest: "{{project_path|quote}}"
@@ -101,6 +117,22 @@
         when: results is defined
       when: scm_type == 'insights'
 
+
+    - name: Repository Version
+      debug: msg="Repository Version {{ scm_version }}"
+      when: scm_version is defined
+
+    - name: Write Repository Version
+      copy:
+        dest: "{{ scm_revision_output }}"
+        content: "{{ scm_version }}"
+      when: scm_version is defined and scm_revision_output is defined
+
+- hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+
     - block:
       - name: detect requirements.yml
         stat: path={{project_path|quote}}/roles/requirements.yml
@@ -112,13 +144,3 @@
           chdir: "{{project_path|quote}}/roles"
         when: doesRequirementsExist.stat.exists
       when: scm_full_checkout|bool
-
-    - name: Repository Version
-      debug: msg="Repository Version {{ scm_version }}"
-      when: scm_version is defined
-
-    - name: Write Repository Version
-      copy:
-        dest: "{{ scm_revision_output }}"
-        content: "{{ scm_version }}"
-      when: scm_version is defined and scm_revision_output is defined
