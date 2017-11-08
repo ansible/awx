@@ -124,6 +124,12 @@
     "reconnectingwebsocket": "^1.0.0",
     "rrule": "git+https://git@github.com/jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
     "select2": "^4.0.2",
-    "sprintf-js": "^1.0.3"
+    "sprintf-js": "^1.0.3",
+    "mathjs": "^3.15.0",
+    "hamsterjs": "^1.1.2",
+    "titlecase": "^1.1.2",
+    "inherits": "^1.0.2",
+    "angular-mousewheel": "^1.0.5",
+    "angular-xeditable": "~0.8.0"
   }
 }
