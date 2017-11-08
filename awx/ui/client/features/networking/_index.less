@@ -1,0 +1,66 @@
+.Networking-header{
+    border: 1px solid @at-color-panel-border;
+    display:flex;
+    height: 40px;
+    width:100%;
+}
+
+.Networking-headerTitle{
+    color: @default-interface-txt;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 10px;
+    align-items: center;
+    display: flex;
+}
+
+.Netowrking-headerActions{
+    align-items: center;
+    display: flex;
+    flex: 1 0 auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.Networking-headerActionItem{
+    justify-content: flex-end;
+    display: flex;
+    padding-right: 10px;
+    font-size: 20px;
+}
+
+.Networking-actionButton{
+    font-size: 16px;
+    height: 30px;
+    min-width: 30px;
+    color: @default-icon;
+    background-color: inherit;
+    border: none;
+    border-radius: 50%;
+}
+
+.Networking-actionButton:hover{
+    background-color:@default-link;
+    color: @default-bg;
+}
+
+.Networking-panels{
+    display:flex;
+    height: calc(~"100vh - 40px");
+}
+
+.Networking-leftPanel{
+    width:100%
+}
+
+.Networking-rightPanel{
+    border-left: 1px solid @at-color-panel-border;
+    display:flex;
+    width:400px;
+    padding: 20px;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+}
