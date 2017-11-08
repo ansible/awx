@@ -24,13 +24,9 @@ function JobsRun ($stateExtender, strings) {
             }
         },
         resolve: {
-            resolved: ['JobsModel', Jobs => {
-                const jobs = new Jobs();
-
-                return {
-                    models: { jobs }
-                };
-            }]
+            job: ['JobsModel', Jobs => new Jobs('get', 1002)
+                .then(job => job.extend('job_events'))
+            ]
         }
     });
 }
