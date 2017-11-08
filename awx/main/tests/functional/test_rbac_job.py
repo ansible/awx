@@ -51,12 +51,20 @@ def proj_updater(project, rando):
     return rando
 
 
-# Read permissions testing
+# Check that superuser & system auditors can see fully orphaned jobs
 @pytest.mark.django_db
-def test_superuser_sees_orphans(normal_job, admin_user):
+@pytest.mark.parametrize("superuser", [True, False])
+def test_superuser_superauditor_sees_orphans(normal_job, superuser, admin_user, system_auditor):
+    if superuser:
+        u = admin_user
+    else:
+        u = system_auditor
     normal_job.job_template = None
-    access = JobAccess(admin_user)
-    assert access.can_read(normal_job)
+    normal_job.project = None
+    normal_job.inventory = None
+    access = JobAccess(u)
+    assert access.can_read(normal_job), "User sys auditor: {}, sys admin: {}".format(
+        u.is_system_auditor, u.is_superuser)
 
 
 @pytest.mark.django_db
