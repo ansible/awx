@@ -10,6 +10,7 @@ import credentialTypesEdit from './edit/main';
 import list from './credential-types.list';
 import form from './credential-types.form';
 import { N_ } from '../i18n';
+import CredentialTypesStrings from './credential-types.strings';
 
 export default
 angular.module('credentialTypes', [
@@ -19,6 +20,7 @@ angular.module('credentialTypes', [
     ])
     .factory('CredentialTypesList', list)
     .factory('CredentialTypesForm', form)
+    .service('CredentialTypesStrings', CredentialTypesStrings)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

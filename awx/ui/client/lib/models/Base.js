@@ -77,11 +77,15 @@ function search (params, config) {
         });
 }
 
-function httpGet (resource) {
+function httpGet (resource, config) {
     const req = {
         method: 'GET',
         url: this.path
     };
+
+    if (config && config.params) {
+        req.params = config.params;
+    }
 
     if (typeof resource === 'object') {
         this.model.GET = resource;
@@ -141,6 +145,19 @@ function httpOptions (resource) {
 
             return res;
         });
+}
+
+function httpDelete (resource) {
+    const req = {
+        method: 'DELETE',
+        url: this.path
+    };
+
+    if (resource) {
+        req.url = `${this.path}${resource}/`;
+    }
+
+    return $http(req).then(res => res);
 }
 
 function options (keys) {
@@ -349,6 +366,32 @@ function graft (id) {
     return new this.Constructor('get', item, true);
 }
 
+function getDependentResourceCounts (id) {
+    if (this.setDependentResources) {
+        this.setDependentResources(id);
+    } else {
+        return Promise.resolve([]);
+    }
+
+    const dependentResourcePromises = [];
+
+    this.dependentResources.forEach(dependentResource => {
+        const config = {};
+
+        if (dependentResource.params) {
+            config.params = dependentResource.params;
+        }
+
+        dependentResourcePromises.push(dependentResource.model.http.get(undefined, config)
+            .then((val) => ({
+                label: dependentResource.model.label,
+                count: val.data.count
+            })));
+    });
+
+    return Promise.all(dependentResourcePromises);
+}
+
 /**
  * `create` is called on instantiation of every model. Models can be
  * instantiated empty or with `GET` and/or `OPTIONS` requests that yield data.
@@ -407,12 +450,14 @@ function BaseModel (path, settings) {
     this.set = set;
     this.unset = unset;
     this.extend = extend;
+    this.getDependentResourceCounts = getDependentResourceCounts;
 
     this.http = {
         get: httpGet.bind(this),
         options: httpOptions.bind(this),
         post: httpPost.bind(this),
         put: httpPut.bind(this),
+        delete: httpDelete.bind(this)
     };
 
     this.model = {};

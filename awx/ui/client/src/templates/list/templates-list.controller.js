@@ -8,13 +8,15 @@ export default ['$scope', '$rootScope',
     'Alert','TemplateList', 'Prompt', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
-    'TemplateCopyService', 'i18n',
+    'TemplateCopyService', 'i18n', 'JobTemplateModel', 'TemplatesStrings',
     function(
         $scope, $rootScope, Alert,
         TemplateList, Prompt, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs, TemplateCopyService, i18n
+        qs, TemplateCopyService, i18n, JobTemplate, TemplatesStrings
     ) {
+
+        let jobTemplate = new JobTemplate();
 
         var list = TemplateList;
 
@@ -98,65 +100,85 @@ export default ['$scope', '$rootScope',
 
         $scope.deleteJobTemplate = function(template) {
            if(template) {
-                    Prompt({
-                        hdr: i18n._('Delete'),
-                        body: `<div class="Prompt-bodyQuery">${i18n._("Are you sure you want to delete the template below?")}</div><div class="Prompt-bodyTarget">${$filter('sanitize')(template.name)}</div>`,
-                        action: function() {
+               var action = function() {
+                   function handleSuccessfulDelete(isWorkflow) {
+                       let stateParamId = isWorkflow ? $state.params.workflow_job_template_id : $state.params.job_template_id;
 
-                            function handleSuccessfulDelete(isWorkflow) {
-                                let stateParamId = isWorkflow ? $state.params.workflow_job_template_id : $state.params.job_template_id;
+                       let reloadListStateParams = null;
 
-                                let reloadListStateParams = null;
+                       if($scope.templates.length === 1 && $state.params.template_search && !_.isEmpty($state.params.template_search.page) && $state.params.template_search.page !== '1') {
+                           reloadListStateParams = _.cloneDeep($state.params);
+                           reloadListStateParams.template_search.page = (parseInt(reloadListStateParams.template_search.page)-1).toString();
+                       }
 
-                                if($scope.templates.length === 1 && $state.params.template_search && !_.isEmpty($state.params.template_search.page) && $state.params.template_search.page !== '1') {
-                                    reloadListStateParams = _.cloneDeep($state.params);
-                                    reloadListStateParams.template_search.page = (parseInt(reloadListStateParams.template_search.page)-1).toString();
-                                }
+                       if (parseInt(stateParamId) === template.id) {
+                           // Move the user back to the templates list
+                           $state.go("templates", reloadListStateParams, {reload: true});
+                       } else {
+                           $state.go(".", reloadListStateParams, {reload: true});
+                       }
+                       Wait('stop');
+                   }
 
-                                if (parseInt(stateParamId) === template.id) {
-                                    // Move the user back to the templates list
-                                    $state.go("templates", reloadListStateParams, {reload: true});
-                                } else {
-                                    $state.go(".", reloadListStateParams, {reload: true});
-                                }
-                                Wait('stop');
-                            }
+                   $('#prompt-modal').modal('hide');
+                   Wait('start');
+                   if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                       TemplatesService.deleteWorkflowJobTemplate(template.id)
+                       .then(function () {
+                           handleSuccessfulDelete(true);
+                       })
+                       .catch(function (response) {
+                           Wait('stop');
+                           ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                               msg: 'Call to delete workflow job template failed. DELETE returned status: ' + response.status + '.'});
+                       });
+                   }
+                   else if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+                       TemplatesService.deleteJobTemplate(template.id)
+                       .then(function () {
+                           handleSuccessfulDelete();
+                       })
+                       .catch(function (response) {
+                           Wait('stop');
+                           ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                               msg: 'Call to delete job template failed. DELETE returned status: ' + response.status + '.'});
+                       });
+                   }
+                   else {
+                       Wait('stop');
+                       Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while deleting.');
+                   }
+               };
 
-                            $('#prompt-modal').modal('hide');
-                            Wait('start');
-                            if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
-                                TemplatesService.deleteWorkflowJobTemplate(template.id)
-                                .then(function () {
-                                    handleSuccessfulDelete(true);
-                                })
-                                .catch(function (response) {
-                                    Wait('stop');
-                                    ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete workflow job template failed. DELETE returned status: ' + response.status + '.'});
-                                });
-                            }
-                            else if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
-                                TemplatesService.deleteJobTemplate(template.id)
-                                .then(function () {
-                                    handleSuccessfulDelete();
-                                })
-                                .catch(function (response) {
-                                    Wait('stop');
-                                    ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete job template failed. DELETE returned status: ' + response.status + '.'});
-                                });
-                            }
-                            else {
-                                Wait('stop');
-                                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while deleting.');
-                            }
-                        },
-                        actionText: i18n._('DELETE')
-                    });
-                }
-                else {
-                    Alert('Error: Unable to delete template', 'Template parameter is missing');
-                }
+               jobTemplate.getDependentResourceCounts(template.id)
+                   .then((counts) => {
+                       const invalidateRelatedLines = [];
+                       let deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
+
+                       counts.forEach(countObj => {
+                           if(countObj.count && countObj.count > 0) {
+                               invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                           }
+                       });
+
+                       if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                           deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}  ${TemplatesStrings.get('jobTemplates.deleteJobTemplate.INVALIDATE')}</div>`;
+                           invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                               deleteModalBody += invalidateRelatedLine;
+                           });
+                       }
+
+                       Prompt({
+                           hdr: i18n._('Delete') + ' ' + $filter('sanitize')(template.name),
+                           body: deleteModalBody,
+                           action: action,
+                           actionText: 'DELETE'
+                       });
+                   });
+            }
+            else {
+                Alert('Error: Unable to delete template', 'Template parameter is missing');
+            }
         };
 
         $scope.submitJob = function(template) {

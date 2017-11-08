@@ -6,9 +6,12 @@
 
 export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', 'GetBasePath',
         'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'credentialType', 'i18n',
+        'CredentialModel', 'CredentialsStrings',
     function($scope, Rest, CredentialList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
-    credentialType, i18n) {
+    credentialType, i18n, Credential, CredentialsStrings) {
+
+        let credential = new Credential();
 
         var list = CredentialList,
             defaultUrl = GetBasePath('credentials');
@@ -83,8 +86,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                 $('#prompt-modal').modal('hide');
                 Wait('start');
                 var url = defaultUrl + id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
+                credential.request('delete', id)
                     .then(() => {
 
                         let reloadListStateParams = null;
@@ -109,12 +111,31 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                     });
             };
 
-            Prompt({
-                hdr: i18n._('Delete'),
-                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the credential below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
-                action: action,
-                actionText: i18n._('DELETE')
-            });
+            credential.getDependentResourceCounts(id)
+                .then((counts) => {
+                    const invalidateRelatedLines = [];
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                        }
+                    });
+
+                    if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}  ${CredentialsStrings.get('deleteCredential.INVALIDATE')}</div>`;
+                        invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                            deleteModalBody += invalidateRelatedLine;
+                        });
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete') + ' ' + $filter('sanitize')(name),
+                        body: deleteModalBody,
+                        action: action,
+                        actionText: 'DELETE'
+                    });
+                });
         };
     }
 ];

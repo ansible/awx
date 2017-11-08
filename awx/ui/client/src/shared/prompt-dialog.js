@@ -42,6 +42,7 @@ angular.module('PromptDialog', ['Utilities'])
                 scope.promptBody = params.body;
                 scope.promptAction = params.action;
                 scope.promptActionText = (params.actionText === null || params.actionText === undefined || params.actionText === '') ? 'YES' : params.actionText;
+                scope.hideActionButton = params.hideActionButton ? true : false;
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;
 

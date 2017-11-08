@@ -5,11 +5,16 @@
  *************************************************/
 
 export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
-    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'Alert', '$q',
+    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter',
+    'Dataset', 'rbacUiControlService', 'Alert', '$q', 'CredentialTypeModel',
+    'CredentialTypesStrings', 'i18n',
     function(
         $rootScope, $scope, Wait, CredentialTypesList,
-        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter, Dataset, rbacUiControlService, Alert, $q
+        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter,
+        Dataset, rbacUiControlService, Alert, $q, CredentialType,
+        CredentialTypesStrings, i18n
     ) {
+        let credentialType = new CredentialType();
         var defaultUrl = GetBasePath('credential_types'),
             list = CredentialTypesList;
 
@@ -58,8 +63,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                 $('#prompt-modal').modal('hide');
                 Wait('start');
                 var url = defaultUrl + id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
+                credentialType.request('delete', id)
                     .then(() => {
 
                         let reloadListStateParams = null;
@@ -83,13 +87,29 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                     });
             };
 
-            var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the credential type below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
-            Prompt({
-                hdr: 'Delete',
-                body: bodyHtml,
-                action: action,
-                actionText: 'DELETE'
-            });
+            credentialType.getDependentResourceCounts(id)
+                .then((counts) => {
+                    let credentialTypeInUse = false;
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialTypesStrings.get('deleteCredentialType.CONFIRM')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            credentialTypeInUse = true;
+                        }
+                    });
+
+                    if (credentialTypeInUse) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialTypesStrings.get('deleteCredentialType.CREDENTIAL_TYPE_IN_USE')}</div>`;
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete') + ' ' + $filter('sanitize')(name),
+                        body: deleteModalBody,
+                        action: action,
+                        hideActionButton: credentialTypeInUse ? true : false,
+                        actionText: 'DELETE'
+                    });
+                });
         };
 
         $scope.addCredentialType = function() {

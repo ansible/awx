@@ -169,7 +169,7 @@ export default ['$stateParams', '$scope', '$rootScope',
 
             Prompt({
                 hdr: i18n._('Delete'),
-                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the organization below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the organization below?  This makes everything in this organization unavailable.') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                 action: action,
                 actionText: i18n._('DELETE')
             });

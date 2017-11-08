@@ -5,11 +5,16 @@
  *************************************************/
 
 export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
-    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'Dataset', 'rbacUiControlService',
+    'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter',
+    'Dataset', 'rbacUiControlService', 'InventoryScriptModel', 'InventoryScriptsStrings',
+    'i18n',
     function(
         $rootScope, $scope, Wait, InventoryScriptsList,
-        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter, Dataset, rbacUiControlService
+        GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter,
+        Dataset, rbacUiControlService, InventoryScript, InventoryScriptsStrings,
+        i18n
     ) {
+        let inventoryScript = new InventoryScript();
         var defaultUrl = GetBasePath('inventory_scripts'),
             list = InventoryScriptsList;
 
@@ -48,8 +53,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
                 $('#prompt-modal').modal('hide');
                 Wait('start');
                 var url = defaultUrl + id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
+                inventoryScript.request('delete', id)
                     .then(() => {
 
                         let reloadListStateParams = null;
@@ -73,13 +77,31 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
                     });
             };
 
-            var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory script below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
-            Prompt({
-                hdr: 'Delete',
-                body: bodyHtml,
-                action: action,
-                actionText: 'DELETE'
-            });
+            inventoryScript.getDependentResourceCounts(id)
+                .then((counts) => {
+                    const invalidateRelatedLines = [];
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryScriptsStrings.get('deleteInventoryScript.CONFIRM')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                        }
+                    });
+
+                    if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryScriptsStrings.get('deleteInventoryScript.CONFIRM')}  ${InventoryScriptsStrings.get('deleteInventoryScript.INVALIDATE')}</div>`;
+                        invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                            deleteModalBody += invalidateRelatedLine;
+                        });
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete') + ' ' + $filter('sanitize')(name),
+                        body: deleteModalBody,
+                        action: action,
+                        actionText: 'DELETE'
+                    });
+                });
         };
 
         $scope.addCustomInv = function() {
