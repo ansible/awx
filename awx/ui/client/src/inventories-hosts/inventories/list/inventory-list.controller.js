@@ -69,6 +69,11 @@ function InventoriesList($scope,
         inventory.kind_label = inventory.kind === '' ? 'Inventory' : (inventory.kind === 'smart' ? i18n._('Smart Inventory'): i18n._('Inventory'));
     }
 
+    $scope.goToGraph = function(inventory){
+        let url = $state.href('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
+        window.open(url, '_blank');
+    };
+
     $scope.editInventory = function (inventory) {
         if(inventory.kind && inventory.kind === 'smart') {
             $state.go('inventories.editSmartInventory', {smartinventory_id: inventory.id});

@@ -194,6 +194,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'insights':
                 icon = "fa-info";
                 break;
+            case 'network':
+                icon = "fa-sitemap";
+                break;
             case 'cancel':
                 icon = "fa-minus-circle";
                 break;

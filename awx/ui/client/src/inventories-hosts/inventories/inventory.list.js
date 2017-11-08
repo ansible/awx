@@ -93,6 +93,13 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
             columnClass: 'col-md-2 col-sm-3 col-xs-4',
+            network: {
+                label: i18n._('Network Visualization'),
+                ngClick: 'goToGraph(inventory)',
+                awToolTip: i18n._('Network Visualization'),
+                dataPlacement: 'top',
+                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
+            },
             edit: {
                 label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory)',

@@ -1,0 +1,36 @@
+<div class="Networking-header">
+    <div class="Networking-headerTitle">{{vm.panelTitle}}</div>
+    <div class="Netowrking-headerActions">
+        <div class="Networking-headerActionItem">
+            <button class="Networking-actionButton"
+                aw-tool-tip="Expand Output"
+                data-placement="bottom"
+                data-original-title="Expand Output"
+                ng-click="vm.togglePanel()"
+                ng-hide="vm.panelIsExpanded">
+                    <i class="fa fa-chevron-left"></i>
+            </button>
+            <button class="Networking-actionButton"
+                aw-tool-tip="Collapse Output"
+                data-placement="left"
+                data-original-title="Collapse Output"
+                ng-click="vm.togglePanel()"
+                ng-hide="!vm.panelIsExpanded">
+                    <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="Networking-headerActionItem">
+            <button ng-click="vm.close()" type="button" class="close">
+				<i class="fa fa-times-circle"></i>
+			</button>
+        </div>
+    </div>
+</div>
+<div class="Networking-panels">
+    <div class="Networking-leftPanel">
+        SVG goes here
+    </div>
+    <div class="Networking-rightPanel" ng-show="vm.panelIsExpanded">
+        VIEW LAYERS
+    </div>
+</div>
