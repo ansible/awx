@@ -1,7 +1,6 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved
 
-from optparse import make_option
 import subprocess
 import warnings
 
@@ -22,12 +21,11 @@ class Command(BaseCommand):
         'Specify `--hostname` to use this command.'
     )
 
-    option_list = BaseCommand.option_list + (
-        make_option('--hostname', dest='hostname', type='string',
-                    help='Hostname used during provisioning'),
-        make_option('--name', dest='name', type='string',
-                    help='(PENDING DEPRECIATION) Hostname used during provisioning'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--hostname', dest='hostname', type=str,
+                            help='Hostname used during provisioning')
+        parser.add_argument('--name', dest='name', type=str,
+                            help='(PENDING DEPRECIATION) Hostname used during provisioning')
 
     @transaction.atomic
     def handle(self, *args, **options):

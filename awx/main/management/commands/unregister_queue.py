@@ -5,7 +5,6 @@ import sys
 from awx.main.utils.pglock import advisory_lock
 from awx.main.models import InstanceGroup
 
-from optparse import make_option
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
@@ -17,13 +16,12 @@ class Command(BaseCommand):
         "Instances inside of queue will continue to exist, \n"
         "but jobs will no longer be processed by queue.")
 
-    option_list = BaseCommand.option_list + (
-        make_option('--queuename', dest='queuename', type='string',
-                    help='Queue to create/update'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--queuename', dest='queuename', type=str,
+                            help='Queue to create/update')
 
     @transaction.atomic
-    def handle(self, **options):
+    def handle(self, *args, **options):
         queuename = options.get('queuename')
         if not queuename:
             raise CommandError('Must specify `--queuename` in order to use command.')

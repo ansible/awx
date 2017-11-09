@@ -4,7 +4,6 @@
 # Python
 import re
 from dateutil.relativedelta import relativedelta
-from optparse import make_option
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
@@ -93,19 +92,20 @@ class CleanupFacts(object):
 
 class Command(BaseCommand):
     help = 'Cleanup facts. For each host older than the value specified, keep one fact scan for each time window (granularity).'
-    option_list = BaseCommand.option_list + (
-        make_option('--older_than',
-                    dest='older_than',
-                    default='30d',
-                    help='Specify the relative time to consider facts older than (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 30d.'),
-        make_option('--granularity',
-                    dest='granularity',
-                    default='1w',
-                    help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 1w.'),
-        make_option('--module',
-                    dest='module',
-                    default=None,
-                    help='Limit cleanup to a particular module.'),)
+
+    def add_arguments(self, parser):
+        parser.add_argument('--older_than',
+                            dest='older_than',
+                            default='30d',
+                            help='Specify the relative time to consider facts older than (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 30d.')
+        parser.add_argument('--granularity',
+                            dest='granularity',
+                            default='1w',
+                            help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 1w.')
+        parser.add_argument('--module',
+                            dest='module',
+                            default=None,
+                            help='Limit cleanup to a particular module.')
 
     def __init__(self):
         super(Command, self).__init__()

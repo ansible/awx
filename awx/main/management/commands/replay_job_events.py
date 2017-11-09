@@ -4,10 +4,9 @@
 import sys
 import time
 import json
-from optparse import make_option
 
 from django.utils import timezone
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 
 from awx.main.models import (
     UnifiedJob,
@@ -162,18 +161,17 @@ class ReplayJobEvents():
             print(json.dumps(stats, indent=4, sort_keys=True))
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
 
     help = 'Replay job events over websockets ordered by created on date.'
 
-    option_list = NoArgsCommand.option_list + (
-        make_option('--job_id', dest='job_id', type='int', metavar='j',
-                    help='Id of the job to replay (job or adhoc)'),
-        make_option('--speed', dest='speed', type='int', metavar='s',
-                    help='Speedup factor.'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--job_id', dest='job_id', type='int', metavar='j',
+                            help='Id of the job to replay (job or adhoc)')
+        parser.add_argument('--speed', dest='speed', type='int', metavar='s',
+                            help='Speedup factor.')
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         job_id = options.get('job_id')
         speed = options.get('speed') or 1
         verbosity = options.get('verbosity') or 0

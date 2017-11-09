@@ -3,8 +3,6 @@
 import sys
 
 from awx.main.models import Instance, InstanceGroup
-
-from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -14,14 +12,13 @@ class Command(BaseCommand):
         "Remove an instance (specified by --hostname) from the specified queue (instance group).\n"
         "In order remove the queue, use the `unregister_queue` command.")
 
-    option_list = BaseCommand.option_list + (
-        make_option('--queuename', dest='queuename', type='string',
-                    help='Queue to be removed from'),
-        make_option('--hostname', dest='hostname', type='string',
-                    help='Host to remove from queue'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--queuename', dest='queuename', type=str,
+                            help='Queue to be removed from')
+        parser.add_argument('--hostname', dest='hostname', type=str,
+                            help='Host to remove from queue')
 
-    def handle(self, **options):
+    def handle(self, *arg, **options):
         if not options.get('queuename'):
             raise CommandError('Must specify `--queuename` in order to use command.')
         ig = InstanceGroup.objects.filter(name=options.get('queuename'))
@@ -36,4 +33,3 @@ class Command(BaseCommand):
         i = i.first()
         ig.instances.remove(i)
         print("Instance removed from instance group")
-

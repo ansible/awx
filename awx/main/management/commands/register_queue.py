@@ -5,20 +5,18 @@ import sys
 from awx.main.utils.pglock import advisory_lock
 from awx.main.models import Instance, InstanceGroup
 
-from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
 
-    option_list = BaseCommand.option_list + (
-        make_option('--queuename', dest='queuename', type='string',
-                    help='Queue to create/update'),
-        make_option('--hostnames', dest='hostnames', type='string',
-                    help='Comma-Delimited Hosts to add to the Queue'),
-        make_option('--controller', dest='controller', type='string', default='',
-                    help='The controlling group (makes this an isolated group)'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--queuename', dest='queuename', type=str,
+                            help='Queue to create/update')
+        parser.add_argument('--hostnames', dest='hostnames', type=str,
+                            help='Comma-Delimited Hosts to add to the Queue')
+        parser.add_argument('--controller', dest='controller', type=str,
+                            default='', help='The controlling group (makes this an isolated group)')
 
     def handle(self, **options):
         queuename = options.get('queuename')
