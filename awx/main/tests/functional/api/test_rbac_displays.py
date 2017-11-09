@@ -92,24 +92,21 @@ class TestJobTemplateCopyEdit:
             credential=None, ask_credential_on_launch=True,
             name='deploy-job-template'
         )
-        serializer = JobTemplateSerializer(jt_res)
-        serializer.context = self.fake_context(admin_user)
+        serializer = JobTemplateSerializer(jt_res, context=self.fake_context(admin_user))
         response = serializer.to_representation(jt_res)
         assert not response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
 
     def test_sys_admin_copy_edit(self, jt_copy_edit, admin_user):
         "Absent a validation error, system admins can do everything"
-        serializer = JobTemplateSerializer(jt_copy_edit)
-        serializer.context = self.fake_context(admin_user)
+        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(admin_user))
         response = serializer.to_representation(jt_copy_edit)
         assert response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
 
     def test_org_admin_copy_edit(self, jt_copy_edit, org_admin):
         "Organization admins SHOULD be able to copy a JT firmly in their org"
-        serializer = JobTemplateSerializer(jt_copy_edit)
-        serializer.context = self.fake_context(org_admin)
+        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(org_admin))
         response = serializer.to_representation(jt_copy_edit)
         assert response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
@@ -125,8 +122,7 @@ class TestJobTemplateCopyEdit:
         jt_copy_edit.credential = machine_credential
         jt_copy_edit.save()
 
-        serializer = JobTemplateSerializer(jt_copy_edit)
-        serializer.context = self.fake_context(org_admin)
+        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(org_admin))
         response = serializer.to_representation(jt_copy_edit)
         assert not response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
@@ -140,8 +136,7 @@ class TestJobTemplateCopyEdit:
         jt_copy_edit.admin_role.members.add(rando)
         jt_copy_edit.save()
 
-        serializer = JobTemplateSerializer(jt_copy_edit)
-        serializer.context = self.fake_context(rando)
+        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(rando))
         response = serializer.to_representation(jt_copy_edit)
         assert not response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
@@ -155,8 +150,7 @@ class TestJobTemplateCopyEdit:
         jt_copy_edit.project.admin_role.members.add(rando)
         jt_copy_edit.project.save()
 
-        serializer = JobTemplateSerializer(jt_copy_edit)
-        serializer.context = self.fake_context(rando)
+        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(rando))
         response = serializer.to_representation(jt_copy_edit)
         assert response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']

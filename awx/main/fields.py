@@ -18,12 +18,12 @@ from django.db.models.signals import (
 )
 from django.db.models.signals import m2m_changed
 from django.db import models
-from django.db.models.fields.related import (
-    add_lazy_relation,
-    SingleRelatedObjectDescriptor,
-    ReverseSingleRelatedObjectDescriptor,
-    ManyRelatedObjectsDescriptor,
-    ReverseManyRelatedObjectsDescriptor,
+from django.db.models.fields.related import add_lazy_relation
+from django.db.models.fields.related_descriptors import (
+    ReverseOneToOneDescriptor,
+    ForwardManyToOneDescriptor,
+    ManyToManyDescriptor,
+    ReverseManyToOneDescriptor,
 )
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -96,7 +96,7 @@ class JSONBField(upstream_JSONBField):
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
 
 
-class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
+class AutoSingleRelatedObjectDescriptor(ReverseOneToOneDescriptor):
     """Descriptor for access to the object from its related class."""
 
     def __get__(self, instance, instance_type=None):
@@ -139,7 +139,7 @@ def resolve_role_field(obj, field):
             raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
     else:
-        if type(obj) is ManyRelatedObjectsDescriptor:
+        if type(obj) is ManyToManyDescriptor:
             for o in obj.all():
                 ret += resolve_role_field(o, field_components[1])
         else:
@@ -179,7 +179,7 @@ def is_implicit_parent(parent_role, child_role):
     return False
 
 
-class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
+class ImplicitRoleDescriptor(ForwardManyToOneDescriptor):
     pass
 
 
@@ -230,18 +230,18 @@ class ImplicitRoleField(models.ForeignKey):
             field_name, sep, field_attr = field_name.partition('.')
             field = getattr(cls, field_name)
 
-            if type(field) is ReverseManyRelatedObjectsDescriptor or \
-               type(field) is ManyRelatedObjectsDescriptor:
+            if type(field) is ReverseManyToOneDescriptor or \
+               type(field) is ManyToManyDescriptor:
 
                 if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
 
-                if type(field) is ReverseManyRelatedObjectsDescriptor:
+                if type(field) is ReverseManyToOneDescriptor:
                     sender = field.through
                 else:
                     sender = field.related.through
 
-                reverse = type(field) is ManyRelatedObjectsDescriptor
+                reverse = type(field) is ManyToManyDescriptor
                 m2m_changed.connect(self.m2m_update(field_attr, reverse), sender, weak=False)
 
     def m2m_update(self, field_attr, _reverse):

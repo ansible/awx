@@ -8,11 +8,11 @@ from datetime import timedelta
     ('admin_checks', 'awx.main.tasks.run_administrative_checks'),
     ('tower_scheduler', 'awx.main.tasks.awx_periodic_scheduler'),
 ])
-def test_CELERYBEAT_SCHEDULE(mocker, job_name, function_path):
-    assert job_name in settings.CELERYBEAT_SCHEDULE
-    assert 'schedule' in settings.CELERYBEAT_SCHEDULE[job_name]
-    assert type(settings.CELERYBEAT_SCHEDULE[job_name]['schedule']) is timedelta
-    assert settings.CELERYBEAT_SCHEDULE[job_name]['task'] == function_path
+def test_CELERY_BEAT_SCHEDULE(mocker, job_name, function_path):
+    assert job_name in settings.CELERY_BEAT_SCHEDULE
+    assert 'schedule' in settings.CELERY_BEAT_SCHEDULE[job_name]
+    assert type(settings.CELERY_BEAT_SCHEDULE[job_name]['schedule']) is timedelta
+    assert settings.CELERY_BEAT_SCHEDULE[job_name]['task'] == function_path
 
     # Ensures that the function exists
     mocker.patch(function_path)

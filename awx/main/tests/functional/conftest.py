@@ -64,7 +64,7 @@ def celery_memory_broker():
 
     Allows django signal code to execute without the need for redis
     '''
-    settings.BROKER_URL='memory://localhost/'
+    settings.CELERY_BROKER_URL='memory://localhost/'
 
 
 @pytest.fixture

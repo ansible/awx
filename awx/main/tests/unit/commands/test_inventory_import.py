@@ -19,7 +19,7 @@ class TestInvalidOptions:
     def test_invalid_options_no_options_specified(self):
         cmd = Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs()
+            cmd.handle()
         assert 'inventory-id' in err.value.message
         assert 'required' in err.value.message
 
@@ -27,7 +27,7 @@ class TestInvalidOptions:
         # You can not specify both name and if of the inventory
         cmd = Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(
+            cmd.handle(
                 inventory_id=42, inventory_name='my-inventory'
             )
         assert 'inventory-id' in err.value.message
@@ -37,7 +37,7 @@ class TestInvalidOptions:
         # You can't overwrite and keep_vars at the same time, that wouldn't make sense
         cmd = Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(
+            cmd.handle(
                 inventory_id=42, overwrite=True, keep_vars=True
             )
         assert 'overwrite-vars' in err.value.message
@@ -47,13 +47,13 @@ class TestInvalidOptions:
         # Need a source to import
         cmd = Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(
+            cmd.handle(
                 inventory_id=42, overwrite=True, keep_vars=True
             )
         assert 'overwrite-vars' in err.value.message
         assert 'exclusive' in err.value.message
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(
+            cmd.handle(
                 inventory_id=42, overwrite_vars=True, keep_vars=True
             )
         assert 'overwrite-vars' in err.value.message
@@ -62,7 +62,7 @@ class TestInvalidOptions:
     def test_invalid_options_missing_source(self):
         cmd = Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(inventory_id=42)
+            cmd.handle(inventory_id=42)
         assert '--source' in err.value.message
         assert 'required' in err.value.message
 

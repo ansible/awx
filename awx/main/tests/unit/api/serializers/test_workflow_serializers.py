@@ -125,11 +125,15 @@ class TestWorkflowJobTemplateNodeSerializerCharPrompts():
         serializer = WorkflowJobTemplateNodeSerializer()
         node = WorkflowJobTemplateNode(pk=1)
         node.char_prompts = {'limit': 'webservers'}
-        serializer.instance = node
+
         view = FakeView(node)
         view.request = FakeRequest()
         view.request.method = "PATCH"
-        serializer.context = {'view': view}
+
+        serializer = WorkflowJobTemplateNodeSerializer()
+        serializer = WorkflowJobTemplateNodeSerializer(context={'view':view})
+        serializer.instance = node
+
         return serializer
 
     def test_change_single_field(self, WFJT_serializer):

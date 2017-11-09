@@ -92,7 +92,7 @@ class TestInvalidOptionsFunctional:
         cmd = inventory_import.Command()
         with mock.patch('django.db.transaction.rollback'):
             with pytest.raises(IOError) as err:
-                cmd.handle_noargs(
+                cmd.handle(
                     inventory_id=inventory.id,
                     source='/tmp/pytest-of-root/pytest-7/inv_files0-invalid')
         assert 'Source does not exist' in err.value.message
@@ -100,14 +100,14 @@ class TestInvalidOptionsFunctional:
     def test_invalid_inventory_id(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(inventory_id=42, source='/notapath/shouldnotmatter')
+            cmd.handle(inventory_id=42, source='/notapath/shouldnotmatter')
         assert 'id = 42' in err.value.message
         assert 'cannot be found' in err.value.message
 
     def test_invalid_inventory_name(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
-            cmd.handle_noargs(inventory_name='fooservers', source='/notapath/shouldnotmatter')
+            cmd.handle(inventory_name='fooservers', source='/notapath/shouldnotmatter')
         assert 'name = fooservers' in err.value.message
         assert 'cannot be found' in err.value.message
 
@@ -122,7 +122,7 @@ class TestINIImports:
     @mock.patch.object(inventory_import.AnsibleInventoryLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
     def test_inventory_single_ini_import(self, inventory, capsys):
         cmd = inventory_import.Command()
-        r = cmd.handle_noargs(
+        r = cmd.handle(
             inventory_id=inventory.pk, source=__file__,
             method='backport')
         out, err = capsys.readouterr()
@@ -192,7 +192,7 @@ class TestINIImports:
     )
     def test_hostvars_are_saved(self, inventory):
         cmd = inventory_import.Command()
-        cmd.handle_noargs(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
         assert inventory.hosts.count() == 1
         h = inventory.hosts.all()[0]
         assert h.name == 'foo'
@@ -219,4 +219,4 @@ class TestINIImports:
     )
     def test_recursive_group_error(self, inventory):
         cmd = inventory_import.Command()
-        cmd.handle_noargs(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')

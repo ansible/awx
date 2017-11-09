@@ -450,7 +450,7 @@ def copy_model_by_class(obj1, Class2, fields, kwargs):
             elif not isinstance(Class2._meta.get_field(field_name), (ForeignObjectRel, ManyToManyField)):
                 create_kwargs[field_name] = kwargs[field_name]
         elif hasattr(obj1, field_name):
-            field_obj = obj1._meta.get_field_by_name(field_name)[0]
+            field_obj = obj1._meta.get_field(field_name)
             if not isinstance(field_obj, ManyToManyField):
                 create_kwargs[field_name] = getattr(obj1, field_name)
 
@@ -471,7 +471,7 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
     '''
     for field_name in fields:
         if hasattr(obj1, field_name):
-            field_obj = obj1._meta.get_field_by_name(field_name)[0]
+            field_obj = obj1._meta.get_field(field_name)
             if isinstance(field_obj, ManyToManyField):
                 # Many to Many can be specified as field_name
                 src_field_value = getattr(obj1, field_name)
