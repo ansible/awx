@@ -3,7 +3,7 @@
 import logging
 
 # Celery
-from celery import Task, task
+from celery import Task, shared_task
 
 # AWX
 from awx.main.scheduler import TaskManager
@@ -21,17 +21,17 @@ class LogErrorsTask(Task):
         super(LogErrorsTask, self).on_failure(exc, task_id, args, kwargs, einfo)
 
 
-@task
+@shared_task
 def run_job_launch(job_id):
     TaskManager().schedule()
 
 
-@task
+@shared_task
 def run_job_complete(job_id):
     TaskManager().schedule()
 
 
-@task(base=LogErrorsTask)
+@shared_task(base=LogErrorsTask)
 def run_task_manager():
     logger.debug("Running Tower task manager.")
     TaskManager().schedule()
