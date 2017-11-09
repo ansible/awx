@@ -12,6 +12,8 @@
 # MISC PROJECT SETTINGS
 ###############################################################################
 import os
+import urllib
+
 
 def patch_broken_pipe_error():
     """Monkey Patch BaseServer.handle_error to not write
@@ -51,7 +53,7 @@ MANAGERS = ADMINS
 # Database settings to use PostgreSQL for development.
 DATABASES = {
     'default': {
-        'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'awx-dev',
         'USER': 'awx-dev',
         'PASSWORD': 'AWXsome1',
@@ -67,7 +69,7 @@ DATABASES = {
 if is_testing(sys.argv):
     DATABASES = {
         'default': {
-            'ENGINE': 'transaction_hooks.backends.sqlite3',
+            'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
             'TEST': {
                 # Test database cannot be :memory: for celery/inventory tests.
@@ -79,15 +81,15 @@ if is_testing(sys.argv):
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
-BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
+CELERY_BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
                                          os.environ.get("RABBITMQ_PASS"),
                                          os.environ.get("RABBITMQ_HOST"),
-                                         os.environ.get("RABBITMQ_VHOST"))
+                                         urllib.quote(os.environ.get("RABBITMQ_VHOST", "/"), safe=''))
 
 CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
+    'default': {'BACKEND': 'asgi_rabbitmq.RabbitmqChannelLayer',
                 'ROUTING': 'awx.main.routing.channel_routing',
-                'CONFIG': {'url': BROKER_URL}}
+                'CONFIG': {'url': CELERY_BROKER_URL}}
 }
 
 # Mongo host configuration
@@ -114,6 +116,7 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
+USE_TZ = False
 TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
@@ -191,7 +194,7 @@ EMAIL_SUBJECT_PREFIX = '[AWX] '
 LOGGING['handlers']['syslog'] = {
     'level': 'WARNING',
     'filters': ['require_debug_false'],
-    'class': 'django.utils.log.NullHandler',
+    'class': 'logging.NullHandler',
     'formatter': 'simple',
 }
 

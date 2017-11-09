@@ -39,13 +39,14 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 # Override django.template.loaders.cached.Loader in defaults.py
-TEMPLATE_LOADERS = (
+template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None) # noqa
+template['OPTIONS']['loaders'] = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 )
 
 # Disable capturing all SQL queries when running celeryd in development.
-if 'celeryd' in sys.argv:
+if 'celery' in sys.argv:
     SQL_DEBUG = False
 
 CELERYD_HIJACK_ROOT_LOGGER = False
@@ -123,11 +124,11 @@ except ImportError:
     sys.exit(1)
 
 CLUSTER_HOST_ID = socket.gethostname()
-CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+CELERY_TASK_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 # Production only runs this schedule on controlling nodes
 # but development will just run it on all nodes
-CELERY_ROUTES['awx.main.tasks.awx_isolated_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
-CELERYBEAT_SCHEDULE['isolated_heartbeat'] = {
+CELERY_TASK_ROUTES['awx.main.tasks.awx_isolated_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+CELERY_BEAT_SCHEDULE['isolated_heartbeat'] = {
     'task': 'awx.main.tasks.awx_isolated_heartbeat',
     'schedule': timedelta(seconds = AWX_ISOLATED_PERIODIC_CHECK),
     'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2,}
@@ -135,7 +136,7 @@ CELERYBEAT_SCHEDULE['isolated_heartbeat'] = {
 
 # Supervisor service name dictionary used for programatic restart
 SERVICE_NAME_DICT = {
-    "celery": "celeryd",
+    "celery": "celery",
     "callback": "receiver",
     "runworker": "channels",
     "uwsgi": "uwsgi",

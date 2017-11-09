@@ -65,7 +65,7 @@ data:
     DATABASES = {
         'default': {
             'ATOMIC_REQUESTS': True,
-            'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': "{{ pg_database }}",
             'USER': "{{ pg_username }}",
             'PASSWORD': "{{ pg_password }}",
@@ -73,7 +73,7 @@ data:
             'PORT': "{{ pg_port }}",
         }
     }
-    BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
+    CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
         "awx",
         "abcdefg",
         "localhost",
@@ -82,7 +82,7 @@ data:
     CHANNEL_LAYERS = {
         'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
                     'ROUTING': 'awx.main.routing.channel_routing',
-                    'CONFIG': {'url': BROKER_URL}}
+                    'CONFIG': {'url': CELERY_BROKER_URL}}
     }
     CACHES = {
         'default': {
