@@ -79,7 +79,7 @@ sso_complete = CompleteView.as_view()
 class MetadataView(View):
 
     def get(self, request, *args, **kwargs):
-        from social.apps.django_app.utils import load_backend, load_strategy
+        from social_django.utils import load_backend, load_strategy
         complete_url = reverse('social:complete', args=('saml', ))
         saml_backend = load_backend(
             load_strategy(request),
