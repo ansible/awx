@@ -1,11 +1,11 @@
 const ENCRYPTED_VALUE = '$encrypted$';
 
-let BaseModel;
-let ProjectModel;
-let JobTemplateModel;
-let InventoryModel;
-let InventorySourceModel;
-let ModelsStrings;
+let Base;
+let Project;
+let JobTemplate;
+let Inventory;
+let InventorySource;
+let strings;
 
 function createFormSchema (method, config) {
     if (!config) {
@@ -48,26 +48,26 @@ function assignInputGroupValues (inputs) {
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new ProjectModel(),
+            model: new Project(),
             params: {
                 credential: id
             }
         },
         {
-            model: new JobTemplateModel(),
+            model: new JobTemplate(),
             params: {
                 credential: id,
                 ask_credential_on_launch: false
             }
         },
         {
-            model: new InventoryModel(),
+            model: new Inventory(),
             params: {
                 insights_credential: id
             }
         },
         {
-            model: new InventorySourceModel(),
+            model: new InventorySource(),
             params: {
                 credential: id
             }
@@ -75,32 +75,32 @@ function setDependentResources (id) {
     ];
 }
 
-function CredentialModel (method, resource, graft) {
-    BaseModel.call(this, 'credentials');
+function CredentialModel (method, resource, config) {
+    Base.call(this, 'credentials');
 
     this.Constructor = CredentialModel;
     this.createFormSchema = createFormSchema.bind(this);
     this.assignInputGroupValues = assignInputGroupValues.bind(this);
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.CREDENTIAL');
+    this.label = strings.get('labels.CREDENTIAL');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function CredentialModelLoader (
-    _BaseModel_,
-    _ProjectModel_,
-    _JobTemplateModel_,
-    _InventoryModel_,
-    _InventorySourceModel_,
-    _ModelsStrings_
+    BaseModel,
+    ProjectModel,
+    JobTemplateModel,
+    InventoryModel,
+    InventorySourceModel,
+    ModelsStrings
 ) {
-    BaseModel = _BaseModel_;
-    ProjectModel = _ProjectModel_;
-    JobTemplateModel = _JobTemplateModel_;
-    InventoryModel = _InventoryModel_;
-    InventorySourceModel = _InventorySourceModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    Project = ProjectModel;
+    JobTemplate = JobTemplateModel;
+    Inventory = InventoryModel;
+    InventorySource = InventorySourceModel;
+    strings = ModelsStrings;
 
     return CredentialModel;
 }

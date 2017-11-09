@@ -1,11 +1,11 @@
-let BaseModel;
-let InventorySourceModel;
-let ModelsStrings;
+let Base;
+let InventorySource;
+let strings;
 
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new InventorySourceModel(),
+            model: new InventorySource(),
             params: {
                 source_script: id
             }
@@ -13,24 +13,24 @@ function setDependentResources (id) {
     ];
 }
 
-function InventoryScriptModel (method, resource, graft) {
-    BaseModel.call(this, 'inventory_scripts');
+function InventoryScriptModel (method, resource, config) {
+    Base.call(this, 'inventory_scripts');
 
     this.Constructor = InventoryScriptModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.INVENTORY_SCRIPT');
+    this.label = strings.get('labels.INVENTORY_SCRIPT');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function InventoryScriptModelLoader (
-    _BaseModel_,
-    _InventorySourceModel_,
-    _ModelsStrings_
+    BaseModel,
+    InventorySourceModel,
+    ModelsStrings
 ) {
-    BaseModel = _BaseModel_;
-    InventorySourceModel = _InventorySourceModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    InventorySource = InventorySourceModel;
+    strings = ModelsStrings;
 
     return InventoryScriptModel;
 }

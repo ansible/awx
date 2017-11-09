@@ -1,5 +1,5 @@
 let $log;
-let BaseModel;
+let Base;
 
 function getTruncatedVersion () {
     let version;
@@ -17,18 +17,18 @@ function isOpen () {
     return this.get('license_info.license_type') === 'open';
 }
 
-function ConfigModel (method, resource, graft) {
-    BaseModel.call(this, 'config', { cache: true });
+function ConfigModel (method, resource, config) {
+    Base.call(this, 'config', { cache: true });
 
     this.Constructor = ConfigModel;
     this.getTruncatedVersion = getTruncatedVersion;
     this.isOpen = isOpen;
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
-function ConfigModelLoader (_BaseModel_, _$log_) {
-    BaseModel = _BaseModel_;
+function ConfigModelLoader (BaseModel, _$log_) {
+    Base = BaseModel;
     $log = _$log_;
 
     return ConfigModel;

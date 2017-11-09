@@ -1,21 +1,21 @@
-let BaseModel;
-let ModelsStrings;
+let Base;
+let strings;
 
-function OrganizationModel (method, resource, graft) {
-    BaseModel.call(this, 'organizations');
+function OrganizationModel (method, resource, config) {
+    Base.call(this, 'organizations');
 
     this.Constructor = OrganizationModel;
-    this.label = ModelsStrings.get('labels.ORGANIZATION');
+    this.label = strings.get('labels.ORGANIZATION');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function OrganizationModelLoader (
-    _BaseModel_,
-    _ModelsStrings_
+    BaseModel,
+    ModelsStrings
 ) {
-    BaseModel = _BaseModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    strings = ModelsStrings;
 
     return OrganizationModel;
 }

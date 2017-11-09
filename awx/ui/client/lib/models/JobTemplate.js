@@ -1,11 +1,11 @@
-let BaseModel;
-let WorkflowJobTemplateNodeModel;
-let ModelsStrings;
+let Base;
+let WorkflowJobTemplateNode;
+let strings;
 
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new WorkflowJobTemplateNodeModel(),
+            model: new WorkflowJobTemplateNode(),
             params: {
                 unified_job_template: id
             }
@@ -13,24 +13,24 @@ function setDependentResources (id) {
     ];
 }
 
-function JobTemplateModel (method, resource, graft) {
-    BaseModel.call(this, 'job_templates');
+function JobTemplateModel (method, resource, config) {
+    Base.call(this, 'job_templates');
 
     this.Constructor = JobTemplateModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.JOB_TEMPLATE');
+    this.label = strings.get('labels.JOB_TEMPLATE');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function JobTemplateModelLoader (
-    _BaseModel_,
-    _WorkflowJobTemplateNodeModel_,
-    _ModelsStrings_
+    BaseModel,
+    WorkflowJobTemplateNodeModel,
+    ModelsStrings
 ) {
-    BaseModel = _BaseModel_;
-    WorkflowJobTemplateNodeModel = _WorkflowJobTemplateNodeModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    WorkflowJobTemplateNode = WorkflowJobTemplateNodeModel;
+    strings = ModelsStrings;
 
     return JobTemplateModel;
 }

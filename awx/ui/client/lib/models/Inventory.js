@@ -1,11 +1,11 @@
-let BaseModel;
-let JobTemplateModel;
-let ModelsStrings;
+let Base;
+let JobTemplate;
+let strings;
 
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new JobTemplateModel(),
+            model: new JobTemplate(),
             params: {
                 inventory: id
             }
@@ -13,24 +13,24 @@ function setDependentResources (id) {
     ];
 }
 
-function InventoryModel (method, resource, graft) {
-    BaseModel.call(this, 'inventories');
+function InventoryModel (method, resource, config) {
+    Base.call(this, 'inventories');
 
     this.Constructor = InventoryModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.INVENTORY');
+    this.label = strings.get('labels.INVENTORY');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function InventoryModelLoader (
-    _BaseModel_,
-    _JobTemplateModel_,
-    _ModelsStrings_
+    BaseModel,
+    JobTemplateModel,
+    ModelsStrings
 ) {
-    BaseModel = _BaseModel_;
-    JobTemplateModel = _JobTemplateModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    JobTemplate = JobTemplateModel;
+    strings = ModelsStrings;
 
     return InventoryModel;
 }
