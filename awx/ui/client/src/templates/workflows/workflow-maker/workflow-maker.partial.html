@@ -1,8 +1,12 @@
 <div id="workflow-modal-dialog" style="display: none;">
     <div class="WorkflowMaker-deleteOverlay" ng-show="deleteOverlayVisible">
+        <div class="modal-dialog">
             <div class="Modal-content modal-content">
                 <div class="Modal-header">
-                    <div class="Modal-title">REMOVE</div>
+                    <div class="Modal-title">
+                        <span>DELETE</span>
+                        <span class="Modal-titleResourceName" ng-bind="nodeToBeDeleted.unifiedJobTemplate.name"></span>
+                    </div>
                     <div class="Modal-exitHolder">
                         <button class="close Modal-exit" ng-click="cancelDeleteNode()">
                             <i class="fa fa-times-circle"></i>
@@ -10,14 +14,14 @@
                     </div>
                 </div>
                 <div class="Modal-body ng-binding">
-                    <div class="Prompt-bodyQuery">Are you sure you want to remove the template below?</div>
-                    <div class="Prompt-bodyTarget">{{nodeToBeDeleted.unifiedJobTemplate.name}}</div>
+                    <div class="Prompt-bodyQuery">Are you sure you want to delete this workflow node?</div>
                 </div>
                 <div class="Modal-footer">
                     <button ng-click="cancelDeleteNode()" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
                     <button ng-click="confirmDeleteNode()" class="btn Modal-footerButton ng-binding Modal-errorButton">DELETE</a>
                 </div>
             </div>
+        </div>
     </div>
     <div class="WorkflowMaker-header">
         <div class="WorkflowMaker-title">

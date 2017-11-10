@@ -23,7 +23,7 @@ module.exports = {
 
         client.inject(
             [store, 'OrganizationModel'],
-            (_store_, Model) => new Model().http.post(_store_.organization),
+            (_store_, Model) => new Model().http.post({ data: _store_.organization }),
             ({ data }) => { store.organization = data; }
         );
 

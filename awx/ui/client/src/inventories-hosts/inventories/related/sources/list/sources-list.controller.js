@@ -9,12 +9,15 @@
     'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
     'GetSyncStatusMsg', 'Dataset', 'Find', 'QuerySet',
     'inventoryData', '$filter', 'Prompt', 'Wait', 'SourcesService', 'inventorySourceOptions',
-    'canAdd', 'hasSyncableSources', 'i18n',
+    'canAdd', 'hasSyncableSources', 'i18n', 'InventoryHostsStrings', 'InventorySourceModel',
     function($scope, $rootScope, $state, $stateParams, SourcesListDefinition,
         InventoryUpdate, CancelSourceUpdate,
         ViewUpdateStatus, rbacUiControlService, GetBasePath, GetSyncStatusMsg,
         Dataset, Find, qs, inventoryData, $filter, Prompt,
-        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources, i18n){
+        Wait, SourcesService, inventorySourceOptions, canAdd, hasSyncableSources, i18n,
+        InventoryHostsStrings, InventorySource){
+
+        let inventorySource = new InventorySource();
 
         let list = SourcesListDefinition;
         var inventory_source;
@@ -117,7 +120,6 @@
             $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
-            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Are you sure you want to permanently delete the inventory source below from the inventory?') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
             var action = function(){
                 delete $rootScope.promptActionBtnClass;
                 Wait('start');
@@ -137,14 +139,35 @@
                     Wait('stop');
                 });
             };
-            // Prompt depends on having $rootScope.promptActionBtnClass available...
-            Prompt({
-                hdr: i18n._('Delete Source'),
-                body: body,
-                action: action,
-                actionText: i18n._('DELETE'),
-            });
-            $rootScope.promptActionBtnClass = 'Modal-errorButton';
+
+            inventorySource.getDependentResourceCounts(inventory_source.id)
+                .then((counts) => {
+                    const invalidateRelatedLines = [];
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteSource.CONFIRM')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                        }
+                    });
+
+                    if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteSource.CONFIRM')}  ${InventoryHostsStrings.get('deleteSource.INVALIDATE')}</div>`;
+                        invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                            deleteModalBody += invalidateRelatedLine;
+                        });
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete Source'),
+                        resourceName: $filter('sanitize')(inventory_source.name),
+                        body: deleteModalBody,
+                        action: action,
+                        actionText: 'DELETE'
+                    });
+                    $rootScope.promptActionBtnClass = 'Modal-errorButton';
+                });
+
         };
 
         $scope.updateSource = function(inventory_source) {

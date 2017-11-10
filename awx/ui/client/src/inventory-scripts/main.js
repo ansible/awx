@@ -10,6 +10,7 @@ import inventoryScriptsEdit from './edit/main';
 import list from './inventory-scripts.list';
 import form from './inventory-scripts.form';
 import { N_ } from '../i18n';
+import InventoryScriptsStrings from './inventory-scripts.strings';
 
 export default
 angular.module('inventoryScripts', [
@@ -19,6 +20,7 @@ angular.module('inventoryScripts', [
     ])
     .factory('InventoryScriptsList', list)
     .factory('InventoryScriptsForm', form)
+    .service('InventoryScriptsStrings', InventoryScriptsStrings)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

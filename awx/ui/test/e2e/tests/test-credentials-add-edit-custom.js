@@ -92,7 +92,7 @@ module.exports = {
 
         client.inject(
             [store.credentialType, 'CredentialTypeModel'],
-            (data, Model) => new Model().http.post(data),
+            (data, Model) => new Model().http.post({ data }),
             ({ data }) => { store.credentialType.response = data; }
         );
 

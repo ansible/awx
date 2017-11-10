@@ -33,7 +33,10 @@
                 <div class="modal-dialog">
                     <div class="Modal-content modal-content">
                         <div class="Modal-header">
-                            <div class="Modal-title" ng-bind="promptHeader" id="prompt-header"></div>
+                            <div class="Modal-title" id="prompt-header">
+                                <span ng-bind="promptHeader"></span>
+                                <span class="Modal-titleResourceName" ng-bind="promptResourceName"></span>
+                            </div>
                             <div class="Modal-exitHolder">
                                 <button class="close Modal-exit" data-target="#prompt-modal" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
                             </div>
@@ -42,7 +45,7 @@
                         </div>
                         <div class="Modal-footer">
                             <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton" translate>CANCEL</a>
-                            <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Modal-footerButton" ng-bind="promptActionText"></a>
+                            <a href="" ng-hide="hideActionButton" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Modal-footerButton" ng-bind="promptActionText"></a>
                         </div>
                     </div>
                     <!-- modal-content -->

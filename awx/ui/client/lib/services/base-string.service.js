@@ -4,7 +4,6 @@ let i18n;
 
 function BaseStringService (namespace) {
     const ERROR_NO_NAMESPACE = 'BaseString cannot be extended without providing a namespace';
-    const ERROR_NO_STRING = 'No string exists with this name';
 
     if (!namespace) {
         throw new Error(ERROR_NO_NAMESPACE);
@@ -67,8 +66,6 @@ function BaseStringService (namespace) {
      * the more globally relevant strings defined here. Strings with with dots as delimeters are
      * supported to give flexibility to extending classes to nest strings as necessary.
      *
-     * If no match is found, an error is thrown to alert the developer immediately instead of
-     * failing silently.
      *
      * The `t.s` and `t.p` calls should only be used where strings are defined in
      * <name>.strings.js` files. To use translated strings elsewhere, access them through this
@@ -88,13 +85,13 @@ function BaseStringService (namespace) {
             } else {
                 value = value[key];
             }
-
-            if (!value) {
-                throw new Error(`${ERROR_NO_STRING}: ${name}`);
-            }
         });
 
-        return typeof value === 'string' ? value : value(...args);
+        if (!value || typeof value === 'string') {
+            return value;
+        }
+
+        return value(...args);
     };
 }
 

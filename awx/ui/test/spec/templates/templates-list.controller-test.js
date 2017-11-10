@@ -14,8 +14,10 @@ describe('Controller: TemplatesList', () => {
         canAddDeferred,
         q,
         TemplatesService,
+        JobTemplateModel,
         deleteWorkflowJobTemplateDeferred,
         deleteJobTemplateDeferred,
+        jobTemplateGetDepDeferred,
         Dataset;
 
     beforeEach(angular.mock.module('awApp'));
@@ -78,11 +80,17 @@ describe('Controller: TemplatesList', () => {
         canAddDeferred = q.defer();
         deleteWorkflowJobTemplateDeferred = q.defer();
         deleteJobTemplateDeferred = q.defer();
+        jobTemplateGetDepDeferred = q.defer();
 
         rbacUiControlService.canAdd = jasmine.createSpy('canAdd').and.returnValue(canAddDeferred.promise);
 
         TemplatesService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
         TemplatesService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
+        JobTemplateModel = function () {
+            this.getDependentResourceCounts = function() {
+                return jobTemplateGetDepDeferred.promise;
+            };
+        };
 
         TemplatesListController = $controller('TemplatesListController', {
             $scope: scope,
@@ -94,8 +102,11 @@ describe('Controller: TemplatesList', () => {
             InitiatePlaybookRun: InitiatePlaybookRun,
             rbacUiControlService: rbacUiControlService,
             TemplatesService: TemplatesService,
+            JobTemplateModel: JobTemplateModel,
             Dataset: Dataset
         });
+
+        rootScope.$apply();
     }));
 
     describe('scope.editJobTemplate()', () => {
@@ -151,10 +162,13 @@ describe('Controller: TemplatesList', () => {
 
             var testTemplate = {
                 id: 1,
-                name: "Test Template"
+                name: "Test Template",
+                type: "Job Template"
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(Prompt).toHaveBeenCalled();
         });
 
@@ -169,6 +183,8 @@ describe('Controller: TemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(TemplatesService.deleteWorkflowJobTemplate).toHaveBeenCalled();
         });
 
@@ -183,6 +199,8 @@ describe('Controller: TemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(TemplatesService.deleteJobTemplate).toHaveBeenCalled();
         });
 

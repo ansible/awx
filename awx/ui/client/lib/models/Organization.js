@@ -1,19 +1,21 @@
-let BaseModel;
+let Base;
 
-function OrganizationModel (method, resource, graft) {
-    BaseModel.call(this, 'organizations');
+function OrganizationModel (method, resource, config) {
+    Base.call(this, 'organizations');
 
     this.Constructor = OrganizationModel;
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
-function OrganizationModelLoader (_BaseModel_) {
-    BaseModel = _BaseModel_;
+function OrganizationModelLoader (BaseModel) {
+    Base = BaseModel;
 
     return OrganizationModel;
 }
 
-OrganizationModelLoader.$inject = ['BaseModel'];
+OrganizationModelLoader.$inject = [
+    'BaseModel'
+];
 
 export default OrganizationModelLoader;

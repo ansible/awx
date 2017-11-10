@@ -130,8 +130,8 @@ describe('Components | Layout', () => {
                 expect(_ComponentsStrings_.get).toHaveBeenCalled();
             }));
 
-            it('ComponentsStrings get() method should throw an error if string is not a property name of the layout class', () => {
-                expect(controller.getString.bind(null, 'SUBMISSION_ERROR_TITLE')).toThrow();
+            it('ComponentsStrings get() method should return undefined if string is not a property name of the layout class', () => {
+                expect(controller.getString('SUBMISSION_ERROR_TITLE')).toBe(undefined);
             });
 
             it('should return layout string', () => {
@@ -142,16 +142,6 @@ describe('Components | Layout', () => {
                 };
 
                 _.forEach(layoutStrings, (value, key) => {
-                    expect(controller.getString(key)).toBe(value);
-                });
-            });
-
-            it('should return default string', () => {
-                const defaultStrings = {
-                    BRAND_NAME: 'AWX'
-                };
-
-                _.forEach(defaultStrings, (value, key) => {
                     expect(controller.getString(key)).toBe(value);
                 });
             });

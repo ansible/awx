@@ -14,6 +14,7 @@ import GetProjectPath from './factories/get-project-path.factory';
 import GetProjectIcon from './factories/get-project-icon.factory';
 import GetProjectToolTip from './factories/get-project-tool-tip.factory';
 import ProjectsTemplatesRoute from './projects-templates.route';
+import ProjectsStrings from './projects.strings';
 
 export default
 angular.module('Projects', [])
@@ -25,6 +26,7 @@ angular.module('Projects', [])
     .factory('GetProjectToolTip', GetProjectToolTip)
     .factory('ProjectList', ProjectList)
     .factory('ProjectsForm', ProjectsForm)
+    .service('ProjectsStrings', ProjectsStrings)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider,$stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

@@ -13,7 +13,9 @@
 function InventoriesList($scope,
     $filter, Rest, InventoryList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state,
-    Dataset, canAdd, i18n) {
+    Dataset, canAdd, i18n, Inventory, InventoryHostsStrings) {
+
+    let inventory = new Inventory();
 
     let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
@@ -85,8 +87,7 @@ function InventoriesList($scope,
             var url = defaultUrl + id + '/';
             Wait('start');
             $('#prompt-modal').modal('hide');
-            Rest.setUrl(url);
-            Rest.destroy()
+            inventory.request('delete', id)
                 .then(() => {
                     Wait('stop');
                 })
@@ -97,13 +98,34 @@ function InventoriesList($scope,
                 });
         };
 
-        Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the inventory below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>' +
-                    '<div class="Prompt-bodyNote"><span class="Prompt-bodyNote--emphasis">Note:</span> ' + i18n._('The inventory will be in a pending status until the final delete is processed.') + '</div>',
-            action: action,
-            actionText: i18n._('DELETE')
-        });
+        inventory.getDependentResourceCounts(id)
+            .then((counts) => {
+                const invalidateRelatedLines = [];
+                let deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}</div>`;
+
+                counts.forEach(countObj => {
+                    if(countObj.count && countObj.count > 0) {
+                        invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                    }
+                });
+
+                if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                    deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}  ${InventoryHostsStrings.get('deleteInventory.INVALIDATE')}</div>`;
+                    invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                        deleteModalBody += invalidateRelatedLine;
+                    });
+                }
+
+                deleteModalBody += '<div class="Prompt-bodyNote"><span class="Prompt-bodyNote--emphasis">Note:</span> ' + i18n._('The inventory will be in a pending status until the final delete is processed.') + '</div>';
+
+                Prompt({
+                    hdr: i18n._('Delete'),
+                    resourceName: $filter('sanitize')(name),
+                    body: deleteModalBody,
+                    action: action,
+                    actionText: 'DELETE'
+                });
+            });
     };
 
     $scope.$on(`ws-inventories`, function(e, data){
@@ -131,5 +153,6 @@ function InventoriesList($scope,
 export default ['$scope',
     '$filter', 'Rest', 'InventoryList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'Dataset', 'canAdd', 'i18n', InventoriesList
+    '$state', 'Dataset', 'canAdd', 'i18n', 'InventoryModel',
+    'InventoryHostsStrings', InventoriesList
 ];

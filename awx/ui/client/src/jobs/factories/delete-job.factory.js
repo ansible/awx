@@ -106,10 +106,11 @@
                 scope.removeCancelJob();
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
-                var cancelBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Submit the request to cancel?") + "</div>";
-                var deleteBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to delete the job below?") + "</div><div class=\"Prompt-bodyTarget\" translate>#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
+                var cancelBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to submit the request to cancel this job?") + "</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to delete this job?") + "</div>";
                 Prompt({
                     hdr: hdr,
+                    resourceName: `#${job.id} ` + $filter('sanitize')(job.name),
                     body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
                     action: action,
                     actionText: (action_label === 'cancel' || job.status === 'new') ? i18n._("OK") : i18n._("DELETE")

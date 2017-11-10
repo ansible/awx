@@ -6,9 +6,9 @@
 
 export default ['$scope', 'Rest', 'TeamList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
-    'rbacUiControlService', 'Dataset',
+    'rbacUiControlService', 'Dataset', 'i18n',
     function($scope, Rest, TeamList, Prompt, ProcessErrors,
-    GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
+    GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset, i18n) {
 
         var list = TeamList,
             defaultUrl = GetBasePath('teams');
@@ -77,7 +77,8 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
 
             Prompt({
                 hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the team below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                resourceName: $filter('sanitize')(name),
+                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete this team?') + '</div>',
                 action: action,
                 actionText: 'DELETE'
             });

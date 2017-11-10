@@ -88,7 +88,7 @@ function EditCredentialsController (models, $state, $scope, strings) {
         data.user = me.get('id');
         credential.unset('inputs');
 
-        return credential.request('put', data);
+        return credential.request('put', { data });
     };
 
     vm.form.onSaveSuccess = () => {

@@ -7,14 +7,16 @@
 export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
     'ProjectList', 'Prompt', 'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
     'Wait', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter',
-    '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet',
+    '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet', 'ProjectModel',
+    'ProjectsStrings',
     function($scope, $rootScope, $log, Rest, Alert, ProjectList,
     Prompt, ProcessErrors, GetBasePath, ProjectUpdate, Wait, Empty, Find,
     GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService,
-    Dataset, i18n, qs) {
+    Dataset, i18n, qs, Project, ProjectsStrings) {
 
-        var list = ProjectList,
-            defaultUrl = GetBasePath('projects');
+        let project = new Project();
+
+        var list = ProjectList;
 
         init();
 
@@ -176,9 +178,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             var action = function() {
                 $('#prompt-modal').modal('hide');
                 Wait('start');
-                var url = defaultUrl + id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
+                project.request('delete', id)
                     .then(() => {
 
                         let reloadListStateParams = null;
@@ -196,19 +196,39 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     })
                     .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
-                            msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
+                            msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), `${project.path}${id}/`) + status });
                     })
                     .finally(function() {
                         Wait('stop');
                     });
             };
 
-            Prompt({
-                hdr: i18n._('Delete'),
-                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the project below?') + '</div>' + '<div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
-                action: action,
-                actionText: 'DELETE'
-            });
+            project.getDependentResourceCounts(id)
+                .then((counts) => {
+                    const invalidateRelatedLines = [];
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                        }
+                    });
+
+                    if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}  ${ProjectsStrings.get('deleteProject.INVALIDATE')}</div>`;
+                        invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                            deleteModalBody += invalidateRelatedLine;
+                        });
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete'),
+                        resourceName: $filter('sanitize')(name),
+                        body: deleteModalBody,
+                        action: action,
+                        actionText: 'DELETE'
+                    });
+                });
         };
 
         if ($scope.removeCancelUpdate) {

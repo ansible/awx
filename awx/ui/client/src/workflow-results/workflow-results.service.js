@@ -35,11 +35,9 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
         deleteJob: function(workflow) {
             Prompt({
                 hdr: 'Delete Job',
+                resourceName: `#${workflow.id} ` + $filter('sanitize')(workflow.name),
                 body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to delete the workflow below?
-                    </div>
-                    <div class='Prompt-bodyTarget'>
-                        #${workflow.id} ${$filter('sanitize')(workflow.name)}
+                        Are you sure you want to delete this workflow?
                     </div>`,
                 action: function() {
                     Wait('start');
@@ -84,11 +82,9 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
 
             Prompt({
                 hdr: 'Cancel Workflow',
+                resourceName: `#${workflow.id} ${$filter('sanitize')(workflow.name)}`,
                 body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to cancel the workflow below?
-                    </div>
-                    <div class='Prompt-bodyTarget'>
-                        #${workflow.id} ${$filter('sanitize')(workflow.name)}
+                        Are you sure you want to cancel this workflow job?
                     </div>`,
                 action: function() {
                     Wait('start');

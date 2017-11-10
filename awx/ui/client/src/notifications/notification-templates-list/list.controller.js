@@ -193,10 +193,11 @@
                          });
                      });
              };
-             var bodyHtml = '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the notification template below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
+
              Prompt({
                  hdr: i18n._('Delete'),
-                 body: bodyHtml,
+                 resourceName: $filter('sanitize')(name),
+                 body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete this notification template?') + '</div>',
                  action: action,
                  actionText: i18n._('DELETE')
              });

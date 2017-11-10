@@ -91,11 +91,9 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
         deleteJob: function(job) {
             Prompt({
                 hdr: i18n._("Delete Job"),
+                resourceName: `#${job.id} ` + $filter('sanitize')(job.name),
                 body: `<div class='Prompt-bodyQuery'>
-                        ${i18n._("Are you sure you want to delete the job below?")}
-                    </div>
-                    <div class='Prompt-bodyTarget'>
-                        #${job.id} ${$filter('sanitize')(job.name)}
+                        ${i18n._("Are you sure you want to delete this job?")}
                     </div>`,
                 action: function() {
                     Wait('start');
@@ -140,11 +138,9 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
 
             Prompt({
                 hdr: i18n._('Cancel Job'),
+                resourceName: `#${job.id} ` + $filter('sanitize')(job.name),
                 body: `<div class='Prompt-bodyQuery' translate>
-                        ${i18n._("Are you sure you want to cancel the job below?")}
-                    </div>
-                    <div class='Prompt-bodyTarget'>
-                        #${job.id} ${$filter('sanitize')(job.name)}
+                        ${i18n._("Are you sure you want to cancel this job?")}
                     </div>`,
                 action: function() {
                     Wait('start');
