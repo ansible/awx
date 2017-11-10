@@ -395,7 +395,7 @@ function getDependentResourceCounts (id) {
     const promises = [];
 
     this.dependentResources.forEach(resource => {
-        promises.push(resource.model.request('get', resource.params)
+        promises.push(resource.model.request('get', { params: resource.params })
             .then(res => ({
                 label: resource.model.label,
                 count: res.data.count
