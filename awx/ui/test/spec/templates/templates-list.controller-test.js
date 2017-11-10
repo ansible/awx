@@ -33,14 +33,6 @@ describe('Controller: TemplatesList', () => {
             id: 1
         };
 
-        // JobTemplateModel = {
-        //     prototype: {
-        //         getDependentResourceCounts: function(){
-        //             return angular.noop;
-        //         }
-        //     }
-        // };
-
         rbacUiControlService = {
             canAdd: function(){
                 return angular.noop;
@@ -99,15 +91,6 @@ describe('Controller: TemplatesList', () => {
                 return jobTemplateGetDepDeferred.promise;
             };
         };
-
-        // JobTemplateModel.prototype.getDependentResourceCounts = jasmine.createSpy()
-        // spyOn(JobTemplateModel, 'getDependentResourceCounts').andCallThrough();
-
-        // JobTemplateModel.prototype.constructor = jasmine.createSpy('constructor').andPassThrough;
-        // JobTemplateModel.prototype.getDependentResourceCounts = jasmine.createSpy('getDependentResourceCounts').and.returnValue(jobTemplateGetDepDeferred.promise);
-        // spyOn(JobTemplate.prototype, "getDependentResourceCounts").and.returnValue(jobTemplateGetDepDeferred.promise);
-        // var mockGetDependentResourceCounts = jasmine.createStub(JobTemplate, ["getDependentResourceCounts"]);
-        // mockGetDependentResourceCounts.method.and.returnValue(jobTemplateGetDepDeferred.promise);
 
         TemplatesListController = $controller('TemplatesListController', {
             $scope: scope,
@@ -179,7 +162,8 @@ describe('Controller: TemplatesList', () => {
 
             var testTemplate = {
                 id: 1,
-                name: "Test Template"
+                name: "Test Template",
+                type: "Job Template"
             };
 
             scope.deleteJobTemplate(testTemplate);
