@@ -4,6 +4,8 @@ module.exports = {
         app: "./src/main.js",
         vendor: ["angular",
                  "angular-ui-router",
+                 "jquery",
+                 "jquery-ui",
                  "hamsterjs",
                  "angular-mousewheel",
                  "reconnectingwebsocket",
