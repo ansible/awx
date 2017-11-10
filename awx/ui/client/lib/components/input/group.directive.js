@@ -99,6 +99,8 @@ function AtInputGroupController ($scope, $compile) {
             config._component = 'at-input-number';
         } else if (input.type === 'boolean') {
             config._component = 'at-input-checkbox';
+        } else if (input.type === 'file') {
+            config._component = 'at-input-file';
         } else if (input.choices) {
             config._component = 'at-input-select';
             config._format = 'array';
