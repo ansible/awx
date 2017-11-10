@@ -42,7 +42,7 @@ function AddCredentialsController (models, $state, strings) {
     vm.form.save = data => {
         data.user = me.get('id');
 
-        return credential.request('post', data);
+        return credential.request('post', { data });
     };
 
     vm.form.onSaveSuccess = res => {

@@ -45,6 +45,7 @@ module.exports = {
             ignoreTemplateLiterals: true,
         }],
         'no-continue': 'off',
+        'no-debugger': 'off',
         'no-mixed-operators': 'off',
         'no-param-reassign': 'off',
         'no-plusplus': 'off',

@@ -1,6 +1,5 @@
-let BaseModel;
-let CredentialModel;
-let ModelsStrings;
+let Base;
+let Credential;
 
 function categorizeByKind () {
     const group = {};
@@ -35,7 +34,7 @@ function mergeInputProperties () {
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new CredentialModel(),
+            model: new Credential(),
             params: {
                 credential_type: id
             }
@@ -43,34 +42,27 @@ function setDependentResources (id) {
     ];
 }
 
-function CredentialTypeModel (method, resource, graft) {
-    BaseModel.call(this, 'credential_types');
+function CredentialTypeModel (method, resource, config) {
+    Base.call(this, 'credential_types');
 
     this.Constructor = CredentialTypeModel;
     this.categorizeByKind = categorizeByKind.bind(this);
     this.mergeInputProperties = mergeInputProperties.bind(this);
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.CREDENTIAL_TYPE');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
-function CredentialTypeModelLoader (
-    _BaseModel_,
-    _CredentialModel_,
-    _ModelsStrings_
-) {
-    BaseModel = _BaseModel_;
-    CredentialModel = _CredentialModel_;
-    ModelsStrings = _ModelsStrings_;
+function CredentialTypeModelLoader (BaseModel, CredentialModel) {
+    Base = BaseModel;
+    Credential = CredentialModel;
 
     return CredentialTypeModel;
 }
 
 CredentialTypeModelLoader.$inject = [
     'BaseModel',
-    'CredentialModel',
-    'ModelsStrings'
+    'CredentialModel'
 ];
 
 export default CredentialTypeModelLoader;

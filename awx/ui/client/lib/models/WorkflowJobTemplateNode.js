@@ -1,28 +1,21 @@
-let BaseModel;
-let ModelsStrings;
+let Base;
 
-function WorkflowJobTemplateNodeModel (method, resource, graft) {
-    BaseModel.call(this, 'workflow_job_template_nodes');
+function WorkflowJobTemplateNodeModel (method, resource, config) {
+    Base.call(this, 'workflow_job_template_nodes');
 
     this.Constructor = WorkflowJobTemplateNodeModel;
-    this.label = ModelsStrings.get('labels.WORKFLOW_JOB_TEMPLATE_NODE');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
-function WorkflowJobTemplateNodeModelLoader (
-    _BaseModel_,
-    _ModelsStrings_
-) {
-    BaseModel = _BaseModel_;
-    ModelsStrings = _ModelsStrings_;
+function WorkflowJobTemplateNodeModelLoader (BaseModel) {
+    Base = BaseModel;
 
     return WorkflowJobTemplateNodeModel;
 }
 
 WorkflowJobTemplateNodeModelLoader.$inject = [
-    'BaseModel',
-    'ModelsStrings'
+    'BaseModel'
 ];
 
 export default WorkflowJobTemplateNodeModelLoader;

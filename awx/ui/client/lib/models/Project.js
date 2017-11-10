@@ -1,25 +1,24 @@
-let BaseModel;
-let JobTemplateModel;
-let WorkflowJobTemplateNodeModel;
-let InventorySourceModel;
-let ModelsStrings;
+let Base;
+let JobTemplate;
+let WorkflowJobTemplateNode;
+let InventorySource;
 
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new JobTemplateModel(),
+            model: new JobTemplate(),
             params: {
                 project: id
             }
         },
         {
-            model: new WorkflowJobTemplateNodeModel(),
+            model: new WorkflowJobTemplateNode(),
             params: {
                 unified_job_template: id
             }
         },
         {
-            model: new InventorySourceModel(),
+            model: new InventorySource(),
             params: {
                 source_project: id
             }
@@ -27,28 +26,25 @@ function setDependentResources (id) {
     ];
 }
 
-function ProjectModel (method, resource, graft) {
-    BaseModel.call(this, 'projects');
+function ProjectModel (method, resource, config) {
+    Base.call(this, 'projects');
 
     this.Constructor = ProjectModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.PROJECT');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function ProjectModelLoader (
-    _BaseModel_,
-    _JobTemplateModel_,
-    _WorkflowJobTemplateNodeModel_,
-    _InventorySourceModel_,
-    _ModelsStrings_
+    BaseModel,
+    JobTemplateModel,
+    WorkflowJobTemplateNodeModel,
+    InventorySourceModel,
 ) {
-    BaseModel = _BaseModel_;
-    JobTemplateModel = _JobTemplateModel_;
-    WorkflowJobTemplateNodeModel = _WorkflowJobTemplateNodeModel_;
-    InventorySourceModel = _InventorySourceModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    JobTemplate = JobTemplateModel;
+    WorkflowJobTemplateNode = WorkflowJobTemplateNodeModel;
+    InventorySource = InventorySourceModel;
 
     return ProjectModel;
 }
@@ -57,8 +53,7 @@ ProjectModelLoader.$inject = [
     'BaseModel',
     'JobTemplateModel',
     'WorkflowJobTemplateNodeModel',
-    'InventorySourceModel',
-    'ModelsStrings'
+    'InventorySourceModel'
 ];
 
 export default ProjectModelLoader;

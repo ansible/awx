@@ -1,11 +1,10 @@
-let BaseModel;
-let WorkflowJobTemplateNodeModel;
-let ModelsStrings;
+let Base;
+let WorkflowJobTemplateNode;
 
 function setDependentResources (id) {
     this.dependentResources = [
         {
-            model: new WorkflowJobTemplateNodeModel(),
+            model: new WorkflowJobTemplateNode(),
             params: {
                 unified_job_template: id
             }
@@ -13,32 +12,28 @@ function setDependentResources (id) {
     ];
 }
 
-function InventorySourceModel (method, resource, graft) {
-    BaseModel.call(this, 'inventory_sources');
+function InventorySourceModel (method, resource, config) {
+    Base.call(this, 'inventory_sources');
 
     this.Constructor = InventorySourceModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = ModelsStrings.get('labels.INVENTORY_SOURCE');
 
-    return this.create(method, resource, graft);
+    return this.create(method, resource, config);
 }
 
 function InventorySourceModelLoader (
-    _BaseModel_,
-    _WorkflowJobTemplateNodeModel_,
-    _ModelsStrings_
+    BaseModel,
+    WorkflowJobTemplateNodeModel
 ) {
-    BaseModel = _BaseModel_;
-    WorkflowJobTemplateNodeModel = _WorkflowJobTemplateNodeModel_;
-    ModelsStrings = _ModelsStrings_;
+    Base = BaseModel;
+    WorkflowJobTemplateNode = WorkflowJobTemplateNodeModel;
 
     return InventorySourceModel;
 }
 
 InventorySourceModelLoader.$inject = [
     'BaseModel',
-    'WorkflowJobTemplateNodeModel',
-    'ModelsStrings'
+    'WorkflowJobTemplateNodeModel'
 ];
 
 export default InventorySourceModelLoader;
