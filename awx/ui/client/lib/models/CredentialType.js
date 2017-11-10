@@ -1,6 +1,5 @@
 let Base;
 let Credential;
-let strings;
 
 function categorizeByKind () {
     const group = {};
@@ -50,27 +49,20 @@ function CredentialTypeModel (method, resource, config) {
     this.categorizeByKind = categorizeByKind.bind(this);
     this.mergeInputProperties = mergeInputProperties.bind(this);
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = strings.get('labels.CREDENTIAL_TYPE');
 
     return this.create(method, resource, config);
 }
 
-function CredentialTypeModelLoader (
-    BaseModel,
-    CredentialModel,
-    ModelsStrings
-) {
+function CredentialTypeModelLoader (BaseModel, CredentialModel) {
     Base = BaseModel;
     Credential = CredentialModel;
-    strings = ModelsStrings;
 
     return CredentialTypeModel;
 }
 
 CredentialTypeModelLoader.$inject = [
     'BaseModel',
-    'CredentialModel',
-    'ModelsStrings'
+    'CredentialModel'
 ];
 
 export default CredentialTypeModelLoader;

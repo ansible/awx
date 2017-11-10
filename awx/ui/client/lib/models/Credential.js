@@ -5,7 +5,6 @@ let Project;
 let JobTemplate;
 let Inventory;
 let InventorySource;
-let strings;
 
 function createFormSchema (method, config) {
     if (!config) {
@@ -82,7 +81,6 @@ function CredentialModel (method, resource, config) {
     this.createFormSchema = createFormSchema.bind(this);
     this.assignInputGroupValues = assignInputGroupValues.bind(this);
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = strings.get('labels.CREDENTIAL');
 
     return this.create(method, resource, config);
 }
@@ -92,15 +90,13 @@ function CredentialModelLoader (
     ProjectModel,
     JobTemplateModel,
     InventoryModel,
-    InventorySourceModel,
-    ModelsStrings
+    InventorySourceModel
 ) {
     Base = BaseModel;
     Project = ProjectModel;
     JobTemplate = JobTemplateModel;
     Inventory = InventoryModel;
     InventorySource = InventorySourceModel;
-    strings = ModelsStrings;
 
     return CredentialModel;
 }
@@ -110,8 +106,7 @@ CredentialModelLoader.$inject = [
     'ProjectModel',
     'JobTemplateModel',
     'InventoryModel',
-    'InventorySourceModel',
-    'ModelsStrings'
+    'InventorySourceModel'
 ];
 
 export default CredentialModelLoader;

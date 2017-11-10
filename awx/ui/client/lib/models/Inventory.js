@@ -1,6 +1,5 @@
 let Base;
 let JobTemplate;
-let strings;
 
 function setDependentResources (id) {
     this.dependentResources = [
@@ -18,27 +17,20 @@ function InventoryModel (method, resource, config) {
 
     this.Constructor = InventoryModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = strings.get('labels.INVENTORY');
 
     return this.create(method, resource, config);
 }
 
-function InventoryModelLoader (
-    BaseModel,
-    JobTemplateModel,
-    ModelsStrings
-) {
+function InventoryModelLoader (BaseModel, JobTemplateModel) {
     Base = BaseModel;
     JobTemplate = JobTemplateModel;
-    strings = ModelsStrings;
 
     return InventoryModel;
 }
 
 InventoryModelLoader.$inject = [
     'BaseModel',
-    'JobTemplateModel',
-    'ModelsStrings'
+    'JobTemplateModel'
 ];
 
 export default InventoryModelLoader;

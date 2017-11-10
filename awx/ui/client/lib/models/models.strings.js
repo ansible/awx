@@ -4,16 +4,46 @@ function ModelsStrings (BaseString) {
     const { t } = this;
     const ns = this.models;
 
-    ns.labels = {
-        CREDENTIAL: t.s('Credentials'),
-        CREDENTIAL_TYPE: t.s('Credential Types'),
-        INVENTORY: t.s('Inventories'),
-        INVENTORY_SCRIPT: t.s('Inventory Scripts'),
-        INVENTORY_SOURCE: t.s('Inventory Sources'),
-        JOB_TEMPLATE: t.s('Job Templates'),
-        ORGANIZATION: t.s('Organizations'),
-        PROJECT: t.s('Projects'),
-        WORKFLOW_JOB_TEMPLATE_NODE: t.s('Workflow Job Template Nodes')
+    ns.credentials = {
+        LABEL: t.s('Credentials')
+    };
+
+    ns.credential_types = {
+        LABEL: t.s('Credential Types')
+    };
+
+    ns.inventories = {
+        LABEL: t.s('Inventories')
+    };
+
+    ns.inventory_scripts = {
+        LABEL: t.s('Inventory Scripts')
+
+    };
+
+    ns.inventory_sources = {
+        LABEL: t.s('Inventory Sources')
+
+    };
+
+    ns.job_templates = {
+        LABEL: t.s('Job Templates')
+
+    };
+
+    ns.organizations = {
+        LABEL: t.s('Organizations')
+
+    };
+
+    ns.projects = {
+        LABEL: t.s('Projects')
+
+    };
+
+    ns.workflow_job_template_nodes = {
+        LABEL: t.s('Workflow Job Template Nodes')
+
     };
 }
 

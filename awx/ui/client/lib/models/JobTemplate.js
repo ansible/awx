@@ -1,6 +1,5 @@
 let Base;
 let WorkflowJobTemplateNode;
-let strings;
 
 function setDependentResources (id) {
     this.dependentResources = [
@@ -18,27 +17,20 @@ function JobTemplateModel (method, resource, config) {
 
     this.Constructor = JobTemplateModel;
     this.setDependentResources = setDependentResources.bind(this);
-    this.label = strings.get('labels.JOB_TEMPLATE');
 
     return this.create(method, resource, config);
 }
 
-function JobTemplateModelLoader (
-    BaseModel,
-    WorkflowJobTemplateNodeModel,
-    ModelsStrings
-) {
+function JobTemplateModelLoader (BaseModel, WorkflowJobTemplateNodeModel) {
     Base = BaseModel;
     WorkflowJobTemplateNode = WorkflowJobTemplateNodeModel;
-    strings = ModelsStrings;
 
     return JobTemplateModel;
 }
 
 JobTemplateModelLoader.$inject = [
     'BaseModel',
-    'WorkflowJobTemplateNodeModel',
-    'ModelsStrings'
+    'WorkflowJobTemplateNodeModel'
 ];
 
 export default JobTemplateModelLoader;

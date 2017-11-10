@@ -1,6 +1,7 @@
 let $http;
 let $q;
 let cache;
+let strings;
 
 function request (method, resource, config) {
     let req = this.parseRequestConfig(method, resource, config);
@@ -473,14 +474,14 @@ function parseRequestConfig (method, resource, config) {
 /**
  * Base functionality for API interaction.
  *
- * @arg {string} path - The API resource for the model extending BaseModel to
+ * @arg {string} resource - The API resource for the model extending BaseModel to
  * use.
  * @arg {Object=} settings - Configuration applied to all instances of the
  * extending model.
  * @arg {boolean=} settings.cache - Cache the model data.
  *
  */
-function BaseModel (path, settings) {
+function BaseModel (resource, settings) {
     this.create = create;
     this.find = find;
     this.get = get;
@@ -511,18 +512,20 @@ function BaseModel (path, settings) {
     };
 
     this.model = {};
-    this.path = this.normalizePath(path);
+    this.path = this.normalizePath(resource);
+    this.label = strings.get(`${resource}.LABEL`);
     this.settings = settings || {};
 }
 
-function BaseModelLoader (_$http_, _$q_, _cache_) {
+function BaseModelLoader (_$http_, _$q_, _cache_, ModelsStrings) {
     $http = _$http_;
     $q = _$q_;
     cache = _cache_;
+    strings = ModelsStrings;
 
     return BaseModel;
 }
 
-BaseModelLoader.$inject = ['$http', '$q', 'CacheService'];
+BaseModelLoader.$inject = ['$http', '$q', 'CacheService', 'ModelsStrings'];
 
 export default BaseModelLoader;
