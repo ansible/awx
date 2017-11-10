@@ -447,13 +447,17 @@ function parseRequestConfig (method, resource, config) {
     if (Array.isArray(method)) {
         if (Array.isArray(resource)) {
             req.resource = resource;
+        } else if (resource === null) {
+            req.resource = undefined;
         } else if (typeof resource === 'object') {
             req = resource;
         }
 
         req.method = method;
     } else if (typeof method === 'string') {
-        if (typeof resource === 'object') {
+        if (resource === null) {
+            req.resource = undefined;
+        } else if (typeof resource === 'object') {
             req = resource;
         } else {
             req.resource = resource;
@@ -465,7 +469,7 @@ function parseRequestConfig (method, resource, config) {
     } else {
         req = config;
         req.method = method;
-        req.resource = resource;
+        req.resource = resource === null ? undefined : resource;
     }
 
     return req;
