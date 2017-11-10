@@ -54,7 +54,8 @@ export default
 
             Prompt({
                 hdr: hdr,
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the schedule below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(schedule.name) + '</div>',
+                resourceName: $filter('sanitize')(schedule.name),
+                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete this schedule?</div>',
                 action: action,
                 actionText: 'DELETE',
                 backdrop: false

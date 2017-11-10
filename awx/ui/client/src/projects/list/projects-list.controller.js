@@ -210,7 +210,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
 
                     counts.forEach(countObj => {
                         if(countObj.count && countObj.count > 0) {
-                            invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                            invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
                         }
                     });
 
@@ -222,7 +222,8 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     }
 
                     Prompt({
-                        hdr: i18n._('Delete') + ' ' + $filter('sanitize')(name),
+                        hdr: i18n._('Delete'),
+                        resourceName: $filter('sanitize')(name),
                         body: deleteModalBody,
                         action: action,
                         actionText: 'DELETE'

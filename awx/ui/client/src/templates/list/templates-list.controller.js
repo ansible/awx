@@ -150,31 +150,44 @@ export default ['$scope', '$rootScope',
                    }
                };
 
-               jobTemplate.getDependentResourceCounts(template.id)
-                   .then((counts) => {
-                       const invalidateRelatedLines = [];
-                       let deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
-
-                       counts.forEach(countObj => {
-                           if(countObj.count && countObj.count > 0) {
-                               invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
-                           }
-                       });
-
-                       if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                           deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}  ${TemplatesStrings.get('jobTemplates.deleteJobTemplate.INVALIDATE')}</div>`;
-                           invalidateRelatedLines.forEach(invalidateRelatedLine => {
-                               deleteModalBody += invalidateRelatedLine;
-                           });
-                       }
-
-                       Prompt({
-                           hdr: i18n._('Delete') + ' ' + $filter('sanitize')(template.name),
-                           body: deleteModalBody,
-                           action: action,
-                           actionText: 'DELETE'
-                       });
+               if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                   Prompt({
+                       hdr: i18n._('Delete'),
+                       resourceName: $filter('sanitize')(template.name),
+                       body: TemplatesStrings.get('workflowJobTemplates.deleteWorkflowJobTemplate.CONFIRM'),
+                       action: action,
+                       actionText: 'DELETE'
                    });
+               }
+               else if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+
+                   jobTemplate.getDependentResourceCounts(template.id)
+                       .then((counts) => {
+                           const invalidateRelatedLines = [];
+                           let deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
+
+                           counts.forEach(countObj => {
+                               if(countObj.count && countObj.count > 0) {
+                                   invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                               }
+                           });
+
+                           if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                               deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}  ${TemplatesStrings.get('jobTemplates.deleteJobTemplate.INVALIDATE')}</div>`;
+                               invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                                   deleteModalBody += invalidateRelatedLine;
+                               });
+                           }
+
+                           Prompt({
+                               hdr: i18n._('Delete'),
+                               resourceName: $filter('sanitize')(template.name),
+                               body: deleteModalBody,
+                               action: action,
+                               actionText: 'DELETE'
+                           });
+                       });
+                   }
             }
             else {
                 Alert('Error: Unable to delete template', 'Template parameter is missing');

@@ -14,8 +14,10 @@ describe('Controller: TemplatesList', () => {
         canAddDeferred,
         q,
         TemplatesService,
+        JobTemplateModel,
         deleteWorkflowJobTemplateDeferred,
         deleteJobTemplateDeferred,
+        jobTemplateGetDepDeferred,
         Dataset;
 
     beforeEach(angular.mock.module('awApp'));
@@ -30,6 +32,14 @@ describe('Controller: TemplatesList', () => {
         state.params = {
             id: 1
         };
+
+        // JobTemplateModel = {
+        //     prototype: {
+        //         getDependentResourceCounts: function(){
+        //             return angular.noop;
+        //         }
+        //     }
+        // };
 
         rbacUiControlService = {
             canAdd: function(){
@@ -78,11 +88,26 @@ describe('Controller: TemplatesList', () => {
         canAddDeferred = q.defer();
         deleteWorkflowJobTemplateDeferred = q.defer();
         deleteJobTemplateDeferred = q.defer();
+        jobTemplateGetDepDeferred = q.defer();
 
         rbacUiControlService.canAdd = jasmine.createSpy('canAdd').and.returnValue(canAddDeferred.promise);
 
         TemplatesService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
         TemplatesService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
+        JobTemplateModel = function () {
+            this.getDependentResourceCounts = function() {
+                return jobTemplateGetDepDeferred.promise;
+            };
+        };
+
+        // JobTemplateModel.prototype.getDependentResourceCounts = jasmine.createSpy()
+        // spyOn(JobTemplateModel, 'getDependentResourceCounts').andCallThrough();
+
+        // JobTemplateModel.prototype.constructor = jasmine.createSpy('constructor').andPassThrough;
+        // JobTemplateModel.prototype.getDependentResourceCounts = jasmine.createSpy('getDependentResourceCounts').and.returnValue(jobTemplateGetDepDeferred.promise);
+        // spyOn(JobTemplate.prototype, "getDependentResourceCounts").and.returnValue(jobTemplateGetDepDeferred.promise);
+        // var mockGetDependentResourceCounts = jasmine.createStub(JobTemplate, ["getDependentResourceCounts"]);
+        // mockGetDependentResourceCounts.method.and.returnValue(jobTemplateGetDepDeferred.promise);
 
         TemplatesListController = $controller('TemplatesListController', {
             $scope: scope,
@@ -94,8 +119,11 @@ describe('Controller: TemplatesList', () => {
             InitiatePlaybookRun: InitiatePlaybookRun,
             rbacUiControlService: rbacUiControlService,
             TemplatesService: TemplatesService,
+            JobTemplateModel: JobTemplateModel,
             Dataset: Dataset
         });
+
+        rootScope.$apply();
     }));
 
     describe('scope.editJobTemplate()', () => {
@@ -155,6 +183,8 @@ describe('Controller: TemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(Prompt).toHaveBeenCalled();
         });
 
@@ -169,6 +199,8 @@ describe('Controller: TemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(TemplatesService.deleteWorkflowJobTemplate).toHaveBeenCalled();
         });
 
@@ -183,6 +215,8 @@ describe('Controller: TemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
+            jobTemplateGetDepDeferred.resolve([]);
+            rootScope.$apply();
             expect(TemplatesService.deleteJobTemplate).toHaveBeenCalled();
         });
 

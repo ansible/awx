@@ -10,6 +10,12 @@ function TemplatesStrings (BaseString) {
             INVALIDATE: t.s('Doing so will invalidate the following:')
         }
     };
+
+    ns.workflowJobTemplates = {
+        deleteWorkflowJobTemplate: {
+            CONFIRM: t.s('Are you sure you want to delete this workflow job template?')
+        }
+    };
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];

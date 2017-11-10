@@ -87,7 +87,8 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
 
             Prompt({
                 hdr: i18n._('Delete'),
-                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the user below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                resourceName: $filter('sanitize')(name),
+                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete this user?') + '</div>',
                 action: action,
                 actionText: i18n._('DELETE')
             });

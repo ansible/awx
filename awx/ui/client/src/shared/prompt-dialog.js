@@ -39,6 +39,7 @@ angular.module('PromptDialog', ['Utilities'])
                     scope = dialog.scope(), cls, local_backdrop;
 
                 scope.promptHeader = params.hdr;
+                scope.promptResourceName = params.resourceName;
                 scope.promptBody = params.body;
                 scope.promptAction = params.action;
                 scope.promptActionText = (params.actionText === null || params.actionText === undefined || params.actionText === '') ? 'YES' : params.actionText;

@@ -147,7 +147,7 @@
 
                     counts.forEach(countObj => {
                         if(countObj.count && countObj.count > 0) {
-                            invalidateRelatedLines.push(`<div>${countObj.label} <span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                            invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
                         }
                     });
 
@@ -159,7 +159,8 @@
                     }
 
                     Prompt({
-                        hdr: i18n._('Delete Source') + ' ' + $filter('sanitize')(inventory_source.name),
+                        hdr: i18n._('Delete Source'),
+                        resourceName: $filter('sanitize')(inventory_source.name),
                         body: deleteModalBody,
                         action: action,
                         actionText: 'DELETE'
