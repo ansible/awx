@@ -47,6 +47,8 @@ import atLibComponents from '~components';
 import atLibModels from '~models';
 import atLibServices from '~services';
 
+import network_ui from './network_ui/main';
+
 start.bootstrap(() => {
     angular.bootstrap(document.body, ['awApp']);
 });
@@ -98,6 +100,7 @@ angular
         projects.name,
         scheduler.name,
         instanceGroups.name,
+        network_ui.tower.name,
 
         'Utilities',
         'templates',

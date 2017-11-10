@@ -13,6 +13,8 @@
     "angular-mousewheel": "~1.0.5",
     "angular-ui-router": "",
     "angular-xeditable": "~0.8.0",
+    "jquery": "~2.2.4",
+    "jquery-ui": "~1.10.5",
     "browserify": "",
     "hamsterjs": "~1.1.2",
     "inherits": "",
