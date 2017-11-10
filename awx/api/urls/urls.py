@@ -111,6 +111,7 @@ v2_urls = [
     url(r'^job_templates/(?P<pk>[0-9]+)/extra_credentials/$', JobTemplateExtraCredentialsList.as_view(), name='job_template_extra_credentials_list'),
 ]
 
+app_name = 'api'
 urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),

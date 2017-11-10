@@ -11,9 +11,9 @@ from awx.main.views import (
 
 
 urlpatterns = [
-    url(r'', include('awx.ui.urls', namespace='ui', app_name='ui')),
-    url(r'^api/', include('awx.api.urls', namespace='api', app_name='api')),
-    url(r'^sso/', include('awx.sso.urls', namespace='sso', app_name='sso')),
+    url(r'', include('awx.ui.urls', namespace='ui')),
+    url(r'^api/', include('awx.api.urls', namespace='api')),
+    url(r'^sso/', include('awx.sso.urls', namespace='sso')),
     url(r'^sso/', include('social_django.urls', namespace='social')),
     url(r'^(?:api/)?400.html$', handle_400),
     url(r'^(?:api/)?403.html$', handle_403),

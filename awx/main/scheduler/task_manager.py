@@ -41,7 +41,8 @@ from awx.main import tasks as awx_tasks
 from awx.main.utils import decrypt_field
 
 # Celery
-from celery.task.control import inspect
+from awx import celery_app
+from celery.app.control import Inspect
 
 
 logger = logging.getLogger('awx.main.scheduler')
@@ -130,8 +131,8 @@ class TaskManager():
     }
     '''
     def get_active_tasks(self):
-        inspector = inspect()
         if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
+            inspector = Inspect(app=celery_app)
             active_task_queues = inspector.active()
         else:
             logger.warn("Ignoring celery task inspector")

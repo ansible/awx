@@ -1,7 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-from django.conf.urls import url, include
+from django.conf.urls import url
 from awx.ui.views import (
     index,
     portal_redirect,
@@ -9,6 +9,7 @@ from awx.ui.views import (
 )
 
 
+app_name = 'ui'
 urlpatterns = [ 
     url(r'^$', index, name='index'),
     url(r'^migrations_notran/$', migrations_notran, name='migrations_notran'),

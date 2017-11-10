@@ -10,6 +10,7 @@ from awx.sso.views import (
 )
 
 
+app_name = 'sso'
 urlpatterns = [
     url(r'^complete/$', sso_complete, name='sso_complete'),
     url(r'^error/$', sso_error, name='sso_error'),
