@@ -14,8 +14,7 @@ function InventoriesEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, $rootScope, resourceData,
-    CreateSelect2, InstanceGroupsService, InstanceGroupsData, CanRemediate,
-    $transitions) {
+    CreateSelect2, InstanceGroupsService, InstanceGroupsData, CanRemediate) {
 
     // Inject dynamic view
     let defaultUrl = GetBasePath('inventory'),
@@ -41,15 +40,11 @@ function InventoriesEdit($scope, $location,
         $scope.instance_groups = InstanceGroupsData;
         $scope.canRemediate = CanRemediate;
 
-        $transitions.onSuccess({}, function(trans) {
-            if(trans.to().name === 'inventories.edit') {
-                ParseTypeChange({
-                    scope: $scope,
-                    variable: 'inventory_variables',
-                    parse_variable: 'parseType',
-                    field_id: 'inventory_inventory_variables'
-                });
-            }
+        ParseTypeChange({
+            scope: $scope,
+            variable: 'inventory_variables',
+            parse_variable: 'parseType',
+            field_id: 'inventory_inventory_variables'
         });
 
         OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})
@@ -120,5 +115,5 @@ export default ['$scope', '$location',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', '$rootScope', 'resourceData', 'CreateSelect2',
     'InstanceGroupsService', 'InstanceGroupsData', 'CanRemediate',
-    '$transitions', InventoriesEdit,
+    InventoriesEdit,
 ];
