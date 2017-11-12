@@ -31,6 +31,7 @@ from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.contrib import auth
 
 
 # Django REST Framework
@@ -177,6 +178,7 @@ class ApiVersionRootView(APIView):
         ''' list top level resources '''
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
+        data['user_session'] = reverse('api:user_session_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
         data['instance_groups'] = reverse('api:instance_group_list', request=request)
@@ -726,6 +728,51 @@ class AuthTokenView(APIView):
                 filter_tokens = AuthToken.objects.filter(key=token_match.groups()[0])
                 if filter_tokens.exists():
                     filter_tokens[0].invalidate()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserSessionView(APIView):
+
+    authentication_classes = []
+    permission_classes = (AllowAny,)
+    serializer_class = UserSessionSerializer
+    nrw_in_330 = True
+    new_in_api_v2 = True
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = self.serializer_class(*args, **kwargs)
+        # Override when called from browsable API to generate raw data form;
+        # update serializer "validated" data to be displayed by the raw data
+        # form.
+        if hasattr(self, '_raw_data_form_marker'):
+            # Always remove read only fields from serializer.
+            for name, field in serializer.fields.items():
+                if getattr(field, 'read_only', None):
+                    del serializer.fields[name]
+            serializer._data = self.update_raw_data(serializer.data)
+        return serializer
+
+    if settings.DEBUG:
+        def get(self, request):
+            return Response(dict(request.session.items()))
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            if 'username' in request.data:
+                logger.warning(
+                    smart_text(u"Login failed for user {}".format(request.data['username'])),
+                    extra=dict(actor=request.data['username'])
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = serializer.validated_data['user']
+        auth.login(request, user)
+        logger.info(smart_text(u"User {} logged in".format(user.username)),
+                    extra=dict(actor=user.username))
+        return Response(status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        auth.logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
