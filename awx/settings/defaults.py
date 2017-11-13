@@ -1124,3 +1124,6 @@ LOGGING = {
     }
 }
 COLOR_LOGS = False
+
+# SSL settings
+SSL_OPENSTACK_VERIFY_CERT = True
