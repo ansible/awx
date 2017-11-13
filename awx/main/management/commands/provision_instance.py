@@ -5,7 +5,6 @@ from awx.main.models import Instance
 from awx.main.utils.pglock import advisory_lock
 from django.conf import settings
 
-from optparse import make_option
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
@@ -21,10 +20,9 @@ class Command(BaseCommand):
         'Specify `--hostname` to use this command.'
     )
 
-    option_list = BaseCommand.option_list + (
-        make_option('--hostname', dest='hostname', type='string',
-                    help='Hostname used during provisioning'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--hostname', dest='hostname', type=str,
+                            help='Hostname used during provisioning')
 
     def _register_hostname(self, hostname):
         if not hostname:

@@ -25,9 +25,9 @@ from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
 import tacacs_plus
 
 # social
-from social.backends.saml import OID_USERID
-from social.backends.saml import SAMLAuth as BaseSAMLAuth
-from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
+from social_core.backends.saml import OID_USERID
+from social_core.backends.saml import SAMLAuth as BaseSAMLAuth
+from social_core.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
 from awx.conf.license import feature_enabled

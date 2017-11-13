@@ -477,7 +477,7 @@ class BaseSerializer(serializers.ModelSerializer):
             return super(BaseSerializer, self).run_validation(data)
         except ValidationError as exc:
             # Avoid bug? in DRF if exc.detail happens to be a list instead of a dict.
-            raise ValidationError(detail=serializers.get_validation_error_detail(exc))
+            raise ValidationError(detail=serializers.as_serializer_error(exc))
 
     def get_validation_exclusions(self, obj=None):
         # Borrowed from DRF 2.x - return model fields that should be excluded

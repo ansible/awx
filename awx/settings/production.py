@@ -60,8 +60,8 @@ LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_
 
 # Supervisor service name dictionary used for programatic restart
 SERVICE_NAME_DICT = {
-    "beat": "awx-celeryd-beat",
-    "celery": "awx-celeryd",
+    "beat": "awx-celery-beat",
+    "celery": "awx-celery",
     "callback": "awx-callback-receiver",
     "channels": "awx-channels-worker",
     "uwsgi": "awx-uwsgi",

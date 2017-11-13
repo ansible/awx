@@ -4,10 +4,9 @@
 # Python
 import datetime
 import logging
-from optparse import make_option
 
 # Django
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.timezone import now
 
@@ -25,41 +24,40 @@ from awx.main.signals import ( # noqa
 from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     '''
     Management command to cleanup old jobs and project updates.
     '''
 
     help = 'Remove old jobs, project and inventory updates from the database.'
 
-    option_list = NoArgsCommand.option_list + (
-        make_option('--days', dest='days', type='int', default=90, metavar='N',
-                    help='Remove jobs/updates executed more than N days ago. Defaults to 90.'),
-        make_option('--dry-run', dest='dry_run', action='store_true',
-                    default=False, help='Dry run mode (show items that would '
-                    'be removed)'),
-        make_option('--jobs', dest='only_jobs', action='store_true',
-                    default=False,
-                    help='Remove jobs'),
-        make_option('--ad-hoc-commands', dest='only_ad_hoc_commands',
-                    action='store_true', default=False,
-                    help='Remove ad hoc commands'),
-        make_option('--project-updates', dest='only_project_updates',
-                    action='store_true', default=False,
-                    help='Remove project updates'),
-        make_option('--inventory-updates', dest='only_inventory_updates',
-                    action='store_true', default=False,
-                    help='Remove inventory updates'),
-        make_option('--management-jobs', default=False,
-                    action='store_true', dest='only_management_jobs',
-                    help='Remove management jobs'),
-        make_option('--notifications', dest='only_notifications',
-                    action='store_true', default=False,
-                    help='Remove notifications'),
-        make_option('--workflow-jobs', default=False,
-                    action='store_true', dest='only_workflow_jobs',
-                    help='Remove workflow jobs')
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--days', dest='days', type='int', default=90, metavar='N',
+                            help='Remove jobs/updates executed more than N days ago. Defaults to 90.')
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true',
+                            default=False, help='Dry run mode (show items that would '
+                            'be removed)')
+        parser.add_argument('--jobs', dest='only_jobs', action='store_true',
+                            default=False,
+                            help='Remove jobs')
+        parser.add_argument('--ad-hoc-commands', dest='only_ad_hoc_commands',
+                            action='store_true', default=False,
+                            help='Remove ad hoc commands')
+        parser.add_argument('--project-updates', dest='only_project_updates',
+                            action='store_true', default=False,
+                            help='Remove project updates')
+        parser.add_argument('--inventory-updates', dest='only_inventory_updates',
+                            action='store_true', default=False,
+                            help='Remove inventory updates')
+        parser.add_argument('--management-jobs', default=False,
+                            action='store_true', dest='only_management_jobs',
+                            help='Remove management jobs')
+        parser.add_argument('--notifications', dest='only_notifications',
+                            action='store_true', default=False,
+                            help='Remove notifications')
+        parser.add_argument('--workflow-jobs', default=False,
+                            action='store_true', dest='only_workflow_jobs',
+                            help='Remove workflow jobs')
 
     def cleanup_jobs(self):
         #jobs_qs = Job.objects.exclude(status__in=('pending', 'running'))
@@ -223,7 +221,7 @@ class Command(NoArgsCommand):
         return skipped, deleted
 
     @transaction.atomic
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
         self.days = int(options.get('days', 90))

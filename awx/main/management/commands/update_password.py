@@ -1,9 +1,6 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved
 
-# Python
-from optparse import make_option
-
 # Django
 from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
@@ -25,12 +22,11 @@ class UpdatePassword(object):
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--username', dest='username', action='store', type='string', default=None,
-                    help='username to change the password for'),
-        make_option('--password', dest='password', action='store', type='string', default=None,
-                    help='new password for user'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--username', dest='username', action='store', type=str, default=None,
+                            help='username to change the password for')
+        parser.add_argument('--password', dest='password', action='store', type=str, default=None,
+                            help='new password for user')
 
     def handle(self, *args, **options):
         if not options['username']:
@@ -43,5 +39,3 @@ class Command(BaseCommand):
         if res:
             return "Password updated"
         return "Password not updated"
-
-

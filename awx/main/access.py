@@ -54,12 +54,12 @@ def get_object_from_data(field, Model, data, obj=None):
         # Calling method needs to deal with non-existence of key
         raise ParseError(_("Required related field %s for permission check." % field))
 
-    if isinstance(raw_value, Model):
-        return raw_value
-    elif raw_value is None:
-        return None
-    else:
-        try:
+    try:
+        if isinstance(raw_value, Model):
+            return raw_value
+        elif raw_value is None:
+            return None
+        else:
             new_pk = int(raw_value)
             # Avoid database query by comparing pk to model for similarity
             if obj and new_pk == getattr(obj, '%s_id' % field, None):
@@ -67,8 +67,8 @@ def get_object_from_data(field, Model, data, obj=None):
             else:
                 # Get the new resource from the database
                 return get_object_or_400(Model, pk=new_pk)
-        except (TypeError, ValueError):
-            raise ParseError(_("Bad data found in related field %s." % field))
+    except (TypeError, ValueError):
+        raise ParseError(_("Bad data found in related field %s." % field))
 
 
 class StateConflict(ValidationError):

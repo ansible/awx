@@ -17,7 +17,7 @@ __all__ = ['CallbackQueueDispatcher']
 class CallbackQueueDispatcher(object):
 
     def __init__(self):
-        self.callback_connection = getattr(settings, 'BROKER_URL', None)
+        self.callback_connection = getattr(settings, 'CELERY_BROKER_URL', None)
         self.connection_queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.connection = None
         self.exchange = None

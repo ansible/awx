@@ -4,29 +4,28 @@
 # Python
 import datetime
 import logging
-from optparse import make_option
 
 # Django
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 
 # AWX
 from awx.main.models import ActivityStream
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     '''
     Management command to purge old activity stream events.
     '''
 
     help = 'Remove old activity stream events from the database'
 
-    option_list = NoArgsCommand.option_list + (
-        make_option('--days', dest='days', type='int', default=90, metavar='N',
-                    help='Remove activity stream events more than N days old'),
-        make_option('--dry-run', dest='dry_run', action='store_true',
-                    default=False, help='Dry run mode (show items that would '
-                    'be removed)'),)
+    def add_arguments(self, parser):
+        parser.add_argument('--days', dest='days', type='int', default=90, metavar='N',
+                            help='Remove activity stream events more than N days old')
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true',
+                            default=False, help='Dry run mode (show items that would '
+                            'be removed)')
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
@@ -61,7 +60,7 @@ class Command(NoArgsCommand):
             n_deleted_items += len(pks_to_delete)
         self.logger.log(99, "Removed %d items", n_deleted_items)
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
         self.days = int(options.get('days', 30))

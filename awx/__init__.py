@@ -1,15 +1,17 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
+from __future__ import absolute_import, unicode_literals
 
 import os
 import sys
 import warnings
 
 from pkg_resources import get_distribution
+from .celery import app as celery_app
 
 __version__ = get_distribution('awx').version
 
-__all__ = ['__version__']
+__all__ = ['__version__', 'celery_app']
 
 # Check for the presence/absence of "devonly" module to determine if running
 # from a source code checkout or release packaage.

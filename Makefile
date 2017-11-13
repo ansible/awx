@@ -203,8 +203,11 @@ develop:
 	fi
 
 version_file:
-	mkdir -p /var/lib/awx/
-	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version
+	mkdir -p /var/lib/awx/; \
+	if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version; \
 
 # Do any one-time init tasks.
 comma := ,
@@ -284,7 +287,7 @@ flower:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
+	celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
 
 collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -322,8 +325,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair --autoreload --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,$(COMPOSE_HOST),$(AWX_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
-	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
+	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,$(COMPOSE_HOST),$(AWX_GROUP_QUEUES) -n celery@$(COMPOSE_HOST)
 
 # Run to start the zeromq callback receiver
 receiver:

@@ -16,7 +16,7 @@ class SettingSerializer(BaseSerializer):
     class Meta:
         model = Setting
         fields = ('id', 'key', 'value')
-        readonly_fields = ('id', 'key', 'value')
+        read_only_fields = ('id', 'key', 'value')
 
     def __init__(self, instance=None, data=serializers.empty, **kwargs):
         if instance is None and data is not serializers.empty and 'key' in data:

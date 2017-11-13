@@ -6,6 +6,7 @@ from django.db.migrations.loader import MigrationLoader
 from django.db import connection
 
 # Python
+from itertools import chain
 import re
 
 
@@ -20,3 +21,15 @@ def get_tower_migration_version():
                 if migration_version > v:
                     v = migration_version
     return v
+
+
+def get_all_field_names(model):
+    # Implements compatibility with _meta.get_all_field_names
+    # See: https://docs.djangoproject.com/en/1.11/ref/models/meta/#migrating-from-the-old-api
+    return list(set(chain.from_iterable(
+        (field.name, field.attname) if hasattr(field, 'attname') else (field.name,)
+        for field in model._meta.get_fields()
+        # For complete backwards compatibility, you may want to exclude
+        # GenericForeignKey from the results.
+        if not (field.many_to_one and field.related_model is None)
+    )))

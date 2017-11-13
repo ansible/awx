@@ -16,7 +16,7 @@ from kombu.mixins import ConsumerMixin
 
 # Django
 from django.conf import settings
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
 from django.db import DatabaseError
 from django.core.cache import cache as django_cache
@@ -147,7 +147,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                 logger.error('Detail: {}'.format(tb))
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     '''
     Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)
     Runs as a management command and receives job save events.  It then hands
@@ -155,8 +155,8 @@ class Command(NoArgsCommand):
     '''
     help = 'Launch the job callback receiver'
 
-    def handle_noargs(self, **options):
-        with Connection(settings.BROKER_URL) as conn:
+    def handle(self, *arg, **options):
+        with Connection(settings.CELERY_BROKER_URL) as conn:
             try:
                 worker = CallbackBrokerWorker(conn)
                 worker.run()

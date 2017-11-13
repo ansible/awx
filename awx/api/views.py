@@ -27,7 +27,6 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
-from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
@@ -53,7 +52,9 @@ import qsstats
 import ansiconv
 
 # Python Social Auth
-from social.backends.utils import load_backends
+from social_core.backends.utils import load_backends
+
+from wsgiref.util import FileWrapper
 
 # AWX
 from awx.main.tasks import send_notifications

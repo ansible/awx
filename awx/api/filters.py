@@ -22,6 +22,7 @@ from rest_framework.filters import BaseFilterBackend
 
 # AWX
 from awx.main.utils import get_type_for_model, to_python_boolean
+from awx.main.utils.db import get_all_field_names
 from awx.main.models.credential import CredentialType
 from awx.main.models.rbac import RoleAncestorEntry
 
@@ -70,7 +71,7 @@ class TypeFilterBackend(BaseFilterBackend):
                     types_map[ct_type] = ct.pk
                 model = queryset.model
                 model_type = get_type_for_model(model)
-                if 'polymorphic_ctype' in model._meta.get_all_field_names():
+                if 'polymorphic_ctype' in get_all_field_names(model):
                     types_pks = set([v for k,v in types_map.items() if k in types])
                     queryset = queryset.filter(polymorphic_ctype_id__in=types_pks)
                 elif model_type in types:
@@ -119,7 +120,7 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
-            if name == 'type' and 'polymorphic_ctype' in model._meta.get_all_field_names():
+            if name == 'type' and 'polymorphic_ctype' in get_all_field_names(model):
                 name = 'polymorphic_ctype'
                 new_parts.append('polymorphic_ctype__model')
             else:
@@ -136,7 +137,7 @@ class FieldLookupBackend(BaseFilterBackend):
                     new_parts.pop()
                     new_parts.append(name_alt)
                 else:
-                    field = model._meta.get_field_by_name(name)[0]
+                    field = model._meta.get_field(name)
                 if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
                     raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 elif getattr(field, '__prevent_search__', False):
@@ -375,7 +376,7 @@ class OrderByBackend(BaseFilterBackend):
                 # given the limited number of views with multiple types,
                 # sorting on polymorphic_ctype.model is effectively the same.
                 new_order_by = []
-                if 'polymorphic_ctype' in queryset.model._meta.get_all_field_names():
+                if 'polymorphic_ctype' in get_all_field_names(queryset.model):
                     for field in order_by:
                         if field == 'type':
                             new_order_by.append('polymorphic_ctype__model')

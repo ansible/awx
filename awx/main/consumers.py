@@ -7,7 +7,7 @@ from channels.sessions import channel_session
 from channels.handler import AsgiRequest
 
 from django.conf import settings
-from django.core.serializers.json import DjangoJSONEncoder
+#from django.core.serializers.json import DjangoJSONEncoder
 
 from django.contrib.auth.models import User
 from awx.main.models.organization import AuthToken
@@ -94,6 +94,8 @@ def ws_receive(message):
 
 def emit_channel_notification(group, payload):
     try:
-        Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
+        # FIXME: Currently broken with asgi_rabbitmq as a ChannelLayer
+        #Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
+        logger.warning("Group sending is currently disabled. Would have sent the following message\nChannel: {0}, Payload: {1}".format(group, payload))
     except ValueError:
         logger.error("Invalid payload emitting channel {} on topic: {}".format(group, payload))

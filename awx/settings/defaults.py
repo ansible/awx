@@ -5,7 +5,6 @@ import os
 import re  # noqa
 import sys
 import ldap
-import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
@@ -42,7 +41,6 @@ def IS_TESTING(argv=None):
 
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
 
 ADMINS = (
@@ -195,20 +193,37 @@ CSRF_COOKIE_SECURE = True
 # Limit CSRF cookies to browser sessions
 CSRF_COOKIE_AGE = None
 
-TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-    'awx.ui.context_processors.settings',
-    'awx.ui.context_processors.version',
-    'social.apps.django_app.context_processors.backends',
-    'social.apps.django_app.context_processors.login_redirect',
-)
+TEMPLATES = [
+    {
+        'NAME': 'default',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'OPTIONS': {
+            'debug': DEBUG,
+            'context_processors': [# NOQA
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'awx.ui.context_processors.settings',
+                'awx.ui.context_processors.version',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
+            ],
+            'loaders': [
+                'django.template.loaders.cached.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+        },
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+    },
+]
 
 MIDDLEWARE_CLASSES = (  # NOQA
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -217,6 +232,7 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
@@ -224,16 +240,6 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'awx.main.middleware.URLModificationMiddleware',
 )
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
-)
-
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
 
 ROOT_URLCONF = 'awx.urls'
 
@@ -248,12 +254,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'rest_framework',
     'django_extensions',
-    'djcelery',
-    'kombu.transport.django',
+    'django_celery_results',
     'channels',
     'polymorphic',
     'taggit',
-    'social.apps.django_app.default',
+    'social_django',
     'awx.conf',
     'awx.main',
     'awx.api',
@@ -302,11 +307,11 @@ AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.LDAPBackend',
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
-    'social.backends.google.GoogleOAuth2',
-    'social.backends.github.GithubOAuth2',
-    'social.backends.github.GithubOrganizationOAuth2',
-    'social.backends.github.GithubTeamOAuth2',
-    'social.backends.azuread.AzureADOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.github.GithubOrganizationOAuth2',
+    'social_core.backends.github.GithubTeamOAuth2',
+    'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -410,41 +415,35 @@ DEVSERVER_DEFAULT_PORT = '8013'
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
-# Initialize Django-Celery.
-djcelery.setup_loader()
-
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
-CELERY_DEFAULT_QUEUE = 'tower'
+CELERY_TASK_DEFAULT_QUEUE = 'tower'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TRACK_STARTED = True
-CELERYD_TASK_TIME_LIMIT = None
-CELERYD_TASK_SOFT_TIME_LIMIT = None
-CELERYD_POOL_RESTARTS = True
-CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
-CELERYBEAT_MAX_LOOP_INTERVAL = 60
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = None
+CELERY_TASK_SOFT_TIME_LIMIT = None
+CELERY_WORKER_POOL_RESTARTS = True
+CELERY_BEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
+CELERY_BEAT_MAX_LOOP_INTERVAL = 60
+CELERY_RESULT_BACKEND = 'django-db'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
-CELERY_QUEUES = (
+CELERY_TASK_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('tower', Exchange('tower'), routing_key='tower'),
     Queue('tower_scheduler', Exchange('scheduler', type='topic'), routing_key='tower_scheduler.job.#', durable=False),
     Broadcast('tower_broadcast_all')
 )
-CELERY_ROUTES = {'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower',
-                                                               'routing_key': 'tower'},
-                 'awx.main.scheduler.tasks.run_job_launch': {'queue': 'tower_scheduler',
-                                                             'routing_key': 'tower_scheduler.job.launch'},
-                 'awx.main.scheduler.tasks.run_job_complete': {'queue': 'tower_scheduler',
-                                                               'routing_key': 'tower_scheduler.job.complete'},
-                 'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
-                                                           'routing_key': 'cluster.heartbeat'},
-                 'awx.main.tasks.purge_old_stdout_files': {'queue': 'default',
-                                                           'routing_key': 'cluster.heartbeat'}}
+CELERY_TASK_ROUTES = {
+    'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower', 'routing_key': 'tower'},
+    'awx.main.scheduler.tasks.run_job_launch': {'queue': 'tower_scheduler', 'routing_key': 'tower_scheduler.job.launch'},
+    'awx.main.scheduler.tasks.run_job_complete': {'queue': 'tower_scheduler', 'routing_key': 'tower_scheduler.job.complete'},
+    'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default', 'routing_key': 'cluster.heartbeat'},
+    'awx.main.tasks.purge_old_stdout_files': {'queue': 'default', 'routing_key': 'cluster.heartbeat'},
+}
 
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
@@ -491,22 +490,22 @@ else:
     }
 
 # Social Auth configuration.
-SOCIAL_AUTH_STRATEGY = 'awx.sso.strategies.django_strategy.AWXDjangoStrategy'
-SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
+SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
+SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
 SOCIAL_AUTH_PIPELINE = (
-    'social.pipeline.social_auth.social_details',
-    'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
-    'social.pipeline.user.get_username',
-    'social.pipeline.social_auth.associate_by_email',
-    'social.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
     'awx.sso.pipeline.check_user_found_or_created',
-    'social.pipeline.social_auth.associate_user',
-    'social.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
     'awx.sso.pipeline.set_is_active_for_new_user',
-    'social.pipeline.user.user_details',
+    'social_core.pipeline.user.user_details',
     'awx.sso.pipeline.prevent_inactive_login',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',

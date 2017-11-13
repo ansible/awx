@@ -2,14 +2,14 @@
 # All Rights Reserved
 
 from awx.main.models import Instance, InstanceGroup
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     """List instances from the Tower database
     """
 
-    def handle(self, **options):
+    def handle(self, *args, **options):
         super(Command, self).__init__()
 
         for instance in Instance.objects.all():

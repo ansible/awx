@@ -132,7 +132,7 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         # Set flag so that task chain works with unit tests.
         settings.CELERY_UNIT_TEST = True
         settings.SYSTEM_UUID='00000000-0000-0000-0000-000000000000'
-        settings.BROKER_URL='redis://localhost:55672/'
+        settings.CELERY_BROKER_URL='redis://localhost:55672/'
         settings.CALLBACK_QUEUE = 'callback_tasks_unit'
 
         # Disable socket notifications for unit tests.

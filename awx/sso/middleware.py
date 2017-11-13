@@ -13,9 +13,9 @@ from django.shortcuts import redirect
 from django.utils.timezone import now
 
 # Python Social Auth
-from social.exceptions import SocialAuthBaseException
-from social.utils import social_logger
-from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
+from social_core.exceptions import SocialAuthBaseException
+from social_core.utils import social_logger
+from social_django.middleware import SocialAuthExceptionMiddleware
 
 # Ansible Tower
 from awx.main.models import AuthToken

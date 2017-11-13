@@ -4,7 +4,6 @@
 # Python
 import json
 import logging
-from optparse import make_option
 import os
 import re
 import subprocess
@@ -15,7 +14,7 @@ import shutil
 
 # Django
 from django.conf import settings
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, transaction
 from django.utils.encoding import smart_text
@@ -251,7 +250,7 @@ def load_inventory_source(source, group_filter_re=None,
     return inventory.all_group
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     '''
     Management command to import inventory from a directory, ini file, or
     dynamic inventory script.
@@ -259,50 +258,49 @@ class Command(NoArgsCommand):
 
     help = 'Import or sync external inventory sources'
 
-    option_list = NoArgsCommand.option_list + (
-        make_option('--inventory-name', dest='inventory_name', type='str',
-                    default=None, metavar='n',
-                    help='name of inventory to sync'),
-        make_option('--inventory-id', dest='inventory_id', type='int',
-                    default=None, metavar='i', help='id of inventory to sync'),
-        make_option('--overwrite', dest='overwrite', action='store_true',
-                    metavar="o", default=False,
-                    help='overwrite the destination hosts and groups'),
-        make_option('--overwrite-vars', dest='overwrite_vars',
-                    action='store_true', metavar="V", default=False,
-                    help='overwrite (rather than merge) variables'),
-        make_option('--keep-vars', dest='keep_vars', action='store_true',
-                    metavar="k", default=False,
-                    help='use database variables if set'),
-        make_option('--custom', dest='custom', action='store_true',
-                    metavar="c", default=False,
-                    help='this is a custom inventory script'),
-        make_option('--source', dest='source', type='str', default=None,
-                    metavar='s', help='inventory directory, file, or script '
-                    'to load'),
-        make_option('--enabled-var', dest='enabled_var', type='str',
-                    default=None, metavar='v', help='host variable used to '
-                    'set/clear enabled flag when host is online/offline, may '
-                    'be specified as "foo.bar" to traverse nested dicts.'),
-        make_option('--enabled-value', dest='enabled_value', type='str',
-                    default=None, metavar='v', help='value of host variable '
-                    'specified by --enabled-var that indicates host is '
-                    'enabled/online.'),
-        make_option('--group-filter', dest='group_filter', type='str',
-                    default=None, metavar='regex', help='regular expression '
-                    'to filter group name(s); only matches are imported.'),
-        make_option('--host-filter', dest='host_filter', type='str',
-                    default=None, metavar='regex', help='regular expression '
-                    'to filter host name(s); only matches are imported.'),
-        make_option('--exclude-empty-groups', dest='exclude_empty_groups',
-                    action='store_true', default=False, help='when set, '
-                    'exclude all groups that have no child groups, hosts, or '
-                    'variables.'),
-        make_option('--instance-id-var', dest='instance_id_var', type='str',
-                    default=None, metavar='v', help='host variable that '
-                    'specifies the unique, immutable instance ID, may be '
-                    'specified as "foo.bar" to traverse nested dicts.'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--inventory-name', dest='inventory_name',
+                            type='str', default=None, metavar='n',
+                            help='name of inventory to sync')
+        parser.add_argument('--inventory-id', dest='inventory_id', type='int',
+                            default=None, metavar='i',
+                            help='id of inventory to sync')
+        parser.add_argument('--overwrite', dest='overwrite', action='store_true',
+                            metavar="o", default=False,
+                            help='overwrite the destination hosts and groups')
+        parser.add_argument('--overwrite-vars', dest='overwrite_vars',
+                            action='store_true', metavar="V", default=False,
+                            help='overwrite (rather than merge) variables')
+        parser.add_argument('--keep-vars', dest='keep_vars', action='store_true',
+                            metavar="k", default=False,
+                            help='use database variables if set')
+        parser.add_argument('--custom', dest='custom', action='store_true',
+                            metavar="c", default=False,
+                            help='this is a custom inventory script')
+        parser.add_argument('--source', dest='source', type='str', default=None,
+                            metavar='s', help='inventory directory, file, or script to load')
+        parser.add_argument('--enabled-var', dest='enabled_var', type='str',
+                            default=None, metavar='v', help='host variable used to '
+                            'set/clear enabled flag when host is online/offline, may '
+                            'be specified as "foo.bar" to traverse nested dicts.')
+        parser.add_argument('--enabled-value', dest='enabled_value', type='str',
+                            default=None, metavar='v', help='value of host variable '
+                            'specified by --enabled-var that indicates host is '
+                            'enabled/online.')
+        parser.add_argument('--group-filter', dest='group_filter', type='str',
+                            default=None, metavar='regex', help='regular expression '
+                            'to filter group name(s); only matches are imported.')
+        parser.add_argument('--host-filter', dest='host_filter', type='str',
+                            default=None, metavar='regex', help='regular expression '
+                            'to filter host name(s); only matches are imported.')
+        parser.add_argument('--exclude-empty-groups', dest='exclude_empty_groups',
+                            action='store_true', default=False, help='when set, '
+                            'exclude all groups that have no child groups, hosts, or '
+                            'variables.')
+        parser.add_argument('--instance-id-var', dest='instance_id_var', type='str',
+                            default=None, metavar='v', help='host variable that '
+                            'specifies the unique, immutable instance ID, may be '
+                            'specified as "foo.bar" to traverse nested dicts.')
 
     def set_logging_level(self):
         log_levels = dict(enumerate([logging.WARNING, logging.INFO,
@@ -927,7 +925,7 @@ class Command(NoArgsCommand):
         self.inventory_update.license_error = True
         self.inventory_update.save(update_fields=['license_error'])
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.set_logging_level()
         self.inventory_name = options.get('inventory_name', None)

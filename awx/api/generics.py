@@ -31,6 +31,7 @@ from rest_framework import views
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
+from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer
 from awx.api.versioning import URLPathVersioning, get_request_version
 from awx.api.metadata import SublistAttachDetatchMetadata
@@ -321,8 +322,7 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
         return page
 
     def get_description_context(self):
-        opts = self.model._meta
-        if 'username' in opts.get_all_field_names():
+        if 'username' in get_all_field_names(self.model):
             order_field = 'username'
         else:
             order_field = 'name'

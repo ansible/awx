@@ -38,7 +38,7 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     'Users can see all roles they have access to, but not all roles'
     this_user = user('user-test_get_roles_list_user')
     organization.member_role.members.add(this_user)
-    custom_role = Role.objects.create(name='custom_role-test_get_roles_list_user')
+    custom_role = Role.objects.create(role_field='custom_role-test_get_roles_list_user')
     organization.member_role.children.add(custom_role)
 
     url = reverse('api:role_list')
@@ -128,7 +128,7 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
     organization.member_role.members.add(alice)
     organization.admin_role.members.add(bob)
     organization.member_role.members.add(bob)
-    custom_role = Role.objects.create(name='custom_role-test_user_view_admin_roles_list')
+    custom_role = Role.objects.create(role_field='custom_role-test_user_view_admin_roles_list')
     organization.member_role.children.add(custom_role)
     team.member_role.members.add(bob)
 
