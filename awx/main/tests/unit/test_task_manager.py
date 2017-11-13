@@ -52,7 +52,7 @@ class TestCleanupInconsistentCeleryTasks():
             logger_mock.error.assert_called_once_with("Task job 2 (failed) DB error in marking failed. Job possibly deleted.")
 
     @mock.patch.object(InstanceGroup.objects, 'prefetch_related', return_value=[])
-    @mock.patch('awx.main.scheduler.task_manager.inspect')
+    @mock.patch('awx.main.scheduler.task_manager.Inspect')
     def test_multiple_active_instances_sanity_check(self, inspect_mock, *args):
         class MockInspector:
             pass
