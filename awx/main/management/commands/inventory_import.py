@@ -265,17 +265,14 @@ class Command(BaseCommand):
         parser.add_argument('--inventory-id', dest='inventory_id', type=int,
                             default=None, metavar='i',
                             help='id of inventory to sync')
-        parser.add_argument('--overwrite', dest='overwrite', action='store_true',
-                            metavar="o", default=False,
+        parser.add_argument('--overwrite', dest='overwrite', action='store_true', default=False,
                             help='overwrite the destination hosts and groups')
         parser.add_argument('--overwrite-vars', dest='overwrite_vars',
-                            action='store_true', metavar="V", default=False,
+                            action='store_true', default=False,
                             help='overwrite (rather than merge) variables')
-        parser.add_argument('--keep-vars', dest='keep_vars', action='store_true',
-                            metavar="k", default=False,
+        parser.add_argument('--keep-vars', dest='keep_vars', action='store_true', default=False,
                             help='use database variables if set')
-        parser.add_argument('--custom', dest='custom', action='store_true',
-                            metavar="c", default=False,
+        parser.add_argument('--custom', dest='custom', action='store_true', default=False,
                             help='this is a custom inventory script')
         parser.add_argument('--source', dest='source', type=str, default=None,
                             metavar='s', help='inventory directory, file, or script to load')
