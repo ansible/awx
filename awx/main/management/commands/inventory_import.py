@@ -260,9 +260,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--inventory-name', dest='inventory_name',
-                            type='str', default=None, metavar='n',
+                            type=str, default=None, metavar='n',
                             help='name of inventory to sync')
-        parser.add_argument('--inventory-id', dest='inventory_id', type='int',
+        parser.add_argument('--inventory-id', dest='inventory_id', type=int,
                             default=None, metavar='i',
                             help='id of inventory to sync')
         parser.add_argument('--overwrite', dest='overwrite', action='store_true',
@@ -277,27 +277,27 @@ class Command(BaseCommand):
         parser.add_argument('--custom', dest='custom', action='store_true',
                             metavar="c", default=False,
                             help='this is a custom inventory script')
-        parser.add_argument('--source', dest='source', type='str', default=None,
+        parser.add_argument('--source', dest='source', type=str, default=None,
                             metavar='s', help='inventory directory, file, or script to load')
-        parser.add_argument('--enabled-var', dest='enabled_var', type='str',
+        parser.add_argument('--enabled-var', dest='enabled_var', type=str,
                             default=None, metavar='v', help='host variable used to '
                             'set/clear enabled flag when host is online/offline, may '
                             'be specified as "foo.bar" to traverse nested dicts.')
-        parser.add_argument('--enabled-value', dest='enabled_value', type='str',
+        parser.add_argument('--enabled-value', dest='enabled_value', type=str,
                             default=None, metavar='v', help='value of host variable '
                             'specified by --enabled-var that indicates host is '
                             'enabled/online.')
-        parser.add_argument('--group-filter', dest='group_filter', type='str',
+        parser.add_argument('--group-filter', dest='group_filter', type=str,
                             default=None, metavar='regex', help='regular expression '
                             'to filter group name(s); only matches are imported.')
-        parser.add_argument('--host-filter', dest='host_filter', type='str',
+        parser.add_argument('--host-filter', dest='host_filter', type=str,
                             default=None, metavar='regex', help='regular expression '
                             'to filter host name(s); only matches are imported.')
         parser.add_argument('--exclude-empty-groups', dest='exclude_empty_groups',
                             action='store_true', default=False, help='when set, '
                             'exclude all groups that have no child groups, hosts, or '
                             'variables.')
-        parser.add_argument('--instance-id-var', dest='instance_id_var', type='str',
+        parser.add_argument('--instance-id-var', dest='instance_id_var', type=str,
                             default=None, metavar='v', help='host variable that '
                             'specifies the unique, immutable instance ID, may be '
                             'specified as "foo.bar" to traverse nested dicts.')

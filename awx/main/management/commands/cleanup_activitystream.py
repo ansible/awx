@@ -21,7 +21,7 @@ class Command(BaseCommand):
     help = 'Remove old activity stream events from the database'
 
     def add_arguments(self, parser):
-        parser.add_argument('--days', dest='days', type='int', default=90, metavar='N',
+        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N',
                             help='Remove activity stream events more than N days old')
         parser.add_argument('--dry-run', dest='dry_run', action='store_true',
                             default=False, help='Dry run mode (show items that would '
