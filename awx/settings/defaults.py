@@ -1124,3 +1124,7 @@ LOGGING = {
     }
 }
 COLOR_LOGS = False
+
+# https://github.com/django-polymorphic/django-polymorphic/issues/195
+# FIXME: Disabling models.E006 warning until we can renamed Project and InventorySource
+SILENCED_SYSTEM_CHECKS = ['models.E006']
