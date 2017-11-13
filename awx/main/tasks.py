@@ -1543,11 +1543,11 @@ class RunProjectUpdate(BaseTask):
             except InventoryUpdate.DoesNotExist:
                 logger.warning('%s Dependent inventory update deleted during execution.', project_update.log_format)
                 continue
-            if project_update.cancel_flag or local_inv_update.cancel_flag:
-                if not project_update.cancel_flag:
-                    self.update_model(project_update.pk, cancel_flag=True, job_explanation=_(
-                        'Dependent inventory update {} was canceled.'.format(local_inv_update.name)))
-                break  # Stop rest of updates if project or inventory update was canceled
+            if project_update.cancel_flag:
+                logger.info('Project update {} was canceled while updating dependent inventories.'.format(project_update.log_format))
+                break
+            if local_inv_update.cancel_flag:
+                logger.info('Continuing to process project dependencies after {} was canceled'.format(local_inv_update.log_format))
             if local_inv_update.status == 'successful':
                 inv_src.scm_last_revision = scm_revision
                 inv_src.save(update_fields=['scm_last_revision'])
