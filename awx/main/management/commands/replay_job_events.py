@@ -166,9 +166,9 @@ class Command(BaseCommand):
     help = 'Replay job events over websockets ordered by created on date.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--job_id', dest='job_id', type='int', metavar='j',
+        parser.add_argument('--job_id', dest='job_id', type=int, metavar='j',
                             help='Id of the job to replay (job or adhoc)')
-        parser.add_argument('--speed', dest='speed', type='int', metavar='s',
+        parser.add_argument('--speed', dest='speed', type=int, metavar='s',
                             help='Speedup factor.')
 
     def handle(self, *args, **options):

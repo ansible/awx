@@ -19,7 +19,7 @@ class Command(BaseCommand):
         parser.add_argument('--stat',
                             action='store',
                             dest='stat',
-                            type="string",
+                            type=str,
                             default="jobs_running",
                             help='Select which stat to get information for')
 

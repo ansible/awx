@@ -32,7 +32,7 @@ class Command(BaseCommand):
     help = 'Remove old jobs, project and inventory updates from the database.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--days', dest='days', type='int', default=90, metavar='N',
+        parser.add_argument('--days', dest='days', type=int, default=90, metavar='N',
                             help='Remove jobs/updates executed more than N days ago. Defaults to 90.')
         parser.add_argument('--dry-run', dest='dry_run', action='store_true',
                             default=False, help='Dry run mode (show items that would '
