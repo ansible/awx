@@ -1,6 +1,6 @@
 # Python
 import json
-from copy import copy
+from copy import copy, deepcopy
 
 # Django
 from django.db import models
@@ -257,7 +257,7 @@ class SurveyJobTemplateMixin(models.Model):
         '''
         Hide encrypted default passwords in survey specs
         '''
-        survey_spec = self.survey_spec.copy() if self.survey_spec else {}
+        survey_spec = deepcopy(self.survey_spec) if self.survey_spec else {}
         for field in survey_spec.get('spec', []):
             if field.get('type') == 'password':
                 if 'default' in field and field['default']:
