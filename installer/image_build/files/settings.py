@@ -96,7 +96,7 @@ CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
     os.getenv("RABBITMQ_VHOST", "tower"))
 
 CHANNEL_LAYERS = {
-    'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
+    'default': {'BACKEND': 'asgi_rabbitmq.RabbitmqChannelLayer',
                 'ROUTING': 'awx.main.routing.channel_routing',
                 'CONFIG': {'url': CELERY_BROKER_URL}}
 }
