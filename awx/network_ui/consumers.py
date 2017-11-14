@@ -23,6 +23,7 @@ from awx.network_ui.utils import transform_dict
 import dpath.util
 from pprint import pformat
 
+import os
 import json
 import time
 # Connected to websocket.connect
@@ -40,7 +41,6 @@ HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
 
 SPACING = 200
 RACK_SPACING = 50
-settings.RECORDING = False
 
 logger = logging.getLogger("awx.network_ui.consumers")
 
@@ -430,15 +430,6 @@ class _Persistence(object):
             else:
                 logger.warning("Unsupported message %s", message['msg_type'])
 
-    def onDeploy(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
-
-    def onDestroy(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Destroy", topology_id])})
-
-    def onDiscover(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Discover", topology_id, yaml_serialize_topology(topology_id)])})
-
     def onLayout(self, message_value, topology_id, client_id):
         # circular_layout(topology_id)
         # grid_layout(topology_id)
@@ -448,18 +439,18 @@ class _Persistence(object):
         pass
 
     def onCoverage(self, coverage, topology_id, client_id):
-        with open("coverage/coverage{0}.json".format(int(time.time())), "w") as f:
+        with open(os.path.abspath("coverage/coverage{0}.json".format(int(time.time()))), "w") as f:
             f.write(json.dumps(coverage['coverage']))
 
     def onStartRecording(self, recording, topology_id, client_id):
-        settings.RECORDING = True
+        pass
 
     def onStopRecording(self, recording, topology_id, client_id):
-        settings.RECORDING = False
+        pass
 
     def write_event(self, event, topology_id, client_id):
-        if settings.RECORDING and event.get('save', True):
-            with open("recording.log", "a") as f:
+        if event.get('save', True):
+            with open(os.path.abspath("recording/recording_{0}.log".format(topology_id)), "a") as f:
                 f.write(json.dumps(event))
                 f.write("\n")
 
@@ -895,25 +886,6 @@ def ws_disconnect(message):
 
 def console_printer(message):
     print message['text']  # pragma: no cover
-
-# Worker channel events
-
-
-@channel_session
-def worker_connect(message):
-    Group("workers").add(message.reply_channel)
-
-
-@channel_session
-def worker_message(message):
-    # Channel('console_printer').send({"text": message['text']})
-    pass
-
-
-@channel_session
-def worker_disconnect(message):
-    pass
-
 
 # Tester channel events
 

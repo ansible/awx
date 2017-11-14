@@ -20,11 +20,11 @@ lint:
 lessc:
 	lessc src/style.less css/style.css
 
-istanbul:
+istanbul: main
 	istanbul instrument --output src-instrumented src
-	webpack src-instrumented/main.js  js/bundle-instrumented.js
+	webpack --config webpack-instrumented.config.js
 	cp index.html index-instrumented.html
-	sed -i "s/bundle.js/bundle-instrumented.js/g" index-instrumented.html
+	sed -i "s/\/bundle.js/\/bundle-instrumented.js/g" index-instrumented.html
 	cp vendor/*.js js/
 
 
@@ -35,6 +35,8 @@ simple-server: lint main lessc
 deploy: main
 	rsync -av src/ ../../../../awx/ui/client/src/network_ui/
 
+deploy-instrumented: istanbul
+	rsync -av src-instrumented/ ../../../../awx/ui/client/src/network_ui/
 
 extract:
 	mkdir -p extracted
