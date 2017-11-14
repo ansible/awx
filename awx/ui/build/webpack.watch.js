@@ -51,6 +51,7 @@ const watch = {
         stats: 'minimal',
         publicPath: '/static/',
         host: '127.0.0.1',
+        https: true,
         port: 3000,
         https: true,
         proxy: {
@@ -61,6 +62,11 @@ const watch = {
                 bypass: req => req.originalUrl.includes('hot-update.json')
             },
             '/websocket': {
+                target: TARGET,
+                secure: false,
+                ws: true
+            },
+            '/network_ui': {
                 target: TARGET,
                 secure: false,
                 ws: true

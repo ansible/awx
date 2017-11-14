@@ -1,4 +1,5 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
+var _ = require('lodash');
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
@@ -21,21 +22,23 @@ var messages = require('./messages.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http) {
+var NetworkUIController = function($scope, $document, $location, $window, $http, $q) {
 
   window.scope = $scope;
   var i = 0;
 
+  $scope.http = $http;
+
   $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
   //
-  $scope.inventory_id = $location.search().inventory_id || 0;
+  $scope.inventory_id = $location.search().inventory_id || 1;
 
   if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
+  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
   } else {
@@ -43,6 +46,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
           on_message: util.noop
       };
   }
+  $scope.my_location = $location.protocol() + "://" + $location.host() + ':' + $location.port();
   $scope.history = [];
   $scope.client_id = 0;
   $scope.onMouseDownResult = "";
@@ -143,23 +147,39 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
   if (!$scope.disconnected) {
+      console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
+      console.log($scope.my_location);
+      function add_host (host) {
+          console.log(host);
+          var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
+          device.icon = true;
+          $scope.inventory_toolbox.items.push(device);
+      }
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
-           .then(function(response) {
-               console.log(response);
+           .then(function(inventory) {
+               console.log(inventory);
+               console.log(inventory.headers());
 
                var host = null;
                var i = 0;
-               function add_host (response) {
-                   console.log(response);
-                   var device = new models.Device(0, response.data.name, 0, 0, response.data.type);
-                   device.icon = true;
-                   $scope.inventory_toolbox.items.push(device);
+               var httpGets = [];
+               for (i=0; i < inventory.data.results.length;i++) {
+                   host = inventory.data.results[i];
+                   console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
+                   console.log($scope.my_location);
+                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data/?format=json'));
                }
-               for (i=0; i<response.data.results.length;i++) {
-                   host = response.data.results[i];
-                   $http.get('/api/v2/hosts/'+ host.id + '/variable_data?format=json')
-                        .then(add_host);
-               }
+               return httpGets;
+           })
+           .then(function(httpGets) {
+               console.log(httpGets);
+               $q.all(httpGets).then(function (results) {
+                   var i = 0;
+                   for (i=0; i < results.length; i++) {
+                       add_host(results[i]);
+                   }
+                   console.log(['done', x]);
+               });
            });
   }
   $scope.inventory_toolbox.spacing = 150;
@@ -352,8 +372,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     // Event Handlers
 
     $scope.normalize_mouse_event = function ($event) {
-        $event.x = $event.pageX;
-        $event.y = $event.pageY;
+        if ($event.pageX !== undefined) {
+            $event.x = $event.pageX;
+        }
+        if ($event.pageY !== undefined) {
+            $event.y = $event.pageY;
+        }
+        if ($event.originalEvent !== undefined) {
+            var originalEvent = $event.originalEvent;
+            if (originalEvent.wheelDelta !== undefined) {
+                $event.delta = $event.originalEvent.wheelDelta;
+            }
+            if (originalEvent.wheelDeltaX !== undefined) {
+                $event.deltaX = $event.originalEvent.wheelDeltaX;
+            }
+            if (originalEvent.wheelDeltaY !== undefined) {
+                $event.deltaY = $event.originalEvent.wheelDeltaY;
+            }
+        }
     };
 
     $scope.onMouseDown = function ($event) {
@@ -418,9 +454,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     $scope.onMouseEnter = $scope.onMouseOver;
 
     $scope.onMouseWheel = function ($event) {
-      var delta = $event.originalEvent.wheelDelta;
-      var deltaX = $event.originalEvent.wheelDeltaX;
-      var deltaY = $event.originalEvent.wheelDeltaY;
+      $scope.normalize_mouse_event($event);
+      var delta = $event.delta;
+      var deltaX = $event.deltaX;
+      var deltaY = $event.deltaY;
       console.log([$event, delta, deltaX, deltaY]);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
@@ -609,19 +646,23 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
         $scope.group_controller.changeState(group.Ready);
     };
 
+    $scope.onExportYamlButton = function (button) {
+        console.log(button);
+        $window.open('/network_ui/topology.yaml?topology_id=' + $scope.topology_id , '_blank');
+    };
+
     // Buttons
 
     $scope.buttons = [
-      new models.Button("DEPLOY", 10, 10, 70, 30, $scope.onDeployButton),
-      new models.Button("DESTROY", 90, 10, 80, 30, $scope.onDestroyButton),
-      new models.Button("RECORD", 180, 10, 80, 30, $scope.onRecordButton),
-      new models.Button("EXPORT", 270, 10, 70, 30, $scope.onExportButton),
-      new models.Button("DISCOVER", 350, 10, 80, 30, $scope.onDiscoverButton),
-      new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
+      new models.Button("DEPLOY", 10, 48, 70, 30, $scope.onDeployButton),
+      new models.Button("DESTROY", 90, 48, 80, 30, $scope.onDestroyButton),
+      new models.Button("RECORD", 180, 48, 80, 30, $scope.onRecordButton),
+      new models.Button("EXPORT", 270, 48, 70, 30, $scope.onExportButton),
+      new models.Button("DISCOVER", 350, 48, 80, 30, $scope.onDiscoverButton),
+      new models.Button("LAYOUT", 440, 48, 70, 30, $scope.onLayoutButton),
+      new models.Button("CONFIGURE", 520, 48, 90, 30, $scope.onConfigureButton),
+      new models.Button("EXPORT YAML", 620, 48, 120, 30, $scope.onExportYamlButton),
     ];
-
-    $scope.buttons = [];
 
     var LAYERS_X = 160;
 
@@ -643,6 +684,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
                               $scope.onUnToggleGroup,
                               true)
     ];
+
+    $scope.layers = [];
 
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.buttons);
