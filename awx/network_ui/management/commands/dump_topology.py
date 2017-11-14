@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.core.management.base import BaseCommand
 
 from awx.network_ui.serializers import yaml_serialize_topology

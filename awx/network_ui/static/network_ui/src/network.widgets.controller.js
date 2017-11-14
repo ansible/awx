@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 // This is not production code.   It is a development environment for UI widgets.
 // Do not refactor this code with the production code in network.ui.controller.js
 // This code is separate so that it can be broken without breaking the main UI code.

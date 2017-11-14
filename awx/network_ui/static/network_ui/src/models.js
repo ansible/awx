@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 var fsm = require('./fsm.js');
 var button = require('./button.js');
 var util = require('./util.js');
