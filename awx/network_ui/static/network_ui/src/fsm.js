@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 function FSMController (scope, initial_state, next_controller) {
     this.scope = scope;
     this.state = initial_state;

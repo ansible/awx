@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 
 var util = require('./util.js');
 var messages = require('./messages.js');

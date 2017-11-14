@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 
 //console.log = function () { };
 var angular = require('angular');

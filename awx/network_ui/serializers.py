@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 
 from awx.network_ui.models import Topology, Device, Link, Interface, Group, GroupDevice, Process, Stream
 from django.db.models import Q
