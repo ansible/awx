@@ -430,15 +430,6 @@ class _Persistence(object):
             else:
                 logger.warning("Unsupported message %s", message['msg_type'])
 
-    def onDeploy(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
-
-    def onDestroy(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Destroy", topology_id])})
-
-    def onDiscover(self, message_value, topology_id, client_id):
-        DeviceGroup("workers").send({"text": json.dumps(["Discover", topology_id, yaml_serialize_topology(topology_id)])})
-
     def onLayout(self, message_value, topology_id, client_id):
         # circular_layout(topology_id)
         # grid_layout(topology_id)
@@ -895,25 +886,6 @@ def ws_disconnect(message):
 
 def console_printer(message):
     print message['text']  # pragma: no cover
-
-# Worker channel events
-
-
-@channel_session
-def worker_connect(message):
-    Group("workers").add(message.reply_channel)
-
-
-@channel_session
-def worker_message(message):
-    # Channel('console_printer').send({"text": message['text']})
-    pass
-
-
-@channel_session
-def worker_disconnect(message):
-    pass
-
 
 # Tester channel events
 
