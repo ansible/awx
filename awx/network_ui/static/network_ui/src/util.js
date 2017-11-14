@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 Array.prototype.extend = function (other_array) {
     /* you should include a test to check whether other_array really is an array */
     var i = 0;
