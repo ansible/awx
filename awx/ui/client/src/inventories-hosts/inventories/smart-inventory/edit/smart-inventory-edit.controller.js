@@ -8,7 +8,7 @@ function SmartInventoryEdit($scope, $location,
     $stateParams, InventoryForm, Rest, ProcessErrors,
     GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, $state, OrgAdminLookup, resourceData,
-    $rootScope, InstanceGroupsService, InstanceGroupsData, $transitions) {
+    $rootScope, InstanceGroupsService, InstanceGroupsData) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -37,15 +37,12 @@ function SmartInventoryEdit($scope, $location,
 
         $scope.parseType = 'yaml';
 
-        $transitions.onSuccess({}, function(trans) {
-            if(trans.to().name === 'inventories.editSmartInventory') {
-                ParseTypeChange({
-                    scope: $scope,
-                    variable: 'smartinventory_variables',
-                    parse_variable: 'parseType',
-                    field_id: 'smartinventory_smartinventory_variables'
-                });
-            }
+
+        ParseTypeChange({
+            scope: $scope,
+            variable: 'smartinventory_variables',
+            parse_variable: 'parseType',
+            field_id: 'smartinventory_smartinventory_variables'
         });
 
         OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})
@@ -109,5 +106,5 @@ export default [ '$scope', '$location',
     'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString',
     '$state', 'OrgAdminLookup', 'resourceData',
-    '$rootScope', 'InstanceGroupsService', 'InstanceGroupsData', '$transitions', SmartInventoryEdit
+    '$rootScope', 'InstanceGroupsService', 'InstanceGroupsData', SmartInventoryEdit
 ];
