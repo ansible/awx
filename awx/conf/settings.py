@@ -9,6 +9,7 @@ import time
 import six
 
 # Django
+from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
@@ -458,3 +459,19 @@ class SettingsWrapper(UserSettingsHolder):
                 set_locally = Setting.objects.filter(key=setting, user__isnull=True).exists()
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
         return (set_locally or set_on_default)
+
+
+def __getattr_without_cache__(self, name):
+    # Django 1.10 added an optimization to settings lookup:
+    # https://code.djangoproject.com/ticket/27625
+    # https://github.com/django/django/commit/c1b221a9b913315998a1bcec2f29a9361a74d1ac
+    # This change caches settings lookups on the __dict__ of the LazySettings
+    # object, which is not okay to do in an environment where settings can
+    # change in-process (the entire point of awx's custom settings implementation)
+    # This restores the original behavior that *does not* cache.
+    if self._wrapped is empty:
+        self._setup(name)
+    return getattr(self._wrapped, name)
+
+
+LazySettings.__getattr__ = __getattr_without_cache__
