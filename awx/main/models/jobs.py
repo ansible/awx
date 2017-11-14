@@ -166,11 +166,11 @@ class JobOptions(BaseModel):
 
     @property
     def network_credentials(self):
-        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'net']
+        return list(self.credentials.filter(credential_type__kind='net'))
 
     @property
     def cloud_credentials(self):
-        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'cloud']
+        return list(self.credentials.filter(credential_type__kind='cloud'))
 
     @property
     def credential(self):
@@ -186,7 +186,7 @@ class JobOptions(BaseModel):
 
     def get_deprecated_credential(self, kind):
         try:
-            return [cred for cred in self.credentials.all() if cred.credential_type.kind == kind][0]
+            return self.credentials.filter(credential_type__kind=kind).first()
         except IndexError:
             return None
 

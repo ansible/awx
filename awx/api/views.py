@@ -2998,7 +2998,7 @@ class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobTemplateExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
@@ -3794,7 +3794,7 @@ class JobExtraCredentialsList(JobCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
         return sublist_qs
 
 
