@@ -17,6 +17,10 @@ class Command(BaseCommand):
                             help='Comma-Delimited Hosts to add to the Queue')
         parser.add_argument('--controller', dest='controller', type=str,
                             default='', help='The controlling group (makes this an isolated group)')
+        parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
+                            help='The percentage of active instances that will be assigned to this group'),
+        parser.add_argument('--instance_minimum', dest='instance_minimum', type=int, default=0,
+                            help='The minimum number of instance that will be retained for this group from available instances')
 
     def handle(self, **options):
         queuename = options.get('queuename')
@@ -38,7 +42,9 @@ class Command(BaseCommand):
                     changed = True
             else:
                 print("Creating instance group {}".format(queuename))
-                ig = InstanceGroup(name=queuename)
+                ig = InstanceGroup(name=queuename,
+                                   policy_instance_percentage=options.get('instance_percent'),
+                                   policy_instance_minimum=options.get('instance_minimum'))
                 if control_ig:
                     ig.controller = control_ig
                 ig.save()
@@ -60,5 +66,7 @@ class Command(BaseCommand):
                     sys.exit(1)
                 else:
                     print("Instance already registered {}".format(instance[0].hostname))
+            ig.policy_instance_list = instance_list
+            ig.save()
             if changed:
                 print('(changed: True)')

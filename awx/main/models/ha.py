@@ -12,6 +12,7 @@ from solo.models import SingletonModel
 
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
+from awx.main.fields import JSONField
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
@@ -87,6 +88,19 @@ class InstanceGroup(models.Model):
         editable=False,
         default=None,
         null=True
+    )
+    policy_instance_percentage = models.IntegerField(
+        default=0,
+        help_text=_("Percentage of Instances to automatically assign to this group")
+    )
+    policy_instance_minimum = models.IntegerField(
+        default=0,
+        help_text=_("Static minimum number of Instances to automatically assign to this group")
+    )
+    policy_instance_list = JSONField(
+        default=[],
+        blank=True,
+        help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
     def get_absolute_url(self, request=None):

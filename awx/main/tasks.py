@@ -2,7 +2,8 @@
 # All Rights Reserved.
 
 # Python
-from collections import OrderedDict
+import codecs
+from collections import OrderedDict, namedtuple
 import ConfigParser
 import cStringIO
 import functools
@@ -129,6 +130,43 @@ def inform_cluster_of_shutdown(*args, **kwargs):
     except Exception:
         # General exception because LogErrorsTask not used with celery signals
         logger.exception('Encountered problem with normal shutdown signal.')
+
+
+@shared_task(bind=True, queue='tower', base=LogErrorsTask)
+def apply_cluster_membership_policies(self):
+    considered_instances = Instance.objects.all().order_by('id').only('id')
+    total_instances = considered_instances.count()
+    actual_groups = []
+    actual_instances = []
+    Group = namedtuple('Group', ['obj', 'instances'])
+    Instance = namedtuple('Instance', ['obj', 'groups'])
+    # Process policy instance list first, these will represent manually managed instances
+    # that will not go through automatic policy determination
+    for ig in InstanceGroup.objects.all():
+        group_actual = Group(obj=ig, instances=[])
+        for i in ig.policy_instance_list:
+            group_actual.instances.append(i)
+            if i in considered_instances:
+                considered_instances.remove(i)
+        actual_groups.append(group_actual)
+    # Process Instance minimum policies next, since it represents a concrete lower bound to the
+    # number of instances to make available to instance groups
+    for i in considered_instances:
+        instance_actual = Instance(obj=i, groups=[])
+        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            if len(g.instances) < g.obj.policy_instance_minimum:
+                g.instances.append(instance_actual.obj.id)
+                instance_actual.groups.append(g.obj.id)
+                break
+        actual_instances.append(instance_actual)
+    # Finally process instance policy percentages
+    for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            if 100 * float(len(g.instances)) / total_instances < g.obj.policy_instance_percentage:
+                g.instances.append(i.obj.id)
+                i.groups.append(g.obj.id)
+                break
+    # Next step
 
 
 @shared_task(queue='tower_broadcast_all', bind=True, base=LogErrorsTask)
