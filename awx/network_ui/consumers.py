@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 # In consumers.py
 from channels import Group, Channel
 from channels.sessions import channel_session

@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.test import TestCase
 
 # Create your tests here.
