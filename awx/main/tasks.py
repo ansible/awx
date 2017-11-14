@@ -1039,13 +1039,7 @@ class RunJob(BaseTask):
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['REST_API_URL'] = settings.INTERNAL_API_URL
             env['REST_API_TOKEN'] = job.task_auth_token or ''
-            env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
-            env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
-        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
-            env['JOB_CALLBACK_DEBUG'] = '2'
-        elif settings.DEBUG:
-            env['JOB_CALLBACK_DEBUG'] = '1'
 
         # Create a directory for ControlPath sockets that is unique to each
         # job and visible inside the proot environment (when enabled).
@@ -2108,14 +2102,8 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
-        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
-        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
-        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
-            env['JOB_CALLBACK_DEBUG'] = '2'
-        elif settings.DEBUG:
-            env['JOB_CALLBACK_DEBUG'] = '1'
 
         # Specify empty SSH args (should disable ControlPersist entirely for
         # ad hoc commands).
