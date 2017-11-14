@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.contrib import admin
 
 from awx.network_ui.models import Device

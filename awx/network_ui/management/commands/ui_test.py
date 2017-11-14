@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.core.management.base import BaseCommand
 import unittest
 from websocket import create_connection
