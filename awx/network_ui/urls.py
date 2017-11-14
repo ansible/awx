@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.conf.urls import include, url
 import sys
 
