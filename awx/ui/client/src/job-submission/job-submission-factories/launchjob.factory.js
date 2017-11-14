@@ -11,6 +11,7 @@ export default
                 job_launch_data = {},
                 url = params.url,
                 submitJobType = params.submitJobType,
+                relaunchHostType = params.relaunchHostType,
                 vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 extra_vars;
@@ -131,6 +132,14 @@ export default
                     if(scope.ask_diff_mode_on_launch && _.has(scope, 'other_prompt_data.diff_mode')){
                         job_launch_data.diff_mode = scope.other_prompt_data.diff_mode;
                     }
+
+                    if(scope.relaunchHostType) {
+                        job_launch_data.hosts = scope.relaunchHostType;
+                    }
+                    console.log(job_launch_data);
+                    // if(_.get(scope, 'retry_counts.failed') === true) {
+                    //     job_launch_data.hosts = "failed";
+                    // }
 
                     // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
                     if(jQuery.isEmptyObject(job_launch_data.extra_vars)===true && scope.prompt_for_vars===false){

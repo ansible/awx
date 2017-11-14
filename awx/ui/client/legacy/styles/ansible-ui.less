@@ -1047,6 +1047,8 @@ input[type="checkbox"].checkbox-no-label {
       color: @green;
   }
 
+  .icon-host-all:before,
+  .icon-host-failed:before,
   .icon-job-active:before,
   .icon-job-running:before,
   .icon-job-success:before,
@@ -1098,12 +1100,17 @@ input[type="checkbox"].checkbox-no-label {
       color: @changed;
   }
 
+  .icon-host-failed,
   .icon-job-stopped,
   .icon-job-error,
   .icon-job-failed,
   .icon-job-stdout-download-tooltip,
   .icon-job-canceled {
       color: @red;
+  }
+
+  .icon-host-all {
+      color: @at-blue;
   }
 
   .icon-job-unreachable {

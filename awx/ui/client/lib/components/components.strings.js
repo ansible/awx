@@ -76,6 +76,11 @@ function ComponentsStrings (BaseString) {
     ns.capacityBar = {
         IS_OFFLINE: t.s('Unavailable to run jobs.')
     };
+
+    ns.relaunch = {
+        DEFAULT: t.s('Relaunch using the same parameters'),
+        HOSTS: t.s('Relaunch using host parameters')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

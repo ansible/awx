@@ -92,12 +92,24 @@ export default ['i18n', function(i18n) {
                 dataPlacement: "top"
             },
             submit: {
-                icon: 'icon-rocket',
+                icon: 'icon-launch',
                 mode: 'all',
                 ngClick: 'relaunchJob($event, job.id)',
                 awToolTip: i18n._('Relaunch using the same parameters'),
                 dataPlacement: 'top',
-                ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start"
+                ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start",
+                relaunch: true,
+                dropdownTitle: 'Relaunch On',
+                dropdownOptions: [
+                    {
+                        name: 'All',
+                        icon: 'icon-host-all'
+                    },
+                    {
+                        name: 'Failed',
+                        icon: 'icon-host-failed'
+                    }
+                ],
             },
             cancel: {
                 mode: 'all',

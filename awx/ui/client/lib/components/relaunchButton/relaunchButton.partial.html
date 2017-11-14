@@ -1,0 +1,33 @@
+<div ng-if="vm.showRelaunch"
+    class="at-Relaunch"
+    aw-tool-tip="{{ vm.tooltip }}"
+    data-placement="top">
+
+    <div class="btn-group" role="group" ng-if="vm.showDropdown">
+        <button class="at-Relaunch--button"
+            data-toggle="dropdown"
+            aria-expanded="false"
+            id="relaunchDropdown">
+            <i class="{{ vm.state.icon }}"></i>
+        </button>
+
+        <ul class="dropdown-menu pull-right" aria-labelledby="relaunchDropdown">
+            <li class="at-Relaunch--dropdownTitle">
+                <span>{{ vm.state.dropdownTitle }}</span>
+            </li>
+            <li ng-repeat="option in vm.state.dropdownOptions"
+                class="at-Relaunch--dropdownOptions">
+                <a ng-click="vm.relaunchOn(option)">
+                    <i class="fa {{ option.icon }}"></i>
+                    {{ option.name }}
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <button class="at-Relaunch--button"
+            ng-click="vm.relaunchJob()"
+            ng-if="!vm.showDropdown">
+            <i class="{{ vm.state.icon }}"></i>
+    </button>
+</div>
