@@ -398,7 +398,7 @@ export default ['$compile', 'Attr', 'Icon',
                             }
                             // Plug in Dropdown Component
                             if (field_action === 'submit' && list.fieldActions[field_action].relaunch === true) {
-                                innerTable += `<at-relaunch scope='$scope' state='list.fieldActions.submit'></at-relaunch>`
+                                innerTable += `<at-relaunch></at-relaunch>`
                             } else {
                                 fAction = list.fieldActions[field_action];
                                 innerTable += "<button id=\"";

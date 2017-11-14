@@ -6,8 +6,7 @@ const atRelaunch = {
         state: '<'
     },
     controller: ['RelaunchJob', 'InitiatePlaybookRun', 'ComponentsStrings', '$scope', atRelaunchCtrl],
-    controllerAs: 'vm',
-    replace: true
+    controllerAs: 'vm'
 };
 
 function atRelaunchCtrl (RelaunchJob, InitiatePlaybookRun, strings, $scope) {
@@ -19,6 +18,26 @@ function atRelaunchCtrl (RelaunchJob, InitiatePlaybookRun, strings, $scope) {
         vm.showRelaunch = !(job.type === 'system_job') && job.summary_fields.user_capabilities.start;
         vm.showDropdown = job.type === 'job' && job.failed === true;
 
+        vm.createDropdown();
+        vm.createTooltips();
+    };
+
+    vm.createDropdown = () => {
+        vm.icon = 'icon-launch';
+        vm.dropdownTitle = strings.get('relaunch.DROPDOWN_TITLE');
+        vm.dropdownOptions = [
+            {
+                name: strings.get('relaunch.ALL'),
+                icon: 'icon-host-all'
+            },
+            {
+                name: strings.get('relaunch.FAILED'),
+                icon: 'icon-host-failed'
+            }
+        ];
+    };
+
+    vm.createTooltips = () => {
         if (vm.showDropdown) {
             vm.tooltip = strings.get('relaunch.HOSTS');
         } else {

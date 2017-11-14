@@ -79,7 +79,10 @@ function ComponentsStrings (BaseString) {
 
     ns.relaunch = {
         DEFAULT: t.s('Relaunch using the same parameters'),
-        HOSTS: t.s('Relaunch using host parameters')
+        HOSTS: t.s('Relaunch using host parameters'),
+        DROPDOWN_TITLE: t.s('Relaunch On'),
+        ALL: t.s('All'),
+        FAILED: t.s('Failed')
     };
 }
 

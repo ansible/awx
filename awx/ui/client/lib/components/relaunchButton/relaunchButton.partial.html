@@ -8,14 +8,14 @@
             data-toggle="dropdown"
             aria-expanded="false"
             id="relaunchDropdown">
-            <i class="{{ vm.state.icon }}"></i>
+            <i class="{{ vm.icon }}"></i>
         </button>
 
         <ul class="dropdown-menu pull-right" aria-labelledby="relaunchDropdown">
             <li class="at-Relaunch--dropdownTitle">
-                <span>{{ vm.state.dropdownTitle }}</span>
+                <span>{{ vm.dropdownTitle }}</span>
             </li>
-            <li ng-repeat="option in vm.state.dropdownOptions"
+            <li ng-repeat="option in vm.dropdownOptions"
                 class="at-Relaunch--dropdownOptions">
                 <a ng-click="vm.relaunchOn(option)">
                     <i class="fa {{ option.icon }}"></i>
@@ -28,6 +28,6 @@
     <button class="at-Relaunch--button"
             ng-click="vm.relaunchJob()"
             ng-if="!vm.showDropdown">
-            <i class="{{ vm.state.icon }}"></i>
+            <i class="{{ vm.icon }}"></i>
     </button>
 </div>

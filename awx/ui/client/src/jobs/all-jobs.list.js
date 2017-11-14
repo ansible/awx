@@ -99,17 +99,6 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start",
                 relaunch: true,
-                dropdownTitle: 'Relaunch On',
-                dropdownOptions: [
-                    {
-                        name: 'All',
-                        icon: 'icon-host-all'
-                    },
-                    {
-                        name: 'Failed',
-                        icon: 'icon-host-failed'
-                    }
-                ],
             },
             cancel: {
                 mode: 'all',

@@ -133,13 +133,9 @@ export default
                         job_launch_data.diff_mode = scope.other_prompt_data.diff_mode;
                     }
 
-                    if(scope.relaunchHostType) {
+                    if(!Empty(scope.relaunchHostType)) {
                         job_launch_data.hosts = scope.relaunchHostType;
                     }
-                    console.log(job_launch_data);
-                    // if(_.get(scope, 'retry_counts.failed') === true) {
-                    //     job_launch_data.hosts = "failed";
-                    // }
 
                     // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
                     if(jQuery.isEmptyObject(job_launch_data.extra_vars)===true && scope.prompt_for_vars===false){

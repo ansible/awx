@@ -19,18 +19,10 @@
                     </div>
 
                     <!-- LEFT PANE HEADER ACTIONS -->
-                    <div>
+                    <div class="JobResults-panelHeaderButtonActions">
 
                         <!-- RELAUNCH ACTION -->
-                        <button class="List-actionButton"
-                            data-placement="top"
-                            mode="all"
-                            ng-click="relaunchJob()"
-                            aw-tool-tip="{{'Relaunch using the same parameters' | translate}}"
-                            data-original-title=""
-                            title="">
-                            <i class="icon-launch"></i>
-                        </button>
+                        <at-relaunch state="job"></at-relaunch>
 
                         <!-- CANCEL ACTION -->
                         <button class="List-actionButton
