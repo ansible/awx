@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');

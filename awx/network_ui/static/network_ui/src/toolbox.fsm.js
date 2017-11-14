@@ -1,3 +1,4 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 

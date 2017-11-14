@@ -1,3 +1,4 @@
+# Copyright (c) 2017 Red Hat, Inc
 from django.shortcuts import render
 from django import forms
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
