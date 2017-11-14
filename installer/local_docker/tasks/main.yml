@@ -167,6 +167,7 @@
       - "{{ host_port }}:8052"
     links: "{{ awx_web_container_links|list }}"
     hostname: awxweb
+    dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
     env:
       http_proxy: "{{ http_proxy | default('') }}"
       https_proxy: "{{ https_proxy | default('') }}"
@@ -196,6 +197,7 @@
     links: "{{ awx_task_container_links|list }}"
     user: root
     hostname: awx
+    dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
     env:
       http_proxy: "{{ http_proxy | default('') }}"
       https_proxy: "{{ https_proxy | default('') }}"

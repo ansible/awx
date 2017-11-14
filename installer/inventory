@@ -72,3 +72,7 @@ pg_port=5432
 #http_proxy=http://proxy:3128
 #https_proxy=http://proxy:3128
 #no_proxy=mycorp.org
+
+# Container networking configuration
+# Set the awx_task and awx_web containers' search domain(s)
+#awx_container_search_domains=example.com,ansible.com
