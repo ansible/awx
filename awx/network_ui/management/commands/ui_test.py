@@ -39,7 +39,7 @@ class Command(BaseCommand):
                        TestRedoPersistence,
                        TestPersistence,
                        TestViews,
-                       TestWorkerWebSocket,
+                       #TestWorkerWebSocket,
                        TestAnsibleWebSocket,
                        TestInvalidValues]
         if options.get('suites'):
@@ -49,7 +49,7 @@ class Command(BaseCommand):
                                 verbosity=0 if options.get('quiet') else 2 if options.get('verbose') else 1,
                                 buffer=options.get('buffer')).run(unittest.TestSuite(tests))
 
-        ui = MessageHandler(create_connection("ws://localhost:8001/network_ui/topology?topology_id=143"))
+        ui = MessageHandler(create_connection("ws://localhost:8013/network_ui/topology?topology_id=143"))
         ui.recv()
         ui.recv()
         ui.send('CoverageRequest')
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 class TestViews(unittest.TestCase):
 
     def test_index(self):
-        requests.get("http://localhost:8001/network_ui")
+        requests.get("http://localhost:8013/network_ui")
 
 
 class MessageHandler(object):
@@ -104,28 +104,10 @@ class MessageHandler(object):
         self.ws.close()
 
 
-class TestWorkerWebSocket(unittest.TestCase):
-
-    def test(self):
-        self.worker = MessageHandler(create_connection("ws://localhost:8001/network_ui/worker?topology_id=143"))
-        self.ui = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
-        self.ui.recv()
-        self.ui.recv()
-        self.ui.send("Deploy")
-        self.assertTrue(self.worker.recv())
-        self.ui.send("Destroy")
-        self.assertTrue(self.worker.recv())
-        self.worker.send("Hi")
-
-    def tearDown(self):
-        self.worker.close()
-        self.ui.close()
-
-
 class TestAnsibleWebSocket(unittest.TestCase):
 
     def test(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/ansible?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/ansible?topology_id=143"))
         self.ws.send('Facts', foo=5)
 
     def tearDown(self):
@@ -135,7 +117,7 @@ class TestAnsibleWebSocket(unittest.TestCase):
 class TestPersistence(unittest.TestCase):
 
     def setUp(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
         self.ws.recv()
         self.ws.recv()
 
@@ -213,7 +195,7 @@ class TestPersistence(unittest.TestCase):
 class TestUndoPersistence(unittest.TestCase):
 
     def setUp(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
         self.ws.recv()
         self.ws.recv()
 
@@ -305,7 +287,7 @@ class TestUndoPersistence(unittest.TestCase):
 class TestRedoPersistence(unittest.TestCase):
 
     def setUp(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
         self.ws.recv()
         self.ws.recv()
 
@@ -332,7 +314,7 @@ class TestRedoPersistence(unittest.TestCase):
 class TestUIWebSocket(unittest.TestCase):
 
     def test(self):
-        self.ui = MessageHandler(create_connection("ws://localhost:8001/network_ui/topology?topology_id=143"))
+        self.ui = MessageHandler(create_connection("ws://localhost:8013/network_ui/topology?topology_id=143"))
         self.ui.recv()
         self.ui.recv()
         self.ui.send("Hello")
@@ -344,8 +326,8 @@ class TestUIWebSocket(unittest.TestCase):
 class TestUI(unittest.TestCase):
 
     def setUp(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
-        self.ui = MessageHandler(create_connection("ws://localhost:8001/network_ui/topology?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
+        self.ui = MessageHandler(create_connection("ws://localhost:8013/network_ui/topology?topology_id=143"))
         self.ws.recv()
         self.ws.recv()
         self.ui.recv()
@@ -515,22 +497,22 @@ topology_id: 143
 class TestInvalidValues(unittest.TestCase):
 
     def test_bad_topology_id1(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=0"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=0"))
         self.ws.close()
 
     def test_bad_topology_id2(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=foo"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=foo"))
         self.ws.close()
 
     def test_bad_sender(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
         self.ws.ws.send(json.dumps(['DeviceCreate', dict(sender=-1, name="TestSwitchA", x=100, y=100, type="switch", id=100)]))
         self.ws.ws.send(json.dumps(['DeviceDestroy', dict(sender=-1, previous_name="TestSwitchA",
                                                           previous_x=100, previous_y=100, previous_type="switch", id=100)]))
         self.ws.close()
 
     def test_unsupported_command(self):
-        self.ws = MessageHandler(create_connection("ws://localhost:8001/network_ui/tester?topology_id=143"))
+        self.ws = MessageHandler(create_connection("ws://localhost:8013/network_ui/tester?topology_id=143"))
         self.ws.recv()
         self.ws.recv()
         self.ws.send("NotSupported")

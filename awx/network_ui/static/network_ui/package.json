@@ -22,7 +22,8 @@
     "reconnectingwebsocket": "^1.0.0",
     "require": "",
     "webpack": "",
-    "titlecase": ""
+    "titlecase": "",
+    "lodash": ""
   },
   "devDependencies": {
     "eslint": "^3.17.1",
