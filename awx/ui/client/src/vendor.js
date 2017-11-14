@@ -63,9 +63,9 @@ require('ng-toast');
 require('lr-infinite-scroll');
 
 // Network Visualization
-require('angular-mousewheel')
-require('angular-xeditable')
-require('hamsterjs')
-require('titlecase')
-require('inherits')
-require('mathjs')
+require('angular-mousewheel');
+require('angular-xeditable');
+require('hamsterjs');
+require('titlecase');
+require('inherits');
+require('mathjs');

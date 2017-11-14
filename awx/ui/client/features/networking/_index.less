@@ -2,7 +2,9 @@
     border: 1px solid @at-color-panel-border;
     display:flex;
     height: 40px;
+    position: absolute;
     width:100%;
+    background-color: @default-bg;
 }
 
 .Networking-headerTitle{
@@ -48,7 +50,6 @@
 
 .Networking-panels{
     display:flex;
-    height: calc(~"100vh - 40px");
 }
 
 .Networking-leftPanel{
@@ -59,8 +60,13 @@
     border-left: 1px solid @at-color-panel-border;
     display:flex;
     width:400px;
+    height: calc(~"100vh - 40px");
     padding: 20px;
     color: @default-interface-txt;
     font-size: 14px;
     font-weight: bold;
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    background-color: @default-bg;
 }
