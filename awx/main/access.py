@@ -2243,7 +2243,7 @@ class ActivityStreamAccess(BaseAccess):
             Q(notification_template__organization__in=auditing_orgs) |
             Q(notification__notification_template__organization__in=auditing_orgs) |
             Q(label__organization__in=auditing_orgs) |
-            Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
+            Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
         ).distinct()
 
     def can_add(self, data):
