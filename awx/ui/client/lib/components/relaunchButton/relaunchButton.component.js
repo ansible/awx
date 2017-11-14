@@ -12,7 +12,7 @@ const atRelaunch = {
 function atRelaunchCtrl (RelaunchJob, InitiatePlaybookRun, strings, $scope) {
     const vm = this;
     const scope = $scope.$parent;
-    const { job } = $scope.$parent;
+    const job = _.get(scope, 'job') || _.get(scope, 'completed_job');
 
     vm.$onInit = () => {
         vm.showRelaunch = !(job.type === 'system_job') && job.summary_fields.user_capabilities.start;

@@ -92,7 +92,7 @@ export default ['i18n', function(i18n) {
                 dataPlacement: "top"
             },
             submit: {
-                icon: 'icon-launch',
+                icon: 'icon-rocket',
                 mode: 'all',
                 ngClick: 'relaunchJob($event, job.id)',
                 awToolTip: i18n._('Relaunch using the same parameters'),
