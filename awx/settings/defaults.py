@@ -71,7 +71,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = None
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -213,11 +213,11 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
-            'loaders': [
+            'loaders': [(
                 'django.template.loaders.cached.Loader',
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ],
+                ('django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',),
+            )],
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
@@ -232,7 +232,6 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
