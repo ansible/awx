@@ -109,6 +109,8 @@ def test_cred_type_input_schema_validity(input_, valid):
     ({'file': 123}, False),
     ({'file': {}}, False),
     ({'file': {'template': '{{username}}'}}, True),
+    ({'file': {'template.username': '{{username}}'}}, True),
+    ({'file': {'template.username': '{{username}}', 'template.password': '{{pass}}'}}, True),
     ({'file': {'foo': 'bar'}}, False),
     ({'env': 123}, False),
     ({'env': {}}, True),

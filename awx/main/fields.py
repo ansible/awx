@@ -695,11 +695,10 @@ class CredentialTypeInjectorField(JSONSchemaField):
             'properties': {
                 'file': {
                     'type': 'object',
-                    'properties': {
-                        'template': {'type': 'string'},
+                    'patternProperties': {
+                        '^template\.[a-zA-Z_]+$': {'type': 'string'},
                     },
                     'additionalProperties': False,
-                    'required': ['template'],
                 },
                 'env': {
                     'type': 'object',
