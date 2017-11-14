@@ -21,7 +21,7 @@ function AtInputFileController (baseInputController, eventService) {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
-        [input] = element.find('input');
+        input = element.find('input')[0]; // eslint-disable-line prefer-destructuring
 
         vm.listeners = vm.setFileListeners(input);
 
