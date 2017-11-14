@@ -272,4 +272,4 @@ class TestResourceAccessList:
 def test_related_search_reverse_FK_field():
     view = ListAPIView()
     view.model = Credential
-    assert 'jobtemplates__search' in view.related_search_fields
+    assert 'unifiedjobtemplates__search' in view.related_search_fields

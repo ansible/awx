@@ -89,8 +89,7 @@ class TestJobTemplateCopyEdit:
             job_type='run',
             project=project,
             inventory=None,  ask_inventory_on_launch=False, # not allowed
-            credential=None, ask_credential_on_launch=True,
-            name='deploy-job-template'
+            ask_credential_on_launch=True, name='deploy-job-template'
         )
         serializer = JobTemplateSerializer(jt_res, context=self.fake_context(admin_user))
         response = serializer.to_representation(jt_res)
@@ -109,22 +108,6 @@ class TestJobTemplateCopyEdit:
         serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(org_admin))
         response = serializer.to_representation(jt_copy_edit)
         assert response['summary_fields']['user_capabilities']['copy']
-        assert response['summary_fields']['user_capabilities']['edit']
-
-    def test_org_admin_foreign_cred_no_copy_edit(self, jt_copy_edit, org_admin, machine_credential):
-        """
-        Organization admins without access to the 3 related resources:
-        SHOULD NOT be able to copy JT
-        SHOULD be able to edit that job template, for nonsensitive changes
-        """
-
-        # Attach credential to JT that org admin cannot use
-        jt_copy_edit.credential = machine_credential
-        jt_copy_edit.save()
-
-        serializer = JobTemplateSerializer(jt_copy_edit, context=self.fake_context(org_admin))
-        response = serializer.to_representation(jt_copy_edit)
-        assert not response['summary_fields']['user_capabilities']['copy']
         assert response['summary_fields']['user_capabilities']['edit']
 
     def test_jt_admin_copy_edit(self, jt_copy_edit, rando):
@@ -302,27 +285,22 @@ def test_prefetch_group_capabilities(group, rando):
 
 
 @pytest.mark.django_db
-def test_prefetch_jt_copy_capability(job_template, project, inventory,
-                                     machine_credential, vault_credential, rando):
+def test_prefetch_jt_copy_capability(job_template, project, inventory, rando):
     job_template.project = project
     job_template.inventory = inventory
-    job_template.credential = machine_credential
-    job_template.vault_credential = vault_credential
     job_template.save()
 
     qs = JobTemplate.objects.all()
     cache_list_capabilities(qs, [{'copy': [
-        'project.use', 'inventory.use', 'credential.use', 'vault_credential.use'
+        'project.use', 'inventory.use',
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': False}
 
     project.use_role.members.add(rando)
     inventory.use_role.members.add(rando)
-    machine_credential.use_role.members.add(rando)
-    vault_credential.use_role.members.add(rando)
 
     cache_list_capabilities(qs, [{'copy': [
-        'project.use', 'inventory.use', 'credential.use', 'vault_credential.use'
+        'project.use', 'inventory.use',
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': True}
 

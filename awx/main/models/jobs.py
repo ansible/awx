@@ -91,26 +91,6 @@ class JobOptions(BaseModel):
         default='',
         blank=True,
     )
-    credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    vault_credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss_as_vault_credential+',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    extra_credentials = models.ManyToManyField(
-        'Credential',
-        related_name='%(class)ss_as_extra_credential+',
-    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -185,21 +165,30 @@ class JobOptions(BaseModel):
         return cred
 
     @property
-    def all_credentials(self):
-        credentials = list(self.extra_credentials.all())
-        if self.vault_credential:
-            credentials.insert(0, self.vault_credential)
-        if self.credential:
-            credentials.insert(0, self.credential)
-        return credentials
-
-    @property
     def network_credentials(self):
-        return [cred for cred in self.extra_credentials.all() if cred.credential_type.kind == 'net']
+        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'net']
 
     @property
     def cloud_credentials(self):
-        return [cred for cred in self.extra_credentials.all() if cred.credential_type.kind == 'cloud']
+        return [cred for cred in self.credentials.all() if cred.credential_type.kind == 'cloud']
+
+    @property
+    def credential(self):
+        cred = self.get_deprecated_credential('ssh')
+        if cred is not None:
+            return cred.pk
+
+    @property
+    def vault_credential(self):
+        cred = self.get_deprecated_credential('vault')
+        if cred is not None:
+            return cred.pk
+
+    def get_deprecated_credential(self, kind):
+        try:
+            return [cred for cred in self.credentials.all() if cred.credential_type.kind == kind][0]
+        except IndexError:
+            return None
 
     # TODO: remove when API v1 is removed
     @property
@@ -221,10 +210,8 @@ class JobOptions(BaseModel):
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
         needed = []
-        if self.credential:
-            needed.extend(self.credential.passwords_needed)
-        if self.vault_credential:
-            needed.extend(self.vault_credential.passwords_needed)
+        for cred in self.credentials.all():
+            needed.extend(cred.passwords_needed)
         return needed
 
 
@@ -234,6 +221,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     playbook) to an inventory source with a given credential.
     '''
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
+    PASSWORD_FIELDS = ('credential', 'vault_credential')
 
     class Meta:
         app_label = 'main'
@@ -298,12 +286,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'vault_credential',
-                'extra_credentials', 'forks', 'schedule', 'limit', 'verbosity',
-                'job_tags', 'extra_vars', 'launch_type', 'force_handlers',
-                'skip_tags', 'start_at_task', 'become_enabled', 'labels',
-                'survey_passwords', 'allow_simultaneous', 'timeout',
-                'use_fact_cache', 'diff_mode',]
+                'playbook', 'credentials', 'forks', 'schedule', 'limit',
+                'verbosity', 'job_tags', 'extra_vars', 'launch_type',
+                'force_handlers', 'skip_tags', 'start_at_task',
+                'become_enabled', 'labels', 'survey_passwords',
+                'allow_simultaneous', 'timeout', 'use_fact_cache',
+                'diff_mode',]
 
     def resource_validation_data(self):
         '''
@@ -317,10 +305,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             resources_needed_to_start.append('inventory')
             if not self.ask_inventory_on_launch:
                 validation_errors['inventory'] = [_("Job Template must provide 'inventory' or allow prompting for it."),]
-        if self.credential is None and self.vault_credential is None:
-            resources_needed_to_start.append('credential')
-            if not self.ask_credential_on_launch:
-                validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
 
         # Job type dependent checks
         if self.project is None:
@@ -379,9 +363,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             job_type=self.ask_job_type_on_launch,
             verbosity=self.ask_verbosity_on_launch,
             inventory=self.ask_inventory_on_launch,
-            credential=self.ask_credential_on_launch,
-            vault_credential=self.ask_credential_on_launch,
-            extra_credentials=self.ask_credential_on_launch,
+            credentials=self.ask_credential_on_launch,
         )
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
@@ -714,17 +696,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
-
-    # Job Credential required
-    @property
-    def can_start(self):
-        if not super(Job, self).can_start:
-            return False
-
-        if not (self.credential) and not (self.vault_credential):
-            return False
-
-        return True
 
     '''
     JobNotificationMixin

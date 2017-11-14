@@ -128,9 +128,6 @@ def job_template_with_ids(job_template_factory):
     cloud_type = CredentialType(kind='aws')
     cloud_cred = Credential(id=3, pk=3, name='testcloudcred', credential_type=cloud_type)
 
-    vault_type = CredentialType(kind='vault')
-    vault_cred = Credential(id=4, pk=4, name='testnetcred', credential_type=vault_type)
-
     inv = Inventory(id=11, pk=11, name='testinv')
     proj = Project(id=14, pk=14, name='testproj')
 
@@ -138,7 +135,6 @@ def job_template_with_ids(job_template_factory):
         'testJT', project=proj, inventory=inv, credential=credential,
         cloud_credential=cloud_cred, network_credential=net_cred,
         persisted=False)
-    jt_objects.job_template.vault_credential = vault_cred
     return jt_objects.job_template
 
 
@@ -184,9 +180,7 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
 
     mock_add.assert_called_once_with({
         'inventory': data['inventory'],
-        'project': job_template_with_ids.project.id,
-        'credential': job_template_with_ids.credential.id,
-        'vault_credential': job_template_with_ids.vault_credential.id
+        'project': job_template_with_ids.project.id
     })
 
 

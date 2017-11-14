@@ -1,13 +1,14 @@
 import pytest
 import json
 
+import mock
+
 
 def test_missing_project_error(job_template_factory):
     objects = job_template_factory(
         'missing-project-jt',
         organization='org1',
         inventory='inventory1',
-        credential='cred1',
         persisted=False)
     obj = objects.job_template
     assert 'project' in obj.resources_needed_to_start
@@ -15,27 +16,24 @@ def test_missing_project_error(job_template_factory):
     assert 'project' in validation_errors
 
 
-def test_inventory_credential_need_to_start(job_template_factory):
+def test_inventory_need_to_start(job_template_factory):
     objects = job_template_factory(
         'job-template-few-resources',
         project='project1',
         persisted=False)
     obj = objects.job_template
     assert 'inventory' in obj.resources_needed_to_start
-    assert 'credential' in obj.resources_needed_to_start
 
 
-def test_inventory_credential_contradictions(job_template_factory):
+def test_inventory_contradictions(job_template_factory):
     objects = job_template_factory(
         'job-template-paradox',
         project='project1',
         persisted=False)
     obj = objects.job_template
     obj.ask_inventory_on_launch = False
-    obj.ask_credential_on_launch = False
     validation_errors, resources_needed_to_start = obj.resource_validation_data()
     assert 'inventory' in validation_errors
-    assert 'credential' in validation_errors
 
 
 def test_survey_answers_as_string(job_template_factory):
@@ -142,4 +140,5 @@ def test_job_template_can_start_with_callback_extra_vars_provided(job_template_f
     )
     obj = objects.job_template
     obj.ask_variables_on_launch = True
-    assert obj.can_start_without_user_input(callback_extra_vars='{"foo": "bar"}') is True
+    with mock.patch.object(obj.__class__, 'passwords_needed_to_start', []):
+        assert obj.can_start_without_user_input(callback_extra_vars='{"foo": "bar"}') is True

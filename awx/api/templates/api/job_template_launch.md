@@ -26,9 +26,6 @@ The response will include the following fields:
   job_template (array, read-only)
 * `survey_enabled`: Flag indicating whether the job_template has an enabled
   survey (boolean, read-only)
-* `credential_needed_to_start`: Flag indicating the presence of a credential
-  associated with the job template.  If not then one should be supplied when
-  launching the job (boolean, read-only)
 * `inventory_needed_to_start`: Flag indicating the presence of an inventory
   associated with the job template.  If not then one should be supplied when
   launching the job (boolean, read-only)
@@ -36,9 +33,8 @@ The response will include the following fields:
 Make a POST request to this resource to launch the job_template. If any
 passwords, inventory, or extra variables (extra_vars) are required, they must
 be passed via POST data, with extra_vars given as a YAML or JSON string and
-escaped parentheses. If `credential_needed_to_start` is `True` then the
-`credential` field is required and if the `inventory_needed_to_start` is
-`True` then the `inventory` is required as well.
+escaped parentheses. If the `inventory_needed_to_start` is `True` then the
+`inventory` is required.
 
 If successful, the response status code will be 201.  If any required passwords
 are not provided, a 400 status code will be returned.  If the job cannot be

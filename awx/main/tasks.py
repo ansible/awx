@@ -791,12 +791,15 @@ class BaseTask(LogErrorsTask):
             safe_env = self.build_safe_env(env, **kwargs)
 
             # handle custom injectors specified on the CredentialType
-            if hasattr(instance, 'all_credentials'):
-                credentials = instance.all_credentials
+            credentials = []
+            if isinstance(instance, Job):
+                credentials = instance.credentials.all()
             elif hasattr(instance, 'credential'):
+                # once other UnifiedJobs (project updates, inventory updates)
+                # move from a .credential -> .credentials model, we can
+                # lose this block
                 credentials = [instance.credential]
-            else:
-                credentials = []
+
             for credential in credentials:
                 if credential:
                     credential.credential_type.inject_credential(
@@ -927,7 +930,7 @@ class RunJob(BaseTask):
         }
         '''
         private_data = {'credentials': {}}
-        for credential in job.all_credentials:
+        for credential in job.credentials.all():
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.ssh_key_data not in (None, ''):
@@ -957,11 +960,11 @@ class RunJob(BaseTask):
         and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
-        for cred, fields in {
-            'credential': ('ssh_key_unlock', 'ssh_password', 'become_password'),
-            'vault_credential': ('vault_password',)
+        for kind, fields in {
+            'ssh': ('ssh_key_unlock', 'ssh_password', 'become_password'),
+            'vault': ('vault_password',)
         }.items():
-            cred = getattr(job, cred, None)
+            cred = job.get_deprecated_credential(kind)
             if cred:
                 for field in fields:
                     if field == 'ssh_password':
@@ -1072,7 +1075,8 @@ class RunJob(BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         '''
-        creds = job.credential
+        creds = job.get_deprecated_credential('ssh')
+
         ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)

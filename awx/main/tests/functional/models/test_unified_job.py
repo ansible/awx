@@ -50,14 +50,15 @@ class TestCreateUnifiedJob:
         mocked.all.assert_called_with()
 
     '''
-    Ensure that extra_credentials m2m field is copied to new relaunched job
+    Ensure that credentials m2m field is copied to new relaunched job
     '''
     def test_job_relaunch_copy_vars(self, machine_credential, inventory,
                                     deploy_jobtemplate, post, mocker, net_credential):
-        job_with_links = Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+        job_with_links = Job.objects.create(name='existing-job', inventory=inventory)
         job_with_links.job_template = deploy_jobtemplate
         job_with_links.limit = "my_server"
-        job_with_links.extra_credentials.add(net_credential)
+        job_with_links.credentials.add(machine_credential)
+        job_with_links.credentials.add(net_credential)
         with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
                           return_value=['inventory', 'credential', 'limit']):
             second_job = job_with_links.copy_unified_job()
@@ -66,7 +67,7 @@ class TestCreateUnifiedJob:
         assert second_job.credential == job_with_links.credential
         assert second_job.inventory == job_with_links.inventory
         assert second_job.limit == 'my_server'
-        assert net_credential in second_job.extra_credentials.all()
+        assert net_credential in second_job.credentials.all()
 
 
 @pytest.mark.django_db

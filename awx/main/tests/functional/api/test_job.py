@@ -10,7 +10,7 @@ def test_extra_credentials(get, organization_factory, job_template_factory, cred
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
-    jt.extra_credentials.add(credential)
+    jt.credentials.add(credential)
     jt.save()
     job = jt.create_unified_job()
 
@@ -22,8 +22,8 @@ def test_extra_credentials(get, organization_factory, job_template_factory, cred
 @pytest.mark.django_db
 def test_job_relaunch_permission_denied_response(
         post, get, inventory, project, credential, net_credential, machine_credential):
-    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project,
-                                    credential=machine_credential)
+    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
+    jt.credentials.add(machine_credential)
     jt_user = User.objects.create(username='jobtemplateuser')
     jt.execute_role.members.add(jt_user)
     job = jt.create_unified_job()
@@ -33,7 +33,7 @@ def test_job_relaunch_permission_denied_response(
     assert r.data['summary_fields']['user_capabilities']['start']
 
     # Job has prompted extra_credential, launch denied w/ message
-    job.extra_credentials.add(net_credential)
+    job.credentials.add(net_credential)
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields' in r.data['detail']
     assert 'do not have permission' in r.data['detail']
@@ -50,8 +50,9 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
     h3 = inventory.hosts.create(name='host3')  # failed host
     jt = JobTemplate.objects.create(
         name='testjt', inventory=inventory,
-        project=project, credential=machine_credential
+        project=project
     )
+    jt.credentials.add(machine_credential)
     job = jt.create_unified_job(_eager_fields={'status': 'failed', 'limit': 'host1,host2,host3'})
     job.job_events.create(event='playbook_on_stats')
     job.job_host_summaries.create(host=h1, failed=False, ok=1, changed=0, failures=0, host_name=h1.name)

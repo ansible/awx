@@ -45,10 +45,10 @@ class Command(BaseCommand):
                                 inventory=i,
                                 variables="ansible_connection: local",
                                 created_by=superuser)
-            JobTemplate.objects.create(name='Demo Job Template',
-                                       playbook='hello_world.yml',
-                                       project=p,
-                                       inventory=i,
-                                       credential=c)
+            jt = JobTemplate.objects.create(name='Demo Job Template',
+                                            playbook='hello_world.yml',
+                                            project=p,
+                                            inventory=i)
+            jt.credentials.add(c)
         print('Default organization added.')
         print('Demo Credential, Inventory, and Job Template added.')

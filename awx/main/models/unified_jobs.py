@@ -149,6 +149,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default='ok',
         editable=False,
     )
+    credentials = models.ManyToManyField(
+        'Credential',
+        related_name='%(class)ss',
+    )
     labels = models.ManyToManyField(
         "Label",
         blank=True,
@@ -578,6 +582,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         on_delete=models.SET_NULL,
         help_text=_('The Rampart/Instance group the job was run under'),
+    )
+    credentials = models.ManyToManyField(
+        'Credential',
+        related_name='%(class)ss',
     )
 
     def get_absolute_url(self, request=None):

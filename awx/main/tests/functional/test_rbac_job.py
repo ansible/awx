@@ -138,28 +138,29 @@ def test_project_org_admin_delete_allowed(normal_job, org_admin):
 class TestJobRelaunchAccess:
 
     def test_job_relaunch_normal_resource_access(self, user, inventory, machine_credential):
-        job_with_links = Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+        job_with_links = Job.objects.create(name='existing-job', inventory=inventory)
+        job_with_links.credentials.add(machine_credential)
         inventory_user = user('user1', False)
         credential_user = user('user2', False)
         both_user = user('user3', False)
 
         # Confirm that a user with inventory & credential access can launch
-        job_with_links.credential.use_role.members.add(both_user)
+        machine_credential.use_role.members.add(both_user)
         job_with_links.inventory.use_role.members.add(both_user)
         assert both_user.can_access(Job, 'start', job_with_links, validate_license=False)
 
         # Confirm that a user with credential access alone cannot launch
-        job_with_links.credential.use_role.members.add(credential_user)
+        machine_credential.use_role.members.add(credential_user)
         assert not credential_user.can_access(Job, 'start', job_with_links, validate_license=False)
 
         # Confirm that a user with inventory access alone cannot launch
         job_with_links.inventory.use_role.members.add(inventory_user)
         assert not inventory_user.can_access(Job, 'start', job_with_links, validate_license=False)
 
-    def test_job_relaunch_extra_credential_access(
+    def test_job_relaunch_credential_access(
             self, inventory, project, credential, net_credential):
         jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
-        jt.extra_credentials.add(credential)
+        jt.credentials.add(credential)
         job = jt.create_unified_job()
 
         # Job is unchanged from JT, user has ability to launch
@@ -168,11 +169,11 @@ class TestJobRelaunchAccess:
         assert jt_user in job.job_template.execute_role
         assert jt_user.can_access(Job, 'start', job, validate_license=False)
 
-        # Job has prompted extra_credential, launch denied w/ message
-        job.extra_credentials.add(net_credential)
+        # Job has prompted net credential, launch denied w/ message
+        job.credentials.add(net_credential)
         assert not jt_user.can_access(Job, 'start', job, validate_license=False)
 
-    def test_prompted_extra_credential_relaunch_denied(
+    def test_prompted_credential_relaunch_denied(
             self, inventory, project, net_credential, rando):
         jt = JobTemplate.objects.create(
             name='testjt', inventory=inventory, project=project,
@@ -180,11 +181,11 @@ class TestJobRelaunchAccess:
         job = jt.create_unified_job()
         jt.execute_role.members.add(rando)
 
-        # Job has prompted extra_credential, rando lacks permission to use it
-        job.extra_credentials.add(net_credential)
+        # Job has prompted net credential, rando lacks permission to use it
+        job.credentials.add(net_credential)
         assert not rando.can_access(Job, 'start', job, validate_license=False)
 
-    def test_prompted_extra_credential_relaunch_allowed(
+    def test_prompted_credential_relaunch_allowed(
             self, inventory, project, net_credential, rando):
         jt = JobTemplate.objects.create(
             name='testjt', inventory=inventory, project=project,
@@ -192,23 +193,24 @@ class TestJobRelaunchAccess:
         job = jt.create_unified_job()
         jt.execute_role.members.add(rando)
 
-        # Job has prompted extra_credential, but rando can use it
+        # Job has prompted net credential, but rando can use it
         net_credential.use_role.members.add(rando)
-        job.extra_credentials.add(net_credential)
+        job.credentials.add(net_credential)
         assert rando.can_access(Job, 'start', job, validate_license=False)
 
-    def test_extra_credential_relaunch_recreation_permission(
+    def test_credential_relaunch_recreation_permission(
             self, inventory, project, net_credential, credential, rando):
         jt = JobTemplate.objects.create(
             name='testjt', inventory=inventory, project=project,
-            credential=credential, ask_credential_on_launch=True)
+            ask_credential_on_launch=True)
         job = jt.create_unified_job()
         project.admin_role.members.add(rando)
         inventory.admin_role.members.add(rando)
         credential.admin_role.members.add(rando)
 
-        # Relaunch blocked by the extra credential
-        job.extra_credentials.add(net_credential)
+        # Relaunch blocked by the net credential
+        job.credentials.add(credential)
+        job.credentials.add(net_credential)
         assert not rando.can_access(Job, 'start', job, validate_license=False)
 
 

@@ -54,12 +54,11 @@ class TestImplicitRolesOmitted:
         assert qs[1].operation == 'delete'
 
     @pytest.mark.django_db
-    def test_activity_stream_create_JT(self, project, inventory, credential):
+    def test_activity_stream_create_JT(self, project, inventory):
         JobTemplate.objects.create(
             name='test-jt',
             project=project,
             inventory=inventory,
-            credential=credential
         )
         qs = ActivityStream.objects.filter(job_template__isnull=False)
         assert qs.count() == 1
