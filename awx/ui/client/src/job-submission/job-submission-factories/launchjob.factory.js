@@ -11,7 +11,6 @@ export default
                 job_launch_data = {},
                 url = params.url,
                 submitJobType = params.submitJobType,
-                relaunchHostType = params.relaunchHostType,
                 vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 extra_vars;
