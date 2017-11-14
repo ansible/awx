@@ -237,7 +237,7 @@ def test_job_launch_fails_without_credential_access(job_template_prompts, runtim
     response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                     dict(credentials=runtime_data['credentials']), rando, expect=403)
 
-    assert response.data['detail'] == u'You do not have permission to perform this action.'
+    assert response.data['detail'] == u'You do not have access to credential runtime-cred'
 
 
 @pytest.mark.django_db
