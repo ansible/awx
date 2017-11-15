@@ -678,11 +678,12 @@ class BaseTask(LogErrorsTask):
         return False
 
     def build_inventory(self, instance, **kwargs):
-        path = os.path.join(kwargs['private_data_dir'], 'inventory')
-        with open(path, 'w') as f:
-            json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
-            f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
-            os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
+        json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
+        handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+        f = os.fdopen(handle, 'w')
+        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
+        f.close()
+        os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
         return path
 
     def build_args(self, instance, **kwargs):
