@@ -33,7 +33,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
   //
-  $scope.inventory_id = $location.search().inventory_id || 0;
+  $scope.inventory_id = $location.search().inventory_id || 1;
 
   if (!$scope.disconnected) {
   $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
@@ -353,11 +353,23 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     // Event Handlers
 
     $scope.normalize_mouse_event = function ($event) {
-        if (_.has($event, 'pageX')) {
+        if ($event.pageX !== undefined) {
             $event.x = $event.pageX;
         }
-        if (_.has($event, 'pageY')) {
+        if ($event.pageY !== undefined) {
             $event.y = $event.pageY;
+        }
+        if ($event.originalEvent !== undefined) {
+            var originalEvent = $event.originalEvent;
+            if (originalEvent.wheelDelta !== undefined) {
+                $event.delta = $event.originalEvent.wheelDelta;
+            }
+            if (originalEvent.wheelDeltaX !== undefined) {
+                $event.deltaX = $event.originalEvent.wheelDeltaX;
+            }
+            if (originalEvent.wheelDeltaY !== undefined) {
+                $event.deltaY = $event.originalEvent.wheelDeltaY;
+            }
         }
     };
 
@@ -423,9 +435,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     $scope.onMouseEnter = $scope.onMouseOver;
 
     $scope.onMouseWheel = function ($event) {
-      var delta = $event.originalEvent.wheelDelta;
-      var deltaX = $event.originalEvent.wheelDeltaX;
-      var deltaY = $event.originalEvent.wheelDeltaY;
+      $scope.normalize_mouse_event($event);
+      var delta = $event.delta;
+      var deltaX = $event.deltaX;
+      var deltaY = $event.deltaY;
       console.log([$event, delta, deltaX, deltaY]);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
