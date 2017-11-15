@@ -338,3 +338,30 @@ def test_extra_creds_prompted_at_launch(get, post, job_template, admin, net_cred
 def test_invalid_mixed_credentials_specification(get, post, job_template, admin, net_credential):
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     post(url, {'credentials': [net_credential.pk], 'extra_credentials': [net_credential.pk]}, admin, expect=400)
+
+
+@pytest.mark.django_db
+def test_rbac_default_credential_usage(get, post, job_template, alice, machine_credential):
+    job_template.credentials.add(machine_credential)
+    job_template.execute_role.members.add(alice)
+    job_template.save()
+
+    # alice can launch; she's not adding any _new_ credentials, and she has
+    # execute access to the JT
+    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
+    post(url, {'credential': machine_credential.pk}, alice, expect=201)
+
+    # make (copy) a _new_ SSH cred
+    new_cred = machine_credential
+    new_cred.pk = None
+    new_cred.save()
+
+    # alice is attempting to launch with a *different* SSH cred, but
+    # she does not have access to it, so she cannot launch
+    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
+    post(url, {'credential': new_cred.pk}, alice, expect=403)
+
+    # if alice has gains access to the credential, she *can* launch
+    new_cred.use_role.members.add(alice)
+    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
+    post(url, {'credential': new_cred.pk}, alice, expect=201)

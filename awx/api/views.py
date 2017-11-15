@@ -2797,10 +2797,14 @@ class JobTemplateLaunch(RetrieveAPIView):
             if request.user not in use_role:
                 raise PermissionDenied()
 
-        for cred in prompted_fields.get('credentials', []):
-            new_credential = get_object_or_400(Credential, pk=cred)
-            if request.user not in new_credential.use_role:
-                raise PermissionDenied()
+        # For credentials that are _added_ via launch parameters, ensure the
+        # launching user has access
+        current_credentials = set(obj.credentials.values_list('id', flat=True))
+        for new_cred in Credential.objects.filter(id__in=prompted_fields.get('credentials', [])):
+            if new_cred.pk not in current_credentials and request.user not in new_cred.use_role:
+                raise PermissionDenied(_(
+                    "You do not have access to credential {}".format(new_cred.name)
+                ))
 
         new_job = obj.create_unified_job(**prompted_fields)
         result = new_job.signal_start(**passwords)
@@ -2994,7 +2998,7 @@ class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobTemplateExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
@@ -3790,7 +3794,7 @@ class JobExtraCredentialsList(JobCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(**{'credential_type__kind__in': ['cloud', 'net']})
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
         return sublist_qs
 
 
