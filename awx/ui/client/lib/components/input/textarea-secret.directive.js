@@ -21,6 +21,7 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         baseInputController.call(vm, 'input', _scope_, element, form);
 
         scope = _scope_;
+
         [textarea] = element.find('textarea');
 
         if (scope.state.format === 'ssh_private_key') {
@@ -38,10 +39,15 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         }
 
         vm.check();
+
+        scope.$watch('state[state._activeModel]', () => vm.check());
+        scope.$watch('state._isBeingReplaced', () => vm.onIsBeingReplacedChanged());
     };
 
-    vm.toggle = () => {
-        vm.toggleRevertReplace();
+    vm.onIsBeingReplacedChanged = () => {
+        if (!scope.state._touched) return;
+
+        vm.onRevertReplaceToggle();
 
         if (scope.state._isBeingReplaced) {
             scope.state._placeholder = '';
@@ -50,7 +56,10 @@ function AtInputTextareaSecretController (baseInputController, eventService) {
         } else {
             scope.state._displayHint = false;
             scope.state._placeholder = vm.strings.get('ENCRYPTED');
-            eventService.remove(vm.listeners);
+
+            if (vm.listeners) {
+                eventService.remove(vm.listeners);
+            }
         }
     };
 
