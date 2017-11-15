@@ -1,4 +1,5 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
+var _ = require('lodash');
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
@@ -27,7 +28,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   var i = 0;
 
   $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -352,8 +353,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     // Event Handlers
 
     $scope.normalize_mouse_event = function ($event) {
-        $event.x = $event.pageX;
-        $event.y = $event.pageY;
+        if (_.has($event, 'pageX')) {
+            $event.x = $event.pageX;
+        }
+        if (_.has($event, 'pageY')) {
+            $event.y = $event.pageY;
+        }
     };
 
     $scope.onMouseDown = function ($event) {
@@ -612,16 +617,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
     // Buttons
 
     $scope.buttons = [
-      new models.Button("DEPLOY", 10, 10, 70, 30, $scope.onDeployButton),
-      new models.Button("DESTROY", 90, 10, 80, 30, $scope.onDestroyButton),
-      new models.Button("RECORD", 180, 10, 80, 30, $scope.onRecordButton),
-      new models.Button("EXPORT", 270, 10, 70, 30, $scope.onExportButton),
-      new models.Button("DISCOVER", 350, 10, 80, 30, $scope.onDiscoverButton),
-      new models.Button("LAYOUT", 440, 10, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", 520, 10, 90, 30, $scope.onConfigureButton)
+      new models.Button("DEPLOY", 10, 48, 70, 30, $scope.onDeployButton),
+      new models.Button("DESTROY", 90, 48, 80, 30, $scope.onDestroyButton),
+      new models.Button("RECORD", 180, 48, 80, 30, $scope.onRecordButton),
+      new models.Button("EXPORT", 270, 48, 70, 30, $scope.onExportButton),
+      new models.Button("DISCOVER", 350, 48, 80, 30, $scope.onDiscoverButton),
+      new models.Button("LAYOUT", 440, 48, 70, 30, $scope.onLayoutButton),
+      new models.Button("CONFIGURE", 520, 48, 90, 30, $scope.onConfigureButton)
     ];
-
-    $scope.buttons = [];
 
     var LAYERS_X = 160;
 
