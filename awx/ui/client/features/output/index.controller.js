@@ -1,38 +1,100 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 
+let ansi;
+
+const EVENT_START_TASK = 'playbook_on_task_start';
+const EVENT_START_PLAY = 'playbook_on_play_start';
+const EVENT_STATS_PLAY = 'playbook_on_stats';
+
+const EVENT_GROUPS = [
+    EVENT_START_TASK,
+    EVENT_START_PLAY
+];
+
+const TIME_EVENTS = [
+    EVENT_START_TASK,
+    EVENT_START_PLAY,
+    EVENT_STATS_PLAY
+];
+
 function JobsIndexController (job, $sce) {
     const vm = this || {};
-    const results = job.get('related.job_events.results');
-    const ansi = new Ansi({});
+    const events = job.get('related.job_events.results');
 
-    /*
-     *    const colors = [];
-     *
-     *    for (let i = 0; i < 255; i++) {
-     *        colors.push('#ababab');
-     *    }
-     *
-     */
+    ansi = new Ansi();
 
-    let html = '';
-    results.forEach((line, i) => {
-        if (!line.stdout) {
-            return;
-        }
-
-        let output;
-
-        if (hasAnsi(line.stdout)) {
-            output = ansi.toHtml(line.stdout);
-        } else {
-            output = line.stdout; // .replace(/(\n|\r)/g, '');
-        }
-
-        html += `<tr><td>${i}</td><td>${output}</td></tr>`;
-    });
+    const html = parseEvents(events);
 
     vm.html = $sce.trustAsHtml(html);
+}
+
+function parseEvents (events) {
+    events.sort((a, b) => a.start_line > b.start_line);
+
+    return events.reduce((html, event) => `${html}${parseLine(event)}`, '');
+}
+
+function parseLine (event) {
+    if (!event || !event.stdout) {
+        return '';
+    }
+
+    const { stdout } = event;
+    const lines = stdout.split('\r\n');
+
+    let ln = event.start_line;
+
+    return lines.reduce((html, line, i) => {
+        ln++;
+
+        const time = getTime(event, i);
+        const group = getGroup(event, i);
+
+        return `${html}${createRow(ln, line, time, group)}`;
+    }, '');
+}
+
+function createRow (ln, content, time, group) {
+    content = hasAnsi(content) ? ansi.toHtml(content) : content;
+
+    let expand = '';
+    if (group.parent) {
+        expand = '<i class="fa fa-caret-down"></i>';
+    }
+
+    return `
+        <tr class="${group.classList}">
+            <td class="at-Stdout-expand">${expand}</td>
+            <td class="at-Stdout-lineNumber">${ln}</td>
+            <td class="at-Stdout-content">${content}</td>
+            <td class="at-Stdout-timestamp">${time}</td>
+        </tr>`;
+}
+
+function getGroup (event, i) {
+    const group = {};
+
+    if (EVENT_GROUPS.includes(event.event) && i === 1) {
+        group.parent = true;
+        group.classList = `parent parent-${event.event_level}`;
+    } else {
+        group.classList = '';
+    }
+
+    group.level = event.event_level;
+
+    return group;
+}
+
+function getTime (event, i) {
+    if (!TIME_EVENTS.includes(event.event) || i !== 1) {
+        return '';
+    }
+
+    const date = new Date(event.created);
+
+    return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
 
 JobsIndexController.$inject = ['job', '$sce'];

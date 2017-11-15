@@ -8,7 +8,7 @@ const MODULE_NAME = 'at.features.output';
 function JobsRun ($stateExtender, strings) {
     $stateExtender.addState({
         name: 'jobz',
-        route: '/jobz',
+        route: '/jobz/:id',
         ncyBreadcrumb: {
             label: strings.get('state.TITLE')
         },
@@ -24,9 +24,12 @@ function JobsRun ($stateExtender, strings) {
             }
         },
         resolve: {
-            job: ['JobsModel', Jobs => new Jobs('get', 1002)
-                .then(job => job.extend('job_events'))
-            ]
+            job: ['JobsModel', '$stateParams', (Jobs, $stateParams) => {
+                const { id } = $stateParams;
+
+                return new Jobs('get', id)
+                    .then(job => job.extend('job_events'));
+            }]
         }
     });
 }
