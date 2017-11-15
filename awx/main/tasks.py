@@ -357,9 +357,9 @@ def handle_work_success(self, result, task_actual):
     run_job_complete.delay(instance.id)
 
 
-@shared_task(bind=True, queue='tower', base=LogErrorsTask)
-def handle_work_error(self, task_id, subtasks=None):
-    logger.debug('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
+@shared_task(queue='tower', base=LogErrorsTask)
+def handle_work_error(request, exc, traceback, task_id, subtasks=None):
+    logger.debug('Executing error task id %s, subtasks: %s' % (request.id, str(subtasks)))
     first_instance = None
     first_instance_type = ''
     if subtasks is not None:
