@@ -318,6 +318,9 @@ class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
+    def get_jobs_fail_chain(self):
+        return [self.project_update] if self.project_update else []
+
     def dependent_jobs_finished(self):
         for j in self.dependent_jobs.all():
             if j.status in ['pending', 'waiting', 'running']:
