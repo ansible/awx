@@ -68,14 +68,17 @@
       when: docker_registry is defined
       delegate_to: localhost
 
+    - name: Enable image stream lookups for awx images
+      shell: "oc set image-lookup --all -n {{ awx_openshift_project }}"
+
     - name: Set full web image path
       set_fact:
-        awx_web_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}"
+        awx_web_openshift_image: "{{ awx_web_image }}:{{ awx_version }}"
       when: awx_web_openshift_image is not defined
 
     - name: Set full task image path
       set_fact:
-        awx_task_openshift_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}"
+        awx_task_openshift_image: "{{ awx_task_image }}:{{ awx_version }}"
       when: awx_task_openshift_image is not defined
   when: dockerhub_base is not defined
 
