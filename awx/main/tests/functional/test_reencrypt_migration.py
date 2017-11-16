@@ -12,6 +12,8 @@ from awx.main.models import (
     UnifiedJob,
     Job,
     JobTemplate,
+    WorkflowJob,
+    WorkflowJobTemplate,
     NotificationTemplate,
     Credential,
 )
@@ -99,9 +101,13 @@ def test_unified_job_migration(old_enc, new_enc, value):
 
 
 @pytest.mark.django_db
-def test_survey_default_password_encryption(job_template_factory):
-    jt = job_template_factory('jt', organization='org1', project='prj',
-                              inventory='inv', credential='cred').job_template
+@pytest.mark.parametrize("attr, cls", [
+    ['job_template', JobTemplate],
+    ['workflow_job_template', WorkflowJobTemplate]
+])
+def test_survey_default_password_encryption(attr, cls, request):
+    factory = request.getfuncargvalue('{}_factory'.format(attr))
+    jt = getattr(factory('jt'), attr)
     jt.survey_enabled = True
     jt.survey_spec = {
         'description': 'A survey',
@@ -117,15 +123,19 @@ def test_survey_default_password_encryption(job_template_factory):
     }
     jt.save()
 
-    _encrypt_survey_passwords(Job, JobTemplate)
-    spec = JobTemplate.objects.get(pk=jt.pk).survey_spec['spec']
+    _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate)
+    spec = cls.objects.get(pk=jt.pk).survey_spec['spec']
     assert decrypt_value(get_encryption_key('value', pk=None), spec[0]['default']) == 'SUPERSECRET'
 
 
 @pytest.mark.django_db
-def test_job_survey_vars_encryption(job_template_factory):
-    jt = job_template_factory('jt', organization='org1', project='prj',
-                              inventory='inv', credential='cred').job_template
+@pytest.mark.parametrize("attr, cls", [
+    ['job_template', Job],
+    ['workflow_job_template', WorkflowJob]
+])
+def test_job_survey_vars_encryption(attr, cls, request):
+    factory = request.getfuncargvalue('{}_factory'.format(attr))
+    jt = getattr(factory('jt'), attr)
     jt.survey_enabled = True
     jt.survey_spec = {
         'description': 'A survey',
@@ -144,6 +154,6 @@ def test_job_survey_vars_encryption(job_template_factory):
     job.extra_vars = json.dumps({'secret_value': 'SUPERSECRET'})
     job.save()
 
-    _encrypt_survey_passwords(Job, JobTemplate)
-    job = Job.objects.get(pk=job.pk)
+    _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate)
+    job = cls.objects.get(pk=job.pk)
     assert json.loads(job.decrypted_extra_vars()) == {'secret_value': 'SUPERSECRET'}
