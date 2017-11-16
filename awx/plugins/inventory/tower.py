@@ -68,8 +68,7 @@ def parse_configuration():
     if not inventory:
         errors.append("Missing TOWER_INVENTORY in environment")
     if errors:
-        print("\n".join(errors))
-        sys.exit(1)
+        raise RuntimeError("\n".join(errors))
         
     return dict(tower_host=host_name,
                 tower_user=username,
@@ -92,12 +91,10 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
             if config_response.ok:
                 source_type = config_response.json()['license_info']['license_type']
                 if not source_type == license_type:
-                    print("Tower server licenses must match: source: {} local: {}".format(source_type,
-                                                                                          license_type))
-                    sys.exit(1)
+                    raise RuntimeError("Tower server licenses must match: source: {} local: {}".format(source_type,
+                                                                                                       license_type))
             else:
-                print("Failed to validate the license of the remote Tower: {}".format(config_response.data))
-                sys.exit(1)
+                raise RuntimeError("Failed to validate the license of the remote Tower: {}".format(config_response.data))
 
         response = requests.get(inventory_url,
                                 auth=HTTPBasicAuth(tower_user, tower_pass),
@@ -110,8 +107,7 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
         reason = "Connection to remote host failed: {}".format(e)
     except json.JSONDecodeError, e:
         reason = "Failed to parse json from host: {}".format(e)
-    print(reason)
-    sys.exit(1)
+    raise RuntimeError(reason)
 
 
 def main():
@@ -127,6 +123,7 @@ def main():
             inventory_hosts
         )
     )
+
 
 if __name__ == '__main__':
     main()
