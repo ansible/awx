@@ -17,7 +17,7 @@ from awx.main.utils.ha import (
 @pytest.fixture
 def conf():
     class Conf():
-        CELERY_ROUTES = dict()
+        CELERY_TASK_ROUTES = dict()
         CELERYBEAT_SCHEDULE = dict()
     return Conf()
 
@@ -87,14 +87,14 @@ class TestUpdateCeleryWorkerRoutes():
         instance.is_controller = mocker.MagicMock(return_value=is_controller)
 
         assert update_celery_worker_routes(instance, conf) == expected_routes
-        assert conf.CELERY_ROUTES == expected_routes
+        assert conf.CELERY_TASK_ROUTES == expected_routes
 
     def test_update_celery_worker_routes_deleted(self, mocker, conf):
         instance = mocker.MagicMock()
         instance.hostname = 'east-1'
         instance.is_controller = mocker.MagicMock(return_value=False)
-        conf.CELERY_ROUTES = {'awx.main.tasks.awx_isolated_heartbeat': 'foobar'}
+        conf.CELERY_TASK_ROUTES = {'awx.main.tasks.awx_isolated_heartbeat': 'foobar'}
 
         update_celery_worker_routes(instance, conf)
-        assert 'awx.main.tasks.awx_isolated_heartbeat' not in conf.CELERY_ROUTES
+        assert 'awx.main.tasks.awx_isolated_heartbeat' not in conf.CELERY_TASK_ROUTES
 

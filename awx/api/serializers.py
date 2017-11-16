@@ -4012,7 +4012,7 @@ class InstanceGroupSerializer(BaseSerializer):
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "instances", "controller",
-                  "policy_instance_percentage", "policy_instance_minimum")
+                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)

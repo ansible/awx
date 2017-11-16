@@ -26,7 +26,7 @@ except Exception:
     psutil = None
 
 # Celery
-from celery import Task, shared_task
+from celery import Task, shared_task, Celery
 from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, celeryd_after_setup
 
 # Django
@@ -58,13 +58,14 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
+from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
            'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
            'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
@@ -132,41 +133,54 @@ def inform_cluster_of_shutdown(*args, **kwargs):
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
-@shared_task(bind=True, queue='tower', base=LogErrorsTask)
+@shared_task(bind=True, queue='tower_instance_router', base=LogErrorsTask)
 def apply_cluster_membership_policies(self):
-    considered_instances = Instance.objects.all().order_by('id').only('id')
-    total_instances = considered_instances.count()
-    actual_groups = []
-    actual_instances = []
-    Group = namedtuple('Group', ['obj', 'instances'])
-    Instance = namedtuple('Instance', ['obj', 'groups'])
-    # Process policy instance list first, these will represent manually managed instances
-    # that will not go through automatic policy determination
-    for ig in InstanceGroup.objects.all():
-        group_actual = Group(obj=ig, instances=[])
-        for i in ig.policy_instance_list:
-            group_actual.instances.append(i)
-            if i in considered_instances:
-                considered_instances.remove(i)
-        actual_groups.append(group_actual)
-    # Process Instance minimum policies next, since it represents a concrete lower bound to the
-    # number of instances to make available to instance groups
-    for i in considered_instances:
-        instance_actual = Instance(obj=i, groups=[])
+    with advisory_lock('cluster_policy_lock', wait=True):
+        considered_instances = Instance.objects.all().order_by('id')
+        total_instances = considered_instances.count()
+        filtered_instances = []
+        actual_groups = []
+        actual_instances = []
+        Group = namedtuple('Group', ['obj', 'instances'])
+        Node = namedtuple('Instance', ['obj', 'groups'])
+        # Process policy instance list first, these will represent manually managed instances
+        # that will not go through automatic policy determination
+        for ig in InstanceGroup.objects.all():
+            logger.info("Considering group {}".format(ig.name))
+            ig.instances.clear()
+            group_actual = Group(obj=ig, instances=[])
+            for i in ig.policy_instance_list:
+                inst = Instance.objects.filter(hostname=i)
+                if not inst.exists():
+                    continue
+                inst = inst[0]
+                logger.info("Policy List, adding {} to {}".format(inst.hostname, ig.name))
+                group_actual.instances.append(inst.id)
+                ig.instances.add(inst)
+                filtered_instances.append(inst)
+            actual_groups.append(group_actual)
+        # Process Instance minimum policies next, since it represents a concrete lower bound to the
+        # number of instances to make available to instance groups
+        actual_instances = [Node(obj=i, groups=[]) for i in filter(lambda x: x not in filtered_instances, considered_instances)]
+        logger.info("Total instances not directly associated: {}".format(total_instances))
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
-            if len(g.instances) < g.obj.policy_instance_minimum:
-                g.instances.append(instance_actual.obj.id)
-                instance_actual.groups.append(g.obj.id)
-                break
-        actual_instances.append(instance_actual)
-    # Finally process instance policy percentages
-    for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
-            if 100 * float(len(g.instances)) / total_instances < g.obj.policy_instance_percentage:
+            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+                if len(g.instances) >= g.obj.policy_instance_minimum:
+                    break
+                logger.info("Policy minimum, adding {} to {}".format(i.obj.hostname, g.obj.name))
+                g.obj.instances.add(i.obj)
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
-                break
-    # Next step
+        # Finally process instance policy percentages
+        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+                if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
+                    break
+                logger.info("Policy percentage, adding {} to {}".format(i.obj.hostname, g.obj.name))
+                g.instances.append(i.obj.id)
+                g.obj.instances.add(i.obj)
+                i.groups.append(g.obj.id)
+        handle_ha_toplogy_changes.apply_async()
 
 
 @shared_task(queue='tower_broadcast_all', bind=True, base=LogErrorsTask)
@@ -190,12 +204,14 @@ def handle_setting_changes(self, setting_keys):
 def handle_ha_toplogy_changes(self):
     instance = Instance.objects.me()
     logger.debug("Reconfigure celeryd queues task on host {}".format(self.request.hostname))
-    (instance, removed_queues, added_queues) = register_celery_worker_queues(self.app, self.request.hostname)
+    awx_app = Celery('awx')
+    awx_app.config_from_object('django.conf:settings', namespace='CELERY')
+    (instance, removed_queues, added_queues) = register_celery_worker_queues(awx_app, self.request.hostname)
     logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
                 .format(instance.hostname, removed_queues, added_queues))
     updated_routes = update_celery_worker_routes(instance, settings)
     logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
-                .format(instance.hostname, updated_routes, self.app.conf.CELERY_ROUTES))
+                .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
 
 
 @worker_ready.connect
@@ -213,7 +229,7 @@ def handle_update_celery_routes(sender=None, conf=None, **kwargs):
     instance = Instance.objects.me()
     added_routes = update_celery_worker_routes(instance, conf)
     logger.info("Workers on tower node '{}' added routes {} all routes are now {}"
-                .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
+                .format(instance.hostname, added_routes, conf.CELERY_TASK_ROUTES))
 
 
 @celeryd_after_setup.connect

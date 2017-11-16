@@ -14,6 +14,7 @@ def _add_remove_celery_worker_queues(app, instance, worker_queues, worker_name):
     removed_queues = []
     added_queues = []
     ig_names = set(instance.rampart_groups.values_list('name', flat=True))
+    ig_names.add("tower_instance_router")
     worker_queue_names = set([q['name'] for q in worker_queues])
 
 
@@ -47,12 +48,12 @@ def update_celery_worker_routes(instance, conf):
     if instance.is_controller():
         tasks.append('awx.main.tasks.awx_isolated_heartbeat')
     else:
-        if 'awx.main.tasks.awx_isolated_heartbeat' in conf.CELERY_ROUTES:
-            del conf.CELERY_ROUTES['awx.main.tasks.awx_isolated_heartbeat']
+        if 'awx.main.tasks.awx_isolated_heartbeat' in conf.CELERY_TASK_ROUTES:
+            del conf.CELERY_TASK_ROUTES['awx.main.tasks.awx_isolated_heartbeat']
 
     for t in tasks:
-        conf.CELERY_ROUTES[t] = {'queue': instance.hostname, 'routing_key': instance.hostname}
-        routes_updated[t] = conf.CELERY_ROUTES[t]
+        conf.CELERY_TASK_ROUTES[t] = {'queue': instance.hostname, 'routing_key': instance.hostname}
+        routes_updated[t] = conf.CELERY_TASK_ROUTES[t]
 
     return routes_updated
 

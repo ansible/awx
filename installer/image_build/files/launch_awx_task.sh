@@ -19,5 +19,5 @@ else
     awx-manage create_preload_data
 fi
 awx-manage provision_instance --hostname=$(hostname)
-awx-manage register_queue --queuename=tower --hostnames=$(hostname)
+awx-manage register_queue --queuename=tower --instance_percent=100
 supervisord -c /supervisor_task.conf

@@ -8,14 +8,15 @@ import awx.main.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0008_v320_drop_v1_credential_fields'),
+        ('main', '0017_v330_move_deprecated_stdout'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='instancegroup',
             name='policy_instance_list',
-            field=awx.main.fields.JSONField(default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group', blank=True),
+            field=awx.main.fields.JSONField(default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group',
+                                            blank=True),
         ),
         migrations.AddField(
             model_name='instancegroup',

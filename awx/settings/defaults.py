@@ -432,6 +432,7 @@ DEVSERVER_DEFAULT_PORT = '8013'
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
+BROKER_POOL_LIMIT = None
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
 CELERY_TASK_DEFAULT_QUEUE = 'tower'
@@ -452,7 +453,7 @@ CELERY_TASK_QUEUES = (
 )
 CELERY_TASK_ROUTES = {}
 
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),
@@ -1123,9 +1124,11 @@ LOGGING = {
         },
         'awx.main.tasks': {
             'handlers': ['task_system'],
+            'propagate': False
         },
         'awx.main.scheduler': {
             'handlers': ['task_system'],
+            'propagate': False
         },
         'awx.main.consumers': {
             'handlers': ['null']
