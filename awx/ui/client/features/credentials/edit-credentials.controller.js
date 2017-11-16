@@ -1,4 +1,4 @@
-function EditCredentialsController (models, $state, $scope, strings) {
+function EditCredentialsController (models, $state, $scope, strings, componentsStrings) {
     const vm = this || {};
 
     const { me, credential, credentialType, organization } = models;
@@ -64,15 +64,35 @@ function EditCredentialsController (models, $state, $scope, strings) {
     vm.form.credential_type._displayValue = credentialType.get('name');
     vm.form.credential_type._placeholder = strings.get('inputs.CREDENTIAL_TYPE_PLACEHOLDER');
 
+    const gceFileInputSchema = {
+        id: 'gce_service_account_key',
+        type: 'file',
+        label: strings.get('inputs.GCE_FILE_INPUT_LABEL'),
+        help_text: strings.get('inputs.GCE_FILE_INPUT_HELP_TEXT'),
+    };
+
+    let gceFileInputPreEditValues;
+
     vm.form.inputs = {
         _get () {
+            let fields;
+
             credentialType.mergeInputProperties();
 
             if (credentialType.get('id') === credential.get('credential_type')) {
-                return credential.assignInputGroupValues(credentialType.get('inputs.fields'));
+                fields = credential.assignInputGroupValues(credentialType.get('inputs.fields'));
+            } else {
+                fields = credentialType.get('inputs.fields');
             }
 
-            return credentialType.get('inputs.fields');
+            if (credentialType.get('name') === 'Google Compute Engine') {
+                fields.splice(2, 0, gceFileInputSchema);
+
+                $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
+                $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', vm.gceOnReplaceKeyChanged);
+            }
+
+            return fields;
         },
         _source: vm.form.credential_type,
         _reference: 'vm.form.inputs',
@@ -88,11 +108,61 @@ function EditCredentialsController (models, $state, $scope, strings) {
         data.user = me.get('id');
         credential.unset('inputs');
 
+        delete data.inputs[gceFileInputSchema.id];
+
         return credential.request('put', { data });
     };
 
     vm.form.onSaveSuccess = () => {
         $state.go('credentials.edit', { credential_id: credential.get('id') }, { reload: true });
+    };
+
+    vm.gceOnReplaceKeyChanged = value => {
+        vm.form[gceFileInputSchema.id]._disabled = !value;
+    };
+
+    vm.gceOnFileInputChanged = (value, oldValue) => {
+        if (value === oldValue) return;
+
+        const gceFileIsLoaded = !!value;
+        const gceFileInputState = vm.form[gceFileInputSchema.id];
+        const { obj, error } = vm.gceParseFileInput(value);
+
+        gceFileInputState._isValid = !error;
+        gceFileInputState._message = error ? componentsStrings.get('message.INVALID_INPUT') : '';
+
+        vm.form.project._disabled = gceFileIsLoaded;
+        vm.form.username._disabled = gceFileIsLoaded;
+        vm.form.ssh_key_data._disabled = gceFileIsLoaded;
+        vm.form.ssh_key_data._displayHint = !vm.form.ssh_key_data._disabled;
+
+        if (gceFileIsLoaded) {
+            gceFileInputPreEditValues = Object.assign({}, {
+                project: vm.form.project._value,
+                ssh_key_data: vm.form.ssh_key_data._value,
+                username: vm.form.username._value
+            });
+            vm.form.project._value = _.get(obj, 'project_id', '');
+            vm.form.ssh_key_data._value = _.get(obj, 'private_key', '');
+            vm.form.username._value = _.get(obj, 'client_email', '');
+        } else {
+            vm.form.project._value = gceFileInputPreEditValues.project;
+            vm.form.ssh_key_data._value = gceFileInputPreEditValues.ssh_key_data;
+            vm.form.username._value = gceFileInputPreEditValues.username;
+        }
+    };
+
+    vm.gceParseFileInput = value => {
+        let obj;
+        let error;
+
+        try {
+            obj = angular.fromJson(value);
+        } catch (err) {
+            error = err;
+        }
+
+        return { obj, error };
     };
 }
 
@@ -100,7 +170,8 @@ EditCredentialsController.$inject = [
     'resolvedModels',
     '$state',
     '$scope',
-    'CredentialsStrings'
+    'CredentialsStrings',
+    'ComponentsStrings'
 ];
 
 export default EditCredentialsController;
