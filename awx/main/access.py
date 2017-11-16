@@ -12,6 +12,7 @@ from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
@@ -1134,8 +1135,11 @@ class ProjectUpdateAccess(BaseAccess):
 
     def can_start(self, obj, validate_license=True):
         # for relaunching
-        if obj and obj.project:
-            return self.user in obj.project.update_role
+        try:
+            if obj and obj.project:
+                return self.user in obj.project.update_role
+        except ObjectDoesNotExist:
+            pass
         return False
 
     @check_superuser
