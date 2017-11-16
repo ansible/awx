@@ -381,8 +381,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                             value: {
                                 page_size: '5',
                                 order_by: 'name',
-                                inventory__isnull: false,
-                                credential__isnull: false
+                                inventory__isnull: false
                             },
                             squash: false,
                             dynamic: true
