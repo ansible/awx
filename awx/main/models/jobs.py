@@ -185,9 +185,10 @@ class JobOptions(BaseModel):
             return cred.pk
 
     def get_deprecated_credential(self, kind):
-        try:
-            return self.credentials.filter(credential_type__kind=kind).first()
-        except IndexError:
+        for cred in self.credentials.all():
+            if cred.credential_type.kind == kind:
+                return cred
+        else:
             return None
 
     # TODO: remove when API v1 is removed
