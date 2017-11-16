@@ -221,7 +221,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     playbook) to an inventory source with a given credential.
     '''
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
-    PASSWORD_FIELDS = ('credential', 'vault_credential')
 
     class Meta:
         app_label = 'main'
