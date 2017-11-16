@@ -301,3 +301,19 @@ def test_isolated_keys_readonly(get, patch, delete, admin, key, expected):
 
     delete(url, user=admin)
     assert getattr(settings, key) == 'secret'
+
+
+@pytest.mark.django_db
+def test_isolated_key_flag_readonly(get, patch, delete, admin):
+    settings.AWX_ISOLATED_KEY_GENERATION = True
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'})
+    resp = get(url, user=admin)
+    assert resp.data['AWX_ISOLATED_KEY_GENERATION'] is True
+
+    patch(url, user=admin, data={
+        'AWX_ISOLATED_KEY_GENERATION': False
+    })
+    assert settings.AWX_ISOLATED_KEY_GENERATION is True
+
+    delete(url, user=admin)
+    assert settings.AWX_ISOLATED_KEY_GENERATION is True
