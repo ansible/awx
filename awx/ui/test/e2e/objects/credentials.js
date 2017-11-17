@@ -67,6 +67,7 @@ const gce = createFormSection({
         email: 'Service Account Email Address',
         project: 'Project',
         sshKeyData: 'RSA Private Key',
+        serviceAccountFile: 'Service Account JSON File'
     }
 });
 

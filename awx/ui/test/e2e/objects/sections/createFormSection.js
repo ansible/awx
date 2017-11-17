@@ -12,7 +12,7 @@ const inputContainerElements = {
     popover: '.at-Popover-container',
     yaml: 'input[type="radio", value="yaml"]',
     json: 'input[type="radio", value="json"]',
-    revert: 'a[class~="reset"]',
+    reset: 'a[class~="reset"]',
     down: 'span[class^="fa-angle-down"]',
     up: 'span[class^="fa-angle-up"]',
     prompt: {
@@ -34,6 +34,14 @@ const inputContainerElements = {
     off: {
         locateStrategy: 'xpath',
         selector: `.//button[${normalized}='off']`
+    },
+    replace: {
+        locateStrategy: 'xpath',
+        selector: `.//button[${normalized}='replace']`
+    },
+    revert: {
+        locateStrategy: 'xpath',
+        selector: `.//button[${normalized}='revert']`
     }
 };
 
