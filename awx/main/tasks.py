@@ -423,13 +423,22 @@ def update_host_smart_inventory_memberships():
             smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
             SmartInventoryMembership.objects.all().delete()
             memberships = []
+            changed_inventories = set([])
             for smart_inventory in smart_inventories:
-                memberships.extend([SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
-                                    for host_id in smart_inventory.hosts.values_list('id')])
+                add_for_inventory = [
+                    SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
+                    for host_id in smart_inventory.hosts.values_list('id')
+                ]
+                memberships.extend(add_for_inventory)
+                if add_for_inventory:
+                    changed_inventories.add(smart_inventory)
             SmartInventoryMembership.objects.bulk_create(memberships)
     except IntegrityError as e:
         logger.error("Update Host Smart Inventory Memberships failed due to an exception: " + str(e))
         return
+    # Update computed fields for changed inventories outside atomic action
+    for smart_inventory in changed_inventories:
+        smart_inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
 
 @task(bind=True, queue='tower', base=LogErrorsTask, max_retries=5)

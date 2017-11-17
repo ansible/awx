@@ -334,8 +334,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         active_hosts = self.hosts
         failed_hosts = active_hosts.filter(has_active_failures=True)
         active_groups = self.groups
+        if self.kind == 'smart':
+            active_groups = active_groups.none()
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
+        if self.kind == 'smart':
+            active_inventory_sources = self.inventory_sources.none()
+        else:
+            active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
@@ -399,6 +404,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).save(*args, **kwargs)
+        if (self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and
+                connection.vendor != 'sqlite'):
+            # Minimal update of host_count for smart inventory host filter changes
+            self.update_computed_fields(update_groups=False, update_hosts=False)
 
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
