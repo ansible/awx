@@ -357,6 +357,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         for field, value in computed_fields.items():
             if getattr(iobj, field) != value:
                 setattr(iobj, field, value)
+                # update in-memory object
+                setattr(self, field, value)
             else:
                 computed_fields.pop(field)
         if computed_fields:
