@@ -27,12 +27,25 @@ function JobsIndexController (job, $sce) {
     const html = parseEvents(events);
 
     vm.html = $sce.trustAsHtml(html);
+    vm.toggle = toggle;
 }
 
 function parseEvents (events) {
-    events.sort((a, b) => a.start_line > b.start_line);
+    events.sort(orderByLineNumber);
 
     return events.reduce((html, event) => `${html}${parseLine(event)}`, '');
+}
+
+function orderByLineNumber (a, b) {
+    if (a.start_line > b.start_line) {
+        return 1;
+    }
+
+    if (a.start_line < b.start_line) {
+        return -1;
+    }
+
+    return 0;
 }
 
 function parseLine (event) {
@@ -60,7 +73,7 @@ function createRow (ln, content, time, group) {
 
     let expand = '';
     if (group.parent) {
-        expand = '<i class="fa fa-caret-down"></i>';
+        expand = '<i class="fa fa-caret-down" ng-click="vm.toggle(group.level)"></i>';
     }
 
     return `
@@ -96,6 +109,16 @@ function getTime (event, i) {
 
     return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
+
+function toggle (id) {
+    console.log(id);
+}
+
+/*
+ *function addDynamic (start) {
+ *    document.getElementsByClassName('parent')
+ *}
+ */
 
 JobsIndexController.$inject = ['job', '$sce'];
 

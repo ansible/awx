@@ -1,9 +1,27 @@
 .at-Stdout {
+    font-family: monospace;
+
+    &-controls {
+        border: 1px solid @at-gray-dark-2x;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom: none;
+    }
+
+    &-controlIcon {
+        font-size: 16px;
+        padding: 10px;
+    }
+
     &-expand {
-        padding-right: 10px;
+        background-color: @at-gray-light-2x;
+
+        padding: 0 10px;
     }
 
     &-lineNumber {
+        background-color: @at-gray-light-2x;
+
         padding-right: 5px;
         border-right: 1px solid gray;
     }
@@ -14,5 +32,15 @@
 
     &-timestamp {
         padding-left: 20px;
+    }
+
+    &-output {
+        font-size: 14px;
+        border: 1px solid @at-gray-dark-2x;
+        background-color: @at-gray-light-3x;
+        padding: 0;
+        margin: 0;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 }

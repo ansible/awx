@@ -5,11 +5,16 @@
         </at-panel>
     </div>
     <div class="col-md-8">
-        <at-panel>
-            <pre class="at-Stdout">
+        <at-panel class="at-Stdout">
+            <div class="at-Stdout-controls">
+                <div class="pull-left"><i class="at-Stdout-controlIcon fa fa-minus-circle"></i></div>
+                <div class="pull-right"><i class="at-Stdout-controlIcon fa fa-arrow-circle-down"></i></div>
+                <div class="at-u-clear"></div>
+            </div>
+
+            <pre class="at-Stdout-output">
                 <table>
-                  <tbody ng-bind-html="vm.html">
-                  </tbody>
+                  <tbody ng-bind-html="vm.html"></tbody>
                 </table>
             </pre>
         </at-panel>
