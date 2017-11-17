@@ -35,21 +35,29 @@ def current_migration(exclude_squashed=True):
         return None
 
 
-def replaces(squashed):
+def replaces(squashed, applied=False):
     '''Build a list of replacement migrations based on the most recent non-squashed migration
     and the provided list of SQUASHED migrations. If the most recent non-squashed migration
     is not present anywhere in the SQUASHED dictionary, assume they have all been applied.
+
+    If applied is True, this will return a list of all the migrations that have already
+    been applied.
     '''
     squashed_keys, key_index = squash_data(squashed)
+    if applied:
+        return [(b'main', key) for key in squashed_keys[:key_index]]
     return [(b'main', key) for key in squashed_keys[key_index:]]
 
 
-def operations(squashed):
+def operations(squashed, applied=False):
     '''Build a list of migration operations based on the most recent non-squashed migration
     and the provided list of squashed migrations. If the most recent non-squashed migration
     is not present anywhere in the `squashed` dictionary, assume they have all been applied.
+
+    If applied is True, this will return a list of all the operations that have
+    already been applied.
     '''
     squashed_keys, key_index = squash_data(squashed)
-    op_keys = squashed_keys[key_index:]
+    op_keys = squashed_keys[:key_index] if applied else squashed_keys[key_index:]
     ops = [squashed[op_key] for op_key in op_keys]
     return [op for op in chain.from_iterable(ops)]
