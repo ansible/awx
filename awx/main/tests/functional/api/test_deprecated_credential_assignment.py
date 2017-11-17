@@ -352,9 +352,11 @@ def test_rbac_default_credential_usage(get, post, job_template, alice, machine_c
     post(url, {'credential': machine_credential.pk}, alice, expect=201)
 
     # make (copy) a _new_ SSH cred
-    new_cred = machine_credential
-    new_cred.pk = None
-    new_cred.save()
+    new_cred = Credential.objects.create(
+        name=machine_credential.name,
+        credential_type=machine_credential.credential_type,
+        inputs=machine_credential.inputs
+    )
 
     # alice is attempting to launch with a *different* SSH cred, but
     # she does not have access to it, so she cannot launch
