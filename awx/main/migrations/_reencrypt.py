@@ -65,7 +65,6 @@ def _credentials(apps):
         credential.save()
 
 
-
 def _unified_jobs(apps):
     UnifiedJob = apps.get_model('main', 'UnifiedJob')
     for uj in UnifiedJob.objects.all():
@@ -80,32 +79,36 @@ def encrypt_survey_passwords(apps, schema_editor):
     _encrypt_survey_passwords(
         apps.get_model('main', 'Job'),
         apps.get_model('main', 'JobTemplate'),
+        apps.get_model('main', 'WorkflowJob'),
+        apps.get_model('main', 'WorkflowJobTemplate'),
     )
 
 
-def _encrypt_survey_passwords(Job, JobTemplate):
+def _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate):
     from awx.main.utils.encryption import encrypt_value
-    for jt in JobTemplate.objects.exclude(survey_spec={}):
-        changed = False
-        if jt.survey_spec.get('spec', []):
-            for field in jt.survey_spec['spec']:
-                if field.get('type') == 'password' and field.get('default', ''):
-                    if field['default'].startswith('$encrypted$'):
-                        continue
-                    field['default'] = encrypt_value(field['default'], pk=None)
-                    changed = True
-        if changed:
-            jt.save()
+    for _type in (JobTemplate, WorkflowJobTemplate):
+        for jt in _type.objects.exclude(survey_spec={}):
+            changed = False
+            if jt.survey_spec.get('spec', []):
+                for field in jt.survey_spec['spec']:
+                    if field.get('type') == 'password' and field.get('default', ''):
+                        if field['default'].startswith('$encrypted$'):
+                            continue
+                        field['default'] = encrypt_value(field['default'], pk=None)
+                        changed = True
+            if changed:
+                jt.save()
 
-    for job in Job.objects.defer('result_stdout_text').exclude(survey_passwords={}).iterator():
-        changed = False
-        for key in job.survey_passwords:
-            if key in job.extra_vars:
-                extra_vars = json.loads(job.extra_vars)
-                if not extra_vars.get(key, '') or extra_vars[key].startswith('$encrypted$'):
-                    continue
-                extra_vars[key] = encrypt_value(extra_vars[key], pk=None)
-                job.extra_vars = json.dumps(extra_vars)
-                changed = True
-        if changed:
-            job.save()
+    for _type in (Job, WorkflowJob):
+        for job in _type.objects.defer('result_stdout_text').exclude(survey_passwords={}).iterator():
+            changed = False
+            for key in job.survey_passwords:
+                if key in job.extra_vars:
+                    extra_vars = json.loads(job.extra_vars)
+                    if not extra_vars.get(key, '') or extra_vars[key].startswith('$encrypted$'):
+                        continue
+                    extra_vars[key] = encrypt_value(extra_vars[key], pk=None)
+                    job.extra_vars = json.dumps(extra_vars)
+                    changed = True
+            if changed:
+                job.save()
