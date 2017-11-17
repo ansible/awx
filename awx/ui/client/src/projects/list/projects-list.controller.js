@@ -215,7 +215,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     });
 
                     if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                        deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}  ${ProjectsStrings.get('deleteProject.INVALIDATE')}</div>`;
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}</div>`;
                         invalidateRelatedLines.forEach(invalidateRelatedLine => {
                             deleteModalBody += invalidateRelatedLine;
                         });

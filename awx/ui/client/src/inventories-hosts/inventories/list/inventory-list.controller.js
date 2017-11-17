@@ -110,7 +110,7 @@ function InventoriesList($scope,
                 });
 
                 if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                    deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}  ${InventoryHostsStrings.get('deleteInventory.INVALIDATE')}</div>`;
+                    deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}</div>`;
                     invalidateRelatedLines.forEach(invalidateRelatedLine => {
                         deleteModalBody += invalidateRelatedLine;
                     });

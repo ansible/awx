@@ -173,7 +173,7 @@ export default ['$scope', '$rootScope',
                            });
 
                            if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                               deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}  ${TemplatesStrings.get('jobTemplates.deleteJobTemplate.INVALIDATE')}</div>`;
+                               deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
                                invalidateRelatedLines.forEach(invalidateRelatedLine => {
                                    deleteModalBody += invalidateRelatedLine;
                                });

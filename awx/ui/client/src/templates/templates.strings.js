@@ -6,8 +6,7 @@ function TemplatesStrings (BaseString) {
 
     ns.jobTemplates = {
         deleteJobTemplate: {
-            CONFIRM: t.s('Are you sure you want to delete this job template?'),
-            INVALIDATE: t.s('Doing so will invalidate the following:')
+            CONFIRM: t.s('The job template is currently being used by other resources. Are you sure you want to delete this job template?')
         }
     };
 

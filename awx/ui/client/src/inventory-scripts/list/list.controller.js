@@ -89,7 +89,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
                     });
 
                     if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                        deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryScriptsStrings.get('deleteInventoryScript.CONFIRM')}  ${InventoryScriptsStrings.get('deleteInventoryScript.INVALIDATE')}</div>`;
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryScriptsStrings.get('deleteInventoryScript.CONFIRM')}</div>`;
                         invalidateRelatedLines.forEach(invalidateRelatedLine => {
                             deleteModalBody += invalidateRelatedLine;
                         });

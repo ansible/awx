@@ -5,13 +5,11 @@ function InventoryHostsStrings (BaseString) {
     let ns = this['inventory-hosts'];
 
     ns.deleteInventory = {
-        CONFIRM: t.s('Are you sure you want to delete this inventory?'),
-        INVALIDATE: t.s('Doing so will invalidate the following:')
+        CONFIRM: t.s('The inventory is currently being used by other resources. Are you sure you want to delete this inventory?')
     };
 
     ns.deleteSource = {
-        CONFIRM: t.s('Are you sure you want to delete this inventory source?'),
-        INVALIDATE: t.s('Doing so will invalidate the following:')
+        CONFIRM: t.s('The inventory source is currently being used by other resources. Are you sure you want to delete this inventory source?')
     };
 
     ns.deletegroup = {

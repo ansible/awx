@@ -5,8 +5,7 @@ function InventoryScriptsStrings (BaseString) {
     let ns = this.inventory_scripts;
 
     ns.deleteInventoryScript = {
-        CONFIRM: t.s('Are you sure you want to delete this inventory script?'),
-        INVALIDATE: t.s('Doing so will invalidate the following:')
+        CONFIRM: t.s('The inventory script is currently being used by other resources. Are you sure you want to delete this inventory script?')
     };
 }
 

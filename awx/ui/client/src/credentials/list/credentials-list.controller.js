@@ -123,7 +123,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                     });
 
                     if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}  ${CredentialsStrings.get('deleteCredential.INVALIDATE')}</div>`;
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}</div>`;
                         invalidateRelatedLines.forEach(invalidateRelatedLine => {
                             deleteModalBody += invalidateRelatedLine;
                         });

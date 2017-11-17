@@ -5,8 +5,7 @@ function ProjectsStrings (BaseString) {
     let ns = this.projects;
 
     ns.deleteProject = {
-        CONFIRM: t.s('Are you sure you want to delete this project?'),
-        INVALIDATE: t.s('Doing so will invalidate the following:')
+        CONFIRM: t.s('The project is currently being used by other resources. Are you sure you want to delete this project?')
     };
 }
 

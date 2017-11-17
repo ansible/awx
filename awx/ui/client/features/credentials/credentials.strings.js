@@ -29,8 +29,7 @@ function CredentialsStrings (BaseString) {
     };
 
     ns.deleteCredential = {
-        CONFIRM: t.s('Are you sure you want to delete this credential?'),
-        INVALIDATE: t.s('Doing so will invalidate the following:')
+        CONFIRM: t.s('The credential is currently being used by other resources. Are you sure you want to delete this credential?')
     };
 }
 
