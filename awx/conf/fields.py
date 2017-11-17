@@ -53,6 +53,42 @@ class StringListField(ListField):
         return super(StringListField, self).to_representation(value)
 
 
+class StringListBooleanField(ListField):
+
+    default_error_messages = {
+        'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.'),
+    }
+    child = CharField()
+
+    def to_representation(self, value):
+        if isinstance(value, (list, tuple)):
+            return super(StringListBooleanField, self).to_representation(value)
+        elif value in fields.NullBooleanField.TRUE_VALUES:
+            return True
+        elif value in fields.NullBooleanField.FALSE_VALUES:
+            return False
+        elif value in fields.NullBooleanField.NULL_VALUES:
+            return None
+        elif isinstance(value, basestring):
+            return self.child.to_representation(value)
+        else:
+            self.fail('type_error', input_type=type(value))
+
+    def to_internal_value(self, data):
+        if isinstance(data, (list, tuple)):
+            return super(StringListBooleanField, self).to_internal_value(data)
+        elif data in fields.NullBooleanField.TRUE_VALUES:
+            return True
+        elif data in fields.NullBooleanField.FALSE_VALUES:
+            return False
+        elif data in fields.NullBooleanField.NULL_VALUES:
+            return None
+        elif isinstance(data, basestring):
+            return self.child.run_validation(data)
+        else:
+            self.fail('type_error', input_type=type(data))
+
+
 class URLField(CharField):
 
     def __init__(self, **kwargs):

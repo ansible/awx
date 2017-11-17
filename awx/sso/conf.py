@@ -70,6 +70,11 @@ SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict([
     ])),
 ])
 
+SOCIAL_AUTH_SAML_SECURITY_CONFIG_HELP_TEXT = _('''\
+Extra https://github.com/onelogin/python-saml#settings\
+''')
+
+
 ###############################################################################
 # AUTHENTICATION BACKENDS DYNAMIC SETTING
 ###############################################################################
@@ -1058,6 +1063,20 @@ register(
             ('attr_email', 'User.email'),
         ])),
     ]),
+    feature_required='enterprise_auth',
+)
+
+register(
+    'SOCIAL_AUTH_SAML_SECURITY_CONFIG',
+    field_class=fields.SAMLSecurityField,
+    allow_null=True,
+    default=None,
+    label=_('SAML Security Config'),
+    help_text=SOCIAL_AUTH_SAML_SECURITY_CONFIG_HELP_TEXT,
+    category=_('SAML'),
+    category_slug='saml',
+    #placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+    placeholder=collections.OrderedDict(),
     feature_required='enterprise_auth',
 )
 
