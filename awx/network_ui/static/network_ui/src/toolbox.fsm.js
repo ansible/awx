@@ -56,7 +56,26 @@ inherits(_Move, _State);
 var Move = new _Move();
 exports.Move = Move;
 
+function _OffScreen () {
+    this.name = 'OffScreen';
+}
+inherits(_OffScreen, _State);
+var OffScreen = new _OffScreen();
+exports.OffScreen = OffScreen;
 
+function _OffScreen2 () {
+    this.name = 'OffScreen2';
+}
+inherits(_OffScreen2, _State);
+var OffScreen2 = new _OffScreen2();
+exports.OffScreen2 = OffScreen2;
+
+function _Disabled () {
+    this.name = 'Disabled';
+}
+inherits(_Disabled, _State);
+var Disabled = new _Disabled();
+exports.Disabled = Disabled;
 
 
 _Dropping.prototype.start = function (controller) {
@@ -136,6 +155,10 @@ _Selecting.prototype.onMouseDown = function (controller) {
 };
 _Selecting.prototype.onMouseDown.transitions = ['Selected', 'Ready'];
 
+_Ready.prototype.onEnable = function () {
+
+};
+
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if(controller.toolbox.enabled &&
@@ -170,7 +193,20 @@ _Ready.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
 
+_Ready.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
+    controller.changeState(OffScreen);
+    controller.next_controller.handle_message(msg_type, message);
+
+};
+_Ready.prototype.onToggleToolbox.transitions = ['OffScreen'];
+
+_Ready.prototype.onDisable = function (controller) {
+
+    controller.changeState(Disabled);
+
+};
+_Ready.prototype.onDisable.transitions = ['Disabled'];
 
 _Scrolling.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
@@ -215,3 +251,82 @@ _Move.prototype.onMouseMove = function (controller) {
     controller.scope.pressedX =  controller.scope.mouseX;
     controller.scope.pressedY =  controller.scope.mouseY;
 };
+
+
+_OffScreen.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, message);
+
+};
+_OffScreen.prototype.onToggleToolbox.transitions = ['Ready'];
+
+
+_OffScreen.prototype.start = function (controller) {
+
+    controller.toolbox.enabled = false;
+
+};
+
+_OffScreen.prototype.end = function (controller) {
+
+    controller.toolbox.enabled = true;
+
+};
+
+_OffScreen.prototype.onDisable = function (controller) {
+
+    controller.changeState(OffScreen2);
+};
+_OffScreen.prototype.onDisable.transitions = ['OffScreen2'];
+
+_OffScreen2.prototype.onEnable = function (controller) {
+
+    controller.changeState(OffScreen);
+};
+_OffScreen2.prototype.onEnable.transitions = ['OffScreen'];
+
+_OffScreen2.prototype.onDisable = function () {
+
+};
+
+_OffScreen2.prototype.start = function (controller) {
+
+    controller.toolbox.enabled = false;
+};
+
+_OffScreen2.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(Disabled);
+    controller.next_controller.handle_message(msg_type, message);
+};
+_OffScreen2.prototype.onToggleToolbox.transitions = ['Disabled'];
+
+_Disabled.prototype.onDisable = function () {
+
+};
+
+_Disabled.prototype.onEnable = function (controller) {
+
+    controller.changeState(Ready);
+};
+_Disabled.prototype.onEnable.transitions = ['Ready'];
+
+_Disabled.prototype.start = function (controller) {
+    if(controller.toolbox !== undefined){
+        controller.toolbox.enabled = false;
+    }
+};
+
+_Disabled.prototype.end = function (controller) {
+
+    controller.toolbox.enabled = true;
+
+};
+
+_Disabled.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(OffScreen2);
+    controller.next_controller.handle_message(msg_type, message);
+};
+_Disabled.prototype.onToggleToolbox.transitions = ['OffScreen2'];

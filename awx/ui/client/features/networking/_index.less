@@ -58,7 +58,6 @@
 
 .Networking-rightPanel{
     border-left: 1px solid @at-color-panel-border;
-    display:flex;
     width:400px;
     height: calc(~"100vh - 40px");
     padding: 20px;
@@ -69,4 +68,35 @@
     top: 40px;
     right: 0px;
     background-color: @default-bg;
+}
+
+
+.Networking-panelHeader {
+    display: flex;
+    height: 30px;
+    width:100%;
+}
+
+.Networking-panelHeaderText {
+    color: @default-interface-txt;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.Networking-resultRow {
+    width: 100%;
+    display: flex;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.Networking-resultRow--variables {
+    flex-direction: column;
+
+    #cm-variables-container {
+        width: 100%;
+    }
 }
