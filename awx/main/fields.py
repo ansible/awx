@@ -748,8 +748,24 @@ class CredentialTypeInjectorField(JSONSchemaField):
 
         class TowerNamespace:
             filename = None
-
         valid_namespace['tower'] = TowerNamespace()
+
+        # ensure either single file or multi-file syntax is used (but not both)
+        template_names = set(key for type_, injector in value.items()
+                             for key, tmpl in injector.items()
+                             if key.startswith('template'))
+        if 'template' in template_names and len(template_names) > 1:
+            raise django_exceptions.ValidationError(
+                _('Must use multi-file syntax when injecting multiple files'),
+                code='invalid',
+                params={'value': value},
+            )
+        if 'template' not in template_names:
+            valid_namespace['tower'].filename = TowerNamespace()
+            for template_name in template_names:
+                template_name = template_name[9:]
+                setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE')
+
         for type_, injector in value.items():
             for key, tmpl in injector.items():
                 try:

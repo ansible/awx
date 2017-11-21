@@ -194,7 +194,8 @@ certificate/key data:
         }
     }
 
-
+Note that the single and multi-file syntax cannot be mixed within the same
+``Credential Type``.
 
 Job and Job Template Credential Assignment
 ------------------------------------------
@@ -326,6 +327,8 @@ When verifying acceptance we should ensure the following statements are true:
 * Custom `Credential Types` should support injecting both single and
   multiple files. (Furthermore, the new syntax for injecting multiple files
   should work properly even if only a single file is injected).
+* Users should not be able to use the syntax for injecting single and
+  multiple files in the same custom credential.
 * The default `Credential Types` included with Tower in 3.2 should be
   non-editable/readonly and cannot be deleted by any user.
 * Stored `Credential` values for _all_ types should be consistent before and
