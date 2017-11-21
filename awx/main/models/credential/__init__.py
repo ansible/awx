@@ -597,8 +597,6 @@ class CredentialType(CommonModelNameNotUnique):
             pass
 
         tower_namespace = TowerNamespace()
-        filename_namespace = TowerNamespace()
-        tower_namespace.filename = filename_namespace
 
         # maintain a normal namespace for building the ansible-playbook arguments (env and args)
         namespace = {'tower': tower_namespace}
@@ -634,8 +632,15 @@ class CredentialType(CommonModelNameNotUnique):
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            file_label = file_label.split('.')[1]
-            setattr(namespace['tower'].filename, file_label, path)
+
+            # determine if filename indicates single file or many
+            if file_label.find('.') == -1:
+                tower_namespace.filename = path
+            else:
+                if not hasattr(tower_namespace, 'filename'):
+                    tower_namespace.filename = TowerNamespace()
+                file_label = file_label.split('.')[1]
+                setattr(tower_namespace.filename, file_label, path)
 
         for env_var, tmpl in self.injectors.get('env', {}).items():
             if env_var.startswith('ANSIBLE_') or env_var in self.ENV_BLACKLIST:
