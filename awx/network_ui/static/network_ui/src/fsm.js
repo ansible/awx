@@ -1,9 +1,11 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
-function FSMController (scope, initial_state, next_controller) {
+function FSMController (scope, initial_state, next_controller, name) {
     this.scope = scope;
     this.state = initial_state;
-    this.state.start(this);
     this.next_controller = next_controller;
+    this.name = name;
+    this.debug = false;
+    this.state.start(this);
 }
 exports.FSMController = FSMController;
 
