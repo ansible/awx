@@ -1,7 +1,10 @@
 import mock
 import pytest
 
+from rest_framework.exceptions import PermissionDenied
+
 from awx.api.versioning import reverse
+from awx.api.serializers import JobTemplateSerializer
 from awx.main.access import (
     BaseAccess,
     JobTemplateAccess,
@@ -132,15 +135,38 @@ class TestJobTemplateCredentials:
         assert JobTemplateAccess(rando).can_attach(
             job_template, credential, 'credentials', {})
 
-    def test_job_template_vault_cred_check(self, job_template, vault_credential, rando):
+    def test_job_template_vault_cred_check(self, mocker, job_template, vault_credential, rando, project):
+        # TODO: remove in 3.3
         job_template.admin_role.members.add(rando)
         # not allowed to use the vault cred
-        assert not JobTemplateAccess(rando).can_change(
-            job_template, {'credentials': [vault_credential.pk]})
+        # this is checked in the serializer validate method, not access.py
+        view = mocker.MagicMock()
+        view.request = mocker.MagicMock()
+        view.request.user = rando
+        serializer = JobTemplateSerializer(job_template, context={'view': view})
+        with pytest.raises(PermissionDenied):
+            serializer.validate({
+                'vault_credential': vault_credential.pk,
+                'project': project,  # necessary because job_template fixture fails validation
+                'ask_inventory_on_launch': True,
+            })
 
-    def test_new_jt_with_vault(self, vault_credential, project, rando):
+    def test_new_jt_with_vault(self, mocker, vault_credential, project, rando):
         project.admin_role.members.add(rando)
-        assert not JobTemplateAccess(rando).can_add({'credentials': [vault_credential.pk], 'project': project.pk})
+        # TODO: remove in 3.3
+        # this is checked in the serializer validate method, not access.py
+        view = mocker.MagicMock()
+        view.request = mocker.MagicMock()
+        view.request.user = rando
+        serializer = JobTemplateSerializer(context={'view': view})
+        with pytest.raises(PermissionDenied):
+            serializer.validate({
+                'vault_credential': vault_credential.pk,
+                'project': project,
+                'playbook': 'helloworld.yml',
+                'ask_inventory_on_launch': True,
+                'name': 'asdf'
+            })
 
 
 @pytest.mark.django_db
