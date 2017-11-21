@@ -94,6 +94,7 @@
         <g awx-net-inventory-toolbox></g>
         </g>
         <g ng-if="!hide_buttons">
+
             <g> <!-- buttons -->
                 <g ng-repeat="button in buttons"
                    ng-attr-transform="translate({{button.x}},{{button.y}})">
@@ -108,6 +109,11 @@
                     <g awx-net-layer> </g>
                 </g>
             </g> <!-- end layers -->
+        </g>
+        <g awx-net-context-menu
+                context_menu="context_menus[0]"
+                ng-if="context_menus[0].enabled"
+                ng-attr-transform="translate({{context_menus[0].x}}, {{context_menus[0].y}})">
         </g>
         <g awx-net-debug></g>
         <g awx-net-cursor></g>

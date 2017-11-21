@@ -33,9 +33,10 @@
 @green: #5CB85C;
 @red:  #D9534F;
 @light-toolbox-background: #f6f6f6;
+@icon-background-hover:#337AB7;
 
 .NetworkUI {
-    background-color: @light-background;
+    background-color: @light-toolbox-background;
     cursor: none;
 }
 
@@ -616,13 +617,25 @@
 
 .NetworkUI__toolbox {
     stroke: none;
-    fill: @light-toolbox-background;
+    fill: @light-background;
+}
+
+.NetworkUI__toolbox-collapsed{
+    fill: @light-background;
+    stroke: @button-outline;
+    stroke-width: 1;
+    rx: 0;
+    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dashoffset: -45;
 }
 
 .NetworkUI__toolbox-bezel {
-    stroke: @group;
-    stroke-width: 2;
+    stroke: @button-outline;
+    stroke-width: 1;
     fill: none;
+    rx: 0;
+    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dashoffset: -200;
 }
 
 .NetworkUI__process {
@@ -695,4 +708,56 @@
     fill: @button-text;
     font-size: 8px;
     font-family: 'Open Sans';
+}
+
+.NetworkUI_chevron{
+    fill: @button-body-pressed;
+}
+
+.NetworkUI_chevron--hover{
+    cursor: pointer;
+    fill: white;
+}
+
+.NetworkUI_iconBackground{
+    fill:@button-body;
+}
+
+.NetworkUI_iconBackground--hover{
+    fill:@icon-background-hover;
+}
+
+.NetworkUI__toolbox--title{
+    fill: @dark-widget-detail;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.NetworkUI__contextMenu{
+    fill: @light-background;
+    stroke: @button-outline;
+    stroke-width: 1;
+
+}
+
+.NetworkUI__contextMenuButton{
+    fill: @light-background;
+}
+
+.NetworkUI__contextMenuButtonText{
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__contextMenuButtonText-hover{
+    fill: @button-text;
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.NetworkUI__contextMenuButton-hover,
+.NetworkUI__contextMenuButton-pressed{
+    fill:@button-body-hover;
 }
