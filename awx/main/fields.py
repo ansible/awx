@@ -763,7 +763,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
         if 'template' not in template_names:
             valid_namespace['tower'].filename = TowerNamespace()
             for template_name in template_names:
-                template_name = template_name[9:]
+                template_name = template_name.split('.')[1]
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE')
 
         for type_, injector in value.items():
