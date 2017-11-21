@@ -171,7 +171,8 @@ def project_factory(organization):
 @pytest.fixture
 def job_factory(job_template, admin):
     def factory(job_template=job_template, initial_state='new', created_by=admin):
-        return job_template.create_job(created_by=created_by, status=initial_state)
+        return job_template.create_unified_job(_eager_fields={
+            'status': initial_state, 'created_by': created_by})
     return factory
 
 
@@ -528,18 +529,19 @@ def _request(verb):
             middleware.process_response(request, response)
         if expect:
             if response.status_code != expect:
-                data_copy = response.data.copy()
-                try:
-                    # Make translated strings printable
-                    for key, value in response.data.items():
-                        if isinstance(value, list):
-                            response.data[key] = []
-                            for item in value:
-                                response.data[key].append(str(value))
-                        else:
-                            response.data[key] = str(value)
-                except Exception:
-                    response.data = data_copy
+                if response.data is not None:
+                    try:
+                        data_copy = response.data.copy()
+                        # Make translated strings printable
+                        for key, value in response.data.items():
+                            if isinstance(value, list):
+                                response.data[key] = []
+                                for item in value:
+                                    response.data[key].append(str(item))
+                            else:
+                                response.data[key] = str(value)
+                    except Exception:
+                        response.data = data_copy
                 print(response.data)
             assert response.status_code == expect
         response.render()
@@ -665,7 +667,8 @@ def workflow_job_template(organization):
 @pytest.fixture
 def workflow_job_factory(workflow_job_template, admin):
     def factory(workflow_job_template=workflow_job_template, initial_state='new', created_by=admin):
-        return workflow_job_template.create_unified_job(created_by=created_by, status=initial_state)
+        return workflow_job_template.create_unified_job(_eager_fields={
+            'status': initial_state, 'created_by': created_by})
     return factory
 
 
@@ -679,7 +682,8 @@ def system_job_template():
 @pytest.fixture
 def system_job_factory(system_job_template, admin):
     def factory(system_job_template=system_job_template, initial_state='new', created_by=admin):
-        return system_job_template.create_unified_job(created_by=created_by, status=initial_state)
+        return system_job_template.create_unified_job(_eager_fields={
+            'status': initial_state, 'created_by': created_by})
     return factory
 
 
