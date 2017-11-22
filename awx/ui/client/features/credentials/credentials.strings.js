@@ -27,10 +27,6 @@ function CredentialsStrings (BaseString) {
     ns.permissions = {
         TITLE: t.s('CREDENTIALS PERMISSIONS')
     };
-
-    ns.deleteCredential = {
-        CONFIRM: t.s('The credential is currently being used by other resources. Are you sure you want to delete this credential?')
-    };
 }
 
 CredentialsStrings.$inject = ['BaseStringService'];
