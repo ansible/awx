@@ -4,14 +4,6 @@ function InventoryHostsStrings (BaseString) {
     let t = this.t;
     let ns = this['inventory-hosts'];
 
-    ns.deleteInventory = {
-        CONFIRM: t.s('The inventory is currently being used by other resources. Are you sure you want to delete this inventory?')
-    };
-
-    ns.deleteSource = {
-        CONFIRM: t.s('The inventory source is currently being used by other resources. Are you sure you want to delete this inventory source?')
-    };
-
     ns.deletegroup = {
         GROUP: count => t.p(count, 'group', 'groups'),
         HOST: count => t.p(count, 'host', 'hosts'),

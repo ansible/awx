@@ -90,7 +90,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
             credentialType.getDependentResourceCounts(id)
                 .then((counts) => {
                     let credentialTypeInUse = false;
-                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialTypesStrings.get('deleteCredentialType.CONFIRM')}</div>`;
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialTypesStrings.get('deleteResource.CONFIRM', 'credential type')}</div>`;
 
                     counts.forEach(countObj => {
                         if(countObj.count && countObj.count > 0) {

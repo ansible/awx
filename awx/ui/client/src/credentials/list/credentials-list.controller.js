@@ -114,7 +114,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
             credential.getDependentResourceCounts(id)
                 .then((counts) => {
                     const invalidateRelatedLines = [];
-                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}</div>`;
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteResource.CONFIRM', 'credential')}</div>`;
 
                     counts.forEach(countObj => {
                         if(countObj.count && countObj.count > 0) {
@@ -123,7 +123,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                     });
 
                     if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteCredential.CONFIRM')}</div>`;
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${CredentialsStrings.get('deleteResource.USED_BY', 'credential')} ${CredentialsStrings.get('deleteResource.CONFIRM', 'credential')}</div>`;
                         invalidateRelatedLines.forEach(invalidateRelatedLine => {
                             deleteModalBody += invalidateRelatedLine;
                         });

@@ -60,6 +60,10 @@ function BaseStringService (namespace) {
     this.CANCEL = t.s('CANCEL');
     this.SAVE = t.s('SAVE');
     this.OK = t.s('OK');
+    this.deleteResource = {
+        USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),
+        CONFIRM: resourceType => t.s('Are you sure you want to delete this {{ resourceType }}?', { resourceType })
+    };
 
     /**
      * This getter searches the extending class' namespace first for a match then falls back to

@@ -154,7 +154,7 @@ export default ['$scope', '$rootScope',
                    Prompt({
                        hdr: i18n._('Delete'),
                        resourceName: $filter('sanitize')(template.name),
-                       body: TemplatesStrings.get('workflowJobTemplates.deleteWorkflowJobTemplate.CONFIRM'),
+                       body: TemplatesStrings.get('deleteResource.CONFIRM', 'workflow job template'),
                        action: action,
                        actionText: 'DELETE'
                    });
@@ -164,7 +164,7 @@ export default ['$scope', '$rootScope',
                    jobTemplate.getDependentResourceCounts(template.id)
                        .then((counts) => {
                            const invalidateRelatedLines = [];
-                           let deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
+                           let deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('deleteResource.CONFIRM', 'job template')}</div>`;
 
                            counts.forEach(countObj => {
                                if(countObj.count && countObj.count > 0) {
@@ -173,7 +173,7 @@ export default ['$scope', '$rootScope',
                            });
 
                            if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                               deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('jobTemplates.deleteJobTemplate.CONFIRM')}</div>`;
+                               deleteModalBody = `<div class="Prompt-bodyQuery">${TemplatesStrings.get('deleteResource.USED_BY', 'job template')} ${TemplatesStrings.get('deleteResource.CONFIRM', 'job template')}</div>`;
                                invalidateRelatedLines.forEach(invalidateRelatedLine => {
                                    deleteModalBody += invalidateRelatedLine;
                                });

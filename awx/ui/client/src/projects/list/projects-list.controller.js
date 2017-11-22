@@ -206,7 +206,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             project.getDependentResourceCounts(id)
                 .then((counts) => {
                     const invalidateRelatedLines = [];
-                    let deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}</div>`;
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteResource.CONFIRM', 'project')}</div>`;
 
                     counts.forEach(countObj => {
                         if(countObj.count && countObj.count > 0) {
@@ -215,7 +215,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     });
 
                     if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                        deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteProject.CONFIRM')}</div>`;
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${ProjectsStrings.get('deleteResource.USED_BY', 'project')} ${ProjectsStrings.get('deleteResource.CONFIRM', 'project')}</div>`;
                         invalidateRelatedLines.forEach(invalidateRelatedLine => {
                             deleteModalBody += invalidateRelatedLine;
                         });
