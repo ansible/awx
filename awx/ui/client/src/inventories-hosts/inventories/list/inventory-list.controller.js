@@ -101,7 +101,7 @@ function InventoriesList($scope,
         inventory.getDependentResourceCounts(id)
             .then((counts) => {
                 const invalidateRelatedLines = [];
-                let deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}</div>`;
+                let deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteResource.CONFIRM', 'inventory')}</div>`;
 
                 counts.forEach(countObj => {
                     if(countObj.count && countObj.count > 0) {
@@ -110,7 +110,7 @@ function InventoriesList($scope,
                 });
 
                 if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
-                    deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteInventory.CONFIRM')}  ${InventoryHostsStrings.get('deleteInventory.INVALIDATE')}</div>`;
+                    deleteModalBody = `<div class="Prompt-bodyQuery">${InventoryHostsStrings.get('deleteResource.USED_BY', 'inventory')} ${InventoryHostsStrings.get('deleteResource.CONFIRM', 'inventory')}</div>`;
                     invalidateRelatedLines.forEach(invalidateRelatedLine => {
                         deleteModalBody += invalidateRelatedLine;
                     });
