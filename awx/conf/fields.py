@@ -136,3 +136,25 @@ class KeyValueField(DictField):
             if not isinstance(value, six.string_types + six.integer_types + (float,)):
                 self.fail('invalid_child', input=value)
         return ret
+
+
+class ListTuplesField(ListField):
+    default_error_messages = {
+        'type_error': _('Expected a list of tuples but got {input_type} instead.'),
+    }
+
+    def to_representation(self, value):
+        if isinstance(value, (list, tuple)):
+            return super(ListTuplesField, self).to_representation(value)
+        else:
+            self.fail('type_error', input_type=type(value))
+
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            for x in data:
+                if not isinstance(x, (list, tuple)):
+                    self.fail('type_error', input_type=type(x))
+
+            return super(ListTuplesField, self).to_internal_value(data)
+        else:
+            self.fail('type_error', input_type=type(data))
