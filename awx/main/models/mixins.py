@@ -166,15 +166,19 @@ class SurveyJobTemplateMixin(models.Model):
         # make a copy of the data to break references (so that we don't
         # inadvertently expose unencrypted default passwords as we validate)
         data = data.copy()
-        if all([
-            survey_element['type'] == "password",
-            data.get(survey_element['variable']) == '$encrypted$'
-        ]):
-            # replace encrypted password defaults so we don't validate on
-            # $encrypted$
+        password_value = data.get(survey_element['variable'])
+        if (
+            survey_element['type'] == "password" and
+            isinstance(password_value, basestring) and
+            password_value.startswith('$encrypted$')
+        ):
+            if password_value == '$encrypted$':
+                # replace encrypted password defaults so we don't validate on
+                # $encrypted$
+                password_value = survey_element['default']
             data[survey_element['variable']] = decrypt_value(
                 get_encryption_key('value', pk=None),
-                survey_element['default']
+                password_value
             )
         if survey_element['variable'] not in data and survey_element['required']:
             errors.append("'%s' value missing" % survey_element['variable'])
