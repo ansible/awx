@@ -1279,10 +1279,12 @@ class RunJob(BaseTask):
                 task_instance.run(local_project_sync.id)
                 job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
-                job = self.update_model(job.pk, status='failed',
-                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
-                                                         ('project_update', local_project_sync.name, local_project_sync.id)))
-                raise
+                local_project_sync.refresh_from_db()
+                if local_project_sync.status != 'canceled':
+                    job = self.update_model(job.pk, status='failed',
+                                            job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
+                                                             ('project_update', local_project_sync.name, local_project_sync.id)))
+                    raise
 
         if job.use_fact_cache and not kwargs.get('isolated'):
             job.start_job_fact_cache()
