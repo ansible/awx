@@ -7,7 +7,7 @@ from channels.sessions import channel_session
 from channels.handler import AsgiRequest
 
 from django.conf import settings
-#from django.core.serializers.json import DjangoJSONEncoder
+from django.core.serializers.json import DjangoJSONEncoder
 
 from django.contrib.auth.models import User
 from awx.main.models.organization import AuthToken
@@ -24,7 +24,7 @@ def discard_groups(message):
 
 @channel_session
 def ws_connect(message):
-    connect_text = {'accept':False, 'user':None}
+    message.reply_channel.send({"accept": True})
 
     message.content['method'] = 'FAKE'
     request = AsgiRequest(message)
@@ -35,11 +35,12 @@ def ws_connect(message):
             auth_token = AuthToken.objects.get(key=token)
             if auth_token.in_valid_tokens:
                 message.channel_session['user_id'] = auth_token.user_id
-                connect_text['accept'] = True
-                connect_text['user'] = auth_token.user_id
+                message.reply_channel.send({"text": json.dumps({"accept": True, "user": auth_token.user_id})})
+                return None
         except AuthToken.DoesNotExist:
             logger.error("auth_token provided was invalid.")
-    message.reply_channel.send({"text": json.dumps(connect_text)})
+    message.reply_channel.send({"close": True})
+    return None
 
 
 @channel_session
@@ -94,8 +95,6 @@ def ws_receive(message):
 
 def emit_channel_notification(group, payload):
     try:
-        # FIXME: Currently broken with asgi_rabbitmq as a ChannelLayer
-        #Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
-        logger.warning("Group sending is currently disabled. Would have sent the following message\nChannel: {0}, Payload: {1}".format(group, payload))
+        Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
     except ValueError:
         logger.error("Invalid payload emitting channel {} on topic: {}".format(group, payload))

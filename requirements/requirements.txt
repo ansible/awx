@@ -8,7 +8,7 @@ adal==0.4.5               # via msrestazure
 amqp==2.2.2               # via kombu
 apache-libcloud==2.0.0
 appdirs==1.4.2
-asgi-rabbitmq==0.5.4
+asgi-amqp==1.0.1
 asgiref==1.1.2
 asn1crypto==0.22.0        # via cryptography
 attrs==17.2.0             # via automat, service-identity
@@ -40,7 +40,6 @@ billiard==3.5.0.3         # via celery
 boto3==1.4.4
 boto==2.46.1
 botocore==1.5.72          # via boto3, s3transfer
-cached-property==1.3.1    # via asgi-rabbitmq
 celery==4.1
 #certifi==2017.11.5        # via msrest
 cffi==1.10.0              # via cryptography
@@ -76,7 +75,7 @@ enum34==1.1.6             # via cryptography, msrest
 ephem==3.7.6.0            # via django-celery-beat
 funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
-futures==3.1.1            # via asgi-rabbitmq, azure-storage, requests-futures, s3transfer, shade
+futures==3.1.1            # via azure-storage, requests-futures, s3transfer, shade
 gevent-websocket==0.9.5
 gevent==1.2.2             # via gevent-websocket
 greenlet==0.4.12          # via gevent
@@ -97,6 +96,7 @@ jaraco.stream==1.1.2      # via irc
 jaraco.text==1.9.2        # via irc, jaraco.collections
 jmespath==0.9.3           # via boto3, botocore, shade
 jsonpatch==1.16           # via openstacksdk, shade, warlock
+jsonpickle==0.9.5         # via asgi_amqp
 jsonpointer==1.10         # via jsonpatch
 jsonschema==2.6.0
 keyring==10.3.3           # via msrestazure
@@ -107,7 +107,7 @@ m2crypto==0.25.1
 markdown==2.6.7
 monotonic==1.3            # via oslo.utils
 more-itertools==3.2.0     # via irc, jaraco.functools, jaraco.itertools
-msgpack-python==0.4.8     # via asgi-rabbitmq, oslo.serialization
+msgpack-python==0.4.8     # via oslo.serialization
 msrest==0.4.10            # via azure-common, msrestazure
 msrestazure==0.4.9        # via azure-common
 munch==2.1.1              # via shade
@@ -124,7 +124,6 @@ oslo.serialization==2.18.0  # via python-ironicclient, python-keystoneclient, py
 oslo.utils==3.26.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
 pbr==3.1.1                # via cliff, debtcollector, keystoneauth1, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, requestsexceptions, shade, stevedore
 pexpect==4.2.1
-pika==0.11.0              # via asgi-rabbitmq
 positional==1.1.1         # via keystoneauth1, python-keystoneclient
 prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-ironicclient, python-novaclient
 psphere==0.5.2

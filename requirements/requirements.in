@@ -1,6 +1,6 @@
 apache-libcloud==2.0.0
 appdirs==1.4.2
-asgi-rabbitmq==0.5.4
+asgi-amqp==1.0.1
 asgiref==1.1.2
 azure==2.0.0rc6
 backports.ssl-match-hostname==3.5.0.1
