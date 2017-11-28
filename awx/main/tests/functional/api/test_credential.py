@@ -588,7 +588,7 @@ def test_create_org_credential_as_admin(post, organization, org_admin, credentia
     params['name'] = 'Some name'
     params['organization'] = organization.id
     response = post(
-        reverse('api:credential_list'),
+        reverse('api:credential_list', kwargs={'version': version}),
         params,
         org_admin
     )
@@ -604,7 +604,7 @@ def test_credential_detail(post, get, organization, org_admin, credentialtype_ss
     params['name'] = 'Some name'
     params['organization'] = organization.id
     response = post(
-        reverse('api:credential_list'),
+        reverse('api:credential_list', kwargs={'version': version}),
         params,
         org_admin
     )
@@ -1466,6 +1466,14 @@ def test_credential_type_mutability(patch, organization, admin, credentialtype_s
     expected = ['You cannot change the credential type of the credential, '
                 'as it may break the functionality of the resources using it.']
     assert response.data['credential_type'] == expected
+
+    response = patch(
+        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+        {'name': 'Worst credential ever'},
+        admin
+    )
+    assert response.status_code == 200
+    assert Credential.objects.get(pk=cred.pk).name == 'Worst credential ever'
 
     related_obj.delete()
     response = _change_credential_type()
