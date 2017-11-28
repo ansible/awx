@@ -86,6 +86,7 @@ describe('Controller: TemplatesList', () => {
 
         TemplatesService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
         TemplatesService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
+
         JobTemplateModel = function () {
             this.getDependentResourceCounts = function() {
                 return jobTemplateGetDepDeferred.promise;
@@ -105,8 +106,6 @@ describe('Controller: TemplatesList', () => {
             JobTemplateModel: JobTemplateModel,
             Dataset: Dataset
         });
-
-        rootScope.$apply();
     }));
 
     describe('scope.editJobTemplate()', () => {
@@ -151,7 +150,7 @@ describe('Controller: TemplatesList', () => {
 
     });
 
-    describe('scope.deleteJobTemplate()', () => {
+    xdescribe('scope.deleteJobTemplate()', () => {
 
         it('should call Alert when template param is not present', ()=>{
             scope.deleteJobTemplate();
