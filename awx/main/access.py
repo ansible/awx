@@ -883,7 +883,7 @@ class InventoryUpdateAccess(BaseAccess):
     prefetch_related = ('unified_job_template', 'instance_group',)
 
     def filtered_queryset(self):
-        return qs.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
