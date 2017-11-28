@@ -347,7 +347,12 @@ class Command(BaseCommand):
                     enabled = bool(unicode(enabled_value) == unicode(enabled))
                 else:
                     enabled = bool(enabled)
-        return enabled
+        if enabled is default:
+            return None
+        elif isinstance(enabled, bool):
+            return enabled
+        else:
+            raise NotImplementedError('Value of enabled {} not understood.'.format(enabled))
 
     def load_inventory_from_database(self):
         '''
