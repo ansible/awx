@@ -883,7 +883,7 @@ class InventorySourceOptions(BaseModel):
         ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
-        ('ovirt4', _('oVirt4')),
+        ('rhv', _('Red Hat Virtualization')),
         ('tower', _('Ansible Tower')),
         ('custom', _('Custom Script')),
     ]
@@ -1134,7 +1134,7 @@ class InventorySourceOptions(BaseModel):
         return [('all', 'All')]
 
     @classmethod
-    def get_ovirt4_region_choices(self):
+    def get_rhv_region_choices(self):
         """No region supprt"""
         return [('all', 'All')]
 

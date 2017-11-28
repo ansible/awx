@@ -704,8 +704,8 @@ class TestJobCredentials(TestJobExecution):
         self.task.run(self.pk)
 
     @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
-    def test_ovirt4_credentials(self, ca_file):
-        ovirt4 = CredentialType.defaults['ovirt4']()
+    def test_rhv_credentials(self, ca_file):
+        rhv = CredentialType.defaults['rhv']()
         inputs = {
             'host': 'some-ovirt-host.example.org',
             'username': 'bob',
@@ -715,7 +715,7 @@ class TestJobCredentials(TestJobExecution):
             inputs['ca_file'] = ca_file
         credential = Credential(
             pk=1,
-            credential_type=ovirt4,
+            credential_type=rhv,
             inputs=inputs
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')

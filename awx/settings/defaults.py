@@ -825,12 +825,12 @@ OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 # ---------------------
 # ----- oVirt4 -----
 # ---------------------
-OVIRT4_ENABLED_VAR = 'status'
-OVIRT4_ENABLED_VALUE = 'up'
-OVIRT4_GROUP_FILTER = r'^.+$'
-OVIRT4_HOST_FILTER = r'^.+$'
-OVIRT4_EXCLUDE_EMPTY_GROUPS = True
-OVIRT4_INSTANCE_ID_VAR = 'id'
+RHV_ENABLED_VAR = 'status'
+RHV_ENABLED_VALUE = 'up'
+RHV_GROUP_FILTER = r'^.+$'
+RHV_HOST_FILTER = r'^.+$'
+RHV_EXCLUDE_EMPTY_GROUPS = True
+RHV_INSTANCE_ID_VAR = 'id'
 
 # ---------------------
 # ----- Tower     -----
