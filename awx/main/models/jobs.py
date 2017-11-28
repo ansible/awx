@@ -400,18 +400,23 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 else:
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
-                        survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
+                        survey_vars = [
+                            question['variable'] for question in self.survey_spec.get('spec', [])
+                        ]
                         extra_vars = parse_yaml_or_json(kwargs[field])
                         for key in extra_vars:
                             if key in survey_vars:
-                                if key in survey_password_variables:
-                                    prompted_fields[field][key] = encrypt_value(extra_vars[key])
-                                else:
-                                    prompted_fields[field][key] = extra_vars[key]
+                                prompted_fields[field][key] = extra_vars[key]
                             else:
                                 ignored_fields[field][key] = extra_vars[key]
                     else:
                         ignored_fields[field] = kwargs[field]
+
+        for key in prompted_fields.get('extra_vars', {}):
+            if key in survey_password_variables:
+                prompted_fields['extra_vars'][key] = encrypt_value(
+                    prompted_fields['extra_vars'][key]
+                )
 
         return prompted_fields, ignored_fields
 

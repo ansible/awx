@@ -93,13 +93,14 @@ def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post,
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
+@pytest.mark.parametrize('with_default', [True, False])
 @pytest.mark.parametrize('value, status', [
     ('SUPERSECRET', 201),
     (['some', 'invalid', 'list'], 400),
     ({'some-invalid': 'dict'}, 400),
     (False, 400)
 ])
-def test_survey_spec_passwords_are_encrypted_on_launch(job_template_factory, post, admin_user, value, status):
+def test_survey_spec_passwords_are_encrypted_on_launch(job_template_factory, post, admin_user, with_default, value, status):
     objects = job_template_factory('jt', organization='org1', project='prj',
                                    inventory='inv', credential='cred')
     job_template = objects.job_template
@@ -116,6 +117,8 @@ def test_survey_spec_passwords_are_encrypted_on_launch(job_template_factory, pos
         }],
         'name': 'my survey'
     }
+    if with_default:
+        input_data['spec'][0]['default'] = 'some-default'
     post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
          data=input_data, user=admin_user, expect=200)
     resp = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
