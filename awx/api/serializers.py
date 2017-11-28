@@ -2127,7 +2127,7 @@ class CredentialSerializer(BaseSerializer):
 
     def to_internal_value(self, data):
         # TODO: remove when API v1 is removed
-        if 'credential_type' not in data:
+        if 'credential_type' not in data and self.version == 1:
             # If `credential_type` is not provided, assume the payload is a
             # v1 credential payload that specifies a `kind` and a flat list
             # of field values
