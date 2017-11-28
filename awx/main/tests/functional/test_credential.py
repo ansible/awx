@@ -25,7 +25,7 @@ def test_default_cred_types():
         'insights',
         'net',
         'openstack',
-        'ovirt4',
+        'rhv',
         'satellite6',
         'scm',
         'ssh',

@@ -174,7 +174,7 @@ def migrate_job_credentials(apps, schema_editor):
         utils.get_current_apps = orig_current_apps
 
 
-def create_ovirt4_tower_credtype(apps, schema_editor):
+def create_rhv_tower_credtype(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
 
 

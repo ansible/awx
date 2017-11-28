@@ -62,7 +62,7 @@ class V1Credential(object):
         ('gce', 'Google Compute Engine'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
-        ('ovirt4', 'oVirt4'),
+        ('rhv', 'Red Hat Virtualization'),
         ('insights', 'Insights'),
         ('tower', 'Ansible Tower'),
     ]
@@ -1019,10 +1019,10 @@ def insights(cls):
 
 
 @CredentialType.default
-def ovirt4(cls):
+def rhv(cls):
     return cls(
         kind='cloud',
-        name='oVirt4',
+        name='Red Hat Virtualization',
         managed_by_tower=True,
         inputs={
             'fields': [{
