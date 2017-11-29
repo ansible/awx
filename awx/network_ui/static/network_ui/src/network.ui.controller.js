@@ -167,7 +167,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                    host = inventory.data.results[i];
                    console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
                    console.log($scope.my_location);
-                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data?format=json'));
+                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data/?format=json'));
                }
                return httpGets;
            })
