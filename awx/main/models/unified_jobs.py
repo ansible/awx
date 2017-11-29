@@ -342,12 +342,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             password_list = self.survey_password_variables()
             for key in kwargs.get('extra_vars', {}):
                 if key in password_list:
-                    if kwargs['extra_vars'][key] == '$encrypted$':
-                        # If we get into this block, it means there's probably
-                        # a bug in the way we substitute default survey
-                        # passwords; the value we anticipate here is plaintext
-                        # that needs to be encrypted
-                        raise NotImplementedError('extra_var encryption failed (unexpected $encrypted$ value)')
                     kwargs['extra_vars'][key] = encrypt_value(
                         kwargs['extra_vars'][key]
                     )
