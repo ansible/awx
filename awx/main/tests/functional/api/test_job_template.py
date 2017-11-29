@@ -3,7 +3,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models.jobs import Job
+from awx.main.models.jobs import Job, JobTemplate
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -27,13 +27,17 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
     if grant_inventory:
         inventory.use_role.members.add(alice)
 
-    post(reverse('api:job_template_list'), {
+    r = post(reverse('api:job_template_list'), {
         'name': 'Some name',
         'project': project.id,
-        'credentials': [machine_credential.id],
+        'credential': machine_credential.id,  # TODO: remove in 3.3
         'inventory': inventory.id,
         'playbook': 'helloworld.yml',
-    }, alice, expect=expect)
+    }, alice)
+    if expect == 201:
+        jt = JobTemplate.objects.get(id=r.data['id'])
+        assert set(jt.credentials.values_list('id', flat=True)) == set([machine_credential.id])
+    assert r.status_code == expect
 
 
 # TODO: remove in 3.3
@@ -291,31 +295,27 @@ def test_filter_by_v1(get, organization_factory, job_template_factory, credentia
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "grant_project, grant_credential, grant_inventory, expect", [
-        (True, True, True, 200),
-        (True, True, False, 403),
-        (True, False, True, 403),
-        (False, True, True, 403),
+    "grant_project, grant_inventory, expect", [
+        (True, True, 200),
+        (True, False, 403),
+        (False, True, 403),
     ]
 )
-def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project, grant_credential, grant_inventory, expect):
+def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project, grant_inventory, expect):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     objs.job_template.admin_role.members.add(alice)
 
     if grant_project:
         objs.project.use_role.members.add(alice)
-    if grant_credential:
-        objs.credential.use_role.members.add(alice)
     if grant_inventory:
         objs.inventory.use_role.members.add(alice)
 
-    patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), {
+    patch(url=reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), data={
         'name': 'Some name',
         'project': objs.project.id,
-        'credentials': [objs.credential.id],
         'inventory': objs.inventory.id,
         'playbook': 'alt-helloworld.yml',
-    }, alice, expect=expect)
+    }, user=alice, expect=expect)
 
 
 @pytest.mark.django_db
