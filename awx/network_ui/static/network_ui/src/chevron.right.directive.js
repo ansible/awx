@@ -1,0 +1,6 @@
+/* Copyright (c) 2017 Red Hat, Inc. */
+
+function chevronRight () {
+  return { restrict: 'A', templateUrl: '/static/network_ui/widgets/chevron_right.svg' };
+}
+exports.chevronRight = chevronRight;

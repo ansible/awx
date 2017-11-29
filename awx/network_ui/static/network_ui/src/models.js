@@ -299,7 +299,7 @@ function Button(name, x, y, width, height, callback) {
     this.callback = callback;
     this.is_pressed = false;
     this.mouse_over = false;
-    this.fsm = new fsm.FSMController(this, button.Start, null);
+    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
 }
 exports.Button = Button;
 
@@ -326,7 +326,7 @@ function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callb
     this.toggle_callback = toggle_callback;
     this.untoggle_callback = untoggle_callback;
     this.mouse_over = false;
-    this.fsm = new fsm.FSMController(this, button.Start, null);
+    this.fsm = new fsm.FSMController(this, button.Start, null, name+'toggle_button_fsm');
 }
 inherits(ToggleButton, Button);
 exports.ToggleButton = ToggleButton;

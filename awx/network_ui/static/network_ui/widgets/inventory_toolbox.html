@@ -7,6 +7,8 @@
       ng-attr-width="{{toolbox.width}}"
       ng-attr-height="{{toolbox.height}}"
       rx=5></rect>
+<g awx-net-chevron-left-icon ng-if="toolbox.enabled" transform="translate(120, 400) scale(0.012)"></g>
+<g awx-net-chevron-left-icon ng-if="!toolbox.enabled" transform="translate(120, 400) scale(0.012)"></g>
 <g clip-path="url(#inventory-toolbox-clip-path)">
 <g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y}})">
 <g ng-repeat="item in toolbox.items track by $index"
