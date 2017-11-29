@@ -1106,8 +1106,13 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
+        try:
+            res.update(dict(
+                project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
+            ))
+        except ObjectDoesNotExist:
+            pass
         res.update(dict(
-            project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
             cancel = self.reverse('api:project_update_cancel', kwargs={'pk': obj.pk}),
             scm_inventory_updates = self.reverse('api:project_update_scm_inventory_updates', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:project_update_notifications_list', kwargs={'pk': obj.pk}),
@@ -1728,8 +1733,15 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
+        try:
+            res.update(dict(
+                inventory_source = self.reverse(
+                    'api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk}
+                ),
+            ))
+        except ObjectDoesNotExist:
+            pass
         res.update(dict(
-            inventory_source = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk}),
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
@@ -2339,14 +2351,30 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
         res['labels'] = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk})
-        if obj.inventory:
-            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.project:
-            res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
-        if obj.credential:
-            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
-        if obj.vault_credential:
-            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential.pk})
+        try:
+            if obj.inventory:
+                res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'inventory', None)
+        try:
+            if obj.project:
+                res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'project', None)
+        try:
+            if obj.credential:
+                res['credential'] = self.reverse(
+                    'api:credential_detail', kwargs={'pk': obj.credential.pk}
+                )
+        except ObjectDoesNotExist:
+            setattr(obj, 'credential', None)
+        try:
+            if obj.vault_credential:
+                res['vault_credential'] = self.reverse(
+                    'api:credential_detail', kwargs={'pk': obj.vault_credential.pk}
+                )
+        except ObjectDoesNotExist:
+            setattr(obj, 'vault_credential', None)
         if self.version > 1:
             if isinstance(obj, UnifiedJobTemplate):
                 res['extra_credentials'] = self.reverse(
@@ -2584,15 +2612,23 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             notifications = self.reverse('api:job_notifications_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:job_label_list', kwargs={'pk': obj.pk}),
         ))
-        if obj.job_template:
-            res['job_template'] = self.reverse('api:job_template_detail',
-                                               kwargs={'pk': obj.job_template.pk})
+        try:
+            if obj.job_template:
+                res['job_template'] = self.reverse('api:job_template_detail',
+                                                   kwargs={'pk': obj.job_template.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'job_template', None)
         if (obj.can_start or True) and self.version == 1:  # TODO: remove in 3.3
             res['start'] = self.reverse('api:job_start', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:job_cancel', kwargs={'pk': obj.pk})
-        if obj.project_update:
-            res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
+        try:
+            if obj.project_update:
+                res['project_update'] = self.reverse(
+                    'api:project_update_detail', kwargs={'pk': obj.project_update.pk}
+                )
+        except ObjectDoesNotExist:
+            pass
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
 
