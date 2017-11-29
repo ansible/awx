@@ -220,3 +220,33 @@ class TestINIImports:
     def test_recursive_group_error(self, inventory):
         cmd = inventory_import.Command()
         cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
+
+
+@pytest.mark.django_db
+@pytest.mark.inventory_import
+class TestEnabledVar:
+    '''
+    Meaning of return values
+    None - import script did not give an indication of enablement
+    True - host is enabled
+    False - host is not enabled
+    '''
+
+    @pytest.fixture
+    def cmd(self):
+        cmd = inventory_import.Command()
+        cmd.enabled_var = 'foo.bar'
+        cmd.enabled_value = 'barfoo'
+        return cmd
+
+    def test_enabled_var_not_present(self, cmd):
+        assert cmd._get_enabled({'ansible_connection': 'local'}) is None
+
+    def test_enabled_dot_var_not_present(self, cmd):
+        assert cmd._get_enabled({'foo': 'barfoo'}) is None
+
+    def test_enabled_var_not_enabled_value(self, cmd):
+        assert cmd._get_enabled({'foo': {'bar': 'foooooo'}}) is False
+
+    def test_enabled_var_is_enabled_value(self, cmd):
+        assert cmd._get_enabled({'foo': {'bar': 'barfoo'}}) is True
