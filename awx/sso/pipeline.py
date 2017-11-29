@@ -5,7 +5,7 @@
 import re
 
 # Python Social Auth
-from social.exceptions import AuthException
+from social_core.exceptions import AuthException
 
 # Django
 from django.utils.translation import ugettext_lazy as _
