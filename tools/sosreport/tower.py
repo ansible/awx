@@ -8,7 +8,7 @@ SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
     "awx-manage --version", # tower version
     "supervisorctl status",   # tower process status
-    "/var/lib/awx/venv/tower/bin/pip freeze",             # pip package list
+    "/var/lib/awx/venv/awx/bin/pip freeze",             # pip package list
     "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
