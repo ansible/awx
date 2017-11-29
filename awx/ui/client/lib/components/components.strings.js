@@ -16,6 +16,10 @@ function ComponentsStrings (BaseString) {
         INVALID_INPUT: t.s('Invalid input for this type.')
     };
 
+    ns.file = {
+        PLACEHOLDER: t.s('CHOOSE A FILE')
+    };
+
     ns.form = {
         SUBMISSION_ERROR_TITLE: t.s('Unable to Submit'),
         SUBMISSION_ERROR_MESSAGE: t.s('Unexpected server error. View the console for more information'),

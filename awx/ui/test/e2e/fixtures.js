@@ -1,5 +1,7 @@
 import uuid from 'uuid';
 
+import { AWX_E2E_PASSWORD } from './settings';
+
 import {
     all,
     get,
@@ -231,7 +233,7 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
         email: 'null@ansible.com',
         is_superuser: false,
         is_system_auditor: true,
-        password: 'password'
+        password: AWX_E2E_PASSWORD
     }));
 
 const getUser = (namespace = session) => getOrganization(namespace)
@@ -243,7 +245,7 @@ const getUser = (namespace = session) => getOrganization(namespace)
         email: 'null@ansible.com',
         is_superuser: false,
         is_system_auditor: false,
-        password: 'password'
+        password: AWX_E2E_PASSWORD
     }));
 
 const getJobTemplateAdmin = (namespace = session) => {
@@ -259,7 +261,7 @@ const getJobTemplateAdmin = (namespace = session) => {
             email: 'null@ansible.com',
             is_superuser: false,
             is_system_auditor: false,
-            password: 'password'
+            password: AWX_E2E_PASSWORD
         }));
 
     const assignRolePromise = Promise.all([userPromise, rolePromise])

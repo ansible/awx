@@ -14,10 +14,14 @@ function atInputTextLink (scope, element, attrs, controllers) {
 function AtInputTextController (baseInputController) {
     const vm = this || {};
 
-    vm.init = (scope, element, form) => {
-        baseInputController.call(vm, 'input', scope, element, form);
+    let scope;
+
+    vm.init = (_scope_, element, form) => {
+        baseInputController.call(vm, 'input', _scope_, element, form);
+        scope = _scope_;
 
         vm.check();
+        scope.$watch('state._value', () => vm.check());
     };
 }
 

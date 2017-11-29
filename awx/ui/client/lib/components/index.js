@@ -5,6 +5,7 @@ import divider from '~components/utility/divider.directive';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
 import inputCheckbox from '~components/input/checkbox.directive';
+import inputFile from '~components/input/file.directive';
 import inputGroup from '~components/input/group.directive';
 import inputLabel from '~components/input/label.directive';
 import inputLookup from '~components/input/lookup.directive';
@@ -41,6 +42,7 @@ angular
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
+    .directive('atInputFile', inputFile)
     .directive('atInputGroup', inputGroup)
     .directive('atInputLabel', inputLabel)
     .directive('atInputLookup', inputLookup)

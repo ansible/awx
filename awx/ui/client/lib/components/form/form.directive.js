@@ -38,6 +38,10 @@ function AtFormController (eventService, strings) {
         component.category = category;
         component.form = vm.state;
 
+        if (category === 'input') {
+            scope.state[component.state.id] = component.state;
+        }
+
         vm.components.push(component);
     };
 
@@ -189,6 +193,7 @@ function AtFormController (eventService, strings) {
             for (let j = 0; j < vm.components.length; j++) {
                 if (components[i] === vm.components[j].state) {
                     vm.components.splice(j, 1);
+                    delete scope.state[components[i].id];
                     break;
                 }
             }

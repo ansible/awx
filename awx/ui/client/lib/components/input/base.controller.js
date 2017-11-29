@@ -85,9 +85,7 @@ function BaseInputController (strings) {
             vm.updateValidationState(result);
         };
 
-        vm.toggleRevertReplace = () => {
-            scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
-
+        vm.onRevertReplaceToggle = () => {
             if (!scope.state._isBeingReplaced) {
                 scope.state._buttonText = vm.strings.get('REPLACE');
                 scope.state._disabled = true;

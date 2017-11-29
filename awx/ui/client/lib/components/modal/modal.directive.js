@@ -22,8 +22,8 @@ function AtModalController (eventService, strings) {
     vm.strings = strings;
 
     vm.init = (scope, el) => {
-        [overlay] = el;
-        [modal] = el.find('.at-Modal-window');
+        overlay = el[0]; // eslint-disable-line prefer-destructuring
+        modal = el.find('.at-Modal-window')[0]; // eslint-disable-line prefer-destructuring
 
         vm.modal = scope[scope.ns].modal;
         vm.modal.show = vm.show;
