@@ -508,8 +508,7 @@ export default
 `Host callbacks are enabled for this template. The callback URL is:
 <p style=\"padding: 10px 0;\">
     <strong>
-        ${$scope.callback_server_path}
-        ${data.related.callback}
+        ${$scope.callback_server_path}${data.related.callback}
     </strong>
 </p>
 <p>The host configuration key is:
