@@ -56,7 +56,19 @@ inherits(_Move, _State);
 var Move = new _Move();
 exports.Move = Move;
 
+function _OffScreen () {
+    this.name = 'OffScreen';
+}
+inherits(_OffScreen, _State);
+var OffScreen = new _OffScreen();
+exports.OffScreen = OffScreen;
 
+function _Disabled () {
+    this.name = 'Disabled';
+}
+inherits(_Disabled, _State);
+var Disabled = new _Disabled();
+exports.Disabled = Disabled;
 
 
 _Dropping.prototype.start = function (controller) {
@@ -170,7 +182,20 @@ _Ready.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
 
+_Ready.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
+    controller.changeState(OffScreen);
+    controller.next_controller.handle_message(msg_type, message);
+
+};
+_Ready.prototype.onToggleToolbox.transitions = ['OffScreen'];
+
+_Ready.prototype.onDisable = function (controller) {
+
+    controller.changeState(Disabled);
+
+};
+_Ready.prototype.onDisable.transitions = ['Disabled'];
 
 _Scrolling.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
@@ -214,4 +239,45 @@ _Move.prototype.onMouseMove = function (controller) {
 
     controller.scope.pressedX =  controller.scope.mouseX;
     controller.scope.pressedY =  controller.scope.mouseY;
+};
+
+
+_OffScreen.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(Ready);
+    controller.next_controller.handle_message(msg_type, message);
+
+};
+_OffScreen.prototype.onToggleToolbox.transitions = ['Ready'];
+
+
+_OffScreen.prototype.start = function (controller) {
+
+    controller.toolbox.enabled = false;
+
+};
+
+_OffScreen.prototype.end = function (controller) {
+
+    controller.toolbox.enabled = true;
+
+};
+
+_Disabled.prototype.onEnable = function (controller) {
+
+    controller.changeState(Ready);
+
+};
+_Disabled.prototype.onEnable.transitions = ['Ready'];
+
+_Disabled.prototype.start = function (controller) {
+    if(controller.toolbox !== undefined){
+        controller.toolbox.enabled = false;
+    }
+};
+
+_Disabled.prototype.end = function (controller) {
+
+    controller.toolbox.enabled = true;
+
 };

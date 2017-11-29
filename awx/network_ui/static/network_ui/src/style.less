@@ -35,7 +35,7 @@
 @light-toolbox-background: #f6f6f6;
 
 .NetworkUI {
-    background-color: @light-background;
+    background-color: @light-toolbox-background;
     cursor: none;
 }
 
@@ -616,13 +616,16 @@
 
 .NetworkUI__toolbox {
     stroke: none;
-    fill: @light-toolbox-background;
+    fill: @light-background;
 }
 
 .NetworkUI__toolbox-bezel {
-    stroke: @group;
-    stroke-width: 2;
+    stroke: @button-outline;
+    stroke-width: 1;
     fill: none;
+    rx: 0;
+    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dashoffset: -150;
 }
 
 .NetworkUI__process {
@@ -695,4 +698,12 @@
     fill: @button-text;
     font-size: 8px;
     font-family: 'Open Sans';
+}
+
+.awxNetIcon-chevron{
+    fill: @button-body-pressed;
+}
+
+.awxNetIcon-chevron:hover{
+    cursor: pointer;
 }
