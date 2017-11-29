@@ -1,7 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-from django.db import models
+from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
@@ -140,26 +140,26 @@ class JobOrigin(models.Model):
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
     if created:
         from awx.main.tasks import apply_cluster_membership_policies
-        apply_cluster_membership_policies.apply_async(countdown=5)
+        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     if created:
         from awx.main.tasks import apply_cluster_membership_policies
-        apply_cluster_membership_policies.apply_async(countdown=5)
+        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
     from awx.main.tasks import apply_cluster_membership_policies
-    apply_cluster_membership_policies.apply_async(countdown=5)
+    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     from awx.main.tasks import apply_cluster_membership_policies
-    apply_cluster_membership_policies.apply_async(countdown=5)
+    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 # Unfortunately, the signal can't just be connected against UnifiedJob; it
