@@ -345,40 +345,9 @@ class LDAPUserFlagsField(fields.DictField):
         return data
 
 
-class LDAPDNMapField(fields.ListField):
+class LDAPDNMapField(fields.StringListBooleanField):
 
-    default_error_messages = {
-        'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.'),
-    }
     child = LDAPDNField()
-
-    def to_representation(self, value):
-        if isinstance(value, (list, tuple)):
-            return super(LDAPDNMapField, self).to_representation(value)
-        elif value in fields.NullBooleanField.TRUE_VALUES:
-            return True
-        elif value in fields.NullBooleanField.FALSE_VALUES:
-            return False
-        elif value in fields.NullBooleanField.NULL_VALUES:
-            return None
-        elif isinstance(value, basestring):
-            return self.child.to_representation(value)
-        else:
-            self.fail('type_error', input_type=type(value))
-
-    def to_internal_value(self, data):
-        if isinstance(data, (list, tuple)):
-            return super(LDAPDNMapField, self).to_internal_value(data)
-        elif data in fields.NullBooleanField.TRUE_VALUES:
-            return True
-        elif data in fields.NullBooleanField.FALSE_VALUES:
-            return False
-        elif data in fields.NullBooleanField.NULL_VALUES:
-            return None
-        elif isinstance(data, basestring):
-            return self.child.run_validation(data)
-        else:
-            self.fail('type_error', input_type=type(data))
 
 
 class BaseDictWithChildField(fields.DictField):
@@ -649,3 +618,28 @@ class SAMLIdPField(BaseDictWithChildField):
 class SAMLEnabledIdPsField(fields.DictField):
 
     child = SAMLIdPField()
+
+
+class SAMLSecurityField(fields.DictField):
+
+    child_fields = {
+        'nameIdEncrypted': fields.BooleanField(required=False),
+        'authnRequestsSigned': fields.BooleanField(required=False),
+        'logoutRequestSigned': fields.BooleanField(required=False),
+        'logoutResponseSigned': fields.BooleanField(required=False),
+        'signMetadata': fields.BooleanField(required=False),
+        'wantMessagesSigned': fields.BooleanField(required=False),
+        'wantAssertionsSigned': fields.BooleanField(required=False),
+        'wantAssertionsEncrypted': fields.BooleanField(required=False),
+        'wantNameId': fields.BooleanField(required=False),
+        'wantNameIdEncrypted': fields.BooleanField(required=False),
+        'wantAttributeStatement': fields.BooleanField(required=False),
+        'requestedAuthnContext': fields.StringListBooleanField(required=False),
+        'requestedAuthnContextComparison': fields.CharField(required=False),
+        'metadataValidUntil': fields.CharField(allow_null=True, required=False),
+        'metadataCacheDuration': fields.CharField(allow_null=True, required=False),
+        'signatureAlgorithm': fields.CharField(allow_null=True, required=False),
+        'digestAlgorithm': fields.CharField(allow_null=True, required=False),
+    }
+    allow_unknown_keys = True
+

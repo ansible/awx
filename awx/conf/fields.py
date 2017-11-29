@@ -53,6 +53,47 @@ class StringListField(ListField):
         return super(StringListField, self).to_representation(value)
 
 
+class StringListBooleanField(ListField):
+
+    default_error_messages = {
+        'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.'),
+    }
+    child = CharField()
+
+    def to_representation(self, value):
+        try:
+            if isinstance(value, (list, tuple)):
+                return super(StringListBooleanField, self).to_representation(value)
+            elif value in NullBooleanField.TRUE_VALUES:
+                return True
+            elif value in NullBooleanField.FALSE_VALUES:
+                return False
+            elif value in NullBooleanField.NULL_VALUES:
+                return None
+            elif isinstance(value, basestring):
+                return self.child.to_representation(value)
+        except TypeError:
+            pass
+
+        self.fail('type_error', input_type=type(value))
+
+    def to_internal_value(self, data):
+        try:
+            if isinstance(data, (list, tuple)):
+                return super(StringListBooleanField, self).to_internal_value(data)
+            elif data in NullBooleanField.TRUE_VALUES:
+                return True
+            elif data in NullBooleanField.FALSE_VALUES:
+                return False
+            elif data in NullBooleanField.NULL_VALUES:
+                return None
+            elif isinstance(data, basestring):
+                return self.child.run_validation(data)
+        except TypeError:
+            pass
+        self.fail('type_error', input_type=type(data))
+
+
 class URLField(CharField):
 
     def __init__(self, **kwargs):
@@ -100,3 +141,25 @@ class KeyValueField(DictField):
             if not isinstance(value, six.string_types + six.integer_types + (float,)):
                 self.fail('invalid_child', input=value)
         return ret
+
+
+class ListTuplesField(ListField):
+    default_error_messages = {
+        'type_error': _('Expected a list of tuples of max length 2 but got {input_type} instead.'),
+    }
+
+    def to_representation(self, value):
+        if isinstance(value, (list, tuple)):
+            return super(ListTuplesField, self).to_representation(value)
+        else:
+            self.fail('type_error', input_type=type(value))
+
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            for x in data:
+                if not isinstance(x, (list, tuple)) or len(x) > 2:
+                    self.fail('type_error', input_type=type(x))
+
+            return super(ListTuplesField, self).to_internal_value(data)
+        else:
+            self.fail('type_error', input_type=type(data))

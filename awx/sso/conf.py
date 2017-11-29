@@ -1062,6 +1062,71 @@ register(
 )
 
 register(
+    'SOCIAL_AUTH_SAML_SECURITY_CONFIG',
+    field_class=fields.SAMLSecurityField,
+    allow_null=True,
+    default={'requestedAuthnContext': False},
+    label=_('SAML Security Config'),
+    help_text=_('A dict of key value pairs that are passed to the underlying'
+                ' python-saml security setting'
+                ' https://github.com/onelogin/python-saml#settings'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=collections.OrderedDict([
+        ("nameIdEncrypted", False),
+        ("authnRequestsSigned", False),
+        ("logoutRequestSigned", False),
+        ("logoutResponseSigned", False),
+        ("signMetadata", False),
+        ("wantMessagesSigned", False),
+        ("wantAssertionsSigned", False),
+        ("wantAssertionsEncrypted", False),
+        ("wantNameId", True),
+        ("wantNameIdEncrypted", False),
+        ("wantAttributeStatement", True),
+        ("requestedAuthnContext", True),
+        ("requestedAuthnContextComparison", "exact"),
+        ("metadataValidUntil", "2015-06-26T20:00:00Z"),
+        ("metadataCacheDuration", "PT518400S"),
+        ("signatureAlgorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1"),
+        ("digestAlgorithm", "http://www.w3.org/2000/09/xmldsig#sha1"),
+    ]),
+    feature_required='enterprise_auth',
+)
+
+register(
+    'SOCIAL_AUTH_SAML_SP_EXTRA',
+    field_class=fields.DictField,
+    allow_null=True,
+    default=None,
+    label=_('SAML Service Provider extra configuration data'),
+    help_text=_('A dict of key value pairs to be passed to the underlying'
+                ' python-saml Service Provider configuration setting.'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=collections.OrderedDict(),
+    feature_required='enterprise_auth',
+)
+
+register(
+    'SOCIAL_AUTH_SAML_EXTRA_DATA',
+    field_class=fields.ListTuplesField,
+    allow_null=True,
+    default=None,
+    label=_('SAML IDP to extra_data attribute mapping'),
+    help_text=_('A list of tuples that maps IDP attributes to extra_attributes.'
+                ' Each attribute will be a list of values, even if only 1 value.'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=[
+        ('attribute_name', 'extra_data_name_for_attribute'),
+        ('department', 'department'),
+        ('manager_full_name', 'manager_full_name')
+    ],
+    feature_required='enterprise_auth',
+)
+
+register(
     'SOCIAL_AUTH_SAML_ORGANIZATION_MAP',
     field_class=fields.SocialOrganizationMapField,
     allow_null=True,
