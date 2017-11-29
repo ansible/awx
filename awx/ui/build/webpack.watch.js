@@ -63,6 +63,11 @@ const watch = {
                 target: TARGET,
                 secure: false,
                 ws: true
+            },
+            '/network_ui': {
+                target: TARGET,
+                secure: false,
+                ws: true
             }
         }
     }

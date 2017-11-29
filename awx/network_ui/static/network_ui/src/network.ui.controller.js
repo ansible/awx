@@ -22,10 +22,12 @@ var messages = require('./messages.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http) {
+var NetworkUIController = function($scope, $document, $location, $window, $http, $q) {
 
   window.scope = $scope;
   var i = 0;
+
+  $scope.http = $http;
 
   $scope.api_token = '';
   $scope.disconnected = false;
@@ -36,7 +38,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   $scope.inventory_id = $location.search().inventory_id || 1;
 
   if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("ws://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
+  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
   } else {
@@ -44,6 +46,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
           on_message: util.noop
       };
   }
+  $scope.my_location = $location.protocol() + "://" + $location.host() + ':' + $location.port();
   $scope.history = [];
   $scope.client_id = 0;
   $scope.onMouseDownResult = "";
@@ -144,23 +147,39 @@ var NetworkUIController = function($scope, $document, $location, $window, $http)
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 10, 200, 150, $scope.graph.height - 200 - 100);
   if (!$scope.disconnected) {
+      console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
+      console.log($scope.my_location);
+      function add_host (host) {
+          console.log(host);
+          var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
+          device.icon = true;
+          $scope.inventory_toolbox.items.push(device);
+      }
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
-           .then(function(response) {
-               console.log(response);
+           .then(function(inventory) {
+               console.log(inventory);
+               console.log(inventory.headers());
 
                var host = null;
                var i = 0;
-               function add_host (response) {
-                   console.log(response);
-                   var device = new models.Device(0, response.data.name, 0, 0, response.data.type);
-                   device.icon = true;
-                   $scope.inventory_toolbox.items.push(device);
+               var httpGets = [];
+               for (i=0; i < inventory.data.results.length;i++) {
+                   host = inventory.data.results[i];
+                   console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
+                   console.log($scope.my_location);
+                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data?format=json'));
                }
-               for (i=0; i<response.data.results.length;i++) {
-                   host = response.data.results[i];
-                   $http.get('/api/v2/hosts/'+ host.id + '/variable_data?format=json')
-                        .then(add_host);
-               }
+               return httpGets;
+           })
+           .then(function(httpGets) {
+               console.log(httpGets);
+               $q.all(httpGets).then(function (results) {
+                   var i = 0;
+                   for (i=0; i < results.length; i++) {
+                       add_host(results[i]);
+                   }
+                   console.log(['done', x]);
+               });
            });
   }
   $scope.inventory_toolbox.spacing = 150;
