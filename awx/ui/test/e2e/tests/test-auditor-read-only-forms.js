@@ -63,7 +63,7 @@ module.exports = {
                 inventories = client.page.inventories();
                 teams = client.page.teams();
 
-                client.login(data.auditor.username, data.auditor.password);
+                client.login(data.auditor.username);
                 client.waitForAngular();
 
                 done();
