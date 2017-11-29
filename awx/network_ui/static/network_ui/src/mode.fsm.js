@@ -5,6 +5,7 @@ var move = require('./move.js');
 var group = require('./group.js');
 var rack_fsm = require('./rack.fsm.js');
 var site_fsm = require('./site.fsm.js');
+var toolbox_fsm = require('./toolbox.fsm.js');
 
 function _State () {
 }
@@ -86,13 +87,13 @@ _Interface.prototype.onMouseWheel.transitions = ['Device'];
 
 _Site.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
-    controller.scope.rack_toolbox.enabled = true;
+    controller.scope.rack_toolbox_controller.handle_message('Enable', {});
     controller.scope.rack_controller.changeState(rack_fsm.Ready);
 };
 
 _Site.prototype.end = function (controller) {
 
-    controller.scope.rack_toolbox.enabled = false;
+    controller.scope.rack_toolbox_controller.handle_message('Disable', {});
     controller.scope.rack_controller.changeState(rack_fsm.Disable);
 };
 
@@ -124,13 +125,13 @@ _Process.prototype.onMouseWheel.transitions = ['Device'];
 
 _MultiSite.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
-    controller.scope.site_toolbox.enabled = true;
+    controller.scope.site_toolbox_controller.handle_message('Enable', {});
     controller.scope.site_controller.changeState(site_fsm.Ready);
 };
 
 _MultiSite.prototype.end = function (controller) {
 
-    controller.scope.site_toolbox.enabled = false;
+    controller.scope.site_toolbox_controller.handle_message('Disable', {});
     controller.scope.site_controller.changeState(site_fsm.Disable);
 };
 
@@ -147,12 +148,12 @@ _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
 
 _Device.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
-    controller.scope.app_toolbox.enabled = true;
+    controller.scope.app_toolbox_controller.handle_message('Enable', {});
 };
 
 _Device.prototype.end = function (controller) {
 
-    controller.scope.app_toolbox.enabled = false;
+    controller.scope.app_toolbox_controller.handle_message('Disable', {});
 };
 
 _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
@@ -174,14 +175,14 @@ _Device.prototype.onMouseWheel.transitions = ['Process', 'Interface', 'Rack'];
 
 _Rack.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
-    controller.scope.inventory_toolbox.enabled = true;
+    controller.scope.inventory_toolbox_controller.handle_message('Enable', {});
     controller.scope.move_controller.changeState(move.Ready);
     controller.scope.group_controller.changeState(group.Ready);
 };
 
 _Rack.prototype.end = function (controller) {
 
-    controller.scope.inventory_toolbox.enabled = false;
+    controller.scope.inventory_toolbox_controller.handle_message('Disable', {});
     controller.scope.move_controller.changeState(move.Disable);
     controller.scope.group_controller.changeState(group.Disable);
 };

@@ -10,7 +10,7 @@ if ($basePath) {
 }
 
 import start from './app.start';
-
+// import networkUI from './../network_ui/static/network_ui/src/main.js';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
