@@ -834,12 +834,12 @@ SATELLITE6_GROUP_PATTERNS = ["{app}-{tier}-{color}", "{app}-{color}", "{app}", "
 # ---------------------
 # ----- CloudForms -----
 # ---------------------
-CLOUDFORMS_ENABLED_VAR = 'power_state'
+CLOUDFORMS_ENABLED_VAR = 'cloudforms.power_state'
 CLOUDFORMS_ENABLED_VALUE = 'on'
 CLOUDFORMS_GROUP_FILTER = r'^.+$'
 CLOUDFORMS_HOST_FILTER = r'^.+$'
 CLOUDFORMS_EXCLUDE_EMPTY_GROUPS = True
-CLOUDFORMS_INSTANCE_ID_VAR = 'id'
+CLOUDFORMS_INSTANCE_ID_VAR = 'cloudforms.id'
 
 # ---------------------
 # ----- Custom -----
