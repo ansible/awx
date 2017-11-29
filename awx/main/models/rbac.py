@@ -372,48 +372,26 @@ class Role(models.Model):
 
 
     @staticmethod
-    @check_singleton
     def visible_roles(user):
-        sql_params = {
-            'ancestors_table': Role.ancestors.through._meta.db_table,
-            'parents_table': Role.parents.through._meta.db_table,
-            'roles_table': Role._meta.db_table,
-            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True)),
-        }
-
-        qs = Role.objects.extra(
-            where = ['''
-                    %(roles_table)s.id IN (
-                        SELECT DISTINCT visible_roles_t2.ancestor_id
-                          FROM %(ancestors_table)s as visible_roles_t1
-                               LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
-                         WHERE visible_roles_t1.ancestor_id IN (%(ids)s)
-                    )
-                    ''' % sql_params]
-        )
-        return qs
+        return Role.filter_visible_roles(user, Role.objects.all())
 
     @staticmethod
     @check_singleton
     def filter_visible_roles(user, roles_qs):
-        sql_params = {
-            'ancestors_table': Role.ancestors.through._meta.db_table,
-            'parents_table': Role.parents.through._meta.db_table,
-            'roles_table': Role._meta.db_table,
-            'ids': ','.join(str(x) for x in user.roles.all().values_list('id', flat=True))
-        }
-
-        qs = roles_qs.extra(
-            where = ['''
-                EXISTS (
-                    SELECT 1
-                      FROM %(ancestors_table)s as visible_roles_t1
-                           LEFT JOIN %(ancestors_table)s as visible_roles_t2 ON (visible_roles_t1.descendent_id = visible_roles_t2.descendent_id)
-                     WHERE visible_roles_t1.ancestor_id = %(roles_table)s.id
-                           AND visible_roles_t2.ancestor_id IN (%(ids)s)
-                ) ''' % sql_params]
+        '''
+        Visible roles include all roles that are ancestors of any
+        roles that the user has access to.
+        Case in point - organization auditor_role must see all roles
+        in their organization, but some of those roles descend from
+        organization admin_role, but not auditor_role.
+        '''
+        return roles_qs.filter(
+            id__in=RoleAncestorEntry.objects.filter(
+                descendent__in=RoleAncestorEntry.objects.filter(
+                    ancestor_id__in=list(user.roles.values_list('id', flat=True))
+                ).values_list('descendent', flat=True)
+            ).distinct().values_list('ancestor', flat=True)
         )
-        return qs
 
     @staticmethod
     def singleton(name):
