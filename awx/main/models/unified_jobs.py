@@ -32,7 +32,7 @@ from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
-    decrypt_field, _inventory_updates,
+    encrypt_value, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
     get_type_for_model, parse_yaml_or_json
 )
@@ -336,6 +336,22 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
+
+        # automatically encrypt survey fields
+        if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
+            password_list = self.survey_password_variables()
+            for key in kwargs.get('extra_vars', {}):
+                if key in password_list:
+                    if kwargs['extra_vars'][key] == '$encrypted$':
+                        # If we get into this block, it means there's probably
+                        # a bug in the way we substitute default survey
+                        # passwords; the value we anticipate here is plaintext
+                        # that needs to be encrypted
+                        raise NotImplementedError('extra_var encryption failed (unexpected $encrypted$ value)')
+                    kwargs['extra_vars'][key] = encrypt_value(
+                        kwargs['extra_vars'][key]
+                    )
+
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
         unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
