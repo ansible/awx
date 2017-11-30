@@ -2696,7 +2696,7 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
-class JobRelaunchSerializer(JobSerializer):
+class JobRelaunchSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.SerializerMethodField()
     retry_counts = serializers.SerializerMethodField()
@@ -2710,6 +2710,7 @@ class JobRelaunchSerializer(JobSerializer):
     )
 
     class Meta:
+        model = Job
         fields = ('passwords_needed_to_start', 'retry_counts', 'hosts',)
 
     def to_internal_value(self, data):
