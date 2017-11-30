@@ -55,6 +55,7 @@ function parseLine (event) {
 
     const { stdout } = event;
     const lines = stdout.split('\r\n');
+    const isTruncated = (event.end_line - event.start_line) > lines.length;
 
     let ln = event.start_line;
 
@@ -63,9 +64,24 @@ function parseLine (event) {
 
         const time = getTime(event, i);
         const group = getGroup(event, i);
+        const isLastLine = i === lines.length - 1;
+
+        if (isTruncated && isLastLine) {
+            return `${html}${createRow(ln, line, time, group)}${createTruncatedRow()}`;
+        }
 
         return `${html}${createRow(ln, line, time, group)}`;
     }, '');
+}
+
+function createTruncatedRow () {
+    return `
+        <tr class="">
+            <td class="at-Stdout-expand"></td>
+            <td class="at-Stdout-lineNumber text-center"><i class="fa fa-long-arrow-down"></i></td>
+            <td class="at-Stdout-content"></td>
+            <td class="at-Stdout-timestamp"></td>
+        </tr>`;
 }
 
 function createRow (ln, content, time, group) {
@@ -73,7 +89,7 @@ function createRow (ln, content, time, group) {
 
     let expand = '';
     if (group.parent) {
-        expand = '<i class="fa fa-caret-down" ng-click="vm.toggle(group.level)"></i>';
+        expand = '<i class="fa fa-chevron-down" ng-click="vm.toggle(group.level)"></i>';
     }
 
     return `

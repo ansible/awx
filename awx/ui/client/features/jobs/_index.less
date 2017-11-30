@@ -2,6 +2,7 @@
     font-family: monospace;
 
     &-controls {
+        color: @at-gray-dark-4x;
         border: 1px solid @at-gray-dark-2x;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
@@ -9,29 +10,34 @@
     }
 
     &-controlIcon {
-        font-size: 16px;
+        font-size: 12px;
         padding: 10px;
     }
 
     &-expand {
-        background-color: @at-gray-light-2x;
+        color: @at-gray-dark-4x;
+        background-color: @at-gray-light;
+        font-size: 12px;
 
-        padding: 0 10px;
+        padding: 0 20px 0 10px;
     }
 
     &-lineNumber {
-        background-color: @at-gray-light-2x;
+        color: @at-gray-dark-4x;
+        background-color: @at-gray-light;
 
         padding-right: 5px;
-        border-right: 1px solid gray;
+        border-right: 1px solid @at-gray-dark;
     }
 
     &-content {
-        padding-left: 5px;
+        padding-left: 20px;
     }
 
     &-timestamp {
         padding-left: 20px;
+        font-size: 12px;
+        text-align: right;
     }
 
     &-output {
