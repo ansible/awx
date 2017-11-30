@@ -173,3 +173,8 @@ def migrate_job_credentials(apps, schema_editor):
     finally:
         utils.get_current_apps = orig_current_apps
 
+
+def add_vault_id_field(apps, schema_editor):
+    vault_credtype = CredentialType.objects.get(kind='vault')
+    vault_credtype.inputs = CredentialType.defaults.get('vault')().inputs
+    vault_credtype.save()

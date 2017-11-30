@@ -173,6 +173,10 @@ class JobOptions(BaseModel):
         return list(self.credentials.filter(credential_type__kind='cloud'))
 
     @property
+    def vault_credentials(self):
+        return list(self.credentials.filter(credential_type__kind='vault'))
+
+    @property
     def credential(self):
         cred = self.get_deprecated_credential('ssh')
         if cred is not None:

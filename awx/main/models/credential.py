@@ -689,6 +689,16 @@ def vault(cls):
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
+            }, {
+                'id': 'vault_id',
+                'label': 'Vault Identifier',
+                'type': 'string',
+                'format': 'vault_id',
+                'help_text': ('Specify an (optional) Vault ID. This is '
+                              'equivalent to specifying the --vault-id '
+                              'Ansible parameter for providing multiple Vault '
+                              'passwords.  Note: this feature only works in '
+                              'Ansible 2.4+.')
             }],
             'required': ['vault_password'],
         }

@@ -712,7 +712,7 @@ class BaseTask(LogErrorsTask):
             job_timeout = 0
         return job_timeout
 
-    def get_password_prompts(self):
+    def get_password_prompts(self, **kwargs):
         '''
         Return a dictionary where keys are strings or regular expressions for
         prompts, and values are password lookup keys (keys that are returned
@@ -833,7 +833,7 @@ class BaseTask(LogErrorsTask):
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_handle.name)
 
             expect_passwords = {}
-            for k, v in self.get_password_prompts().items():
+            for k, v in self.get_password_prompts(**kwargs).items():
                 expect_passwords[k] = kwargs['passwords'].get(v, '') or ''
             _kw = dict(
                 expect_passwords=expect_passwords,
@@ -961,19 +961,30 @@ class RunJob(BaseTask):
         and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
-        for kind, fields in {
-            'ssh': ('ssh_key_unlock', 'ssh_password', 'become_password'),
-            'vault': ('vault_password',)
-        }.items():
-            cred = job.get_deprecated_credential(kind)
-            if cred:
-                for field in fields:
-                    if field == 'ssh_password':
-                        value = kwargs.get(field, decrypt_field(cred, 'password'))
-                    else:
-                        value = kwargs.get(field, decrypt_field(cred, field))
-                    if value not in ('', 'ASK'):
-                        passwords[field] = value
+        cred = job.get_deprecated_credential('ssh')
+        if cred:
+            for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
+                value = kwargs.get(
+                    field,
+                    decrypt_field(cred, 'password' if field == 'ssh_password' else field)
+                )
+                if value not in ('', 'ASK'):
+                    passwords[field] = value
+
+        for cred in job.vault_credentials:
+            field = 'vault_password'
+            if cred.inputs.get('vault_id'):
+                field = 'vault_password.{}'.format(cred.inputs['vault_id'])
+                if field in passwords:
+                    raise RuntimeError(
+                        'multiple vault credentials were specified with --vault-id {}@prompt'.format(
+                            cred.inputs['vault_id']
+                        )
+                    )
+            value = kwargs.get(field, decrypt_field(cred, 'vault_password'))
+            if value not in ('', 'ASK'):
+                passwords[field] = value
+
         return passwords
 
     def build_env(self, job, **kwargs):
@@ -1107,9 +1118,16 @@ class RunJob(BaseTask):
             args.extend(['--become-user', become_username])
         if 'become_password' in kwargs.get('passwords', {}):
             args.append('--ask-become-pass')
-        # Support prompting for a vault password.
-        if 'vault_password' in kwargs.get('passwords', {}):
-            args.append('--ask-vault-pass')
+
+        # Support prompting for multiple vault passwords
+        for k, v in kwargs.get('passwords', {}).items():
+            if k.startswith('vault_password'):
+                if k == 'vault_password':
+                    args.append('--ask-vault-pass')
+                else:
+                    vault_id = k.split('.')[1]
+                    args.append('--vault-id')
+                    args.append('{}@prompt'.format(vault_id))
 
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
@@ -1177,8 +1195,8 @@ class RunJob(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
 
-    def get_password_prompts(self):
-        d = super(RunJob, self).get_password_prompts()
+    def get_password_prompts(self, **kwargs):
+        d = super(RunJob, self).get_password_prompts(**kwargs)
         d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         for method in PRIVILEGE_ESCALATION_METHODS:
@@ -1187,6 +1205,10 @@ class RunJob(BaseTask):
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
+        for k, v in kwargs.get('passwords', {}).items():
+            if k.startswith('vault_password.'):
+                vault_id = k.split('.')[1]
+                d[re.compile(r'Vault password \({}\):\s*?$'.format(vault_id), re.M)] = k
         return d
 
     def get_stdout_handle(self, instance):
@@ -1442,8 +1464,8 @@ class RunProjectUpdate(BaseTask):
             output_replacements.append((pattern2 % d_before, pattern2 % d_after))
         return output_replacements
 
-    def get_password_prompts(self):
-        d = super(RunProjectUpdate, self).get_password_prompts()
+    def get_password_prompts(self, **kwargs):
+        d = super(RunProjectUpdate, self).get_password_prompts(**kwargs)
         d[re.compile(r'Username for.*:\s*?$', re.M)] = 'scm_username'
         d[re.compile(r'Password for.*:\s*?$', re.M)] = 'scm_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'scm_password'
@@ -2142,8 +2164,8 @@ class RunAdHocCommand(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
 
-    def get_password_prompts(self):
-        d = super(RunAdHocCommand, self).get_password_prompts()
+    def get_password_prompts(self, **kwargs):
+        d = super(RunAdHocCommand, self).get_password_prompts(**kwargs)
         d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         for method in PRIVILEGE_ESCALATION_METHODS:

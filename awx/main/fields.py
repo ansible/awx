@@ -415,6 +415,13 @@ class JSONSchemaField(JSONBField):
         return value
 
 
+@JSONSchemaField.format_checker.checks('vault_id')
+def format_vault_id(value):
+    if '@' in value:
+        raise jsonschema.exceptions.FormatError('@ is not an allowed character')
+    return True
+
+
 @JSONSchemaField.format_checker.checks('ssh_private_key')
 def format_ssh_private_key(value):
     # Sanity check: GCE, in particular, provides JSON-encoded private
