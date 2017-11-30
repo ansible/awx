@@ -30,6 +30,7 @@ from rest_framework import views
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
+from awx.main.access import access_registry
 from awx.main.utils import * # noqa
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer
@@ -273,12 +274,17 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         return serializer
 
     def get_queryset(self):
-        #if hasattr(self.request.user, 'get_queryset'):
-        #    return self.request.user.get_queryset(self.model)
         if self.queryset is not None:
             return self.queryset._clone()
         elif self.model is not None:
-            return self.model._default_manager.all()
+            qs = self.model._default_manager
+            if self.model in access_registry:
+                access_class = access_registry[self.model]
+                if access_class.select_related:
+                    qs = qs.select_related(*access_class.select_related)
+                if access_class.prefetch_related:
+                    qs = qs.prefetch_related(*access_class.prefetch_related)
+            return qs
         else:
             return super(GenericAPIView, self).get_queryset()
 
