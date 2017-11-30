@@ -58,7 +58,9 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
     vm.form.save = data => {
         data.user = me.get('id');
 
-        delete data.inputs[gceFileInputSchema.id];
+        if (_.get(data.inputs, gceFileInputSchema.id)) {
+            delete data.inputs[gceFileInputSchema.id];
+        }
 
         return credential.request('post', { data });
     };

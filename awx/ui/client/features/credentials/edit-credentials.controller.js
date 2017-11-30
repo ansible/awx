@@ -108,7 +108,9 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
         data.user = me.get('id');
         credential.unset('inputs');
 
-        delete data.inputs[gceFileInputSchema.id];
+        if (_.get(data.inputs, gceFileInputSchema.id)) {
+            delete data.inputs[gceFileInputSchema.id];
+        }
 
         return credential.request('put', { data });
     };
