@@ -1026,9 +1026,6 @@ class RunJob(BaseTask):
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         env = self.add_ansible_venv(env, add_awx_lib=kwargs.get('isolated', False))
-        # give ansible a hint about the intended tmpdir to work around issues
-        # like https://github.com/ansible/ansible/issues/30064
-        env['TMPDIR'] = settings.AWX_PROOT_BASE_PATH
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1356,6 +1353,9 @@ class RunProjectUpdate(BaseTask):
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
+        # give ansible a hint about the intended tmpdir to work around issues
+        # like https://github.com/ansible/ansible/issues/30064
+        env['TMP'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def _build_scm_url_extra_vars(self, project_update, **kwargs):
