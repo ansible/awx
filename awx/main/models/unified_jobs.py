@@ -1236,7 +1236,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
             if not self.cancel_flag:
                 self.cancel_flag = True
-                cancel_fields = ['cancel_flag']
+                self.start_args = ''  # blank field to remove encrypted passwords
+                cancel_fields = ['cancel_flag', 'start_args']
                 if self.status in ('pending', 'waiting', 'new'):
                     self.status = 'canceled'
                     cancel_fields.append('status')
