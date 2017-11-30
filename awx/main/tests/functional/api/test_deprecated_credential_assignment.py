@@ -131,7 +131,7 @@ def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_
     assert get(url, admin).data['count'] == 1
 
     resp = post(url, _new_cred('Second Cred'), admin, expect=400)
-    assert 'Cannot assign multiple Machine credentials.' in resp.content
+    assert 'Cannot assign multiple ssh credentials.' in resp.content
 
 
 @pytest.mark.django_db
@@ -167,7 +167,7 @@ def test_extra_credentials_unique_by_kind(get, post, job_template, admin,
     assert get(url, admin).data['count'] == 1
 
     resp = post(url, _new_cred('Second Cred'), admin, expect=400)
-    assert 'Cannot assign multiple Amazon Web Services credentials.' in resp.content
+    assert 'Cannot assign multiple aws credentials.' in resp.content
 
 
 @pytest.mark.django_db

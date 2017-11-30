@@ -326,9 +326,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     @property
     def passwords_needed(self):
         needed = []
-        for field in ('ssh_password', 'become_password', 'ssh_key_unlock', 'vault_password'):
+        for field in ('ssh_password', 'become_password', 'ssh_key_unlock'):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
+        if self.needs_vault_password:
+            if self.inputs.get('vault_id'):
+                needed.append('vault_password.{}'.format(self.inputs.get('vault_id')))
+            else:
+                needed.append('vault_password')
         return needed
 
     def _password_field_allows_ask(self, field):
@@ -369,15 +374,23 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 field_val[k] = '$encrypted$'
         return field_val
 
-    def unique_hash(self):
+    def unique_hash(self, display=False):
         '''
         Credential exclusivity is not defined solely by the related
         credential type (due to vault), so this produces a hash
         that can be used to evaluate exclusivity
         '''
-        if self.kind == 'vault' and self.inputs.get('id', None):
-            return '{}_{}'.format(self.credential_type_id, self.inputs.get('id'))
-        return str(self.credential_type_id)
+        if display:
+            type_alias = self.kind
+        else:
+            type_alias = self.credential_type_id
+        if self.kind == 'vault' and self.inputs.get('vault_id', None):
+            if display:
+                fmt_str = '{} (id={})'
+            else:
+                fmt_str = '{}_{}'
+            return fmt_str.format(type_alias, self.inputs.get('vault_id'))
+        return str(type_alias)
 
     @staticmethod
     def unique_dict(cred_qs):

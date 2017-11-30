@@ -626,9 +626,9 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
 
         if not getattr(parent, ask_field_name):
             return {"msg": _("Related template is not configured to accept credentials on launch.")}
-        elif sub.kind != 'vault' and parent.credentials.filter(credential_type__kind=sub.kind).exists():
+        elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
             return {"msg": _("This launch configuration already provides a {credential_type} credential.".format(
-                credential_type=sub.kind))}
+                credential_type=sub.unique_hash(display=True)))}
         elif sub.pk in parent.unified_job_template.credentials.values_list('pk', flat=True):
             return {"msg": _("Related template already uses {credential_type} credential.".format(
                 credential_type=sub.name))}
@@ -3061,9 +3061,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
-        current_extra_types = [cred.credential_type.pk for cred in parent.credentials.all()]
-        if sub.credential_type.pk in current_extra_types:
-            return {'error': _('Cannot assign multiple %s credentials.' % sub.credential_type.name)}
+        if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
+            return {"msg": _("Cannot assign multiple {credential_type} credentials.".format(
+                credential_type=sub.unique_hash(display=True)))}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 

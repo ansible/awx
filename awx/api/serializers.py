@@ -3449,7 +3449,8 @@ class JobLaunchSerializer(BaseSerializer):
                         dict(
                             id=cred.id,
                             name=cred.name,
-                            credential_type=cred.credential_type.pk
+                            credential_type=cred.credential_type.pk,
+                            passwords_needed=cred.passwords_needed
                         )
                         for cred in obj.credentials.all()
                     ]
