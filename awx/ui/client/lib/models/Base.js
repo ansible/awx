@@ -327,25 +327,17 @@ function has (method, keys) {
     return value !== undefined && value !== null;
 }
 
-function extend (method, related, config = {}) {
-    if (!related) {
-        related = method;
-        method = 'GET';
-    } else {
-        method = method.toUpperCase();
-    }
+function extend (related, config) {
+    const req = this.parseRequestConfig('GET', config);
 
-    if (this.has(method, `related.${related}`)) {
-        const req = {
-            method,
-            url: this.get(`related.${related}`)
-        };
+    if (this.has(req.method, `related.${related}`)) {
+        req.url = this.get(`related.${related}`);
 
         Object.assign(req, config);
 
         return $http(req)
             .then(({ data }) => {
-                this.set(method, `related.${related}`, data);
+                this.set(req.method, `related.${related}`, data);
 
                 return this;
             });

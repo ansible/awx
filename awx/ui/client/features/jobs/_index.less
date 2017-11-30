@@ -1,7 +1,7 @@
 .at-Stdout {
     font-family: monospace;
 
-    &-controls {
+    &-menu {
         color: @at-gray-dark-4x;
         border: 1px solid @at-gray-dark-2x;
         border-top-left-radius: 4px;
@@ -9,12 +9,12 @@
         border-bottom: none;
     }
 
-    &-controlIcon {
+    &-menuIcon {
         font-size: 12px;
         padding: 10px;
     }
 
-    &-expand {
+    &-toggle {
         color: @at-gray-dark-4x;
         background-color: @at-gray-light;
         font-size: 12px;
@@ -22,25 +22,38 @@
         padding: 0 20px 0 10px;
     }
 
-    &-lineNumber {
+    &-line {
         color: @at-gray-dark-4x;
         background-color: @at-gray-light;
+
+        text-align: right;
 
         padding-right: 5px;
         border-right: 1px solid @at-gray-dark;
     }
 
-    &-content {
-        padding-left: 20px;
+    &-event {
+        padding-left: 2ch;
+        width: 83ch;
     }
 
-    &-timestamp {
+    &-time {
         padding-left: 20px;
         font-size: 12px;
         text-align: right;
     }
 
-    &-output {
+    &-container {
+        & > table {
+            table-layout: fixed;
+
+            td {
+                vertical-align: top;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+            }
+        }
+
         font-size: 14px;
         border: 1px solid @at-gray-dark-2x;
         background-color: @at-gray-light-3x;

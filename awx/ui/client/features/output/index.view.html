@@ -6,26 +6,26 @@
     </div>
     <div class="col-md-8">
         <at-panel class="at-Stdout">
-            <div class="at-Stdout-controls">
-                <div class="pull-left"><i class="at-Stdout-controlIcon fa fa-minus"></i></div>
-                <div class="pull-right"><i class="at-Stdout-controlIcon fa fa-arrow-down"></i></div>
+            <div class="at-Stdout-menu">
+                <div class="pull-left"><i class="at-Stdout-menuIcon fa fa-minus"></i></div>
+                <div class="pull-right"><i class="at-Stdout-menuIcon fa fa-arrow-down"></i></div>
                 <div class="at-u-clear"></div>
             </div>
 
-            <pre class="at-Stdout-output"><table>
+            <pre class="at-Stdout-container"><table>
                 <thead>
                     <tr>
-                        <th class="at-Stdout-expand">&nbsp;</th>
-                        <th class="at-Stdout-lineNumber"></th>
-                        <th class="at-Stdout-content"></th>
+                        <th class="at-Stdout-toggle">&nbsp;</th>
+                        <th class="at-Stdout-line"></th>
+                        <th class="at-Stdout-event"></th>
                     </tr>
                 </thead>
                 <tbody ng-bind-html="vm.html"></tbody>
                 <tfoot>
                     <tr>
-                        <td class="at-Stdout-expand">&nbsp;</td>
-                        <td class="at-Stdout-lineNumber"></td>
-                        <td class="at-Stdout-content"></td>
+                        <td class="at-Stdout-toggle">&nbsp;</td>
+                        <td class="at-Stdout-line"></td>
+                        <td class="at-Stdout-event"></td>
                         <td class="at-Stdout-backToTop"><i class="fa fa-caret-up"></i> <span>Back to Top</span></td>
                     </tr>
                 </tfoot></table></pre>

@@ -33,6 +33,7 @@ function JobsIndexController (job, $sce) {
 function parseEvents (events) {
     events.sort(orderByLineNumber);
 
+    console.log(events);
     return events.reduce((html, event) => `${html}${parseLine(event)}`, '');
 }
 
@@ -67,20 +68,20 @@ function parseLine (event) {
         const isLastLine = i === lines.length - 1;
 
         if (isTruncated && isLastLine) {
-            return `${html}${createRow(ln, line, time, group)}${createTruncatedRow()}`;
+            return `${html}${createRow(ln, line, time, group)}${createTruncatedRow(event.id)}`;
         }
 
         return `${html}${createRow(ln, line, time, group)}`;
     }, '');
 }
 
-function createTruncatedRow () {
+function createTruncatedRow (id) {
     return `
-        <tr class="">
-            <td class="at-Stdout-expand"></td>
-            <td class="at-Stdout-lineNumber text-center"><i class="fa fa-long-arrow-down"></i></td>
-            <td class="at-Stdout-content"></td>
-            <td class="at-Stdout-timestamp"></td>
+        <tr class="${id}">
+            <td class="at-Stdout-toggle"></td>
+            <td class="at-Stdout-line text-center">...</td>
+            <td class="at-Stdout-event"></td>
+            <td class="at-Stdout-time"></td>
         </tr>`;
 }
 
@@ -94,10 +95,10 @@ function createRow (ln, content, time, group) {
 
     return `
         <tr class="${group.classList}">
-            <td class="at-Stdout-expand">${expand}</td>
-            <td class="at-Stdout-lineNumber">${ln}</td>
-            <td class="at-Stdout-content">${content}</td>
-            <td class="at-Stdout-timestamp">${time}</td>
+            <td class="at-Stdout-toggle">${expand}</td>
+            <td class="at-Stdout-line">${ln}</td>
+            <td class="at-Stdout-event">${content}</td>
+            <td class="at-Stdout-time">${time}</td>
         </tr>`;
 }
 
@@ -129,13 +130,17 @@ function getTime (event, i) {
 function toggle (id) {
     console.log(id);
 }
-
 /*
+ *
+ *function getTruncatedEvent () {
+ *
+ *}
+ *
  *function addDynamic (start) {
  *    document.getElementsByClassName('parent')
  *}
+ *
  */
-
 JobsIndexController.$inject = ['job', '$sce'];
 
 module.exports = JobsIndexController;

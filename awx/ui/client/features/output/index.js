@@ -28,7 +28,12 @@ function JobsRun ($stateExtender, strings) {
                 const { id } = $stateParams;
 
                 return new Jobs('get', id)
-                    .then(job => job.extend('job_events'));
+                    .then(job => job.extend('job_events', {
+                        params: {
+                            page_size: 200,
+                            order_by: 'start_line'
+                        }
+                    }));
             }]
         }
     });
