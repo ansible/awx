@@ -646,6 +646,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.group_controller.changeState(group.Ready);
     };
 
+    $scope.onExportYamlButton = function (button) {
+        console.log(button);
+        $window.open('/network_ui/topology.yaml?topology_id=' + $scope.topology_id , '_blank');
+    };
+
     // Buttons
 
     $scope.buttons = [
@@ -655,7 +660,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("EXPORT", 270, 48, 70, 30, $scope.onExportButton),
       new models.Button("DISCOVER", 350, 48, 80, 30, $scope.onDiscoverButton),
       new models.Button("LAYOUT", 440, 48, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", 520, 48, 90, 30, $scope.onConfigureButton)
+      new models.Button("CONFIGURE", 520, 48, 90, 30, $scope.onConfigureButton),
+      new models.Button("EXPORT YAML", 620, 48, 120, 30, $scope.onExportYamlButton),
     ];
 
     var LAYERS_X = 160;
@@ -678,6 +684,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                               $scope.onUnToggleGroup,
                               true)
     ];
+
+    $scope.layers = [];
 
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.buttons);
