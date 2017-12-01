@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 from awx.main.migrations import _migration_utils as migration_utils
+from awx.main.migrations import _credentialtypes as credentialtypes
 from awx.main.migrations._multi_cred import migrate_to_multi_cred
 
 
@@ -50,4 +51,5 @@ class Migration(migrations.Migration):
             model_name='jobtemplate',
             name='vault_credential',
         ),
+        migrations.RunPython(credentialtypes.add_vault_id_field)
     ]

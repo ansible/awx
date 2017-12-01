@@ -248,6 +248,31 @@ def test_ssh_key_data_validation(organization, kind, ssh_key_data, ssh_key_unloc
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('inputs, valid', [
+    ({'vault_password': 'some-pass'}, True),
+    ({}, False),
+    ({'vault_password': 'dev-pass', 'vault_id': 'dev'}, True),
+    ({'vault_password': 'dev-pass', 'vault_id': 'dev@prompt'}, False),  # @ not allowed
+])
+def test_vault_validation(organization, inputs, valid):
+    cred_type = CredentialType.defaults['vault']()
+    cred_type.save()
+    cred = Credential(
+        credential_type=cred_type,
+        name="Best credential ever",
+        inputs=inputs,
+        organization=organization
+    )
+    cred.save()
+    if valid:
+        cred.full_clean()
+    else:
+        with pytest.raises(Exception) as e:
+            cred.full_clean()
+        assert e.type in (ValidationError, serializers.ValidationError)
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('become_method, valid', zip(
     dict(V1Credential.FIELDS['become_method'].choices).keys(),
     itertools.repeat(True)
