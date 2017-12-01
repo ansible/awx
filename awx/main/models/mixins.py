@@ -310,8 +310,8 @@ class SurveyJobMixin(models.Model):
         if self.survey_passwords:
             extra_vars = json.loads(self.extra_vars)
             for key in self.survey_passwords:
-                if key in extra_vars:
-                    value = extra_vars[key]
+                value = extra_vars.get(key)
+                if value and isinstance(value, basestring) and value.startswith('$encrypted$'):
                     extra_vars[key] = decrypt_value(get_encryption_key('value', pk=None), value)
             return json.dumps(extra_vars)
         else:
