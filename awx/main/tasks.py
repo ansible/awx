@@ -1080,6 +1080,8 @@ class RunJob(BaseTask):
                     env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
                     env['AZURE_AD_USER'] = cloud_cred.username
                     env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
+                if cloud_cred.inputs.get('cloud_environment', None):
+                    env['AZURE_CLOUD_ENVIRONMENT'] = cloud_cred.inputs['cloud_environment']
             elif cloud_cred and cloud_cred.kind == 'vmware':
                 env['VMWARE_USER'] = cloud_cred.username
                 env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')

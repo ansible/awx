@@ -635,7 +635,8 @@ class TestJobCredentials(TestJobExecution):
             inputs = {
                 'subscription': 'some-subscription',
                 'username': 'bob',
-                'password': 'secret'
+                'password': 'secret',
+                'cloud_environment': 'foobar'
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
@@ -650,6 +651,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
+        assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
     def test_vmware_credentials(self):
         vmware = CredentialType.defaults['vmware']()
