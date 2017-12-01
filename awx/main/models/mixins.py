@@ -245,6 +245,17 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                    choice_list))
         return errors
 
+    @staticmethod
+    def pivot_spec(spec):
+        '''
+        Utility method that will return a dictionary keyed off variable names
+        '''
+        pivoted = {}
+        for element_data in spec.get('spec', []):
+            if 'variable' in element_data:
+                pivoted[element_data['variable']] = element_data
+        return pivoted
+
     def survey_variable_validation(self, data):
         errors = []
         if not self.survey_enabled:
