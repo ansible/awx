@@ -136,6 +136,38 @@ def test_survey_spec_passwords_are_encrypted_on_launch(job_template_factory, pos
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
+def test_survey_spec_passwords_with_empty_default(job_template_factory, post, admin_user):
+    objects = job_template_factory('jt', organization='org1', project='prj',
+                                   inventory='inv', credential='cred')
+    job_template = objects.job_template
+    job_template.survey_enabled = True
+    job_template.save()
+    input_data = {
+        'description': 'A survey',
+        'spec': [{
+            'index': 0,
+            'question_name': 'What is your password?',
+            'required': False,
+            'variable': 'secret_value',
+            'type': 'password',
+            'default': ''
+        }],
+        'name': 'my survey'
+    }
+    post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+         data=input_data, user=admin_user, expect=200)
+
+    resp = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
+                {}, admin_user, expect=201)
+    job = Job.objects.get(pk=resp.data['id'])
+    assert json.loads(job.extra_vars)['secret_value'] == ''
+    assert json.loads(job.decrypted_extra_vars()) == {
+        'secret_value': ''
+    }
+
+
+@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
+@pytest.mark.django_db
 @pytest.mark.parametrize('default, status', [
     ('SUPERSECRET', 200),
     (['some', 'invalid', 'list'], 400),
