@@ -92,7 +92,18 @@ def _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
             if jt.survey_spec.get('spec', []):
                 for field in jt.survey_spec['spec']:
                     if field.get('type') == 'password' and field.get('default', ''):
-                        if field['default'].startswith('$encrypted$'):
+                        default = field['default']
+                        if default.startswith('$encrypted$'):
+                            if default == '$encrypted$':
+                                # If you have a survey_spec with a literal
+                                # '$encrypted$' as the default, you have
+                                # encountered a known bug in awx/Tower
+                                # https://github.com/ansible/ansible-tower/issues/7800
+                                logger.error(
+                                    '{}.pk={} survey_spec has ambiguous $encrypted$ default for {}, needs attention...'.format(jt, jt.pk, field['variable'])
+                                )
+                                field['default'] = ''
+                                changed = True
                             continue
                         field['default'] = encrypt_value(field['default'], pk=None)
                         changed = True
