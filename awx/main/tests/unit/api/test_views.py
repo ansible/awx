@@ -1,6 +1,7 @@
 import mock
 import pytest
 import requests
+from copy import deepcopy
 
 from collections import namedtuple
 
@@ -10,13 +11,18 @@ from awx.api.views import (
     InventoryInventorySourcesUpdate,
     InventoryHostsList,
     HostInsights,
+    JobTemplateSurveySpec
 )
 
 from awx.main.models import (
     Host,
+    JobTemplate,
+    User
 )
 
 from awx.main.managers import HostManager
+
+from rest_framework.test import APIRequestFactory
 
 
 @pytest.fixture
@@ -215,3 +221,134 @@ class TestInventoryHostsList(object):
                 view = InventoryHostsList()
                 view.get_queryset()
                 mock_query.assert_called_once_with('localhost')
+
+
+class TestSurveySpecValidation:
+
+    @pytest.fixture
+    def spec_view(self):
+        def view_factory(old_spec):
+            obj = JobTemplate()
+            if old_spec:
+                obj.survey_spec = old_spec
+
+            def save(**kwargs):
+                pass
+
+            def get_object():
+                return get_object.object
+
+            get_object.object = obj
+            obj.save = save
+
+            user = User(username='admin')
+
+            def can_access(*args, **kwargs):
+                return True
+
+            user.can_access = can_access
+
+            request = APIRequestFactory().get('/api/v2/job_templates/42/survey_spec/')
+            request.user = user
+            view = JobTemplateSurveySpec()
+            view.request = request
+            view.get_object = get_object
+            return view
+        return view_factory
+
+    def test_create_text_encrypted(self, spec_view):
+        view = spec_view(None)
+        view.request.data = {
+            "name": "new survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "$encrypted$",
+                    "max": 1024,
+                    "required": True,
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "text"
+                }
+            ]
+        }
+        resp = view.post(view.request)
+        assert resp.status_code == 400
+        assert '$encrypted$ is a reserved keyword for password question defaults' in str(resp.data['error'])
+
+
+    def test_change_encrypted_var_name(self, spec_view):
+        old = {
+            "name": "old survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "$encrypted$foooooooo",
+                    "max": 1024,
+                    "required": True,
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "password"
+                }
+            ]
+        }
+        view = spec_view(old)
+        new = deepcopy(old)
+        new['spec'][0]['variable'] = 'openstack_username'
+        view.request.data = new
+        resp = view.post(view.request)
+        assert resp.status_code == 400
+        assert 'may not be used for new default' in str(resp.data['error'])
+
+    def test_use_saved_encrypted_default(self, spec_view):
+        '''
+        Save is allowed, the $encrypted$ replacement is done
+        '''
+        old = {
+            "name": "old survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "$encrypted$foooooooo",
+                    "max": 1024,
+                    "required": True,
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "password"
+                }
+            ]
+        }
+        view = spec_view(old)
+        new = deepcopy(old)
+        new['spec'][0]['default'] = '$encrypted$'
+        new['spec'][0]['required'] = False
+        view.request.data = new
+        resp = view.post(view.request)
+        assert resp.status_code == 200
+        assert resp.data is None
+        assert view.get_object.object.survey_spec == {
+            "name": "old survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "$encrypted$foooooooo",
+                    "max": 1024,
+                    "required": False,  # only thing changed
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "password"
+                }
+            ]
+        }

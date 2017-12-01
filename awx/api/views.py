@@ -2896,9 +2896,10 @@ class JobTemplateSurveySpec(GenericAPIView):
         if len(new_spec["spec"]) < 1:
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
 
-        idx = 0
         variable_set = set()
-        for survey_item in new_spec["spec"]:
+        old_spec = obj.survey_spec
+        old_spec_dict = JobTemplate.pivot_spec(old_spec)
+        for idx, survey_item in enumerate(new_spec["spec"]):
             if not isinstance(survey_item, dict):
                 return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
@@ -2922,22 +2923,28 @@ class JobTemplateSurveySpec(GenericAPIView):
                     ).format(
                         question_default=survey_item["default"], variable_name=survey_item["variable"])
                     ), status=status.HTTP_400_BAD_REQUEST)
-                elif survey_item["default"].startswith('$encrypted$'):
-                    if not obj.survey_spec:
-                        return Response(dict(error=_(
-                            "$encrypted$ is reserved keyword for password questions and may not "
-                            "be used as a default for '{variable_name}' in survey question {question_position}."
-                        ).format(
-                            variable_name=survey_item["variable"], question_position=str(idx))
-                        ), status=status.HTTP_400_BAD_REQUEST)
-                    else:
-                        old_spec = obj.survey_spec
-                        for old_item in old_spec['spec']:
-                            if old_item['variable'] == survey_item['variable']:
-                                survey_item['default'] = old_item['default']
-                else:
-                    survey_item['default'] = encrypt_value(survey_item['default'])
-            idx += 1
+
+            if ("default" in survey_item and isinstance(survey_item['default'], six.string_types) and
+                    survey_item['default'].startswith('$encrypted$')):
+                # Submission expects the existence of encrypted DB value to replace given default
+                if survey_item["type"] != "password":
+                    return Response(dict(error=_(
+                        "$encrypted$ is a reserved keyword for password question defaults, "
+                        "survey question {question_position} is type {question_type}."
+                    ).format(
+                        question_position=str(idx), question_type=survey_item["type"])
+                    ), status=status.HTTP_400_BAD_REQUEST)
+                old_element = old_spec_dict.get(survey_item['variable'], {})
+                if (survey_item['variable'] not in old_spec_dict or 'default' not in old_element or
+                        not old_element['default'].startswith('$encrypted$') or
+                        old_element['default'] == '$encrypted$'):
+                    return Response(dict(error=_(
+                        "$encrypted$ is a reserved keyword, may not be used for new default in position {question_position}."
+                    ).format(question_position=str(idx))), status=status.HTTP_400_BAD_REQUEST)
+                survey_item['default'] = old_element['default']
+            elif survey_item["type"] == "password" and 'default' in survey_item:
+                # Submission provides new encrypted default
+                survey_item['default'] = encrypt_value(survey_item['default'])
 
         obj.survey_spec = new_spec
         obj.save(update_fields=['survey_spec'])
