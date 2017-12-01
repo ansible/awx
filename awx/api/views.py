@@ -2884,7 +2884,14 @@ class JobTemplateSurveySpec(GenericAPIView):
 
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
-        new_spec = request.data
+        response = self._validate_spec_data(request.data, obj.survey_spec)
+        if response:
+            return response
+        obj.survey_spec = request.data
+        obj.save(update_fields=['survey_spec'])
+        return Response()
+
+    def _validate_spec_data(self, new_spec, old_spec):
         if "name" not in new_spec:
             return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if "description" not in new_spec:
@@ -2897,7 +2904,6 @@ class JobTemplateSurveySpec(GenericAPIView):
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
 
         variable_set = set()
-        old_spec = obj.survey_spec
         old_spec_dict = JobTemplate.pivot_spec(old_spec)
         for idx, survey_item in enumerate(new_spec["spec"]):
             if not isinstance(survey_item, dict):
@@ -2945,10 +2951,6 @@ class JobTemplateSurveySpec(GenericAPIView):
             elif survey_item["type"] == "password" and 'default' in survey_item:
                 # Submission provides new encrypted default
                 survey_item['default'] = encrypt_value(survey_item['default'])
-
-        obj.survey_spec = new_spec
-        obj.save(update_fields=['survey_spec'])
-        return Response()
 
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()

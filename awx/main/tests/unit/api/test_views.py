@@ -16,13 +16,9 @@ from awx.api.views import (
 
 from awx.main.models import (
     Host,
-    JobTemplate,
-    User
 )
 
 from awx.main.managers import HostManager
-
-from rest_framework.test import APIRequestFactory
 
 
 @pytest.fixture
@@ -225,40 +221,9 @@ class TestInventoryHostsList(object):
 
 class TestSurveySpecValidation:
 
-    @pytest.fixture
-    def spec_view(self):
-        def view_factory(old_spec):
-            obj = JobTemplate()
-            if old_spec:
-                obj.survey_spec = old_spec
-
-            def save(**kwargs):
-                pass
-
-            def get_object():
-                return get_object.object
-
-            get_object.object = obj
-            obj.save = save
-
-            user = User(username='admin')
-
-            def can_access(*args, **kwargs):
-                return True
-
-            user.can_access = can_access
-
-            request = APIRequestFactory().get('/api/v2/job_templates/42/survey_spec/')
-            request.user = user
-            view = JobTemplateSurveySpec()
-            view.request = request
-            view.get_object = get_object
-            return view
-        return view_factory
-
-    def test_create_text_encrypted(self, spec_view):
-        view = spec_view(None)
-        view.request.data = {
+    def test_create_text_encrypted(self):
+        view = JobTemplateSurveySpec()
+        resp = view._validate_spec_data({
             "name": "new survey",
             "description": "foobar",
             "spec": [
@@ -274,13 +239,12 @@ class TestSurveySpecValidation:
                     "type": "text"
                 }
             ]
-        }
-        resp = view.post(view.request)
+        }, {})
         assert resp.status_code == 400
         assert '$encrypted$ is a reserved keyword for password question defaults' in str(resp.data['error'])
 
-
-    def test_change_encrypted_var_name(self, spec_view):
+    def test_change_encrypted_var_name(self):
+        view = JobTemplateSurveySpec()
         old = {
             "name": "old survey",
             "description": "foobar",
@@ -298,18 +262,17 @@ class TestSurveySpecValidation:
                 }
             ]
         }
-        view = spec_view(old)
         new = deepcopy(old)
         new['spec'][0]['variable'] = 'openstack_username'
-        view.request.data = new
-        resp = view.post(view.request)
+        resp = view._validate_spec_data(new, old)
         assert resp.status_code == 400
         assert 'may not be used for new default' in str(resp.data['error'])
 
-    def test_use_saved_encrypted_default(self, spec_view):
+    def test_use_saved_encrypted_default(self):
         '''
         Save is allowed, the $encrypted$ replacement is done
         '''
+        view = JobTemplateSurveySpec()
         old = {
             "name": "old survey",
             "description": "foobar",
@@ -327,15 +290,12 @@ class TestSurveySpecValidation:
                 }
             ]
         }
-        view = spec_view(old)
         new = deepcopy(old)
         new['spec'][0]['default'] = '$encrypted$'
         new['spec'][0]['required'] = False
-        view.request.data = new
-        resp = view.post(view.request)
-        assert resp.status_code == 200
-        assert resp.data is None
-        assert view.get_object.object.survey_spec == {
+        resp = view._validate_spec_data(new, old)
+        assert resp is None
+        assert new == {
             "name": "old survey",
             "description": "foobar",
             "spec": [
