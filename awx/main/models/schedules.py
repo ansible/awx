@@ -105,7 +105,7 @@ class Schedule(CommonModel):
         if not isinstance(extra_data, dict):
             try:
                 extra_data = json.loads(self.extra_data)
-            except:
+            except Exception:
                 raise ValidationError(_("Expected JSON"))
 
         if extra_data and 'days' in extra_data:

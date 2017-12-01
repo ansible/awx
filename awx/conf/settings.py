@@ -366,7 +366,7 @@ class SettingsWrapper(UserSettingsHolder):
                     return internal_value
                 else:
                     return field.run_validation(value)
-            except:
+            except Exception:
                 logger.warning(
                     'The current value "%r" for setting "%s" is invalid.',
                     value, name, exc_info=True)

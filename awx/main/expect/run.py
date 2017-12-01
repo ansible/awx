@@ -122,7 +122,7 @@ def run_pexpect(args, cwd, env, logfile,
         if cancelled_callback:
             try:
                 canceled = cancelled_callback()
-            except:
+            except Exception:
                 logger.exception('Could not check cancel callback - canceling immediately')
                 if isinstance(extra_update_fields, dict):
                     extra_update_fields['job_explanation'] = "System error during job execution, check system logs"

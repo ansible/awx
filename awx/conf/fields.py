@@ -84,7 +84,7 @@ class URLField(CharField):
                         else:
                             netloc = '{}@{}' % (url_parts.username, netloc)
                     value = urlparse.urlunsplit([url_parts.scheme, netloc, url_parts.path, url_parts.query, url_parts.fragment])
-            except:
+            except Exception:
                 raise  # If something fails here, just fall through and let the validators check it.
         super(URLField, self).run_validators(value)
 

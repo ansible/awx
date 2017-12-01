@@ -41,7 +41,7 @@ from ansible import constants as C
 
 try:
     from ansible.cache.base import BaseCacheModule
-except:
+except Exception:
     from ansible.plugins.cache.base import BaseCacheModule
 
 

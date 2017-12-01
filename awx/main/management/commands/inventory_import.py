@@ -168,7 +168,7 @@ class AnsibleInventoryLoader(object):
             data = json.loads(stdout)
             if not isinstance(data, dict):
                 raise TypeError('Returned JSON must be a dictionary, got %s instead' % str(type(data)))
-        except:
+        except Exception:
             logger.error('Failed to load JSON from: %s', stdout)
             raise
         return data
