@@ -63,6 +63,13 @@ inherits(_OffScreen, _State);
 var OffScreen = new _OffScreen();
 exports.OffScreen = OffScreen;
 
+function _OffScreen2 () {
+    this.name = 'OffScreen2';
+}
+inherits(_OffScreen2, _State);
+var OffScreen2 = new _OffScreen2();
+exports.OffScreen2 = OffScreen2;
+
 function _Disabled () {
     this.name = 'Disabled';
 }
@@ -147,6 +154,10 @@ _Selecting.prototype.onMouseDown = function (controller) {
 
 };
 _Selecting.prototype.onMouseDown.transitions = ['Selected', 'Ready'];
+
+_Ready.prototype.onEnable = function (controller) {
+
+}
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -263,10 +274,41 @@ _OffScreen.prototype.end = function (controller) {
 
 };
 
+_OffScreen.prototype.onDisable = function (controller) {
+
+    controller.changeState(OffScreen2);
+};
+_OffScreen.prototype.onDisable.transitions = ['OffScreen2'];
+
+_OffScreen2.prototype.onEnable = function (controller) {
+
+    controller.changeState(OffScreen);
+};
+_OffScreen2.prototype.onEnable.transitions = ['OffScreen'];
+
+_OffScreen2.prototype.onDisable = function (controller) {
+
+};
+
+_OffScreen2.prototype.start = function (controller) {
+
+    controller.toolbox.enabled = false;
+};
+
+_OffScreen2.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(Disabled);
+    controller.next_controller.handle_message(msg_type, message);
+};
+_OffScreen2.prototype.onToggleToolbox.transitions = ['Disabled'];
+
+_Disabled.prototype.onDisable = function (controller) {
+
+}
+
 _Disabled.prototype.onEnable = function (controller) {
 
     controller.changeState(Ready);
-
 };
 _Disabled.prototype.onEnable.transitions = ['Ready'];
 
@@ -281,3 +323,10 @@ _Disabled.prototype.end = function (controller) {
     controller.toolbox.enabled = true;
 
 };
+
+_Disabled.prototype.onToggleToolbox = function (controller, msg_type, message) {
+
+    controller.changeState(OffScreen2);
+    controller.next_controller.handle_message(msg_type, message);
+};
+_Disabled.prototype.onToggleToolbox.transitions = ['OffScreen2'];
