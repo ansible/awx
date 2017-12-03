@@ -8,7 +8,6 @@ from awx.main.models import (
     JobTemplate,
     WorkflowJobTemplate
 )
-from awx.main.utils.encryption import encrypt_value
 
 
 @pytest.fixture
@@ -142,21 +141,6 @@ def test_optional_survey_question_defaults(
         assert json.loads(defaulted_extra_vars['extra_vars'])['c'] == expect_value
     else:
         assert 'c' not in defaulted_extra_vars['extra_vars']
-
-
-@pytest.mark.survey
-def test_encrypted_default_validation(survey_spec_factory):
-    element = {
-        "required": True,
-        "default": encrypt_value("test1234", pk=None),
-        "variable": "x",
-        "min": 0,
-        "max": 8,
-        "type": "password",
-    }
-    spec = survey_spec_factory([element])
-    jt = JobTemplate(name="test-jt", survey_spec=spec, survey_enabled=True)
-    assert not len(jt.survey_variable_validation({'x': '$encrypted$'}))
 
 
 @pytest.mark.survey
