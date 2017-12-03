@@ -61,13 +61,16 @@
                 Rest.setUrl(url);
                 return Rest.get();
             },
-            copyWorkflow: function(id) {
+            getWorkflowCopyName: function(baseName) {
+                return `${baseName}@${moment().format('h:mm:ss a')}`;
+            },
+            copyWorkflow: function(id, name) {
                 let url = GetBasePath('workflow_job_templates');
 
                 url = url + id + '/copy';
 
                 Rest.setUrl(url);
-                return Rest.post();
+                return Rest.post({ name });
             }
         };
     }
