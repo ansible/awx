@@ -32,6 +32,8 @@ spec:
               value: {{ pg_database }}
             - name: DATABASE_HOST
               value: {{ pg_hostname|default('postgresql') }}
+            - name: DATABASE_PORT
+              value: {{ pg_port|default('5432') }}
             - name: DATABASE_PASSWORD
               value: {{ pg_password }}
             - name: AWX_ADMIN_USER
