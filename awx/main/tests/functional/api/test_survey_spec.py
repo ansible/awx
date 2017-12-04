@@ -168,6 +168,101 @@ def test_survey_spec_passwords_with_empty_default(job_template_factory, post, ad
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
+@pytest.mark.parametrize('default, launch_value, expected_extra_vars, status', [
+    ['', '$encrypted$', {'secret_value': ''}, 201],
+    ['', 'y', {'secret_value': 'y'}, 201],
+    ['', 'y' * 100, None, 400],
+    [None, '$encrypted$', {}, 201],
+    [None, 'y', {'secret_value': 'y'}, 201],
+    [None, 'y' * 100, {}, 400],
+    ['x', '$encrypted$', {'secret_value': 'x'}, 201],
+    ['x', 'y', {'secret_value': 'y'}, 201],
+    ['x', 'y' * 100, {}, 400],
+    ['x' * 100, '$encrypted$', {}, 201],
+    ['x' * 100, 'y', {'secret_value': 'y'}, 201],
+    ['x' * 100, 'y' * 100, {}, 400],
+])
+def test_survey_spec_passwords_with_default_optional(job_template_factory, post, admin_user,
+                                                     default, launch_value,
+                                                     expected_extra_vars, status):
+    objects = job_template_factory('jt', organization='org1', project='prj',
+                                   inventory='inv', credential='cred')
+    job_template = objects.job_template
+    job_template.survey_enabled = True
+    job_template.save()
+    input_data = {
+        'description': 'A survey',
+        'spec': [{
+            'index': 0,
+            'question_name': 'What is your password?',
+            'required': False,
+            'variable': 'secret_value',
+            'type': 'password',
+            'max': 3
+        }],
+        'name': 'my survey'
+    }
+    if default is not None:
+        input_data['spec'][0]['default'] = default
+    post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+         data=input_data, user=admin_user, expect=200)
+
+    resp = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
+                data={'extra_vars': {'secret_value': launch_value}}, user=admin_user, expect=status)
+
+    if status == 201:
+        job = Job.objects.get(pk=resp.data['job'])
+        assert json.loads(job.decrypted_extra_vars()) == expected_extra_vars
+        if default:
+            assert default not in json.loads(job.extra_vars).values()
+        assert launch_value not in json.loads(job.extra_vars).values()
+
+
+@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
+@pytest.mark.django_db
+@pytest.mark.parametrize('default, launch_value, expected_extra_vars, status', [
+    ['', '$encrypted$', {'secret_value': ''}, 201],
+    [None, '$encrypted$', {}, 400],
+    [None, 'y', {'secret_value': 'y'}, 201],
+])
+def test_survey_spec_passwords_with_default_required(job_template_factory, post, admin_user,
+                                                     default, launch_value,
+                                                     expected_extra_vars, status):
+    objects = job_template_factory('jt', organization='org1', project='prj',
+                                   inventory='inv', credential='cred')
+    job_template = objects.job_template
+    job_template.survey_enabled = True
+    job_template.save()
+    input_data = {
+        'description': 'A survey',
+        'spec': [{
+            'index': 0,
+            'question_name': 'What is your password?',
+            'required': True,
+            'variable': 'secret_value',
+            'type': 'password',
+            'max': 3
+        }],
+        'name': 'my survey'
+    }
+    if default is not None:
+        input_data['spec'][0]['default'] = default
+    post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+         data=input_data, user=admin_user, expect=200)
+
+    resp = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
+                data={'extra_vars': {'secret_value': launch_value}}, user=admin_user, expect=status)
+
+    if status == 201:
+        job = Job.objects.get(pk=resp.data['job'])
+        assert json.loads(job.decrypted_extra_vars()) == expected_extra_vars
+        if default:
+            assert default not in json.loads(job.extra_vars).values()
+        assert launch_value not in json.loads(job.extra_vars).values()
+
+
+@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
+@pytest.mark.django_db
 @pytest.mark.parametrize('default, status', [
     ('SUPERSECRET', 200),
     (['some', 'invalid', 'list'], 400),

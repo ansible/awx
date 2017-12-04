@@ -143,14 +143,20 @@ class SurveyJobTemplateMixin(models.Model):
                 variable_key = survey_element.get('variable')
 
                 if survey_element.get('type') == 'password':
-                    if variable_key in runtime_extra_vars and default:
+                    if variable_key in runtime_extra_vars:
                         kw_value = runtime_extra_vars[variable_key]
-                        if kw_value == '$encrypted$' and kw_value != default:
-                            runtime_extra_vars[variable_key] = default
+                        if kw_value == '$encrypted$':
+                            runtime_extra_vars.pop(variable_key)
 
                 if default is not None:
-                    data = {variable_key: default}
-                    errors = self._survey_element_validation(survey_element, data)
+                    decrypted_default = default
+                    if (
+                        survey_element['type'] == "password" and
+                        isinstance(decrypted_default, basestring) and
+                        decrypted_default.startswith('$encrypted$')
+                    ):
+                        decrypted_default = decrypt_value(get_encryption_key('value', pk=None), decrypted_default)
+                    errors = self._survey_element_validation(survey_element, {variable_key: decrypted_default})
                     if not errors:
                         survey_defaults[variable_key] = default
         extra_vars.update(survey_defaults)
@@ -162,24 +168,20 @@ class SurveyJobTemplateMixin(models.Model):
         return create_kwargs
 
     def _survey_element_validation(self, survey_element, data):
+        # Don't apply validation to the `$encrypted$` placeholder; the decrypted
+        # default (if any) will be validated against instead
         errors = []
-        # make a copy of the data to break references (so that we don't
-        # inadvertently expose unencrypted default passwords as we validate)
-        data = data.copy()
-        password_value = data.get(survey_element['variable'])
-        if (
-            survey_element['type'] == "password" and
-            isinstance(password_value, basestring) and
-            password_value.startswith('$encrypted$')
-        ):
-            if password_value == '$encrypted$':
-                # replace encrypted password defaults so we don't validate on
-                # $encrypted$
-                password_value = survey_element['default']
-            data[survey_element['variable']] = decrypt_value(
-                get_encryption_key('value', pk=None),
-                password_value
-            )
+
+        if (survey_element['type'] == "password"):
+            password_value = data.get(survey_element['variable'])
+            if (
+                isinstance(password_value, basestring) and
+                password_value == '$encrypted$'
+            ):
+                if survey_element.get('default') is None and survey_element['required']:
+                    errors.append("'%s' value missing" % survey_element['variable'])
+                return errors
+
         if survey_element['variable'] not in data and survey_element['required']:
             errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
