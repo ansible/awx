@@ -136,7 +136,7 @@ class TestJobTemplateCredentials:
             job_template, credential, 'credentials', {})
 
     def test_job_template_vault_cred_check(self, mocker, job_template, vault_credential, rando, project):
-        # TODO: remove in 3.3
+        # TODO: remove in 3.4
         job_template.admin_role.members.add(rando)
         # not allowed to use the vault cred
         # this is checked in the serializer validate method, not access.py
@@ -151,9 +151,27 @@ class TestJobTemplateCredentials:
                 'ask_inventory_on_launch': True,
             })
 
+    def test_job_template_vault_cred_check_noop(self, mocker, job_template, vault_credential, rando, project):
+        # TODO: remove in 3.4
+        job_template.credentials.add(vault_credential)
+        job_template.admin_role.members.add(rando)
+        # not allowed to use the vault cred
+        # this is checked in the serializer validate method, not access.py
+        view = mocker.MagicMock()
+        view.request = mocker.MagicMock()
+        view.request.user = rando
+        serializer = JobTemplateSerializer(job_template, context={'view': view})
+        # should not raise error:
+        serializer.validate({
+            'vault_credential': vault_credential.pk,
+            'project': project,  # necessary because job_template fixture fails validation
+            'playbook': 'helloworld.yml',
+            'ask_inventory_on_launch': True,
+        })
+
     def test_new_jt_with_vault(self, mocker, vault_credential, project, rando):
         project.admin_role.members.add(rando)
-        # TODO: remove in 3.3
+        # TODO: remove in 3.4
         # this is checked in the serializer validate method, not access.py
         view = mocker.MagicMock()
         view.request = mocker.MagicMock()

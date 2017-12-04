@@ -2446,7 +2446,8 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
                     cred = v1_credentials[attr] = Credential.objects.get(pk=pk)
                     if cred.credential_type.kind != kind:
                         raise serializers.ValidationError({attr: error})
-                    if view and view.request and view.request.user not in cred.use_role:
+                    if ((not self.instance or cred.pk != getattr(self.instance, attr)) and
+                            view and view.request and view.request.user not in cred.use_role):
                         raise PermissionDenied()
 
         if 'project' in self.fields and 'playbook' in self.fields:
