@@ -8,6 +8,7 @@ This document provides a guide for installing AWX.
   - [Clone the repo](#clone-the-repo)
   - [AWX branding](#awx-branding)
   - [Prerequisites](#prerequisites)
+  - [System Requirements](#system-requirements)
   - [AWX Tunables](#awx-tunables)
   - [Choose a deployment platform](#choose-a-deployment-platform)
   - [Official vs Building Images](#official-vs-building-images)
@@ -54,6 +55,15 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/)
+
+### System Requirements
+
+The system that runs the AWX service will need to satisfy the following requirements
+
+- At leasts 4GB of memory
+- At least 2 cpu cores
+- At least 20GB of space
+- Running Docker or Openshift
 
 ### AWX Tunables
 
