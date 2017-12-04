@@ -5,7 +5,7 @@ import mock
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project
+from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule
 from awx.main.models.ha import InstanceGroup
 
 
@@ -110,3 +110,39 @@ class TestIsolatedRuns:
                                       link=success_callback, 
                                       queue='thepentagon',
                                       task_id='something')
+
+
+@pytest.mark.django_db
+class TestMetaVars:
+    '''
+    Extension of unit tests with same class name
+    '''
+
+    def test_workflow_job_metavars(self, admin_user):
+        workflow_job = WorkflowJob.objects.create(
+            name='workflow-job',
+            created_by=admin_user
+        )
+        job = Job.objects.create(
+            name='fake-job',
+            launch_type='workflow'
+        )
+        workflow_job.workflow_nodes.create(job=job)
+        data = job.awx_meta_vars()
+        assert data['awx_user_name'] == admin_user.username
+        assert data['awx_workflow_job_id'] == workflow_job.pk
+
+    def test_scheduled_job_metavars(self, job_template, admin_user):
+        schedule = Schedule.objects.create(
+            name='job-schedule',
+            rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY',
+            unified_job_template=job_template
+        )
+        job = Job.objects.create(
+            name='fake-job',
+            launch_type='workflow',
+            schedule=schedule,
+            job_template=job_template
+        )
+        data = job.awx_meta_vars()
+        assert data['awx_schedule_id'] == schedule.pk

@@ -701,6 +701,17 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             return self.global_instance_groups
         return selected_groups
 
+    def awx_meta_vars(self):
+        r = super(Job, self).awx_meta_vars()
+        if self.project:
+            for name in ('awx', 'tower'):
+                r['{}_project_revision'.format(name)] = self.project.scm_revision
+        if self.job_template:
+            for name in ('awx', 'tower'):
+                r['{}_job_template_id'.format(name)] = self.job_template.pk
+                r['{}_job_template_name'.format(name)] = self.job_template.name
+        return r
+
     '''
     JobNotificationMixin
     '''

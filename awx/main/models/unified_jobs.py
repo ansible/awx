@@ -855,14 +855,20 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
 
     @property
+    def workflow_job_id(self):
+        workflow_job = self.get_workflow_job()
+        if workflow_job:
+            return workflow_job.pk
+        return None
+
+    @property
     def spawned_by_workflow(self):
         return self.launch_type == 'workflow'
 
-    @property
-    def workflow_job_id(self):
+    def get_workflow_job(self):
         if self.spawned_by_workflow:
             try:
-                return self.unified_job_node.workflow_job.pk
+                return self.unified_job_node.workflow_job
             except UnifiedJob.unified_job_node.RelatedObjectDoesNotExist:
                 pass
         return None
@@ -1129,3 +1135,32 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if default_instance_group.exists():
             return [default_instance_group.first()]
         return []
+
+    def awx_meta_vars(self):
+        '''
+        The result of this method is used as extra_vars of a job launched
+        by AWX, for purposes of client playbook hooks
+        '''
+        r = {}
+        for name in ('awx', 'tower'):
+            r['{}_job_id'.format(name)] = self.pk
+            r['{}_job_launch_type'.format(name)] = self.launch_type
+        if self.created_by:
+            for name in ('awx', 'tower'):
+                r['{}_user_id'.format(name)] = self.created_by.pk
+                r['{}_user_name'.format(name)] = self.created_by.username
+        else:
+            wj = self.get_workflow_job()
+            if wj:
+                for name in ('awx', 'tower'):
+                    r['{}_workflow_job_id'.format(name)] = wj.pk
+                    r['{}_workflow_job_name'.format(name)] = wj.name
+                if wj.created_by:
+                    for name in ('awx', 'tower'):
+                        r['{}_user_id'.format(name)] = wj.created_by.pk
+                        r['{}_user_name'.format(name)] = wj.created_by.username
+            if self.schedule:
+                for name in ('awx', 'tower'):
+                    r['{}_schedule_id'.format(name)] = self.schedule.pk
+                    r['{}_schedule_name'.format(name)] = self.schedule.name
+        return r

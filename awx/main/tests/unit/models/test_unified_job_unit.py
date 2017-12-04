@@ -5,7 +5,10 @@ from awx.main.models import (
     UnifiedJob,
     WorkflowJob,
     WorkflowJobNode,
-    Job
+    Job,
+    User,
+    Project,
+    JobTemplate
 )
 
 
@@ -61,3 +64,45 @@ def test_log_representation():
     assert job.log_format == 'job 4 (running)'
     assert uj.log_format == 'unified_job 4 (running)'
 
+
+class TestMetaVars:
+    '''
+    Corresponding functional test exists for cases with indirect relationships
+    '''
+
+    def test_job_metavars(self):
+        maker = User(username='joe', pk=47, id=47)
+        assert Job(
+            name='fake-job',
+            pk=42, id=42,
+            launch_type='manual',
+            created_by=maker
+        ).awx_meta_vars() == {
+            'tower_job_id': 42,
+            'awx_job_id': 42,
+            'tower_job_launch_type': 'manual',
+            'awx_job_launch_type': 'manual',
+            'awx_user_name': 'joe',
+            'tower_user_name': 'joe',
+            'awx_user_id': 47,
+            'tower_user_id': 47
+        }
+
+    def test_project_update_metavars(self):
+        data = Job(
+            name='fake-job',
+            pk=40, id=40,
+            launch_type='manual',
+            project=Project(
+                name='jobs-sync',
+                scm_revision='12345444'
+            ),
+            job_template=JobTemplate(
+                name='jobs-jt',
+                id=92, pk=92
+            )
+        ).awx_meta_vars()
+        assert data['awx_project_revision'] == '12345444'
+        assert 'tower_job_template_id' in data
+        assert data['tower_job_template_id'] == 92
+        assert data['tower_job_template_name'] == 'jobs-jt'

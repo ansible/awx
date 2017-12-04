@@ -1145,31 +1145,8 @@ class RunJob(BaseTask):
             args.append('--start-at-task=%s' % job.start_at_task)
 
         # Define special extra_vars for AWX, combine with job.extra_vars.
-        extra_vars = {
-            'tower_job_id': job.pk,
-            'tower_job_launch_type': job.launch_type,
-            'awx_job_id': job.pk,
-            'awx_job_launch_type': job.launch_type,
-        }
-        if job.project:
-            extra_vars.update({
-                'tower_project_revision': job.project.scm_revision,
-                'awx_project_revision': job.project.scm_revision,
-            })
-        if job.job_template:
-            extra_vars.update({
-                'tower_job_template_id': job.job_template.pk,
-                'tower_job_template_name': job.job_template.name,
-                'awx_job_template_id': job.job_template.pk,
-                'awx_job_template_name': job.job_template.name,
-            })
-        if job.created_by:
-            extra_vars.update({
-                'tower_user_id': job.created_by.pk,
-                'tower_user_name': job.created_by.username,
-                'awx_user_id': job.created_by.pk,
-                'awx_user_name': job.created_by.username,
-            })
+        extra_vars = job.awx_meta_vars()
+
         if job.extra_vars_dict:
             if kwargs.get('display', False) and job.job_template:
                 extra_vars.update(json.loads(job.display_extra_vars()))
