@@ -507,6 +507,8 @@ SOCIAL_AUTH_PIPELINE = (
     'awx.sso.pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
     'awx.sso.pipeline.prevent_inactive_login',
+    'awx.sso.pipeline.update_user_orgs_by_saml_attr',
+    'awx.sso.pipeline.update_user_teams_by_saml_attr',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
 )
@@ -553,6 +555,9 @@ SOCIAL_AUTH_SAML_ORG_INFO = {}
 SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
+
+SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
+SOCIAL_AUTH_SAML_TEAM_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
