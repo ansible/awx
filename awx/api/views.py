@@ -2941,9 +2941,15 @@ class JobTemplateSurveySpec(GenericAPIView):
                         question_position=str(idx), question_type=survey_item["type"])
                     ), status=status.HTTP_400_BAD_REQUEST)
                 old_element = old_spec_dict.get(survey_item['variable'], {})
-                if (survey_item['variable'] not in old_spec_dict or 'default' not in old_element or
-                        not old_element['default'].startswith('$encrypted$') or
-                        old_element['default'] == '$encrypted$'):
+                encryptedish_default_exists = False
+                if 'default' in old_element:
+                    old_default = old_element['default']
+                    if isinstance(old_default, six.string_types):
+                        if old_default.startswith('$encrypted$'):
+                            encryptedish_default_exists = True
+                        elif old_default == "":  # unencrypted blank string is allowed as DB value as special case
+                            encryptedish_default_exists = True
+                if not encryptedish_default_exists:
                     return Response(dict(error=_(
                         "$encrypted$ is a reserved keyword, may not be used for new default in position {question_position}."
                     ).format(question_position=str(idx))), status=status.HTTP_400_BAD_REQUEST)
