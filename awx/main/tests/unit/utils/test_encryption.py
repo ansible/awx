@@ -51,3 +51,24 @@ def test_encrypt_field_with_ask():
 def test_encrypt_field_with_empty_value():
     encrypted = encryption.encrypt_field(Setting(value=None), 'value')
     assert encrypted is None
+
+
+class TestSurveyReversibilityValue:
+    '''
+    Tests to enforce the contract with survey password question encrypted values
+    '''
+    _key = encryption.get_encryption_key('value', None)
+
+    def test_encrypt_empty_string(self):
+        assert encryption.encrypt_value('') == ''
+        # the reverse, decryption, does not work
+
+    def test_encrypt_encryption_key(self):
+        assert encryption.encrypt_value('$encrypted$') == '$encrypted$'
+        # the reverse, decryption, does not work
+
+    def test_encrypt_empty_string_twice(self):
+        # Encryption is idempotent
+        val = encryption.encrypt_value('foobar')
+        val2 = encryption.encrypt_value(val)
+        assert encryption.decrypt_value(self._key, val2) == 'foobar'
