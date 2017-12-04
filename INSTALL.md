@@ -5,6 +5,9 @@ This document provides a guide for installing AWX.
 ## Table of contents
 
 - [Getting started](#getting-started)
+  - [Minimum Hardware Requirements](#minimum-hardware-requirements)
+    - [CPU](#cpu)
+    - [RAM](#ram)
   - [Clone the repo](#clone-the-repo)
   - [AWX branding](#awx-branding)
   - [Prerequisites](#prerequisites)
@@ -33,6 +36,15 @@ This document provides a guide for installing AWX.
   - [Accessing AWX](#accessing-awx-1)
 
 ## Getting started
+
+### Minimum Hardware Requirements
+
+#### CPU
+2 CPUs are recommended.
+
+#### RAM
+2 GB RAM is required.
+4 GB RAM is recommended.
 
 ### Clone the repo
 
