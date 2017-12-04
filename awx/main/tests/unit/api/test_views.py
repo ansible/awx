@@ -302,9 +302,55 @@ class TestSurveySpecValidation:
                 {
                     "question_description": "",
                     "min": 0,
-                    "default": "$encrypted$foooooooo",
+                    "default": "$encrypted$foooooooo",  # default remained the same
                     "max": 1024,
                     "required": False,  # only thing changed
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "password"
+                }
+            ]
+        }
+
+    def test_use_saved_empty_string_default(self):
+        '''
+        Save is allowed, the $encrypted$ replacement is done with empty string
+        The empty string value for default is unencrypted,
+        unlike all other password questions
+        '''
+        view = JobTemplateSurveySpec()
+        old = {
+            "name": "old survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "",
+                    "max": 1024,
+                    "required": True,
+                    "choices": "",
+                    "variable": "openshift_username",
+                    "question_name": "OpenShift Username",
+                    "type": "password"
+                }
+            ]
+        }
+        new = deepcopy(old)
+        new['spec'][0]['default'] = '$encrypted$'
+        resp = view._validate_spec_data(new, old)
+        assert resp is None
+        assert new == {
+            "name": "old survey",
+            "description": "foobar",
+            "spec": [
+                {
+                    "question_description": "",
+                    "min": 0,
+                    "default": "",  # still has old unencrypted default
+                    "max": 1024,
+                    "required": True,
                     "choices": "",
                     "variable": "openshift_username",
                     "question_name": "OpenShift Username",
