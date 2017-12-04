@@ -2,6 +2,10 @@ import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 
 let ansi;
+let $timeout;
+let $sce;
+let $compile;
+let $scope;
 
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
@@ -18,22 +22,30 @@ const TIME_EVENTS = [
     EVENT_STATS_PLAY
 ];
 
-function JobsIndexController (job, $sce) {
+function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
+    ansi = new Ansi();
+    $timeout = _$timeout_;
+    $sce = _$sce_;
+    $compile = _$compile_;
+    $scope = _$scope_;
+
     const vm = this || {};
     const events = job.get('related.job_events.results');
+    const html = $sce.trustAsHtml(parseEvents(events));
 
-    ansi = new Ansi();
-
-    const html = parseEvents(events);
-
-    vm.html = $sce.trustAsHtml(html);
     vm.toggle = toggle;
+
+    $timeout(() => {
+        const table = $('#result-table');
+
+        table.html($sce.getTrustedHtml(html));
+        $compile(table.contents())($scope);
+    });
 }
 
 function parseEvents (events) {
     events.sort(orderByLineNumber);
 
-    console.log(events);
     return events.reduce((html, event) => `${html}${parseLine(event)}`, '');
 }
 
@@ -90,12 +102,12 @@ function createRow (ln, content, time, group) {
 
     let expand = '';
     if (group.parent) {
-        expand = '<i class="fa fa-chevron-down" ng-click="vm.toggle(group.level)"></i>';
+        expand = '<i class="fa fa-chevron-down can-toggle"></i>';
     }
 
     return `
         <tr class="${group.classList}">
-            <td class="at-Stdout-toggle">${expand}</td>
+            <td class="at-Stdout-toggle" ng-click="vm.toggle(${group.id})">${expand}</td>
             <td class="at-Stdout-line">${ln}</td>
             <td class="at-Stdout-event">${content}</td>
             <td class="at-Stdout-time">${time}</td>
@@ -108,6 +120,7 @@ function getGroup (event, i) {
     if (EVENT_GROUPS.includes(event.event) && i === 1) {
         group.parent = true;
         group.classList = `parent parent-${event.event_level}`;
+        group.id = i;
     } else {
         group.classList = '';
     }
@@ -130,17 +143,7 @@ function getTime (event, i) {
 function toggle (id) {
     console.log(id);
 }
-/*
- *
- *function getTruncatedEvent () {
- *
- *}
- *
- *function addDynamic (start) {
- *    document.getElementsByClassName('parent')
- *}
- *
- */
-JobsIndexController.$inject = ['job', '$sce'];
+
+JobsIndexController.$inject = ['job', '$sce', '$timeout', '$scope', '$compile'];
 
 module.exports = JobsIndexController;

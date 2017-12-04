@@ -20,6 +20,7 @@
         font-size: 12px;
 
         padding: 0 20px 0 10px;
+        user-select: none;
     }
 
     &-line {
@@ -30,30 +31,24 @@
 
         padding-right: 5px;
         border-right: 1px solid @at-gray-dark;
+        user-select: none;
     }
 
     &-event {
-        padding-left: 2ch;
-        width: 83ch;
+        padding: 0 10px;
     }
 
     &-time {
-        padding-left: 20px;
+        padding-right: 2ch;
         font-size: 12px;
         text-align: right;
+        user-select: none;
+        width: 11ch;
+        border-left: 1px dashed @at-gray-dark;
     }
 
     &-container {
-        & > table {
-            table-layout: fixed;
-
-            td {
-                vertical-align: top;
-                word-wrap: break-word;
-                white-space: pre-wrap;
-            }
-        }
-
+        max-height: 80vh;
         font-size: 14px;
         border: 1px solid @at-gray-dark-2x;
         background-color: @at-gray-light-3x;
@@ -61,5 +56,19 @@
         margin: 0;
         border-top-left-radius: 0;
         border-top-right-radius: 0;
+
+        & > table {
+            table-layout: fixed;
+
+            tr:hover > td {
+                background: white;
+            }
+
+            td {
+                vertical-align: top;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+            }
+        }
     }
 }
