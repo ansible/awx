@@ -45,7 +45,8 @@ export default ['$state', '$stateParams', '$scope', 'RelatedHostsFormDefinition'
             };
             HostsService.post(params).then(function(res) {
                 $state.go('^.edit', { host_id: res.data.id }, { reload: true });
-            });
+            })
+            .catch(function(){});
         };
     }
 ];

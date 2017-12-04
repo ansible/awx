@@ -18,7 +18,7 @@
                 return '';
             },
             error: function(data, status) {
-                ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                ProcessErrors($rootScope, data.data, status, null, { hdr: 'Error!',
                 msg: 'Call to ' + this.url + '. GET returned: ' + status });
             },
             success: function(data){
