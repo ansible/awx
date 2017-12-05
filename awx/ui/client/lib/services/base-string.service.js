@@ -67,15 +67,18 @@ function BaseStringService (namespace) {
     this.OFF = t.s('OFF');
     this.YAML = t.s('YAML');
     this.JSON = t.s('JSON');
+    this.DELETE = t.s('DELETE');
+    this.COPY = t.s('COPY');
 
     this.deleteResource = {
         HEADER: t.s('Delete'),
         USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),
         CONFIRM: resourceType => t.s('Are you sure you want to delete this {{ resourceType }}?', { resourceType })
     };
+
     this.error = {
         HEADER: t.s('Error!'),
-        CALL: ({ path, status }) => t.s('Call to {{ path }} failed. DELETE returned status: {{ status }}.', { path, status })
+        CALL: ({ path, action, status }) => t.s('Call to {{ path }} failed. {{ action }} returned status: {{ status }}.', { path, action, status }),
     };
 
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
