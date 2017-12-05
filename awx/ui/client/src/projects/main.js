@@ -42,7 +42,7 @@ angular.module('Projects', [])
                             }).catch(function(response) {
                                 ProcessErrors(null, response.data, response.status, null, {
                                     hdr: 'Error!',
-                                    msg: 'Failed to get credential tpyes. GET returned status: ' +
+                                    msg: 'Failed to get credential types. GET returned status: ' +
                                         response.status
                                 });
                             });
