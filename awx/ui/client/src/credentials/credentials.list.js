@@ -69,7 +69,15 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: 'credential.summary_fields.user_capabilities.edit'
             },
-
+            copy: {
+                label: i18n._('Copy'),
+                ngClick: 'copyCredential(credential)',
+                "class": 'btn-danger btn-xs',
+                awToolTip: i18n._('Copy credential'),
+                dataPlacement: 'top',
+                // requires future  api rbac changes
+                //ngShow: 'credential.summary_fields.user_capabilities.copy'
+            },
             view: {
                 ngClick: "editCredential(credential.id)",
                 label: i18n._('View'),
