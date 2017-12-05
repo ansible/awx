@@ -177,6 +177,30 @@ module.exports = {
 
         credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
         credentials.expect.element(row).text.contain(store.credential.name);
+    },
+    'change the password after saving': client => {
+        const credentials = client.page.credentials();
+        const { edit } = credentials.section;
+        const { machine } = edit.section.details.section;
+
+        machine.section.password.expect.element('@replace').visible;
+        machine.section.password.expect.element('@replace').enabled;
+        machine.section.password.expect.element('@revert').not.present;
+
+        machine.expect.element('@password').not.enabled;
+
+        machine.section.password.click('@replace');
+        machine.section.password.expect.element('@replace').not.present;
+        machine.section.password.expect.element('@revert').visible;
+
+        machine.expect.element('@password').enabled;
+        machine.setValue('@password', 'newpassword');
+
+        edit.section.details.click('@save');
+
+        credentials
+            .waitForElementVisible('div.spinny')
+            .waitForElementNotVisible('div.spinny');
 
         client.end();
     }

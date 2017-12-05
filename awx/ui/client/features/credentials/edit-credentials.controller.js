@@ -23,7 +23,7 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
     };
 
     $scope.$watch('$state.current.name', (value) => {
-        if (/credentials.edit($|\.organization$)/.test(value)) {
+        if (/credentials.edit($|\.organization$|\.credentialType$)/.test(value)) {
             vm.tab.details._active = true;
             vm.tab.permissions._active = false;
         } else {
