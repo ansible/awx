@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-27 19:27+0000\n"
+"POT-Creation-Date: 2017-11-30 20:23+0000\n"
 "PO-Revision-Date: 2017-08-31 08:53+0000\n"
 "Last-Translator: helena02 <vertaler2helena@gmail.com>\n"
 "Language-Team: Dutch\n"
@@ -81,25 +81,30 @@ msgstr "Filteren op %s is niet toegestaan."
 msgid "Loops not allowed in filters, detected on field {}."
 msgstr "Lussen zijn niet toegestaan in filters, gedetecteerd in veld {}."
 
-#: awx/api/filters.py:297
+#: awx/api/filters.py:171
+#, python-brace-format
+msgid "Invalid {field_name} id: {field_id}"
+msgstr ""
+
+#: awx/api/filters.py:302
 #, python-format
 msgid "cannot filter on kind %s"
 msgstr "kan niet filteren op soort %s"
 
-#: awx/api/filters.py:404
+#: awx/api/filters.py:409
 #, python-format
 msgid "cannot order by field %s"
 msgstr "Kan niet ordenen op veld %s"
 
-#: awx/api/generics.py:515 awx/api/generics.py:577
+#: awx/api/generics.py:550 awx/api/generics.py:612
 msgid "\"id\" field must be an integer."
 msgstr "'Id'-veld moet een geheel getal zijn."
 
-#: awx/api/generics.py:574
+#: awx/api/generics.py:609
 msgid "\"id\" is required to disassociate"
 msgstr "'id' is vereist om los te koppelen"
 
-#: awx/api/generics.py:625
+#: awx/api/generics.py:660
 msgid "{} 'id' field is missing."
 msgstr "{} 'id'-veld ontbreekt."
 
@@ -180,7 +185,7 @@ msgstr "Workflowtaak"
 msgid "Workflow Template"
 msgstr "Workflowsjabloon"
 
-#: awx/api/serializers.py:697 awx/api/serializers.py:755 awx/api/views.py:4314
+#: awx/api/serializers.py:701 awx/api/serializers.py:759 awx/api/views.py:4365
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -190,38 +195,38 @@ msgstr ""
 "alleen download ondersteund voor groottes van meer dan %(supported_size)d "
 "bytes"
 
-#: awx/api/serializers.py:770
+#: awx/api/serializers.py:774
 msgid "Write-only field used to change the password."
 msgstr "Een alleen-schrijven-veld is gebruikt om het wachtwoord te wijzigen."
 
-#: awx/api/serializers.py:772
+#: awx/api/serializers.py:776
 msgid "Set if the account is managed by an external service"
 msgstr "Instellen als de account wordt beheerd door een externe service"
 
-#: awx/api/serializers.py:796
+#: awx/api/serializers.py:800
 msgid "Password required for new User."
 msgstr "Wachtwoord vereist voor een nieuwe gebruiker."
 
-#: awx/api/serializers.py:882
+#: awx/api/serializers.py:886
 #, python-format
 msgid "Unable to change %s on user managed by LDAP."
 msgstr "Kan %s niet wijzigen voor gebruiker die wordt beheerd met LDAP."
 
-#: awx/api/serializers.py:1046
+#: awx/api/serializers.py:1050
 msgid "Organization is missing"
 msgstr "Organisatie ontbreekt"
 
-#: awx/api/serializers.py:1050
+#: awx/api/serializers.py:1054
 msgid "Update options must be set to false for manual projects."
 msgstr ""
 "De update-opties moeten voor handmatige projecten worden ingesteld op "
 "onwaar."
 
-#: awx/api/serializers.py:1056
+#: awx/api/serializers.py:1060
 msgid "Array of playbooks available within this project."
 msgstr "Er is binnen dit project een draaiboekenmatrix beschikbaar."
 
-#: awx/api/serializers.py:1075
+#: awx/api/serializers.py:1079
 msgid ""
 "Array of inventory files and directories available within this project, not "
 "comprehensive."
@@ -229,68 +234,72 @@ msgstr ""
 "Er is binnen dit project een niet-volledige matrix met "
 "inventarisatiebestanden en -mappen beschikbaar."
 
-#: awx/api/serializers.py:1282
+#: awx/api/serializers.py:1201
+msgid "Smart inventories must specify host_filter"
+msgstr ""
+
+#: awx/api/serializers.py:1303
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr "Ongeldige poortspecificatie: %s"
 
-#: awx/api/serializers.py:1293
+#: awx/api/serializers.py:1314
 msgid "Cannot create Host for Smart Inventory"
 msgstr "Kan geen host aanmaken voor Smart-inventaris"
 
-#: awx/api/serializers.py:1315 awx/api/serializers.py:3218
-#: awx/api/serializers.py:3303 awx/main/validators.py:198
+#: awx/api/serializers.py:1336 awx/api/serializers.py:3321
+#: awx/api/serializers.py:3406 awx/main/validators.py:198
 msgid "Must be valid JSON or YAML."
 msgstr "Moet geldig JSON of YAML zijn."
 
-#: awx/api/serializers.py:1411
+#: awx/api/serializers.py:1432
 msgid "Invalid group name."
 msgstr "Ongeldige groepsnaam."
 
-#: awx/api/serializers.py:1416
+#: awx/api/serializers.py:1437
 msgid "Cannot create Group for Smart Inventory"
 msgstr "Kan geen groep aanmaken voor Smart-inventaris"
 
-#: awx/api/serializers.py:1488
+#: awx/api/serializers.py:1509
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr ""
 "Script moet beginnen met een hashbang-reeks, bijvoorbeeld ... #!/usr/bin/env"
 " python"
 
-#: awx/api/serializers.py:1534
+#: awx/api/serializers.py:1555
 msgid "`{}` is a prohibited environment variable"
 msgstr "`{}` is niet toegestaan als omgevingsvariabele"
 
-#: awx/api/serializers.py:1545
+#: awx/api/serializers.py:1566
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr "Als 'bron' 'aangepast' is, moet 'source_script' worden geleverd."
 
-#: awx/api/serializers.py:1551
+#: awx/api/serializers.py:1572
 msgid "Must provide an inventory."
 msgstr "Moet een inventaris verschaffen."
 
-#: awx/api/serializers.py:1555
+#: awx/api/serializers.py:1576
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr ""
 "Het 'source_script' behoort niet tot dezelfde categorie als de inventaris."
 
-#: awx/api/serializers.py:1557
+#: awx/api/serializers.py:1578
 msgid "'source_script' doesn't exist."
 msgstr "'source_script' bestaat niet."
 
-#: awx/api/serializers.py:1581
+#: awx/api/serializers.py:1602
 msgid "Automatic group relationship, will be removed in 3.3"
 msgstr "Automatische groepsrelatie, wordt verwijderd in 3.3"
 
-#: awx/api/serializers.py:1658
+#: awx/api/serializers.py:1679
 msgid "Cannot use manual project for SCM-based inventory."
 msgstr ""
 "Kan geen handmatig project gebruiken voor een SCM-gebaseerde inventaris."
 
-#: awx/api/serializers.py:1664
+#: awx/api/serializers.py:1685
 msgid ""
 "Manual inventory sources are created automatically when a group is created "
 "in the v1 API."
@@ -298,50 +307,56 @@ msgstr ""
 "Handmatige inventarisbronnen worden automatisch gemaakt wanneer er een groep"
 " wordt gemaakt in de v1 API."
 
-#: awx/api/serializers.py:1669
+#: awx/api/serializers.py:1690
 msgid "Setting not compatible with existing schedules."
 msgstr "Instelling is niet compatibel met bestaande schema's."
 
-#: awx/api/serializers.py:1674
+#: awx/api/serializers.py:1695
 msgid "Cannot create Inventory Source for Smart Inventory"
 msgstr "Kan geen inventarisbron aanmaken voor Smart-inventaris"
 
-#: awx/api/serializers.py:1688
+#: awx/api/serializers.py:1709
 #, python-format
 msgid "Cannot set %s if not SCM type."
 msgstr "Kan %s niet instellen als het geen SCM-type is."
 
-#: awx/api/serializers.py:1929
+#: awx/api/serializers.py:1950
 msgid "Modifications not allowed for managed credential types"
 msgstr "Wijzigingen zijn niet toegestaan voor beheerde referentietypen"
 
-#: awx/api/serializers.py:1934
+#: awx/api/serializers.py:1955
 msgid ""
 "Modifications to inputs are not allowed for credential types that are in use"
 msgstr ""
 "Wijzigingen in inputs zijn niet toegestaan voor referentietypen die in "
 "gebruik zijn"
 
-#: awx/api/serializers.py:1940
+#: awx/api/serializers.py:1961
 #, python-format
 msgid "Must be 'cloud' or 'net', not %s"
 msgstr "Moet 'cloud' of 'net' zijn, niet %s"
 
-#: awx/api/serializers.py:1946
+#: awx/api/serializers.py:1967
 msgid "'ask_at_runtime' is not supported for custom credentials."
 msgstr "'ask_at_runtime' wordt niet ondersteund voor aangepaste referenties."
 
-#: awx/api/serializers.py:2119
+#: awx/api/serializers.py:2140
 #, python-format
 msgid "\"%s\" is not a valid choice"
 msgstr "\"%s\" is geen geldige keuze"
 
-#: awx/api/serializers.py:2138
+#: awx/api/serializers.py:2159
 #, python-format
 msgid "'%s' is not a valid field for %s"
 msgstr "'%s' is geen geldig veld voor %s"
 
-#: awx/api/serializers.py:2150
+#: awx/api/serializers.py:2180
+msgid ""
+"You cannot change the credential type of the credential, as it may break the"
+" functionality of the resources using it."
+msgstr ""
+
+#: awx/api/serializers.py:2191
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
@@ -350,7 +365,7 @@ msgstr ""
 "de eigenaarrol. Indien verschaft, geef geen team of organisatie op. Alleen "
 "geldig voor maken."
 
-#: awx/api/serializers.py:2155
+#: awx/api/serializers.py:2196
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
@@ -359,7 +374,7 @@ msgstr ""
 "te voegen. Indien verschaft, geef geen gebruiker of organisatie op. Alleen "
 "geldig voor maken."
 
-#: awx/api/serializers.py:2160
+#: awx/api/serializers.py:2201
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not"
 " give either user or team."
@@ -367,124 +382,128 @@ msgstr ""
 "Neem machtigingen over van organisatierollen. Indien verschaft bij maken, "
 "geef geen gebruiker of team op."
 
-#: awx/api/serializers.py:2176
+#: awx/api/serializers.py:2217
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr "'gebruiker', 'team' of 'organisatie' ontbreekt."
 
-#: awx/api/serializers.py:2216
+#: awx/api/serializers.py:2257
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr ""
 "Referentieorganisatie moet worden ingesteld en moet overeenkomen vóór "
 "toewijzing aan een team"
 
-#: awx/api/serializers.py:2378
+#: awx/api/serializers.py:2424
 msgid "You must provide a cloud credential."
 msgstr "U moet een cloudreferentie opgeven."
 
-#: awx/api/serializers.py:2379
+#: awx/api/serializers.py:2425
 msgid "You must provide a network credential."
 msgstr "U moet een netwerkreferentie opgeven."
 
-#: awx/api/serializers.py:2395
+#: awx/api/serializers.py:2441
 msgid "This field is required."
 msgstr "Dit veld is vereist."
 
-#: awx/api/serializers.py:2397 awx/api/serializers.py:2399
+#: awx/api/serializers.py:2443 awx/api/serializers.py:2445
 msgid "Playbook not found for project."
 msgstr "Draaiboek is niet gevonden voor project."
 
-#: awx/api/serializers.py:2401
+#: awx/api/serializers.py:2447
 msgid "Must select playbook for project."
 msgstr "Moet een draaiboek selecteren voor het project."
 
-#: awx/api/serializers.py:2476
+#: awx/api/serializers.py:2522
 msgid "Must either set a default value or ask to prompt on launch."
 msgstr ""
 "Moet een standaardwaarde instellen of hierom laten vragen bij het opstarten."
 
-#: awx/api/serializers.py:2478 awx/main/models/jobs.py:325
+#: awx/api/serializers.py:2524 awx/main/models/jobs.py:326
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr ""
 "Aan de taaktypen 'uitvoeren' en 'controleren' moet een project zijn "
 "toegewezen."
 
-#: awx/api/serializers.py:2549
+#: awx/api/serializers.py:2611
 msgid "Invalid job template."
 msgstr "Ongeldige taaksjabloon."
 
-#: awx/api/serializers.py:2630
-msgid "Credential not found or deleted."
-msgstr "Referentie niet gevonden of verwijderd."
+#: awx/api/serializers.py:2708
+msgid "Neither credential nor vault credential provided."
+msgstr ""
 
-#: awx/api/serializers.py:2632
+#: awx/api/serializers.py:2711
 msgid "Job Template Project is missing or undefined."
 msgstr "Het taaksjabloonproject ontbreekt of is niet gedefinieerd."
 
-#: awx/api/serializers.py:2634
+#: awx/api/serializers.py:2713
 msgid "Job Template Inventory is missing or undefined."
 msgstr "De taaksjablooninventaris ontbreekt of is niet gedefinieerd."
 
-#: awx/api/serializers.py:2921
+#: awx/api/serializers.py:2782 awx/main/tasks.py:2186
+msgid "{} are prohibited from use in ad hoc commands."
+msgstr ""
+
+#: awx/api/serializers.py:3008
 #, python-format
 msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
 msgstr "%(job_type)s is geen geldig taaktype. De keuzes zijn %(choices)s."
 
-#: awx/api/serializers.py:2926
+#: awx/api/serializers.py:3013
 msgid "Workflow job template is missing during creation."
 msgstr "De taaksjabloon voor de workflow ontbreekt tijdens het maken."
 
-#: awx/api/serializers.py:2931
+#: awx/api/serializers.py:3018
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr "Kan geen a %s nesten in een WorkflowJobTemplate"
 
-#: awx/api/serializers.py:3188
+#: awx/api/serializers.py:3291
 #, python-format
 msgid "Job Template '%s' is missing or undefined."
 msgstr "Taaksjabloon '%s' ontbreekt of is niet gedefinieerd."
 
-#: awx/api/serializers.py:3191
+#: awx/api/serializers.py:3294
 msgid "The inventory associated with this Job Template is being deleted."
 msgstr "De aan deze taaksjabloon gekoppelde inventaris wordt verwijderd."
 
-#: awx/api/serializers.py:3232 awx/api/views.py:2991
+#: awx/api/serializers.py:3335 awx/api/views.py:3023
 #, python-format
 msgid "Cannot assign multiple %s credentials."
 msgstr "Kan niet meerdere referenties voor %s toewijzen."
 
-#: awx/api/serializers.py:3234 awx/api/views.py:2994
+#: awx/api/serializers.py:3337 awx/api/views.py:3026
 msgid "Extra credentials must be network or cloud."
 msgstr "Extra referenties moeten netwerk of cloud zijn."
 
-#: awx/api/serializers.py:3371
+#: awx/api/serializers.py:3474
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr ""
 "Ontbrekende vereiste velden voor kennisgevingsconfiguratie: "
 "notification_type"
 
-#: awx/api/serializers.py:3394
+#: awx/api/serializers.py:3497
 msgid "No values specified for field '{}'"
 msgstr "Geen waarden opgegeven voor veld '{}'"
 
-#: awx/api/serializers.py:3399
+#: awx/api/serializers.py:3502
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "Ontbrekende vereiste velden voor kennisgevingsconfiguratie: {}."
 
-#: awx/api/serializers.py:3402
+#: awx/api/serializers.py:3505
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "Configuratieveld '{}' onjuist type, {} verwacht."
 
-#: awx/api/serializers.py:3455
+#: awx/api/serializers.py:3558
 msgid "Inventory Source must be a cloud resource."
 msgstr "Inventarisbron moet een cloudresource zijn."
 
-#: awx/api/serializers.py:3457
+#: awx/api/serializers.py:3560
 msgid "Manual Project cannot have a schedule set."
 msgstr "Handmatig project kan geen ingesteld schema hebben."
 
-#: awx/api/serializers.py:3460
+#: awx/api/serializers.py:3563
 msgid ""
 "Inventory sources with `update_on_project_update` cannot be scheduled. "
 "Schedule its source project `{}` instead."
@@ -492,71 +511,71 @@ msgstr ""
 "Inventarisbronnen met `update_on_project_update` kunnen niet worden gepland."
 " Plan in plaats daarvan het bijbehorende bronproject `{}`."
 
-#: awx/api/serializers.py:3479
+#: awx/api/serializers.py:3582
 msgid "Projects and inventory updates cannot accept extra variables."
 msgstr ""
 "Projecten en inventarisupdates kunnen geen extra variabelen accepteren."
 
-#: awx/api/serializers.py:3501
+#: awx/api/serializers.py:3604
 msgid ""
 "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr ""
 "DTSTART vereist in rrule. De waarde moet overeenkomen: "
 "DTSTART:YYYYMMDDTHHMMSSZ"
 
-#: awx/api/serializers.py:3503
+#: awx/api/serializers.py:3606
 msgid "Multiple DTSTART is not supported."
 msgstr "Meervoudige DTSTART wordt niet ondersteund."
 
-#: awx/api/serializers.py:3505
+#: awx/api/serializers.py:3608
 msgid "RRULE require in rrule."
 msgstr "RRULE vereist in rrule."
 
-#: awx/api/serializers.py:3507
+#: awx/api/serializers.py:3610
 msgid "Multiple RRULE is not supported."
 msgstr "Meervoudige RRULE wordt niet ondersteund."
 
-#: awx/api/serializers.py:3509
+#: awx/api/serializers.py:3612
 msgid "INTERVAL required in rrule."
 msgstr "INTERVAL is vereist in rrule."
 
-#: awx/api/serializers.py:3511
+#: awx/api/serializers.py:3614
 msgid "TZID is not supported."
 msgstr "TZID wordt niet ondersteund."
 
-#: awx/api/serializers.py:3513
+#: awx/api/serializers.py:3616
 msgid "SECONDLY is not supported."
 msgstr "SECONDLY wordt niet ondersteund."
 
-#: awx/api/serializers.py:3515
+#: awx/api/serializers.py:3618
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "Meerdere BYMONTHDAY's worden niet ondersteund."
 
-#: awx/api/serializers.py:3517
+#: awx/api/serializers.py:3620
 msgid "Multiple BYMONTHs not supported."
 msgstr "Meerdere BYMONTH's worden niet ondersteund."
 
-#: awx/api/serializers.py:3519
+#: awx/api/serializers.py:3622
 msgid "BYDAY with numeric prefix not supported."
 msgstr "BYDAY met numeriek voorvoegsel wordt niet ondersteund."
 
-#: awx/api/serializers.py:3521
+#: awx/api/serializers.py:3624
 msgid "BYYEARDAY not supported."
 msgstr "BYYEARDAY wordt niet ondersteund."
 
-#: awx/api/serializers.py:3523
+#: awx/api/serializers.py:3626
 msgid "BYWEEKNO not supported."
 msgstr "BYWEEKNO wordt niet ondersteund."
 
-#: awx/api/serializers.py:3527
+#: awx/api/serializers.py:3630
 msgid "COUNT > 999 is unsupported."
 msgstr "COUNT > 999 wordt niet ondersteund."
 
-#: awx/api/serializers.py:3531
+#: awx/api/serializers.py:3634
 msgid "rrule parsing failed validation."
 msgstr "De validering van rrule-parsering is mislukt."
 
-#: awx/api/serializers.py:3631
+#: awx/api/serializers.py:3760
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
@@ -564,7 +583,7 @@ msgstr ""
 "Een overzicht van de nieuwe en gewijzigde waarden wanneer een object wordt "
 "gemaakt, bijgewerkt of verwijderd"
 
-#: awx/api/serializers.py:3633
+#: awx/api/serializers.py:3762
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
@@ -574,7 +593,7 @@ msgstr ""
 "objecttype. Voor koppel- en ontkoppel-gebeurtenissen is dit het objecttype "
 "dat wordt gekoppeld aan of ontkoppeld van object2."
 
-#: awx/api/serializers.py:3636
+#: awx/api/serializers.py:3765
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated"
@@ -584,165 +603,165 @@ msgstr ""
 "en ontkoppel-gebeurtenissen is dit het objecttype waaraan object1 wordt "
 "gekoppeld."
 
-#: awx/api/serializers.py:3639
+#: awx/api/serializers.py:3768
 msgid "The action taken with respect to the given object(s)."
 msgstr "De actie ondernomen met betrekking tot de gegeven objecten."
 
-#: awx/api/serializers.py:3749
+#: awx/api/serializers.py:3885
 msgid "Unable to login with provided credentials."
 msgstr "Kan niet aanmelden met de verschafte referenties."
 
-#: awx/api/serializers.py:3751
+#: awx/api/serializers.py:3887
 msgid "Must include \"username\" and \"password\"."
 msgstr "Moet \"gebruikersnaam\" en \"wachtwoord\" bevatten."
 
-#: awx/api/views.py:106
+#: awx/api/views.py:108
 msgid "Your license does not allow use of the activity stream."
 msgstr "Uw licentie staat het gebruik van de activiteitenstroom niet toe."
 
-#: awx/api/views.py:116
+#: awx/api/views.py:118
 msgid "Your license does not permit use of system tracking."
 msgstr "Uw licentie staat het gebruik van systeemtracking niet toe."
 
-#: awx/api/views.py:126
+#: awx/api/views.py:128
 msgid "Your license does not allow use of workflows."
 msgstr "Uw licentie staat het gebruik van workflows niet toe."
 
-#: awx/api/views.py:140
+#: awx/api/views.py:142
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr ""
 "Kan taakresource niet verwijderen wanneer een gekoppelde workflowtaak wordt "
 "uitgevoerd."
 
-#: awx/api/views.py:144
+#: awx/api/views.py:146
 msgid "Cannot delete running job resource."
 msgstr "Kan geen taakbron in uitvoering verwijderen."
 
-#: awx/api/views.py:153 awx/templates/rest_framework/api.html:28
+#: awx/api/views.py:155 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: awx/api/views.py:162 awx/templates/rest_framework/api.html:4
+#: awx/api/views.py:164 awx/templates/rest_framework/api.html:4
 msgid "AWX REST API"
 msgstr "AWX REST API"
 
-#: awx/api/views.py:224
+#: awx/api/views.py:226
 msgid "Version 1"
 msgstr "Versie 1"
 
-#: awx/api/views.py:228
+#: awx/api/views.py:230
 msgid "Version 2"
 msgstr "Versie 2"
 
-#: awx/api/views.py:239
+#: awx/api/views.py:241
 msgid "Ping"
 msgstr "Ping"
 
-#: awx/api/views.py:270 awx/conf/apps.py:12
+#: awx/api/views.py:272 awx/conf/apps.py:12
 msgid "Configuration"
 msgstr "Configuratie"
 
-#: awx/api/views.py:323
+#: awx/api/views.py:325
 msgid "Invalid license data"
 msgstr "Ongeldige licentiegegevens"
 
-#: awx/api/views.py:325
+#: awx/api/views.py:327
 msgid "Missing 'eula_accepted' property"
 msgstr "Ontbrekende eigenschap 'eula_accepted'"
 
-#: awx/api/views.py:329
+#: awx/api/views.py:331
 msgid "'eula_accepted' value is invalid"
 msgstr "Waarde 'eula_accepted' is ongeldig"
 
-#: awx/api/views.py:332
+#: awx/api/views.py:334
 msgid "'eula_accepted' must be True"
 msgstr "'eula_accepted' moet True zijn"
 
-#: awx/api/views.py:339
+#: awx/api/views.py:341
 msgid "Invalid JSON"
 msgstr "Ongeldig JSON"
 
-#: awx/api/views.py:347
+#: awx/api/views.py:349
 msgid "Invalid License"
 msgstr "Ongeldige licentie"
 
-#: awx/api/views.py:357
+#: awx/api/views.py:359
 msgid "Invalid license"
 msgstr "Ongeldige licentie"
 
-#: awx/api/views.py:365
+#: awx/api/views.py:367
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr "Kan licentie niet verwijderen (%s)"
 
-#: awx/api/views.py:370
+#: awx/api/views.py:372
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: awx/api/views.py:469
+#: awx/api/views.py:471
 msgid "Dashboard Jobs Graphs"
 msgstr "Dashboardtaakgrafieken"
 
-#: awx/api/views.py:505
+#: awx/api/views.py:507
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr "Onbekende periode \"%s\""
 
-#: awx/api/views.py:519
+#: awx/api/views.py:521
 msgid "Instances"
 msgstr "Instanties"
 
-#: awx/api/views.py:527
+#: awx/api/views.py:529
 msgid "Instance Detail"
 msgstr "Instantiedetails"
 
-#: awx/api/views.py:535
+#: awx/api/views.py:537
 msgid "Instance Running Jobs"
 msgstr "Taken in uitvoering van instantie"
 
-#: awx/api/views.py:550
+#: awx/api/views.py:552
 msgid "Instance's Instance Groups"
 msgstr "Instantiegroepen van instantie"
 
-#: awx/api/views.py:560
+#: awx/api/views.py:562
 msgid "Instance Groups"
 msgstr "Instantiegroepen"
 
-#: awx/api/views.py:568
+#: awx/api/views.py:570
 msgid "Instance Group Detail"
 msgstr "Details van instantiegroep"
 
-#: awx/api/views.py:576
+#: awx/api/views.py:578
 msgid "Instance Group Running Jobs"
 msgstr "Taken in uitvoering van instantiegroep"
 
-#: awx/api/views.py:586
+#: awx/api/views.py:588
 msgid "Instance Group's Instances"
 msgstr "Instanties van instantiegroep"
 
-#: awx/api/views.py:596
+#: awx/api/views.py:598
 msgid "Schedules"
 msgstr "Schema's"
 
-#: awx/api/views.py:615
+#: awx/api/views.py:617
 msgid "Schedule Jobs List"
 msgstr "Schema takenlijst"
 
-#: awx/api/views.py:841
+#: awx/api/views.py:843
 msgid "Your license only permits a single organization to exist."
 msgstr "Uw licentie staat het gebruik van maar één organisatie toe."
 
-#: awx/api/views.py:1077 awx/api/views.py:4615
+#: awx/api/views.py:1079 awx/api/views.py:4666
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr ""
 "U kunt een organisatierol niet toewijzen als een onderliggende rol voor een "
 "team."
 
-#: awx/api/views.py:1081 awx/api/views.py:4629
+#: awx/api/views.py:1083 awx/api/views.py:4680
 msgid "You cannot grant system-level permissions to a team."
 msgstr "U kunt een team  geen rechten op systeemniveau verlenen."
 
-#: awx/api/views.py:1088 awx/api/views.py:4621
+#: awx/api/views.py:1090 awx/api/views.py:4672
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
@@ -750,36 +769,36 @@ msgstr ""
 "U kunt een team geen referentietoegang verlenen wanneer het veld Organisatie"
 " niet is ingesteld of behoort tot een andere organisatie"
 
-#: awx/api/views.py:1178
+#: awx/api/views.py:1180
 msgid "Cannot delete project."
 msgstr "Kan project niet verwijderen."
 
-#: awx/api/views.py:1213
+#: awx/api/views.py:1215
 msgid "Project Schedules"
 msgstr "Projectschema's"
 
-#: awx/api/views.py:1225
+#: awx/api/views.py:1227
 msgid "Project SCM Inventory Sources"
 msgstr "SCM-inventarisbronnen van project"
 
-#: awx/api/views.py:1352
+#: awx/api/views.py:1354
 msgid "Project Update SCM Inventory Updates"
 msgstr "SCM-inventarisupdates van projectupdate"
 
-#: awx/api/views.py:1407
+#: awx/api/views.py:1409
 msgid "Me"
 msgstr "Mij"
 
-#: awx/api/views.py:1451 awx/api/views.py:4572
+#: awx/api/views.py:1453 awx/api/views.py:4623
 msgid "You may not perform any action with your own admin_role."
 msgstr "U kunt geen actie uitvoeren met uw eigen admin_role."
 
-#: awx/api/views.py:1457 awx/api/views.py:4576
+#: awx/api/views.py:1459 awx/api/views.py:4627
 msgid "You may not change the membership of a users admin_role"
 msgstr ""
 "U kunt het lidmaatschap van de admin_role van een gebruiker niet wijzigen"
 
-#: awx/api/views.py:1462 awx/api/views.py:4581
+#: awx/api/views.py:1464 awx/api/views.py:4632
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
@@ -787,52 +806,53 @@ msgstr ""
 "U kunt geen referentietoegang verlenen aan een gebruiker die niet tot de "
 "organisatie van de referenties behoort"
 
-#: awx/api/views.py:1466 awx/api/views.py:4585
+#: awx/api/views.py:1468 awx/api/views.py:4636
 msgid "You cannot grant private credential access to another user"
 msgstr "U kunt geen privéreferentietoegang verlenen aan een andere gebruiker"
 
-#: awx/api/views.py:1564
+#: awx/api/views.py:1566
 #, python-format
 msgid "Cannot change %s."
 msgstr "Kan %s niet wijzigen."
 
-#: awx/api/views.py:1570
+#: awx/api/views.py:1572
 msgid "Cannot delete user."
 msgstr "Kan gebruiker niet verwijderen."
 
-#: awx/api/views.py:1599
+#: awx/api/views.py:1601
 msgid "Deletion not allowed for managed credential types"
 msgstr "Verwijdering is niet toegestaan voor beheerde referentietypen"
 
-#: awx/api/views.py:1601
+#: awx/api/views.py:1603
 msgid "Credential types that are in use cannot be deleted"
 msgstr "Referentietypen die in gebruik zijn, kunnen niet worden verwijderd"
 
-#: awx/api/views.py:1779
+#: awx/api/views.py:1781
 msgid "Cannot delete inventory script."
 msgstr "Kan inventarisscript niet verwijderen."
 
-#: awx/api/views.py:1864
+#: awx/api/views.py:1866
+#, python-brace-format
 msgid "{0}"
 msgstr "{0}"
 
-#: awx/api/views.py:2089
+#: awx/api/views.py:2101
 msgid "Fact not found."
 msgstr "Feit niet gevonden."
 
-#: awx/api/views.py:2113
+#: awx/api/views.py:2125
 msgid "SSLError while trying to connect to {}"
 msgstr "SSLError tijdens poging om verbinding te maken met {}"
 
-#: awx/api/views.py:2115
+#: awx/api/views.py:2127
 msgid "Request to {} timed out."
 msgstr "Er is een time-out opgetreden voor de aanvraag naar {}"
 
-#: awx/api/views.py:2117
+#: awx/api/views.py:2129
 msgid "Unkown exception {} while trying to GET {}"
 msgstr "Onbekende uitzondering {} tijdens poging tot OPHALEN {}"
 
-#: awx/api/views.py:2120
+#: awx/api/views.py:2132
 msgid ""
 "Unauthorized access. Please check your Insights Credential username and "
 "password."
@@ -840,7 +860,7 @@ msgstr ""
 "Geen toegang. Controleer uw Insights Credential gebruikersnaam en "
 "wachtwoord."
 
-#: awx/api/views.py:2122
+#: awx/api/views.py:2134
 msgid ""
 "Failed to gather reports and maintenance plans from Insights API at URL {}. "
 "Server responded with {} status code and message {}"
@@ -848,201 +868,211 @@ msgstr ""
 "Kan rapporten en onderhoudsplannen niet verzamelen uit Insights API op URL "
 "{}. Server heeft gereageerd met statuscode {} en bericht {}"
 
-#: awx/api/views.py:2128
+#: awx/api/views.py:2140
 msgid "Expected JSON response from Insights but instead got {}"
 msgstr "Verwachtte JSON-reactie van Insights, maar kreeg in plaats daarvan {}"
 
-#: awx/api/views.py:2135
+#: awx/api/views.py:2147
 msgid "This host is not recognized as an Insights host."
 msgstr "Deze host wordt niet herkend als een Insights-host."
 
-#: awx/api/views.py:2140
+#: awx/api/views.py:2152
 msgid "The Insights Credential for \"{}\" was not found."
 msgstr "De Insights-referentie voor \"{}\" is niet gevonden."
 
-#: awx/api/views.py:2209
+#: awx/api/views.py:2221
 msgid "Cyclical Group association."
 msgstr "Cyclische groepskoppeling."
 
-#: awx/api/views.py:2482
+#: awx/api/views.py:2499
 msgid "Inventory Source List"
 msgstr "Lijst met inventarisbronnen"
 
-#: awx/api/views.py:2495
+#: awx/api/views.py:2512
 msgid "Inventory Sources Update"
 msgstr "Update van inventarisbronnen"
 
-#: awx/api/views.py:2525
+#: awx/api/views.py:2542
 msgid "Could not start because `can_update` returned False"
 msgstr "Kan niet starten omdat 'can_update' False heeft geretourneerd"
 
-#: awx/api/views.py:2533
+#: awx/api/views.py:2550
 msgid "No inventory sources to update."
 msgstr "Er zijn geen inventarisbronnen om bij te werken."
 
-#: awx/api/views.py:2565
+#: awx/api/views.py:2582
 msgid "Cannot delete inventory source."
 msgstr "Kan inventarisbron niet verwijderen."
 
-#: awx/api/views.py:2573
+#: awx/api/views.py:2590
 msgid "Inventory Source Schedules"
 msgstr "Inventarisbronschema's"
 
-#: awx/api/views.py:2603
+#: awx/api/views.py:2620
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr ""
 "Berichtsjablonen kunnen alleen worden toegewezen wanneer de bron een van {} "
 "is."
 
-#: awx/api/views.py:2826
+#: awx/api/views.py:2851
 msgid "Job Template Schedules"
 msgstr "Taaksjabloonschema's"
 
-#: awx/api/views.py:2846 awx/api/views.py:2862
+#: awx/api/views.py:2871 awx/api/views.py:2882
 msgid "Your license does not allow adding surveys."
 msgstr "Uw licentie staat toevoeging van enquêtes niet toe."
 
-#: awx/api/views.py:2869
+#: awx/api/views.py:2889
 msgid "'name' missing from survey spec."
 msgstr "'name' ontbreekt in de enquêtespecificaties."
 
-#: awx/api/views.py:2871
+#: awx/api/views.py:2891
 msgid "'description' missing from survey spec."
 msgstr "'description' ontbreekt in de enquêtespecificaties."
 
-#: awx/api/views.py:2873
+#: awx/api/views.py:2893
 msgid "'spec' missing from survey spec."
 msgstr "'spec' ontbreekt in de enquêtespecificaties."
 
-#: awx/api/views.py:2875
+#: awx/api/views.py:2895
 msgid "'spec' must be a list of items."
 msgstr "'spec' moet een lijst met items zijn."
 
-#: awx/api/views.py:2877
+#: awx/api/views.py:2897
 msgid "'spec' doesn't contain any items."
 msgstr "'spec' bevat geen items."
 
-#: awx/api/views.py:2883
+#: awx/api/views.py:2903
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "Enquêtevraag %s is geen json-object."
 
-#: awx/api/views.py:2885
+#: awx/api/views.py:2905
 #, python-format
 msgid "'type' missing from survey question %s."
 msgstr "'type' ontbreekt in enquêtevraag %s."
 
-#: awx/api/views.py:2887
+#: awx/api/views.py:2907
 #, python-format
 msgid "'question_name' missing from survey question %s."
 msgstr "'question_name' ontbreekt in enquêtevraag %s."
 
-#: awx/api/views.py:2889
+#: awx/api/views.py:2909
 #, python-format
 msgid "'variable' missing from survey question %s."
 msgstr "'variable' ontbreekt in enquêtevraag %s."
 
-#: awx/api/views.py:2891
+#: awx/api/views.py:2911
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr "'variable' '%(item)s' gedupliceerd in enquêtevraag %(survey)s."
 
-#: awx/api/views.py:2896
+#: awx/api/views.py:2916
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr "'required' ontbreekt in enquêtevraag %s."
 
-#: awx/api/views.py:2901
+#: awx/api/views.py:2921
+#, python-brace-format
 msgid ""
-"$encrypted$ is reserved keyword and may not be used as a default for "
-"password {}."
+"Value {question_default} for '{variable_name}' expected to be a string."
 msgstr ""
-"$encrypted$ is een gereserveerd sleutelwoord en mag niet als standaardwaarde"
-" worden gebruikt voor wachtwoord {}."
 
-#: awx/api/views.py:3017
+#: awx/api/views.py:2928
+#, python-brace-format
+msgid ""
+"$encrypted$ is reserved keyword for password questions and may not be used "
+"as a default for '{variable_name}' in survey question {question_position}."
+msgstr ""
+
+#: awx/api/views.py:3049
 msgid "Maximum number of labels for {} reached."
 msgstr "Het maximumaantal labels voor {} is bereikt."
 
-#: awx/api/views.py:3136
+#: awx/api/views.py:3170
 msgid "No matching host could be found!"
 msgstr "Er is geen overeenkomende host gevonden."
 
-#: awx/api/views.py:3139
+#: awx/api/views.py:3173
 msgid "Multiple hosts matched the request!"
 msgstr "Meerdere hosts kwamen overeen met de aanvraag."
 
-#: awx/api/views.py:3144
+#: awx/api/views.py:3178
 msgid "Cannot start automatically, user input required!"
 msgstr "Kan niet automatisch starten. Gebruikersinput is vereist."
 
-#: awx/api/views.py:3151
+#: awx/api/views.py:3185
 msgid "Host callback job already pending."
 msgstr "Er is al een hostterugkoppelingstaak in afwachting."
 
-#: awx/api/views.py:3164
+#: awx/api/views.py:3199
 msgid "Error starting job!"
 msgstr "Fout bij starten taak."
 
-#: awx/api/views.py:3271
+#: awx/api/views.py:3306
+#, python-brace-format
 msgid "Cannot associate {0} when {1} have been associated."
 msgstr "Kan {0} niet koppelen wanneer {1} zijn gekoppeld."
 
-#: awx/api/views.py:3296
+#: awx/api/views.py:3331
 msgid "Multiple parent relationship not allowed."
 msgstr "Relatie met meerdere bovenliggende elementen is niet toegestaan."
 
-#: awx/api/views.py:3301
+#: awx/api/views.py:3336
 msgid "Cycle detected."
 msgstr "Cyclus gedetecteerd."
 
-#: awx/api/views.py:3505
+#: awx/api/views.py:3540
 msgid "Workflow Job Template Schedules"
 msgstr "Taaksjabloonschema's voor workflows"
 
-#: awx/api/views.py:3650 awx/api/views.py:4217
+#: awx/api/views.py:3685 awx/api/views.py:4268
 msgid "Superuser privileges needed."
 msgstr "Supergebruikersbevoegdheden vereist."
 
-#: awx/api/views.py:3682
+#: awx/api/views.py:3717
 msgid "System Job Template Schedules"
 msgstr "Taaksjabloonschema's voor systeem"
 
-#: awx/api/views.py:3891
+#: awx/api/views.py:3780
+msgid "POST not allowed for Job launching in version 2 of the api"
+msgstr ""
+
+#: awx/api/views.py:3942
 msgid "Job Host Summaries List"
 msgstr "Lijst met taakhostoverzichten"
 
-#: awx/api/views.py:3938
+#: awx/api/views.py:3989
 msgid "Job Event Children List"
 msgstr "Lijst met onderliggende taakgebeurteniselementen"
 
-#: awx/api/views.py:3947
+#: awx/api/views.py:3998
 msgid "Job Event Hosts List"
 msgstr "Lijst met taakgebeurtenishosts"
 
-#: awx/api/views.py:3957
+#: awx/api/views.py:4008
 msgid "Job Events List"
 msgstr "Lijst met taakgebeurtenissen"
 
-#: awx/api/views.py:4171
+#: awx/api/views.py:4222
 msgid "Ad Hoc Command Events List"
 msgstr "Lijst met ad-hoc-opdrachtgebeurtenissen"
 
-#: awx/api/views.py:4386
+#: awx/api/views.py:4437
 msgid "Error generating stdout download file: {}"
 msgstr "Fout bij genereren stdout-downloadbestand: {}"
 
-#: awx/api/views.py:4399
+#: awx/api/views.py:4450
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr "Fout bij genereren stdout-downloadbestand: %s"
 
-#: awx/api/views.py:4444
+#: awx/api/views.py:4495
 msgid "Delete not allowed while there are pending notifications"
 msgstr ""
 "Verwijderen is niet toegestaan wanneer er berichten in afwachting zijn"
 
-#: awx/api/views.py:4451
+#: awx/api/views.py:4502
 msgid "Notification Template Test"
 msgstr "Berichtsjabloon"
 
@@ -1199,15 +1229,16 @@ msgstr "Voorbeeld van instelling die anders kan zijn voor elke gebruiker."
 msgid "User"
 msgstr "Gebruiker"
 
-#: awx/conf/fields.py:62
+#: awx/conf/fields.py:63
 msgid "Enter a valid URL"
 msgstr "Geef een geldige URL op"
 
-#: awx/conf/fields.py:94
+#: awx/conf/fields.py:95
+#, python-brace-format
 msgid "\"{input}\" is not a valid string."
 msgstr "\"{input} is geen geldige tekenreeks."
 
-#: awx/conf/license.py:19
+#: awx/conf/license.py:22
 msgid "Your Tower license does not allow that."
 msgstr "Uw Tower-licentie staat dat niet toe."
 
@@ -1227,7 +1258,11 @@ msgstr ""
 msgid "Skip commenting out settings in files."
 msgstr "Sla het becommentariëren van instellingen in bestanden over."
 
-#: awx/conf/management/commands/migrate_to_database_settings.py:61
+#: awx/conf/management/commands/migrate_to_database_settings.py:62
+msgid "Skip migrating and only comment out settings in files."
+msgstr ""
+
+#: awx/conf/management/commands/migrate_to_database_settings.py:68
 msgid "Backup existing settings files with this suffix."
 msgstr ""
 "Maak een back-up van bestaande instellingenbestanden met dit achtervoegsel."
@@ -1252,7 +1287,7 @@ msgstr "Gewijzigd"
 msgid "User-Defaults"
 msgstr "Standaardinstellingen voor gebruiker"
 
-#: awx/conf/registry.py:151
+#: awx/conf/registry.py:154
 msgid "This value has been set manually in a settings file."
 msgstr "Deze waarde is handmatig ingesteld in een instellingenbestand."
 
@@ -1324,94 +1359,92 @@ msgstr "Instellingsdetail"
 msgid "Logging Connectivity Test"
 msgstr "Connectiviteitstest logboekregistratie"
 
-#: awx/main/access.py:224
+#: awx/main/access.py:44
+msgid "Resource is being used by running jobs."
+msgstr ""
+
+#: awx/main/access.py:237
 #, python-format
 msgid "Bad data found in related field %s."
 msgstr "Ongeldige gegevens gevonden in gerelateerd veld %s."
 
-#: awx/main/access.py:268
+#: awx/main/access.py:281
 msgid "License is missing."
 msgstr "Licentie ontbreekt."
 
-#: awx/main/access.py:270
+#: awx/main/access.py:283
 msgid "License has expired."
 msgstr "Licentie is verlopen."
 
-#: awx/main/access.py:278
+#: awx/main/access.py:291
 #, python-format
 msgid "License count of %s instances has been reached."
 msgstr "Het aantal licenties van %s instanties is bereikt."
 
-#: awx/main/access.py:280
+#: awx/main/access.py:293
 #, python-format
 msgid "License count of %s instances has been exceeded."
 msgstr "Het aantal licenties van %s instanties is overschreden."
 
-#: awx/main/access.py:282
+#: awx/main/access.py:295
 msgid "Host count exceeds available instances."
 msgstr "Het aantal hosts is groter dan het aantal instanties."
 
-#: awx/main/access.py:286
+#: awx/main/access.py:299
 #, python-format
 msgid "Feature %s is not enabled in the active license."
 msgstr "De functie %s is niet ingeschakeld in de actieve licentie."
 
-#: awx/main/access.py:288
+#: awx/main/access.py:301
 msgid "Features not found in active license."
 msgstr "Functies niet gevonden in actieve licentie."
 
-#: awx/main/access.py:534 awx/main/access.py:619 awx/main/access.py:748
-#: awx/main/access.py:801 awx/main/access.py:1063 awx/main/access.py:1263
-#: awx/main/access.py:1725
-msgid "Resource is being used by running jobs"
-msgstr "Resource wordt gebruikt door taken uit te voeren"
-
-#: awx/main/access.py:675
+#: awx/main/access.py:707
 msgid "Unable to change inventory on a host."
 msgstr "Kan inventaris op een host niet wijzigen."
 
-#: awx/main/access.py:692 awx/main/access.py:737
+#: awx/main/access.py:724 awx/main/access.py:769
 msgid "Cannot associate two items from different inventories."
 msgstr "Kan twee items uit verschillende inventarissen niet koppelen."
 
-#: awx/main/access.py:725
+#: awx/main/access.py:757
 msgid "Unable to change inventory on a group."
 msgstr "Kan inventaris van een groep niet wijzigen."
 
-#: awx/main/access.py:983
+#: awx/main/access.py:1017
 msgid "Unable to change organization on a team."
 msgstr "Kan organisatie van een team niet wijzigen."
 
-#: awx/main/access.py:996
+#: awx/main/access.py:1030
 msgid "The {} role cannot be assigned to a team"
 msgstr "De rol {} kan niet worden toegewezen aan een team"
 
-#: awx/main/access.py:998
+#: awx/main/access.py:1032
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr ""
 "De admin_role voor een gebruiker kan niet worden toegewezen aan een team"
 
-#: awx/main/access.py:1443
+#: awx/main/access.py:1479
 msgid "Job has been orphaned from its job template."
 msgstr "De taak is verwijderd uit zijn taaksjabloon."
 
-#: awx/main/access.py:1445
+#: awx/main/access.py:1481
 msgid "You do not have execute permission to related job template."
 msgstr "U hebt geen uitvoermachtiging voor de gerelateerde taaksjabloon."
 
-#: awx/main/access.py:1448
+#: awx/main/access.py:1484
 msgid "Job was launched with prompted fields."
 msgstr "De taak is gestart met invoervelden."
 
-#: awx/main/access.py:1450
+#: awx/main/access.py:1486
 msgid " Organization level permissions required."
 msgstr "Organisatieniveaumachtigingen zijn vereist."
 
-#: awx/main/access.py:1452
+#: awx/main/access.py:1488
 msgid " You do not have permission to related resources."
 msgstr "U hebt geen machtiging voor gerelateerde resources."
 
-#: awx/main/access.py:1798
+#: awx/main/access.py:1833
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."
@@ -1945,86 +1978,86 @@ msgstr ""
 msgid "\n"
 msgstr "\n"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Sudo"
 msgstr "Sudo"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Su"
 msgstr "Su"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Pbrun"
 msgstr "Pbrun"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Pfexec"
 msgstr "Pfexec"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "DZDO"
 msgstr "DZDO"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Pmrun"
 msgstr "Pmrun"
 
-#: awx/main/constants.py:8
+#: awx/main/constants.py:10
 msgid "Runas"
 msgstr "Runas"
 
-#: awx/main/fields.py:56
+#: awx/main/fields.py:57
 #, python-format
 msgid "'%s' is not one of ['%s']"
 msgstr "'%s' is niet een van ['%s']"
 
-#: awx/main/fields.py:531
+#: awx/main/fields.py:533
 #, python-format
 msgid "cannot be set unless \"%s\" is set"
 msgstr "kan niet ingesteld worden, tenzij '%s' ingesteld is"
 
-#: awx/main/fields.py:547
+#: awx/main/fields.py:549
 #, python-format
 msgid "required for %s"
 msgstr "vereist voor %s"
 
-#: awx/main/fields.py:571
+#: awx/main/fields.py:573
 msgid "must be set when SSH key is encrypted."
 msgstr "moet worden ingesteld wanneer SSH-sleutel wordt versleuteld."
 
-#: awx/main/fields.py:577
+#: awx/main/fields.py:579
 msgid "should not be set when SSH key is not encrypted."
 msgstr "mag niet worden ingesteld wanneer SSH-sleutel niet is gecodeerd."
 
-#: awx/main/fields.py:635
+#: awx/main/fields.py:637
 msgid "'dependencies' is not supported for custom credentials."
 msgstr ""
 "'afhankelijkheden' is niet ondersteund voor aangepaste toegangsgegevens."
 
-#: awx/main/fields.py:649
+#: awx/main/fields.py:651
 msgid "\"tower\" is a reserved field name"
 msgstr "\"tower\" is een gereserveerde veldnaam"
 
-#: awx/main/fields.py:656
+#: awx/main/fields.py:658
 #, python-format
 msgid "field IDs must be unique (%s)"
 msgstr "veld-id's  moeten uniek zijn (%s)"
 
-#: awx/main/fields.py:669
+#: awx/main/fields.py:671
 #, python-format
 msgid "%s not allowed for %s type (%s)"
 msgstr "%s niet toegestaan voor type %s (%s)"
 
-#: awx/main/fields.py:753
+#: awx/main/fields.py:755
 #, python-format
 msgid "%s uses an undefined field (%s)"
 msgstr "%s gebruikt een niet-gedefinieerd veld (%s)"
 
-#: awx/main/middleware.py:121
+#: awx/main/middleware.py:157
 msgid "Formats of all available named urls"
 msgstr "Indelingen van alle beschikbare, genoemde url's"
 
-#: awx/main/middleware.py:122
+#: awx/main/middleware.py:158
 msgid ""
 "Read-only list of key-value pairs that shows the standard format of all "
 "available named URLs."
@@ -2032,15 +2065,15 @@ msgstr ""
 "Alleen-lezen-lijst met sleutelwaardeparen die de standaardindeling van alle "
 "beschikbare, genoemde URL's toont."
 
-#: awx/main/middleware.py:124 awx/main/middleware.py:134
+#: awx/main/middleware.py:160 awx/main/middleware.py:170
 msgid "Named URL"
 msgstr "Genoemde URL"
 
-#: awx/main/middleware.py:131
+#: awx/main/middleware.py:167
 msgid "List of all named url graph nodes."
 msgstr "Lijst met alle grafische knooppunten van genoemde URL's."
 
-#: awx/main/middleware.py:132
+#: awx/main/middleware.py:168
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use"
 " this list to programmatically generate named URLs for resources"
@@ -2049,51 +2082,51 @@ msgstr ""
 "genoemde URL's duidelijk maakt. Gebruik deze lijst om programmatische "
 "genoemde URL's voor resources te genereren."
 
-#: awx/main/migrations/_reencrypt.py:23 awx/main/models/notifications.py:33
+#: awx/main/migrations/_reencrypt.py:25 awx/main/models/notifications.py:33
 msgid "Email"
 msgstr "E-mail"
 
-#: awx/main/migrations/_reencrypt.py:24 awx/main/models/notifications.py:34
+#: awx/main/migrations/_reencrypt.py:26 awx/main/models/notifications.py:34
 msgid "Slack"
 msgstr "Slack"
 
-#: awx/main/migrations/_reencrypt.py:25 awx/main/models/notifications.py:35
+#: awx/main/migrations/_reencrypt.py:27 awx/main/models/notifications.py:35
 msgid "Twilio"
 msgstr "Twilio"
 
-#: awx/main/migrations/_reencrypt.py:26 awx/main/models/notifications.py:36
+#: awx/main/migrations/_reencrypt.py:28 awx/main/models/notifications.py:36
 msgid "Pagerduty"
 msgstr "Pagerduty"
 
-#: awx/main/migrations/_reencrypt.py:27 awx/main/models/notifications.py:37
+#: awx/main/migrations/_reencrypt.py:29 awx/main/models/notifications.py:37
 msgid "HipChat"
 msgstr "HipChat"
 
-#: awx/main/migrations/_reencrypt.py:28 awx/main/models/notifications.py:38
+#: awx/main/migrations/_reencrypt.py:30 awx/main/models/notifications.py:38
 msgid "Webhook"
 msgstr "Webhook"
 
-#: awx/main/migrations/_reencrypt.py:29 awx/main/models/notifications.py:39
+#: awx/main/migrations/_reencrypt.py:31 awx/main/models/notifications.py:39
 msgid "IRC"
 msgstr "IRC"
 
-#: awx/main/models/activity_stream.py:24
+#: awx/main/models/activity_stream.py:25
 msgid "Entity Created"
 msgstr "Entiteit gemaakt"
 
-#: awx/main/models/activity_stream.py:25
+#: awx/main/models/activity_stream.py:26
 msgid "Entity Updated"
 msgstr "Entiteit bijgewerkt"
 
-#: awx/main/models/activity_stream.py:26
+#: awx/main/models/activity_stream.py:27
 msgid "Entity Deleted"
 msgstr "Entiteit verwijderd"
 
-#: awx/main/models/activity_stream.py:27
+#: awx/main/models/activity_stream.py:28
 msgid "Entity Associated with another Entity"
 msgstr "Entiteit gekoppeld aan een andere entiteit"
 
-#: awx/main/models/activity_stream.py:28
+#: awx/main/models/activity_stream.py:29
 msgid "Entity was Disassociated with another Entity"
 msgstr "Entiteit is losgekoppeld van een andere entiteit"
 
@@ -2119,43 +2152,43 @@ msgstr "Niet-ondersteunde module voor ad-hocopdrachten."
 msgid "No argument passed to %s module."
 msgstr "Geen argument doorgegeven aan module %s."
 
-#: awx/main/models/ad_hoc_commands.py:245 awx/main/models/jobs.py:904
+#: awx/main/models/ad_hoc_commands.py:245 awx/main/models/jobs.py:911
 msgid "Host Failed"
 msgstr "Host is mislukt"
 
-#: awx/main/models/ad_hoc_commands.py:246 awx/main/models/jobs.py:905
+#: awx/main/models/ad_hoc_commands.py:246 awx/main/models/jobs.py:912
 msgid "Host OK"
 msgstr "Host OK"
 
-#: awx/main/models/ad_hoc_commands.py:247 awx/main/models/jobs.py:908
+#: awx/main/models/ad_hoc_commands.py:247 awx/main/models/jobs.py:915
 msgid "Host Unreachable"
 msgstr "Host onbereikbaar"
 
-#: awx/main/models/ad_hoc_commands.py:252 awx/main/models/jobs.py:907
+#: awx/main/models/ad_hoc_commands.py:252 awx/main/models/jobs.py:914
 msgid "Host Skipped"
 msgstr "Host overgeslagen"
 
-#: awx/main/models/ad_hoc_commands.py:262 awx/main/models/jobs.py:935
+#: awx/main/models/ad_hoc_commands.py:262 awx/main/models/jobs.py:942
 msgid "Debug"
 msgstr "Foutopsporing"
 
-#: awx/main/models/ad_hoc_commands.py:263 awx/main/models/jobs.py:936
+#: awx/main/models/ad_hoc_commands.py:263 awx/main/models/jobs.py:943
 msgid "Verbose"
 msgstr "Uitgebreid"
 
-#: awx/main/models/ad_hoc_commands.py:264 awx/main/models/jobs.py:937
+#: awx/main/models/ad_hoc_commands.py:264 awx/main/models/jobs.py:944
 msgid "Deprecated"
 msgstr "Afgeschaft"
 
-#: awx/main/models/ad_hoc_commands.py:265 awx/main/models/jobs.py:938
+#: awx/main/models/ad_hoc_commands.py:265 awx/main/models/jobs.py:945
 msgid "Warning"
 msgstr "Waarschuwing"
 
-#: awx/main/models/ad_hoc_commands.py:266 awx/main/models/jobs.py:939
+#: awx/main/models/ad_hoc_commands.py:266 awx/main/models/jobs.py:946
 msgid "System Warning"
 msgstr "Systeemwaarschuwing"
 
-#: awx/main/models/ad_hoc_commands.py:267 awx/main/models/jobs.py:940
+#: awx/main/models/ad_hoc_commands.py:267 awx/main/models/jobs.py:947
 #: awx/main/models/unified_jobs.py:64
 msgid "Error"
 msgstr "Fout"
@@ -2174,27 +2207,27 @@ msgstr "Controleren"
 msgid "Scan"
 msgstr "Scannen"
 
-#: awx/main/models/credential.py:82
+#: awx/main/models/credential.py:86
 msgid "Host"
 msgstr "Host"
 
-#: awx/main/models/credential.py:83
+#: awx/main/models/credential.py:87
 msgid "The hostname or IP address to use."
 msgstr "Te gebruiken hostnaam of IP-adres"
 
-#: awx/main/models/credential.py:89
+#: awx/main/models/credential.py:93
 msgid "Username"
 msgstr "Gebruikersnaam"
 
-#: awx/main/models/credential.py:90
+#: awx/main/models/credential.py:94
 msgid "Username for this credential."
 msgstr "Gebruikersnaam voor deze referentie."
 
-#: awx/main/models/credential.py:96
+#: awx/main/models/credential.py:100
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: awx/main/models/credential.py:97
+#: awx/main/models/credential.py:101
 msgid ""
 "Password for this credential (or \"ASK\" to prompt the user for machine "
 "credentials)."
@@ -2202,43 +2235,43 @@ msgstr ""
 "Wachtwoord voor deze referentie (of \"ASK\" om de gebruiker om de "
 "machinereferenties te vragen)."
 
-#: awx/main/models/credential.py:104
+#: awx/main/models/credential.py:108
 msgid "Security Token"
 msgstr "Beveiligingstoken"
 
-#: awx/main/models/credential.py:105
+#: awx/main/models/credential.py:109
 msgid "Security Token for this credential"
 msgstr "Beveiligingstoken voor deze referentie"
 
-#: awx/main/models/credential.py:111
+#: awx/main/models/credential.py:115
 msgid "Project"
 msgstr "Project"
 
-#: awx/main/models/credential.py:112
+#: awx/main/models/credential.py:116
 msgid "The identifier for the project."
 msgstr "De id voor het project."
 
-#: awx/main/models/credential.py:118
+#: awx/main/models/credential.py:122
 msgid "Domain"
 msgstr "Domein"
 
-#: awx/main/models/credential.py:119
+#: awx/main/models/credential.py:123
 msgid "The identifier for the domain."
 msgstr "De id voor het domein."
 
-#: awx/main/models/credential.py:124
+#: awx/main/models/credential.py:128
 msgid "SSH private key"
 msgstr "SSH-privésleutel"
 
-#: awx/main/models/credential.py:125
+#: awx/main/models/credential.py:129
 msgid "RSA or DSA private key to be used instead of password."
 msgstr "RSA- of DSA-privésleutel te gebruiken in plaats van wachtwoord."
 
-#: awx/main/models/credential.py:131
+#: awx/main/models/credential.py:135
 msgid "SSH key unlock"
 msgstr "SSH-sleutelontgrendeling"
 
-#: awx/main/models/credential.py:132
+#: awx/main/models/credential.py:136
 msgid ""
 "Passphrase to unlock SSH private key if encrypted (or \"ASK\" to prompt the "
 "user for machine credentials)."
@@ -2246,51 +2279,51 @@ msgstr ""
 "Wachtwoordzin om SSH-privésleutel te ontgrendelen indien versleuteld (of "
 "\"ASK\" om de gebruiker om de machinereferenties te vragen)."
 
-#: awx/main/models/credential.py:139
+#: awx/main/models/credential.py:143
 msgid "None"
 msgstr "Geen"
 
-#: awx/main/models/credential.py:140
+#: awx/main/models/credential.py:144
 msgid "Privilege escalation method."
 msgstr "Methode voor verhoging van rechten."
 
-#: awx/main/models/credential.py:146
+#: awx/main/models/credential.py:150
 msgid "Privilege escalation username."
 msgstr "Gebruikersnaam voor verhoging van rechten."
 
-#: awx/main/models/credential.py:152
+#: awx/main/models/credential.py:156
 msgid "Password for privilege escalation method."
 msgstr "Wachtwoord voor methode voor verhoging van rechten."
 
-#: awx/main/models/credential.py:158
+#: awx/main/models/credential.py:162
 msgid "Vault password (or \"ASK\" to prompt the user)."
 msgstr "Wachtwoord voor kluis (of \"ASK\" om de gebruiker te vragen)."
 
-#: awx/main/models/credential.py:162
+#: awx/main/models/credential.py:166
 msgid "Whether to use the authorize mechanism."
 msgstr "Of het autorisatiemechanisme mag worden gebruikt."
 
-#: awx/main/models/credential.py:168
+#: awx/main/models/credential.py:172
 msgid "Password used by the authorize mechanism."
 msgstr "Wachtwoord gebruikt door het autorisatiemechanisme."
 
-#: awx/main/models/credential.py:174
+#: awx/main/models/credential.py:178
 msgid "Client Id or Application Id for the credential"
 msgstr "Klant-id voor toepassings-id voor de referentie"
 
-#: awx/main/models/credential.py:180
+#: awx/main/models/credential.py:184
 msgid "Secret Token for this credential"
 msgstr "Geheim token voor deze referentie"
 
-#: awx/main/models/credential.py:186
+#: awx/main/models/credential.py:190
 msgid "Subscription identifier for this credential"
 msgstr "Abonnements-id voor deze referentie"
 
-#: awx/main/models/credential.py:192
+#: awx/main/models/credential.py:196
 msgid "Tenant identifier for this credential"
 msgstr "Huurder-id voor deze referentie"
 
-#: awx/main/models/credential.py:216
+#: awx/main/models/credential.py:220
 msgid ""
 "Specify the type of credential you want to create. Refer to the Ansible "
 "Tower documentation for details on each type."
@@ -2298,7 +2331,7 @@ msgstr ""
 "Geef het type referentie op dat u wilt maken. Raadpleeg de documentatie voor"
 " Ansible Tower voor details over elk type."
 
-#: awx/main/models/credential.py:230 awx/main/models/credential.py:416
+#: awx/main/models/credential.py:234 awx/main/models/credential.py:420
 msgid ""
 "Enter inputs using either JSON or YAML syntax. Use the radio button to "
 "toggle between the two. Refer to the Ansible Tower documentation for example"
@@ -2308,31 +2341,31 @@ msgstr ""
 "wisselen tussen de twee. Raadpleeg de documentatie voor Ansible Tower voor "
 "voorbeeldsyntaxis."
 
-#: awx/main/models/credential.py:397
+#: awx/main/models/credential.py:401
 msgid "Machine"
 msgstr "Machine"
 
-#: awx/main/models/credential.py:398
+#: awx/main/models/credential.py:402
 msgid "Vault"
 msgstr "Kluis"
 
-#: awx/main/models/credential.py:399
+#: awx/main/models/credential.py:403
 msgid "Network"
 msgstr "Netwerk"
 
-#: awx/main/models/credential.py:400
+#: awx/main/models/credential.py:404
 msgid "Source Control"
 msgstr "Broncontrole"
 
-#: awx/main/models/credential.py:401
+#: awx/main/models/credential.py:405
 msgid "Cloud"
 msgstr "Cloud"
 
-#: awx/main/models/credential.py:402
+#: awx/main/models/credential.py:406
 msgid "Insights"
 msgstr "Inzichten"
 
-#: awx/main/models/credential.py:423
+#: awx/main/models/credential.py:427
 msgid ""
 "Enter injectors using either JSON or YAML syntax. Use the radio button to "
 "toggle between the two. Refer to the Ansible Tower documentation for example"
@@ -2341,6 +2374,11 @@ msgstr ""
 "Geef injectoren op met JSON- of YAML-syntaxis. Gebruik het keuzerondje om te"
 " wisselen tussen de twee. Raadpleeg de documentatie voor Ansible Tower voor "
 "voorbeeldsyntaxis."
+
+#: awx/main/models/credential.py:478
+#, python-format
+msgid "adding %s credential type"
+msgstr ""
 
 #: awx/main/models/fact.py:25
 msgid "Host for the facts that the fact scan captured."
@@ -2358,11 +2396,11 @@ msgstr ""
 "Willekeurige JSON-structuur van modulefeiten vastgelegd bij de tijdstempel "
 "voor één host."
 
-#: awx/main/models/ha.py:76
+#: awx/main/models/ha.py:78
 msgid "Instances that are members of this InstanceGroup"
 msgstr "Instanties die lid zijn van deze InstanceGroup"
 
-#: awx/main/models/ha.py:81
+#: awx/main/models/ha.py:83
 msgid "Instance Group to remotely control this group."
 msgstr "Instantiegroep om deze groep extern te regelen."
 
@@ -2556,38 +2594,42 @@ msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
 #: awx/main/models/inventory.py:870
-msgid "Microsoft Azure Classic (deprecated)"
-msgstr "Microsoft Azure Classic (afgeschaft)"
-
-#: awx/main/models/inventory.py:871
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: awx/main/models/inventory.py:872
+#: awx/main/models/inventory.py:871
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: awx/main/models/inventory.py:873
+#: awx/main/models/inventory.py:872
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: awx/main/models/inventory.py:874
+#: awx/main/models/inventory.py:873
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: awx/main/models/inventory.py:875
+#: awx/main/models/inventory.py:874
 msgid "OpenStack"
 msgstr "OpenStack"
 
+#: awx/main/models/inventory.py:875
+msgid "oVirt4"
+msgstr ""
+
 #: awx/main/models/inventory.py:876
+msgid "Ansible Tower"
+msgstr ""
+
+#: awx/main/models/inventory.py:877
 msgid "Custom Script"
 msgstr "Aangepast script"
 
-#: awx/main/models/inventory.py:993
+#: awx/main/models/inventory.py:994
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "Bronvariabelen inventaris in YAML- of JSON-indeling."
 
-#: awx/main/models/inventory.py:1012
+#: awx/main/models/inventory.py:1013
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
@@ -2595,77 +2637,77 @@ msgstr ""
 "Door komma's gescheiden lijst met filterexpressies (alleen EC2). Hosts "
 "worden geïmporteerd wanneer WILLEKEURIG WELK van de filters overeenkomt."
 
-#: awx/main/models/inventory.py:1018
+#: awx/main/models/inventory.py:1019
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr ""
 "Overschrijf groepen die automatisch gemaakt worden op grond van "
 "inventarisbron (alleen EC2)."
 
-#: awx/main/models/inventory.py:1022
+#: awx/main/models/inventory.py:1023
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr ""
 "Overschrijf lokale groepen en hosts op grond van externe inventarisbron."
 
-#: awx/main/models/inventory.py:1026
+#: awx/main/models/inventory.py:1027
 msgid "Overwrite local variables from remote inventory source."
 msgstr "Overschrijf lokale variabelen op grond van externe inventarisbron."
 
-#: awx/main/models/inventory.py:1031 awx/main/models/jobs.py:159
+#: awx/main/models/inventory.py:1032 awx/main/models/jobs.py:160
 #: awx/main/models/projects.py:117
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr ""
 "De hoeveelheid tijd (in seconden) voor uitvoering voordat de taak wordt "
 "geannuleerd."
 
-#: awx/main/models/inventory.py:1064
+#: awx/main/models/inventory.py:1065
 msgid "Image ID"
 msgstr "Image-id"
 
-#: awx/main/models/inventory.py:1065
+#: awx/main/models/inventory.py:1066
 msgid "Availability Zone"
 msgstr "Beschikbaarheidszone"
 
-#: awx/main/models/inventory.py:1066
+#: awx/main/models/inventory.py:1067
 msgid "Account"
 msgstr "Account"
 
-#: awx/main/models/inventory.py:1067
+#: awx/main/models/inventory.py:1068
 msgid "Instance ID"
 msgstr "Instantie-id"
 
-#: awx/main/models/inventory.py:1068
+#: awx/main/models/inventory.py:1069
 msgid "Instance State"
 msgstr "Instantiestaat"
 
-#: awx/main/models/inventory.py:1069
+#: awx/main/models/inventory.py:1070
 msgid "Instance Type"
 msgstr "Instantietype"
 
-#: awx/main/models/inventory.py:1070
+#: awx/main/models/inventory.py:1071
 msgid "Key Name"
 msgstr "Sleutelnaam"
 
-#: awx/main/models/inventory.py:1071
+#: awx/main/models/inventory.py:1072
 msgid "Region"
 msgstr "Regio"
 
-#: awx/main/models/inventory.py:1072
+#: awx/main/models/inventory.py:1073
 msgid "Security Group"
 msgstr "Beveiligingsgroep"
 
-#: awx/main/models/inventory.py:1073
+#: awx/main/models/inventory.py:1074
 msgid "Tags"
 msgstr "Tags"
 
-#: awx/main/models/inventory.py:1074
+#: awx/main/models/inventory.py:1075
 msgid "Tag None"
 msgstr "Tag geen"
 
-#: awx/main/models/inventory.py:1075
+#: awx/main/models/inventory.py:1076
 msgid "VPC ID"
 msgstr "VPC ID"
 
-#: awx/main/models/inventory.py:1138
+#: awx/main/models/inventory.py:1145
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
@@ -2674,30 +2716,36 @@ msgstr ""
 "Cloudgebaseerde inventarisbronnen (zoals %s) vereisen referenties voor de "
 "overeenkomende cloudservice."
 
-#: awx/main/models/inventory.py:1145
+#: awx/main/models/inventory.py:1152
 msgid "Credential is required for a cloud source."
 msgstr "Referentie is vereist voor een cloudbron."
 
-#: awx/main/models/inventory.py:1167
+#: awx/main/models/inventory.py:1155
+msgid ""
+"Credentials of type machine, source control, insights and vault are "
+"disallowed for custom inventory sources."
+msgstr ""
+
+#: awx/main/models/inventory.py:1179
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr "Ongeldige %(source)s regio: %(region)s"
 
-#: awx/main/models/inventory.py:1191
+#: awx/main/models/inventory.py:1203
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr "Ongeldige filterexpressie: %(filter)s"
 
-#: awx/main/models/inventory.py:1212
+#: awx/main/models/inventory.py:1224
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr "Ongeldige groep op keuze: %(choice)s"
 
-#: awx/main/models/inventory.py:1247
+#: awx/main/models/inventory.py:1259
 msgid "Project containing inventory file used as source."
 msgstr "Project met inventarisbestand dat wordt gebruikt als bron."
 
-#: awx/main/models/inventory.py:1395
+#: awx/main/models/inventory.py:1407
 #, python-format
 msgid ""
 "Unable to configure this item for cloud sync. It is already managed by %s."
@@ -2705,7 +2753,7 @@ msgstr ""
 "Kan dit item niet configureren voor cloudsynchronisatie. Wordt al beheerd "
 "door %s."
 
-#: awx/main/models/inventory.py:1405
+#: awx/main/models/inventory.py:1417
 msgid ""
 "More than one SCM-based inventory source with update on project update per-"
 "inventory not allowed."
@@ -2713,7 +2761,7 @@ msgstr ""
 "Het is niet toegestaan meer dan één SCM-gebaseerde inventarisbron met een "
 "update bovenop een projectupdate per inventaris te hebben."
 
-#: awx/main/models/inventory.py:1412
+#: awx/main/models/inventory.py:1424
 msgid ""
 "Cannot update SCM-based inventory source on launch if set to update on "
 "project update. Instead, configure the corresponding source project to "
@@ -2723,30 +2771,30 @@ msgstr ""
 "ingesteld op bijwerken bij projectupdate. Configureer in plaats daarvan het "
 "overeenkomstige bronproject om bij te werken bij opstarten."
 
-#: awx/main/models/inventory.py:1418
+#: awx/main/models/inventory.py:1430
 msgid "SCM type sources must set `overwrite_vars` to `true`."
 msgstr "SCM-typebronnen moeten 'overwrite_vars' instellen op 'true'."
 
-#: awx/main/models/inventory.py:1423
+#: awx/main/models/inventory.py:1435
 msgid "Cannot set source_path if not SCM type."
 msgstr "Kan source_path niet instellen als het geen SCM-type is."
 
-#: awx/main/models/inventory.py:1448
+#: awx/main/models/inventory.py:1460
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr ""
 "Inventarisbestanden uit deze projectupdate zijn gebruikt voor de "
 "inventarisupdate."
 
-#: awx/main/models/inventory.py:1561
+#: awx/main/models/inventory.py:1573
 msgid "Inventory script contents"
 msgstr "Inhoud inventarisscript"
 
-#: awx/main/models/inventory.py:1566
+#: awx/main/models/inventory.py:1578
 msgid "Organization owning this inventory script"
 msgstr "Organisatie die eigenaar is van deze inventarisscript"
 
-#: awx/main/models/jobs.py:65
+#: awx/main/models/jobs.py:66
 msgid ""
 "If enabled, textual changes made to any templated files on the host are "
 "shown in the standard output"
@@ -2754,7 +2802,7 @@ msgstr ""
 "Indien ingeschakeld, worden tekstwijzigingen aangebracht in "
 "sjabloonbestanden op de host weergegeven in de standaardoutput"
 
-#: awx/main/models/jobs.py:163
+#: awx/main/models/jobs.py:164
 msgid ""
 "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts"
 " at the end of a playbook run to the database and caching facts for use by "
@@ -2765,37 +2813,37 @@ msgstr ""
 "database en worden feiten voor gebruik door Ansible in het cachegeheugen "
 "opgeslagen."
 
-#: awx/main/models/jobs.py:172
+#: awx/main/models/jobs.py:173
 msgid "You must provide an SSH credential."
 msgstr "U moet een SSH-referentie opgeven."
 
-#: awx/main/models/jobs.py:180
+#: awx/main/models/jobs.py:181
 msgid "You must provide a Vault credential."
 msgstr "U moet een kluisreferentie opgeven."
 
-#: awx/main/models/jobs.py:316
+#: awx/main/models/jobs.py:317
 msgid "Job Template must provide 'inventory' or allow prompting for it."
 msgstr "Taaksjabloon moet 'inventory' verschaffen of toestaan erom te vragen."
 
-#: awx/main/models/jobs.py:320
+#: awx/main/models/jobs.py:321
 msgid "Job Template must provide 'credential' or allow prompting for it."
 msgstr ""
 "Taaksjabloon moet 'credential' verschaffen of toestaan erom te vragen."
 
-#: awx/main/models/jobs.py:422
+#: awx/main/models/jobs.py:427
 msgid "Cannot override job_type to or from a scan job."
 msgstr "Kan job_type niet vervangen naar of vanuit een scantaak."
 
-#: awx/main/models/jobs.py:488 awx/main/models/projects.py:263
+#: awx/main/models/jobs.py:493 awx/main/models/projects.py:263
 msgid "SCM Revision"
 msgstr "SCM-revisie"
 
-#: awx/main/models/jobs.py:489
+#: awx/main/models/jobs.py:494
 msgid "The SCM Revision from the Project used for this job, if available"
 msgstr ""
 "De SCM-revisie uit het project gebruikt voor deze taak, indien beschikbaar"
 
-#: awx/main/models/jobs.py:497
+#: awx/main/models/jobs.py:502
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
@@ -2803,105 +2851,105 @@ msgstr ""
 "De taak SCM vernieuwen gebruik om te verzekeren dat de draaiboeken "
 "beschikbaar waren om de taak uit te voeren"
 
-#: awx/main/models/jobs.py:802
+#: awx/main/models/jobs.py:809
 msgid "job host summaries"
 msgstr "taakhostoverzichten"
 
-#: awx/main/models/jobs.py:906
+#: awx/main/models/jobs.py:913
 msgid "Host Failure"
 msgstr "Hostmislukking"
 
-#: awx/main/models/jobs.py:909 awx/main/models/jobs.py:923
+#: awx/main/models/jobs.py:916 awx/main/models/jobs.py:930
 msgid "No Hosts Remaining"
 msgstr "Geen resterende hosts"
 
-#: awx/main/models/jobs.py:910
+#: awx/main/models/jobs.py:917
 msgid "Host Polling"
 msgstr "Hostpolling"
 
-#: awx/main/models/jobs.py:911
+#: awx/main/models/jobs.py:918
 msgid "Host Async OK"
 msgstr "Host Async OK"
 
-#: awx/main/models/jobs.py:912
+#: awx/main/models/jobs.py:919
 msgid "Host Async Failure"
 msgstr "Host Async mislukking"
 
-#: awx/main/models/jobs.py:913
+#: awx/main/models/jobs.py:920
 msgid "Item OK"
 msgstr "Item OK"
 
-#: awx/main/models/jobs.py:914
+#: awx/main/models/jobs.py:921
 msgid "Item Failed"
 msgstr "Item mislukt"
 
-#: awx/main/models/jobs.py:915
+#: awx/main/models/jobs.py:922
 msgid "Item Skipped"
 msgstr "Item overgeslagen"
 
-#: awx/main/models/jobs.py:916
+#: awx/main/models/jobs.py:923
 msgid "Host Retry"
 msgstr "Host opnieuw proberen"
 
-#: awx/main/models/jobs.py:918
+#: awx/main/models/jobs.py:925
 msgid "File Difference"
 msgstr "Bestandsverschil"
 
-#: awx/main/models/jobs.py:919
+#: awx/main/models/jobs.py:926
 msgid "Playbook Started"
 msgstr "Draaiboek gestart"
 
-#: awx/main/models/jobs.py:920
+#: awx/main/models/jobs.py:927
 msgid "Running Handlers"
 msgstr "Handlers die worden uitgevoerd"
 
-#: awx/main/models/jobs.py:921
+#: awx/main/models/jobs.py:928
 msgid "Including File"
 msgstr "Inclusief bestand"
 
-#: awx/main/models/jobs.py:922
+#: awx/main/models/jobs.py:929
 msgid "No Hosts Matched"
 msgstr "Geen overeenkomende hosts"
 
-#: awx/main/models/jobs.py:924
+#: awx/main/models/jobs.py:931
 msgid "Task Started"
 msgstr "Taak gestart"
 
-#: awx/main/models/jobs.py:926
+#: awx/main/models/jobs.py:933
 msgid "Variables Prompted"
 msgstr "Variabelen gevraagd"
 
-#: awx/main/models/jobs.py:927
+#: awx/main/models/jobs.py:934
 msgid "Gathering Facts"
 msgstr "Feiten verzamelen"
 
-#: awx/main/models/jobs.py:928
+#: awx/main/models/jobs.py:935
 msgid "internal: on Import for Host"
 msgstr "intern: bij importeren voor host"
 
-#: awx/main/models/jobs.py:929
+#: awx/main/models/jobs.py:936
 msgid "internal: on Not Import for Host"
 msgstr "intern: niet bij importeren voor host"
 
-#: awx/main/models/jobs.py:930
+#: awx/main/models/jobs.py:937
 msgid "Play Started"
 msgstr "Afspelen gestart"
 
-#: awx/main/models/jobs.py:931
+#: awx/main/models/jobs.py:938
 msgid "Playbook Complete"
 msgstr "Draaiboek voltooid"
 
-#: awx/main/models/jobs.py:1363
+#: awx/main/models/jobs.py:1351
 msgid "Remove jobs older than a certain number of days"
 msgstr "Taken ouder dan een bepaald aantal dagen verwijderen"
 
-#: awx/main/models/jobs.py:1364
+#: awx/main/models/jobs.py:1352
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr ""
 "Vermeldingen activiteitenstroom ouder dan een bepaald aantal dagen "
 "verwijderen"
 
-#: awx/main/models/jobs.py:1365
+#: awx/main/models/jobs.py:1353
 msgid "Purge and/or reduce the granularity of system tracking data"
 msgstr ""
 "Granulariteit van systeemtrackinggegevens verwijderen en/of verminderen"
@@ -3324,7 +3372,7 @@ msgstr "Uitzondering bij het maken van de verbinding met Twilio: {}"
 msgid "Error sending notification webhook: {}"
 msgstr "Fout bij verzending bericht webhook: {}"
 
-#: awx/main/scheduler/__init__.py:184
+#: awx/main/scheduler/task_manager.py:197
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
@@ -3332,7 +3380,7 @@ msgstr ""
 "Taak voortgebracht vanuit workflow kon niet starten omdat deze niet de "
 "juiste status of vereiste handmatige referenties had"
 
-#: awx/main/scheduler/__init__.py:188
+#: awx/main/scheduler/task_manager.py:201
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
@@ -3352,7 +3400,7 @@ msgstr "De licentie voor Ansible Tower verloopt binnenkort"
 msgid "status_str must be either succeeded or failed"
 msgstr "status_str must moet geslaagd of mislukt zijn"
 
-#: awx/main/tasks.py:1531
+#: awx/main/tasks.py:1549
 msgid "Dependent inventory update {} was canceled."
 msgstr "De afhankelijke inventarisupdate {} is geannuleerd."
 
@@ -3361,38 +3409,38 @@ msgstr "De afhankelijke inventarisupdate {} is geannuleerd."
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "Kan \"%s\" niet converteren in boolean"
 
-#: awx/main/utils/common.py:209
+#: awx/main/utils/common.py:235
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "Niet-ondersteund SCM-type \"%s\""
 
-#: awx/main/utils/common.py:216 awx/main/utils/common.py:228
-#: awx/main/utils/common.py:247
+#: awx/main/utils/common.py:242 awx/main/utils/common.py:254
+#: awx/main/utils/common.py:273
 #, python-format
 msgid "Invalid %s URL"
 msgstr "Ongeldige %s URL"
 
-#: awx/main/utils/common.py:218 awx/main/utils/common.py:257
+#: awx/main/utils/common.py:244 awx/main/utils/common.py:283
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "Niet-ondersteunde %s URL"
 
-#: awx/main/utils/common.py:259
+#: awx/main/utils/common.py:285
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "Niet-ondersteunde host \"%s\" voor bestand:// URL"
 
-#: awx/main/utils/common.py:261
+#: awx/main/utils/common.py:287
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "Host is vereist voor %s URL"
 
-#: awx/main/utils/common.py:279
+#: awx/main/utils/common.py:305
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "Gebruikersnaam moet \"git\" zijn voor SSH-toegang tot %s."
 
-#: awx/main/utils/common.py:285
+#: awx/main/utils/common.py:311
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "Gebruikersnaam moet \"hg\" zijn voor SSH-toegang tot %s."
@@ -3513,287 +3561,287 @@ msgstr "Serverfout"
 msgid "A server error has occurred."
 msgstr "Er is een serverfout opgetreden"
 
-#: awx/settings/defaults.py:664
+#: awx/settings/defaults.py:665
 msgid "US East (Northern Virginia)"
 msgstr "VS Oosten (Northern Virginia)"
 
-#: awx/settings/defaults.py:665
+#: awx/settings/defaults.py:666
 msgid "US East (Ohio)"
 msgstr "VS Oosten (Ohio)"
 
-#: awx/settings/defaults.py:666
+#: awx/settings/defaults.py:667
 msgid "US West (Oregon)"
 msgstr "VS Westen (Oregon)"
 
-#: awx/settings/defaults.py:667
+#: awx/settings/defaults.py:668
 msgid "US West (Northern California)"
 msgstr "VS Westen (Northern California)"
 
-#: awx/settings/defaults.py:668
+#: awx/settings/defaults.py:669
 msgid "Canada (Central)"
 msgstr "Canada (Midden)"
 
-#: awx/settings/defaults.py:669
+#: awx/settings/defaults.py:670
 msgid "EU (Frankfurt)"
 msgstr "EU (Frankfurt)"
 
-#: awx/settings/defaults.py:670
+#: awx/settings/defaults.py:671
 msgid "EU (Ireland)"
 msgstr "EU (Ierland)"
 
-#: awx/settings/defaults.py:671
+#: awx/settings/defaults.py:672
 msgid "EU (London)"
 msgstr "EU (Londen)"
 
-#: awx/settings/defaults.py:672
+#: awx/settings/defaults.py:673
 msgid "Asia Pacific (Singapore)"
 msgstr "Azië-Pacific (Singapore)"
 
-#: awx/settings/defaults.py:673
+#: awx/settings/defaults.py:674
 msgid "Asia Pacific (Sydney)"
 msgstr "Azië-Pacific (Sydney)"
 
-#: awx/settings/defaults.py:674
+#: awx/settings/defaults.py:675
 msgid "Asia Pacific (Tokyo)"
 msgstr "Azië-Pacific (Tokyo)"
 
-#: awx/settings/defaults.py:675
+#: awx/settings/defaults.py:676
 msgid "Asia Pacific (Seoul)"
 msgstr "Azië-Pacific (Seoul)"
 
-#: awx/settings/defaults.py:676
+#: awx/settings/defaults.py:677
 msgid "Asia Pacific (Mumbai)"
 msgstr "Azië-Pacific (Mumbai)"
 
-#: awx/settings/defaults.py:677
+#: awx/settings/defaults.py:678
 msgid "South America (Sao Paulo)"
 msgstr "Zuid-Amerika (Sao Paulo)"
 
-#: awx/settings/defaults.py:678
+#: awx/settings/defaults.py:679
 msgid "US West (GovCloud)"
 msgstr "VS Westen (GovCloud)"
 
-#: awx/settings/defaults.py:679
+#: awx/settings/defaults.py:680
 msgid "China (Beijing)"
 msgstr "China (Beijing)"
 
-#: awx/settings/defaults.py:728
+#: awx/settings/defaults.py:729
 msgid "US East 1 (B)"
 msgstr "VS Oosten 1 (B)"
 
-#: awx/settings/defaults.py:729
+#: awx/settings/defaults.py:730
 msgid "US East 1 (C)"
 msgstr "VS Oosten 1 (C)"
 
-#: awx/settings/defaults.py:730
+#: awx/settings/defaults.py:731
 msgid "US East 1 (D)"
 msgstr "VS Oosten 1 (D)"
 
-#: awx/settings/defaults.py:731
+#: awx/settings/defaults.py:732
 msgid "US East 4 (A)"
 msgstr "VS Oosten 4 (A)"
 
-#: awx/settings/defaults.py:732
+#: awx/settings/defaults.py:733
 msgid "US East 4 (B)"
 msgstr "VS Oosten 4 (B)"
 
-#: awx/settings/defaults.py:733
+#: awx/settings/defaults.py:734
 msgid "US East 4 (C)"
 msgstr "VS Oosten 4 (C)"
 
-#: awx/settings/defaults.py:734
+#: awx/settings/defaults.py:735
 msgid "US Central (A)"
 msgstr "VS Midden (A)"
 
-#: awx/settings/defaults.py:735
+#: awx/settings/defaults.py:736
 msgid "US Central (B)"
 msgstr "VS Midden (B)"
 
-#: awx/settings/defaults.py:736
+#: awx/settings/defaults.py:737
 msgid "US Central (C)"
 msgstr "VS Midden (C)"
 
-#: awx/settings/defaults.py:737
+#: awx/settings/defaults.py:738
 msgid "US Central (F)"
 msgstr "VS Midden (F)"
 
-#: awx/settings/defaults.py:738
+#: awx/settings/defaults.py:739
 msgid "US West (A)"
 msgstr "VS Westen (A)"
 
-#: awx/settings/defaults.py:739
+#: awx/settings/defaults.py:740
 msgid "US West (B)"
 msgstr "VS Westen (B)"
 
-#: awx/settings/defaults.py:740
+#: awx/settings/defaults.py:741
 msgid "US West (C)"
 msgstr "VS Westen (C)"
 
-#: awx/settings/defaults.py:741
+#: awx/settings/defaults.py:742
 msgid "Europe West 1 (B)"
 msgstr "Europa Westen 1 (B)"
 
-#: awx/settings/defaults.py:742
+#: awx/settings/defaults.py:743
 msgid "Europe West 1 (C)"
 msgstr "Europa Westen 1 (C)"
 
-#: awx/settings/defaults.py:743
+#: awx/settings/defaults.py:744
 msgid "Europe West 1 (D)"
 msgstr "Europa Westen 1 (D)"
 
-#: awx/settings/defaults.py:744
+#: awx/settings/defaults.py:745
 msgid "Europe West 2 (A)"
 msgstr "Europa Westen 2 (A)"
 
-#: awx/settings/defaults.py:745
+#: awx/settings/defaults.py:746
 msgid "Europe West 2 (B)"
 msgstr "Europa Westen 2 (B)"
 
-#: awx/settings/defaults.py:746
+#: awx/settings/defaults.py:747
 msgid "Europe West 2 (C)"
 msgstr "Europa Westen 2 (C)"
 
-#: awx/settings/defaults.py:747
+#: awx/settings/defaults.py:748
 msgid "Asia East (A)"
 msgstr "Azië Oosten (A)"
 
-#: awx/settings/defaults.py:748
+#: awx/settings/defaults.py:749
 msgid "Asia East (B)"
 msgstr "Azië Oosten (B)"
 
-#: awx/settings/defaults.py:749
+#: awx/settings/defaults.py:750
 msgid "Asia East (C)"
 msgstr "Azië Oosten (C)"
 
-#: awx/settings/defaults.py:750
+#: awx/settings/defaults.py:751
 msgid "Asia Southeast (A)"
 msgstr "Azië (Zuidoost) (A)"
 
-#: awx/settings/defaults.py:751
+#: awx/settings/defaults.py:752
 msgid "Asia Southeast (B)"
 msgstr "Azië (Zuidoost) (B)"
 
-#: awx/settings/defaults.py:752
+#: awx/settings/defaults.py:753
 msgid "Asia Northeast (A)"
 msgstr "Azië (Noordoost) (A)"
 
-#: awx/settings/defaults.py:753
+#: awx/settings/defaults.py:754
 msgid "Asia Northeast (B)"
 msgstr "Azië (Noordoost) (B)"
 
-#: awx/settings/defaults.py:754
+#: awx/settings/defaults.py:755
 msgid "Asia Northeast (C)"
 msgstr "Azië (Noordoost) (C)"
 
-#: awx/settings/defaults.py:755
+#: awx/settings/defaults.py:756
 msgid "Australia Southeast (A)"
 msgstr "Australië Zuidoost (A)"
 
-#: awx/settings/defaults.py:756
+#: awx/settings/defaults.py:757
 msgid "Australia Southeast (B)"
 msgstr "Australië Zuidoost (B)"
 
-#: awx/settings/defaults.py:757
+#: awx/settings/defaults.py:758
 msgid "Australia Southeast (C)"
 msgstr "Australië Zuidoost (C)"
 
-#: awx/settings/defaults.py:781
+#: awx/settings/defaults.py:780
 msgid "US East"
 msgstr "VS Oosten"
 
-#: awx/settings/defaults.py:782
+#: awx/settings/defaults.py:781
 msgid "US East 2"
 msgstr "VS Oosten 2"
 
-#: awx/settings/defaults.py:783
+#: awx/settings/defaults.py:782
 msgid "US Central"
 msgstr "VS Midden"
 
-#: awx/settings/defaults.py:784
+#: awx/settings/defaults.py:783
 msgid "US North Central"
 msgstr "VS Noord Midden"
 
-#: awx/settings/defaults.py:785
+#: awx/settings/defaults.py:784
 msgid "US South Central"
 msgstr "VS Zuid MIdden"
 
-#: awx/settings/defaults.py:786
+#: awx/settings/defaults.py:785
 msgid "US West Central"
 msgstr "VS West Midden"
 
-#: awx/settings/defaults.py:787
+#: awx/settings/defaults.py:786
 msgid "US West"
 msgstr "VS Westen"
 
-#: awx/settings/defaults.py:788
+#: awx/settings/defaults.py:787
 msgid "US West 2"
 msgstr "VS Westen 2"
 
-#: awx/settings/defaults.py:789
+#: awx/settings/defaults.py:788
 msgid "Canada East"
 msgstr "Canada Oosten"
 
-#: awx/settings/defaults.py:790
+#: awx/settings/defaults.py:789
 msgid "Canada Central"
 msgstr "Canada Midden"
 
-#: awx/settings/defaults.py:791
+#: awx/settings/defaults.py:790
 msgid "Brazil South"
 msgstr "Brazilië Zuiden"
 
-#: awx/settings/defaults.py:792
+#: awx/settings/defaults.py:791
 msgid "Europe North"
 msgstr "Europa Noorden"
 
-#: awx/settings/defaults.py:793
+#: awx/settings/defaults.py:792
 msgid "Europe West"
 msgstr "Europa Westen"
 
-#: awx/settings/defaults.py:794
+#: awx/settings/defaults.py:793
 msgid "UK West"
 msgstr "VK Westen"
 
-#: awx/settings/defaults.py:795
+#: awx/settings/defaults.py:794
 msgid "UK South"
 msgstr "VK Zuiden"
 
-#: awx/settings/defaults.py:796
+#: awx/settings/defaults.py:795
 msgid "Asia East"
 msgstr "Azië Oosten"
 
-#: awx/settings/defaults.py:797
+#: awx/settings/defaults.py:796
 msgid "Asia Southeast"
 msgstr "Azië Zuidoosten"
 
-#: awx/settings/defaults.py:798
+#: awx/settings/defaults.py:797
 msgid "Australia East"
 msgstr "Australië Oosten"
 
-#: awx/settings/defaults.py:799
+#: awx/settings/defaults.py:798
 msgid "Australia Southeast"
 msgstr "Australië Zuidoosten"
 
-#: awx/settings/defaults.py:800
+#: awx/settings/defaults.py:799
 msgid "India West"
 msgstr "India Westen"
 
-#: awx/settings/defaults.py:801
+#: awx/settings/defaults.py:800
 msgid "India South"
 msgstr "India Zuiden"
 
-#: awx/settings/defaults.py:802
+#: awx/settings/defaults.py:801
 msgid "Japan East"
 msgstr "Japan Oosten"
 
-#: awx/settings/defaults.py:803
+#: awx/settings/defaults.py:802
 msgid "Japan West"
 msgstr "Japan Westen"
 
-#: awx/settings/defaults.py:804
+#: awx/settings/defaults.py:803
 msgid "Korea Central"
 msgstr "Korea Midden"
 
-#: awx/settings/defaults.py:805
+#: awx/settings/defaults.py:804
 msgid "Korea South"
 msgstr "Korea Zuiden"
 
@@ -4544,6 +4592,7 @@ msgid "SAML Team Map"
 msgstr "SAML-teamtoewijzing"
 
 #: awx/sso/fields.py:123
+#, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "Ongeldige verbindingsoptie(s): {invalid_options}."
 
@@ -4560,16 +4609,19 @@ msgid "Subtree"
 msgstr "Substructuur"
 
 #: awx/sso/fields.py:214
+#, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr "Verwachtte een lijst met drie items, maar kreeg er {length}."
 
 #: awx/sso/fields.py:215
+#, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr ""
 "Verwachtte een instantie van LDAPSearch, maar kreeg in plaats daarvan "
 "{input_type}."
 
 #: awx/sso/fields.py:251
+#, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
@@ -4578,20 +4630,24 @@ msgstr ""
 "plaats daarvan {input_type}."
 
 #: awx/sso/fields.py:289
+#, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "Ongeldig(e) gebruikerskenmerk(en): {invalid_attrs}."
 
 #: awx/sso/fields.py:306
+#, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr ""
 "Verwachtte een instantie van LDAPGroupType, maar kreeg in plaats daarvan "
 "{input_type}."
 
 #: awx/sso/fields.py:334
+#, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "Ongeldige gebruikersvlag: \"{invalid_flag}\"."
 
 #: awx/sso/fields.py:350 awx/sso/fields.py:517
+#, python-brace-format
 msgid ""
 "Expected None, True, False, a string or list of strings but got {input_type}"
 " instead."
@@ -4600,46 +4656,57 @@ msgstr ""
 "maar kreeg in plaats daarvan {input_type}."
 
 #: awx/sso/fields.py:386
+#, python-brace-format
 msgid "Missing key(s): {missing_keys}."
 msgstr "Ontbrekende sleutel(s): {missing_keys}."
 
 #: awx/sso/fields.py:387
+#, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "Ongeldige sleutel(s): {invalid_keys}."
 
 #: awx/sso/fields.py:436 awx/sso/fields.py:553
+#, python-brace-format
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr "Ongeldige sleutel(s) voor organisatietoewijzing: {invalid_keys}."
 
 #: awx/sso/fields.py:454
+#, python-brace-format
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr "Ontbrekende vereiste sleutel voor teamtoewijzing: {invalid_keys}."
 
 #: awx/sso/fields.py:455 awx/sso/fields.py:572
+#, python-brace-format
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr "Ongeldige sleutel(s) voor teamtoewijzing: {invalid_keys}."
 
 #: awx/sso/fields.py:571
+#, python-brace-format
 msgid "Missing required key for team map: {missing_keys}."
 msgstr "Ontbrekende vereiste sleutel voor teamtoewijzing: {missing_keys}."
 
 #: awx/sso/fields.py:589
+#, python-brace-format
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr "Ontbrekende vereiste sleutel(s) voor org info record: {missing_keys}."
 
 #: awx/sso/fields.py:602
+#, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr "Ongeldige taalcode(s) voor org info: {invalid_lang_codes}."
 
 #: awx/sso/fields.py:621
+#, python-brace-format
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr "Ontbrekende vereiste sleutel(s) voor contactpersoon: {missing_keys}."
 
 #: awx/sso/fields.py:633
+#, python-brace-format
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr "Ontbrekende vereiste sleutel(s) voor IdP: {missing_keys}."
 
 #: awx/sso/pipeline.py:24
+#, python-brace-format
 msgid "An account cannot be found for {0}"
 msgstr "Een account kan niet worden gevonden voor {0}"
 
@@ -4733,6 +4800,7 @@ msgid "Make a PATCH request on the %(name)s resource"
 msgstr "Maak een PATCH-aanvraag voor de resource van %(name)s"
 
 #: awx/ui/apps.py:9 awx/ui/conf.py:22 awx/ui/conf.py:36 awx/ui/conf.py:51
+#: awx/ui/conf.py:63
 msgid "UI"
 msgstr "Gebruikersinterface"
 
@@ -4786,6 +4854,15 @@ msgstr ""
 "aangepaste logo ziet er op zijn best uit als u een .png-bestand met "
 "transparante achtergrond gebruikt. De indelingen  GIF, PNG en JPEG worden "
 "ondersteund."
+
+#: awx/ui/conf.py:60
+msgid "Max Job Events Retreived by UI"
+msgstr ""
+
+#: awx/ui/conf.py:61
+msgid ""
+"Maximum number of job events for the UI to retreive within a single request."
+msgstr ""
 
 #: awx/ui/fields.py:29
 msgid ""
