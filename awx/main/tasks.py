@@ -1756,7 +1756,7 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, 'ssl_verify', "false")
 
             cloudforms_opts = dict(inventory_update.source_vars_dict.items())
-            for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags']:
+            for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags', 'suffix']:
                 if opt in cloudforms_opts:
                     cp.set(section, opt, cloudforms_opts[opt])
 
