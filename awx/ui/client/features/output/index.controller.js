@@ -7,6 +7,8 @@ let $sce;
 let $compile;
 let $scope;
 
+const record = {};
+
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -41,6 +43,8 @@ function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
     });
+
+    console.log(record);
 }
 
 function parseEvents (events) {
@@ -68,22 +72,46 @@ function parseLine (event) {
 
     const { stdout } = event;
     const lines = stdout.split('\r\n');
-    const isTruncated = (event.end_line - event.start_line) > lines.length;
 
-    let ln = event.start_line;
+    let eventLn = event.start_line;
+    let ln = event.start_line + 1;
+
+    if (lines[0] === '') {
+        ln++;
+    }
+
+    record[ln] = {
+        line: ln,
+        id: event.id,
+        uuid: event.uuid,
+        level: event.event_level,
+        start: event.start_line,
+        end: event.end_line,
+        isTruncated: (event.end_line - event.start_line) > lines.length
+    };
+
+    if (record[ln].isTruncated) {
+        record[ln].truncatedAt = event.start_line + lines.length;
+    }
+
+    if (EVENT_GROUPS.includes(event.event)) {
+        record[ln].parent = true;
+    }
+
+    const current = record[ln];
 
     return lines.reduce((html, line, i) => {
-        ln++;
+        eventLn++;
 
         const time = getTime(event, i);
         const group = getGroup(event, i);
         const isLastLine = i === lines.length - 1;
 
-        if (isTruncated && isLastLine) {
-            return `${html}${createRow(ln, line, time, group)}${createTruncatedRow(event.id)}`;
+        if (current.isTruncated && isLastLine) {
+            return `${html}${createRow(eventLn, line, time, group)}${createTruncatedRow(event.id)}`;
         }
 
-        return `${html}${createRow(ln, line, time, group)}`;
+        return `${html}${createRow(eventLn, line, time, group)}`;
     }, '');
 }
 
