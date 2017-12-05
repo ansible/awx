@@ -37,6 +37,12 @@ function AtInputSecretController (baseInputController) {
         vm.check();
     };
 
+    vm.toggleRevertReplace = () => {
+        scope.state._isBeingReplaced = !scope.state._isBeingReplaced;
+
+        vm.onRevertReplaceToggle();
+    };
+
     vm.toggleShowHide = () => {
         if (scope.type === 'password') {
             scope.type = 'text';
