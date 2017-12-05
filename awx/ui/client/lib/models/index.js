@@ -13,6 +13,7 @@ import Job from '~models/Job';
 import JobTemplate from '~models/JobTemplate';
 import Me from '~models/Me';
 import ModelsStrings from '~models/models.strings';
+import NotificationTemplate from '~models/NotificationTemplate';
 import Organization from '~models/Organization';
 import Project from '~models/Project';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
@@ -39,6 +40,7 @@ angular
     .service('JobTemplateModel', JobTemplate)
     .service('MeModel', Me)
     .service('ModelsStrings', ModelsStrings)
+    .service('NotificationTemplate', NotificationTemplate)
     .service('OrganizationModel', Organization)
     .service('ProjectModel', Project)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)

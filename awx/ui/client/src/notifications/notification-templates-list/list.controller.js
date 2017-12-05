@@ -7,7 +7,7 @@
  export default ['$scope', 'Wait', 'NotificationTemplatesList',
      'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state',
      'ngToast', '$filter', 'Dataset', 'rbacUiControlService',
-     'i18n',
+     'i18n', 'NotificationTemplateModel',
      function(
          $scope, Wait, NotificationTemplatesList,
          GetBasePath, Rest, ProcessErrors, Prompt, $state,
