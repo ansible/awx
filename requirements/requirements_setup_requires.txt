@@ -4,3 +4,4 @@ vcversioner>=2.16.0.0
 pytest-runner
 isort
 virtualenv
+m2r
