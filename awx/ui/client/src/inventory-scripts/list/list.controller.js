@@ -47,6 +47,21 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
             });
         };
 
+        $scope.copyCustomInv = inventoryScript => {
+            Wait('start');
+            new InventoryScript('get', inventoryScript.id)
+                .then(model => model.copy())
+                .then(({ id }) => {
+                    const params = { inventory_script_id: id };
+                    $state.go('inventoryScripts.edit', params, { reload: true });
+                })
+                .catch(({ data, status }) => {
+                    const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
+                    ProcessErrors($scope, data, status, null, params);
+                })
+                .finally(() => Wait('stop'));
+        };
+
         $scope.deleteCustomInv = function(id, name) {
 
             var action = function() {

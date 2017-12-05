@@ -57,6 +57,15 @@ export default ['i18n', function(i18n){
                 dataPlacement: 'top',
                 ngShow: 'inventory_script.summary_fields.user_capabilities.edit'
             },
+            copy: {
+                label: i18n._('Copy'),
+                ngClick: 'copyCustomInv(inventory_script)',
+                "class": 'btn-danger btn-xs',
+                awToolTip: i18n._('Copy inventory scruot'),
+                dataPlacement: 'top',
+                // requires future  api rbac changes
+                //ngShow: 'inventory_script.summary_fields.user_capabilities.copy'
+            },
             view: {
                 ngClick: "editCustomInv(inventory_script.id)",
                 label: i18n._('View'),
