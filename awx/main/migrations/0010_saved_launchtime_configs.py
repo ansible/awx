@@ -6,7 +6,7 @@ import django.db.models.deletion
 import awx.main.fields
 
 from awx.main.migrations import _migration_utils as migration_utils
-from awx.main.migrations._workflow_credential import migrate_workflow_cred
+from awx.main.migrations._multi_cred import migrate_workflow_cred, migrate_workflow_cred_reverse
 
 
 class Migration(migrations.Migration):
@@ -67,8 +67,8 @@ class Migration(migrations.Migration):
             field=awx.main.fields.JSONField(default={}, editable=False, blank=True),
         ),
         # Run data migration before removing the old credential field
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations, lambda x, y: None),
-        migrations.RunPython(migrate_workflow_cred, lambda x, y: None),
+        migrations.RunPython(migration_utils.set_current_apps_for_migrations, migrations.RunPython.noop),
+        migrations.RunPython(migrate_workflow_cred, migrate_workflow_cred_reverse),
         migrations.RemoveField(
             model_name='workflowjobnode',
             name='credential',
