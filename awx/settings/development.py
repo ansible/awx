@@ -19,6 +19,18 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
+# awx-manage shell_plus --notebook
+NOTEBOOK_ARGUMENTS = [
+    '--NotebookApp.token=',
+    '--ip', '0.0.0.0',
+    '--port', '8888',
+    '--allow-root',
+    '--no-browser',
+]
+
+# print SQL queries in shell_plus
+SHELL_PLUS_PRINT_SQL = False
+
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
 LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'

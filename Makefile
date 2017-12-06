@@ -334,17 +334,17 @@ receiver:
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
 
-socketservice:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_socketio_service
-
 nginx:
 	nginx -g "daemon off;"
 
 rdb:
 	$(PYTHON) tools/rdb.py
+
+jupyter:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(MANAGEMENT_COMMAND) shell_plus --notebook
 
 reports:
 	mkdir -p $@
