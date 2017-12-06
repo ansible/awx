@@ -296,7 +296,12 @@ def _update_host_last_jhs(host):
     except IndexError:
         jhs = None
     update_fields = []
-    last_job = jhs.job if jhs else None
+    try:
+        last_job = jhs.job if jhs else None
+    except Job.DoesNotExist:
+        # The job (and its summaries) have already been/are currently being
+        # deleted, so there's no need to update the host w/ a reference to it
+        return
     if host.last_job != last_job:
         host.last_job = last_job
         update_fields.append('last_job')
