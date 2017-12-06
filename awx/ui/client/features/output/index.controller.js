@@ -25,11 +25,11 @@ const TIME_EVENTS = [
 ];
 
 function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
-    ansi = new Ansi();
     $timeout = _$timeout_;
     $sce = _$sce_;
     $compile = _$compile_;
     $scope = _$scope_;
+    ansi = new Ansi();
 
     const vm = this || {};
     const events = job.get('related.job_events.results');
@@ -73,103 +73,104 @@ function parseLine (event) {
     const { stdout } = event;
     const lines = stdout.split('\r\n');
 
-    let eventLn = event.start_line;
-    let ln = event.start_line + 1;
+    let eventLine = event.start_line;
+    let displayLine = event.start_line + 1;
 
     if (lines[0] === '') {
-        ln++;
+        displayLine++;
     }
 
-    record[ln] = {
-        line: ln,
+    record[displayLine] = {
+        line: displayLine,
         id: event.id,
         uuid: event.uuid,
         level: event.event_level,
         start: event.start_line,
         end: event.end_line,
-        isTruncated: (event.end_line - event.start_line) > lines.length
+        isTruncated: (event.end_line - event.start_line) > lines.length,
     };
 
-    if (record[ln].isTruncated) {
-        record[ln].truncatedAt = event.start_line + lines.length;
+    if (record[displayLine].isTruncated) {
+        record[displayLine].truncatedAt = event.start_line + lines.length;
     }
 
     if (EVENT_GROUPS.includes(event.event)) {
-        record[ln].parent = true;
+        record[displayLine].isParent = true;
     }
 
-    const current = record[ln];
+    if (TIME_EVENTS.includes(event.event)) {
+        record[displayLine].time = getTime(event.created);
+    }
+
+    const current = record[displayLine];
 
     return lines.reduce((html, line, i) => {
-        eventLn++;
+        eventLine++;
 
-        const time = getTime(event, i);
-        const group = getGroup(event, i);
         const isLastLine = i === lines.length - 1;
+        let append = createRow(eventLine, line, current);
 
         if (current.isTruncated && isLastLine) {
-            return `${html}${createRow(eventLn, line, time, group)}${createTruncatedRow(event.id)}`;
+            append += createRow();
         }
 
-        return `${html}${createRow(eventLn, line, time, group)}`;
+        return `${html}${append}`;
     }, '');
 }
 
-function createTruncatedRow (id) {
-    return `
-        <tr class="${id}">
-            <td class="at-Stdout-toggle"></td>
-            <td class="at-Stdout-line text-center">...</td>
-            <td class="at-Stdout-event"></td>
-            <td class="at-Stdout-time"></td>
-        </tr>`;
-}
-
-function createRow (ln, content, time, group) {
-    content = hasAnsi(content) ? ansi.toHtml(content) : content;
-
+function createRow (ln, content, current) {
     let expand = '';
-    if (group.parent) {
-        expand = '<i class="fa fa-chevron-down can-toggle"></i>';
+    let timestamp = '';
+    let toggleRow = '';
+    let classList = '';
+
+    content = content || '';
+
+    if (hasAnsi(content)) {
+        content = ansi.toHtml(content);
+    }
+
+    if (current) {
+        if (current.line === ln) {
+            if (current.isParent) {
+                expand = '<i class="fa fa-chevron-down can-toggle"></i>';
+                toggleRow = `<td class="at-Stdout-toggle" ng-click="vm.toggle(${ln})">${expand}</td>`;
+            }
+
+            if (current.time) {
+                timestamp = current.time;
+            }
+        } else {
+            classList += `child-of-${current.line}`;
+        }
+    }
+
+    if (!toggleRow) {
+        toggleRow = '<td class="at-Stdout-toggle"></td>';
+    }
+
+    if (!ln) {
+        ln = '...';
     }
 
     return `
-        <tr class="${group.classList}">
-            <td class="at-Stdout-toggle" ng-click="vm.toggle(${group.id})">${expand}</td>
+        <tr class="${classList}">
+            ${toggleRow}
             <td class="at-Stdout-line">${ln}</td>
             <td class="at-Stdout-event">${content}</td>
-            <td class="at-Stdout-time">${time}</td>
+            <td class="at-Stdout-time">${timestamp}</td>
         </tr>`;
 }
 
-function getGroup (event, i) {
-    const group = {};
-
-    if (EVENT_GROUPS.includes(event.event) && i === 1) {
-        group.parent = true;
-        group.classList = `parent parent-${event.event_level}`;
-        group.id = i;
-    } else {
-        group.classList = '';
-    }
-
-    group.level = event.event_level;
-
-    return group;
-}
-
-function getTime (event, i) {
-    if (!TIME_EVENTS.includes(event.event) || i !== 1) {
-        return '';
-    }
-
-    const date = new Date(event.created);
+function getTime (created) {
+    const date = new Date(created);
 
     return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
 
-function toggle (id) {
-    console.log(id);
+function toggle (line) {
+    const lines = document.getElementsByClassName(`child-of-${line}`);
+    console.log(lines);
 }
 
 JobsIndexController.$inject = ['job', '$sce', '$timeout', '$scope', '$compile'];
