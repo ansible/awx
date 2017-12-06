@@ -12,6 +12,7 @@ services:
       CELERY_RDB_HOST: 0.0.0.0
       AWX_GROUP_QUEUES: tower
     ports:
+      - "8888:8888"
       - "8080:8080"
       - "5555:5555"
       - "8013:8013"

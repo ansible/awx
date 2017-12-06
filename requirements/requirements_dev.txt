@@ -13,3 +13,5 @@ pytest-mock
 logutils
 flower
 uwsgitop
+jupyter
+matplotlib
