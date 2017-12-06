@@ -1403,7 +1403,7 @@ class JobAccess(BaseAccess):
         except JobLaunchConfig.DoesNotExist:
             config = None
 
-        # Check if JT execute access (and related prompts) are sufficient
+        # Check if JT execute access (and related prompts) is sufficient
         if obj.job_template is not None:
             if config is None:
                 prompts_access = False

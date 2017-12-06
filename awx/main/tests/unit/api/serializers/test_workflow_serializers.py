@@ -91,9 +91,6 @@ class TestWorkflowJobTemplateNodeSerializerGetRelated():
         'always_nodes',
     ])
     def test_get_related(self, test_get_related, workflow_job_template_node, related_resource_name):
-        serializer = WorkflowJobTemplateNodeSerializer()
-        print serializer.get_related(workflow_job_template_node)
-        # import pdb; pdb.set_trace()
         test_get_related(WorkflowJobTemplateNodeSerializer,
                          workflow_job_template_node,
                          'workflow_job_template_nodes',

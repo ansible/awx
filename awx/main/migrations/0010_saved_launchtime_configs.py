@@ -7,6 +7,7 @@ import awx.main.fields
 
 from awx.main.migrations import _migration_utils as migration_utils
 from awx.main.migrations._multi_cred import migrate_workflow_cred, migrate_workflow_cred_reverse
+from awx.main.migrations._scan_jobs import remove_scan_type_nodes
 
 
 class Migration(migrations.Migration):
@@ -69,6 +70,7 @@ class Migration(migrations.Migration):
         # Run data migration before removing the old credential field
         migrations.RunPython(migration_utils.set_current_apps_for_migrations, migrations.RunPython.noop),
         migrations.RunPython(migrate_workflow_cred, migrate_workflow_cred_reverse),
+        migrations.RunPython(remove_scan_type_nodes, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='workflowjobnode',
             name='credential',

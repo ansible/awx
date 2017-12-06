@@ -36,8 +36,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model, parse_yaml_or_json,
-    cached_subclassproperty
+    get_type_for_model, parse_yaml_or_json
 )
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -395,17 +394,16 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
 
         return unified_job
 
-    @cached_subclassproperty
-    def ask_mapping(cls):
+    @classmethod
+    def get_ask_mapping(cls):
+        '''
+        Creates dictionary that maps the unified job field (keys)
+        to the field that enables prompting for the field (values)
+        '''
         mapping = {}
         for field in cls._meta.fields:
-            if not isinstance(field, AskForField):
-                continue
-            if field.allows_field == '__default__':
-                allows_field = field.name[len('ask_'):-len('_on_launch')]
-            else:
-                allows_field = field.allows_field
-            mapping[allows_field] = field.name
+            if isinstance(field, AskForField):
+                mapping[field.allows_field] = field.name
         return mapping
 
     @classmethod
@@ -862,7 +860,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         JobLaunchConfig = self._meta.get_field('launch_config').related_model
         config = JobLaunchConfig(job=self)
         for field_name, value in kwargs.items():
-            if (field_name not in self.unified_job_template.ask_mapping and field_name != 'survey_passwords'):
+            if (field_name not in self.unified_job_template.get_ask_mapping() and field_name != 'survey_passwords'):
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
             if field_name == 'credentials':
                 continue

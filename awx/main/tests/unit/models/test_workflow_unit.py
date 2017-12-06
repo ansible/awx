@@ -233,5 +233,5 @@ class TestWorkflowJobNodeJobKWARGS:
         assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base
 
 
-def test_ask_mapping_integrity():
-    assert WorkflowJobTemplate.ask_mapping.keys() == ['extra_vars']
+def test_get_ask_mapping_integrity():
+    assert WorkflowJobTemplate.get_ask_mapping().keys() == ['extra_vars']

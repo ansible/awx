@@ -26,6 +26,7 @@ from awx.main.models.rbac import (
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.jobs import LaunchTimeConfig
+from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
 
@@ -130,7 +131,6 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         allowed_creds = []
         for field_name in self._get_workflow_job_field_names():
             if field_name == 'credentials':
-                Credential = self._meta.get_field('credentials').related_model
                 for cred in self.credentials.all():
                     if user.can_access(Credential, 'use', cred):
                         allowed_creds.append(cred)

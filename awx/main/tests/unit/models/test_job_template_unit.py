@@ -104,5 +104,5 @@ def test_job_template_can_start_with_callback_extra_vars_provided(job_template_f
 
 
 def test_ask_mapping_integrity():
-    assert 'credentials' in JobTemplate.ask_mapping
-    assert JobTemplate.ask_mapping['job_tags'] == 'ask_tags_on_launch'
+    assert 'credentials' in JobTemplate.get_ask_mapping()
+    assert JobTemplate.get_ask_mapping()['job_tags'] == 'ask_tags_on_launch'

@@ -3096,7 +3096,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
 
     def validate(self, attrs):
         deprecated_fields = {}
-        if 'credential' in attrs:
+        if 'credential' in attrs:  # TODO: remove when v2 API is deprecated
             deprecated_fields['credential'] = attrs.pop('credential')
         view = self.context.get('view')
         if self.instance is None and ('workflow_job_template' not in attrs or
@@ -3120,7 +3120,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
         errors.pop('variables_needed_to_start', None)
         if errors:
             raise serializers.ValidationError(errors)
-        if 'credential' in deprecated_fields:
+        if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
             cred = deprecated_fields['credential']
             attrs['credential'] = cred
             if cred is not None:
@@ -3130,7 +3130,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
                     raise PermissionDenied()
         return attrs
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # TODO: remove when v2 API is deprecated
         deprecated_fields = {}
         if 'credential' in validated_data:
             deprecated_fields['credential'] = validated_data.pop('credential')
@@ -3140,7 +3140,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
                 obj.credentials.add(deprecated_fields['credential'])
         return obj
 
-    def update(self, obj, validated_data):
+    def update(self, obj, validated_data):  # TODO: remove when v2 API is deprecated
         deprecated_fields = {}
         if 'credential' in validated_data:
             deprecated_fields['credential'] = validated_data.pop('credential')
@@ -3438,7 +3438,7 @@ class JobLaunchSerializer(BaseSerializer):
 
     def get_defaults(self, obj):
         defaults_dict = {}
-        for field_name in JobTemplate.ask_mapping.keys():
+        for field_name in JobTemplate.get_ask_mapping().keys():
             if field_name == 'inventory':
                 defaults_dict[field_name] = dict(
                     name=getattrd(obj, '%s.name' % field_name, None),
@@ -3467,7 +3467,7 @@ class JobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         template = self.context.get('template')
 
-        template._is_manual_launch = True  # TODO: hopefully remove this
+        template._is_manual_launch = True  # signal to make several error types non-blocking
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(**attrs)
         self._ignored_fields = rejected
 
@@ -3493,13 +3493,12 @@ class JobLaunchSerializer(BaseSerializer):
         passwords = attrs.get('credential_passwords', {})  # get from original attrs
         passwords_lacking = []
         for cred in launch_credentials:
-            if cred.passwords_needed:
-                for p in cred.passwords_needed:
-                    if p not in passwords:
-                        passwords_lacking.append(p)
-                    else:
-                        accepted.setdefault('credential_passwords', {})
-                        accepted['credential_passwords'][p] = passwords[p]
+            for p in cred.passwords_needed:
+                if p not in passwords:
+                    passwords_lacking.append(p)
+                else:
+                    accepted.setdefault('credential_passwords', {})
+                    accepted['credential_passwords'][p] = passwords[p]
         if len(passwords_lacking):
             errors['passwords_needed_to_start'] = passwords_lacking
 

@@ -616,22 +616,25 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
     def is_valid_relation(self, parent, sub, created=False):
         if not parent.unified_job_template:
             return {"msg": _("Cannot assign credential when related template is null.")}
-        elif self.relationship not in parent.unified_job_template.ask_mapping:
-            return {"msg": _("Related template cannot accept credentials on launch.")}
+
+        ask_mapping = parent.unified_job_template.get_ask_mapping()
+
+        if self.relationship not in ask_mapping:
+            return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
         elif sub.passwords_needed:
             return {"msg": _("Credential that requires user input on launch "
                              "cannot be used in saved launch configuration.")}
 
-        ask_field_name = parent.unified_job_template.ask_mapping[self.relationship]
+        ask_field_name = ask_mapping[self.relationship]
 
         if not getattr(parent, ask_field_name):
             return {"msg": _("Related template is not configured to accept credentials on launch.")}
         elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
-            return {"msg": _("This launch configuration already provides a {credential_type} credential.".format(
-                credential_type=sub.unique_hash(display=True)))}
+            return {"msg": _("This launch configuration already provides a {credential_type} credential.").format(
+                credential_type=sub.unique_hash(display=True))}
         elif sub.pk in parent.unified_job_template.credentials.values_list('pk', flat=True):
-            return {"msg": _("Related template already uses {credential_type} credential.".format(
-                credential_type=sub.name))}
+            return {"msg": _("Related template already uses {credential_type} credential.").format(
+                credential_type=sub.name)}
 
         # None means there were no validation errors
         return None
@@ -2752,7 +2755,7 @@ class JobTemplateLaunch(RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
-            modified_ask_mapping = JobTemplate.ask_mapping.copy()
+            modified_ask_mapping = JobTemplate.get_ask_mapping()
             modified_ask_mapping.pop('extra_vars')
             for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
@@ -2823,7 +2826,7 @@ class JobTemplateLaunch(RetrieveAPIView):
                     # If user gave extra_credentials, special case to use exactly
                     # the given list without merging with JT credentials
                     if key == 'extra_credentials' and prompted_value:
-                        obj._deprecated_credential_launch = True
+                        obj._deprecated_credential_launch = True  # signal to not merge credentials
                     new_credentials.extend(prompted_value)
 
             # combine the list of "new" and the filtered list of "old"
@@ -2840,14 +2843,12 @@ class JobTemplateLaunch(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        print request.data
 
         try:
             modern_data, ignored_fields = self.modernize_launch_payload(
                 data=request.data, obj=obj
             )
         except ParseError as exc:
-            print ' args ' + str(exc.args)
             return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.serializer_class(data=modern_data, context={'template': obj})

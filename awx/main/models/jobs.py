@@ -341,7 +341,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # that of job template launch, so prompting_needed should
         # not block a provisioning callback from creating/launching jobs.
         if callback_extra_vars is None:
-            for ask_field_name in set(self.ask_mapping.values()):
+            for ask_field_name in set(self.get_ask_mapping().values()):
                 if getattr(self, ask_field_name):
                     prompting_needed = True
                     break
@@ -359,7 +359,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             rejected_data['extra_vars'] = rejected_vars
 
         # Handle all the other fields that follow the simple prompting rule
-        for field_name, ask_field_name in self.ask_mapping.items():
+        for field_name, ask_field_name in self.get_ask_mapping().items():
             if field_name not in kwargs or field_name == 'extra_vars' or kwargs[field_name] is None:
                 continue
 
@@ -370,7 +370,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             if isinstance(field, models.ManyToManyField):
                 old_value = set(old_value.all())
                 if getattr(self, '_deprecated_credential_launch', False):
-                    # pass
+                    # TODO: remove this code branch when support for `extra_credentials` goes away
                     new_value = set(kwargs[field_name])
                 else:
                     new_value = set(kwargs[field_name]) - old_value
@@ -859,7 +859,7 @@ class LaunchTimeConfig(BaseModel):
 
     def prompts_dict(self, display=False):
         data = {}
-        for prompt_name in JobTemplate.ask_mapping.keys():
+        for prompt_name in JobTemplate.get_ask_mapping().keys():
             try:
                 field = self._meta.get_field(prompt_name)
             except FieldDoesNotExist:
@@ -919,7 +919,7 @@ class LaunchTimeConfig(BaseModel):
             return None
 
 
-for field_name in JobTemplate.ask_mapping.keys():
+for field_name in JobTemplate.get_ask_mapping().keys():
     try:
         LaunchTimeConfig._meta.get_field(field_name)
     except FieldDoesNotExist:
@@ -948,7 +948,7 @@ class JobLaunchConfig(LaunchTimeConfig):
         launching with those prompts
         '''
         prompts = self.prompts_dict()
-        for field_name, ask_field_name in template.ask_mapping.items():
+        for field_name, ask_field_name in template.get_ask_mapping().items():
             if field_name in prompts and not getattr(template, ask_field_name):
                 return True
         else:

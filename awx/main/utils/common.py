@@ -47,7 +47,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'cached_subclassproperty',]
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -935,17 +935,3 @@ def has_model_field_prefetched(model_obj, field_name):
     # NOTE: Update this function if django internal implementation changes.
     return getattr(getattr(model_obj, field_name, None),
                    'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
-
-
-class cached_subclassproperty(object):
-    '''Caches property in subclasses'''
-
-    def __init__(self, method):
-        self.method = method
-        self.name = method.__name__
-
-    def __get__(self, instance, cls):
-        r = self.method(cls)
-        if self.name not in cls.__dict__:
-            setattr(cls, self.name, r)
-        return r

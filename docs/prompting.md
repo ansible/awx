@@ -45,7 +45,7 @@ extra_vars.
 Prompting enablement for several types of credentials is controlled by a single
 field. On launch, multiple types of credentials can be provided in their respective fields
 inside of `credential`, `vault_credential`, and `extra_credentials`. Providing
-a credential that requirements password input from the user on launch is
+credentials that require password input from the user on launch is
 allowed, and the password must be provided along-side the credential, of course.
 
 If the job is being spawned using a saved launch configuration, however,

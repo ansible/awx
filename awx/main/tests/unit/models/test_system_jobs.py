@@ -1,7 +1,7 @@
 import pytest
 
 from awx.main.models import SystemJobTemplate
-    
+
 
 @pytest.mark.parametrize("extra_data", [
     '{ "days": 1 }',

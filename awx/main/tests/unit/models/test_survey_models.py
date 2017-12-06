@@ -13,7 +13,7 @@ from awx.main.models import (
 
 @pytest.mark.survey
 class SurveyVariableValidation:
-    
+
     def test_survey_answers_as_string(self, job_template_factory):
         objects = job_template_factory(
             'job-template-with-survey',
