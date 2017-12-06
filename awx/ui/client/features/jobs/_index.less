@@ -19,6 +19,10 @@
         background-color: @at-gray-light;
         font-size: 12px;
 
+        & > i {
+            cursor: pointer;
+        }
+
         padding: 0 20px 0 10px;
         user-select: none;
     }
@@ -29,6 +33,7 @@
 
         text-align: right;
 
+        vertical-align: top;
         padding-right: 5px;
         border-right: 1px solid @at-gray-dark;
         user-select: none;
@@ -36,6 +41,8 @@
 
     &-event {
         padding: 0 10px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
     }
 
     &-time {
@@ -62,12 +69,6 @@
 
             tr:hover > td {
                 background: white;
-            }
-
-            td {
-                vertical-align: top;
-                word-wrap: break-word;
-                white-space: pre-wrap;
             }
         }
     }

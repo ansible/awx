@@ -73,56 +73,66 @@ function parseLine (event) {
     const { stdout } = event;
     const lines = stdout.split('\r\n');
 
-    let eventLine = event.start_line;
-    let displayLine = event.start_line + 1;
+    let ln = event.start_line;
 
-    if (lines[0] === '') {
-        displayLine++;
-    }
-
-    record[displayLine] = {
-        line: displayLine,
-        id: event.id,
-        uuid: event.uuid,
-        level: event.event_level,
-        start: event.start_line,
-        end: event.end_line,
-        isTruncated: (event.end_line - event.start_line) > lines.length,
-    };
-
-    if (record[displayLine].isTruncated) {
-        record[displayLine].truncatedAt = event.start_line + lines.length;
-    }
-
-    if (EVENT_GROUPS.includes(event.event)) {
-        record[displayLine].isParent = true;
-    }
-
-    if (TIME_EVENTS.includes(event.event)) {
-        record[displayLine].time = getTime(event.created);
-    }
-
-    const current = record[displayLine];
+    const current = createRecord(ln, lines, event);
 
     return lines.reduce((html, line, i) => {
-        eventLine++;
+        ln++;
 
         const isLastLine = i === lines.length - 1;
-        let append = createRow(eventLine, line, current);
+        let append = createRow(current, ln, line);
 
-        if (current.isTruncated && isLastLine) {
-            append += createRow();
+        if (current && current.isTruncated && isLastLine) {
+            append += createRow(current);
         }
 
         return `${html}${append}`;
     }, '');
 }
 
-function createRow (ln, content, current) {
+function createRecord (ln, lines, event) {
+    if (!event.uuid) {
+        return null;
+    }
+
+    const info = {
+        line: ln + 1,
+        uuid: event.uuid,
+        level: event.event_level,
+        start: event.start_line,
+        end: event.end_line,
+        isTruncated: (event.end_line - event.start_line) > lines.length
+    };
+
+    if (event.parent_uuid) {
+        info.childOf = event.parent_uuid;
+    }
+
+    if (info.isTruncated) {
+        info.truncatedAt = event.start_line + lines.length;
+    }
+
+    if (EVENT_GROUPS.includes(event.event)) {
+        info.isParent = true;
+    }
+
+    if (TIME_EVENTS.includes(event.event)) {
+        info.time = getTime(event.created);
+        info.line++;
+    }
+
+    record[event.uuid] = info;
+
+    return info;
+}
+
+function createRow (current, ln, content) {
     let expand = '';
     let timestamp = '';
     let toggleRow = '';
     let classList = '';
+    let id = '';
 
     content = content || '';
 
@@ -131,17 +141,18 @@ function createRow (ln, content, current) {
     }
 
     if (current) {
-        if (current.line === ln) {
-            if (current.isParent) {
-                expand = '<i class="fa fa-chevron-down can-toggle"></i>';
-                toggleRow = `<td class="at-Stdout-toggle" ng-click="vm.toggle(${ln})">${expand}</td>`;
-            }
+        if (current.isParent && current.line === ln) {
+            id = current.uuid;
+            expand = '<i class="fa fa-chevron-down can-toggle"></i>';
+            toggleRow = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${current.uuid}')">${expand}</td>`;
+        }
 
-            if (current.time) {
-                timestamp = current.time;
-            }
-        } else {
-            classList += `child-of-${current.line}`;
+        if (current.time && current.line === ln) {
+            timestamp = current.time;
+        }
+
+        if (!classList) {
+            classList += `child-of-${current.childOf}`;
         }
     }
 
@@ -154,7 +165,7 @@ function createRow (ln, content, current) {
     }
 
     return `
-        <tr class="${classList}">
+        <tr id="${id}" class="${classList}">
             ${toggleRow}
             <td class="at-Stdout-line">${ln}</td>
             <td class="at-Stdout-event">${content}</td>
@@ -168,9 +179,20 @@ function getTime (created) {
     return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
 
-function toggle (line) {
-    const lines = document.getElementsByClassName(`child-of-${line}`);
-    console.log(lines);
+function toggle (uuid) {
+    const i = $(`#${uuid} .at-Stdout-toggle > i`);
+
+    if (i.hasClass('fa-chevron-down')) {
+        i.addClass('fa-chevron-right');
+        i.removeClass('fa-chevron-down');
+
+        $(`.child-of-${uuid}`).addClass('hidden');
+    } else {
+        i.addClass('fa-chevron-down');
+        i.removeClass('fa-chevron-right');
+
+        $(`.child-of-${uuid}`).removeClass('hidden');
+    }
 }
 
 JobsIndexController.$inject = ['job', '$sce', '$timeout', '$scope', '$compile'];
