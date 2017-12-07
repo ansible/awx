@@ -1,5 +1,17 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
+<!-- begin collapsed toolbox -->
+<g ng-if="overall_toolbox_collapsed">
+<rect class="NetworkUI__toolbox-collapsed"
+      x=0
+      y=40
+      width=50
+      ng-attr-height={{toolbox.height}}>
+</rect>
+<!-- <g awx-net-chevron-right-icon ng-if="overall_toolbox_collapsed" ng-attr-transform="translate(15, {{toolbox.height/2}})"></g> -->
+</g>
+<!-- end collapsed toolbox -->
+
 <g ng-if="toolbox.enabled">
 <rect class="NetworkUI__toolbox"
       ng-attr-x="{{toolbox.x}}"
@@ -7,8 +19,7 @@
       ng-attr-width="{{toolbox.width}}"
       ng-attr-height="{{toolbox.height}}"
       rx=5></rect>
-<g awx-net-chevron-left-icon ng-if="toolbox.enabled" transform="translate(120, 400) scale(0.012)"></g>
-<g awx-net-chevron-left-icon ng-if="!toolbox.enabled" transform="translate(120, 400) scale(0.012)"></g>
+<!-- <g awx-net-chevron-left-icon ng-if="toolbox.enabled" ng-attr-transform="translate({{toolbox.width - 30}}, {{toolbox.height/2}})"></g> -->
 <g clip-path="url(#inventory-toolbox-clip-path)">
 <g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y}})">
 <g ng-repeat="item in toolbox.items track by $index"
