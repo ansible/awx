@@ -230,7 +230,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         if extra_vars:
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
-        data['launch_type'] = 'workflow'
+        data['_eager_fields'] = {'launch_type': 'workflow'}
         return data
 
 
@@ -366,7 +366,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
         # WFJTs do not behave like JTs, it can not accept inventory, credential, etc.
         bad_kwargs = kwargs.copy()
-        bad_kwargs.pop('extra_vars')
+        bad_kwargs.pop('extra_vars', None)
         if bad_kwargs:
             rejected_fields.update(bad_kwargs)
             for field in bad_kwargs:

@@ -3106,15 +3106,15 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             })
         if 'unified_job_template' in attrs:
             ujt_obj = attrs['unified_job_template']
-        elif self.instance:
+        ujt_obj = None
+        if self.instance:
             ujt_obj = self.instance.unified_job_template
-        else:
-            raise serializers.ValidationError({
-                "unified_job_template": _("Node needs to have a template attached.")})
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
                 "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         attrs = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        if ujt_obj is None:
+            ujt_obj = attrs.get('unified_job_template')
         accepted, rejected, errors = ujt_obj._accept_or_ignore_job_kwargs(**self._build_mock_obj(attrs).prompts_dict())
         # Do not raise survey validation errors
         errors.pop('variables_needed_to_start', None)
@@ -3703,8 +3703,10 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer):
             elif self.instance:
                 ujt = self.instance.unified_job_template
             accepted, rejected, errors = ujt.accept_or_ignore_variables(extra_data)
+            if 'extra_vars' in errors:
+                errors['extra_data'] = errors.pop('extra_vars')
             if errors:
-                raise serializers.ValidationError({'extra_data': errors['extra_vars']})
+                raise serializers.ValidationError(errors)
         return super(ScheduleSerializer, self).validate(attrs)
 
     # We reject rrules if:

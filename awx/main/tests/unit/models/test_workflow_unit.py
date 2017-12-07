@@ -198,7 +198,7 @@ class TestWorkflowJobNodeJobKWARGS:
     Tests for building the keyword arguments that go into creating and
     launching a new job that corresponds to a workflow node.
     """
-    kwargs_base = {'launch_type': 'workflow'}
+    kwargs_base = {'_eager_fields': {'launch_type': 'workflow'}}
 
     def test_null_kwargs(self, job_node_no_prompts):
         assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base

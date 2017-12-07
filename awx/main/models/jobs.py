@@ -876,7 +876,7 @@ class LaunchTimeConfig(BaseModel):
                         data[prompt_name] = self.display_extra_data()
                     else:
                         data[prompt_name] = self.extra_data
-                if self.survey_passwords:
+                if self.survey_passwords and not display:
                     data['survey_passwords'] = self.survey_passwords
             else:
                 prompt_val = getattr(self, prompt_name)
@@ -889,11 +889,11 @@ class LaunchTimeConfig(BaseModel):
         Hides fields marked as passwords in survey.
         '''
         if self.survey_passwords:
-            extra_data = json.loads(self.extra_data)
+            extra_data = parse_yaml_or_json(self.extra_data)
             for key, value in self.survey_passwords.items():
                 if key in extra_data:
                     extra_data[key] = value
-            return json.dumps(extra_data)
+            return extra_data
         else:
             return self.extra_data
 

@@ -307,14 +307,8 @@ def awx_periodic_scheduler(self):
             logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
             continue
         try:
-            prompts = schedule.get_job_kwargs()
-            new_unified_job = schedule.unified_job_template.create_unified_job(
-                _eager_fields=dict(
-                    launch_type='scheduled',
-                    schedule=schedule
-                ),
-                **prompts
-            )
+            job_kwargs = schedule.get_job_kwargs()
+            new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
             can_start = new_unified_job.signal_start()
         except Exception:
             logger.exception('Error spawning scheduled job.')

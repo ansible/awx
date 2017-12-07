@@ -381,7 +381,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         that can be used to evaluate exclusivity
         '''
         if display:
-            type_alias = self.kind
+            type_alias = self.credential_type.name
         else:
             type_alias = self.credential_type_id
         if self.kind == 'vault' and self.inputs.get('vault_id', None):

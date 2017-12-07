@@ -343,7 +343,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
-        original_passwords = kwargs.pop('survey_passwords', {})
+        new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
@@ -363,12 +363,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
 
         # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
-            password_list = self.survey_password_variables()
-            hide_password_dict = getattr(unified_job, 'survey_passwords', {})
-            hide_password_dict.update(original_passwords)
-            for password in password_list:
-                hide_password_dict[password] = REPLACE_STR
-            unified_job.survey_passwords = hide_password_dict
+            for password in self.survey_password_variables():
+                new_job_passwords[password] = REPLACE_STR
+        if new_job_passwords:
+            unified_job.survey_passwords = new_job_passwords
+            kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
         unified_job.save()
 
@@ -430,7 +429,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Override in subclass if template accepts _any_ prompted params
         '''
-        return ({}, kwargs, {"all": ["Fields {} are not allowed on launch.".format(kwargs.keys())]})
+        errors = {}
+        if kwargs:
+            errors['all'] = [_("Fields {} are not allowed on launch.").format(kwargs.keys())]
+        return ({}, kwargs, errors)
 
     def accept_or_ignore_variables(self, data, errors=None):
         '''
@@ -859,8 +861,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             return None
         JobLaunchConfig = self._meta.get_field('launch_config').related_model
         config = JobLaunchConfig(job=self)
+        valid_fields = self.unified_job_template.get_ask_mapping().keys()
+        if hasattr(self, 'extra_vars'):
+            valid_fields.extend(['survey_passwords', 'extra_vars'])
         for field_name, value in kwargs.items():
-            if (field_name not in self.unified_job_template.get_ask_mapping() and field_name != 'survey_passwords'):
+            if field_name not in valid_fields:
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
             if field_name == 'credentials':
                 continue

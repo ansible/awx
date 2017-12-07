@@ -2820,7 +2820,7 @@ class JobTemplateLaunch(RetrieveAPIView):
                     prompted_value = modern_data.pop(key)
 
                     # add the deprecated credential specified in the request
-                    if not isinstance(prompted_value, Iterable):
+                    if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
                         prompted_value = [prompted_value]
 
                     # If user gave extra_credentials, special case to use exactly
@@ -3063,7 +3063,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
-            return {"msg": _("Cannot assign multiple {credential_type} credentials.".format(
+            return {"error": _("Cannot assign multiple {credential_type} credentials.".format(
                 credential_type=sub.unique_hash(display=True)))}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)

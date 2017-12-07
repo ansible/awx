@@ -252,7 +252,7 @@ class SurveyJobTemplateMixin(models.Model):
                     survey_errors += element_errors
                     if key is not None and key in extra_vars:
                         rejected[key] = extra_vars.pop(key)
-                else:
+                elif key in extra_vars:
                     accepted[key] = extra_vars.pop(key)
             if survey_errors:
                 errors['variables_needed_to_start'] = survey_errors
