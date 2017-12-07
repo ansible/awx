@@ -33,6 +33,7 @@
 @green: #5CB85C;
 @red:  #D9534F;
 @light-toolbox-background: #f6f6f6;
+@icon-background-hover:#337AB7;
 
 .NetworkUI {
     background-color: @light-toolbox-background;
@@ -619,13 +620,22 @@
     fill: @light-background;
 }
 
+.NetworkUI__toolbox-collapsed{
+    fill: @light-background;
+    stroke: @button-outline;
+    stroke-width: 1;
+    rx: 0;
+    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dashoffset: -50;
+}
+
 .NetworkUI__toolbox-bezel {
     stroke: @button-outline;
     stroke-width: 1;
     fill: none;
     rx: 0;
     stroke-dasharray: calc(~"100vh - 40px");
-    stroke-dashoffset: -150;
+    stroke-dashoffset: -200;
 }
 
 .NetworkUI__process {
@@ -702,8 +712,18 @@
 
 .awxNetIcon-chevron{
     fill: @button-body-pressed;
+    // fill: white;
 }
 
 .awxNetIcon-chevron:hover{
     cursor: pointer;
+}
+
+.NetworkUI_iconBackground{
+    fill:@button-body;
+    // fill:@icon-background-hover;
+}
+
+.NetworkUI_iconBackground--icon-hover{
+    fill:@icon-background-hover;
 }
