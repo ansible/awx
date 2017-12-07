@@ -1,6 +1,7 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 
+let vm;
 let ansi;
 let $timeout;
 let $sce;
@@ -8,6 +9,7 @@ let $compile;
 let $scope;
 
 const record = {};
+const meta = {};
 
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
@@ -31,11 +33,20 @@ function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
     $scope = _$scope_;
     ansi = new Ansi();
 
-    const vm = this || {};
+    vm = this || {};
     const events = job.get('related.job_events.results');
     const html = $sce.trustAsHtml(parseEvents(events));
 
     vm.toggle = toggle;
+    vm.menu = {
+        expand: menuExpand,
+        scrollToBottom: menuScrollToBottom,
+        scrollToTop: menuScrollToTop
+    };
+
+    vm.state = {
+        expand: true
+    };
 
     $timeout(() => {
         const table = $('#result-table');
@@ -43,8 +54,23 @@ function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
     });
+}
 
-    console.log(record);
+function menuExpand () {
+    vm.state.expand = !vm.state.expand;
+    vm.toggle(meta.parent);
+}
+
+function menuScrollToBottom () {
+    const container = $('.at-Stdout-container')[0];
+
+    container.scrollTo(0, container.scrollHeight);
+}
+
+function menuScrollToTop () {
+    const container = $('.at-Stdout-container')[0];
+
+    container.scrollTo(0, 0);
 }
 
 function parseEvents (events) {
@@ -106,7 +132,7 @@ function createRecord (ln, lines, event) {
     };
 
     if (event.parent_uuid) {
-        info.childOf = event.parent_uuid;
+        info.parents = getParentEvents(event.parent_uuid);
     }
 
     if (info.isTruncated) {
@@ -115,6 +141,19 @@ function createRecord (ln, lines, event) {
 
     if (EVENT_GROUPS.includes(event.event)) {
         info.isParent = true;
+
+        if (event.event_level === 1) {
+            meta.parent = event.uuid;
+        }
+
+        if (event.parent_uuid) {
+            if (record[event.parent_uuid].children &&
+                !record[event.parent_uuid].children.includes(event.uuid)) {
+                record[event.parent_uuid].children.push(event.uuid);
+            } else {
+                record[event.parent_uuid].children = [event.uuid];
+            }
+        }
     }
 
     if (TIME_EVENTS.includes(event.event)) {
@@ -125,6 +164,20 @@ function createRecord (ln, lines, event) {
     record[event.uuid] = info;
 
     return info;
+}
+
+function getParentEvents (uuid, list) {
+    list = list || [];
+
+    if (record[uuid]) {
+        list.push(uuid);
+    }
+
+    if (record[uuid].parents) {
+        list = list.concat(record[uuid].parents);
+    }
+
+    return list;
 }
 
 function createRow (current, ln, content) {
@@ -151,8 +204,8 @@ function createRow (current, ln, content) {
             timestamp = current.time;
         }
 
-        if (!classList) {
-            classList += `child-of-${current.childOf}`;
+        if (current.parents) {
+            classList = current.parents.reduce((list, uuid) => `${list} child-of-${uuid}`, '');
         }
     }
 
@@ -180,18 +233,23 @@ function getTime (created) {
 }
 
 function toggle (uuid) {
-    const i = $(`#${uuid} .at-Stdout-toggle > i`);
+    const lines = $(`.child-of-${uuid}`);
+    let icon = $(`#${uuid} .at-Stdout-toggle > i`);
 
-    if (i.hasClass('fa-chevron-down')) {
-        i.addClass('fa-chevron-right');
-        i.removeClass('fa-chevron-down');
+    if (record[uuid].children) {
+        icon = icon.add($(`#${record[uuid].children.join(', #')}`).find('.at-Stdout-toggle > i'));
+    }
 
-        $(`.child-of-${uuid}`).addClass('hidden');
+    if (icon.hasClass('fa-chevron-down')) {
+        icon.addClass('fa-chevron-right');
+        icon.removeClass('fa-chevron-down');
+
+        lines.addClass('hidden');
     } else {
-        i.addClass('fa-chevron-down');
-        i.removeClass('fa-chevron-right');
+        icon.addClass('fa-chevron-down');
+        icon.removeClass('fa-chevron-right');
 
-        $(`.child-of-${uuid}`).removeClass('hidden');
+        lines.removeClass('hidden');
     }
 }
 

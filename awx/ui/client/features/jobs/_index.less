@@ -1,7 +1,7 @@
 .at-Stdout {
     font-family: monospace;
 
-    &-menu {
+    &-menuTop {
         color: @at-gray-dark-4x;
         border: 1px solid @at-gray-dark-2x;
         border-top-left-radius: 4px;
@@ -9,9 +9,18 @@
         border-bottom: none;
     }
 
+    &-menuBottom {
+        color: @at-gray-dark-4x;
+        border: 1px solid @at-gray-dark-2x;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-top: none;
+    }
+
     &-menuIcon {
         font-size: 12px;
         padding: 10px;
+        cursor: pointer;
     }
 
     &-toggle {
@@ -51,7 +60,6 @@
         text-align: right;
         user-select: none;
         width: 11ch;
-        border-left: 1px dashed @at-gray-dark;
     }
 
     &-container {
@@ -61,8 +69,7 @@
         background-color: @at-gray-light-3x;
         padding: 0;
         margin: 0;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
+        border-radius: 0;
 
         & > table {
             table-layout: fixed;
