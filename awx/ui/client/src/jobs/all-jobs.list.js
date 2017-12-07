@@ -97,7 +97,8 @@ export default ['i18n', function(i18n) {
                 ngClick: 'relaunchJob($event, job.id)',
                 awToolTip: i18n._('Relaunch using the same parameters'),
                 dataPlacement: 'top',
-                ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start"
+                ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start",
+                relaunch: true,
             },
             cancel: {
                 mode: 'all',

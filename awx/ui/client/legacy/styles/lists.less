@@ -19,7 +19,6 @@ table, tbody {
     width: 100%;
     margin-top: 20px;
     table-layout: fixed;
-    overflow: hidden;
 }
 
 .List-tableHeader{
@@ -70,7 +69,7 @@ table, tbody {
 }
 
 .List-tableRow--selected {
-    border-left: 10px solid @list-row-select-bord;
+    border-left: 5px solid @list-row-select-bord;
 }
 
 .List-tableRow--selected > :first-child {
@@ -124,7 +123,8 @@ table, tbody {
     color: @list-action-icon;
     background-color: @list-actn-bg;
     border: none;
-    border-radius: 50%;
+    border-radius: 4px;
+    margin-left: 15px;
 }
 
 .List-actionButton:hover {
@@ -134,10 +134,6 @@ table, tbody {
 
 .List-actionButton--delete:hover {
     background-color: @list-actn-del-bg-hov !important;
-}
-
-.List-actionButton + .List-actionButton {
-    margin-left: 15px;
 }
 
 .List-header {

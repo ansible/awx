@@ -10,10 +10,13 @@ export default
                 var scope = params.scope.$new(),
                 id = params.id,
                 relaunch = params.relaunch || false,
-                job_type = params.job_type;
+                job_type = params.job_type,
+                host_type = params.host_type || "";
                 scope.job_template_id = id;
 
-                var el = $compile( "<submit-job data-submit-job-id=" + id + " submit-job-type=" + job_type + " data-submit-job-relaunch=" + relaunch + "></submit-job>" )( scope );
+                var el = $compile( "<submit-job data-submit-job-id=" + id + " submit-job-type=" + job_type + " data-submit-job-relaunch=" + relaunch +
+                " relaunch-host-type=" + host_type +
+                "></submit-job>" )( scope );
                 $('#content-container').remove('submit-job').append( el );
             };
         }

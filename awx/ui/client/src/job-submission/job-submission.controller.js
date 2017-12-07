@@ -83,7 +83,8 @@ export default
                 LaunchJob({
                     scope: $scope,
                     url: launch_url,
-                    submitJobType: $scope.submitJobType
+                    submitJobType: $scope.submitJobType,
+                    relaunchHostType: $scope.relaunchHostType
                 });
             };
 

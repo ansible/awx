@@ -27,6 +27,7 @@ import tab from '~components/tabs/tab.directive';
 import tabGroup from '~components/tabs/group.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
+import relaunch from '~components/relaunchButton/relaunchButton.component';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
@@ -64,6 +65,7 @@ angular
     .directive('atTabGroup', tabGroup)
     .directive('atTopNavItem', topNavItem)
     .directive('atTruncate', truncate)
+    .component('atRelaunch', relaunch)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
 

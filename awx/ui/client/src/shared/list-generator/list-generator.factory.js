@@ -396,7 +396,10 @@ export default ['$compile', 'Attr', 'Icon',
                             if (field_action === 'pending_deletion') {
                                 innerTable += `<a ng-if='${list.iterator}.pending_deletion'>Pending Delete</a>`;
                             }
-                            else {
+                            // Plug in Dropdown Component
+                            if (field_action === 'submit' && list.fieldActions[field_action].relaunch === true) {
+                                innerTable += `<at-relaunch></at-relaunch>`;
+                            } else {
                                 fAction = list.fieldActions[field_action];
                                 innerTable += "<button id=\"";
                                 innerTable += (fAction.id) ? fAction.id : field_action + "-action";

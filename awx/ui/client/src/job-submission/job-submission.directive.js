@@ -12,7 +12,8 @@ export default [ 'templateUrl', 'CreateDialog', 'Wait', 'CreateSelect2', 'ParseT
         scope: {
             submitJobId: '=',
             submitJobType: '@',
-            submitJobRelaunch: '='
+            submitJobRelaunch: '=',
+            relaunchHostType: '@'
         },
         templateUrl: templateUrl('job-submission/job-submission'),
         controller: jobSubmissionController,
