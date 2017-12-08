@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
@@ -115,6 +115,10 @@ class APIView(views.APIView):
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
+        try:
+            request.drf_request_user = getattr(drf_request, 'user', False)
+        except AuthenticationFailed:
+            request.drf_request_user = None
         return drf_request
 
     def finalize_response(self, request, response, *args, **kwargs):
