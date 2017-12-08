@@ -627,7 +627,7 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
 
         ask_field_name = ask_mapping[self.relationship]
 
-        if not getattr(parent, ask_field_name):
+        if not getattr(parent.unified_job_template, ask_field_name):
             return {"msg": _("Related template is not configured to accept credentials on launch.")}
         elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
             return {"msg": _("This launch configuration already provides a {credential_type} credential.").format(
