@@ -31,7 +31,7 @@ standard HTML events and rendering.
 
 This interface is more like computer graphics than it is building a styled text
 document with interactive components.  A good grasp of cartesian coordinates,
-trignometry, and analytic geometry is useful when working with this code.
+trignometry, and analytic geometry are useful when working with this code.
 
 See: <https://en.wikipedia.org/wiki/Analytic_geometry>
 
@@ -41,7 +41,7 @@ Certain design choices were made to make the UI performant and scale to a large
 number of nodes in a diagram.  These include the use of simple ES5 forms for
 better performance over more advanced forms.  For instance C-style for-loops
 were many times faster than implementations of forEach or iterators which make
-function calls during each iteration.  These basic ES5 style should be followed
+function calls during each iteration.  This basic ES5 style should be followed
 throughout the implementation of the Network UI.
 
 AngularJS:
@@ -122,7 +122,7 @@ but this can be simulated with ng-repeat and a list. The following example
 sets the toolbox.selected_item value to the variable item which the directives
 used in the child scope expect to be set.
 
-See: <https://docs.racket-lang.org/reference/let.html>
+See: <https://docs.racket-lang.org/reference/let.html> (Optional reference, just look if you are curious)
 
 See: widgets/inventory_toolbox.html
 ```
@@ -130,13 +130,54 @@ See: widgets/inventory_toolbox.html
 ```
 
 
-Events:
+DOM:
 
-All mouse and keyboard events are captured by the outer most element of the
-network UI.
+No state is stored in or attached to the DOM.  All state is stored in
+javascript objects attached to the network ui controller.
+
+Direct DOM manipulation should not be used in the network UI unless absolutely
+necessary. JQuery should not be used.  The DOM is generated through the use of
+AngularJS templates.
+
+SVG (Scalable Vector Graphics):
+
+See: <https://developer.mozilla.org/en-US/docs/Web/SVG>
+
+The network UI is built as one large SVG element (the SVG canvas) with other
+graphical elements (lines, circles, rectangles, paths, and text) absolutely
+placed within the outer most SVG element.  The browser is not involved with
+layout of the elements within the SVG.   Each "widget" in the network UI needs
+to track or calculate its own position on the SVG canvas. The z-level of the
+elements are determined by the draw order on the canvas which is defined
+in `widgets/network_ui.html`.  Elements drawn first will be hidden behind
+elements drawn later.
 
 Rendering Pipeline:
 
-Javscript objects -> AngularJS templates -> SVG
+Event -> Javscript objects -> AngularJS templates -> SVG
 
+AngularJS is used to render the SVG inside the SVG canvas using directives
+and templates.  AngularJS is also used to schedule when the SVG canvas will
+be updated. When an input event comes from the user or an event is received
+over the websocket javascript objects will be updated according the the network
+UI code.  Then AngularJS will be notified that it needs to update the templates
+either automatically for some events or explicitly using `$scope.$apply();` if
+not handled automatically by AngularJS.  The templates will render to SVG and be
+included in the DOM for the rest of the AWX UI.
 
+Because the networking UI does not use watchers nor data-binding features of
+AngularJS events flow in one way from event to javascript to angular to SVG.
+Events do not flow backwards through this pipeline.
+
+Clicking on an SVG element will not send the event to that SVG element directly
+from the browser.   It must be routed through the network UI code first.
+
+Events:
+
+All mouse and keyboard events are captured by the outer most element of the
+network UI.  Mouse movements, mouse clicks, and key presses are all routed by
+the network UI code and not by the browser.  This is done to implement
+interactions with the virtual graphical canvas that are not supported by the
+browser.  "Simple" things like buttons and text fields have to be handled by
+the network UI code instead of relying on the browser to route the mouse click
+to the appropriate object.
