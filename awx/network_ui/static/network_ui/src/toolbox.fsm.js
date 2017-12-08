@@ -155,9 +155,9 @@ _Selecting.prototype.onMouseDown = function (controller) {
 };
 _Selecting.prototype.onMouseDown.transitions = ['Selected', 'Ready'];
 
-_Ready.prototype.onEnable = function (controller) {
+_Ready.prototype.onEnable = function () {
 
-}
+};
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -286,7 +286,7 @@ _OffScreen2.prototype.onEnable = function (controller) {
 };
 _OffScreen2.prototype.onEnable.transitions = ['OffScreen'];
 
-_OffScreen2.prototype.onDisable = function (controller) {
+_OffScreen2.prototype.onDisable = function () {
 
 };
 
@@ -302,9 +302,9 @@ _OffScreen2.prototype.onToggleToolbox = function (controller, msg_type, message)
 };
 _OffScreen2.prototype.onToggleToolbox.transitions = ['Disabled'];
 
-_Disabled.prototype.onDisable = function (controller) {
+_Disabled.prototype.onDisable = function () {
 
-}
+};
 
 _Disabled.prototype.onEnable = function (controller) {
 

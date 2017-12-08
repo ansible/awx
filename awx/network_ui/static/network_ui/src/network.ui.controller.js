@@ -157,12 +157,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
-      function add_host (host) {
+      var add_host = function(host) {
           console.log(host);
           var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
           device.icon = true;
           $scope.inventory_toolbox.items.push(device);
-      }
+      };
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
            .then(function(inventory) {
                console.log(inventory);
