@@ -431,7 +431,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         errors = {}
         if kwargs:
-            errors['all'] = [_("Fields {} are not allowed on launch.").format(kwargs.keys())]
+            for field_name in kwargs.keys():
+                errors[field_name] = [_("Field is not allowed on launch.")]
         return ({}, kwargs, errors)
 
     def accept_or_ignore_variables(self, data, errors=None):

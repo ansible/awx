@@ -3695,18 +3695,16 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer):
         return value
 
     def validate(self, attrs):
-        extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
-        if extra_data:
-            ujt = None
-            if 'unified_job_template' in attrs:
-                ujt = attrs['unified_job_template']
-            elif self.instance:
-                ujt = self.instance.unified_job_template
-            accepted, rejected, errors = ujt.accept_or_ignore_variables(extra_data)
-            if 'extra_vars' in errors:
-                errors['extra_data'] = errors.pop('extra_vars')
-            if errors:
-                raise serializers.ValidationError(errors)
+        ujt = None
+        if 'unified_job_template' in attrs:
+            ujt = attrs['unified_job_template']
+        elif self.instance:
+            ujt = self.instance.unified_job_template
+        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(**self._build_mock_obj(attrs).prompts_dict())
+        if 'extra_vars' in errors:
+            errors['extra_data'] = errors.pop('extra_vars')
+        if errors:
+            raise serializers.ValidationError(errors)
         return super(ScheduleSerializer, self).validate(attrs)
 
     # We reject rrules if:

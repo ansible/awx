@@ -50,7 +50,7 @@ def test_reject_other_prommpts():
     sjt = SystemJobTemplate()
     accepted, ignored, errors = sjt._accept_or_ignore_job_kwargs(limit="")
     assert accepted == {}
-    assert 'not allowed on launch' in errors['all'][0]
+    assert 'not allowed on launch' in errors['limit'][0]
 
 
 def test_reject_some_accept_some():
@@ -61,5 +61,5 @@ def test_reject_some_accept_some():
     })
     assert accepted == {"extra_vars": {"days": 34}}
     assert ignored == {"limit": "", "extra_vars": {"foobar": "baz"}}
-    assert 'not allowed on launch' in errors['all'][0]
+    assert 'not allowed on launch' in errors['limit'][0]
 
