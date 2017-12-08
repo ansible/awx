@@ -17,7 +17,7 @@ Getting Started With Development
 ================================
 
 
-Introduction:
+*Introduction*
 
 The Networking UI component of AWX works differently from the rest of the AWX
 web UI to support high-scale interactive graphical design of networking
@@ -35,7 +35,7 @@ trignometry, and analytic geometry are useful when working with this code.
 
 See: <https://en.wikipedia.org/wiki/Analytic_geometry>
 
-Design choices:
+*Design choices*
 
 Certain design choices were made to make the UI performant and scale to a large
 number of nodes in a diagram.  These include the use of simple ES5 forms for
@@ -44,7 +44,7 @@ were many times faster than implementations of forEach or iterators which make
 function calls during each iteration.  This basic ES5 style should be followed
 throughout the implementation of the Network UI.
 
-AngularJS:
+*AngularJS*
 
 The Networking UI component uses AngularJS 1.6.x for part of the rendering pipeline
 but it is not a normal AngularJS web application.  AngularJS makes use of
@@ -54,14 +54,14 @@ AngularJS for SVG rendering (using AnguarJS templates) which does scale
 sufficiently.
 
 
-AngularJS Controllers:
+*AngularJS Controllers*
 
 Instead of creating many AngularJS controllers and directives the networking UI
 uses one big controller to hold the state of the entire UI.  Normally this is
 an anti-pattern in AngularJS.  Here is was necessary to scale to a large number
 of on-screen elements.
 
-AngularJS Directives:
+*AngularJS Directives*
 
 See: <https://docs.angularjs.org/guide/directive>
 
@@ -80,7 +80,7 @@ function deviceDetail () {
 }
 ```
 
-AngularJS Templates:
+*AngularJS Templates*
 
 See: <https://docs.angularjs.org/guide/templates>
 
@@ -130,7 +130,7 @@ See: widgets/inventory_toolbox.html
 ```
 
 
-DOM:
+*DOM (Document Object Model)*
 
 No state is stored in or attached to the DOM.  All state is stored in
 javascript objects attached to the network ui controller.
@@ -139,7 +139,7 @@ Direct DOM manipulation should not be used in the network UI unless absolutely
 necessary. JQuery should not be used.  The DOM is generated through the use of
 AngularJS templates.
 
-SVG (Scalable Vector Graphics):
+*SVG (Scalable Vector Graphics)*
 
 See: <https://developer.mozilla.org/en-US/docs/Web/SVG>
 
@@ -152,7 +152,7 @@ elements are determined by the draw order on the canvas which is defined
 in `widgets/network_ui.html`.  Elements drawn first will be hidden behind
 elements drawn later.
 
-Rendering Pipeline:
+*Rendering Pipeline*
 
 Event -> Javscript objects -> AngularJS templates -> SVG
 
@@ -172,7 +172,7 @@ Events do not flow backwards through this pipeline.
 Clicking on an SVG element will not send the event to that SVG element directly
 from the browser.   It must be routed through the network UI code first.
 
-Events:
+*Events*
 
 All mouse and keyboard events are captured by the outer most element of the
 network UI.  Mouse movements, mouse clicks, and key presses are all routed by
