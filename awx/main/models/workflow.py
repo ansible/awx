@@ -219,7 +219,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
-        extra_vars = {}
+        extra_vars = data.get('extra_vars', {})
         if aa_dict:
             functional_aa_dict = copy(aa_dict)
             functional_aa_dict.pop('_ansible_no_log', None)

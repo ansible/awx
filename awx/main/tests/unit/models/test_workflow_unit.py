@@ -112,6 +112,7 @@ def workflow_job_template_unit():
 def jt_ask(job_template_factory):
     # note: factory sets ask_xxxx_on_launch to true for inventory & credential
     jt = job_template_factory(name='example-jt', persisted=False).job_template
+    jt.ask_variables_on_launch = True
     jt.ask_job_type_on_launch = True
     jt.ask_skip_tags_on_launch = True
     jt.ask_limit_on_launch = True
@@ -203,11 +204,12 @@ class TestWorkflowJobNodeJobKWARGS:
     def test_null_kwargs(self, job_node_no_prompts):
         assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base
 
-    def test_inherit_workflow_job_extra_vars(self, job_node_no_prompts):
+    def test_inherit_workflow_job_and_node_extra_vars(self, job_node_no_prompts):
+        job_node_no_prompts.extra_data = {"b": 98}
         workflow_job = job_node_no_prompts.workflow_job
         workflow_job.extra_vars = '{"a": 84}'
         assert job_node_no_prompts.get_job_kwargs() == dict(
-            extra_vars={'a': 84}, **self.kwargs_base)
+            extra_vars={'a': 84, 'b': 98}, **self.kwargs_base)
 
     def test_char_prompts_and_res_node_prompts(self, job_node_with_prompts):
         # TBD: properly handle multicred credential assignment
