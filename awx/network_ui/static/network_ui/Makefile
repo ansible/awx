@@ -58,18 +58,18 @@ extract:
 
 
 diff:
-	fsm_diff designs/button.yml extracted/button.yml
-	fsm_diff designs/buttons.yml extracted/buttons.yml
-	fsm_diff designs/device_detail.yml extracted/device_detail.yml
-	fsm_diff designs/group.yml extracted/group.yml
-	fsm_diff designs/hotkeys.yml extracted/hotkeys.yml
-	fsm_diff designs/link.yml extracted/link.yml
-	fsm_diff designs/mode.yml extracted/mode.yml
-	fsm_diff designs/move.yml extracted/move.yml
-	fsm_diff designs/null.yml extracted/null.yml
-	fsm_diff designs/rack.yml extracted/rack.yml
-	fsm_diff designs/site.yml extracted/site.yml
-	fsm_diff designs/stream.yml extracted/stream.yml
-	fsm_diff designs/time.yml extracted/time.yml
-	fsm_diff designs/toolbox.yml extracted/toolbox.yml
-	fsm_diff designs/view.yml extracted/view.yml
+	./tools/fsm-diff designs/button.yml extracted/button.yml
+	./tools/fsm-diff designs/buttons.yml extracted/buttons.yml
+	./tools/fsm-diff designs/device_detail.yml extracted/device_detail.yml
+	./tools/fsm-diff designs/group.yml extracted/group.yml
+	./tools/fsm-diff designs/hotkeys.yml extracted/hotkeys.yml
+	./tools/fsm-diff designs/link.yml extracted/link.yml
+	./tools/fsm-diff designs/mode.yml extracted/mode.yml
+	./tools/fsm-diff designs/move.yml extracted/move.yml
+	./tools/fsm-diff designs/null.yml extracted/null.yml
+	./tools/fsm-diff designs/rack.yml extracted/rack.yml
+	./tools/fsm-diff designs/site.yml extracted/site.yml
+	./tools/fsm-diff designs/stream.yml extracted/stream.yml
+	./tools/fsm-diff designs/time.yml extracted/time.yml
+	./tools/fsm-diff designs/toolbox.yml extracted/toolbox.yml
+	./tools/fsm-diff designs/view.yml extracted/view.yml
