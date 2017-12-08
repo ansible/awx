@@ -5,7 +5,6 @@ var move = require('./move.js');
 var group = require('./group.js');
 var rack_fsm = require('./rack.fsm.js');
 var site_fsm = require('./site.fsm.js');
-var toolbox_fsm = require('./toolbox.fsm.js');
 
 function _State () {
 }
@@ -200,4 +199,3 @@ _Rack.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.next_controller.handle_message(msg_type, $event);
 };
 _Rack.prototype.onMouseWheel.transitions = ['Site', 'Device'];
-

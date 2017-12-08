@@ -95,14 +95,6 @@
         </g>
         <g ng-if="!hide_buttons">
 
-            <g> <!-- action icons -->
-                <g ng-repeat="action_icon in action_icons"
-                   ng-attr-transform="translate({{action_icon.x}},{{action_icon.y}})">
-                    <!-- <g awx-net-action-icon name="{{action_icon.name}}">{{action_icon.name}}</g> -->
-                    <g awx-net-action-icon data-name="chevron_left"></g>
-                </g>
-            </g> <!-- end action icons -->
-
             <g> <!-- buttons -->
                 <g ng-repeat="button in buttons"
                    ng-attr-transform="translate({{button.x}},{{button.y}})">
