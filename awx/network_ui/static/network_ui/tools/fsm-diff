@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from fsm_diff.cli import main
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main(sys.argv[1:]))
+
