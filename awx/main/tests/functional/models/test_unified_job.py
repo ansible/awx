@@ -38,25 +38,20 @@ class TestCreateUnifiedJob:
     '''
     def test_many_to_many_kwargs(self, mocker, job_template_labels):
         jt = job_template_labels
-        mocked = mocker.MagicMock()
-        mocked.__class__.__name__ = 'ManyRelatedManager'
-        kwargs = {
-            'labels': mocked
-        }
         _get_unified_job_field_names = mocker.patch('awx.main.models.jobs.JobTemplate._get_unified_job_field_names', return_value=['labels'])
-        jt.create_unified_job(**kwargs)
+        jt.create_unified_job()
 
         _get_unified_job_field_names.assert_called_with()
-        mocked.all.assert_called_with()
 
     '''
     Ensure that credentials m2m field is copied to new relaunched job
     '''
     def test_job_relaunch_copy_vars(self, machine_credential, inventory,
                                     deploy_jobtemplate, post, mocker, net_credential):
-        job_with_links = Job.objects.create(name='existing-job', inventory=inventory)
+        job_with_links = Job(name='existing-job', inventory=inventory)
         job_with_links.job_template = deploy_jobtemplate
         job_with_links.limit = "my_server"
+        job_with_links.save()
         job_with_links.credentials.add(machine_credential)
         job_with_links.credentials.add(net_credential)
         with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',

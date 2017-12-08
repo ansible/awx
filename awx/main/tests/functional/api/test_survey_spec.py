@@ -200,7 +200,7 @@ def test_delete_survey_spec_without_license(job_template_with_survey, delete, ad
 
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda self, **kwargs: True)
 @mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job',
-            lambda self, extra_vars: mock.MagicMock(spec=Job, id=968))
+            lambda self, **kwargs: mock.MagicMock(spec=Job, id=968))
 @mock.patch('awx.api.serializers.JobSerializer.to_representation', lambda self, obj: {})
 @pytest.mark.django_db
 @pytest.mark.survey

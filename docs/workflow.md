@@ -15,9 +15,16 @@ Workflow Nodes are containers of workflow spawned job resources and function as 
 
 Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d+/workflow_nodes/` to be associated with underlying workflow job template, or directly under endpoint `/workflow_job_template_nodes/`. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parnent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
 
-Apart from the core fields, workflow job template nodes have optional fields `credential`, `inventory`, `job_type`, `job_tags`, `skip_tags` and `limit`. These fields will be passed on to corresponding fields of underlying jobs if those fields are set prompted at runtime.
+#### Workflow Node Launch Configuration
+
+Workflow nodes may also contain the launch-time configuration for the job it will spawn.
+As such, they share all the properties common to all saved launch configurations.
 
 When a workflow job template is launched a workflow job is created. A workflow job node is created for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus an additional field, `job`, which is a reference to the to-be-spawned job resource.
+
+See the document on saved launch configurations for how these are processed
+when the job is launched, and the API validation involved in building
+the launch configurations on workflow nodes.
 
 ### Tree-Graph Formation and Restrictions
 The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:

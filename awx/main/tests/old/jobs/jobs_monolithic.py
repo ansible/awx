@@ -1121,8 +1121,6 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             response = self.get(launch_url)
             self.assertTrue('favorite_color' in response['variables_needed_to_start'])
             response = self.post(launch_url, dict(extra_vars=dict()), expect=400)
-            # Note: The below assertion relies on how survey_variable_validation() crafts
-            # the error message
             self.assertIn("'favorite_color' value missing", response['variables_needed_to_start'])
 
         # launch job template with required survey without providing survey data and without
@@ -1132,8 +1130,6 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):
             response = self.get(launch_url)
             self.assertTrue('favorite_color' in response['variables_needed_to_start'])
             response = self.post(launch_url, {}, expect=400)
-            # Note: The below assertion relies on how survey_variable_validation() crafts
-            # the error message
             self.assertIn("'favorite_color' value missing", response['variables_needed_to_start'])
 
         with self.current_user(self.user_sue):

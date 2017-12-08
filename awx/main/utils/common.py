@@ -27,6 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
+from django.db.models.query import QuerySet
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -477,7 +478,7 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 src_field_value = getattr(obj1, field_name)
                 if kwargs and field_name in kwargs:
                     override_field_val = kwargs[field_name]
-                    if isinstance(override_field_val, list):
+                    if isinstance(override_field_val, (set, list, QuerySet)):
                         getattr(obj2, field_name).add(*override_field_val)
                         continue
                     if override_field_val.__class__.__name__ is 'ManyRelatedManager':

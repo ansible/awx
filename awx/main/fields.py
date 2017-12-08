@@ -761,3 +761,22 @@ class CredentialTypeInjectorField(JSONSchemaField):
                         code='invalid',
                         params={'value': value},
                     )
+
+
+class AskForField(models.BooleanField):
+    """
+    Denotes whether to prompt on launch for another field on the same template
+    """
+    def __init__(self, allows_field=None, **kwargs):
+        super(AskForField, self).__init__(**kwargs)
+        self._allows_field = allows_field
+
+    @property
+    def allows_field(self):
+        if self._allows_field is None:
+            try:
+                return self.name[len('ask_'):-len('_on_launch')]
+            except AttributeError:
+                # self.name will be set by the model metaclass, not this field
+                raise Exception('Corresponding allows_field cannot be accessed until model is initialized.')
+        return self._allows_field

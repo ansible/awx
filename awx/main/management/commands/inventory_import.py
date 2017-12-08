@@ -400,10 +400,10 @@ class Command(BaseCommand):
                     overwrite_vars=self.overwrite_vars,
                 )
                 self.inventory_update = self.inventory_source.create_inventory_update(
-                    job_args=json.dumps(sys.argv),
-                    job_env=dict(os.environ.items()),
-                    job_cwd=os.getcwd(),
                     _eager_fields=dict(
+                        job_args=json.dumps(sys.argv),
+                        job_env=dict(os.environ.items()),
+                        job_cwd=os.getcwd(),
                         execution_node=settings.CLUSTER_HOST_ID,
                         instance_group=InstanceGroup.objects.get(name='tower'))
                 )

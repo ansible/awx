@@ -607,6 +607,46 @@ class ScheduleDetail(RetrieveUpdateDestroyAPIView):
     new_in_148 = True
 
 
+class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    relationship = 'credentials'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if not parent.unified_job_template:
+            return {"msg": _("Cannot assign credential when related template is null.")}
+
+        ask_mapping = parent.unified_job_template.get_ask_mapping()
+
+        if self.relationship not in ask_mapping:
+            return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
+        elif sub.passwords_needed:
+            return {"msg": _("Credential that requires user input on launch "
+                             "cannot be used in saved launch configuration.")}
+
+        ask_field_name = ask_mapping[self.relationship]
+
+        if not getattr(parent.unified_job_template, ask_field_name):
+            return {"msg": _("Related template is not configured to accept credentials on launch.")}
+        elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
+            return {"msg": _("This launch configuration already provides a {credential_type} credential.").format(
+                credential_type=sub.unique_hash(display=True))}
+        elif sub.pk in parent.unified_job_template.credentials.values_list('pk', flat=True):
+            return {"msg": _("Related template already uses {credential_type} credential.").format(
+                credential_type=sub.name)}
+
+        # None means there were no validation errors
+        return None
+
+
+class ScheduleCredentialsList(LaunchConfigCredentialsBase):
+
+    parent_model = Schedule
+    new_in_330 = True
+    new_in_api_v2 = True
+
+
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = UnifiedJob
@@ -2704,16 +2744,21 @@ class JobTemplateLaunch(RetrieveAPIView):
             return data
         extra_vars = data.pop('extra_vars', None) or {}
         if obj:
-            for p in obj.passwords_needed_to_start:
-                data[p] = u''
+            needed_passwords = obj.passwords_needed_to_start
+            if needed_passwords:
+                data['credential_passwords'] = {}
+                for p in needed_passwords:
+                    data['credential_passwords'][p] = u''
+            else:
+                data.pop('credential_passwords')
             for v in obj.variables_needed_to_start:
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
-            ask_for_vars_dict = obj._ask_for_vars_dict()
-            ask_for_vars_dict.pop('extra_vars')
-            for field in ask_for_vars_dict:
-                if not ask_for_vars_dict[field]:
+            modified_ask_mapping = JobTemplate.get_ask_mapping()
+            modified_ask_mapping.pop('extra_vars')
+            for field, ask_field_name in modified_ask_mapping.items():
+                if not getattr(obj, ask_field_name):
                     data.pop(field, None)
                 elif field == 'inventory':
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
@@ -2723,39 +2768,41 @@ class JobTemplateLaunch(RetrieveAPIView):
                     data[field] = getattr(obj, field)
         return data
 
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
+    def modernize_launch_payload(self, data, obj):
+        '''
+        Steps to do simple translations of request data to support
+        old field structure to launch endpoint
+        TODO: delete this method with future API version changes
+        '''
         ignored_fields = {}
+        modern_data = data.copy()
 
         for fd in ('credential', 'vault_credential', 'inventory'):
             id_fd = '{}_id'.format(fd)
-            if fd not in request.data and id_fd in request.data:
-                request.data[fd] = request.data[id_fd]
+            if fd not in modern_data and id_fd in modern_data:
+                modern_data[fd] = modern_data[id_fd]
 
         # This block causes `extra_credentials` to _always_ be ignored for
         # the launch endpoint if we're accessing `/api/v1/`
-        if get_request_version(self.request) == 1 and 'extra_credentials' in request.data:
-            if hasattr(request.data, '_mutable') and not request.data._mutable:
-                request.data._mutable = True
-            extra_creds = request.data.pop('extra_credentials', None)
+        if get_request_version(self.request) == 1 and 'extra_credentials' in modern_data:
+            extra_creds = modern_data.pop('extra_credentials', None)
             if extra_creds is not None:
                 ignored_fields['extra_credentials'] = extra_creds
 
         # Automatically convert legacy launch credential arguments into a list of `.credentials`
-        if 'credentials' in request.data and (
-            'credential' in request.data or
-            'vault_credential' in request.data or
-            'extra_credentials' in request.data
+        if 'credentials' in modern_data and (
+            'credential' in modern_data or
+            'vault_credential' in modern_data or
+            'extra_credentials' in modern_data
         ):
-            return Response(dict(
-                error=_("'credentials' cannot be used in combination with 'credential', 'vault_credential', or 'extra_credentials'.")),  # noqa
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise ParseError({"error": _(
+                "'credentials' cannot be used in combination with 'credential', 'vault_credential', or 'extra_credentials'."
+            )})
 
         if (
-            'credential' in request.data or
-            'vault_credential' in request.data or
-            'extra_credentials' in request.data
+            'credential' in modern_data or
+            'vault_credential' in modern_data or
+            'extra_credentials' in modern_data
         ):
             # make a list of the current credentials
             existing_credentials = obj.credentials.all()
@@ -2765,49 +2812,56 @@ class JobTemplateLaunch(RetrieveAPIView):
                 ('vault_credential', lambda cred: cred.credential_type.kind != 'vault'),
                 ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'))
             ):
-                if key in request.data:
+                if key in modern_data:
                     # if a specific deprecated key is specified, remove all
                     # credentials of _that_ type from the list of current
                     # credentials
                     existing_credentials = filter(conditional, existing_credentials)
-                    prompted_value = request.data.pop(key)
+                    prompted_value = modern_data.pop(key)
 
                     # add the deprecated credential specified in the request
-                    if not isinstance(prompted_value, Iterable):
+                    if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
                         prompted_value = [prompted_value]
+
+                    # If user gave extra_credentials, special case to use exactly
+                    # the given list without merging with JT credentials
+                    if key == 'extra_credentials' and prompted_value:
+                        obj._deprecated_credential_launch = True  # signal to not merge credentials
                     new_credentials.extend(prompted_value)
 
             # combine the list of "new" and the filtered list of "old"
             new_credentials.extend([cred.pk for cred in existing_credentials])
             if new_credentials:
-                request.data['credentials'] = new_credentials
+                modern_data['credentials'] = new_credentials
 
-        passwords = {}
-        serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
+        # credential passwords were historically provided as top-level attributes
+        if 'credential_passwords' not in modern_data:
+            modern_data['credential_passwords'] = data.copy()
+
+        return (modern_data, ignored_fields)
+
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        try:
+            modern_data, ignored_fields = self.modernize_launch_payload(
+                data=request.data, obj=obj
+            )
+        except ParseError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=modern_data, context={'template': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        _accepted_or_ignored = obj._accept_or_ignore_job_kwargs(**request.data)
-        prompted_fields = _accepted_or_ignored[0]
-        ignored_fields.update(_accepted_or_ignored[1])
+        ignored_fields.update(serializer._ignored_fields)
 
-        fd = 'inventory'
-        if fd in prompted_fields and prompted_fields[fd] != getattrd(obj, '{}.pk'.format(fd), None):
-            new_res = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, fd))
-            use_role = getattr(new_res, 'use_role')
-            if request.user not in use_role:
-                raise PermissionDenied()
+        if not request.user.can_access(JobLaunchConfig, 'add', serializer.validated_data, template=obj):
+            raise PermissionDenied()
 
-        # For credentials that are _added_ via launch parameters, ensure the
-        # launching user has access
-        current_credentials = set(obj.credentials.values_list('id', flat=True))
-        for new_cred in Credential.objects.filter(id__in=prompted_fields.get('credentials', [])):
-            if new_cred.pk not in current_credentials and request.user not in new_cred.use_role:
-                raise PermissionDenied(_(
-                    "You do not have access to credential {}".format(new_cred.name)
-                ))
-
-        new_job = obj.create_unified_job(**prompted_fields)
+        passwords = serializer.validated_data.pop('credential_passwords', {})
+        new_job = obj.create_unified_job(**serializer.validated_data)
         result = new_job.signal_start(**passwords)
 
         if not result:
@@ -2817,9 +2871,33 @@ class JobTemplateLaunch(RetrieveAPIView):
         else:
             data = OrderedDict()
             data['job'] = new_job.id
-            data['ignored_fields'] = ignored_fields
+            data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
             data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             return Response(data, status=status.HTTP_201_CREATED)
+
+
+    def sanitize_for_response(self, data):
+        '''
+        Model objects cannot be serialized by DRF,
+        this replaces objects with their ids for inclusion in response
+        '''
+
+        def display_value(val):
+            if hasattr(val, 'id'):
+                return val.id
+            else:
+                return val
+
+        sanitized_data = {}
+        for field_name, value in data.items():
+            if isinstance(value, (set, list)):
+                sanitized_data[field_name] = []
+                for sub_value in value:
+                    sanitized_data[field_name].append(display_value(sub_value))
+            else:
+                sanitized_data[field_name] = display_value(value)
+
+        return sanitized_data
 
 
 class JobTemplateSchedulesList(SubListCreateAPIView):
@@ -2984,9 +3062,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
-        current_extra_types = [cred.credential_type.pk for cred in parent.credentials.all()]
-        if sub.credential_type.pk in current_extra_types:
-            return {'error': _('Cannot assign multiple %s credentials.' % sub.credential_type.name)}
+        if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
+            return {"error": _("Cannot assign multiple {credential_type} credentials.".format(
+                credential_type=sub.unique_hash(display=True)))}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
@@ -3238,10 +3316,20 @@ class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
     new_in_310 = True
 
 
+class WorkflowJobNodeCredentialsList(SubListAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = WorkflowJobNode
+    relationship = 'credentials'
+    new_in_330 = True
+    new_in_api_v2 = True
+
+
 class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     new_in_310 = True
 
 
@@ -3251,21 +3339,18 @@ class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDes
     serializer_class = WorkflowJobTemplateNodeDetailSerializer
     new_in_310 = True
 
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        try:
-            obj = self.get_object()
-            data.update(obj.char_prompts)
-        except Exception:
-            pass
-        return super(WorkflowJobTemplateNodeDetail, self).update_raw_data(data)
+
+class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
+
+    parent_model = WorkflowJobTemplateNode
+    new_in_330 = True
+    new_in_api_v2 = True
 
 
 class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     always_allow_superuser = True
     parent_model = WorkflowJobTemplateNode
     relationship = ''
@@ -3447,7 +3532,7 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
+        prompted_fields, ignored_fields, errors = obj._accept_or_ignore_job_kwargs(**request.data)
 
         new_job = obj.create_unified_job(**prompted_fields)
         new_job.signal_start()
@@ -3489,16 +3574,11 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
 class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeListSerializer
+    serializer_class = WorkflowJobTemplateNodeSerializer
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
     new_in_310 = True
-
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
     def get_queryset(self):
         return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
@@ -3934,6 +4014,52 @@ class JobRelaunch(RetrieveAPIView):
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url(request=request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class JobCreateSchedule(RetrieveAPIView):
+
+    model = Job
+    obj_permission_type = 'start'
+    serializer_class = JobCreateScheduleSerializer
+    new_in_330 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        if not obj.can_schedule:
+            return Response({"error": _('Information needed to schedule this job is missing.')},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        config = obj.launch_config
+        if not request.user.can_access(JobLaunchConfig, 'add', {'reference_obj': obj}):
+            raise PermissionDenied()
+
+        # Make up a name for the schedule, guarentee that it is unique
+        name = 'Auto-generated schedule from job {}'.format(obj.id)
+        existing_names = Schedule.objects.filter(name__startswith=name).values_list('name', flat=True)
+        if name in existing_names:
+            idx = 1
+            alt_name = '{} - number {}'.format(name, idx)
+            while alt_name in existing_names:
+                idx += 1
+                alt_name = '{} - number {}'.format(name, idx)
+            name = alt_name
+
+        schedule = Schedule.objects.create(
+            name=name,
+            unified_job_template=obj.unified_job_template,
+            enabled=False,
+            rrule='{}Z RRULE:FREQ=MONTHLY;INTERVAL=1'.format(now().strftime('DTSTART:%Y%m%dT%H%M%S')),
+            extra_data=config.extra_data,
+            survey_passwords=config.survey_passwords,
+            inventory=config.inventory,
+            char_prompts=config.char_prompts
+        )
+        schedule.credentials.add(*config.credentials.all())
+
+        data = ScheduleSerializer(schedule, context=self.get_serializer_context()).data
+        headers = {'Location': schedule.get_absolute_url(request=request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class JobNotificationsList(SubListAPIView):

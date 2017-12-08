@@ -1,6 +1,7 @@
 import mock
 import pytest
 import yaml
+import json
 
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
@@ -29,6 +30,8 @@ def runtime_data(organization, credentialtype_ssh):
         skip_tags='restart',
         inventory=inv_obj.pk,
         credentials=[cred_obj.pk],
+        diff_mode=True,
+        verbosity=2
     )
 
 
@@ -45,6 +48,10 @@ def job_template_prompts(project, inventory, machine_credential):
             project=project,
             inventory=inventory,
             name='deploy-job-template',
+            # JT values must differ from prompted vals in order to register
+            limit='webservers',
+            job_tags = 'foobar',
+            skip_tags = 'barfoo',
             ask_variables_on_launch=on_off,
             ask_tags_on_launch=on_off,
             ask_skip_tags_on_launch=on_off,
@@ -52,6 +59,7 @@ def job_template_prompts(project, inventory, machine_credential):
             ask_inventory_on_launch=on_off,
             ask_limit_on_launch=on_off,
             ask_credential_on_launch=on_off,
+            ask_diff_mode_on_launch=on_off,
             ask_verbosity_on_launch=on_off,
         )
         jt.credentials.add(machine_credential)
@@ -73,8 +81,24 @@ def job_template_prompts_null(project):
         ask_inventory_on_launch=True,
         ask_limit_on_launch=True,
         ask_credential_on_launch=True,
+        ask_diff_mode_on_launch=True,
         ask_verbosity_on_launch=True,
     )
+
+
+def data_to_internal(data):
+    '''
+    returns internal representation, model objects, dictionaries, etc
+    as opposed to integer primary keys and JSON strings
+    '''
+    internal = data.copy()
+    if 'extra_vars' in data:
+        internal['extra_vars'] = json.loads(data['extra_vars'])
+    if 'credentials' in data:
+        internal['credentials'] = set(Credential.objects.get(pk=_id) for _id in data['credentials'])
+    if 'inventory' in data:
+        internal['inventory'] = Inventory.objects.get(pk=data['inventory'])
+    return internal
 
 
 # End of setup, tests start here
@@ -87,10 +111,10 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
 
     with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
-            response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
+            response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                             runtime_data, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{}},)
+            assert JobTemplate.create_unified_job.call_args == ()
 
     # Check that job is serialized correctly
     job_id = response.data['job']
@@ -121,7 +145,8 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
             response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
                             runtime_data, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
+            called_with = data_to_internal(runtime_data)
+            JobTemplate.create_unified_job.assert_called_with(**called_with)
 
     job_id = response.data['job']
     assert job_id == 968
@@ -131,7 +156,7 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
-def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
+def test_job_accept_empty_tags(job_template_prompts, post, admin_user, mocker):
     job_template = job_template_prompts(True)
 
     mock_job = mocker.MagicMock(spec=Job, id=968)
@@ -167,7 +192,8 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
             response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
                             runtime_data, rando, expect=201)
             assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
+            expected_call = data_to_internal(runtime_data)
+            assert JobTemplate.create_unified_job.call_args == (expected_call,)
 
     job_id = response.data['job']
     assert job_id == 968
@@ -211,7 +237,7 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, admin_user
     response = post(reverse('api:job_template_launch',
                     kwargs={'pk': deploy_jobtemplate.pk}), {}, admin_user, expect=400)
 
-    assert response.data['inventory'] == ["Job Template 'inventory' is missing or undefined."]
+    assert 'inventory' in response.data['resources_needed_to_start'][0]
 
 
 @pytest.mark.django_db
@@ -234,10 +260,8 @@ def test_job_launch_fails_without_credential_access(job_template_prompts, runtim
     job_template.execute_role.members.add(rando)
 
     # Assure that giving a credential without access blocks the launch
-    response = post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
-                    dict(credentials=runtime_data['credentials']), rando, expect=403)
-
-    assert response.data['detail'] == u'You do not have access to credential runtime-cred'
+    post(reverse('api:job_template_launch', kwargs={'pk':job_template.pk}),
+         dict(credentials=runtime_data['credentials']), rando, expect=403)
 
 
 @pytest.mark.django_db
@@ -253,24 +277,24 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
 
 
 @pytest.mark.django_db
-def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
+def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jobtemplate):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
     deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.ask_variables_on_launch = True
     deploy_jobtemplate.save()
 
-    kv = dict(extra_vars={"job_launch_var": 4}, credentials=[machine_credential.id])
-    serializer = JobLaunchSerializer(
-        instance=deploy_jobtemplate, data=kv,
-        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    kv = dict(extra_vars={"job_launch_var": 4}, credentials=[machine_credential.pk])
+    serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
-    assert validated
+    assert validated, serializer.errors
 
+    kv['credentials'] = [machine_credential]  # conversion to internal value
     job_obj = deploy_jobtemplate.create_unified_job(**kv)
 
     final_job_extra_vars = yaml.load(job_obj.extra_vars)
-    assert 'job_template_var' in final_job_extra_vars
     assert 'job_launch_var' in final_job_extra_vars
-    assert [cred.pk for cred in job_obj.credentials.all()] == [machine_credential.id]
+    assert 'job_template_var' in final_job_extra_vars
+    assert set([cred.pk for cred in job_obj.credentials.all()]) == set([machine_credential.id, credential.id])
 
 
 @pytest.mark.django_db
@@ -279,16 +303,38 @@ def test_job_launch_with_default_creds(machine_credential, vault_credential, dep
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.credentials.add(vault_credential)
     kv = dict()
-    serializer = JobLaunchSerializer(
-        instance=deploy_jobtemplate, data=kv,
-        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
     assert job_obj.credential == machine_credential.pk
     assert job_obj.vault_credential == vault_credential.pk
+
+
+@pytest.mark.django_db
+def test_job_launch_JT_enforces_unique_credentials_kinds(machine_credential, credentialtype_aws, deploy_jobtemplate):
+    """
+    JT launching should require that extra_credentials have distinct CredentialTypes
+    """
+    creds = []
+    for i in range(2):
+        aws = Credential.objects.create(
+            name='cred-%d' % i,
+            credential_type=credentialtype_aws,
+            inputs={
+                'username': 'test_user',
+                'password': 'pas4word'
+            }
+        )
+        aws.save()
+        creds.append(aws)
+
+    kv = dict(credentials=creds, credential=machine_credential.id)
+    serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
+    validated = serializer.is_valid()
+    assert not validated
 
 
 @pytest.mark.django_db
@@ -297,16 +343,14 @@ def test_job_launch_with_empty_creds(machine_credential, vault_credential, deplo
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.credentials.add(vault_credential)
     kv = dict(credentials=[])
-    serializer = JobLaunchSerializer(
-        instance=deploy_jobtemplate, data=kv,
-        context={'obj': deploy_jobtemplate, 'data': kv, 'passwords': {}})
+    serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
     assert validated
 
-    prompted_fields, ignored_fields = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
-    assert job_obj.credential is None
-    assert job_obj.vault_credential is None
+    assert job_obj.credential is deploy_jobtemplate.credential
+    assert job_obj.vault_credential is deploy_jobtemplate.vault_credential
 
 
 @pytest.mark.django_db
@@ -384,6 +428,28 @@ def test_job_launch_pass_with_prompted_vault_password(machine_credential, vault_
 
 
 @pytest.mark.django_db
+def test_job_launch_JT_with_credentials(machine_credential, credential, net_credential, deploy_jobtemplate):
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.save()
+
+    kv = dict(credentials=[credential.pk, net_credential.pk, machine_credential.pk])
+    serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
+    validated = serializer.is_valid()
+    assert validated, serializer.errors
+
+    kv['credentials'] = [credential, net_credential, machine_credential]  # convert to internal value
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    deploy_jobtemplate._is_manual_launch = True
+    job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
+
+    creds = job_obj.credentials.all()
+    assert len(creds) == 3
+    assert credential in creds
+    assert net_credential in creds
+    assert machine_credential in creds
+
+
+@pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
     job_template = job_template_prompts(False)
@@ -401,7 +467,6 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
                     admin_user, expect=201)
                 assert JobTemplate.create_unified_job.called
                 assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{'survey_var': 4}},)
-
 
     job_id = response.data['job']
     assert job_id == 968

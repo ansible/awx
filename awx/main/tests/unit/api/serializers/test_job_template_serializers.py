@@ -20,7 +20,7 @@ from rest_framework import serializers
 
 
 def mock_JT_resource_data():
-    return ({}, [])
+    return {}
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def job_template(mocker):
     mock_jt = mocker.MagicMock(spec=JobTemplate)
     mock_jt.pk = 5
     mock_jt.host_config_key = '9283920492'
-    mock_jt.resource_validation_data = mock_JT_resource_data
+    mock_jt.validation_errors = mock_JT_resource_data
     return mock_jt
 
 

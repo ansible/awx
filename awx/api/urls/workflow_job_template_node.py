@@ -9,6 +9,7 @@ from awx.api.views import (
     WorkflowJobTemplateNodeSuccessNodesList,
     WorkflowJobTemplateNodeFailureNodesList,
     WorkflowJobTemplateNodeAlwaysNodesList,
+    WorkflowJobTemplateNodeCredentialsList,
 )
 
 
@@ -18,6 +19,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/success_nodes/$', WorkflowJobTemplateNodeSuccessNodesList.as_view(), name='workflow_job_template_node_success_nodes_list'),
     url(r'^(?P<pk>[0-9]+)/failure_nodes/$', WorkflowJobTemplateNodeFailureNodesList.as_view(), name='workflow_job_template_node_failure_nodes_list'),
     url(r'^(?P<pk>[0-9]+)/always_nodes/$', WorkflowJobTemplateNodeAlwaysNodesList.as_view(), name='workflow_job_template_node_always_nodes_list'),
+    url(r'^(?P<pk>[0-9]+)/credentials/$', WorkflowJobTemplateNodeCredentialsList.as_view(), name='workflow_job_template_node_credentials_list'),
 ]
 
 __all__ = ['urls']

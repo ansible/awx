@@ -35,6 +35,11 @@ JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_SCAN, _('Scan')),
 ]
 
+NEW_JOB_TYPE_CHOICES = [
+    (PERM_INVENTORY_DEPLOY, _('Run')),
+    (PERM_INVENTORY_CHECK, _('Check')),
+]
+
 AD_HOC_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
     (PERM_INVENTORY_CHECK, _('Check')),

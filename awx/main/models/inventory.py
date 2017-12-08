@@ -1339,7 +1339,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                'timeout', 'verbosity', 'launch_type', 'source_project_update',]
+                'timeout', 'verbosity', 'source_project_update',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,

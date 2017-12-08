@@ -202,7 +202,6 @@ def test_modify_ssh_credential_at_launch(get, post, job_template, admin,
                                          machine_credential, vault_credential, credential):
     job_template.credentials.add(vault_credential)
     job_template.credentials.add(credential)
-    job_template.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     pk = post(url, {'credential': machine_credential.pk}, admin, expect=201).data['job']
 
@@ -215,7 +214,6 @@ def test_modify_vault_credential_at_launch(get, post, job_template, admin,
                                            machine_credential, vault_credential, credential):
     job_template.credentials.add(machine_credential)
     job_template.credentials.add(credential)
-    job_template.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     pk = post(url, {'vault_credential': vault_credential.pk}, admin, expect=201).data['job']
 
@@ -228,7 +226,6 @@ def test_modify_extra_credentials_at_launch(get, post, job_template, admin,
                                             machine_credential, vault_credential, credential):
     job_template.credentials.add(machine_credential)
     job_template.credentials.add(vault_credential)
-    job_template.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     pk = post(url, {'extra_credentials': [credential.pk]}, admin, expect=201).data['job']
 
@@ -239,7 +236,6 @@ def test_modify_extra_credentials_at_launch(get, post, job_template, admin,
 @pytest.mark.django_db
 def test_overwrite_ssh_credential_at_launch(get, post, job_template, admin, machine_credential):
     job_template.credentials.add(machine_credential)
-    job_template.save()
 
     new_cred = machine_credential
     new_cred.pk = None
@@ -256,7 +252,6 @@ def test_overwrite_ssh_credential_at_launch(get, post, job_template, admin, mach
 @pytest.mark.django_db
 def test_ssh_password_prompted_at_launch(get, post, job_template, admin, machine_credential):
     job_template.credentials.add(machine_credential)
-    job_template.save()
     machine_credential.inputs['password'] = 'ASK'
     machine_credential.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
@@ -265,16 +260,17 @@ def test_ssh_password_prompted_at_launch(get, post, job_template, admin, machine
 
 
 @pytest.mark.django_db
-def test_prompted_credential_removed_on_launch(get, post, job_template, admin, machine_credential):
+def test_prompted_credential_replaced_on_launch(get, post, job_template, admin, machine_credential):
     # If a JT has a credential that needs a password, but the launch POST
-    # specifies {"credentials": []}, don't require any passwords
-    job_template.credentials.add(machine_credential)
-    job_template.save()
-    machine_credential.inputs['password'] = 'ASK'
-    machine_credential.save()
+    # specifies credential that does not require any passwords
+    cred2 = Credential(name='second-cred', inputs=machine_credential.inputs,
+                       credential_type=machine_credential.credential_type)
+    cred2.inputs['password'] = 'ASK'
+    cred2.save()
+    job_template.credentials.add(cred2)
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     resp = post(url, {}, admin, expect=400)
-    resp = post(url, {'credentials': []}, admin, expect=201)
+    resp = post(url, {'credentials': [machine_credential.pk]}, admin, expect=201)
     assert 'job' in resp.data
 
 
@@ -297,7 +293,6 @@ def test_ssh_credential_with_password_at_launch(get, post, job_template, admin, 
 @pytest.mark.django_db
 def test_vault_password_prompted_at_launch(get, post, job_template, admin, vault_credential):
     job_template.credentials.add(vault_credential)
-    job_template.save()
     vault_credential.inputs['vault_password'] = 'ASK'
     vault_credential.save()
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
@@ -337,14 +332,14 @@ def test_extra_creds_prompted_at_launch(get, post, job_template, admin, net_cred
 @pytest.mark.django_db
 def test_invalid_mixed_credentials_specification(get, post, job_template, admin, net_credential):
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
-    post(url, {'credentials': [net_credential.pk], 'extra_credentials': [net_credential.pk]}, admin, expect=400)
+    post(url=url, data={'credentials': [net_credential.pk], 'extra_credentials': [net_credential.pk]},
+         user=admin, expect=400)
 
 
 @pytest.mark.django_db
 def test_rbac_default_credential_usage(get, post, job_template, alice, machine_credential):
     job_template.credentials.add(machine_credential)
     job_template.execute_role.members.add(alice)
-    job_template.save()
 
     # alice can launch; she's not adding any _new_ credentials, and she has
     # execute access to the JT
@@ -352,9 +347,11 @@ def test_rbac_default_credential_usage(get, post, job_template, alice, machine_c
     post(url, {'credential': machine_credential.pk}, alice, expect=201)
 
     # make (copy) a _new_ SSH cred
-    new_cred = machine_credential
-    new_cred.pk = None
-    new_cred.save()
+    new_cred = Credential.objects.create(
+        name=machine_credential.name,
+        credential_type=machine_credential.credential_type,
+        inputs=machine_credential.inputs
+    )
 
     # alice is attempting to launch with a *different* SSH cred, but
     # she does not have access to it, so she cannot launch

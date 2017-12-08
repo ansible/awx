@@ -3,10 +3,12 @@
 
 # Python
 #import urlparse
+import logging
 
 # Django
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 #from django import settings as tower_settings
 
 # AWX
@@ -23,8 +25,9 @@ from awx.main.models.rbac import (
 )
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
+from awx.main.models.jobs import LaunchTimeConfig
+from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
-from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 from copy import copy
@@ -32,10 +35,11 @@ from urlparse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
-CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit']
+
+logger = logging.getLogger('awx.main.models.workflow')
 
 
-class WorkflowNodeBase(CreatedModifiedModel):
+class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
     class Meta:
         abstract = True
         app_label = 'main'
@@ -66,78 +70,6 @@ class WorkflowNodeBase(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    # Prompting-related fields
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    credential = models.ForeignKey(
-        'Credential',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    char_prompts = JSONField(
-        blank=True,
-        default={}
-    )
-
-    def prompts_dict(self):
-        data = {}
-        if self.inventory:
-            data['inventory'] = self.inventory.pk
-        if self.credential:
-            data['credential'] = self.credential.pk
-        for fd in CHAR_PROMPTS_LIST:
-            if fd in self.char_prompts:
-                data[fd] = self.char_prompts[fd]
-        return data
-
-    @property
-    def job_type(self):
-        return self.char_prompts.get('job_type', None)
-
-    @property
-    def job_tags(self):
-        return self.char_prompts.get('job_tags', None)
-
-    @property
-    def skip_tags(self):
-        return self.char_prompts.get('skip_tags', None)
-
-    @property
-    def limit(self):
-        return self.char_prompts.get('limit', None)
-
-    def get_prompts_warnings(self):
-        ujt_obj = self.unified_job_template
-        if ujt_obj is None:
-            return {}
-        prompts_dict = self.prompts_dict()
-        if not hasattr(ujt_obj, '_ask_for_vars_dict'):
-            if prompts_dict:
-                return {'ignored': {'all': 'Cannot use prompts on unified_job_template that is not type of job template'}}
-            else:
-                return {}
-
-        accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
-
-        ignored_dict = {}
-        for fd in ignored_fields:
-            ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
-        scan_errors = ujt_obj._extra_job_type_errors(accepted_fields)
-        ignored_dict.update(scan_errors)
-
-        data = {}
-        if ignored_dict:
-            data['ignored'] = ignored_dict
-        return data
 
     def get_parent_nodes(self):
         '''Returns queryset containing all parents of this node'''
@@ -152,7 +84,8 @@ class WorkflowNodeBase(CreatedModifiedModel):
         Return field names that should be copied from template node to job node.
         '''
         return ['workflow_job', 'unified_job_template',
-                'inventory', 'credential', 'char_prompts']
+                'extra_data', 'survey_passwords',
+                'inventory', 'credentials', 'char_prompts']
 
     def create_workflow_job_node(self, **kwargs):
         '''
@@ -160,11 +93,20 @@ class WorkflowNodeBase(CreatedModifiedModel):
         '''
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
+            if field_name == 'credentials':
+                continue
             if field_name in kwargs:
                 create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
                 create_kwargs[field_name] = getattr(self, field_name)
-        return WorkflowJobNode.objects.create(**create_kwargs)
+        new_node = WorkflowJobNode.objects.create(**create_kwargs)
+        if self.pk:
+            allowed_creds = self.credentials.all()
+        else:
+            allowed_creds = []
+        for cred in allowed_creds:
+            new_node.credentials.add(cred)
+        return new_node
 
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
@@ -186,11 +128,17 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         is not allowed to access
         '''
         create_kwargs = {}
+        allowed_creds = []
         for field_name in self._get_workflow_job_field_names():
+            if field_name == 'credentials':
+                for cred in self.credentials.all():
+                    if user.can_access(Credential, 'use', cred):
+                        allowed_creds.append(cred)
+                continue
             item = getattr(self, field_name, None)
             if item is None:
                 continue
-            if field_name in ['inventory', 'credential']:
+            if field_name == 'inventory':
                 if not user.can_access(item.__class__, 'use', item):
                     continue
             if field_name in ['unified_job_template']:
@@ -198,7 +146,10 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
                     continue
             create_kwargs[field_name] = item
         create_kwargs['workflow_job_template'] = workflow_job_template
-        return self.__class__.objects.create(**create_kwargs)
+        new_node = self.__class__.objects.create(**create_kwargs)
+        for cred in allowed_creds:
+            new_node.credentials.add(cred)
+        return new_node
 
 
 class WorkflowJobNode(WorkflowNodeBase):
@@ -237,10 +188,14 @@ class WorkflowJobNode(WorkflowNodeBase):
         # reject/accept prompted fields
         data = {}
         ujt_obj = self.unified_job_template
-        if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
-            accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
-            for fd in ujt_obj._extra_job_type_errors(accepted_fields):
-                accepted_fields.pop(fd)
+        if ujt_obj is not None:
+            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
+            if errors:
+                logger.info(_('Bad launch configuration starting template {template_pk} as part of '
+                              'workflow {workflow_pk}. Errors:\n{error_text}').format(
+                                  template_pk=ujt_obj.pk,
+                                  workflow_pk=self.pk,
+                                  error_text=errors))
             data.update(accepted_fields)  # missing fields are handled in the scheduler
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
@@ -251,18 +206,20 @@ class WorkflowJobNode(WorkflowNodeBase):
         if aa_dict:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
+        # process password list
         password_dict = {}
         if '_ansible_no_log' in aa_dict:
             for key in aa_dict:
                 if key != '_ansible_no_log':
                     password_dict[key] = REPLACE_STR
-        workflow_job_survey_passwords = self.workflow_job.survey_passwords
-        if workflow_job_survey_passwords:
-            password_dict.update(workflow_job_survey_passwords)
+        if self.workflow_job.survey_passwords:
+            password_dict.update(self.workflow_job.survey_passwords)
+        if self.survey_passwords:
+            password_dict.update(self.survey_passwords)
         if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
-        extra_vars = {}
+        extra_vars = data.get('extra_vars', {})
         if aa_dict:
             functional_aa_dict = copy(aa_dict)
             functional_aa_dict.pop('_ansible_no_log', None)
@@ -273,7 +230,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         if extra_vars:
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
-        data['launch_type'] = 'workflow'
+        data['_eager_fields'] = {'launch_type': 'workflow'}
         return data
 
 
@@ -370,7 +327,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
         base_list.remove('labels')
         return (base_list +
-                ['survey_spec', 'survey_enabled', 'organization'])
+                ['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization'])
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -398,27 +355,26 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
-    def _accept_or_ignore_job_kwargs(self, extra_vars=None, **kwargs):
-        # Only accept allowed survey variables
-        ignored_fields = {}
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
         prompted_fields = {}
-        prompted_fields['extra_vars'] = {}
-        ignored_fields['extra_vars'] = {}
-        extra_vars = parse_yaml_or_json(extra_vars)
-        if self.survey_enabled and self.survey_spec:
-            survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-            for key in extra_vars:
-                if key in survey_vars:
-                    prompted_fields['extra_vars'][key] = extra_vars[key]
-                else:
-                    ignored_fields['extra_vars'][key] = extra_vars[key]
-        else:
-            prompted_fields['extra_vars'] = extra_vars
+        rejected_fields = {}
+        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}))
+        if accepted_vars:
+            prompted_fields['extra_vars'] = accepted_vars
+        if rejected_vars:
+            rejected_fields['extra_vars'] = rejected_vars
 
-        return prompted_fields, ignored_fields
+        # WFJTs do not behave like JTs, it can not accept inventory, credential, etc.
+        bad_kwargs = kwargs.copy()
+        bad_kwargs.pop('extra_vars', None)
+        if bad_kwargs:
+            rejected_fields.update(bad_kwargs)
+            for field in bad_kwargs:
+                errors_dict[field] = _('Field is not allowed for use in workflows.')
+
+        return prompted_fields, rejected_fields, errors_dict
 
     def can_start_without_user_input(self):
-        '''Return whether WFJT can be launched without survey passwords.'''
         return not bool(
             self.variables_needed_to_start or
             self.node_templates_missing() or
@@ -431,8 +387,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     def node_prompts_rejected(self):
         node_list = []
         for node in self.workflow_job_template_nodes.prefetch_related('unified_job_template').all():
-            node_prompts_warnings = node.get_prompts_warnings()
-            if node_prompts_warnings:
+            ujt_obj = node.unified_job_template
+            if ujt_obj is None:
+                continue
+            prompts_dict = node.prompts_dict()
+            accepted_fields, ignored_fields, prompts_errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
+            if prompts_errors:
                 node_list.append(node.pk)
         return node_list
 

@@ -5,21 +5,19 @@ import re
 import logging
 import datetime
 import dateutil.rrule
-import json
 
 # Django
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware, get_default_timezone
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
+from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.schedule')
 
@@ -53,7 +51,7 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
         return ScheduleQuerySet(self.model, using=self._db)
 
 
-class Schedule(CommonModel):
+class Schedule(CommonModel, LaunchTimeConfig):
 
     class Meta:
         app_label = 'main'
@@ -92,50 +90,20 @@ class Schedule(CommonModel):
         editable=False,
         help_text=_("The next time that the scheduled action will run.")
     )
-    extra_data = JSONField(
-        blank=True,
-        default={}
-    )
-
-    # extra_data is actually a string with a JSON payload in it. This
-    # is technically OK because a string is a valid JSON. One day we will
-    # enforce non-string JSON.
-    def _clean_extra_data_system_jobs(self):
-        extra_data = self.extra_data
-        if not isinstance(extra_data, dict):
-            try:
-                extra_data = json.loads(self.extra_data)
-            except Exception:
-                raise ValidationError(_("Expected JSON"))
-
-        if extra_data and 'days' in extra_data:
-            try:
-                if type(extra_data['days']) is bool:
-                    raise ValueError
-                if float(extra_data['days']) != int(extra_data['days']):
-                    raise ValueError
-                days = int(extra_data['days'])
-                if days < 0:
-                    raise ValueError
-            except ValueError:
-                raise ValidationError(_("days must be a positive integer."))
-        return self.extra_data
-
-    def clean_extra_data(self):
-        if not self.unified_job_template:
-            return self.extra_data
-
-        # Compare class by string name because it's hard to import SystemJobTemplate
-        if type(self.unified_job_template).__name__ is not 'SystemJobTemplate':
-            return self.extra_data
-
-        return self._clean_extra_data_system_jobs()
 
     def __unicode__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
     def get_absolute_url(self, request=None):
         return reverse('api:schedule_detail', kwargs={'pk': self.pk}, request=request)
+
+    def get_job_kwargs(self):
+        config_data = self.prompts_dict()
+        job_kwargs, rejected, errors = self.unified_job_template._accept_or_ignore_job_kwargs(**config_data)
+        if errors:
+            logger.info('Errors creating scheduled job: {}'.format(errors))
+        job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
+        return job_kwargs
 
     def update_computed_fields(self):
         future_rs = dateutil.rrule.rrulestr(self.rrule, forceset=True)

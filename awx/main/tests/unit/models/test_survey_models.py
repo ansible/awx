@@ -11,6 +11,53 @@ from awx.main.models import (
 )
 
 
+@pytest.mark.survey
+class SurveyVariableValidation:
+
+    def test_survey_answers_as_string(self, job_template_factory):
+        objects = job_template_factory(
+            'job-template-with-survey',
+            survey=[{'variable': 'var1', 'type': 'text'}],
+            persisted=False)
+        jt = objects.job_template
+        user_extra_vars = json.dumps({'var1': 'asdf'})
+        accepted, ignored, errors = jt._accept_or_ignore_job_kwargs(extra_vars=user_extra_vars)
+        assert ignored.get('extra_vars', {}) == {}, [str(element) for element in errors]
+        assert 'var1' in accepted['extra_vars']
+
+    def test_job_template_survey_variable_validation(self, job_template_factory):
+        objects = job_template_factory(
+            'survey_variable_validation',
+            organization='org1',
+            inventory='inventory1',
+            credential='cred1',
+            persisted=False,
+        )
+        obj = objects.job_template
+        obj.survey_spec = {
+            "description": "",
+            "spec": [
+                {
+                    "required": True,
+                    "min": 0,
+                    "default": "5",
+                    "max": 1024,
+                    "question_description": "",
+                    "choices": "",
+                    "variable": "a",
+                    "question_name": "Whosyourdaddy",
+                    "type": "text"
+                }
+            ],
+            "name": ""
+        }
+        obj.survey_enabled = True
+        accepted, rejected, errors = obj.accept_or_ignore_variables({"a": 5})
+        assert rejected == {"a": 5}
+        assert accepted == {}
+        assert str(errors[0]) == "Value 5 for 'a' expected to be a string."
+
+
 @pytest.fixture
 def job(mocker):
     ret = mocker.MagicMock(**{

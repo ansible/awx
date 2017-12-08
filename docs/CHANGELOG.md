@@ -54,3 +54,11 @@
   which backward compatibility support for 3.1 use pattern
   [[#6915](https://github.com/ansible/ansible-tower/issues/6915)]
 * Allow relaunching jobs on a subset of hosts, by status.[[#219](https://github.com/ansible/awx/issues/219)]
+* Added `ask_variables_on_launch` to workflow JTs.[[#497](https://github.com/ansible/awx/issues/497)]
+* Added `diff_mode` and `verbosity` fields to WFJT nodes.[[#555](https://github.com/ansible/awx/issues/555)]
+* Block creation of schedules when variables not allowed are given.
+  Block similar cases for WFJT nodes.[[#478](https://github.com/ansible/awx/issues/478)]
+* Changed WFJT node `credential` to many-to-many `credentials`.
+* Saved Launch-time configurations feature - added WFJT node promptable fields to schedules,
+  added `extra_data` to WFJT nodes, added "schedule this job" endpoint.
+  [[#169](https://github.com/ansible/awx/issues/169)]

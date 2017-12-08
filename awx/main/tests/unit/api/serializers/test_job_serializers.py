@@ -16,13 +16,13 @@ from awx.main.models import (
 
 
 def mock_JT_resource_data():
-    return ({}, [])
+    return {}
 
 
 @pytest.fixture
 def job_template(mocker):
     mock_jt = mocker.MagicMock(pk=5)
-    mock_jt.resource_validation_data = mock_JT_resource_data
+    mock_jt.validation_errors = mock_JT_resource_data
     return mock_jt
 
 
