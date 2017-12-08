@@ -558,8 +558,8 @@ def get_current_user_from_drf_request(sender, **kwargs):
     drf_request on the underlying Django Request object.
     '''
     request = get_current_request()
-    drf_request = getattr(request, 'drf_request', None)
-    return (getattr(drf_request, 'user', False), 0)
+    drf_request_user = getattr(request, 'drf_request_user', False)
+    return (drf_request_user, 0)
 
 
 @receiver(pre_delete, sender=Organization)
