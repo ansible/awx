@@ -33,7 +33,7 @@ This interface is more like computer graphics than it is building a styled text
 document with interactive components.  A good grasp of cartesian coordinates,
 trigonometry, and analytic geometry are useful when working with this code.
 
-See: <https://en.wikipedia.org/wiki/Analytic_geometry>
+* See: <https://en.wikipedia.org/wiki/Analytic_geometry>
 
 **Design choices**
 
@@ -59,27 +59,22 @@ sufficiently.
 Instead of creating many AngularJS controllers and directives the networking UI
 uses one big controller to hold the state of the entire UI.  Normally this is
 an anti-pattern in AngularJS.  Here is was necessary to scale to a large number
-of on-screen elements. 
-
-The on-screen elements inherit the controllers from it's parent objects, which 
-establishes a hierarchy of inheritance from the top view down to the individual 
-elements on the canvas. The controllers are defined in `network.ui.controller.js`, 
-starting w/ the `null_controller`. 
+of on-screen elements.
 
 **AngularJS Directives**
 
-See: <https://docs.angularjs.org/guide/directive>
+* See: <https://docs.angularjs.org/guide/directive>
 
 AngularJS directives are used in the networking UI application using the element
 matching style and the templateUrl option to include a template. A majority of
 the directives are defined in `src/network.ui.app.js`.
 
-See: `src/network.ui.app.js`
+* See: `src/network.ui.app.js`
 ```
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
 ```
 
-See: `src/device.detail.directive.js`
+* See: `src/device.detail.directive.js`
 ```
 function deviceDetail () {
   return { restrict: 'A', templateUrl: '/static/network_ui/widgets/device_detail.html' };
@@ -88,7 +83,7 @@ function deviceDetail () {
 
 **AngularJS Templates**
 
-See: <https://docs.angularjs.org/guide/templates>
+* See: <https://docs.angularjs.org/guide/templates>
 
 Normal AngularJS templates are used with the networking UI controller.  
 The templates can be foundin `/widgets`. Child
@@ -97,17 +92,17 @@ scopes are created for sub-templates using the `ng-repeat` directive.
 In this example the `awx-net-link` directive expects a Link model to be
 passed to it.  The Link model is defined in the `src/models.js` file.
 
-See: `src/link.directive.js`
-See: `widgets/link.html`
+* See: `src/link.directive.js`
+* See: `widgets/link.html`
 
-See: `widgets/network_ui.html`:
+* See: `widgets/network_ui.html`:
 ```
     <g ng-repeat="link in links">
     <g awx-net-link></g>
     </g>
 ```
 
-See: `src/models.js`
+* See: `src/models.js`
 ```
 function Link(id, from_device, to_device, from_interface, to_interface) {
     this.id = id;
@@ -126,7 +121,7 @@ function Link(id, from_device, to_device, from_interface, to_interface) {
 The following example sets the toolbox.selected_item value to the variable 
 item which the directives used in the child scope expect to be set.
 
-See: `widgets/inventory_toolbox.html`
+* See: `widgets/inventory_toolbox.html`
 ```
 <g ng-repeat="item in [toolbox.selected_item]">
 ```
@@ -143,11 +138,11 @@ AngularJS templates.
 
 **SVG (Scalable Vector Graphics)**
 
-See: <https://developer.mozilla.org/en-US/docs/Web/SVG>
+* See: <https://developer.mozilla.org/en-US/docs/Web/SVG>
 
 The network UI is built as one large SVG element (the SVG canvas) with other
 graphical elements (lines, circles, rectangles, paths, and text) absolutely
-placed within the outer most SVG element.  The browser is not involved with
+positioned within the outer most SVG element.  The browser is not involved with
 layout of the elements within the SVG.   Each "widget" in the network UI needs
 to track or calculate its own position on the SVG canvas. The z-level of the
 elements are determined by the draw order on the canvas which is defined
@@ -175,6 +170,64 @@ Events do not flow backwards through this pipeline.
 
 Clicking on an SVG element will not send the event to that SVG element directly
 from the browser.   It must be routed through the network UI code first.
+
+
+** SVG Primer **
+
+SVG uses tags to define graphical elements just like HTML uses tags to define
+text documents.   Commonly use tags include g, circle, rect, path, and text.
+SVG elements are absolutely positioned within an SVG canvas.  The group tag, g,
+is similar to the div tag in HTML.  Text in SVG must be contained in the text
+tag and cannot be outside tags as in HTML.
+
+* See: <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>
+
+Each tag that describes a visual element requires X and Y coordinates as input
+to position that element. These coordinates are relative to position of the SVG
+canvas. The network UI uses the entire page height and width for the SVG canvas
+so that the position on the SVG on the canvas is the same as the position on
+the page.
+
+
+SVG supports graphical transformations on several tags to allow relative
+positioning of sub-elements which makes calculating the X and Y positions
+easier.   The network UI uses transformations often for this purpose.
+Transformations that are often used here are the translate, scale, and rotate
+transforms.  Translate moves the origin of the coordinate system to a new point
+for the sub-elements.  Scale multiplies the size of the units in a coordinate
+system by some factor.  Rotate performs a rotation about the origin by some
+number of degrees.  These functions are converted to a matrix operation on the
+coordinate system which can be efficiently applied.  It is often useful to use
+the transforms to simplify the calculations of X and Y coordinates instead of
+calculating those values in javascript. Also these transforms make developing
+widgets much easier since we only need to keep up with a single point for the
+widget and all other points can be relatively positioned from that point.
+Hard-coding positions in widget development is the normal case since transforms
+can change the size and position of the widget when the widget is applied to
+the canvas.  Only when necessary should we calculate positions of parts of a
+widget in javascript.
+
+* See: <https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform>
+
+
+SVG paths are a mini-language for defining graphics operations in one tag. It
+is often used to create shapes that are more complex than lines, rectangles,
+and circles.  It is very useful for defining arcs.
+
+* See: <https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths>
+
+**SVG and CSS**
+
+CSS and SVG work really nicely together for setting style, colors, and fonts in SVG.
+The SVG uses different attributes for setting colors than does HTML elements.
+Most SVG elements use `stroke` and `fill` to define the colors and `stroke-width`
+to define the width of lines and curves. The attributes `font-family` and `font-size`
+are used to set the font for text elements in SVG.  The network UI uses the Less
+CSS compiler and BEM naming conventions to simplify and organize CSS.
+
+* See: src/style.less
+* See: <http://lesscss.org/>
+* See: <http://getbem.com/introduction/>
 
 **Events**
 
