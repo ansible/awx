@@ -238,3 +238,66 @@ interactions with the virtual graphical canvas that are not supported by the
 browser.  "Simple" things like buttons and text fields have to be handled by
 the network UI code instead of relying on the browser to route the mouse click
 to the appropriate object.
+
+
+The following code captures all the mouse movements, mouse clicks, mouse wheel,
+and touch events and sends them to the corresponding network UI controller functions.
+
+* See: widgets/network_ui.html
+
+```
+    <svg id="frame" class="NetworkUI"
+         ng-attr-height="{{graph.height}}"
+         ng-attr-width="{{graph.width}}"
+         ng-mousedown="onMouseDown($event)"
+         ng-mouseup="onMouseUp($event)"
+         ng-mouseenter="onMouseEnter($event)"
+         ng-mouseleave="onMouseLeave($event)"
+         ng-mousemove="onMouseMove($event)"
+         ng-mouseover="onMouseOver($event)"
+         ng-touchstart="onTouchStart($event)"
+         ng-touchmove="onTouchMove($event)"
+         ng-touchend="onTouchEnd($event)"
+         ng-tap="onTap($event)"
+         msd-wheel="onMouseWheel($event, $delta, $deltaX, $deltaY)">
+```
+
+
+Key events are captured by the following code:
+
+* See: src/network.ui.controller.js
+
+```
+    $document.bind("keydown", $scope.onKeyDown);
+```
+
+**Describing Behavior with Finite State Machines**
+
+To implement complex UI interactions predictably and correctly is a tough
+problem.  Often the problem is solved by creating a large library of generic
+reusable components that are rigorously tested and hardened by a large group of
+developers over a period of several years. Eventually the myriad bugs are
+hammered out at great expense.  Only then can the UI components be reliably
+used.  This code does not follow that approach.
+
+The workflows this code supports require very specific UI components that are
+not found in generic libraries.  The interactions we want to support are not
+available in generic libraries.  This code develops from scratch only the
+components that are necessary to implement the workflows of designing and
+operating networks of devices.
+
+This code defines those elements using finite state machines to process the
+events from user input and other software components.  Programming with finite
+state machines allows us to define formally complex behavior that would
+normally be informally defined by branches, functions, object interactions, and
+object inheritance.  Formal definition eliminates much of the unexpected
+behavior that causes defects in the software.
+
+* See: <https://en.wikipedia.org/wiki/Finite-state_machine>
+
+Finite state machines can be represented as a directed graph of labeled nodes and labeled edges
+which can be both be represented visually and in machine readable code.
+
+The network UI uses finite state machines to describe what happens when the software receives
+an input.   
+
