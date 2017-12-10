@@ -299,5 +299,9 @@ Finite state machines can be represented as a directed graph of labeled nodes an
 which can be both be represented visually and in machine readable code.
 
 The network UI uses finite state machines to describe what happens when the software receives
-an input.   
+an input.
+
+* See: designs/README.md
+
+
 
