@@ -158,6 +158,7 @@ module.exports = {
 
         // client.expect.element('div.spinny').visible;
         client.expect.element('div.spinny').not.visible;
+        client.waitForAngular();
 
         client.expect.element('#job_template_tab').enabled;
 
@@ -217,8 +218,8 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
     },
     'check user roles list for unsanitized content': client => {
-        const { admin_role } = data.jobTemplate.summary_fields.object_roles;
-        const itemDelete = `#permissions_table tr[id="${admin_role.id}"] #delete-action`;
+        const adminRole = data.jobTemplate.summary_fields.object_roles.admin_role;
+        const itemDelete = `#permissions_table tr[id="${adminRole.id}"] #delete-action`;
 
         client.expect.element('#permissions_tab').visible;
         client.expect.element('#permissions_tab').enabled;
@@ -234,7 +235,7 @@ module.exports = {
         client.expect.element('div[ui-view="related"]').visible;
         client.expect.element('div[ui-view="related"] smart-search input').enabled;
 
-        client.sendKeys('div[ui-view="related"] smart-search input', `id:${admin_role.id}`);
+        client.sendKeys('div[ui-view="related"] smart-search input', `id:${adminRole.id}`);
         client.sendKeys('div[ui-view="related"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').not.visible;
