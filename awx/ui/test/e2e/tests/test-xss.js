@@ -158,6 +158,7 @@ module.exports = {
 
         // client.expect.element('div.spinny').visible;
         client.expect.element('div.spinny').not.visible;
+        client.waitForAngular();
 
         client.expect.element('#job_template_tab').enabled;
 
