@@ -301,13 +301,11 @@ which can be both be represented visually and in machine readable code.
 The network UI uses finite state machines to describe what happens when the software receives
 an input.
 
-* See: designs/README.md
-
 **Link FSM**
 
 ![Link FSM](designs/link.png)
 
-For example the link FSM describes how to connect devices with links. In the FSM
+For example the link FSM describes how to connect devices with links. The FSM
 diagram above maps out the states and events that will select a device to connect and another
 device to connect to.  FSMs traditionally start in the `Start` state.  We get a free transition
 to the `Ready` state by handling the special event called `start` and changing state to `Ready`.
@@ -319,6 +317,26 @@ mouse is over another device otherwise it goes back to the `Ready` state since t
 the connecting operation.   Finally in the `Connected` state the FSM changes to the `Ready` state
 for free using the `start` event so that the user can connect another set of devices.
 
+* See: designs/link.yml
+* See: src/link.js
 
+The link FSM diagram has an equivalent machine readable representation in `designs/link.yml`. This
+representation is useful for comparing the current implementation in `src/link.js` to the design to see if they
+are out-of-sync.  If they are out-of-sync either the design or the implementation can be updated depending
+on if you are changing the design or implementation first.
+
+
+Tools are provided to facilitate the design-first and the implementation-first workflows.
+
+Design-First Workflow:
+
+
+Implementation-First Workflow:
+
+
+
+
+
+* See: designs/README.md
 
 
