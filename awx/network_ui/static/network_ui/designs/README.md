@@ -11,41 +11,43 @@ check that the implementations still match the designs.
 ![Null FSM](null.png)
 
 **Button FSM**
-![](button.png)
+![Button FSM](button.png)
 
 **Buttons FSM**
-![](buttons.png)
+![Buttons FSM](buttons.png)
 
 **Device Detail FSM**
-![](device_detail.png)
+![Device Detail FSM](device_detail.png)
 
 **Group FSM**
-![](group.png)
+![Group FSM](group.png)
 
 **Hot Keys FSM**
-![](hotkeys.png)
+![Hot Keys FSm](hotkeys.png)
 
 **Link FSM**
-![](link.png)
+![Link](link.png)
 
 **Mode FSM**
-![](mode.png)
+![Mode](mode.png)
 
 **Move FSM**
-![](move.png)
+![Move](move.png)
 
 **Rack FSM**
-![](rack.png)
+![Rack](rack.png)
 
 **Site FSM**
-![](site.png)
+![Site](site.png)
 
 **Stream FSM**
-![](stream.png)
+![Stream](stream.png)
 
 **Time FSM**
-![](time.png)
+![Time](time.png)
 
-![](toolbox.png)
+**Toolbox FSM**
+![Toolbox](toolbox.png)
 
-![](view.png)
+**View FSM**
+![View](view.png)
