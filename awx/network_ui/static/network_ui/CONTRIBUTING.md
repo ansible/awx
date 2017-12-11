@@ -69,12 +69,12 @@ AngularJS directives are used in the networking UI application using the element
 matching style and the templateUrl option to include a template. A majority of
 the directives are defined in `src/network.ui.app.js`.
 
-* See: `src/network.ui.app.js`
+* See: [src/network.ui.app.js](src/network.ui.app.js)
 ```
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
 ```
 
-* See: `src/device.detail.directive.js`
+* See: [src/device.detail.directive.js](src/device.detail.directive.js)
 ```
 function deviceDetail () {
   return { restrict: 'A', templateUrl: '/static/network_ui/widgets/device_detail.html' };
@@ -92,17 +92,17 @@ scopes are created for sub-templates using the `ng-repeat` directive.
 In this example the `awx-net-link` directive expects a Link model to be
 passed to it.  The Link model is defined in the `src/models.js` file.
 
-* See: `src/link.directive.js`
-* See: `widgets/link.html`
+* See: [src/link.directive.js](src/link.directive.js)
+* See: [widgets/link.html](widgets/link.html)
 
-* See: `widgets/network_ui.html`:
+* See: [widgets/network_ui.html](widgets/network_ui.html)
 ```
     <g ng-repeat="link in links">
     <g awx-net-link></g>
     </g>
 ```
 
-* See: `src/models.js`
+* See: [src/models.js](src/models.js)
 ```
 function Link(id, from_device, to_device, from_interface, to_interface) {
     this.id = id;
@@ -121,7 +121,7 @@ function Link(id, from_device, to_device, from_interface, to_interface) {
 The following example sets the toolbox.selected_item value to the variable 
 item which the directives used in the child scope expect to be set.
 
-* See: `widgets/inventory_toolbox.html`
+* See: [widgets/inventory_toolbox.html](widgets/inventory_toolbox.html)
 ```
 <g ng-repeat="item in [toolbox.selected_item]">
 ```
@@ -172,7 +172,7 @@ Clicking on an SVG element will not send the event to that SVG element directly
 from the browser.   It must be routed through the network UI code first.
 
 
-** SVG Primer **
+**SVG Primer **
 
 SVG uses tags to define graphical elements just like HTML uses tags to define
 text documents.   Commonly use tags include g, circle, rect, path, and text.
@@ -225,7 +225,7 @@ to define the width of lines and curves. The attributes `font-family` and `font-
 are used to set the font for text elements in SVG.  The network UI uses the Less
 CSS compiler and BEM naming conventions to simplify and organize CSS.
 
-* See: src/style.less
+* See: [src/style.less](src/style.less)
 * See: <http://lesscss.org/>
 * See: <http://getbem.com/introduction/>
 
@@ -243,7 +243,7 @@ to the appropriate object.
 The following code captures all the mouse movements, mouse clicks, mouse wheel,
 and touch events and sends them to the corresponding network UI controller functions.
 
-* See: widgets/network_ui.html
+* See: [widgets/network_ui.html](widgets/network_ui.html)
 
 ```
     <svg id="frame" class="NetworkUI"
@@ -265,7 +265,7 @@ and touch events and sends them to the corresponding network UI controller funct
 
 Key events are captured by the following code:
 
-* See: src/network.ui.controller.js
+* See: [src/network.ui.controller.js](src/network.ui.controller.js)
 
 ```
     $document.bind("keydown", $scope.onKeyDown);
@@ -318,7 +318,7 @@ the connecting operation.   Finally in the `Connected` state the FSM changes to 
 for free using the `start` event so that the user can connect another set of devices.
 
 * See: [designs/link.yml](designs/link.yml)
-* See: src/link.js
+* See: [src/link.js](src/link.js)
 
 The link FSM diagram has an equivalent machine readable representation in `designs/link.yml`. This
 representation is useful for comparing the current implementation in `src/link.js` to the design to see if they
@@ -328,15 +328,15 @@ on if you are changing the design or implementation first.
 
 Tools are provided to facilitate the design-first and the implementation-first workflows.
 
-Design-First Workflow:
+**Design-First Workflow**
 
 
-Implementation-First Workflow:
+**Implementation-First Workflow**
 
 
 
 
 
-* See: designs/README.md
+* See: [designs/README.md](designs/README.md)
 
 
