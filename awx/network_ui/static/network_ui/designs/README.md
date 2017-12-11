@@ -10,10 +10,9 @@ check that the implementations still match the designs.
 **Machine Readable FSM Schema**
 
 The machine readable FSM schema contains three top-level elements: `name`, `states`, and `transitions`.
-The `name` element is a string.
-The `states` element contains a list of `state` elements which have attributes `id`, `label`, and `x`, and `y`.
-The `transitions` element contains a list of `transition` elements which have attributes `from_state`,
-`to_state`, and `label`.
+* The `name` element is a string.
+* The `states` element contains a list of `state` elements which have attributes `id`, `label`, and `x`, and `y`.
+* The `transitions` element contains a list of `transition` elements which have attributes `from_state`, `to_state`, and `label`.
 
 
 **Design Diagrams**
