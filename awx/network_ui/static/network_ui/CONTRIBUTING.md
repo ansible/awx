@@ -317,7 +317,7 @@ mouse is over another device otherwise it goes back to the `Ready` state since t
 the connecting operation.   Finally in the `Connected` state the FSM changes to the `Ready` state
 for free using the `start` event so that the user can connect another set of devices.
 
-* See: designs/link.yml
+* See: [designs/link.yml](designs/link.yml)
 * See: src/link.js
 
 The link FSM diagram has an equivalent machine readable representation in `designs/link.yml`. This
