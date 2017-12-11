@@ -46,6 +46,7 @@ from awx.main.utils import (
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
     has_model_field_prefetched, extract_ansible_vars)
 from awx.main.utils.filters import SmartFilter
+from awx.main.redact import REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -3028,6 +3029,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     diff_mode = serializers.NullBooleanField(required=False, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None,
                                         choices=VERBOSITY_CHOICES)
+    exclude_errors = ()
 
     class Meta:
         fields = ('*', 'extra_data', 'inventory', # Saved launch-time config fields
@@ -3055,10 +3057,47 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 attrs.pop(field_name)
         return mock_obj
 
+    def to_representation(self, obj):
+        ret = super(LaunchConfigurationBaseSerializer, self).to_representation(obj)
+        if obj is None:
+            return ret
+        if 'extra_data' in ret and obj.survey_passwords:
+            ret['extra_data'] = obj.display_extra_data()
+        return ret
+
     def validate(self, attrs):
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
-        # Verify that fields do not violate template's prompting rules
-        attrs['char_prompts'] = self._build_mock_obj(attrs).char_prompts
+
+        # Build unsaved version of this config, use it to detect prompts errors
+        ujt = None
+        if 'unified_job_template' in attrs:
+            ujt = attrs['unified_job_template']
+        elif self.instance:
+            ujt = self.instance.unified_job_template
+        mock_obj = self._build_mock_obj(attrs)
+        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(
+            _exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+
+        # Launch configs call extra_vars extra_data for historical reasons
+        if 'extra_vars' in errors:
+            errors['extra_data'] = errors.pop('extra_vars')
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        # Model `.save` needs the container dict, not the psuedo fields
+        attrs['char_prompts'] = mock_obj.char_prompts
+
+        # Insert survey_passwords to track redacted variables
+        # TODO: perform encryption on save
+        if 'extra_data' in attrs:
+            extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
+            if hasattr(ujt, 'survey_password_variables'):
+                password_dict = {}
+                for key in ujt.survey_password_variables():
+                    if key in extra_data:
+                        password_dict[key] = REPLACE_STR
+                if not self.instance or password_dict != self.instance.survey_passwords:
+                    attrs['survey_passwords'] = password_dict
         return attrs
 
 
@@ -3069,6 +3108,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    exclude_errors = ('required')  # required variables may be provided by WFJT or on launch
 
     class Meta:
         model = WorkflowJobTemplateNode
@@ -3082,8 +3122,10 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
         res['always_nodes'] = self.reverse('api:workflow_job_template_node_always_nodes_list', kwargs={'pk': obj.pk})
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
-        if obj.workflow_job_template:
+        try:
             res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail', kwargs={'pk': obj.workflow_job_template.pk})
+        except WorkflowJobTemplate.DoesNotExist:
+            pass
         return res
 
     def build_field(self, field_name, info, model_class, nested_depth):
@@ -3094,32 +3136,28 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
                                              self.credential)
         return super(WorkflowJobTemplateNodeSerializer, self).build_field(field_name, info, model_class, nested_depth)
 
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(WorkflowJobTemplateNodeSerializer, self).build_relational_field(field_name, relation_info)
+        # workflow_job_template is read-only unless creating a new node.
+        if self.instance and field_name == 'workflow_job_template':
+            field_kwargs['read_only'] = True
+            field_kwargs.pop('queryset', None)
+        return field_class, field_kwargs
+
     def validate(self, attrs):
         deprecated_fields = {}
         if 'credential' in attrs:  # TODO: remove when v2 API is deprecated
             deprecated_fields['credential'] = attrs.pop('credential')
         view = self.context.get('view')
-        if self.instance is None and ('workflow_job_template' not in attrs or
-                                      attrs['workflow_job_template'] is None):
-            raise serializers.ValidationError({
-                "workflow_job_template": _("Workflow job template is missing during creation.")
-            })
+        attrs = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+        ujt_obj = None
         if 'unified_job_template' in attrs:
             ujt_obj = attrs['unified_job_template']
-        ujt_obj = None
-        if self.instance:
+        elif self.instance:
             ujt_obj = self.instance.unified_job_template
         if isinstance(ujt_obj, (WorkflowJobTemplate)):
             raise serializers.ValidationError({
                 "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
-        attrs = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
-        if ujt_obj is None:
-            ujt_obj = attrs.get('unified_job_template')
-        accepted, rejected, errors = ujt_obj._accept_or_ignore_job_kwargs(**self._build_mock_obj(attrs).prompts_dict())
-        # Do not raise survey validation errors
-        errors.pop('variables_needed_to_start', None)
-        if errors:
-            raise serializers.ValidationError(errors)
         if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
             cred = deprecated_fields['credential']
             attrs['credential'] = cred
@@ -3467,8 +3505,9 @@ class JobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         template = self.context.get('template')
 
-        template._is_manual_launch = True  # signal to make several error types non-blocking
-        accepted, rejected, errors = template._accept_or_ignore_job_kwargs(**attrs)
+        accepted, rejected, errors = template._accept_or_ignore_job_kwargs(
+            _exclude_errors=['prompts', 'required'],  # make several error types non-blocking
+            **attrs)
         self._ignored_fields = rejected
 
         if template.inventory and template.inventory.pending_deletion is True:
@@ -3544,7 +3583,9 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         obj = self.instance
 
-        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(**attrs)
+        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(
+            _exclude_errors=['required'],
+            **attrs)
 
         WFJT_extra_vars = obj.extra_vars
         attrs = super(WorkflowJobLaunchSerializer, self).validate(attrs)
@@ -3693,19 +3734,6 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer):
                 'Inventory sources with `update_on_project_update` cannot be scheduled. '
                 'Schedule its source project `{}` instead.'.format(value.source_project.name)))
         return value
-
-    def validate(self, attrs):
-        ujt = None
-        if 'unified_job_template' in attrs:
-            ujt = attrs['unified_job_template']
-        elif self.instance:
-            ujt = self.instance.unified_job_template
-        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(**self._build_mock_obj(attrs).prompts_dict())
-        if 'extra_vars' in errors:
-            errors['extra_data'] = errors.pop('extra_vars')
-        if errors:
-            raise serializers.ValidationError(errors)
-        return super(ScheduleSerializer, self).validate(attrs)
 
     # We reject rrules if:
     # - DTSTART is not include

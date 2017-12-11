@@ -350,9 +350,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 not variables_needed)
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
+        exclude_errors = kwargs.pop('_exclude_errors', [])
         prompted_data = {}
         rejected_data = {}
-        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}))
+        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
+            kwargs.get('extra_vars', {}),
+            _exclude_errors=exclude_errors)
         if accepted_vars:
             prompted_data['extra_vars'] = accepted_vars
         if rejected_vars:
@@ -389,10 +392,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 rejected_data[field_name] = new_value
                 # Not considered an error for manual launch, to support old
                 # behavior of putting them in ignored_fields and launching anyway
-                if not getattr(self, '_is_manual_launch', False):
+                if 'prompts' not in exclude_errors:
                     errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
 
-        if not getattr(self, '_is_manual_launch', False) and self.passwords_needed_to_start:
+        if 'prompts' not in exclude_errors and self.passwords_needed_to_start:
             errors_dict['passwords_needed_to_start'] = _(
                 'Saved launch configurations cannot provide passwords needed to start.')
 
@@ -1565,7 +1568,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             rejected_data['extra_vars'] = rejected_vars
         return (prompted_data, rejected_data, errors)
 
-    def _accept_or_ignore_variables(self, data, errors):
+    def _accept_or_ignore_variables(self, data, errors, _exclude_errors=()):
         '''
         Unlike other templates, like project updates and inventory sources,
         system job templates can accept a limited number of fields

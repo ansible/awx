@@ -13,6 +13,10 @@ from awx.main.models import (
     WorkflowJobTemplateNode,
     WorkflowJob,
     WorkflowJobNode,
+    WorkflowJobTemplate,
+    Project,
+    Inventory,
+    JobTemplate
 )
 
 
@@ -148,6 +152,46 @@ class TestWorkflowJobTemplateNodeSerializerCharPrompts():
         assert internal_value['job_type'] is None
         WFJT_serializer.instance.job_type = None
         assert WFJT_serializer.instance.limit == 'webservers'
+
+
+@mock.patch('awx.api.serializers.BaseSerializer.validate', lambda self, attrs: attrs)
+class TestWorkflowJobTemplateNodeSerializerSurveyPasswords():
+
+    @pytest.fixture
+    def jt(self, survey_spec_factory):
+        return JobTemplate(
+            name='fake-jt',
+            survey_enabled=True,
+            survey_spec=survey_spec_factory(variables='var1', default_type='password'),
+            project=Project('fake-proj'), project_id=42,
+            inventory=Inventory('fake-inv'), inventory_id=42
+        )
+
+    def test_set_survey_passwords_create(self, jt):
+        serializer = WorkflowJobTemplateNodeSerializer()
+        wfjt = WorkflowJobTemplate(name='fake-wfjt')
+        attrs = serializer.validate({
+            'unified_job_template': jt,
+            'workflow_job_template': wfjt,
+            'extra_data': {'var1': 'secret_answer'}
+        })
+        assert 'survey_passwords' in attrs
+        assert 'var1' in attrs['survey_passwords']
+
+    def test_set_survey_passwords_modify(self, jt):
+        serializer = WorkflowJobTemplateNodeSerializer()
+        wfjt = WorkflowJobTemplate(name='fake-wfjt')
+        serializer.instance = WorkflowJobTemplateNode(
+            workflow_job_template=wfjt,
+            unified_job_template=jt
+        )
+        attrs = serializer.validate({
+            'unified_job_template': jt,
+            'workflow_job_template': wfjt,
+            'extra_data': {'var1': 'secret_answer'}
+        })
+        assert 'survey_passwords' in attrs
+        assert 'var1' in attrs['survey_passwords']
 
 
 @mock.patch('awx.api.serializers.WorkflowJobTemplateNodeSerializer.get_related', lambda x,y: {})
