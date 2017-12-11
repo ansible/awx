@@ -330,10 +330,53 @@ Tools are provided to facilitate the design-first and the implementation-first w
 
 **Design-First Workflow**
 
+In the design-first workflow, first change the design and then update the implementation to match.
+In this workflow we use the `fsm-designer` tool to change the FSM diagram, then export the
+FSM to a file, then generate a skeleton of the javascript code that implements the FSM.  Then
+development of the logic inside the event handlers can begin with a clear understanding of the
+state of the system and what that event handler should do.
+
+Use `tools/fsm_generate_diffs.py` to generate the new skeleton code:
+
+```
+./tools/fsm_generate_diffs.py designs/link.yml ./src/link.js
+```
+
+This will print out code for additional states or transitions needed in the implementation.
+Copy those lines into the implementation code and fill out the event handler functions.
+
 
 **Implementation-First Workflow**
 
+In the implementation-first workflow, first change the code and then update the
+design to reflect the changes.  This workflow is useful when the design doesn't
+survive its impact with reality and the code adds additional requirements to
+the design.  Often in usabilty testing we find that we forgot to consider
+handling a certain interaction or user input in a state.  We can quickly add
+that transition to the code and test it out.   Once confirmed that the interaction
+is correct we can update the design and run `./tools/fsm-diff` to make sure the two
+are in sync.
 
+
+Use `./extract.js` and `tools/fsm-diff` to compare the implementation to the design
+and add any additional transitions to the FSM design.
+
+```
+./extract.js ./src/link.js > ./extracted/link.yml
+./tools/fsm-diff designs/link.yml extracted/link.yml
+```
+
+
+**Validating That Design Matches Implementation**
+
+Use the `make extract` and `make diff` Makefile targets to do a mass extact of the
+FSMs from the implementation and a mass comparison against the designs.  Take
+note of any differences between design and implementation and update the appropriate
+files as outlined in the workflows above.
+
+```
+make extract; make diff
+```
 
 
 
