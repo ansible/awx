@@ -2196,7 +2196,11 @@ class RunSystemJob(BaseTask):
     def build_args(self, system_job, **kwargs):
         args = ['awx-manage', system_job.job_type]
         try:
-            json_vars = json.loads(system_job.extra_vars)
+            # System Job extra_vars can be blank, must be JSON if not blank
+            if system_job.extra_vars == '':
+                json_vars = {}
+            else:
+                json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
                 args.extend(['--days', str(json_vars.get('days', 60))])
             if 'dry_run' in json_vars and json_vars['dry_run'] and system_job.job_type != 'cleanup_facts':
@@ -2211,7 +2215,7 @@ class RunSystemJob(BaseTask):
                 if 'granularity' in json_vars:
                     args.extend(['--granularity', str(json_vars['granularity'])])
         except Exception:
-            logger.exception("%s Failed to parse system job", instance.log_format)
+            logger.exception("%s Failed to parse system job", system_job.log_format)
         return args
 
     def get_stdout_handle(self, instance):
