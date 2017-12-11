@@ -49,9 +49,13 @@
     }
 
     &-event {
-        padding: 0 10px;
-        word-wrap: break-word;
-        white-space: pre-wrap;
+        .at-mixin-event();
+    }
+
+    &-event--host {
+        .at-mixin-event();
+
+        cursor: pointer;
     }
 
     &-time {
@@ -79,4 +83,11 @@
             }
         }
     }
+}
+
+.at-mixin-event() {
+    padding: 0 10px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+
 }

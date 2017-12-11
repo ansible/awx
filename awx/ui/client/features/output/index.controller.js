@@ -33,11 +33,19 @@ function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
     $scope = _$scope_;
     ansi = new Ansi();
 
-    vm = this || {};
     const events = job.get('related.job_events.results');
     const html = $sce.trustAsHtml(parseEvents(events));
 
+    vm = this || {};
+
+    $scope.ns = 'jobs';
+    $scope.jobs = {
+        modal: {}
+    };
+
     vm.toggle = toggle;
+    vm.showHostDetails = showHostDetails;
+
     vm.menu = {
         expand: menuExpand,
         scrollToBottom: menuScrollToBottom,
@@ -64,13 +72,13 @@ function menuExpand () {
 function menuScrollToBottom () {
     const container = $('.at-Stdout-container')[0];
 
-    container.scrollTo(0, container.scrollHeight);
+    container.scrollTop = container.scrollHeight;
 }
 
 function menuScrollToTop () {
     const container = $('.at-Stdout-container')[0];
 
-    container.scrollTo(0, 0);
+    container.scrollTop = 0;
 }
 
 function parseEvents (events) {
@@ -123,13 +131,19 @@ function createRecord (ln, lines, event) {
     }
 
     const info = {
+        id: event.id,
         line: ln + 1,
         uuid: event.uuid,
         level: event.event_level,
         start: event.start_line,
         end: event.end_line,
-        isTruncated: (event.end_line - event.start_line) > lines.length
+        isTruncated: (event.end_line - event.start_line) > lines.length,
+        isHost: typeof event.host === 'number'
     };
+
+    if (info.isHost) {
+        console.log(event);
+    }
 
     if (event.parent_uuid) {
         info.parents = getParentEvents(event.parent_uuid);
@@ -147,11 +161,13 @@ function createRecord (ln, lines, event) {
         }
 
         if (event.parent_uuid) {
-            if (record[event.parent_uuid].children &&
-                !record[event.parent_uuid].children.includes(event.uuid)) {
-                record[event.parent_uuid].children.push(event.uuid);
-            } else {
-                record[event.parent_uuid].children = [event.uuid];
+            if (record[event.parent_uuid]) {
+                if (record[event.parent_uuid].children &&
+                    !record[event.parent_uuid].children.includes(event.uuid)) {
+                    record[event.parent_uuid].children.push(event.uuid);
+                } else {
+                    record[event.parent_uuid].children = [event.uuid];
+                }
             }
         }
     }
@@ -171,21 +187,21 @@ function getParentEvents (uuid, list) {
 
     if (record[uuid]) {
         list.push(uuid);
-    }
 
-    if (record[uuid].parents) {
-        list = list.concat(record[uuid].parents);
+        if (record[uuid].parents) {
+            list = list.concat(record[uuid].parents);
+        }
     }
 
     return list;
 }
 
 function createRow (current, ln, content) {
-    let expand = '';
-    let timestamp = '';
-    let toggleRow = '';
-    let classList = '';
     let id = '';
+    let timestamp = '';
+    let tdToggle = '';
+    let tdEvent = '';
+    let classList = '';
 
     content = content || '';
 
@@ -196,8 +212,11 @@ function createRow (current, ln, content) {
     if (current) {
         if (current.isParent && current.line === ln) {
             id = current.uuid;
-            expand = '<i class="fa fa-chevron-down can-toggle"></i>';
-            toggleRow = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${current.uuid}')">${expand}</td>`;
+            tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-chevron-down can-toggle"></i></td>`;
+        }
+
+        if (current.isHost) {
+            tdEvent = `<td class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}')">${content}</td>`;
         }
 
         if (current.time && current.line === ln) {
@@ -209,8 +228,12 @@ function createRow (current, ln, content) {
         }
     }
 
-    if (!toggleRow) {
-        toggleRow = '<td class="at-Stdout-toggle"></td>';
+    if (!tdEvent) {
+        tdEvent = `<td class="at-Stdout-event">${content}</td>`;
+    }
+
+    if (!tdToggle) {
+        tdToggle = '<td class="at-Stdout-toggle"></td>';
     }
 
     if (!ln) {
@@ -219,9 +242,9 @@ function createRow (current, ln, content) {
 
     return `
         <tr id="${id}" class="${classList}">
-            ${toggleRow}
+            ${tdToggle}
             <td class="at-Stdout-line">${ln}</td>
-            <td class="at-Stdout-event">${content}</td>
+            ${tdEvent}
             <td class="at-Stdout-time">${timestamp}</td>
         </tr>`;
 }
@@ -230,6 +253,10 @@ function getTime (created) {
     const date = new Date(created);
 
     return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+function showHostDetails (id) {
+    $scope.jobs.modal.show('title', `test${id}`);
 }
 
 function toggle (uuid) {
