@@ -325,7 +325,6 @@ representation is useful for comparing the current implementation in `src/link.j
 are out-of-sync.  If they are out-of-sync either the design or the implementation can be updated depending
 on if you are changing the design or implementation first.
 
-
 Tools are provided to facilitate the design-first and the implementation-first workflows.
 
 **Design-First Workflow**
@@ -378,6 +377,45 @@ files as outlined in the workflows above.
 make extract; make diff
 ```
 
+
+**Finite State Machine Implementation**
+
+* See: <https://en.wikipedia.org/wiki/Flyweight_pattern>
+* See: <https://en.wikipedia.org/wiki/Singleton_pattern>
+
+The implementation of a finite state machine in the network UI is split into
+two parts: the declaration of the states and the event-handlers which may cause
+FSM transitions using `controller.changeState`.
+
+**FSM States**
+
+States are implemented using an object-oriented style in ES5 using the
+flyweight and singleton patterns. This means that the state objects store no
+information on themselves and that there is only one instance of each state
+class.  All states should provide a `start` and `end` function which will be
+called when a FSM state is entered and exited respectively. Subclassing
+[fsm.State](src/fsm.js#36) will provide empty `start` and `end` functions that
+can be overridden as necessary.
+
+The state variable is stored on another object called an FSMController (which
+should not be confused with an AngularJS controller).
+
+* See: [src/link.js](src/link.js#L33)
+
+This code block defines the `_Connecting` class in ES5 style and uses the
+`inherits` NPM module to define that the class is a subclass of `_State`.  We
+also create a single instance (a singleton) of this class named `Connecting`.
+
+```
+function _Connecting () {
+    this.name = 'Connecting';
+}
+inherits(_Connecting, _State);
+var Connecting = new _Connecting();
+exports.Connecting = Connecting;
+```
+
+**FSM Event Handlers and Transitions**
 
 
 * See: [designs/README.md](designs/README.md)
