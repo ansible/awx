@@ -411,6 +411,16 @@ in the event handlers. In the network UI often the `scope` is a reference
 to the network UI AngularJS controller's scope. In the case of a button
 the scope is a reference to the `Button` model.
 
+* See: [src/models.js](src/models.js#302)
+
+The following code creates a new instance of `FSMController` using the
+`Button` model as the scope and the `button.Start` state as the initial
+state.
+
+```
+    this.fsm = new fsm.FSMController(this, button.Start, null);
+```
+
 * See: [src/link.js](src/link.js#L40)
 
 This code block defines the `_Selecting` class in ES5 style and uses the
