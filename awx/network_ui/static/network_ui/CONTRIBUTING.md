@@ -243,7 +243,7 @@ to the appropriate object.
 The following code captures all the mouse movements, mouse clicks, mouse wheel,
 and touch events and sends them to the corresponding network UI controller functions.
 
-* See: [widgets/network_ui.html](widgets/network_ui.html)
+* See: [widgets/network_ui.html](widgets/network_ui.html#L3)
 
 ```
     <svg id="frame" class="NetworkUI"
