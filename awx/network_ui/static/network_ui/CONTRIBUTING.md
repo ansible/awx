@@ -380,44 +380,83 @@ make extract; make diff
 
 **Finite State Machine Implementation**
 
-* See: <https://en.wikipedia.org/wiki/Flyweight_pattern>
-* See: <https://en.wikipedia.org/wiki/Singleton_pattern>
-
 The implementation of a finite state machine in the network UI is split into
 two parts: the declaration of the states and the event-handlers which may cause
 FSM transitions using `controller.changeState`.
 
 **FSM States**
 
+* See: <https://en.wikipedia.org/wiki/Flyweight_pattern>
+* See: <https://en.wikipedia.org/wiki/Singleton_pattern>
+
 States are implemented using an object-oriented style in ES5 using the
 flyweight and singleton patterns. This means that the state objects store no
 information on themselves and that there is only one instance of each state
 class.  All states should provide a `start` and `end` function which will be
 called when a FSM state is entered and exited respectively. Subclassing
-[fsm.State](src/fsm.js#36) will provide empty `start` and `end` functions that
+[fsm.State](src/fsm.js#L36) will provide empty `start` and `end` functions that
 can be overridden as necessary.
 
 The state variable is stored on another object called an FSMController (which
 should not be confused with an AngularJS controller).
 
-* See: [src/link.js](src/link.js#L33)
+* See: [src/link.js](src/link.js#L40)
 
-This code block defines the `_Connecting` class in ES5 style and uses the
+This code block defines the `_Selecting` class in ES5 style and uses the
 `inherits` NPM module to define that the class is a subclass of `_State`.  We
-also create a single instance (a singleton) of this class named `Connecting`.
+also create a single instance (a singleton) of this class named `Selecting`.
 
 ```
-function _Connecting () {
-    this.name = 'Connecting';
+function _Selecting () {
+    this.name = 'Selecting';
 }
-inherits(_Connecting, _State);
-var Connecting = new _Connecting();
-exports.Connecting = Connecting;
+inherits(_Selecting, _State);
+var Selecting = new _Selecting();
+exports.Selecting = Selecting;
 ```
 
 **FSM Event Handlers and Transitions**
 
+After all the states are defined the event handlers for those state classes can be defined.
+We do this to prevent forward references in the file.
+
+* See: [src/link.js](src/link.js#L134)
+
+In this code we define an event handler for the `MouseUp` event on the `Selecting` state. This
+code should select a single device if the mouse is over that device.  It should store
+that device somewhere and change to the `Connecting` state. The code below creates a new
+`Link` model and stores the `selected_device` in that object.  The `new_link` object is
+stored in the `controller.scope` for later use in the FSM.
+
+Event handlers must start with the prefix of `on` and a suffix of the name of the messsage
+type. The special functions `start` and `end` do not follow this rule nor do
+they receive a message.
+
+The event handler must also define its `transitions` as a list so that `./extract.js` can
+find them.
+
+```
+_Selecting.prototype.onMouseUp = function (controller) {
+
+    var selected_device = controller.scope.select_items(false).last_selected_device;
+    if (selected_device !== null) {
+        controller.scope.new_link = new models.Link(controller.scope.link_id_seq(), selected_device, null, null, null, true);
+        controller.scope.links.push(controller.scope.new_link);
+        controller.changeState(Connecting);
+    }
+};
+_Selecting.prototype.onMouseUp.transitions = ['Connecting'];
+
+```
 
 * See: [designs/README.md](designs/README.md)
+
+
+**Data Models**
+
+
+**Message Types**
+
+
 
 
