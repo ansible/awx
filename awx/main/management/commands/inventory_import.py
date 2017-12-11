@@ -85,10 +85,8 @@ class AnsibleInventoryLoader(object):
         env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = '1'
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        for python_ver in ["python2.7", "python2.6"]:
-            if os.path.isdir(os.path.join(venv_libdir, python_ver)):
-                env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
-                break
+        if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
+            env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
         return env
 
     def get_base_args(self):

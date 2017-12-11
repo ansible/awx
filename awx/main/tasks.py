@@ -622,10 +622,8 @@ class BaseTask(LogErrorsTask):
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        for python_ver in ["python2.7", "python2.6"]:
-            if os.path.isdir(os.path.join(venv_libdir, python_ver)):
-                env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
-                break
+        if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
+            env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
         # Add awx/lib to PYTHONPATH.
         if add_awx_lib:
             env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
