@@ -172,7 +172,7 @@ Clicking on an SVG element will not send the event to that SVG element directly
 from the browser.   It must be routed through the network UI code first.
 
 
-**SVG Primer **
+**SVG Primer**
 
 SVG uses tags to define graphical elements just like HTML uses tags to define
 text documents.   Commonly use tags include g, circle, rect, path, and text.
