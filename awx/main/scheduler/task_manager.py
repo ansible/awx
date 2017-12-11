@@ -479,6 +479,7 @@ class TaskManager():
                 if isolated:
                     new_status = 'error'
                 task.status = new_status
+                task.start_args = ''  # blank field to remove encrypted passwords
                 if isolated:
                     # TODO: cancel and reap artifacts of lost jobs from heartbeat
                     task.job_explanation += ' '.join((
@@ -493,7 +494,7 @@ class TaskManager():
                         'Celery, so it has been marked as failed.',
                     ))
                 try:
-                    task.save(update_fields=['status', 'job_explanation'])
+                    task.save(update_fields=['status', 'start_args', 'job_explanation'])
                 except DatabaseError:
                     logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
                     continue
