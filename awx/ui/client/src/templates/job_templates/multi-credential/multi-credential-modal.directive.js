@@ -17,23 +17,31 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                     scope.credentialKind = scope.selectedCredentials.machine && scope.selectedCredentials.machine.readOnly ? (scope.selectedCredentials.vault && scope.selectedCredentials.vault.readOnly ? "" + kinds.Network : "" + kinds.Vault) : "" + kinds.Machine;
 
                     scope.showModal = function() {
+                        scope.modalHidden = false;
                         $('#multi-credential-modal').modal('show');
                     };
 
-                    scope.destroyModal = function() {
+                    scope.hideModal = function() {
+                        scope.modalHidden = true;
                         scope.credentialKind = kinds.Machine;
                         $('#multi-credential-modal').modal('hide');
                     };
 
-                    scope.generateCredentialList = function() {
+                    scope.generateCredentialList = function(inputType = 'radio') {
                         let html = GenerateList.build({
                             list: scope.list,
-                            input_type: 'radio',
+                            input_type: inputType,
                             mode: 'lookup'
                         });
-                        $('#multi-credential-modal-body')
-                            .append($compile(html)(scope));
+
+                        $('#multi-credential-modal-body').append($compile(html)(scope));
+                        scope.listRendered = true;
                     };
+
+                    scope.destroyCredentialList = () => {
+                        $('#multi-credential-modal-body').empty();
+                        scope.listRendered = false;
+                    }
 
                     $('#multi-credential-modal').on('hidden.bs.modal', function () {
                         $('#multi-credential-modal').off('hidden.bs.modal');
@@ -129,9 +137,37 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                         $scope.allCredentialTypeOptions);
             };
 
+            const onCredentialKindChanged = (newValue, oldValue) => {
+                const newValueIsVault = (parseInt(newValue) === _.get($scope, 'credentialKinds.Vault'));
+                const oldValueIsVault = (parseInt(oldValue) === _.get($scope, 'credentialKinds.Vault'));
+                const isClosing = ((newValue !== oldValue) && $scope.modalHidden);
+
+                if ((oldValueIsVault || newValueIsVault) && !isClosing) {
+                    $scope.destroyCredentialList();
+                }
+
+                $scope.credential_queryset.page = 1;
+                $scope.credential_default_params.credential_type = parseInt($scope.credentialKind);
+                $scope.credential_queryset.credential_type = parseInt($scope.credentialKind);
+
+                qs.search(GetBasePath('credentials'), $scope.credential_default_params)
+                    .then(res => {
+                        $scope.credential_dataset = res.data;
+                        $scope.credentials = $scope.credential_dataset.results;
+
+                        if(!$scope.listRendered) {
+                            if (newValueIsVault) {
+                                $scope.generateCredentialList('checkbox');
+                            } else {
+                                $scope.generateCredentialList();
+                            }
+                            $scope.showModal();
+                        }
+                    });
+            };
+
             let init = function() {
-                $scope.originalSelectedCredentials = _.cloneDeep($scope
-                    .selectedCredentials);
+                $scope.originalSelectedCredentials = _.cloneDeep($scope.selectedCredentials);
                 $scope.credential_dataset = [];
                 $scope.credentials = $scope.credentials || [];
                 $scope.listRendered = false;
@@ -150,26 +186,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                     page_size: 5
                 };
 
-                $scope.$watch('credentialKind', function(){
-                    $scope.credential_queryset.page = 1;
-                    $scope.credential_default_params.credential_type = $scope
-                        .credential_queryset.credential_type = parseInt($scope
-                            .credentialKind);
-
-                    qs.search(GetBasePath('credentials'), $scope
-                        .credential_default_params)
-                            .then(res => {
-                                $scope.credential_dataset = res.data;
-                                $scope.credentials = $scope.credential_dataset
-                                    .results;
-
-                                if(!$scope.listRendered) {
-                                    $scope.generateCredentialList();
-                                    $scope.listRendered = true;
-                                    $scope.showModal();
-                                }
-                            });
-                });
+                $scope.$watch('credentialKind', onCredentialKindChanged);
 
                 $scope.$watchCollection('selectedCredentials.extra', () => {
                     if($scope.credentials && $scope.credentials.length > 0) {
@@ -299,12 +316,12 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
             $scope.cancelForm = function() {
                 $scope.selectedCredentials = $scope.originalSelectedCredentials;
                 $scope.credTags = $scope.credentialsToPost;
-                $scope.destroyModal();
+                $scope.hideModal();
             };
 
             $scope.saveForm = function() {
                 $scope.credentialsToPost = $scope.credTags;
-                $scope.destroyModal();
+                $scope.hideModal();
             };
         }]
     };
