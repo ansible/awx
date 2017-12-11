@@ -329,11 +329,13 @@ Tools are provided to facilitate the design-first and the implementation-first w
 
 **Design-First Workflow**
 
-In the design-first workflow, first change the design and then update the implementation to match.
-In this workflow we use the `fsm-designer` tool to change the FSM diagram, then export the
-FSM to a file, then generate a skeleton of the javascript code that implements the FSM.  Then
-development of the logic inside the event handlers can begin with a clear understanding of the
-state of the system and what that event handler should do.
+In the design-first workflow, first change the design and then update the
+implementation to match.  In this workflow we use the
+[fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg) tool to
+change the FSM diagram, then export the FSM to a file, then generate a skeleton
+of the javascript code that implements the FSM.  Then development of the logic
+inside the event handlers can begin with a clear understanding of the state of
+the system and what that event handler should do.
 
 Use `tools/fsm_generate_diffs.py` to generate the new skeleton code:
 
@@ -471,17 +473,61 @@ _Selecting.prototype.onMouseUp.transitions = ['Connecting'];
 
 ```
 
+**FSM Designs**
+
+All the finite state machines for the network UI have been designed using the
+[fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg) tool
+and their designs are stored in the `designs` directory.
+
 * See: [designs/README.md](designs/README.md)
 
 
 **Data Models**
 
+There are two types of data structures used in the network UI: messages and
+models.  Models are used for long-lived data that is used to render the UI
+whereas messages are used for ephemeral data that is passed from one part of
+the system to another.  Models may be unpacked or serialized into messages that
+are sent to other FSMControllers in the client or sent over a websocket to the
+server.
+
+* See: [src/models.js](src/models.js)
 
 **Message Types**
 
+Message types define the structure of the data that is passed between the server
+and the client and between different parts of the client. This provides a known and
+well defined data structure that can be counted up on the code.
+
+* See: [src/messages.js](src/messages.js)
 
 **Message Passing**
 
+Messages are passed along channels between FSMs and over the websocket to and from the
+server. Messages from the server over the web socket and user input events from the web
+browser are passed to the `first_controller` where they are handled and discarded or
+passed along the chain of FSMControllers until they reach the end with `null_controller`
+or they are handled and the models are updated.
 
+* See: [src/network.ui.controller.js](src/network.ui.controller.js)
+
+The order (from first to last) of message handling is:
+
+* Mode FSM
+* Site Toolbox FSM
+* Rack Toolbox FSM
+* Inventory Toolbox FSM
+* App Toolbox FSM
+* Time FSM
+* Buttons FSM
+* Site FSM
+* Rack FSM
+* Group FSM
+* Stream FSM
+* Link FSM
+* Move FSM
+* Device Detail FSM
+* View FSM
+* Null FSM
 
 
