@@ -397,8 +397,19 @@ called when a FSM state is entered and exited respectively. Subclassing
 [fsm.State](src/fsm.js#L36) will provide empty `start` and `end` functions that
 can be overridden as necessary.
 
+* See: [src/fsm.js](src/fsm.js#L2)
+
 The state variable is stored on another object called an FSMController (which
-should not be confused with an AngularJS controller).
+should not be confused with an AngularJS controller). The FSMController holds
+all the state for each FSM instance.  If you need more than one copy of an FSM
+(for buttons for instance) use more than one instance of FSMController and
+pass the same FSM starting state to their constructor e.g. `button.Start`.
+Variables other than `state` should not be stored on the FSMController. A
+special variable named `scope` is useful for that. The scope can be used
+to hold arbitrary data that the FSM code will use in addition to the messages
+in the event handlers. In the network UI often the `scope` is a reference
+to the network UI AngularJS controller's scope. In the case of a button
+the scope is a reference to the `Button` model.
 
 * See: [src/link.js](src/link.js#L40)
 
@@ -426,7 +437,8 @@ In this code we define an event handler for the `MouseUp` event on the `Selectin
 code should select a single device if the mouse is over that device.  It should store
 that device somewhere and change to the `Connecting` state. The code below creates a new
 `Link` model and stores the `selected_device` in that object.  The `new_link` object is
-stored in the `controller.scope` for later use in the FSM.
+stored in the `controller.scope` for later use in the FSM. Finally the event handler changes
+state using `controller.changeState` to change the state of the FSM to `Connecting`.
 
 Event handlers must start with the prefix of `on` and a suffix of the name of the messsage
 type. The special functions `start` and `end` do not follow this rule nor do
@@ -456,6 +468,9 @@ _Selecting.prototype.onMouseUp.transitions = ['Connecting'];
 
 
 **Message Types**
+
+
+**Message Passing**
 
 
 
