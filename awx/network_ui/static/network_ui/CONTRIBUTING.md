@@ -303,8 +303,12 @@ an input.
 
 * See: designs/README.md
 
-For example the link FSM describes how to connect devices with links. In the following FSM
-diagram we map out the states and events that will select a device to connect and another
+**Link FSM**
+
+![Link FSM](designs/link.png)
+
+For example the link FSM describes how to connect devices with links. In the FSM
+diagram above maps out the states and events that will select a device to connect and another
 device to connect to.  FSMs traditionally start in the `Start` state.  We get a free transition
 to the `Ready` state by handling the special event called `start` and changing state to `Ready`.
 Then when the `NewLink` event is received from a hot key or button click the FSM changes
@@ -314,11 +318,6 @@ state the FSM changes to the `Connected` state when it receives a `MouseUp` even
 mouse is over another device otherwise it goes back to the `Ready` state since the user  cancelled
 the connecting operation.   Finally in the `Connected` state the FSM changes to the `Ready` state
 for free using the `start` event so that the user can connect another set of devices.
-
-** Link FSM**
-
-![Link FSM](designs/link.png)
-
 
 
 
