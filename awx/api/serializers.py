@@ -3109,7 +3109,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
         ujt_obj = None
         if self.instance:
             ujt_obj = self.instance.unified_job_template
-        if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
+        if isinstance(ujt_obj, (WorkflowJobTemplate)):
             raise serializers.ValidationError({
                 "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         attrs = super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
