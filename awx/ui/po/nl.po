@@ -4,14 +4,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2017-09-13 08:29+0000\n"
-"Last-Translator: Froebel Flores <froebel.flores@welocalize.com>\n"
+"PO-Revision-Date: 2017-12-06 02:10+0000\n"
+"Last-Translator: helena <info@helena.nl>\n"
 "Language-Team: Dutch\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Zanata 4.2.1\n"
+"X-Generator: Zanata 4.3.2\n"
 
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/edit/projects-edit.controller.js:288
@@ -33,7 +33,7 @@ msgid ""
 "only protocol (git://) does not use username or password information."
 msgstr ""
 "%sLet op:%s als u een SSH-protocol gebruikt voor GitHub of Bitbucket, voer "
-"dan alleen een SSH-sleutel in, voer geen gebruikersnaam in (behalve git). "
+"dan alleen een SSH-sleutel in. Voer geen gebruikersnaam in (behalve git). "
 "Daarnaast ondersteunen GitHub en Bitbucket geen wachtwoordauthenticatie bij "
 "gebruik van SSH. Het GIT-alleen-lezen-protocol (git://) gebruikt geen "
 "gebruikersnaam- of wachtwoordinformatie."
@@ -364,11 +364,11 @@ msgstr "Antwoordtype"
 #: client/src/templates/survey-maker/shared/question-definition.form.js:44
 #: client/src/templates/survey-maker/shared/question-definition.form.js:53
 msgid "Answer Variable Name"
-msgstr ""
+msgstr "Antwoord naam variabele"
 
 #: client/src/job-results/job-results.service.js:144
 msgid "Are you sure you want to cancel the job below?"
-msgstr ""
+msgstr "Weet je zeker dat u de onderstaande taak wilt annuleren?"
 
 #: client/src/credentials/list/credentials-list.controller.js:133
 msgid "Are you sure you want to delete the credential below?"
@@ -397,7 +397,7 @@ msgstr "Weet u zeker dat u onderstaand project wilt verwijderen?"
 
 #: client/src/templates/list/templates-list.controller.js:103
 msgid "Are you sure you want to delete the template below?"
-msgstr ""
+msgstr "Weet je zeker dat u het onderstaande sjabloon wilt verwijderen?"
 
 #: client/src/users/list/users-list.controller.js:90
 msgid "Are you sure you want to delete the user below?"
@@ -698,7 +698,7 @@ msgstr "Annuleren"
 
 #: client/src/job-results/job-results.service.js:142
 msgid "Cancel Job"
-msgstr ""
+msgstr "Taak annuleren"
 
 #: client/src/projects/list/projects-list.controller.js:241
 msgid "Cancel Not Allowed"
@@ -893,6 +893,9 @@ msgid ""
 "the inventory. Deleting this inventory source also deletes its associated "
 "groups and hosts."
 msgstr ""
+"Bevestig dat u de onderstaande inventarisbron permanent wilt verwijderen uit"
+" de inventaris. Wanneer u deze inventaris verwijdert, worden alle "
+"bijbehorende groepen en hosts eveneens verwijderd."
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-groups-labels/relatedGroupsLabelsList.directive.js:82
 msgid "Confirm the removal of the"
@@ -1141,7 +1144,7 @@ msgstr "Groep verwijderen"
 
 #: client/src/job-results/job-results.service.js:93
 msgid "Delete Job"
-msgstr ""
+msgstr "Taak verwijderen"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:175
 msgid "Delete Source"
@@ -1314,7 +1317,7 @@ msgstr "Diff-modus"
 
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups-disassociate.partial.html:6
 msgid "Disassociate Group From Group"
-msgstr ""
+msgstr "Groep van groep loskoppelen"
 
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.partial.html:6
 msgid "Disassociate Host"
@@ -1323,7 +1326,7 @@ msgstr "Host loskoppelen"
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts-disassociate.partial.html:6
 #: client/src/inventories-hosts/inventories/related/hosts/related/nested-groups/host-nested-groups-disassociate.partial.html:6
 msgid "Disassociate Host From Group"
-msgstr ""
+msgstr "Host van groep loskoppelen"
 
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.list.js:65
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.list.js:110
@@ -2255,6 +2258,12 @@ msgid ""
 "manually created group to promote them into, they will be left in the "
 "\"all\" default group for the inventory."
 msgstr ""
+"Als dit vakje aangevinkt is, worden alle groepen en hosts die eerder "
+"aanwezig waren in de externe bron, maar die nu verwijderd zijn, verwijderd "
+"uit de inventaris. Hosts en groepen die niet beheerd werden door de "
+"inventarisbron, worden omhoog verplaatst naar de volgende handmatig gemaakte"
+" groep. Als er geen handmatig gemaakte groep is waar ze naartoe kunnen "
+"worden verplaatst, blijven ze staan in de standaard inventarisgroep 'Alle'."
 
 #: client/src/templates/job_templates/job-template.form.js:267
 msgid "If enabled, run this playbook as an administrator."
@@ -2267,12 +2276,18 @@ msgid ""
 "If enabled, show the changes made by Ansible tasks, where supported. This is"
 " equivalent to Ansible&#x2019;s --diff mode."
 msgstr ""
+"Als deze mogelijkheid ingeschakeld is, worden de wijzigingen die aangebracht"
+" zijn door Ansible-taken weergegeven, waar ondersteund. Dit staat gelijk aan"
+" de diff-modus van Ansible."
 
 #: client/src/templates/job_templates/job-template.form.js:251
 msgid ""
 "If enabled, show the changes made by Ansible tasks, where supported. This is"
 " equivalent to Ansible&#x2019s --diff mode."
 msgstr ""
+"Als deze mogelijkheid ingeschakeld is, worden de wijzigingen die aangebracht"
+" zijn door Ansible-taken weergegeven, waar ondersteund. Dit staat gelijk aan"
+" de diff-modus van Ansible."
 
 #: client/src/templates/job_templates/job-template.form.js:291
 msgid "If enabled, simultaneous runs of this job template will be allowed."
@@ -2710,7 +2725,7 @@ msgstr "Afmelden"
 
 #: client/src/configuration/system-form/configuration-system.controller.js:225
 msgid "Log aggregator test failed. <br> Detail:"
-msgstr ""
+msgstr "Log aggregator-test mislukt. <br> Details:"
 
 #: client/src/configuration/system-form/configuration-system.controller.js:218
 msgid "Log aggregator test successful."
@@ -3102,6 +3117,9 @@ msgid ""
 "sub-groups must be disassociated directly from the sub-group level that they"
 " belong."
 msgstr ""
+"Let op: Alleen hosts die zich direct in deze groep bevinden, kunnen worden "
+"losgekoppeld. Hosts in subgroepen moeten rechtstreeks worden losgekoppeld "
+"van het subgroepniveau waar ze bij horen."
 
 #: client/src/notifications/notificationTemplates.form.js:288
 #: client/src/notifications/notificationTemplates.form.js:289
@@ -3336,7 +3354,7 @@ msgstr "VOORVERTONING"
 
 #: client/src/job-results/job-results.service.js:166
 msgid "PROCEED"
-msgstr ""
+msgstr "DOORGAAN"
 
 #: client/src/partials/job-template-details.html:2
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:73
@@ -3710,7 +3728,7 @@ msgstr "Selecteer een inventaris."
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:26
 msgid "Please select an organization before editing the host filter."
-msgstr ""
+msgstr "Selecteer een organisatie voordat u het hostfilter wijzigt."
 
 #: client/src/shared/form-generator.js:1186
 msgid "Please select at least one value."
@@ -3901,6 +3919,8 @@ msgid ""
 "Provide the named URL encoded name or id of the remote Tower inventory to be"
 " imported."
 msgstr ""
+"Voer de URL, versleutelde naam of ID of de externe inventaris in die "
+"geïmporteerd moet worden."
 
 #: client/src/templates/job_templates/job-template.form.js:311
 #: client/src/templates/job_templates/job-template.form.js:319
@@ -4946,7 +4966,7 @@ msgstr "SJABLONEN"
 
 #: client/src/instance-groups/instance-groups.list.js:8
 msgid "THERE ARE CURRENTLY NO INSTANCE GROUPS DEFINED"
-msgstr ""
+msgstr "ER ZIJN OP DIT MOMENT GEEN INSTANTIEGROEPEN GEDEFINIEERD"
 
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:104
 msgid "TIME"
@@ -5152,6 +5172,9 @@ msgid ""
 "separated (for example, foo_bar, user_id, host_name, etc.). Variable names "
 "with spaces are not allowed."
 msgstr ""
+"De voorgestelde indeling voor namen van variabelen: kleine letters en "
+"gescheiden door middel van een underscore (bijvoorbeeld foo_bar, user_id, "
+"host_name etc.) De naam van een variabele mag geen spaties bevatten."
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:124
 msgid "The time must be in HH24:MM:SS format."
@@ -5186,14 +5209,19 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:140
 msgid "There was an error deleting inventory source groups. Returned status:"
 msgstr ""
+"Er is iets misgegaan bij het verwijderen van de inventarisbrongroepen. "
+"Status:"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:130
 msgid "There was an error deleting inventory source hosts. Returned status:"
 msgstr ""
+"Er is iets misgegaan bij het verwijderen van de inventarisbrongroepen. "
+"Status:"
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:167
 msgid "There was an error deleting inventory source. Returned status:"
 msgstr ""
+"Er is iets misgegaan bij het verwijderen van de inventarisbron. Status:"
 
 #: client/src/configuration/configuration.controller.js:349
 msgid "There was an error resetting value. Returned status:"
@@ -5395,7 +5423,7 @@ msgstr "Kon niet indienen"
 
 #: client/lib/components/components.strings.js:52
 msgid "Unavailable to run jobs."
-msgstr ""
+msgstr "Kan geen taken uitvoeren."
 
 #: client/lib/components/components.strings.js:22
 msgid "Unexpected Error"
@@ -5461,7 +5489,7 @@ msgstr "TLS gebruiken"
 #: client/src/instance-groups/instances/instances-list.partial.html:21
 #: client/src/instance-groups/list/instance-groups-list.partial.html:32
 msgid "Used Capacity"
-msgstr ""
+msgstr "Gebruikte capaciteit"
 
 #: client/src/credentials/credentials.form.js:76
 msgid ""
@@ -5857,7 +5885,7 @@ msgstr "U heeft geen machtiging om een gebruiker toe te voegen."
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:28
 msgid "You do not have sufficient permissions to edit the host filter."
-msgstr ""
+msgstr "U hebt geen toestemming om het hostfilter te bewerken."
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:72
 #: client/src/configuration/configuration.controller.js:199

@@ -3,17 +3,18 @@
 # mkim <mkim@redhat.com>, 2017. #zanata
 # plocatelli <pm.account06@oceantranslations.com>, 2017. #zanata
 # trh01 <tr.rh01@oceantranslations.com>, 2017. #zanata
+# trrh02 <tr.rh02@oceantranslations.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2017-12-05 05:02+0000\n"
-"Last-Translator: trh01 <tr.rh01@oceantranslations.com>\n"
+"PO-Revision-Date: 2017-12-06 11:32+0000\n"
+"Last-Translator: trrh02 <tr.rh02@oceantranslations.com>\n"
 "Language-Team: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Zanata 4.2.1\n"
+"X-Generator: Zanata 4.3.2\n"
 
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/edit/projects-edit.controller.js:288
@@ -2274,13 +2275,12 @@ msgid ""
 "manually created group to promote them into, they will be left in the "
 "\"all\" default group for the inventory."
 msgstr ""
-"Si las opciones están marcadas, cualquier grupo o host que fueron "
-"presentados previamente en la fuente externa pero que ahora son eliminados "
-"del inventario de Tower. Los hosts y grupos que no fueron administrados por "
-"la fuente del inventario serán promovidos al siguiente grupo creado "
-"manualmente o, si no hay un grupo creado manualmente al que puedan ser "
-"promovidos, se los dejará en el grupo predeterminado \"Todo\" para el "
-"inventario."
+"Si las opciones están marcadas, cualquier grupo o host  que estuvo presente "
+"previamente en la fuente externa pero que ahora se eliminó, se eliminará del"
+" inventario de Tower. Los hosts y grupos que no fueron administrados por la "
+"fuente del inventario serán promovidos al siguiente grupo creado manualmente"
+" o, si no hay un grupo creado manualmente al que puedan ser promovidos, se "
+"los dejará en el grupo predeterminado \"Todo\" para el inventario."
 
 #: client/src/templates/job_templates/job-template.form.js:267
 msgid "If enabled, run this playbook as an administrator."

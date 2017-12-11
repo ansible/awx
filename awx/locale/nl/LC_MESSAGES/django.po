@@ -6,15 +6,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-30 20:23+0000\n"
-"PO-Revision-Date: 2017-08-31 08:53+0000\n"
-"Last-Translator: helena02 <vertaler2helena@gmail.com>\n"
+"PO-Revision-Date: 2017-12-06 02:18+0000\n"
+"Last-Translator: helena <info@helena.nl>\n"
 "Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Zanata 4.2.1\n"
+"X-Generator: Zanata 4.3.2\n"
 
 #: awx/api/authentication.py:67
 msgid "Invalid token header. No credentials provided."
@@ -84,7 +84,7 @@ msgstr "Lussen zijn niet toegestaan in filters, gedetecteerd in veld {}."
 #: awx/api/filters.py:171
 #, python-brace-format
 msgid "Invalid {field_name} id: {field_id}"
-msgstr ""
+msgstr "Ongeldig {field_name} id: {field_id}"
 
 #: awx/api/filters.py:302
 #, python-format
@@ -236,7 +236,7 @@ msgstr ""
 
 #: awx/api/serializers.py:1201
 msgid "Smart inventories must specify host_filter"
-msgstr ""
+msgstr "Smart-inventaris moet hostfilter specificeren"
 
 #: awx/api/serializers.py:1303
 #, python-format
@@ -355,6 +355,8 @@ msgid ""
 "You cannot change the credential type of the credential, as it may break the"
 " functionality of the resources using it."
 msgstr ""
+"U kunt het soort toegangsgegevens niet wijzigen, omdat dan de bronnen die "
+"deze gebruiken niet langer werken."
 
 #: awx/api/serializers.py:2191
 msgid ""
@@ -430,7 +432,7 @@ msgstr "Ongeldige taaksjabloon."
 
 #: awx/api/serializers.py:2708
 msgid "Neither credential nor vault credential provided."
-msgstr ""
+msgstr "Geen toegangsgegevens of toegangsgegevens voor de kluis ingevoerd."
 
 #: awx/api/serializers.py:2711
 msgid "Job Template Project is missing or undefined."
@@ -442,7 +444,7 @@ msgstr "De taaksjablooninventaris ontbreekt of is niet gedefinieerd."
 
 #: awx/api/serializers.py:2782 awx/main/tasks.py:2186
 msgid "{} are prohibited from use in ad hoc commands."
-msgstr ""
+msgstr "{} kunnen niet worden gebruikt in ad-hocopdrachten."
 
 #: awx/api/serializers.py:3008
 #, python-format
@@ -977,6 +979,7 @@ msgstr "'required' ontbreekt in enquêtevraag %s."
 msgid ""
 "Value {question_default} for '{variable_name}' expected to be a string."
 msgstr ""
+"Waarde {question_default} voor '{variable_name}' zou een string moeten zijn."
 
 #: awx/api/views.py:2928
 #, python-brace-format
@@ -984,6 +987,9 @@ msgid ""
 "$encrypted$ is reserved keyword for password questions and may not be used "
 "as a default for '{variable_name}' in survey question {question_position}."
 msgstr ""
+"$encrypted$ is een gereserveerd sleutelwoord voor het wachtwoord en mag niet"
+" als standaardwaarde worden gebruikt voor '{variable_name}' in enquêtevraag "
+"{question_position}."
 
 #: awx/api/views.py:3049
 msgid "Maximum number of labels for {} reached."
@@ -1037,6 +1043,7 @@ msgstr "Taaksjabloonschema's voor systeem"
 #: awx/api/views.py:3780
 msgid "POST not allowed for Job launching in version 2 of the api"
 msgstr ""
+"POST is niet toegestaan voor het openen van taken in versie 2 van de API"
 
 #: awx/api/views.py:3942
 msgid "Job Host Summaries List"
@@ -1261,6 +1268,8 @@ msgstr "Sla het becommentariëren van instellingen in bestanden over."
 #: awx/conf/management/commands/migrate_to_database_settings.py:62
 msgid "Skip migrating and only comment out settings in files."
 msgstr ""
+"Sla migreren over en maak alleen opmerkingen over de instellingen in "
+"bestanden."
 
 #: awx/conf/management/commands/migrate_to_database_settings.py:68
 msgid "Backup existing settings files with this suffix."
@@ -1361,7 +1370,7 @@ msgstr "Connectiviteitstest logboekregistratie"
 
 #: awx/main/access.py:44
 msgid "Resource is being used by running jobs."
-msgstr ""
+msgstr "Bron wordt gebruikt om taken uit te voeren."
 
 #: awx/main/access.py:237
 #, python-format
@@ -2378,7 +2387,7 @@ msgstr ""
 #: awx/main/models/credential.py:478
 #, python-format
 msgid "adding %s credential type"
-msgstr ""
+msgstr "%s soort toegangsgegevens toevoegen"
 
 #: awx/main/models/fact.py:25
 msgid "Host for the facts that the fact scan captured."
@@ -2615,11 +2624,11 @@ msgstr "OpenStack"
 
 #: awx/main/models/inventory.py:875
 msgid "oVirt4"
-msgstr ""
+msgstr "oVirt4"
 
 #: awx/main/models/inventory.py:876
 msgid "Ansible Tower"
-msgstr ""
+msgstr "Ansible Tower"
 
 #: awx/main/models/inventory.py:877
 msgid "Custom Script"
@@ -2725,6 +2734,8 @@ msgid ""
 "Credentials of type machine, source control, insights and vault are "
 "disallowed for custom inventory sources."
 msgstr ""
+"Toegangsgegevens van soort machine, bronbeheer, inzichten en kluis zijn niet"
+" toegestaan voor aangepaste inventarisbronnen."
 
 #: awx/main/models/inventory.py:1179
 #, python-format
@@ -4857,12 +4868,13 @@ msgstr ""
 
 #: awx/ui/conf.py:60
 msgid "Max Job Events Retreived by UI"
-msgstr ""
+msgstr "Het maximumaantal taakgebeurtenissen dat is opgehaald door de UI"
 
 #: awx/ui/conf.py:61
 msgid ""
 "Maximum number of job events for the UI to retreive within a single request."
 msgstr ""
+"Het maximumaantal taakgebeurtenissen dat de UI kan ophalen met één verzoek."
 
 #: awx/ui/fields.py:29
 msgid ""

@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Zanata 4.2.1\n"
+"X-Generator: Zanata 4.3.2\n"
 
 #: awx/api/authentication.py:67
 msgid "Invalid token header. No credentials provided."

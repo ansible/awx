@@ -5,14 +5,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2017-12-04 10:38+0000\n"
+"PO-Revision-Date: 2017-12-06 12:57+0000\n"
 "Last-Translator: asasaki <asasaki@redhat.com>\n"
 "Language-Team: Japanese\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-"X-Generator: Zanata 4.2.1\n"
+"X-Generator: Zanata 4.3.2\n"
 
 #: client/src/projects/add/projects-add.controller.js:153
 #: client/src/projects/edit/projects-edit.controller.js:288
@@ -130,7 +130,7 @@ msgstr "ソースの追加"
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:16
 msgid "ADD SURVEY PROMPT"
-msgstr "Survey  プロンプトの追加"
+msgstr "Survey プロンプトの追加"
 
 #: client/src/shared/smart-search/smart-search.partial.html:51
 msgid "ADDITIONAL INFORMATION"
@@ -5603,7 +5603,7 @@ msgstr "黄"
 msgid ""
 "You can create a job template <a "
 "href=\"#/templates/add_job_template\">here</a>."
-msgstr "ジョブテンプレートを<a href=\"#/templates/add_job_template\">ここ</a>に作成できます。"
+msgstr "ジョブテンプレートの作成は<a href=\"#/templates/add_job_template\">ここ</a>から実行できます。"
 
 #: client/src/projects/edit/projects-edit.controller.js:62
 msgid "You do not have access to view this property"
