@@ -51,7 +51,7 @@ _Ready.prototype.onNewLink = function (controller, msg_type, message) {
 
     controller.scope.clear_selections();
     controller.changeState(Selecting);
-    controller.next_controller.handle_message(msg_type, message);
+    controller.delegate_channel.send(msg_type, message);
 };
 _Ready.prototype.onNewLink.transitions = ['Selecting'];
 

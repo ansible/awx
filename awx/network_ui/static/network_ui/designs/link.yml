@@ -1,5 +1,5 @@
 finite_state_machine_id: 10
-name: src/link
+name: link_fsm
 states:
 - id: 5
   label: Selecting

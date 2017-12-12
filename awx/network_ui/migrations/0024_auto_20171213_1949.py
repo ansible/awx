@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations
+
+import yaml
+
+messages = yaml.load('''
 messages:
     - {msg_type: DeviceMove, fields: [msg_type, sender, id, x, y, previous_x, previous_y]}
     - {msg_type: DeviceCreate, fields: [msg_type, sender, id, x, y, name, type]}
@@ -45,3 +53,24 @@ messages:
     - {msg_type: FSMTrace, fields: [msg_type, order, sender, trace_id, fsm_name, from_state, to_state, recv_message_type]}
     - {msg_type: ChannelTrace, fields: [msg_type, sender, trace_id, from_fsm, to_fsm, sent_message_type]}
 
+                     ''')
+
+
+def populate_message_types(apps, schema_editor):
+
+    MessageType = apps.get_model('network_ui', 'MessageType')
+    for message in messages['messages']:
+        MessageType.objects.get_or_create(name=message['msg_type'])
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('network_ui', '0023_auto_20171213_1623'),
+    ]
+
+    operations = [
+        migrations.RunPython(
+            code=populate_message_types,
+        ),
+    ]
