@@ -20,6 +20,7 @@ import launchTemplate from '~components/launchTemplateButton/launchTemplateButto
 import layout from '~components/layout/layout.directive';
 import list from '~components/list/list.directive';
 import modal from '~components/modal/modal.directive';
+import outputStdout from '~components/output/stdout.directive';
 import panel from '~components/panel/panel.directive';
 import panelBody from '~components/panel/body.directive';
 import panelHeading from '~components/panel/heading.directive';
@@ -68,6 +69,7 @@ angular
     .directive('atRowItem', rowItem)
     .directive('atRowAction', rowAction)
     .directive('atModal', modal)
+    .directive('atOutputStdout', outputStdout)
     .directive('atPanel', panel)
     .directive('atPanelBody', panelBody)
     .directive('atPanelHeading', panelHeading)

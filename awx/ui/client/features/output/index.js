@@ -1,5 +1,10 @@
 import JobsStrings from '~features/output/jobs.strings';
 import IndexController from '~features/output/index.controller';
+import atLibModels from '~models';
+import atLibComponents from '~components';
+
+import JobsStrings from '~features/output/jobs.strings';
+import IndexController from '~features/output/index.controller';
 
 const indexTemplate = require('~features/output/index.view.html');
 
@@ -24,7 +29,7 @@ function JobsRun ($stateExtender, strings) {
             }
         },
         resolve: {
-            job: ['JobsModel', '$stateParams', (Jobs, $stateParams) => {
+            job: ['JobModel', '$stateParams', (Jobs, $stateParams) => {
                 const { id } = $stateParams;
 
                 return new Jobs('get', id)
@@ -42,7 +47,10 @@ function JobsRun ($stateExtender, strings) {
 JobsRun.$inject = ['$stateExtender', 'JobsStrings'];
 
 angular
-    .module(MODULE_NAME, [])
+    .module(MODULE_NAME, [
+        atLibModels,
+        atLibComponents
+    ])
     .controller('indexController', IndexController)
     .service('JobsStrings', JobsStrings)
     .run(JobsRun);

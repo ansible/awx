@@ -3,6 +3,7 @@ import hasAnsi from 'has-ansi';
 
 let vm;
 let ansi;
+let jobEvent;
 let $timeout;
 let $sce;
 let $compile;
@@ -26,19 +27,19 @@ const TIME_EVENTS = [
     EVENT_STATS_PLAY
 ];
 
-function JobsIndexController (job, _$sce_, _$timeout_, _$scope_, _$compile_) {
+function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, _$compile_) {
     $timeout = _$timeout_;
     $sce = _$sce_;
     $compile = _$compile_;
     $scope = _$scope_;
+
     ansi = new Ansi();
+    jobEvent = new JobEventModel();
 
     const events = job.get('related.job_events.results');
     const html = $sce.trustAsHtml(parseEvents(events));
 
-    vm = this || {};
-
-    $scope.ns = 'jobs';
+    vm = this || {}; $scope.ns = 'jobs';
     $scope.jobs = {
         modal: {}
     };
@@ -256,7 +257,17 @@ function getTime (created) {
 }
 
 function showHostDetails (id) {
-    $scope.jobs.modal.show('title', `test${id}`);
+    jobEvent.request('get', id)
+        .then(() => {
+            const title = jobEvent.get('host_name');
+
+            vm.host = {
+                menu: true,
+                stdout: jobEvent.get('stdout')
+            };
+
+            $scope.jobs.modal.show(title);
+        });
 }
 
 function toggle (uuid) {
@@ -280,6 +291,6 @@ function toggle (uuid) {
     }
 }
 
-JobsIndexController.$inject = ['job', '$sce', '$timeout', '$scope', '$compile'];
+JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];
 
 module.exports = JobsIndexController;

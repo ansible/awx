@@ -1,5 +1,5 @@
-let Base;
 let $http;
+let BaseModel;
 
 function getRelaunch (params) {
     const req = {
@@ -24,7 +24,7 @@ function postRelaunch (params) {
 }
 
 function JobModel (method, resource, config) {
-    Base.call(this, 'jobs');
+    BaseModel.call(this, 'jobs');
 
     this.Constructor = JobModel;
     this.postRelaunch = postRelaunch.bind(this);
@@ -33,8 +33,8 @@ function JobModel (method, resource, config) {
     return this.create(method, resource, config);
 }
 
-function JobModelLoader (BaseModel, _$http_) {
-    Base = BaseModel;
+function JobModelLoader (_BaseModel_, _$http_) {
+    BaseModel = _BaseModel_;
     $http = _$http_;
 
     return JobModel;
