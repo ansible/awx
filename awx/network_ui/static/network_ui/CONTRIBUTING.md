@@ -599,13 +599,14 @@ The order (from first to last) of message handling is:
 * Null FSM
 
 
-**Widget Development**
+Widget Development
+==================
 
 When developing a new UI widget follow this process:
 
-For a widget named `new widget` do:
+For a widget named `new widget` do this:
 
-* Add a template in `widgets` for the new widget with name `new.widget.html`
+* Add a template in `widgets` for the new widget with name `new_widget.html`
 * Add a directive that loads that template in `src` with name `new.widget.directive.js`
 * Register the directive with the network UI application in `src/network.ui.app.js` using name `awxNetNewWidget`
 * Add a tag that loads the directive into an existing template in `widgets`.  If you are not sure add it to `widgets/network_ui.html`.
@@ -625,5 +626,39 @@ For a widget named `new widget` do:
 
 **Widget Development Example**
 
+This example follows development of the inventory toolbox widget.
 
+* Add a template in `widgets` for the new widget with name [widgets/inventory_toolbox.html](widgets/inventory_toolbox.html)
+
+```
+<!-- Copyright (c) 2017 Red Hat, Inc. -->
+
+<g ng-if="toolbox.enabled">
+<rect class="NetworkUI__toolbox"
+      ng-attr-x="{{toolbox.x}}"
+      ng-attr-y="{{toolbox.y}}"
+      ng-attr-width="{{toolbox.width}}"
+      ng-attr-height="{{toolbox.height}}"
+      rx=5></rect>
+...
+</g> <!-- ng-if toolbox.enabled -->
+```
+
+* Add a directive that loads that template in `src` with name [src/inventory.toolbox.directive.js](src/inventory.toolbox.directive.js)
+
+```
+/* Copyright (c) 2017 Red Hat, Inc. */
+
+function inventoryToolbox () {
+  return { restrict: 'A', templateUrl: '/static/network_ui/widgets/inventory_toolbox.html' };
+}
+exports.inventoryToolbox = inventoryToolbox;
+```
+
+
+* Register the directive with the network UI application in [src/network.ui.app.js](src/network.ui.app.js#L61) using name `awxNetInventoryToolbox`
+
+```
+    .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
+```
 
