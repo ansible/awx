@@ -83,7 +83,7 @@ _Interface.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
     //controller.changeState(Device);
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 
 };
 _Interface.prototype.onMouseWheel.transitions = ['Device'];
@@ -110,7 +110,7 @@ _Site.prototype.onMouseWheel = function (controller, msg_type, $event) {
         controller.changeState(Rack);
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 
 };
 _Site.prototype.onMouseWheel.transitions = ['MultiSite', 'Rack'];
@@ -119,7 +119,7 @@ _Site.prototype.onMouseWheel.transitions = ['MultiSite', 'Rack'];
 
 _Process.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 
     //controller.changeState(Device);
 
@@ -145,7 +145,7 @@ _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
         controller.changeState(Site);
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
 
@@ -171,7 +171,7 @@ _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
         controller.changeState(Rack);
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 _Device.prototype.onMouseWheel.transitions = ['Process', 'Interface', 'Rack'];
 
@@ -200,6 +200,6 @@ _Rack.prototype.onMouseWheel = function (controller, msg_type, $event) {
         controller.changeState(Device);
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 _Rack.prototype.onMouseWheel.transitions = ['Site', 'Device'];

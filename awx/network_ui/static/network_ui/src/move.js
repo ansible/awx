@@ -79,7 +79,7 @@ exports.Placing = Placing;
 _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 
 _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
@@ -209,7 +209,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
     } else if (last_selected.last_selected_interface !== null) {
         controller.changeState(Selected1);
     } else {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1'];
@@ -345,7 +345,7 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
         }
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
 

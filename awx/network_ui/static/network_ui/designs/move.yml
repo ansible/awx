@@ -1,5 +1,5 @@
 finite_state_machine_id: 13
-name: move
+name: move_fsm
 states:
 - id: 9
   label: Disable
