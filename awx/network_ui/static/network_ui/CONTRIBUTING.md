@@ -571,11 +571,11 @@ The messages defined are [src/messages.js](src/messages.js):
 
 **Message Passing**
 
-Messages are passed along channels between FSMs and over the websocket to and from the
-server. Messages from the server over the web socket and user input events from the web
-browser are passed to the `first_controller` where they are handled and discarded or
-passed along the chain of FSMControllers until they reach the end with `null_controller`
-or they are handled and the models are updated.
+Messages are passed along channels between FSMs and over the websocket to and
+from the server. Messages from the server over the web socket and user input
+events from the web browser are passed to the `first_channel` where they are
+passed along the chain of FSMControllers until they reach the end with
+`NullChannel` or they are handled and the models are updated.
 
 * See: [src/network.ui.controller.js](src/network.ui.controller.js#L115)
 

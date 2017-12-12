@@ -45,16 +45,16 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
 	var scope = controller.scope;
 
     if ($event.key === 'c' && ($event.ctrlKey || $event.metaKey)) {
-        scope.first_controller.handle_message("CopySelected", $event);
+        scope.first_channel.send("CopySelected", $event);
     }
 
     if ($event.key === 'l') {
-        scope.first_controller.handle_message("NewLink", $event);
+        scope.first_channel.send("NewLink", $event);
         return;
     }
 
     if ($event.key === 'm') {
-        scope.first_controller.handle_message("NewStream", $event);
+        scope.first_channel.send("NewStream", $event);
     }
 
     if ($event.key === 'd') {
@@ -75,27 +75,27 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
     }
 
 	if ($event.key === 'r') {
-        scope.first_controller.handle_message("NewDevice", new messages.NewDevice("router"));
+        scope.first_channel.send("NewDevice", new messages.NewDevice("router"));
         return;
 	}
     else if ($event.key === 's') {
-        scope.first_controller.handle_message("NewDevice", new messages.NewDevice("switch"));
+        scope.first_channel.send("NewDevice", new messages.NewDevice("switch"));
         return;
 	}
     else if ($event.key === 'a') {
-        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("rack"));
+        scope.first_channel.send("NewGroup", new messages.NewGroup("rack"));
         return;
 	}
     else if ($event.key === 'h') {
-        scope.first_controller.handle_message("NewDevice", new messages.NewDevice("host"));
+        scope.first_channel.send("NewDevice", new messages.NewDevice("host"));
         return;
 	}
     else if ($event.key === 'g') {
-        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("group"));
+        scope.first_channel.send("NewGroup", new messages.NewGroup("group"));
         return;
 	}
     else if ($event.key === 'e') {
-        scope.first_controller.handle_message("NewGroup", new messages.NewGroup("site"));
+        scope.first_channel.send("NewGroup", new messages.NewGroup("site"));
         return;
 	}
     else if ($event.key === '0') {
@@ -106,7 +106,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.updatePanAndScale();
     }
 
-	controller.next_controller.handle_message(msg_type, $event);
+	controller.delegate_channel.send(msg_type, $event);
 };
 
 _Start.prototype.start = function (controller) {

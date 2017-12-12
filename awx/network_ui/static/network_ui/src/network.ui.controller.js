@@ -1,5 +1,4 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
-// var _ = require('lodash');
 var angular = require('angular');
 var fsm = require('./fsm.js');
 var null_fsm = require('./null.fsm.js');
@@ -112,19 +111,38 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                       'y': 0,
                       'width': 0,
                       'height': 0};
+  $scope.trace_id_seq = util.natural_numbers(0);
+  $scope.trace_order_seq = util.natural_numbers(0);
+  $scope.trace_id = $scope.trace_id_seq();
 
-  $scope.null_controller = new fsm.FSMController($scope, null_fsm.Start, null, 'null_fsm');
-  $scope.hotkeys_controller = new fsm.FSMController($scope, hotkeys.Start, $scope.null_controller, 'hotkeys_fsm');
-  $scope.view_controller = new fsm.FSMController($scope, view.Start, $scope.hotkeys_controller, 'null_fsm');
-  $scope.device_detail_controller = new fsm.FSMController($scope, device_detail_fsm.Start, $scope.view_controller, 'device_detail_fsm');
-  $scope.move_controller = new fsm.FSMController($scope, move.Start, $scope.device_detail_controller, 'move_fsm');
-  $scope.link_controller = new fsm.FSMController($scope, link.Start, $scope.move_controller, 'link_fsm');
-  $scope.stream_controller = new fsm.FSMController($scope, stream_fsm.Start, $scope.link_controller, 'stream_fsm');
-  $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.stream_controller, 'group_fsm');
-  $scope.rack_controller = new fsm.FSMController($scope, rack_fsm.Disable, $scope.group_controller, 'rack_fsm');
-  $scope.site_controller = new fsm.FSMController($scope, site_fsm.Disable, $scope.rack_controller, 'site_fsm');
-  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.site_controller, 'time_fsm');
-  $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Disabled, $scope.time_controller, 'toolbox_fsm');
+    $scope.send_trace_message = function (message) {
+        console.log(message);
+        message.sender = $scope.client_id;
+        message.trace_id = $scope.trace_id;
+        message.message_id = $scope.message_id_seq();
+        var data = messages.serialize(message);
+        if (!$scope.disconnected) {
+            $scope.control_socket.send(data);
+        } else {
+            console.log(data);
+        }
+    };
+
+  //Define the FSMs
+  $scope.null_controller = new fsm.FSMController($scope, "null_fsm", null_fsm.Start, $scope);
+  $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
+  $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
+  $scope.device_detail_controller = new fsm.FSMController($scope, "device_detail_fsm", device_detail_fsm.Start, $scope);
+  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
+  $scope.link_controller = new fsm.FSMController($scope, "link_fsm", link.Start, $scope);
+  $scope.stream_controller = new fsm.FSMController($scope, "stream_fsm", stream_fsm.Start, $scope);
+  $scope.group_controller = new fsm.FSMController($scope, "group_fsm", group.Start, $scope);
+  $scope.rack_controller = new fsm.FSMController($scope, "rack_fsm", rack_fsm.Disable, $scope);
+  $scope.site_controller = new fsm.FSMController($scope, "site_fsm", site_fsm.Disable, $scope);
+  $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
+  $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
+  $scope.app_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
+
   //App Toolbox Setup
   $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, 40, 200, $scope.graph.height - 40);
   $scope.app_toolbox.title_coordinates = {x: 70, y: 70};
@@ -133,7 +151,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
   $scope.app_toolbox_controller.debug = true;
   $scope.app_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteProcess", new messages.PasteProcess(selected_item));
+    $scope.first_channel.send("PasteProcess", new messages.PasteProcess(selected_item));
   };
 
   $scope.app_toolbox.items.push(new models.Process(0, 'BGP', 'process', 0, 0));
@@ -145,19 +163,19 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $scope.app_toolbox.items[i].icon = true;
   }
 
-  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller, 'inventory_toolbox_fsm');
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
+  function add_host (host) {
+      console.log(host);
+      var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
+      device.icon = true;
+      $scope.inventory_toolbox.items.push(device);
+  }
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
-      var add_host = function(host) {
-          console.log(host);
-          var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
-          device.icon = true;
-          $scope.inventory_toolbox.items.push(device);
-      };
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
            .then(function(inventory) {
                console.log(inventory);
@@ -191,11 +209,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.inventory_toolbox_controller.remove_on_drop = true;
   $scope.inventory_toolbox_controller.debug = true;
   $scope.inventory_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteDevice", new messages.PasteDevice(selected_item));
+    $scope.first_channel.send("PasteDevice", new messages.PasteDevice(selected_item));
   };
 
   //End Inventory Toolbox Setup
-  $scope.rack_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller, 'rack_toolbox_fsm');
+  $scope.rack_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Rack Toolbox Setup
   $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, 40, 200, $scope.graph.height - 40);
   $scope.rack_toolbox.title_coordinates = {x: 80, y: 70};
@@ -205,14 +223,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.rack_toolbox_controller.toolbox = $scope.rack_toolbox;
   $scope.rack_toolbox_controller.debug = true;
   $scope.rack_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteRack", new messages.PasteRack(selected_item));
+    $scope.first_channel.send("PasteRack", new messages.PasteRack(selected_item));
   };
   for(i = 0; i < $scope.rack_toolbox.items.length; i++) {
       $scope.rack_toolbox.items[i].icon = true;
       $scope.rack_toolbox.items[i].selected = false;
   }
   //End Rack Toolbox Setup
-  $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.rack_toolbox_controller, 'site_toolbox_fsm');
+  $scope.site_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Site Toolbox Setup
   $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, 40, 200, $scope.graph.height - 40);
   $scope.site_toolbox.title_coordinates = {x: 80, y: 70};
@@ -222,16 +240,67 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.site_toolbox_controller.toolbox = $scope.site_toolbox;
   $scope.site_toolbox_controller.debug = true;
   $scope.site_toolbox_controller.dropped_action = function (selected_item) {
-    $scope.first_controller.handle_message("PasteSite", new messages.PasteSite(selected_item));
+    $scope.first_channel.send("PasteSite", new messages.PasteSite(selected_item));
   };
   for(i = 0; i < $scope.site_toolbox.items.length; i++) {
       $scope.site_toolbox.items[i].icon = true;
       $scope.site_toolbox.items[i].selected = false;
   }
   //End Site Toolbox Setup
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_toolbox_controller, 'buttons_fsm');
-  $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.buttons_controller, 'mode_fsm');
-  $scope.first_controller = $scope.mode_controller;
+
+  $scope.mode_controller = new fsm.FSMController($scope, "mode_fsm", mode_fsm.Start, $scope);
+
+  //Wire up the FSMs
+  $scope.view_controller.delegate_channel = new fsm.Channel($scope.view_controller,
+                                                            $scope.hotkeys_controller,
+                                                            $scope);
+  $scope.device_detail_controller.delegate_channel = new fsm.Channel($scope.device_detail_controller,
+                                                            $scope.view_controller,
+                                                            $scope);
+  $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
+                                                            $scope.device_detail_controller,
+                                                            $scope);
+  $scope.link_controller.delegate_channel = new fsm.Channel($scope.link_controller,
+                                                                  $scope.move_controller,
+                                                                  $scope);
+  $scope.stream_controller.delegate_channel = new fsm.Channel($scope.stream_controller,
+                                                                  $scope.link_controller,
+                                                                  $scope);
+  $scope.group_controller.delegate_channel = new fsm.Channel($scope.group_controller,
+                                                                  $scope.stream_controller,
+                                                                  $scope);
+  $scope.rack_controller.delegate_channel = new fsm.Channel($scope.rack_controller,
+                                                               $scope.group_controller,
+                                                               $scope);
+  $scope.site_controller.delegate_channel = new fsm.Channel($scope.site_controller,
+                                                               $scope.rack_controller,
+                                                               $scope);
+  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
+                                                               $scope.site_controller,
+                                                               $scope);
+  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+                                                            $scope.buttons_controller,
+                                                            $scope);
+  $scope.app_toolbox_controller.delegate_channel = new fsm.Channel($scope.app_toolbox_controller,
+                                                            $scope.time_controller,
+                                                            $scope);
+  $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
+                                                            $scope.app_toolbox_controller,
+                                                            $scope);
+  $scope.rack_toolbox_controller.delegate_channel = new fsm.Channel($scope.rack_toolbox_controller,
+                                                            $scope.inventory_toolbox_controller,
+                                                            $scope);
+  $scope.site_toolbox_controller.delegate_channel = new fsm.Channel($scope.site_toolbox_controller,
+                                                            $scope.rack_toolbox_controller,
+                                                            $scope);
+  $scope.mode_controller.delegate_channel = new fsm.Channel($scope.mode_controller,
+                                                            $scope.site_toolbox_controller,
+                                                            $scope);
+
+  $scope.first_channel = new fsm.Channel(null,
+                                         $scope.mode_controller,
+                                         $scope);
+
     var getMouseEventResult = function (mouseEvent) {
       return "(" + mouseEvent.x + ", " + mouseEvent.y + ")";
     };
@@ -406,7 +475,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
       $scope.last_event = $event;
-      $scope.first_controller.handle_message('MouseDown', $event);
+      $scope.first_channel.send('MouseDown', $event);
       $scope.onMouseDownResult = getMouseEventResult($event);
 	  $event.preventDefault();
     };
@@ -417,7 +486,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
           $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
       }
       $scope.last_event = $event;
-      $scope.first_controller.handle_message('MouseUp', $event);
+      $scope.first_channel.send('MouseUp', $event);
       $scope.onMouseUpResult = getMouseEventResult($event);
 	  $event.preventDefault();
     };
@@ -444,7 +513,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $scope.mouseX = $event.x;
       $scope.mouseY = $event.y;
       $scope.updateScaledXY();
-      $scope.first_controller.handle_message('MouseMove', $event);
+      $scope.first_channel.send('MouseMove', $event);
       $scope.onMouseMoveResult = getMouseEventResult($event);
 	  $event.preventDefault();
     };
@@ -471,7 +540,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
           $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
       }
       $scope.last_event = $event;
-      $scope.first_controller.handle_message('MouseWheel', [$event, delta, deltaX, deltaY]);
+      $scope.first_channel.send('MouseWheel', [$event, delta, deltaX, deltaY]);
       event.preventDefault();
     };
 
@@ -489,7 +558,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.last_event = $event;
         $scope.last_key = $event.key;
         $scope.last_key_code = $event.keyCode;
-        $scope.first_controller.handle_message('KeyDown', $event);
+        $scope.first_channel.send('KeyDown', $event);
         $scope.$apply();
         $event.preventDefault();
     };
@@ -518,7 +587,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
           $scope.mouseY = $event.touches[0].screenY;
           $scope.updateScaledXY();
      }
-      $scope.first_controller.handle_message('TouchStart', $event);
+      $scope.first_channel.send('TouchStart', $event);
       $scope.onTouchStartEvent = $event;
 	  $event.preventDefault();
 	};
@@ -533,7 +602,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
      if ($scope.recording) {
           $scope.send_control_message(new messages.TouchEvent($scope.client_id, "touchend", touches));
      }
-      $scope.first_controller.handle_message('TouchEnd', $event);
+      $scope.first_channel.send('TouchEnd', $event);
       $scope.onTouchEndEvent = $event;
 	  $event.preventDefault();
 	};
@@ -558,7 +627,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
           $scope.updateScaledXY();
      }
 
-      $scope.first_controller.handle_message('TouchMove', $event);
+      $scope.first_channel.send('TouchMove', $event);
       $scope.onTouchMoveEvent = $event;
 	  $event.preventDefault();
 	};
@@ -715,35 +784,37 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     var button_offset = 200;
 
     $scope.buttons = [
-      new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton),
-      new models.Button("DESTROY", button_offset + 90, 48, 80, 30, $scope.onDestroyButton),
-      new models.Button("RECORD", button_offset + 180, 48, 80, 30, $scope.onRecordButton),
-      new models.Button("EXPORT", button_offset + 270, 48, 70, 30, $scope.onExportButton),
-      new models.Button("DISCOVER", button_offset + 350, 48, 80, 30, $scope.onDiscoverButton),
-      new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton),
-      new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton),
+      new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton, $scope),
+      new models.Button("DESTROY", button_offset + 90, 48, 80, 30, $scope.onDestroyButton, $scope),
+      new models.Button("RECORD", button_offset + 180, 48, 80, 30, $scope.onRecordButton, $scope),
+      new models.Button("EXPORT", button_offset + 270, 48, 70, 30, $scope.onExportButton, $scope),
+      new models.Button("DISCOVER", button_offset + 350, 48, 80, 30, $scope.onDiscoverButton, $scope),
+      new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton, $scope),
+      new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
+      new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
     ];
 
     var LAYERS_X = 160;
 
     $scope.layers = [
-      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true),
-      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true),
+      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true, $scope),
+      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true, $scope),
+      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true, $scope),
+      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true, $scope),
+      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true, $scope),
+      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true, $scope),
       new models.ToggleButton("PHYSICAL",
                               $scope.graph.width - LAYERS_X, 250, 120, 30,
                               $scope.onTogglePhysical,
                               $scope.onUnTogglePhysical,
-                              true),
+                              true,
+                              $scope),
       new models.ToggleButton("GROUP",
                               $scope.graph.width - LAYERS_X, 290, 120, 30,
                               $scope.onToggleGroup,
                               $scope.onUnToggleGroup,
-                              true)
+                              true,
+                              $scope)
     ];
 
     $scope.layers = [];
@@ -1559,7 +1630,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
 
     $scope.control_socket.onmessage = function(message) {
-        $scope.first_controller.handle_message('Message', message);
+        $scope.first_channel.send('Message', message);
         $scope.$apply();
     };
 

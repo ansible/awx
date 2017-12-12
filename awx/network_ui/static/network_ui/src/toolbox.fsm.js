@@ -145,7 +145,7 @@ _Selecting.prototype.onMouseDown = function (controller) {
         toolbox.selected_item.x = toolbox.x + toolbox.width/2;
         toolbox.selected_item.y = selected_item * toolbox.spacing + toolbox.y + toolbox.scroll_offset + toolbox.spacing/2;
         controller.scope.clear_selections();
-        controller.scope.first_controller.handle_message("UnselectAll", {});
+        controller.scope.first_channel.send("UnselectAll", {});
         controller.changeState(Selected);
     } else {
         toolbox.selected_item = null;
@@ -171,7 +171,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
        controller.handle_message(msg_type, $event);
 
     } else {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 };
 _Ready.prototype.onMouseDown.transitions = ['Selecting'];
@@ -188,7 +188,7 @@ _Ready.prototype.onMouseWheel = function (controller, msg_type, $event) {
        controller.handle_message(msg_type, $event);
 
     } else {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 };
 _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
