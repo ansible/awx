@@ -617,7 +617,7 @@ For a widget named `new widget` do this:
 * Create a new empty FSM implementation file in `src` named `src/new.wiget.fsm.js`
 * Use the `./tools/fsm_generate_diffs.py` tool to generate the skeleton for the new FSM implementation
 * Decide if you need any new data structures for your UI widget. If so, add them to `src/models.js`.
-* Device if you need any new messages to communicate between the UI and the server or between pieces of the UI.
+* Decide if you need any new messages to communicate between the UI and the server or between pieces of the UI.
   If so, add them to `src/messages.js`
 * Add the FSM implementation to a FSMController in `src/network.ui.controller.js`
 * Write the logic in the event handlers to update the models, send any messages, and change states according to the design.
@@ -950,7 +950,7 @@ This example follows development of the inventory toolbox widget.
     exports.ToolBox = ToolBox;
 ```
 
-* Device if you need any new messages to communicate between the UI and the server or between pieces of the UI.
+* Decide if you need any new messages to communicate between the UI and the server or between pieces of the UI.
   If so, add them to [src/messages.js](src/messages.js#L251)
 
 ```
