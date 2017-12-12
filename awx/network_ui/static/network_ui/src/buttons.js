@@ -46,7 +46,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
         button = null;
     }
     if (button === null) {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 
 };
@@ -70,7 +70,7 @@ _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
         }
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 
 

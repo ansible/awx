@@ -311,7 +311,7 @@ ActionIcon.prototype.is_selected = function (x, y) {
 
 };
 
-function Button(name, x, y, width, height, callback) {
+function Button(name, x, y, width, height, callback, tracer) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -321,7 +321,7 @@ function Button(name, x, y, width, height, callback) {
     this.is_pressed = false;
     this.mouse_over = false;
     this.enabled = true;
-    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+    this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
 }
 exports.Button = Button;
 
@@ -336,7 +336,7 @@ Button.prototype.is_selected = function (x, y) {
 };
 
 
-function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callback, default_toggled) {
+function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callback, default_toggled, tracer) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -348,8 +348,12 @@ function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callb
     this.toggle_callback = toggle_callback;
     this.untoggle_callback = untoggle_callback;
     this.mouse_over = false;
+<<<<<<< HEAD
     this.enabled = true;
     this.fsm = new fsm.FSMController(this, button.Start, null, name+'toggle_button_fsm');
+=======
+    this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
+>>>>>>> ba91f21e7... Adds channels between FSMs
 }
 inherits(ToggleButton, Button);
 exports.ToggleButton = ToggleButton;

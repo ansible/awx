@@ -91,7 +91,7 @@ exports.Placing = Placing;
 _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 
 _Resize.prototype.onMouseUp = function (controller, msg_type, $event) {
@@ -343,7 +343,7 @@ _Move.prototype.end = function (controller) {
 _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
     if (controller.scope.hide_groups) {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
         return;
     }
 
@@ -353,14 +353,14 @@ _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
         controller.scope.groups[i].update_hightlighted(controller.scope.scaledX, controller.scope.scaledY);
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 };
 
 
 _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (controller.scope.hide_groups) {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
         return;
     }
 
@@ -402,7 +402,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
         }
     }
 
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1', 'CornerSelected'];
@@ -564,7 +564,7 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                                                                             groups[i].name));
         }
     } else {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
