@@ -30,7 +30,7 @@ other features that would be very difficult or impossible to implement with
 standard HTML events and rendering.
 
 This interface is more like computer graphics than it is building a styled text
-document with interactive components.  A good grasp of cartesian coordinates,
+document with interactive components.  A good grasp of Cartesian coordinates,
 trigonometry, and analytic geometry are useful when working with this code.
 
 * See: <https://en.wikipedia.org/wiki/Analytic_geometry>
@@ -40,7 +40,7 @@ trigonometry, and analytic geometry are useful when working with this code.
 Certain design choices were made to make the UI performant and scale to a large
 number of nodes in a diagram.  These include the use of simple ES5 functions for
 better performance over more advanced functions.  For instance C-style for-loops
-were many times faster than implementations of forEach or iterators which make
+were many times faster than implementations of `forEach` or iterators which make
 function calls during each iteration.  This basic ES5 style should be followed
 throughout the implementation of the Network UI.
 
@@ -66,7 +66,7 @@ of on-screen elements.
 * See: <https://docs.angularjs.org/guide/directive>
 
 AngularJS directives are used in the networking UI application using the element
-matching style and the templateUrl option to include a template. A majority of
+matching style and the `templateUrl` option to include a template. A majority of
 the directives are defined in `src/network.ui.app.js`.
 
 * See: [src/network.ui.app.js](src/network.ui.app.js)
@@ -86,7 +86,7 @@ function deviceDetail () {
 * See: <https://docs.angularjs.org/guide/templates>
 
 Normal AngularJS templates are used with the networking UI controller.  
-The templates can be foundin `/widgets`. Child
+The templates can be found in `/widgets`. Child
 scopes are created for sub-templates using the `ng-repeat` directive.
 
 In this example the `awx-net-link` directive expects a Link model to be
@@ -199,7 +199,7 @@ system by some factor.  Rotate performs a rotation about the origin by some
 number of degrees.  These functions are converted to a matrix operation on the
 coordinate system which can be efficiently applied.  It is often useful to use
 the transforms to simplify the calculations of X and Y coordinates instead of
-calculating those values in javascript. Also these transforms make developing
+calculating those values in Javascript. Also these transforms make developing
 widgets much easier since we only need to keep up with a single point for the
 widget and all other points can be relatively positioned from that point.
 Hard-coding positions in widget development is the normal case since transforms
@@ -340,7 +340,7 @@ the system and what that event handler should do.
 Use `tools/fsm_generate_diffs.py` to generate the new skeleton code:
 
 ```
-./tools/fsm_generate_diffs.py designs/link.yml ./src/link.js
+    ./tools/fsm_generate_diffs.py designs/link.yml ./src/link.js
 ```
 
 This will print out code for additional states or transitions needed in the implementation.
@@ -363,8 +363,8 @@ Use `./extract.js` and `tools/fsm-diff` to compare the implementation to the des
 and add any additional transitions to the FSM design.
 
 ```
-./extract.js ./src/link.js > ./extracted/link.yml
-./tools/fsm-diff designs/link.yml extracted/link.yml
+    ./extract.js ./src/link.js > ./extracted/link.yml
+    ./tools/fsm-diff designs/link.yml extracted/link.yml
 ```
 
 
@@ -376,7 +376,7 @@ note of any differences between design and implementation and update the appropr
 files as outlined in the workflows above.
 
 ```
-make extract; make diff
+    make extract; make diff
 ```
 
 
@@ -430,12 +430,12 @@ This code block defines the `_Selecting` class in ES5 style and uses the
 also create a single instance (a singleton) of this class named `Selecting`.
 
 ```
-function _Selecting () {
-    this.name = 'Selecting';
-}
-inherits(_Selecting, _State);
-var Selecting = new _Selecting();
-exports.Selecting = Selecting;
+    function _Selecting () {
+        this.name = 'Selecting';
+    }
+    inherits(_Selecting, _State);
+    var Selecting = new _Selecting();
+    exports.Selecting = Selecting;
 ```
 
 **FSM Event Handlers and Transitions**
@@ -460,16 +460,16 @@ The event handler must also define its `transitions` as a list so that `./extrac
 find them.
 
 ```
-_Selecting.prototype.onMouseUp = function (controller) {
+    _Selecting.prototype.onMouseUp = function (controller) {
 
-    var selected_device = controller.scope.select_items(false).last_selected_device;
-    if (selected_device !== null) {
-        controller.scope.new_link = new models.Link(controller.scope.link_id_seq(), selected_device, null, null, null, true);
-        controller.scope.links.push(controller.scope.new_link);
-        controller.changeState(Connecting);
-    }
-};
-_Selecting.prototype.onMouseUp.transitions = ['Connecting'];
+        var selected_device = controller.scope.select_items(false).last_selected_device;
+        if (selected_device !== null) {
+            controller.scope.new_link = new models.Link(controller.scope.link_id_seq(), selected_device, null, null, null, true);
+            controller.scope.links.push(controller.scope.new_link);
+            controller.changeState(Connecting);
+        }
+    };
+    _Selecting.prototype.onMouseUp.transitions = ['Connecting'];
 
 ```
 
@@ -612,13 +612,14 @@ For a widget named `new widget` do this:
 * Add a tag that loads the directive into an existing template in `widgets`.  If you are not sure add it to `widgets/network_ui.html`.
 * Test that the directive is loaded when the page renders in a browser
 * Iterate on the template for the new widget until the UI look matches the mockup
-* Define the interaction behavior using [fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg)
-* Export the FSM to `designs` in a file named `designs/new_widget.yml`
+* Design the interaction behavior using [fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg)
+* Export the FSM design to `designs` in a file named `designs/new_widget.yml`
 * Create a new empty FSM implementation file in `src` named `src/new.wiget.fsm.js`
 * Use the `./tools/fsm_generate_diffs.py` tool to generate the skeleton for the new FSM implementation
 * Decide if you need any new data structures for your UI widget. If so, add them to `src/models.js`.
 * Device if you need any new messages to communicate between the UI and the server or between pieces of the UI.
   If so, add them to `src/messages.js`
+* Add the FSM implementation to a FSMController in `src/network.ui.controller.js`
 * Write the logic in the event handlers to update the models, send any messages, and change states according to the design.
 * Test the interaction manually in a browser
 * Iterate on changing the event handlers until the desired interaction is acheived
@@ -631,34 +632,344 @@ This example follows development of the inventory toolbox widget.
 * Add a template in `widgets` for the new widget with name [widgets/inventory_toolbox.html](widgets/inventory_toolbox.html)
 
 ```
-<!-- Copyright (c) 2017 Red Hat, Inc. -->
+    <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
-<g ng-if="toolbox.enabled">
-<rect class="NetworkUI__toolbox"
-      ng-attr-x="{{toolbox.x}}"
-      ng-attr-y="{{toolbox.y}}"
-      ng-attr-width="{{toolbox.width}}"
-      ng-attr-height="{{toolbox.height}}"
-      rx=5></rect>
-...
-</g> <!-- ng-if toolbox.enabled -->
+    <g ng-if="toolbox.enabled">
+    <rect class="NetworkUI__toolbox"
+          ng-attr-x="{{toolbox.x}}"
+          ng-attr-y="{{toolbox.y}}"
+          ng-attr-width="{{toolbox.width}}"
+          ng-attr-height="{{toolbox.height}}"
+          rx=5></rect>
+    ...
+    </g> <!-- ng-if toolbox.enabled -->
 ```
 
 * Add a directive that loads that template in `src` with name [src/inventory.toolbox.directive.js](src/inventory.toolbox.directive.js)
 
 ```
-/* Copyright (c) 2017 Red Hat, Inc. */
+    /* Copyright (c) 2017 Red Hat, Inc. */
 
-function inventoryToolbox () {
-  return { restrict: 'A', templateUrl: '/static/network_ui/widgets/inventory_toolbox.html' };
-}
-exports.inventoryToolbox = inventoryToolbox;
+    function inventoryToolbox () {
+      return { restrict: 'A', templateUrl: '/static/network_ui/widgets/inventory_toolbox.html' };
+    }
+    exports.inventoryToolbox = inventoryToolbox;
 ```
 
 
 * Register the directive with the network UI application in [src/network.ui.app.js](src/network.ui.app.js#L61) using name `awxNetInventoryToolbox`
 
 ```
+...
+    var inventoryToolbox = require('./inventory.toolbox.directive.js');
+...
     .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
+...
 ```
 
+* Add a tag that loads the directive into an existing template in `widgets` in [widgets/network_ui.html](widgets/network_ui.html#L94)
+
+```
+        <g awx-net-inventory-toolbox></g>
+```
+
+* Test that the directive is loaded when the page renders in a browser
+* Iterate on the template for the new widget until the UI look matches the mockup
+* Design the interaction behavior using [fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg)
+
+![Toolbox](designs/toolbox.png)
+
+* Export the FSM design to `designs` in a file named `designs/toolbox.yml`
+
+```
+    finite_state_machine_id: 14
+    name: toolbox
+    states:
+    - id: 2
+      label: Selected
+      x: 1180
+      y: 959
+    - id: 6
+      label: Move
+      x: 1409
+      y: 741
+    - id: 3
+      label: Ready
+      x: 892
+      y: 429
+    - id: 4
+      label: Scrolling
+      x: 567
+      y: 431
+    - id: 5
+      label: Start
+      x: 892
+      y: 216
+    - id: 7
+      label: Selecting
+      x: 888
+      y: 710
+    - id: 1
+      label: Dropping
+      x: 1358
+      y: 431
+    transitions:
+    - from_state: Selecting
+      label: onMouseDown
+      to_state: Selected
+    - from_state: Selected
+      label: onMouseMove
+      to_state: Move
+    - from_state: Selecting
+      label: onMouseDown
+      to_state: Ready
+    - from_state: Selected
+      label: onMouseUp
+      to_state: Ready
+    - from_state: Dropping
+      label: start
+      to_state: Ready
+    - from_state: Start
+      label: start
+      to_state: Ready
+    - from_state: Scrolling
+      label: onMouseWheel
+      to_state: Ready
+    - from_state: Ready
+      label: onMouseWheel
+      to_state: Scrolling
+    - from_state: Ready
+      label: onMouseDown
+      to_state: Selecting
+    - from_state: Move
+      label: onMouseUp
+      to_state: Dropping
+```
+
+* Create a new empty FSM implementation file in `src` named `src/toolbox.fsm.js`
+
+```
+    touch src/toolbox.fsm.js
+```
+
+* Use the `./tools/fsm_generate_diffs.py` tool to generate the skeleton for the new FSM implementation
+
+```
+    ./tools/fsm_generate_diffs.py designs/toolbox.yml src/toolbox.fsm.js --append
+```
+
+
+```
+    var inherits = require('inherits');
+    var fsm = require('./fsm.js');
+
+    function _State () {
+    }
+    inherits(_State, fsm._State);
+
+
+    function _Start () {
+        this.name = 'Start';
+    }
+    inherits(_Start, _State);
+    var Start = new _Start();
+    exports.Start = Start;
+
+    function _Selected () {
+        this.name = 'Selected';
+    }
+    inherits(_Selected, _State);
+    var Selected = new _Selected();
+    exports.Selected = Selected;
+
+    function _Dropping () {
+        this.name = 'Dropping';
+    }
+    inherits(_Dropping, _State);
+    var Dropping = new _Dropping();
+    exports.Dropping = Dropping;
+
+    function _Ready () {
+        this.name = 'Ready';
+    }
+    inherits(_Ready, _State);
+    var Ready = new _Ready();
+    exports.Ready = Ready;
+
+    function _Selecting () {
+        this.name = 'Selecting';
+    }
+    inherits(_Selecting, _State);
+    var Selecting = new _Selecting();
+    exports.Selecting = Selecting;
+
+    function _Move () {
+        this.name = 'Move';
+    }
+    inherits(_Move, _State);
+    var Move = new _Move();
+    exports.Move = Move;
+
+    function _Scrolling () {
+        this.name = 'Scrolling';
+    }
+    inherits(_Scrolling, _State);
+    var Scrolling = new _Scrolling();
+    exports.Scrolling = Scrolling;
+
+
+
+
+    _Start.prototype.start = function (controller) {
+
+        controller.changeState(Ready);
+
+    };
+    _Start.prototype.start.transitions = ['Ready'];
+
+
+
+    _Selected.prototype.onMouseMove = function (controller) {
+
+        controller.changeState(Move);
+
+    };
+    _Selected.prototype.onMouseMove.transitions = ['Move'];
+
+    _Selected.prototype.onMouseUp = function (controller) {
+
+        controller.changeState(Ready);
+
+    };
+    _Selected.prototype.onMouseUp.transitions = ['Ready'];
+
+
+
+    _Dropping.prototype.start = function (controller) {
+
+        controller.changeState(Ready);
+
+    };
+    _Dropping.prototype.start.transitions = ['Ready'];
+
+
+
+    _Ready.prototype.onMouseDown = function (controller) {
+
+        controller.changeState(Selecting);
+
+    };
+    _Ready.prototype.onMouseDown.transitions = ['Selecting'];
+
+    _Ready.prototype.onMouseWheel = function (controller) {
+
+        controller.changeState(Scrolling);
+
+    };
+    _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
+
+
+
+    _Selecting.prototype.onMouseDown = function (controller) {
+
+        controller.changeState(Ready);
+
+        controller.changeState(Selected);
+
+    };
+    _Selecting.prototype.onMouseDown.transitions = ['Ready', 'Selected'];
+
+
+
+    _Move.prototype.onMouseUp = function (controller) {
+
+        controller.changeState(Dropping);
+
+    };
+    _Move.prototype.onMouseUp.transitions = ['Dropping'];
+
+
+
+    _Scrolling.prototype.onMouseWheel = function (controller) {
+
+        controller.changeState(Ready);
+
+    };
+    _Scrolling.prototype.onMouseWheel.transitions = ['Ready'];
+    };
+    _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
+
+
+
+    _Selecting.prototype.onMouseDown = function (controller) {
+
+        controller.changeState(Ready);
+
+        controller.changeState(Selected);
+
+    };
+    _Selecting.prototype.onMouseDown.transitions = ['Ready', 'Selected'];
+
+
+
+    _Move.prototype.onMouseUp = function (controller) {
+
+        controller.changeState(Dropping);
+
+    };
+    _Move.prototype.onMouseUp.transitions = ['Dropping'];
+
+
+
+    _Scrolling.prototype.onMouseWheel = function (controller) {
+
+        controller.changeState(Ready);
+
+    };
+    _Scrolling.prototype.onMouseWheel.transitions = ['Ready'];
+
+```
+
+* Decide if you need any new data structures for your UI widget. If so, add them to [src/models.js](src/models.js#L608).
+
+```
+    function ToolBox(id, name, type, x, y, width, height) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.items = [];
+        this.spacing = 200;
+        this.scroll_offset = 0;
+        this.selected_item = null;
+        this.enabled = true;
+    }
+    exports.ToolBox = ToolBox;
+```
+
+* Device if you need any new messages to communicate between the UI and the server or between pieces of the UI.
+  If so, add them to [src/messages.js](src/messages.js#L251)
+
+```
+    function PasteDevice(device) {
+        this.device = device;
+    }
+    exports.PasteDevice = PasteDevice;
+```
+
+* Write the logic in the event handlers to update the models, send any messages, and change states according to the design.
+
+See: [src/toolbox.fsm.js](src/toolbox.fsm.js)
+
+* Add the FSM implementation to a FSMController in [src/network.ui.controller.js](src/network.ui.controller.js#L145)
+
+```
+    $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
+```
+
+* Test the interaction manually in a browser
+* Iterate on changing the event handlers until the desired interaction is achieved
+* Update the design to match the implementation
