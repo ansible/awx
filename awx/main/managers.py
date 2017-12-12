@@ -7,7 +7,7 @@ import logging
 
 from django.db import models
 from django.utils.timezone import now
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
@@ -21,11 +21,15 @@ class HostManager(models.Manager):
     """Custom manager class for Hosts model."""
 
     def active_count(self):
-        """Return count of active, unique hosts for licensing. Exclude ones source from another Tower"""
-        try:
-            return self.filter(~Q(inventory_sources__source='tower')).order_by('name').distinct('name').count()
-        except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
-            return len(set(self.values_list('name', flat=True)))
+        """Return count of active, unique hosts for licensing.
+        Construction of query involves:
+         - remove any ordering specified in model's Meta
+         - Exclude hosts sourced from another Tower
+         - Restrict the query to only return the name column
+         - Only consider results that are unique
+         - Return the count of this query
+        """
+        return self.order_by().exclude(inventory_sources__source='tower').values('name').distinct().count()
 
     def get_queryset(self):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
