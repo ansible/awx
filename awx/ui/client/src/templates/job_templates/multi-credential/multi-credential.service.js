@@ -182,61 +182,61 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
         let credentialGetPermissionDenied = false;
 
         // get machine credential
-        if (data.related.credential) {
-            Rest.setUrl(data.related.credential);
-            credDefers.push(Rest.get()
-                .then(({data}) => {
-                    selectedCredentials.machine = data;
-                })
-                .catch(({data, status}) => {
-                    if (status === 403) {
-                        /* User doesn't have read access to the machine credential, so use summary_fields */
-                        credentialGetPermissionDenied = true;
-                        selectedCredentials.machine = job_template_obj.summary_fields.credential;
-                        selectedCredentials.machine.credential_type = job_template_obj.summary_fields.credential.credential_type_id;
-                        selectedCredentials.machine.readOnly = true;
-                    } else {
-                        ProcessErrors(
-                            null, data, status, null,
-                            {
-                                hdr: 'Error!',
-                                msg: 'Failed to get machine credential. ' +
-                                'Get returned status: ' +
-                                status
-                        });
-                    }
-                }));
-        }
+        // if (data.related.credential) {
+        //     Rest.setUrl(data.related.credential);
+        //     credDefers.push(Rest.get()
+        //         .then(({data}) => {
+        //             selectedCredentials.machine = data;
+        //         })
+        //         .catch(({data, status}) => {
+        //             if (status === 403) {
+        //                 /* User doesn't have read access to the machine credential, so use summary_fields */
+        //                 credentialGetPermissionDenied = true;
+        //                 selectedCredentials.machine = job_template_obj.summary_fields.credential;
+        //                 selectedCredentials.machine.credential_type = job_template_obj.summary_fields.credential.credential_type_id;
+        //                 selectedCredentials.machine.readOnly = true;
+        //             } else {
+        //                 ProcessErrors(
+        //                     null, data, status, null,
+        //                     {
+        //                         hdr: 'Error!',
+        //                         msg: 'Failed to get machine credential. ' +
+        //                         'Get returned status: ' +
+        //                         status
+        //                 });
+        //             }
+        //         }));
+        // }
 
-        if (data.related.vault_credential) {
-            Rest.setUrl(data.related.vault_credential);
-            credDefers.push(Rest.get()
-                .then(({data}) => {
-                    selectedCredentials.vault = data;
-                })
-                .catch(({data, status}) => {
-                    if (status === 403) {
-                        /* User doesn't have read access to the vault credential, so use summary_fields */
-                        credentialGetPermissionDenied = true;
-                        selectedCredentials.vault = job_template_obj.summary_fields.vault_credential;
-                        selectedCredentials.vault.credential_type = job_template_obj.summary_fields.vault_credential.credential_type_id;
-                        selectedCredentials.vault.readOnly = true;
-                    } else {
-                        ProcessErrors(
-                            null, data, status, null,
-                            {
-                                hdr: 'Error!',
-                                msg: 'Failed to get machine credential. ' +
-                                'Get returned status: ' +
-                                status
-                        });
-                    }
-                }));
-        }
+        // if (data.related.vault_credential) {
+        //     Rest.setUrl(data.related.vault_credential);
+        //     credDefers.push(Rest.get()
+        //         .then(({data}) => {
+        //             selectedCredentials.vault = data;
+        //         })
+        //         .catch(({data, status}) => {
+        //             if (status === 403) {
+        //                 /* User doesn't have read access to the vault credential, so use summary_fields */
+        //                 credentialGetPermissionDenied = true;
+        //                 selectedCredentials.vault = job_template_obj.summary_fields.vault_credential;
+        //                 selectedCredentials.vault.credential_type = job_template_obj.summary_fields.vault_credential.credential_type_id;
+        //                 selectedCredentials.vault.readOnly = true;
+        //             } else {
+        //                 ProcessErrors(
+        //                     null, data, status, null,
+        //                     {
+        //                         hdr: 'Error!',
+        //                         msg: 'Failed to get machine credential. ' +
+        //                         'Get returned status: ' +
+        //                         status
+        //                 });
+        //             }
+        //         }));
+        // }
 
         // get extra credentials
-        if (data.related.extra_credentials) {
-            Rest.setUrl(data.related.extra_credentials);
+        if (data.related.credentials) {
+            Rest.setUrl(data.related.credentials);
             credDefers.push(Rest.get()
                 .then(({data}) => {
                     selectedCredentials.extra = data.results;
@@ -245,7 +245,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                     if (status === 403) {
                         /* User doesn't have read access to the extra credentials, so use summary_fields */
                         credentialGetPermissionDenied = true;
-                        selectedCredentials.extra = job_template_obj.summary_fields.extra_credentials;
+                        selectedCredentials.extra = job_template_obj.summary_fields.credentials;
                         _.map(selectedCredentials.extra, (cred) => {
                             cred.credential_type = cred.credential_type_id;
                             cred.readOnly = true;
