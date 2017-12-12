@@ -1440,6 +1440,19 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     def create_inventory_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
 
+    def create_unified_job(self, **kwargs):
+        # Use special name, if name not already specified
+        if self.inventory:
+            if '_eager_fields' not in kwargs:
+                kwargs['_eager_fields'] = {}
+            if 'name' not in kwargs['_eager_fields']:
+                name = '{} - {}'.format(self.inventory.name, self.name)
+                name_field = self._meta.get_field('name')
+                if len(name) > name_field.max_length:
+                    name = name[:name_field.max_length]
+                kwargs['_eager_fields']['name'] = name
+        return super(InventorySource, self).create_unified_job(**kwargs)
+
     @property
     def cache_timeout_blocked(self):
         if not self.last_job_run:
@@ -1566,15 +1579,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         if self.inventory_source.deprecated_group is not None:  # TODO: remove in 3.3
             websocket_data.update(dict(group_id=self.inventory_source.deprecated_group.id))
         return websocket_data
-
-    def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
-        inventory_source = self.inventory_source
-        if inventory_source.inventory and self.name == inventory_source.name:
-            self.name = inventory_source.inventory.name
-            if 'name' not in update_fields:
-                update_fields.append('name')
-        super(InventoryUpdate, self).save(*args, **kwargs)
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_update_detail', kwargs={'pk': self.pk}, request=request)
