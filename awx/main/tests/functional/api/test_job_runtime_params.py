@@ -371,6 +371,56 @@ def test_job_launch_fails_with_missing_vault_password(machine_credential, vault_
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('launch_kwargs', [
+    {'vault_password.abc': 'vault-me-1', 'vault_password.xyz': 'vault-me-2'},
+    {'credential_passwords': {'vault_password.abc': 'vault-me-1', 'vault_password.xyz': 'vault-me-2'}}
+])
+def test_job_launch_fails_with_missing_multivault_password(machine_credential, vault_credential,
+                                                           deploy_jobtemplate, launch_kwargs,
+                                                           get, post, rando):
+    vault_cred_first = Credential(
+        name='Vault #1',
+        credential_type=vault_credential.credential_type,
+        inputs={
+            'vault_password': 'ASK',
+            'vault_id': 'abc'
+        }
+    )
+    vault_cred_first.save()
+    vault_cred_second = Credential(
+        name='Vault #2',
+        credential_type=vault_credential.credential_type,
+        inputs={
+            'vault_password': 'ASK',
+            'vault_id': 'xyz'
+        }
+    )
+    vault_cred_second.save()
+    deploy_jobtemplate.credentials.add(vault_cred_first)
+    deploy_jobtemplate.credentials.add(vault_cred_second)
+    deploy_jobtemplate.execute_role.members.add(rando)
+    deploy_jobtemplate.save()
+
+    url = reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk})
+    resp = get(url, rando, expect=200)
+    assert resp.data['passwords_needed_to_start'] == ['vault_password.abc', 'vault_password.xyz']
+    assert sum([
+        cred['passwords_needed'] for cred in resp.data['defaults']['credentials']
+        if cred['credential_type'] == vault_credential.credential_type_id
+    ], []) == ['vault_password.abc', 'vault_password.xyz']
+
+    resp = post(url, rando, expect=400)
+    assert resp.data['passwords_needed_to_start'] == ['vault_password.abc', 'vault_password.xyz']
+
+    with mock.patch.object(Job, 'signal_start') as signal_start:
+        post(url, launch_kwargs, rando, expect=201)
+        signal_start.assert_called_with(**{
+            'vault_password.abc': 'vault-me-1',
+            'vault_password.xyz': 'vault-me-2'
+        })
+
+
+@pytest.mark.django_db
 def test_job_launch_fails_with_missing_ssh_password(machine_credential, deploy_jobtemplate, post,
                                                     rando):
     machine_credential.password = 'ASK'

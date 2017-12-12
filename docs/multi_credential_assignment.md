@@ -161,3 +161,62 @@ deprecated,backwards compatible support for specifying credentials at launch tim
 via the `credential`, `vault_credential`, and `extra_credentials` fields:
 
 `POST /api/v2/job_templates/N/launch/ {'credential': A, 'vault_credential': B, 'extra_credentials': [C, D]}`
+
+
+Specifying Multiple Vault Credentials
+-------------------------------------
+One interesting use case supported by the new "zero or more credentials" model
+is the ability to assign multiple Vault credentials to a Job Template run.
+
+This specific use case covers Ansible's support for multiple vault passwords for
+a playbook run (since Ansible 2.4):
+http://docs.ansible.com/ansible/latest/vault.html#vault-ids-and-multiple-vault-passwords
+
+Vault credentials in awx now have an optional field, `vault_id`, which is
+analogous to the `--vault-id` argument to `ansible-playbook`.  To run
+a playbook which makes use of multiple vault passwords:
+
+1.  Make a Vault credential in Tower for each vault password; specify the Vault
+    ID as a field on the credential and input the password (which will be
+    encrypted and stored).
+2.  Assign multiple vault credentials to the job template via the new
+    `credentials` endpoint:
+
+    ```
+    POST /api/v2/job_templates/N/credentials/
+
+    {
+        'associate': true,
+        'id': X
+    }
+    ```
+3.  Launch the job template, and `ansible-playbook` will be invoked with
+    multiple `--vault-id` arguments.
+
+Prompted Vault Credentials
+--------------------------
+Vault credentials can have passwords that are marked as "Prompt on launch".
+When this is the case, the launch endpoint of any related Job Templates will
+communicate necessary Vault passwords via the `passwords_needed_to_start` key:
+
+```
+GET /api/v2/job_templates/N/launch/
+{
+    'passwords_needed_to_start': [
+        'vault_password.X',
+        'vault_password.Y',
+    ]
+}
+```
+
+...where `X` and `Y` are primary keys of the associated Vault credentials.
+
+```
+POST /api/v2/job_templates/N/launch/
+{
+    'credential_passwords': {
+        'vault_password.X': 'first-vault-password'
+        'vault_password.Y': 'second-vault-password'
+    }
+}
+```
