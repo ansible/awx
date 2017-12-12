@@ -1558,10 +1558,10 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
-    def _accept_or_ignore_job_kwargs(self, **kwargs):
+    def _accept_or_ignore_job_kwargs(self, _exclude_errors=None, **kwargs):
         extra_data = kwargs.pop('extra_vars', {})
         prompted_data, rejected_data, errors = super(SystemJobTemplate, self)._accept_or_ignore_job_kwargs(**kwargs)
-        prompted_vars, rejected_vars, errors = self.accept_or_ignore_variables(extra_data, errors)
+        prompted_vars, rejected_vars, errors = self.accept_or_ignore_variables(extra_data, errors, _exclude_errors=_exclude_errors)
         if prompted_vars:
             prompted_data['extra_vars'] = prompted_vars
         if rejected_vars:

@@ -425,7 +425,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         copy_m2m_relationships(self, unified_jt, fields)
         return unified_jt
 
-    def _accept_or_ignore_job_kwargs(self, **kwargs):
+    def _accept_or_ignore_job_kwargs(self, _exclude_errors=None, **kwargs):
         '''
         Override in subclass if template accepts _any_ prompted params
         '''
