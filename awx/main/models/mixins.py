@@ -233,7 +233,7 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                    choice_list))
         return errors
 
-    def _accept_or_ignore_variables(self, data, errors=None):
+    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
         survey_is_enabled = (self.survey_enabled and self.survey_spec)
         extra_vars = data.copy()
         if errors is None:
@@ -266,7 +266,7 @@ class SurveyJobTemplateMixin(models.Model):
             # Leftover extra_vars, keys provided that are not allowed
             rejected.update(extra_vars)
             # ignored variables does not block manual launch
-            if not getattr(self, '_is_manual_launch', False):
+            if 'prompts' not in _exclude_errors:
                 errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch.').format(
                     list_of_keys=', '.join(extra_vars.keys()))]
 

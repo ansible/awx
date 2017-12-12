@@ -488,8 +488,8 @@ def test_job_launch_JT_with_credentials(machine_credential, credential, net_cred
     assert validated, serializer.errors
 
     kv['credentials'] = [credential, net_credential, machine_credential]  # convert to internal value
-    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
-    deploy_jobtemplate._is_manual_launch = True
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(
+        _exclude_errors=['required', 'prompts'], **kv)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     creds = job_obj.credentials.all()
