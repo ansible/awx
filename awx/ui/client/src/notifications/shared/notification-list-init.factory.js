@@ -72,7 +72,7 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
                     Rest.setUrl(notifier_url);
                     Rest.get()
                         .then(function(response) {
-                            var type = (url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
+                            var type = (response.config.url.indexOf('success')>0) ? "notification_templates_success" : "notification_templates_error";
                             if (response.data.results) {
                                     _.forEach(response.data.results, function(result){
                                         _.forEach(scope.notifications, function(notification){
