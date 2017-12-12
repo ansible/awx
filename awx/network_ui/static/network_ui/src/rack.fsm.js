@@ -284,7 +284,7 @@ _Selected2.prototype.onCopySelected = function (controller) {
 _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 
     //controller.changeState(Ready);
-    controller.next_controller.handle_message(msg_type, $event);
+    controller.delegate_channel.send(msg_type, $event);
 
 };
 _Selected2.prototype.onKeyDown.transitions = ['Ready'];
@@ -407,7 +407,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
     if (selected) {
         controller.changeState(Selected1);
     } else {
-        controller.next_controller.handle_message(msg_type, $event);
+        controller.delegate_channel.send(msg_type, $event);
     }
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1'];

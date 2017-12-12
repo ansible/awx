@@ -1,5 +1,5 @@
 finite_state_machine_id: 15
-name: view
+name: view_fsm
 states:
 - id: 1
   label: Start

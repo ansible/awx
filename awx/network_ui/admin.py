@@ -1,4 +1,3 @@
-# Copyright (c) 2017 Red Hat, Inc
 from django.contrib import admin
 
 from awx.network_ui.models import Device
@@ -32,6 +31,8 @@ from awx.network_ui.models import Process
 from awx.network_ui.models import Toolbox
 
 from awx.network_ui.models import ToolboxItem
+
+from awx.network_ui.models import FSMTrace
 
 
 class DeviceAdmin(admin.ModelAdmin):
@@ -160,3 +161,11 @@ class ToolboxItemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ToolboxItem, ToolboxItemAdmin)
+
+
+class FSMTraceAdmin(admin.ModelAdmin):
+    fields = ('fsm_name', 'from_state', 'to_state', 'message_type', 'client', 'trace_session_id', 'order',)
+    raw_id_fields = ('client',)
+
+
+admin.site.register(FSMTrace, FSMTraceAdmin)

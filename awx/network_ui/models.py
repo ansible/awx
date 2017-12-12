@@ -156,3 +156,15 @@ class ToolboxItem(models.Model):
     toolbox_item_id = models.AutoField(primary_key=True,)
     toolbox = models.ForeignKey('Toolbox',)
     data = models.TextField()
+
+
+class FSMTrace(models.Model):
+
+    fsm_trace_id = models.AutoField(primary_key=True,)
+    fsm_name = models.CharField(max_length=200,)
+    from_state = models.CharField(max_length=200,)
+    to_state = models.CharField(max_length=200,)
+    message_type = models.CharField(max_length=200,)
+    client = models.ForeignKey('Client',)
+    trace_session_id = models.IntegerField(default=0)
+    order = models.IntegerField(default=0)
