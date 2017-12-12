@@ -2935,7 +2935,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        # Sanity check: Are surveys available on this license?
+        # Sanity check: Are surveys available on this license??
         # If not, do not allow them to be used.
         if not feature_enabled('surveys'):
             raise LicenseForbids(_('Your license does not allow '
