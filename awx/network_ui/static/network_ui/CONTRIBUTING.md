@@ -493,6 +493,21 @@ server.
 
 * See: [src/models.js](src/models.js)
 
+The models defined in [src/models.js](src/models.js) are:
+
+* Device - a networking device i.e. a router, a switch, or a host
+* Interface - a networking interface
+* Link - a connection between interfaces
+* Button - a UI button
+* ToggleButton - a togglable UI button
+* Task - a playbook task
+* Group - a grouping of devices
+* ToolBox - a UI element for holding things that can be placed on the virtual canvas
+* Configuration - a configuration for a device
+* Process - an application running on a device
+* Stream - a flow of data between applications
+
+
 **Message Types**
 
 Message types define the structure of the data that is passed between the server
@@ -500,6 +515,59 @@ and the client and between different parts of the client. This provides a known 
 well defined data structure that can be counted up on the code.
 
 * See: [src/messages.js](src/messages.js)
+
+The messages defined are [src/messages.js](src/messages.js):
+
+* DeviceMove - Device has changed x,y position
+* DeviceCreate - A device was created
+* DeviceDestroy - A device was destroyed
+* DeviceLabelEdit - The label of a device was changed
+* DeviceSelected - A device was selected
+* DeviceUnSelected - A device was unselected
+* InterfaceCreate - An interface was created
+* InterfaceLabelEdit - The label of an interface was changed
+* LinkLabelEdit - The label of a link was changed
+* LinkCreate - A link was created
+* LinkDestroy - A link was destroyed
+* LinkSelected - A link was selected
+* LinkUnSelected -  A link was unselected
+* Undo - Undo the last operation
+* Redo - Redo the last undone operation
+* Deploy - Call the deploy playbook
+* Destroy - Call the destroy playbook
+* Discover - Call the discover playbook
+* Layout - Call the layout function
+* MultipleMessage - A collection of messages that should be handled together
+* Coverage - A coverage report
+* MouseEvent - A generic mouse event
+* MouseWheelEvent  - A mouse wheel event
+* KeyEvent - A key press event
+* TouchEvent - A touch screen event
+* StartRecording - Start recording user interactions
+* StopRecording - Stop recording user interactions
+* ViewPort - Update the view port onto the virtual canvas
+* NewDevice - Request for a new device
+* PasteDevice - Paste a device from a toolbox
+* PasteProcess - Paste a process from a toolbox
+* NewGroup - Request for a new group
+* PasteGroup - Paste a group from a toolbox
+* PasteRack - Paste a rack from a toolbox
+* PasteSite - Paste a site from a toolbox
+* CopySite - Copy a stie to a toolbox
+* GroupMove - A group has changed its x, y coordinates
+* GroupCreate - A new group was created
+* GroupDestroy - A group was destroyed
+* GroupLabelEdit - The label for a group was changed
+* GroupSelected - A group was selected
+* GroupUnSelected - A group was unselected
+* GroupMembership - The device membership of a group changed
+* TableCellEdit - A table cell was chaged
+* ProcessCreate - A new process was created
+* StreamCreate - A new stream was created
+* StreamDestroy - A stream was destroyed
+* StreamLabelEdit - The label of a stream was changed
+* StreamSelected - A stream was selected
+* StreamUnSelected - A stream was unselected
 
 **Message Passing**
 
@@ -509,7 +577,7 @@ browser are passed to the `first_controller` where they are handled and discarde
 passed along the chain of FSMControllers until they reach the end with `null_controller`
 or they are handled and the models are updated.
 
-* See: [src/network.ui.controller.js](src/network.ui.controller.js)
+* See: [src/network.ui.controller.js](src/network.ui.controller.js#L115)
 
 The order (from first to last) of message handling is:
 
@@ -529,5 +597,33 @@ The order (from first to last) of message handling is:
 * Device Detail FSM
 * View FSM
 * Null FSM
+
+
+**Widget Development**
+
+When developing a new UI widget follow this process:
+
+For a widget named `new widget` do:
+
+* Add a template in `widgets` for the new widget with name `new.widget.html`
+* Add a directive that loads that template in `src` with name `new.widget.directive.js`
+* Register the directive with the network UI application in `src/network.ui.app.js` using name `awxNetNewWidget`
+* Add a tag that loads the directive into an existing template in `widgets`.  If you are not sure add it to `widgets/network_ui.html`.
+* Test that the directive is loaded when the page renders in a browser
+* Iterate on the template for the new widget until the UI look matches the mockup
+* Define the interaction behavior using [fsm-designer-svg](https://github.com/benthomasson/fsm-designer-svg)
+* Export the FSM to `designs` in a file named `designs/new_widget.yml`
+* Create a new empty FSM implementation file in `src` named `src/new.wiget.fsm.js`
+* Use the `./tools/fsm_generate_diffs.py` tool to generate the skeleton for the new FSM implementation
+* Decide if you need any new data structures for your UI widget. If so, add them to `src/models.js`.
+* Device if you need any new messages to communicate between the UI and the server or between pieces of the UI.
+  If so, add them to `src/messages.js`
+* Write the logic in the event handlers to update the models, send any messages, and change states according to the design.
+* Test the interaction manually in a browser
+* Iterate on changing the event handlers until the desired interaction is acheived
+* Update the design to match the implementation
+
+**Widget Development Example**
+
 
 
