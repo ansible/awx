@@ -29,7 +29,7 @@ istanbul: main
 
 
 simple-server: lint main lessc
-	python -m SimpleHTTPServer 8081
+	python -m SimpleHTTPServer 8082
 
 
 deploy: main

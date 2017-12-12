@@ -1,5 +1,5 @@
 finite_state_machine_id: 130
-name: mode
+name: mode_fsm
 states:
 - id: 1
   label: Start

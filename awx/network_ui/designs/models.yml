@@ -99,8 +99,8 @@ models:
     pk: true
     type: AutoField
   name: Client
-  x: -455
-  y: 109
+  x: -510
+  y: 141
 - fields:
   - name: topology_history_id
     pk: true
@@ -136,8 +136,8 @@ models:
     name: name
     type: CharField
   name: MessageType
-  x: -509
-  y: 383
+  x: -501
+  y: 428
 - display: name
   fields:
   - name: interface_id
@@ -305,8 +305,8 @@ models:
     name: name
     type: CharField
   name: Toolbox
-  x: -222
-  y: 627
+  x: 179
+  y: 644
 - fields:
   - name: toolbox_item_id
     pk: true
@@ -318,8 +318,37 @@ models:
   - name: data
     type: TextField
   name: ToolboxItem
-  x: 54
-  y: 664
+  x: 391
+  y: 645
+- fields:
+  - name: fsm_trace_id
+    pk: true
+    type: AutoField
+  - len: 200 
+    name: fsm_name
+    type: CharField
+  - len: 200 
+    name: from_state
+    type: CharField
+  - len: 200 
+    name: to_state
+    type: CharField
+  - len: 200 
+    name: message_type
+    type: CharField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - default: 0
+    name: order
+    type: IntegerField
+  name: FSMTrace
+  x: -872
+  y: 507
 modules: []
 view:
   panX: 213.72955551921206

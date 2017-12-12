@@ -1,5 +1,5 @@
 finite_state_machine_id: 131
-name: fsm
+name: rack_fsm
 states:
 - id: 5
   label: Selected2
