@@ -492,6 +492,18 @@ class UnifiedJobTypeStringMixin(object):
         return UnifiedJobTypeStringMixin._camel_to_underscore(self.__class__.__name__)
 
 
+class UnifiedJobDeprecatedStdout(models.Model):
+
+    class Meta:
+        managed = False
+        db_table = 'main_unifiedjob'
+
+    result_stdout_text = models.TextField(
+        null=True,
+        editable=False,
+    )
+
+
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
@@ -620,11 +632,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     ))
-    result_stdout_text = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
     result_stdout_file = models.TextField( # FilePathfield?
         blank=True,
         default='',
@@ -881,6 +888,19 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if job_creds:
             config.credentials.add(*job_creds)
         return config
+
+    @property
+    def result_stdout_text(self):
+        related = UnifiedJobDeprecatedStdout.objects.get(pk=self.pk)
+        return related.result_stdout_text or ''
+
+    @result_stdout_text.setter
+    def result_stdout_text(self, value):
+        # TODO: remove this method once all stdout is based on jobevents
+        # (because it won't be used for writing anymore)
+        related = UnifiedJobDeprecatedStdout.objects.get(pk=self.pk)
+        related.result_stdout_text = value
+        related.save()
 
     def result_stdout_raw_handle(self, attempt=0):
         """Return a file-like object containing the standard out of the

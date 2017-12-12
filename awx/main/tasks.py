@@ -516,6 +516,10 @@ class BaseTask(LogErrorsTask):
                         update_fields.append(field)
                         if field == 'status':
                             update_fields.append('failed')
+                    if 'result_stdout_text' in update_fields:
+                        # result_stdout_text is now deprecated, and is no longer
+                        # an actual Django field (it's a property)
+                        update_fields.remove('result_stdout_text')
                     instance.save(update_fields=update_fields)
                 return instance
         except DatabaseError as e:

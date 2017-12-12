@@ -2663,12 +2663,6 @@ class InventoryUpdateList(ListAPIView):
     model = InventoryUpdate
     serializer_class = InventoryUpdateListSerializer
 
-    def get_queryset(self):
-        qs = super(InventoryUpdateList, self).get_queryset()
-        # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
-        qs = qs.defer('result_stdout_text')
-        return qs
-
 
 class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 

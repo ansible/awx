@@ -8,15 +8,15 @@ from StringIO import StringIO
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import UnifiedJob
+from awx.main import models
 
 
 # stdout file present
 @mock.patch('os.path.exists', return_value=True)
 @mock.patch('codecs.open', return_value='my_file_handler')
+@mock.patch.object(models.UnifiedJob, 'result_stdout_text', '')
 def test_result_stdout_raw_handle_file__found(exists, open):
-    unified_job = UnifiedJob()
-    unified_job.result_stdout_file = 'dummy'
+    unified_job = models.UnifiedJob()
 
     with mock.patch('os.stat', return_value=Mock(st_size=1)):
         result = unified_job.result_stdout_raw_handle()
@@ -26,8 +26,9 @@ def test_result_stdout_raw_handle_file__found(exists, open):
 
 # stdout file missing, job finished
 @mock.patch('os.path.exists', return_value=False)
+@mock.patch.object(models.UnifiedJob, 'result_stdout_text', '')
 def test_result_stdout_raw_handle__missing(exists):
-    unified_job = UnifiedJob()
+    unified_job = models.UnifiedJob()
     unified_job.result_stdout_file = 'dummy'
     unified_job.finished = now()
 
@@ -39,8 +40,9 @@ def test_result_stdout_raw_handle__missing(exists):
 
 # stdout file missing, job not finished
 @mock.patch('os.path.exists', return_value=False)
+@mock.patch.object(models.UnifiedJob, 'result_stdout_text', '')
 def test_result_stdout_raw_handle__pending(exists):
-    unified_job = UnifiedJob()
+    unified_job = models.UnifiedJob()
     unified_job.result_stdout_file = 'dummy'
     unified_job.finished = None
 

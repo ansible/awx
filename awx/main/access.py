@@ -140,14 +140,7 @@ def get_user_capabilities(user, instance, **kwargs):
     convenient for the user interface to consume and hide or show various
     actions in the interface.
     '''
-    cls = instance.__class__
-    # When `.defer()` is used w/ the Django ORM, the result is a subclass of
-    # the original that represents e.g.,
-    # awx.main.models.ad_hoc_commands.AdHocCommand_Deferred_result_stdout_text
-    # We want to do the access registry lookup keyed on the base class name.
-    if getattr(cls, '_deferred', False):
-        cls = instance.__class__.__bases__[0]
-    access_class = access_registry[cls]
+    access_class = access_registry[instance.__class__]
     return access_class(user).get_user_capabilities(instance, **kwargs)
 
 
@@ -2075,8 +2068,7 @@ class UnifiedJobAccess(BaseAccess):
             Q(job__inventory__organization__in=org_auditor_qs) |
             Q(job__project__organization__in=org_auditor_qs)
         )
-        # TODO: remove this defer in 3.3 when we implement https://github.com/ansible/ansible-tower/issues/5436
-        return qs.defer('result_stdout_text')
+        return qs
 
 
 class ScheduleAccess(BaseAccess):
