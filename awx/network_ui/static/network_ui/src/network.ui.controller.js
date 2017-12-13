@@ -802,7 +802,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton, $scope),
       new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
       new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
-      new models.Button("DOWNLOAD TRACE", button_offset + 740, 48, 120, 30, $scope.onDownloadTraceButton, $scope),
+      new models.Button("DOWNLOAD TRACE", button_offset + 750, 48, 150, 30, $scope.onDownloadTraceButton, $scope),
     ];
 
     var LAYERS_X = 160;
