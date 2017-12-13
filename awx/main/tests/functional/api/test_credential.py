@@ -1427,8 +1427,8 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
     ['ad_hoc_commands', AdHocCommand()],
     ['insights_inventories', Inventory()],
     ['inventorysources', InventorySource()],
-    ['jobs', Job()],
-    ['jobtemplates', JobTemplate()],
+    ['unifiedjobs', Job()],
+    ['unifiedjobtemplates', JobTemplate()],
     ['projects', Project()],
     ['workflowjobnodes', WorkflowJobNode()],
 ])

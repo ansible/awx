@@ -54,7 +54,7 @@ def test_ctint_activity_stream(monkeypatch, get, user, settings):
     Setting.objects.create(key="FOO", value="bar")
     settings.ACTIVITY_STREAM_ENABLED = True
     u = user('admin', True)
-    activity_stream = ActivityStream.objects.filter(setting={'name': 'FOO', 'category': None}).latest('pk')
+    activity_stream = ActivityStream.objects.filter(setting__icontains="FOO").latest('pk')
     activity_stream.actor = u
     activity_stream.save()
 
