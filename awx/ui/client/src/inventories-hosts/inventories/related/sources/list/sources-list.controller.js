@@ -120,7 +120,6 @@
             $state.go('inventories.edit.inventory_sources.edit', {inventory_source_id: id});
         };
         $scope.deleteSource = function(inventory_source){
-            var body = '<div class=\"Prompt-bodyQuery\">' + i18n._('Confirm that you want to permanently delete the inventory source below from the inventory. Deleting this inventory source also deletes its associated groups and hosts.') + '</div><div class=\"Prompt-bodyTarget\">' + $filter('sanitize')(inventory_source.name) + '</div>';
             var action = function(){
                 $rootScope.promptActionBtnClass = "Modal-errorButton--sourcesDelete";
                 Wait('start');
