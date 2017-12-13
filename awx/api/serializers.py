@@ -2385,14 +2385,14 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         try:
             if obj.credential:
                 res['credential'] = self.reverse(
-                    'api:credential_detail', kwargs={'pk': obj.credential.pk}
+                    'api:credential_detail', kwargs={'pk': obj.credential}
                 )
         except ObjectDoesNotExist:
             setattr(obj, 'credential', None)
         try:
             if obj.vault_credential:
                 res['vault_credential'] = self.reverse(
-                    'api:credential_detail', kwargs={'pk': obj.vault_credential.pk}
+                    'api:credential_detail', kwargs={'pk': obj.vault_credential}
                 )
         except ObjectDoesNotExist:
             setattr(obj, 'vault_credential', None)
