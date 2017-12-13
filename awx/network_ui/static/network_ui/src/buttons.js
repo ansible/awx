@@ -98,4 +98,3 @@ _ButtonPressed.prototype.onMouseUp = function (controller, msg_type, $event) {
 _ButtonPressed.prototype.onMouseUp.transitions = ['Ready'];
 
 _ButtonPressed.prototype.onTouchEnd = _ButtonPressed.prototype.onMouseUp;
-
