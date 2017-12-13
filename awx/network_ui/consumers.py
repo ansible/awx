@@ -8,6 +8,7 @@ from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
+from awx.network_ui.models import FSMTrace
 from awx.network_ui.serializers import yaml_serialize_topology
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
@@ -267,7 +268,11 @@ class _Persistence(object):
             return
         message_type = data[0]
         message_value = data[1]
-        message_type_id = MessageType.objects.get_or_create(name=message_type)[0].pk
+        try:
+            message_type_id = MessageType.objects.get(name=message_type).pk
+        except ObjectDoesNotExist, e:
+            logger.warning("Unsupported message %s", message_type)
+            return
         TopologyHistory(topology_id=topology_id,
                         client_id=client_id,
                         message_type_id=message_type_id,
