@@ -50,7 +50,7 @@ PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'vmware', 'gce', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms', 'scm',]
+CLOUD_INVENTORY_SOURCES = ['ec2', 'vmware', 'gce', 'azure_rm', 'openstack', 'rhv', 'custom', 'satellite6', 'cloudforms', 'scm', 'tower',]
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),
@@ -288,7 +288,10 @@ class PrimordialModel(CreatedModifiedModel):
                 continue
             if not (self.pk and self.pk == obj.pk):
                 errors.append(
-                    '%s with this (%s) combination already exists.' % (model.__name__, ', '.join(ut))
+                    '%s with this (%s) combination already exists.' % (
+                        model.__name__,
+                        ', '.join(set(ut) - {'polymorphic_ctype'})
+                    )
                 )
         if errors:
             raise ValidationError(errors)

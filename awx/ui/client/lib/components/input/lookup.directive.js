@@ -84,6 +84,7 @@ function AtInputLookupController (baseInputController, $q, $state) {
         scope.state._touched = true;
 
         if (scope.state._displayValue === '' && !scope.state._required) {
+            scope.state._value = null;
             return vm.check({ isValid: true });
         }
 

@@ -165,6 +165,10 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.$broadcast('resetWorkflowChart');
         };
 
+        $scope.zoomToFitChart = function() {
+            $scope.$broadcast('zoomToFitChart');
+        };
+
         $scope.workflowZoomed = function(zoom) {
             $scope.$broadcast('workflowZoomed', {
                 zoom: zoom

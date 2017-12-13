@@ -13,7 +13,7 @@ from awx.main.migrations._scan_jobs import remove_scan_type_nodes
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0009_v330_multi_credential'),
+        ('main', '0013_v330_multi_credential'),
     ]
 
     operations = [

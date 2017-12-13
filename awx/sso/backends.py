@@ -241,7 +241,8 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
         """
         key = self.conf.get(conf_key, default_attribute)
         value = attributes[key] if key in attributes else None
-        if isinstance(value, list):
+        # In certain implementations (like https://pagure.io/ipsilon) this value is a string, not a list
+        if isinstance(value, (list, tuple)):
             value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
             logger.warn("Could not map user detail '%s' from SAML attribute '%s'; "
@@ -309,7 +310,7 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
                 should_add = True
     if should_add:
         rel.add(user)
-    elif remove:
+    elif remove and user in rel.all():
         rel.remove(user)
 
 

@@ -4,12 +4,25 @@ import re
 import mock # noqa
 import pytest
 
-from awx.main.models.credential import Credential, CredentialType
+from awx.main.models import (AdHocCommand, Credential, CredentialType, Job, JobTemplate,
+                             Inventory, InventorySource, Project,
+                             WorkflowJobNode)
 from awx.main.utils import decrypt_field
 from awx.api.versioning import reverse
 
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
+
+
+@pytest.mark.django_db
+def test_idempotent_credential_type_setup():
+    assert CredentialType.objects.count() == 0
+    CredentialType.setup_tower_managed_defaults()
+    total = CredentialType.objects.count()
+    assert total > 0
+
+    CredentialType.setup_tower_managed_defaults()
+    assert CredentialType.objects.count() == total
 
 
 @pytest.mark.django_db
@@ -575,7 +588,7 @@ def test_create_org_credential_as_admin(post, organization, org_admin, credentia
     params['name'] = 'Some name'
     params['organization'] = organization.id
     response = post(
-        reverse('api:credential_list'),
+        reverse('api:credential_list', kwargs={'version': version}),
         params,
         org_admin
     )
@@ -591,7 +604,7 @@ def test_credential_detail(post, get, organization, org_admin, credentialtype_ss
     params['name'] = 'Some name'
     params['organization'] = organization.id
     response = post(
-        reverse('api:credential_list'),
+        reverse('api:credential_list', kwargs={'version': version}),
         params,
         org_admin
     )
@@ -1410,7 +1423,17 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
 
 
 @pytest.mark.django_db
-def test_credential_type_immutable_in_v2(patch, organization, admin, credentialtype_ssh, credentialtype_aws):
+@pytest.mark.parametrize('relation, related_obj', [
+    ['ad_hoc_commands', AdHocCommand()],
+    ['insights_inventories', Inventory()],
+    ['inventorysources', InventorySource()],
+    ['jobs', Job()],
+    ['jobtemplates', JobTemplate()],
+    ['projects', Project()],
+    ['workflowjobnodes', WorkflowJobNode()],
+])
+def test_credential_type_mutability(patch, organization, admin, credentialtype_ssh,
+                                    credentialtype_aws, relation, related_obj):
     cred = Credential(
         credential_type=credentialtype_ssh,
         name='Best credential ever',
@@ -1422,19 +1445,39 @@ def test_credential_type_immutable_in_v2(patch, organization, admin, credentialt
     )
     cred.save()
 
+    related_obj.save()
+    getattr(cred, relation).add(related_obj)
+
+    def _change_credential_type():
+        return patch(
+            reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+            {
+                'credential_type': credentialtype_aws.pk,
+                'inputs': {
+                    'username': u'jim',
+                    'password': u'pass'
+                }
+            },
+            admin
+        )
+
+    response = _change_credential_type()
+    assert response.status_code == 400
+    expected = ['You cannot change the credential type of the credential, '
+                'as it may break the functionality of the resources using it.']
+    assert response.data['credential_type'] == expected
+
     response = patch(
         reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
-        {
-            'credential_type': credentialtype_aws.pk,
-            'inputs': {
-                'username': u'jim',
-                'password': u'pass'
-            }
-        },
+        {'name': 'Worst credential ever'},
         admin
     )
-    assert response.status_code == 400
-    assert 'credential_type' in response.data
+    assert response.status_code == 200
+    assert Credential.objects.get(pk=cred.pk).name == 'Worst credential ever'
+
+    related_obj.delete()
+    response = _change_credential_type()
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db

@@ -399,8 +399,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         active_hosts = self.hosts
         failed_hosts = active_hosts.filter(has_active_failures=True)
         active_groups = self.groups
+        if self.kind == 'smart':
+            active_groups = active_groups.none()
         failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
+        if self.kind == 'smart':
+            active_inventory_sources = self.inventory_sources.none()
+        else:
+            active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
@@ -417,6 +422,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         for field, value in computed_fields.items():
             if getattr(iobj, field) != value:
                 setattr(iobj, field, value)
+                # update in-memory object
+                setattr(self, field, value)
             else:
                 computed_fields.pop(field)
         if computed_fields:
@@ -464,6 +471,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).save(*args, **kwargs)
+        if (self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and
+                connection.vendor != 'sqlite'):
+            # Minimal update of host_count for smart inventory host filter changes
+            self.update_computed_fields(update_groups=False, update_hosts=False)
 
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
@@ -937,6 +948,8 @@ class InventorySourceOptions(BaseModel):
         ('satellite6', _('Red Hat Satellite 6')),
         ('cloudforms', _('Red Hat CloudForms')),
         ('openstack', _('OpenStack')),
+        ('rhv', _('Red Hat Virtualization')),
+        ('tower', _('Ansible Tower')),
         ('custom', _('Custom Script')),
     ]
 
@@ -1185,6 +1198,16 @@ class InventorySourceOptions(BaseModel):
         """Red Hat CloudForms region choices (not implemented)"""
         return [('all', 'All')]
 
+    @classmethod
+    def get_rhv_region_choices(self):
+        """No region supprt"""
+        return [('all', 'All')]
+
+    @classmethod
+    def get_tower_region_choices(self):
+        """No region supprt"""
+        return [('all', 'All')]
+
     def clean_credential(self):
         if not self.source:
             return None
@@ -1256,7 +1279,7 @@ class InventorySourceOptions(BaseModel):
                 raise ValidationError(_('Invalid filter expression: %(filter)s') %
                                       {'filter': ', '.join(invalid_filters)})
             return instance_filters
-        elif self.source == 'vmware':
+        elif self.source in ('vmware', 'tower'):
             return instance_filters
         else:
             return ''

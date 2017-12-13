@@ -3,6 +3,7 @@
 from collections import OrderedDict
 import functools
 import json
+import logging
 import operator
 import os
 import stat
@@ -35,6 +36,8 @@ from awx.main.utils import encrypt_field
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential']
 
+logger = logging.getLogger('awx.main.models.credential')
+
 
 class V1Credential(object):
 
@@ -59,7 +62,9 @@ class V1Credential(object):
         ('gce', 'Google Compute Engine'),
         ('azure_rm', 'Microsoft Azure Resource Manager'),
         ('openstack', 'OpenStack'),
+        ('rhv', 'Red Hat Virtualization'),
         ('insights', 'Insights'),
+        ('tower', 'Ansible Tower'),
     ]
     FIELDS = {
         'kind': models.CharField(
@@ -413,8 +418,8 @@ class CredentialType(CommonModelNameNotUnique):
     ENV_BLACKLIST = set((
         'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
         'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
-        'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'TOWER_HOST',
-        'AWX_HOST', 'MAX_EVENT_RES', 'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
+        'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'MAX_EVENT_RES',
+        'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
         'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
     ))
 
@@ -498,6 +503,11 @@ class CredentialType(CommonModelNameNotUnique):
         for default in cls.defaults.values():
             default_ = default()
             if persisted:
+                if CredentialType.objects.filter(name=default_.name, kind=default_.kind).count():
+                    continue
+                logger.debug(_(
+                    "adding %s credential type" % default_.name
+                ))
                 default_.save()
 
     @classmethod
@@ -1009,6 +1019,12 @@ def azure_rm(cls):
                 'id': 'tenant',
                 'label': 'Tenant ID',
                 'type': 'string'
+            }, {
+                'id': 'cloud_environment',
+                'label': 'Azure Cloud Environment',
+                'type': 'string',
+                'help_text': ('Environment variable AZURE_CLOUD_ENVIRONMENT when'
+                              ' using Azure GovCloud or Azure stack.')
             }],
             'required': ['subscription'],
         }
@@ -1039,5 +1055,91 @@ def insights(cls):
                 "scm_username": "{{username}}",
                 "scm_password": "{{password}}",
             },
+        },
+    )
+
+
+@CredentialType.default
+def rhv(cls):
+    return cls(
+        kind='cloud',
+        name='Red Hat Virtualization',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'Host (Authentication URL)',
+                'type': 'string',
+                'help_text': ('The host to authenticate with.')
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'ca_file',
+                'label': 'CA File',
+                'type': 'string',
+                'help_text': ('Absolute file path to the CA file to use (optional)')
+            }],
+            'required': ['host', 'username', 'password'],
+        },
+        injectors={
+            # The duplication here is intentional; the ovirt4 inventory plugin
+            # writes a .ini file for authentication, while the ansible modules for
+            # ovirt4 use a separate authentication process that support
+            # environment variables; by injecting both, we support both
+            'file': {
+                'template': '\n'.join([
+                    '[ovirt]',
+                    'ovirt_url={{host}}',
+                    'ovirt_username={{username}}',
+                    'ovirt_password={{password}}',
+                    '{% if ca_file %}ovirt_ca_file={{ca_file}}{% endif %}'])
+            },
+            'env': {
+                'OVIRT_INI_PATH': '{{tower.filename}}',
+                'OVIRT_URL': '{{host}}',
+                'OVIRT_USERNAME': '{{username}}',
+                'OVIRT_PASSWORD': '{{password}}'
+            }
+        },
+    )
+
+
+@CredentialType.default
+def tower(cls):
+    return cls(
+        kind='cloud',
+        name='Ansible Tower',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'host',
+                'label': 'Ansible Tower Hostname',
+                'type': 'string',
+                'help_text': ('The Ansible Tower base URL to authenticate with.')
+            }, {
+                'id': 'username',
+                'label': 'Username',
+                'type': 'string'
+            }, {
+                'id': 'password',
+                'label': 'Password',
+                'type': 'string',
+                'secret': True,
+            }],
+            'required': ['host', 'username', 'password'],
+        },
+        injectors={
+            'env': {
+                'TOWER_HOST': '{{host}}',
+                'TOWER_USERNAME': '{{username}}',
+                'TOWER_PASSWORD': '{{password}}',
+            }
         },
     )

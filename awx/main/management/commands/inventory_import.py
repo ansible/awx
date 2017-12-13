@@ -173,6 +173,7 @@ class AnsibleInventoryLoader(object):
     def load(self):
         base_args = self.get_base_args()
         logger.info('Reading Ansible inventory source: %s', self.source)
+
         data = self.command_to_json(base_args + ['--list'])
 
         # TODO: remove after we run custom scripts through ansible-inventory
@@ -225,6 +226,7 @@ def load_inventory_source(source, group_filter_re=None,
     '''
     # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
     # good naming conventions
+    source = source.replace('rhv.py', 'ovirt4.py')
     source = source.replace('satellite6.py', 'foreman.py')
     source = source.replace('vmware.py', 'vmware_inventory.py')
     if not os.path.exists(source):
@@ -600,27 +602,20 @@ class Command(BaseCommand):
 
     def _update_inventory(self):
         '''
-        Update/overwrite variables from "all" group.  If importing from a
-        cloud source attached to a specific group, variables will be set on
-        the base group, otherwise they will be set on the whole inventory.
+        Update inventory variables from "all" group.
         '''
-        # FIXME: figure out how "all" variables are handled in the new inventory source system
+        # TODO: We disable variable overwrite here in case user-defined inventory variables get
+        # mangled. But we still need to figure out a better way of processing multiple inventory
+        # update variables mixing with each other.
         all_obj = self.inventory
-        all_name = 'inventory'
         db_variables = all_obj.variables_dict
-        if self.overwrite_vars:
-            db_variables = self.all_group.variables
-        else:
-            db_variables.update(self.all_group.variables)
+        db_variables.update(self.all_group.variables)
         if db_variables != all_obj.variables_dict:
             all_obj.variables = json.dumps(db_variables)
             all_obj.save(update_fields=['variables'])
-            if self.overwrite_vars:
-                logger.info('%s variables replaced from "all" group', all_name.capitalize())
-            else:
-                logger.info('%s variables updated from "all" group', all_name.capitalize())
+            logger.info('Inventory variables updated from "all" group')
         else:
-            logger.info('%s variables unmodified', all_name.capitalize())
+            logger.info('Inventory variables unmodified')
 
     def _create_update_groups(self):
         '''

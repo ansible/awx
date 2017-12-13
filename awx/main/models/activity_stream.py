@@ -3,6 +3,7 @@
 
 # Tower
 from awx.api.versioning import reverse
+from awx.main.fields import JSONField
 
 # Django
 from django.db import models
@@ -65,6 +66,8 @@ class ActivityStream(models.Model):
     label = models.ManyToManyField("Label", blank=True)
     role = models.ManyToManyField("Role", blank=True)
     instance_group = models.ManyToManyField("InstanceGroup", blank=True)
+
+    setting = JSONField(blank=True)
 
     def get_absolute_url(self, request=None):
         return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)

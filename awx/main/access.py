@@ -12,6 +12,7 @@ from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied, ValidationError
@@ -31,7 +32,7 @@ from awx.conf.license import LicenseForbids, feature_enabled
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects', 'consumer_access',
-           'user_admin_role', 'StateConflict',]
+           'user_admin_role', 'ActiveJobConflict',]
 
 logger = logging.getLogger('awx.main.access')
 
@@ -71,8 +72,14 @@ def get_object_from_data(field, Model, data, obj=None):
         raise ParseError(_("Bad data found in related field %s." % field))
 
 
-class StateConflict(ValidationError):
+class ActiveJobConflict(ValidationError):
     status_code = 409
+
+    def __init__(self, active_jobs):
+        super(ActiveJobConflict, self).__init__({
+            "conflict": _("Resource is being used by running jobs."),
+            "active_jobs": active_jobs
+        })
 
 
 def register_access(model_class, access_class):
@@ -568,8 +575,7 @@ class OrganizationAccess(BaseAccess):
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
@@ -662,8 +668,7 @@ class InventoryAccess(BaseAccess):
         active_jobs.extend([dict(type="ad_hoc_command", id=o.id)
                             for o in AdHocCommand.objects.filter(inventory=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
     def can_run_ad_hoc_commands(self, obj):
@@ -788,8 +793,7 @@ class GroupAccess(BaseAccess):
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
     def can_start(self, obj, validate_license=True):
@@ -839,8 +843,7 @@ class InventorySourceAccess(BaseAccess):
             return False
         active_jobs_qs = InventoryUpdate.objects.filter(inventory_source=obj, status__in=ACTIVE_STATES)
         if active_jobs_qs.exists():
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": [dict(type="inventory_update", id=o.id) for o in active_jobs_qs.all()]})
+            raise ActiveJobConflict([dict(type="inventory_update", id=o.id) for o in active_jobs_qs.all()])
         return True
 
     @check_superuser
@@ -1090,8 +1093,7 @@ class ProjectAccess(BaseAccess):
         active_jobs.extend([dict(type="project_update", id=o.id)
                             for o in ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
     @check_superuser
@@ -1124,8 +1126,11 @@ class ProjectUpdateAccess(BaseAccess):
 
     def can_start(self, obj, validate_license=True):
         # for relaunching
-        if obj and obj.project:
-            return self.user in obj.project.update_role
+        try:
+            if obj and obj.project:
+                return self.user in obj.project.update_role
+        except ObjectDoesNotExist:
+            pass
         return False
 
     @check_superuser
@@ -1265,8 +1270,7 @@ class JobTemplateAccess(BaseAccess):
         active_jobs = [dict(type="job", id=o.id)
                        for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
     @check_superuser
@@ -1771,8 +1775,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         active_jobs = [dict(type="workflow_job", id=o.id)
                        for o in obj.workflow_jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
-                                 "active_jobs": active_jobs})
+            raise ActiveJobConflict(active_jobs)
         return True
 
 

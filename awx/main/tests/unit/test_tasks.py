@@ -16,6 +16,7 @@ from django.conf import settings
 
 
 from awx.main.models import (
+    AdHocCommand,
     Credential,
     CredentialType,
     Inventory,
@@ -26,10 +27,11 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     UnifiedJob,
+    User
 )
 
 from awx.main import tasks
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, encrypt_value
 
 
 
@@ -304,6 +306,32 @@ class TestGenericRun(TestJobExecution):
         assert '--ro-bind %s %s' % (settings.ANSIBLE_VENV_PATH, settings.ANSIBLE_VENV_PATH) in ' '.join(args)  # noqa
         assert '--ro-bind %s %s' % (settings.AWX_VENV_PATH, settings.AWX_VENV_PATH) in ' '.join(args)  # noqa
 
+    def test_created_by_extra_vars(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"tower_user_id": 123,' in ' '.join(args)
+        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_user_id": 123,' in ' '.join(args)
+        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+
+    def test_survey_extra_vars(self):
+        self.instance.extra_vars = json.dumps({
+            'super_secret': encrypt_value('CLASSIFIED', pk=None)
+        })
+        self.instance.survey_passwords = {
+            'super_secret': '$encrypted$'
+        }
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"super_secret": "CLASSIFIED"' in ' '.join(args)
+
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
         patch.start()
@@ -314,6 +342,35 @@ class TestGenericRun(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
+
+
+class TestAdhocRun(TestJobExecution):
+
+    TASK_CLS = tasks.RunAdHocCommand
+
+    def get_instance(self):
+        return AdHocCommand(
+            pk=1,
+            created=datetime.utcnow(),
+            inventory=Inventory(pk=1),
+            status='new',
+            cancel_flag=False,
+            verbosity=3,
+            extra_vars={'awx_foo': 'awx-bar'}
+        )
+
+    def test_created_by_extra_vars(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        assert '"tower_user_id": 123,' in ' '.join(args)
+        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_user_id": 123,' in ' '.join(args)
+        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+        assert '"awx_foo": "awx-bar' in ' '.join(args)
 
 
 class TestIsolatedExecution(TestJobExecution):
@@ -670,7 +727,8 @@ class TestJobCredentials(TestJobExecution):
             inputs = {
                 'subscription': 'some-subscription',
                 'username': 'bob',
-                'password': 'secret'
+                'password': 'secret',
+                'cloud_environment': 'foobar'
             }
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
@@ -685,6 +743,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
+        assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
     def test_vmware_credentials(self):
         vmware = CredentialType.defaults['vmware']()
@@ -733,6 +792,41 @@ class TestJobCredentials(TestJobExecution):
                 '      username: bob',
                 ''
             ])
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
+    def test_rhv_credentials(self, ca_file):
+        rhv = CredentialType.defaults['rhv']()
+        inputs = {
+            'host': 'some-ovirt-host.example.org',
+            'username': 'bob',
+            'password': 'some-pass',
+        }
+        if ca_file:
+            inputs['ca_file'] = ca_file
+        credential = Credential(
+            pk=1,
+            credential_type=rhv,
+            inputs=inputs
+        )
+        credential.inputs['password'] = encrypt_field(credential, 'password')
+        self.instance.extra_credentials.add(credential)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            config = ConfigParser.ConfigParser()
+            config.read(env['OVIRT_INI_PATH'])
+            assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
+            assert config.get('ovirt', 'ovirt_username') == 'bob'
+            assert config.get('ovirt', 'ovirt_password') == 'some-pass'
+            if ca_file:
+                assert config.get('ovirt', 'ovirt_ca_file') == ca_file
+            else:
+                with pytest.raises(ConfigParser.NoOptionError):
+                    config.get('ovirt', 'ovirt_ca_file')
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1368,6 +1462,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['GCE_ZONE'] == expected_gce_zone
             ssh_key_data = env['GCE_PEM_FILE_PATH']
             assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+
+            config = ConfigParser.ConfigParser()
+            config.read(env['GCE_INI_PATH'])
+            assert 'cache' in config.sections()
+            assert config.getint('cache', 'cache_max_age') == 0
+
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect

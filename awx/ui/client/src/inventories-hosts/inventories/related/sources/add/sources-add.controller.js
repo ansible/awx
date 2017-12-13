@@ -198,7 +198,10 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 $scope.group_by = $scope.group_by_choices;
                 $scope.groupByPopOver = i18n._("Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail.");
                 $scope.instanceFilterPopOver = i18n._("Provide a comma-separated list of filter expressions. Hosts are imported when all of the filters match. Refer to Ansible Tower documentation for more detail.");
-                }
+            }
+            if( _.get($scope, 'source') === 'tower' || _.get($scope.source, 'value') === 'tower') {
+                $scope.instanceFilterPopOver = i18n._("Provide the named URL encoded name or id of the remote Tower inventory to be imported.");
+            }
             CreateSelect2({
                 element: '#inventory_source_group_by',
                 multiple: true,

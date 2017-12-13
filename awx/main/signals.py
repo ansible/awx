@@ -26,6 +26,8 @@ from awx.main.fields import is_implicit_parent
 
 from awx.main.consumers import emit_channel_notification
 
+from awx.conf.utils import conf_to_dict
+
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
@@ -284,7 +286,12 @@ def _update_host_last_jhs(host):
     except IndexError:
         jhs = None
     update_fields = []
-    last_job = jhs.job if jhs else None
+    try:
+        last_job = jhs.job if jhs else None
+    except Job.DoesNotExist:
+        # The job (and its summaries) have already been/are currently being
+        # deleted, so there's no need to update the host w/ a reference to it
+        return
     if host.last_job != last_job:
         host.last_job = last_job
         update_fields.append('last_job')
@@ -392,12 +399,15 @@ def activity_stream_create(sender, instance, created, **kwargs):
             object1=object1,
             changes=json.dumps(changes),
             actor=get_current_user_or_none())
-        activity_entry.save()
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.
         if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
+            activity_entry.save()
             getattr(activity_entry, object1).add(instance)
+        else:
+            activity_entry.setting = conf_to_dict(instance)
+            activity_entry.save()
 
 
 def activity_stream_update(sender, instance, **kwargs):
@@ -423,9 +433,12 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes),
         actor=get_current_user_or_none())
-    activity_entry.save()
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
+        activity_entry.save()
         getattr(activity_entry, object1).add(instance)
+    else:
+        activity_entry.setting = conf_to_dict(instance)
+        activity_entry.save()
 
 
 def activity_stream_delete(sender, instance, **kwargs):
@@ -535,8 +548,8 @@ def get_current_user_from_drf_request(sender, **kwargs):
     drf_request on the underlying Django Request object.
     '''
     request = get_current_request()
-    drf_request = getattr(request, 'drf_request', None)
-    return (getattr(drf_request, 'user', False), 0)
+    drf_request_user = getattr(request, 'drf_request_user', False)
+    return (drf_request_user, 0)
 
 
 @receiver(pre_delete, sender=Organization)

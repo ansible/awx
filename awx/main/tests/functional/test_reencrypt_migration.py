@@ -10,6 +10,10 @@ from django.apps import apps
 
 from awx.main.models import (
     UnifiedJob,
+    Job,
+    JobTemplate,
+    WorkflowJob,
+    WorkflowJobTemplate,
     NotificationTemplate,
     Credential,
 )
@@ -20,9 +24,10 @@ from awx.main.migrations._reencrypt import (
     _notification_templates,
     _credentials,
     _unified_jobs,
+    _encrypt_survey_passwords
 )
 
-from awx.main.utils import decrypt_field
+from awx.main.utils import decrypt_field, get_encryption_key, decrypt_value
 
 
 @pytest.mark.django_db
@@ -93,3 +98,62 @@ def test_unified_job_migration(old_enc, new_enc, value):
     # Exception if the encryption type of AESCBC is not properly skipped, ensures
     # our `startswith` calls don't have typos
     _unified_jobs(apps)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("attr, cls", [
+    ['job_template', JobTemplate],
+    ['workflow_job_template', WorkflowJobTemplate]
+])
+def test_survey_default_password_encryption(attr, cls, request):
+    factory = request.getfuncargvalue('{}_factory'.format(attr))
+    jt = getattr(factory('jt'), attr)
+    jt.survey_enabled = True
+    jt.survey_spec = {
+        'description': 'A survey',
+        'spec': [{
+            'index': 0,
+            'question_name': 'What is your password?',
+            'required': True,
+            'variable': 'secret_value',
+            'default': 'SUPERSECRET',
+            'type': 'password'
+        }],
+        'name': 'my survey'
+    }
+    jt.save()
+
+    _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate)
+    spec = cls.objects.get(pk=jt.pk).survey_spec['spec']
+    assert decrypt_value(get_encryption_key('value', pk=None), spec[0]['default']) == 'SUPERSECRET'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("attr, cls", [
+    ['job_template', Job],
+    ['workflow_job_template', WorkflowJob]
+])
+def test_job_survey_vars_encryption(attr, cls, request):
+    factory = request.getfuncargvalue('{}_factory'.format(attr))
+    jt = getattr(factory('jt'), attr)
+    jt.survey_enabled = True
+    jt.survey_spec = {
+        'description': 'A survey',
+        'spec': [{
+            'index': 0,
+            'question_name': 'What is your password?',
+            'required': True,
+            'variable': 'secret_value',
+            'default': '',
+            'type': 'password'
+        }],
+        'name': 'my survey'
+    }
+    jt.save()
+    job = jt.create_unified_job()
+    job.extra_vars = json.dumps({'secret_value': 'SUPERSECRET'})
+    job.save()
+
+    _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate)
+    job = cls.objects.get(pk=job.pk)
+    assert json.loads(job.decrypted_extra_vars()) == {'secret_value': 'SUPERSECRET'}

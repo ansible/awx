@@ -9,11 +9,12 @@
         'adjustGraphSize',
         'templateUrl',
         'i18n',
+        'moment',
         'jobStatusGraphData',
         JobStatusGraph
     ];
 
-function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataService) {
+function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, graphDataService) {
             return {
                 restrict: 'E',
                 scope: {
@@ -72,11 +73,11 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                         }
                     });
 
-                    if(period==="day") {
-                        timeFormat="%H:%M";
+                    if(period === "day") {
+                        timeFormat="H:M";
                     }
                     else {
-                        timeFormat = '%m/%d';
+                        timeFormat = "MMM D";
                     }
                     graphData.map(function(series) {
                         series.values = series.values.map(function(d) {
@@ -93,7 +94,8 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                     .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                     .showLegend(false)       //Show the legend, allowing users to turn on/off line series.
                     .showYAxis(true)        //Show the y-axis
-                    .showXAxis(true);       //Show the x-axis
+                    .showXAxis(true)        //Show the x-axis
+                    .margin({ right: 32 });
 
                     job_status_chart.interactiveLayer.tooltip.fixedTop(-10); //distance from the top of the chart to tooltip
                     job_status_chart.interactiveLayer.tooltip.distance(-1); //distance from interactive line to tooltip
@@ -101,8 +103,15 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataSe
                     job_status_chart.xAxis
                     .axisLabel(i18n._("TIME"))//.showMaxMin(true)
                     .tickFormat(function(d) {
-                        var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
-                        return dx ? d3.time.format(timeFormat)(new Date(Number(dx+'000'))) : '';
+                        const dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
+
+                        if (!dx) {
+                            return '';
+                        }
+
+                        const tickDate = new Date(Number(dx + '000'));
+
+                        return moment(tickDate).format(timeFormat);
                     });
 
                     job_status_chart.yAxis     //Chart y-axis settings

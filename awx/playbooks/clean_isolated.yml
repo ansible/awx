@@ -16,4 +16,14 @@
 
     - name: remove build artifacts
       file: path="{{item}}" state=absent
+      register: result
       with_items: "{{cleanup_dirs}}"
+      until: result|succeeded
+      ignore_errors: yes
+      retries: 3
+      delay: 5
+
+    - name: fail if build artifacts were not cleaned
+      fail:
+        msg: 'Unable to cleanup build artifacts'
+      when: not result|succeeded

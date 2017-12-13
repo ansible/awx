@@ -166,7 +166,13 @@ class FieldLookupBackend(BaseFilterBackend):
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
         elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
-            return self.to_python_related(value)
+            try:
+                return self.to_python_related(value)
+            except ValueError:
+                raise ParseError(_('Invalid {field_name} id: {field_id}').format(
+                    field_name=getattr(field, 'name', 'related field'),
+                    field_id=value)
+                )
         else:
             return field.to_python(value)
 
@@ -243,11 +249,10 @@ class FieldLookupBackend(BaseFilterBackend):
                 # Search across related objects.
                 if key.endswith('__search'):
                     for value in values:
-                        for search_term in force_text(value).replace(',', ' ').split():
-                            search_value, new_keys = self.value_to_python(queryset.model, key, search_term)
-                            assert isinstance(new_keys, list)
-                            for new_key in new_keys:
-                                search_filters.append((new_key, search_value))
+                        search_value, new_keys = self.value_to_python(queryset.model, key, force_text(value))
+                        assert isinstance(new_keys, list)
+                        for new_key in new_keys:
+                            search_filters.append((new_key, search_value))
                     continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can

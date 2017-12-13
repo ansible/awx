@@ -10,7 +10,8 @@ export default ['templateUrl',
             scope: {
                 panChart: '&',
                 resetChart: '&',
-                zoomChart: '&'
+                zoomChart: '&',
+                zoomToFitChart: '&'
             },
             templateUrl: templateUrl('templates/workflows/workflow-controls/workflow-controls'),
             restrict: 'E',
@@ -58,6 +59,10 @@ export default ['templateUrl',
                     scope.zoomChart({
                         zoom: scope.zoom
                     });
+                };
+
+                scope.zoomToFit = function() {
+                    scope.zoomToFitChart();
                 };
 
                 scope.$on('workflowZoomed', function(evt, params) {

@@ -72,7 +72,7 @@ function AtFormController (eventService, strings) {
         const data = vm.components
             .filter(component => component.category === 'input')
             .reduce((values, component) => {
-                if (!component.state._value) {
+                if (component.state._value === undefined) {
                     return values;
                 }
 

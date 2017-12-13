@@ -1,5 +1,7 @@
 import logging
+import json
 from django.utils.translation import ugettext_lazy as _
+import six
 
 from awx.conf.migrations._reencrypt import (
     decrypt_field,
@@ -65,7 +67,6 @@ def _credentials(apps):
         credential.save()
 
 
-
 def _unified_jobs(apps):
     UnifiedJob = apps.get_model('main', 'UnifiedJob')
     for uj in UnifiedJob.objects.all():
@@ -91,3 +92,53 @@ def blank_old_start_args(apps, schema_editor):
             logger.debug('Blanking job args for %s', uj.pk)
             uj.start_args = ''
             uj.save()
+
+
+def encrypt_survey_passwords(apps, schema_editor):
+    _encrypt_survey_passwords(
+        apps.get_model('main', 'Job'),
+        apps.get_model('main', 'JobTemplate'),
+        apps.get_model('main', 'WorkflowJob'),
+        apps.get_model('main', 'WorkflowJobTemplate'),
+    )
+
+
+def _encrypt_survey_passwords(Job, JobTemplate, WorkflowJob, WorkflowJobTemplate):
+    from awx.main.utils.encryption import encrypt_value
+    for _type in (JobTemplate, WorkflowJobTemplate):
+        for jt in _type.objects.exclude(survey_spec={}):
+            changed = False
+            if jt.survey_spec.get('spec', []):
+                for field in jt.survey_spec['spec']:
+                    if field.get('type') == 'password' and field.get('default', ''):
+                        default = field['default']
+                        if default.startswith('$encrypted$'):
+                            if default == '$encrypted$':
+                                # If you have a survey_spec with a literal
+                                # '$encrypted$' as the default, you have
+                                # encountered a known bug in awx/Tower
+                                # https://github.com/ansible/ansible-tower/issues/7800
+                                logger.error(
+                                    '{}.pk={} survey_spec has ambiguous $encrypted$ default for {}, needs attention...'.format(jt, jt.pk, field['variable'])
+                                )
+                                field['default'] = ''
+                                changed = True
+                            continue
+                        field['default'] = encrypt_value(field['default'], pk=None)
+                        changed = True
+            if changed:
+                jt.save()
+
+    for _type in (Job, WorkflowJob):
+        for job in _type.objects.defer('result_stdout_text').exclude(survey_passwords={}).iterator():
+            changed = False
+            for key in job.survey_passwords:
+                if key in job.extra_vars:
+                    extra_vars = json.loads(job.extra_vars)
+                    if not extra_vars.get(key, '') or extra_vars[key].startswith('$encrypted$'):
+                        continue
+                    extra_vars[key] = encrypt_value(extra_vars[key], pk=None)
+                    job.extra_vars = json.dumps(extra_vars)
+                    changed = True
+            if changed:
+                job.save()

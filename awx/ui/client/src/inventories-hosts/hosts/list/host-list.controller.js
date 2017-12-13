@@ -7,7 +7,7 @@
 
 function HostsList($scope, HostsList, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, $transitions) {
+    HostsService, SetStatus, canAdd, $transitions, InventoryHostsStrings, HostsList) {
 
     let list = HostsList;
 
@@ -16,6 +16,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     function init(){
         $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
+        $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
 
         // Search init
         $scope.list = list;
@@ -37,14 +38,16 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
             if(trans.params('to') && trans.params('to').host_search) {
                 let hasMoreThanDefaultKeys = false;
                 angular.forEach(trans.params('to').host_search, function(value, key) {
-                    if(key !== 'order_by' && key !== 'page_size') {
+                    if(key !== 'order_by' && key !== 'page_size' && key !== 'page') {
                         hasMoreThanDefaultKeys = true;
                     }
                 });
                 $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+                $scope.smartInventoryButtonTooltip = hasMoreThanDefaultKeys ? InventoryHostsStrings.get('smartinventorybutton.ENABLED_INSTRUCTIONS') : InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
             else {
                 $scope.enableSmartInventoryButton = false;
+                $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
         });
 
@@ -83,20 +86,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
     };
 
     $scope.smartInventory = function() {
-        // Gather up search terms and pass them to the add smart inventory form
-        let stateParamsCopy = angular.copy($state.params.host_search);
-        let defaults = _.find($state.$current.path, (step) => {
-            if(step && step.params && step.params.hasOwnProperty(`host_search`)){
-                return step.params.hasOwnProperty(`host_search`);
-            }
-        }).params[`host_search`].config.value;
-
-        // Strip defaults out of the state params copy
-        angular.forEach(Object.keys(defaults), function(value) {
-            delete stateParamsCopy[value];
-        });
-
-        $state.go('inventories.addSmartInventory', {hostfilter: JSON.stringify(stateParamsCopy)});
+        $state.go('inventories.addSmartInventory', {hostfilter: JSON.stringify({"host_filter":`${$state.params.host_search.host_filter}`})});
     };
 
     $scope.editInventory = function(host) {
@@ -114,5 +104,5 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
 export default ['$scope', 'HostsList', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', '$transitions', HostsList
+    'HostsService', 'SetStatus', 'canAdd', '$transitions', 'InventoryHostsStrings', HostsList
 ];

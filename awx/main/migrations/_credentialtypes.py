@@ -178,3 +178,14 @@ def add_vault_id_field(apps, schema_editor):
     vault_credtype = CredentialType.objects.get(kind='vault')
     vault_credtype.inputs = CredentialType.defaults.get('vault')().inputs
     vault_credtype.save()
+
+
+def create_rhv_tower_credtype(apps, schema_editor):
+    CredentialType.setup_tower_managed_defaults()
+
+
+def add_azure_cloud_environment_field(apps, schema_editor):
+    azure_rm_credtype = CredentialType.objects.get(kind='cloud',
+                                                   name='Microsoft Azure Resource Manager')
+    azure_rm_credtype.inputs = CredentialType.defaults.get('azure_rm')().inputs
+    azure_rm_credtype.save()

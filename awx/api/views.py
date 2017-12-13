@@ -14,6 +14,7 @@ import logging
 import requests
 from base64 import b64encode
 from collections import OrderedDict, Iterable
+import six
 
 # Django
 from django.conf import settings
@@ -72,6 +73,7 @@ from awx.main.utils import (
     extract_ansible_vars,
     decrypt_field,
 )
+from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
 
@@ -1967,7 +1969,17 @@ class InventoryJobTemplateList(SubListAPIView):
         return qs.filter(inventory=parent)
 
 
-class HostList(ListCreateAPIView):
+class HostRelatedSearchMixin(object):
+
+    @property
+    def related_search_fields(self):
+        # Edge-case handle: https://github.com/ansible/ansible-tower/issues/7712
+        ret = super(HostRelatedSearchMixin, self).related_search_fields
+        ret.append('ansible_facts')
+        return ret
+
+
+class HostList(HostRelatedSearchMixin, ListCreateAPIView):
 
     always_allow_superuser = False
     model = Host
@@ -2004,7 +2016,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
     new_in_api_v2 = True
 
 
-class InventoryHostsList(SubListCreateAttachDetachAPIView):
+class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
 
     model = Host
     serializer_class = HostSerializer
@@ -2274,7 +2286,9 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
+class GroupHostsList(HostRelatedSearchMixin,
+                     ControlledByScmMixin,
+                     SubListCreateAttachDetachAPIView):
     ''' the list of hosts directly below a group '''
 
     model = Host
@@ -2301,7 +2315,7 @@ class GroupHostsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
 
-class GroupAllHostsList(SubListAPIView):
+class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
 
     model = Host
@@ -2419,6 +2433,8 @@ class InventoryScriptView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
         hostname = request.query_params.get('host', '')
+        hostvars = bool(request.query_params.get('hostvars', ''))
+        towervars = bool(request.query_params.get('towervars', ''))
         show_all = bool(request.query_params.get('all', ''))
         if hostname:
             hosts_q = dict(name=hostname)
@@ -2607,23 +2623,25 @@ class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificatio
     relationship = 'notification_templates_success'
 
 
-class InventorySourceHostsList(SubListAPIView):
+class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
 
     model = Host
     serializer_class = HostSerializer
     parent_model = InventorySource
     relationship = 'hosts'
     new_in_148 = True
+    check_sub_obj_permission = False
     capabilities_prefetch = ['inventory.admin']
 
 
-class InventorySourceGroupsList(SubListAPIView):
+class InventorySourceGroupsList(SubListDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer
     parent_model = InventorySource
     relationship = 'groups'
     new_in_148 = True
+    check_sub_obj_permission = False
 
 
 class InventorySourceUpdatesList(SubListAPIView):
@@ -2918,13 +2936,8 @@ class JobTemplateSurveySpec(GenericAPIView):
         if not feature_enabled('surveys'):
             raise LicenseForbids(_('Your license does not allow '
                                    'adding surveys.'))
-        survey_spec = obj.survey_spec
-        for pos, field in enumerate(survey_spec.get('spec', [])):
-            if field.get('type') == 'password':
-                if 'default' in field and field['default']:
-                    field['default'] = '$encrypted$'
 
-        return Response(survey_spec)
+        return Response(obj.display_survey_spec())
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2937,7 +2950,14 @@ class JobTemplateSurveySpec(GenericAPIView):
 
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
-        new_spec = request.data
+        response = self._validate_spec_data(request.data, obj.survey_spec)
+        if response:
+            return response
+        obj.survey_spec = request.data
+        obj.save(update_fields=['survey_spec'])
+        return Response()
+
+    def _validate_spec_data(self, new_spec, old_spec):
         if "name" not in new_spec:
             return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if "description" not in new_spec:
@@ -2949,9 +2969,9 @@ class JobTemplateSurveySpec(GenericAPIView):
         if len(new_spec["spec"]) < 1:
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
 
-        idx = 0
         variable_set = set()
-        for survey_item in new_spec["spec"]:
+        old_spec_dict = JobTemplate.pivot_spec(old_spec)
+        for idx, survey_item in enumerate(new_spec["spec"]):
             if not isinstance(survey_item, dict):
                 return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
@@ -2968,21 +2988,41 @@ class JobTemplateSurveySpec(GenericAPIView):
             if "required" not in survey_item:
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
 
-            if survey_item["type"] == "password":
-                if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
-                    if not obj.survey_spec:
-                        return Response(dict(error=_("$encrypted$ is reserved keyword and may not be used as a default for password {}.".format(str(idx)))),
-                                        status=status.HTTP_400_BAD_REQUEST)
-                    else:
-                        old_spec = obj.survey_spec
-                        for old_item in old_spec['spec']:
-                            if old_item['variable'] == survey_item['variable']:
-                                survey_item['default'] = old_item['default']
-            idx += 1
+            if survey_item["type"] == "password" and "default" in survey_item:
+                if not isinstance(survey_item['default'], six.string_types):
+                    return Response(dict(error=_(
+                        "Value {question_default} for '{variable_name}' expected to be a string."
+                    ).format(
+                        question_default=survey_item["default"], variable_name=survey_item["variable"])
+                    ), status=status.HTTP_400_BAD_REQUEST)
 
-        obj.survey_spec = new_spec
-        obj.save(update_fields=['survey_spec'])
-        return Response()
+            if ("default" in survey_item and isinstance(survey_item['default'], six.string_types) and
+                    survey_item['default'].startswith('$encrypted$')):
+                # Submission expects the existence of encrypted DB value to replace given default
+                if survey_item["type"] != "password":
+                    return Response(dict(error=_(
+                        "$encrypted$ is a reserved keyword for password question defaults, "
+                        "survey question {question_position} is type {question_type}."
+                    ).format(
+                        question_position=str(idx), question_type=survey_item["type"])
+                    ), status=status.HTTP_400_BAD_REQUEST)
+                old_element = old_spec_dict.get(survey_item['variable'], {})
+                encryptedish_default_exists = False
+                if 'default' in old_element:
+                    old_default = old_element['default']
+                    if isinstance(old_default, six.string_types):
+                        if old_default.startswith('$encrypted$'):
+                            encryptedish_default_exists = True
+                        elif old_default == "":  # unencrypted blank string is allowed as DB value as special case
+                            encryptedish_default_exists = True
+                if not encryptedish_default_exists:
+                    return Response(dict(error=_(
+                        "$encrypted$ is a reserved keyword, may not be used for new default in position {question_position}."
+                    ).format(question_position=str(idx))), status=status.HTTP_400_BAD_REQUEST)
+                survey_item['default'] = old_element['default']
+            elif survey_item["type"] == "password" and 'default' in survey_item:
+                # Submission provides new encrypted default
+                survey_item['default'] = encrypt_value(survey_item['default'])
 
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4121,7 +4161,7 @@ class JobEventChildrenList(SubListAPIView):
     view_name = _('Job Event Children List')
 
 
-class JobEventHostsList(SubListAPIView):
+class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
 
     model = Host
     serializer_class = HostSerializer
@@ -4141,7 +4181,7 @@ class BaseJobEventsList(SubListAPIView):
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
         return super(BaseJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 

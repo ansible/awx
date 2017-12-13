@@ -5,6 +5,7 @@ from awx.api.versioning import reverse
 from awx.main.middleware import ActivityStreamMiddleware
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.access import ActivityStreamAccess
+from awx.conf.models import Setting
 
 
 def mock_feature_enabled(feature):
@@ -45,6 +46,26 @@ def test_basic_fields(monkeypatch, organization, get, user, settings):
     assert 'summary_fields' in response.data
     assert 'organization' in response.data['summary_fields']
     assert response.data['summary_fields']['organization'][0]['name'] == 'test-org'
+
+
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_ctint_activity_stream(monkeypatch, get, user, settings):
+    Setting.objects.create(key="FOO", value="bar")
+    settings.ACTIVITY_STREAM_ENABLED = True
+    u = user('admin', True)
+    activity_stream = ActivityStream.objects.filter(setting={'name': 'FOO', 'category': None}).latest('pk')
+    activity_stream.actor = u
+    activity_stream.save()
+
+    aspk = activity_stream.pk
+    url = reverse('api:activity_stream_detail', kwargs={'pk': aspk})
+    response = get(url, user('admin', True))
+
+    assert response.status_code == 200
+    assert 'summary_fields' in response.data
+    assert 'setting' in response.data['summary_fields']
+    assert response.data['summary_fields']['setting'][0]['name'] == 'FOO'
 
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)

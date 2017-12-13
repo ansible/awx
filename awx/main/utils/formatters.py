@@ -120,6 +120,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             # exist if SQL_DEBUG is turned on in settings.
             headers = [
                 (float, 'X-API-Time'),  # may end with an 's' "0.33s"
+                (float, 'X-API-Total-Time'),
                 (int, 'X-API-Query-Count'),
                 (float, 'X-API-Query-Time'), # may also end with an 's'
                 (str, 'X-API-Node'),
@@ -131,8 +132,10 @@ class LogstashFormatter(LogstashFormatterVersion1):
                 'path': request.path,
                 'path_info': request.path_info,
                 'query_string': request.META['QUERY_STRING'],
-                'data': request.data,
             }
+
+            if hasattr(request, 'data'):
+                data_for_log['request']['data'] = request.data
 
         return data_for_log
 

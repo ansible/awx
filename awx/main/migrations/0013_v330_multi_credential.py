@@ -11,7 +11,7 @@ from awx.main.migrations._multi_cred import migrate_to_multi_cred
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0008_v320_drop_v1_credential_fields'),
+        ('main', '0012_v322_update_cred_types'),
     ]
 
     operations = [

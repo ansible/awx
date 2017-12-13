@@ -345,7 +345,9 @@ class BaseSerializer(serializers.ModelSerializer):
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
-                    if field == 'credential_type_id' and fk == 'credential' and self.version < 2:  # TODO: remove version check in 3.3
+                    if (
+                            self.version < 2 and field == 'credential_type_id' and
+                            fk in ['credential', 'vault_credential']):  # TODO: remove version check in 3.3
                         continue
 
                     fval = getattr(fkval, field, None)
@@ -1111,8 +1113,13 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
+        try:
+            res.update(dict(
+                project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
+            ))
+        except ObjectDoesNotExist:
+            pass
         res.update(dict(
-            project = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk}),
             cancel = self.reverse('api:project_update_cancel', kwargs={'pk': obj.pk}),
             scm_inventory_updates = self.reverse('api:project_update_scm_inventory_updates', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:project_update_notifications_list', kwargs={'pk': obj.pk}),
@@ -1726,8 +1733,15 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
+        try:
+            res.update(dict(
+                inventory_source = self.reverse(
+                    'api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk}
+                ),
+            ))
+        except ObjectDoesNotExist:
+            pass
         res.update(dict(
-            inventory_source = self.reverse('api:inventory_source_detail', kwargs={'pk': obj.inventory_source.pk}),
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
         ))
@@ -2125,7 +2139,7 @@ class CredentialSerializer(BaseSerializer):
 
     def to_internal_value(self, data):
         # TODO: remove when API v1 is removed
-        if 'credential_type' not in data:
+        if 'credential_type' not in data and self.version == 1:
             # If `credential_type` is not provided, assume the payload is a
             # v1 credential payload that specifies a `kind` and a flat list
             # of field values
@@ -2162,10 +2176,22 @@ class CredentialSerializer(BaseSerializer):
 
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
-            raise ValidationError(
-                _('You cannot change the credential type of the credential, as it may break the functionality'
-                  ' of the resources using it.'),
-            )
+            for rel in (
+                'ad_hoc_commands',
+                'insights_inventories',
+                'inventorysources',
+                'inventoryupdates',
+                'jobs',
+                'jobtemplates',
+                'projects',
+                'projectupdates',
+                'workflowjobnodes'
+            ):
+                if getattr(self.instance, rel).count() > 0:
+                    raise ValidationError(
+                        _('You cannot change the credential type of the credential, as it may break the functionality'
+                          ' of the resources using it.'),
+                    )
         return credential_type
 
 
@@ -2346,14 +2372,30 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
         res['labels'] = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk})
-        if obj.inventory:
-            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.project:
-            res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
-        if obj.credential:
-            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential})
-        if obj.vault_credential:
-            res['vault_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.vault_credential})
+        try:
+            if obj.inventory:
+                res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'inventory', None)
+        try:
+            if obj.project:
+                res['project'] = self.reverse('api:project_detail', kwargs={'pk': obj.project.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'project', None)
+        try:
+            if obj.credential:
+                res['credential'] = self.reverse(
+                    'api:credential_detail', kwargs={'pk': obj.credential.pk}
+                )
+        except ObjectDoesNotExist:
+            setattr(obj, 'credential', None)
+        try:
+            if obj.vault_credential:
+                res['vault_credential'] = self.reverse(
+                    'api:credential_detail', kwargs={'pk': obj.vault_credential.pk}
+                )
+        except ObjectDoesNotExist:
+            setattr(obj, 'vault_credential', None)
         if self.version > 1:
             if isinstance(obj, UnifiedJobTemplate):
                 res['extra_credentials'] = self.reverse(
@@ -2608,15 +2650,23 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             notifications = self.reverse('api:job_notifications_list', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:job_label_list', kwargs={'pk': obj.pk}),
         ))
-        if obj.job_template:
-            res['job_template'] = self.reverse('api:job_template_detail',
-                                               kwargs={'pk': obj.job_template.pk})
+        try:
+            if obj.job_template:
+                res['job_template'] = self.reverse('api:job_template_detail',
+                                                   kwargs={'pk': obj.job_template.pk})
+        except ObjectDoesNotExist:
+            setattr(obj, 'job_template', None)
         if (obj.can_start or True) and self.version == 1:  # TODO: remove in 3.3
             res['start'] = self.reverse('api:job_start', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:job_cancel', kwargs={'pk': obj.pk})
-        if obj.project_update:
-            res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
+        try:
+            if obj.project_update:
+                res['project_update'] = self.reverse(
+                    'api:project_update_detail', kwargs={'pk': obj.project_update.pk}
+                )
+        except ObjectDoesNotExist:
+            pass
         res['create_schedule'] = self.reverse('api:job_create_schedule', kwargs={'pk': obj.pk})
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
@@ -2756,8 +2806,10 @@ class JobRelaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        if not obj.credential:
-            raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
+        if not obj.credential and not obj.vault_credential:
+            raise serializers.ValidationError(
+                dict(credential=[_("Neither credential nor vault credential provided.")])
+            )
         if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None or obj.inventory.pending_deletion:
@@ -3820,6 +3872,7 @@ class InstanceSerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
 
+    committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
@@ -3827,7 +3880,8 @@ class InstanceGroupSerializer(BaseSerializer):
 
     class Meta:
         model = InstanceGroup
-        fields = ("id", "type", "url", "related", "name", "created", "modified", "capacity", "consumed_capacity",
+        fields = ("id", "type", "url", "related", "name", "created", "modified",
+                  "capacity", "committed_capacity", "consumed_capacity",
                   "percent_capacity_remaining", "jobs_running", "instances", "controller")
 
     def get_related(self, obj):
@@ -3856,7 +3910,10 @@ class InstanceGroupSerializer(BaseSerializer):
         return self.context['capacity_map']
 
     def get_consumed_capacity(self, obj):
-        return self.get_capacity_dict()[obj.name]['consumed_capacity']
+        return self.get_capacity_dict()[obj.name]['running_capacity']
+
+    def get_committed_capacity(self, obj):
+        return self.get_capacity_dict()[obj.name]['committed_capacity']
 
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
@@ -3954,6 +4011,11 @@ class ActivityStreamSerializer(BaseSerializer):
 
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
+        if obj.setting and obj.setting.get('category', None):
+            rel['setting'] = self.reverse(
+                'api:setting_singleton_detail',
+                kwargs={'category_slug': obj.setting['category']}
+            )
         return rel
 
     def _get_rel(self, obj, fk):
@@ -4005,6 +4067,8 @@ class ActivityStreamSerializer(BaseSerializer):
                                            username = obj.actor.username,
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
+        if obj.setting:
+            summary_fields['setting'] = [obj.setting]
         return summary_fields
 
 

@@ -8,14 +8,9 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.conf import settings
 import awx.main.fields
-import jsonfield.fields
 
-
-def update_dashed_host_variables(apps, schema_editor):
-    Host = apps.get_model('main', 'Host')
-    for host in Host.objects.filter(variables='---'):
-        host.variables = ''
-        host.save()
+import _squashed
+from _squashed_30 import SQUASHED_30
 
 
 class Migration(migrations.Migration):
@@ -27,13 +22,7 @@ class Migration(migrations.Migration):
                 (b'main', '0025_v300_update_rbac_parents'),
                 (b'main', '0026_v300_credential_unique'),
                 (b'main', '0027_v300_team_migrations'),
-                (b'main', '0028_v300_org_team_cascade'),
-                (b'main', '0029_v302_add_ask_skip_tags'),
-                (b'main', '0030_v302_job_survey_passwords'),
-                (b'main', '0031_v302_migrate_survey_passwords'),
-                (b'main', '0032_v302_credential_permissions_update'),
-                (b'main', '0033_v303_v245_host_variable_fix'),]
-
+                (b'main', '0028_v300_org_team_cascade')] + _squashed.replaces(SQUASHED_30, applied=True)
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -130,27 +119,4 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(related_name='teams', to='main.Organization'),
             preserve_default=False,
         ),
-        # add ask skip tags
-        migrations.AddField(
-            model_name='jobtemplate',
-            name='ask_skip_tags_on_launch',
-            field=models.BooleanField(default=False),
-        ),
-        # job survery passwords
-        migrations.AddField(
-            model_name='job',
-            name='survey_passwords',
-            field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
-        ),
-        # RBAC credential permission updates
-        migrations.AlterField(
-            model_name='credential',
-            name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_administrator', b'organization.admin_role'], to='main.Role', null=b'True'),
-        ),
-        migrations.AlterField(
-            model_name='credential',
-            name='use_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'admin_role'], to='main.Role', null=b'True'),
-        ),
-    ]
+    ] + _squashed.operations(SQUASHED_30, applied=True)

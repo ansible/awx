@@ -164,7 +164,7 @@ STDOUT_MAX_BYTES_DISPLAY = 1048576
 
 # Returned in the header on event api lists as a recommendation to the UI
 # on how many events to display before truncating/hiding
-RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 4000
+MAX_UI_JOB_EVENTS = 4000
 
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
@@ -226,6 +226,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (  # NOQA
+    'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -517,7 +518,7 @@ SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
 
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
-SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+#SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 SOCIAL_AUTH_CLEAN_USERNAMES = True
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
@@ -818,6 +819,26 @@ OPENSTACK_GROUP_FILTER = r'^.+$'
 OPENSTACK_HOST_FILTER = r'^.+$'
 OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
+
+# ---------------------
+# ----- oVirt4 -----
+# ---------------------
+RHV_ENABLED_VAR = 'status'
+RHV_ENABLED_VALUE = 'up'
+RHV_GROUP_FILTER = r'^.+$'
+RHV_HOST_FILTER = r'^.+$'
+RHV_EXCLUDE_EMPTY_GROUPS = True
+RHV_INSTANCE_ID_VAR = 'id'
+
+# ---------------------
+# ----- Tower     -----
+# ---------------------
+TOWER_ENABLED_VAR = 'remote_tower_enabled'
+TOWER_ENABLED_VALUE = 'true'
+TOWER_GROUP_FILTER = r'^.+$'
+TOWER_HOST_FILTER = r'^.+$'
+TOWER_EXCLUDE_EMPTY_GROUPS = True
+TOWER_INSTANCE_ID_VAR = 'remote_tower_id'
 
 # ---------------------
 # ----- Foreman -----
@@ -1122,8 +1143,12 @@ LOGGING = {
         },
     }
 }
+# Apply coloring to messages logged to the console
 COLOR_LOGS = False
 
 # https://github.com/django-polymorphic/django-polymorphic/issues/195
 # FIXME: Disabling models.E006 warning until we can renamed Project and InventorySource
 SILENCED_SYSTEM_CHECKS = ['models.E006']
+
+# Use middleware to get request statistics
+AWX_REQUEST_PROFILE = False

@@ -29,43 +29,48 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 return defer.promise;
             },
 
+            replaceDefaultFlags (value) {
+                value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
+                value = value.toString().replace(/__search_DEFAULT/g, "__search");
+
+                return value;
+            },
+
+            replaceEncodedTokens(value) {
+                return decodeURIComponent(value).replace(/"|'/g, "");
+            },
+
+            encodeTerms (values, key) {
+                key = this.replaceDefaultFlags(key);
+
+                if (!Array.isArray(values)) {
+                    values = this.replaceEncodedTokens(values);
+
+                    return `${key}=${values}`;
+                }
+
+                return values
+                    .map(value => {
+                        value = this.replaceDefaultFlags(value);
+                        value = this.replaceEncodedTokens(value);
+
+                        return `${key}=${value}`;
+                    })
+                    .join('&');
+            },
             // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
             encodeQueryset(params) {
-                let queryset;
-                queryset = _.reduce(params, (result, value, key) => {
-                    return result + encodeTerm(value, key);
-                }, '');
-                queryset = queryset.substring(0, queryset.length - 1);
-                return angular.isObject(params) ? `?${queryset}` : '';
-
-                function encodeTerm(value, key){
-
-                    key = key.toString().replace(/__icontains_DEFAULT/g, "__icontains");
-                    key = key.toString().replace(/__search_DEFAULT/g, "__search");
-
-                    value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
-                    value = value.toString().replace(/__search_DEFAULT/g, "__search");
-
-                    if (Array.isArray(value)){
-                        value = _.uniq(_.flattenDeep(value));
-                        let concated = '';
-                        angular.forEach(value, function(item){
-                            if(item && typeof item === 'string') {
-                                item = decodeURIComponent(item).replace(/"|'/g, "");
-                            }
-                            concated += `${key}=${item}&`;
-                        });
-
-                        return concated;
-                    }
-                    else {
-                        if(value && typeof value === 'string') {
-                            value = decodeURIComponent(value).replace(/"|'/g, "");
-                        }
-
-                        return `${key}=${value}&`;
-                    }
+                if (typeof params !== 'object') {
+                    return '';
                 }
+
+                return _.reduce(params, (result, value, key) => {
+                    if (result !== '?') {
+                        result += '&';
+                    }
+
+                    return result += this.encodeTerms(value, key);
+                }, '?');
             },
             // encodes a ui smart-search param to a django-friendly param
             // operand:key:comparator:value => {operand__key__comparator: value}
@@ -127,7 +132,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 }
 
                 if(params.singleSearchParam) {
-                    return {[params.singleSearchParam]: encodeURIComponent(paramString + "=" + valueString)};
+                    return {[params.singleSearchParam]: paramString + "=" + valueString};
                 }
                 else {
                     return {[paramString] : encodeURIComponent(valueString)};

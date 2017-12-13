@@ -432,13 +432,22 @@ def update_host_smart_inventory_memberships():
             smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
             SmartInventoryMembership.objects.all().delete()
             memberships = []
+            changed_inventories = set([])
             for smart_inventory in smart_inventories:
-                memberships.extend([SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
-                                    for host_id in smart_inventory.hosts.values_list('id')])
+                add_for_inventory = [
+                    SmartInventoryMembership(inventory_id=smart_inventory.id, host_id=host_id[0])
+                    for host_id in smart_inventory.hosts.values_list('id')
+                ]
+                memberships.extend(add_for_inventory)
+                if add_for_inventory:
+                    changed_inventories.add(smart_inventory)
             SmartInventoryMembership.objects.bulk_create(memberships)
     except IntegrityError as e:
         logger.error("Update Host Smart Inventory Memberships failed due to an exception: " + str(e))
         return
+    # Update computed fields for changed inventories outside atomic action
+    for smart_inventory in changed_inventories:
+        smart_inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
 
 @shared_task(bind=True, queue='tower', base=LogErrorsTask, max_retries=5)
@@ -874,6 +883,12 @@ class BaseTask(LogErrorsTask):
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
+                # If stdout_handle was wrapped with event filter, log data
+                if hasattr(stdout_handle, '_event_ct'):
+                    logger.info('%s finished running, producing %s events.',
+                                instance.log_format, stdout_handle._event_ct)
+                else:
+                    logger.info('%s finished running', instance.log_format)
             except Exception:
                 pass
 
@@ -1026,13 +1041,9 @@ class RunJob(BaseTask):
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['TOWER_HOST'] = settings.TOWER_URL_BASE
             env['AWX_HOST'] = settings.TOWER_URL_BASE
-            env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
-            env['CALLBACK_CONNECTION'] = settings.CELERY_BROKER_URL
+            env['REST_API_URL'] = settings.INTERNAL_API_URL
+            env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
-        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
-            env['JOB_CALLBACK_DEBUG'] = '2'
-        elif settings.DEBUG:
-            env['JOB_CALLBACK_DEBUG'] = '1'
 
         # Create a directory for ControlPath sockets that is unique to each
         # job and visible inside the proot environment (when enabled).
@@ -1067,6 +1078,8 @@ class RunJob(BaseTask):
                     env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
                     env['AZURE_AD_USER'] = cloud_cred.username
                     env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
+                if cloud_cred.inputs.get('cloud_environment', None):
+                    env['AZURE_CLOUD_ENVIRONMENT'] = cloud_cred.inputs['cloud_environment']
             elif cloud_cred and cloud_cred.kind == 'vmware':
                 env['VMWARE_USER'] = cloud_cred.username
                 env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
@@ -1159,7 +1172,7 @@ class RunJob(BaseTask):
             if kwargs.get('display', False) and job.job_template:
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
-                extra_vars.update(job.extra_vars_dict)
+                extra_vars.update(json.loads(job.decrypted_extra_vars()))
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
@@ -1252,10 +1265,12 @@ class RunJob(BaseTask):
                 task_instance.run(local_project_sync.id)
                 job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
-                job = self.update_model(job.pk, status='failed',
-                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
-                                                         ('project_update', local_project_sync.name, local_project_sync.id)))
-                raise
+                local_project_sync.refresh_from_db()
+                if local_project_sync.status != 'canceled':
+                    job = self.update_model(job.pk, status='failed',
+                                            job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' %
+                                                             ('project_update', local_project_sync.name, local_project_sync.id)))
+                    raise
 
         if job.use_fact_cache and not kwargs.get('isolated'):
             job.start_job_fact_cache()
@@ -1327,6 +1342,9 @@ class RunProjectUpdate(BaseTask):
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
+        # give ansible a hint about the intended tmpdir to work around issues
+        # like https://github.com/ansible/ansible/issues/30064
+        env['TMP'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def _build_scm_url_extra_vars(self, project_update, **kwargs):
@@ -1519,11 +1537,11 @@ class RunProjectUpdate(BaseTask):
             except InventoryUpdate.DoesNotExist:
                 logger.warning('%s Dependent inventory update deleted during execution.', project_update.log_format)
                 continue
-            if project_update.cancel_flag or local_inv_update.cancel_flag:
-                if not project_update.cancel_flag:
-                    self.update_model(project_update.pk, cancel_flag=True, job_explanation=_(
-                        'Dependent inventory update {} was canceled.'.format(local_inv_update.name)))
-                break  # Stop rest of updates if project or inventory update was canceled
+            if project_update.cancel_flag:
+                logger.info('Project update {} was canceled while updating dependent inventories.'.format(project_update.log_format))
+                break
+            if local_inv_update.cancel_flag:
+                logger.info('Continuing to process project dependencies after {} was canceled'.format(local_inv_update.log_format))
             if local_inv_update.status == 'successful':
                 inv_src.scm_last_revision = scm_revision
                 inv_src.save(update_fields=['scm_last_revision'])
@@ -1864,11 +1882,24 @@ class RunInventoryUpdate(BaseTask):
                 env['AZURE_AD_USER'] = passwords.get('source_username', '')
                 env['AZURE_PASSWORD'] = passwords.get('source_password', '')
             env['AZURE_INI_PATH'] = cloud_credential
+            if inventory_update.credential and \
+                    inventory_update.credential.inputs.get('cloud_environment', None):
+                env['AZURE_CLOUD_ENVIRONMENT'] = inventory_update.credential.inputs['cloud_environment']
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
             env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''
+
+            # by default, the GCE inventory source caches results on disk for
+            # 5 minutes; disable this behavior
+            cp = ConfigParser.ConfigParser()
+            cp.add_section('cache')
+            cp.set('cache', 'cache_max_age', '0')
+            handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+            cp.write(os.fdopen(handle, 'w'))
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            env['GCE_INI_PATH'] = path
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'satellite6':
@@ -1879,6 +1910,9 @@ class RunInventoryUpdate(BaseTask):
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+        elif inventory_update.source == 'tower':
+            env['TOWER_INVENTORY'] = inventory_update.instance_filters
+            env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
         elif inventory_update.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
         # add private_data_files
@@ -2066,14 +2100,10 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
-        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
-        env['CALLBACK_CONNECTION'] = settings.CELERY_BROKER_URL
+        env['REST_API_URL'] = settings.INTERNAL_API_URL
+        env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
-        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
-            env['JOB_CALLBACK_DEBUG'] = '2'
-        elif settings.DEBUG:
-            env['JOB_CALLBACK_DEBUG'] = '1'
 
         # Specify empty SSH args (should disable ControlPersist entirely for
         # ad hoc commands).
@@ -2124,14 +2154,27 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
+        # Define special extra_vars for AWX, combine with ad_hoc_command.extra_vars
+        extra_vars = {
+            'tower_job_id': ad_hoc_command.pk,
+            'awx_job_id': ad_hoc_command.pk,
+        }
+        if ad_hoc_command.created_by:
+            extra_vars.update({
+                'tower_user_id': ad_hoc_command.created_by.pk,
+                'tower_user_name': ad_hoc_command.created_by.username,
+                'awx_user_id': ad_hoc_command.created_by.pk,
+                'awx_user_name': ad_hoc_command.created_by.username,
+            })
+
         if ad_hoc_command.extra_vars_dict:
             redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_(
                     "{} are prohibited from use in ad hoc commands."
                 ).format(", ".join(removed_vars)))
-
-            args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
+            extra_vars.update(ad_hoc_command.extra_vars_dict)
+        args.extend(['-e', json.dumps(extra_vars)])
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])

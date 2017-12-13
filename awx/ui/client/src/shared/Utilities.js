@@ -636,6 +636,22 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                         if (!multiple) {
                             config.minimumResultsForSearch = 1;
+                            config.matcher = function(params, data) {
+                                // If there are no search terms, return all of the data
+                                if ($.trim(params.term) === '' &&
+                                    data.text.indexOf("Choose an") === -1) {
+                                        return data;
+                                }
+
+                                // Do not display the item if there is no 'text' property
+                                if (typeof data.text === 'undefined' ||
+                                    data.text.indexOf("Choose an") > -1) {
+                                  return null;
+                                }
+
+                                // Return `null` if the term should not be displayed
+                                return null;
+                            };
                         }
                     }
 

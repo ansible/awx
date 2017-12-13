@@ -6,11 +6,11 @@
 
 export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData', 'inventoryData',
+    'HostsService', 'SetStatus', 'canAdd', 'GroupsService', 'ProcessErrors', 'groupData', 'inventoryData', 'InventoryHostsStrings',
     '$transitions',
     function($scope, NestedHostsListDefinition, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData, inventoryData,
+    HostsService, SetStatus, canAdd, GroupsService, ProcessErrors, groupData, inventoryData, InventoryHostsStrings,
     $transitions) {
 
     let list = NestedHostsListDefinition;
@@ -21,6 +21,7 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
         $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
         $scope.disassociateFrom = groupData;
+        $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
 
         // Search init
         $scope.list = list;
@@ -52,14 +53,16 @@ export default ['$scope', 'NestedHostsListDefinition', '$rootScope', 'GetBasePat
             if(trans.params('to') && trans.params('to').host_search) {
                 let hasMoreThanDefaultKeys = false;
                 angular.forEach(trans.params('to').host_search, function(value, key) {
-                    if(key !== 'order_by' && key !== 'page_size') {
+                    if(key !== 'order_by' && key !== 'page_size' && key !== 'page') {
                         hasMoreThanDefaultKeys = true;
                     }
                 });
                 $scope.enableSmartInventoryButton = hasMoreThanDefaultKeys ? true : false;
+                $scope.smartInventoryButtonTooltip = hasMoreThanDefaultKeys ? InventoryHostsStrings.get('smartinventorybutton.ENABLED_INSTRUCTIONS') : InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
             else {
                 $scope.enableSmartInventoryButton = false;
+                $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
             }
         });
 

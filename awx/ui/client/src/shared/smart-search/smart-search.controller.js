@@ -140,7 +140,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
         function searchWithoutKey(term) {
             if($scope.singleSearchParam) {
                 return {
-                    [$scope.singleSearchParam]: encodeURIComponent("search=" + term)
+                    [$scope.singleSearchParam]: "search=" + encodeURIComponent(term)
                 };
             }
            return {
@@ -328,6 +328,10 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     else {
                         if($scope.singleSearchParam && set[$scope.singleSearchParam] && set[$scope.singleSearchParam].includes("%20and%20")) {
                             let searchParamParts = set[$scope.singleSearchParam].split("%20and%20");
+                            // The value side of each paramPart might have been encoded in SmartSearch.splitFilterIntoTerms
+                            _.each(searchParamParts, (paramPart, paramPartIndex) => {
+                                searchParamParts[paramPartIndex] = decodeURIComponent(paramPart);
+                            });
                             var index = searchParamParts.indexOf(value);
                             if (index !== -1) {
                                 searchParamParts.splice(index, 1);

@@ -120,6 +120,34 @@ export default
             source = source && source.value ? source.value : '';
             if(source === 'ec2'){
                 return _.map(group_by, 'value').join(',');
+                }
+                if(source === 'vmware'){
+                    group_by = _.map(group_by, (i) => {return i.value;});
+                    $("#inventory_source_group_by").siblings(".select2").first().find(".select2-selection__choice").each(function(optionIndex, option){
+                        group_by.push(option.title);
+                    });
+                    group_by = (Array.isArray(group_by)) ?  _.uniq(group_by).join() : "";
+                    return group_by;
+                }
+                else {
+                    return;
+                }
+            },
+            deleteHosts(id) {
+                this.url = GetBasePath('inventory_sources') + id + '/hosts/';
+                Rest.setUrl(this.url);
+                return Rest.destroy()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this))
+                    .finally();
+            },
+            deleteGroups(id) {
+                this.url = GetBasePath('inventory_sources') + id + '/groups/';
+                Rest.setUrl(this.url);
+                return Rest.destroy()
+                    .success(this.success.bind(this))
+                    .error(this.error.bind(this))
+                    .finally();
             }
             if(source === 'vmware'){
                 group_by = _.map(group_by, (i) => {return i.value;});

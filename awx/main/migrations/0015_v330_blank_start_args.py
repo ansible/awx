@@ -13,7 +13,7 @@ from awx.main.migrations._reencrypt import blank_old_start_args
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0010_saved_launchtime_configs'),
+        ('main', '0014_v330_saved_launchtime_configs'),
     ]
 
     operations = [

@@ -11,7 +11,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
     credentialType, i18n, Credential, CredentialsStrings) {
 
-        let credential = new Credential();
+        const credential = new Credential();
 
         var list = CredentialList,
             defaultUrl = GetBasePath('credentials');
@@ -48,9 +48,25 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
                 return;
             }
 
-            $scope[list.name].forEach(credential => {
-                credential.kind = credentialType.match('id', credential.credential_type).name;
-            });
+            const params = $scope[list.name]
+                .reduce((accumulator, credential) => {
+                    accumulator.push(credential.credential_type);
+
+                    return accumulator;
+                }, [])
+                .filter((id, i, array) => array.indexOf(id) === i)
+                .map(id => `or__id=${id}`);
+
+            credentialType.search(params)
+                .then(found => {
+                    if (!found) {
+                      return;
+                    }
+
+                    $scope[list.name].forEach(credential => {
+                        credential.kind = credentialType.match('id', credential.credential_type).name;
+                    });
+                });
         }
 
         // iterate over the list and add fields like type label, after the

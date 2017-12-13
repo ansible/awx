@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 # AWX
+from awx.main.migrations import ActivityStreamDisabledMigration
 from awx.main.migrations import _inventory_source as invsrc
 from awx.main.migrations import _migration_utils as migration_utils
 from awx.main.migrations import _reencrypt as reencrypt
@@ -15,7 +16,7 @@ from awx.main.migrations import _azure_credentials as azurecreds
 import awx.main.fields
 
 
-class Migration(migrations.Migration):
+class Migration(ActivityStreamDisabledMigration):
 
     dependencies = [
         ('main', '0006_v320_release'),
