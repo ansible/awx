@@ -289,13 +289,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credentials', 'forks', 'schedule', 'limit',
-                'verbosity', 'job_tags', 'extra_vars',
-                'force_handlers', 'skip_tags', 'start_at_task',
-                'become_enabled', 'labels', 'survey_passwords',
-                'allow_simultaneous', 'timeout', 'use_fact_cache',
-                'diff_mode',]
+        return set(f.name for f in JobOptions._meta.fields) | set(
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials']
+        )
 
     @property
     def validation_errors(self):

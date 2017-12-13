@@ -838,7 +838,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         unified_job_class = self.__class__
         unified_jt_class = self._get_unified_job_template_class()
         parent_field_name = unified_job_class._get_parent_field_name()
-        fields = unified_jt_class._get_unified_job_field_names() + [parent_field_name]
+        fields = unified_jt_class._get_unified_job_field_names() | set([parent_field_name])
 
         create_data = {"launch_type": "relaunch"}
         if limit:
