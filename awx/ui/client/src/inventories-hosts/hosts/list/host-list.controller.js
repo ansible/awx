@@ -7,7 +7,7 @@
 
 function HostsList($scope, HostsList, $rootScope, GetBasePath,
     rbacUiControlService, Dataset, $state, $filter, Prompt, Wait,
-    HostsService, SetStatus, canAdd, $transitions, InventoryHostsStrings, HostsList) {
+    HostsService, SetStatus, canAdd, $transitions, InventoryHostsStrings) {
 
     let list = HostsList;
 
@@ -104,5 +104,5 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
 
 export default ['$scope', 'HostsList', '$rootScope', 'GetBasePath',
     'rbacUiControlService', 'Dataset', '$state', '$filter', 'Prompt', 'Wait',
-    'HostsService', 'SetStatus', 'canAdd', '$transitions', 'InventoryHostsStrings', HostsList
+    'HostsService', 'SetStatus', 'canAdd', '$transitions', 'InventoryHostsStrings'
 ];
