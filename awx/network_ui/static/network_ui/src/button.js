@@ -33,9 +33,16 @@ function _Pressed () {
 inherits(_Pressed, _State);
 var Pressed = new _Pressed();
 exports.Pressed = Pressed;
+function _Disabled () {
+    this.name = 'Disabled';
+}
+inherits(_Disabled, _State);
+var Disabled = new _Disabled();
+exports.Disabled = Disabled;
 
 
 
+// Begin ready state
 _Ready.prototype.onMouseDown = function (controller) {
 
     controller.changeState(Pressed);
@@ -44,6 +51,20 @@ _Ready.prototype.onMouseDown = function (controller) {
 _Ready.prototype.onMouseDown.transitions = ['Pressed'];
 
 _Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
+
+_Ready.prototype.start = function (controller) {
+
+    controller.scope.enabled = true;
+
+};
+
+_Ready.prototype.onDisable = function (controller) {
+
+    controller.changeState(Disabled);
+
+};
+_Ready.prototype.onDisable.transitions = ['Disabled'];
+// end ready state
 
 
 _Start.prototype.start = function (controller) {
@@ -57,8 +78,8 @@ _Start.prototype.start.transitions = ['Ready'];
 _Clicked.prototype.start = function (controller) {
 
     controller.scope.is_pressed = false;
-    controller.scope.callback(controller.scope);
     controller.changeState(Ready);
+    controller.scope.callback(controller.scope);
 };
 _Clicked.prototype.start.transitions = ['Ready'];
 
@@ -75,3 +96,16 @@ _Pressed.prototype.onMouseUp = function (controller) {
 _Pressed.prototype.onMouseUp.transitions = ['Clicked'];
 
 _Pressed.prototype.onTouchEnd = _Pressed.prototype.onMouseUp;
+
+_Disabled.prototype.onEnable = function (controller) {
+
+    controller.changeState(Ready);
+
+};
+_Disabled.prototype.onEnable.transitions = ['Ready'];
+
+_Disabled.prototype.start = function (controller) {
+
+    controller.scope.enabled = false;
+
+};
