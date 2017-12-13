@@ -263,7 +263,7 @@ class _Persistence(object):
             print "no sender"
             return
         if isinstance(data[1], dict) and client_id != data[1].get('sender'):
-            logger.error("client_id mismatch expected:", client_id, "actual:", data[1].get('sender'))
+            logger.error("client_id mismatch expected: %s actual %s", client_id, data[1].get('sender'))
             logger.error(pformat(data))
             return
         message_type = data[0]
@@ -514,6 +514,15 @@ class _Persistence(object):
                                               device_id=device_map[i]))
         if new_entries:
             GroupDeviceMap.objects.bulk_create(new_entries)
+
+    def onFSMTrace(self, message_value, diagram_id, client_id):
+	FSMTrace(trace_session_id=message_value['trace_id'],
+	     fsm_name=message_value['fsm_name'],
+	     from_state=message_value['from_state'],
+	     to_state=message_value['to_state'],
+	     order=message_value['order'],
+	     client_id=client_id,
+	     message_type=message_value['recv_message_type'] or "none").save()
 
 
 persistence = _Persistence()

@@ -39,8 +39,9 @@ function FSMController (scope, name, initial_state, tracer) {
     this.delegate_channel = new NullChannel(this, tracer);
     this.tracer = tracer;
     this.trace = true;
-    this.handling_message_type = null;
+    this.handling_message_type = 'start';
     this.state.start(this);
+    this.handling_message_type = null;
 }
 exports.FSMController = FSMController;
 
