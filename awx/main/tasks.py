@@ -1041,8 +1041,6 @@ class RunJob(BaseTask):
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
             env['TOWER_HOST'] = settings.TOWER_URL_BASE
             env['AWX_HOST'] = settings.TOWER_URL_BASE
-            env['REST_API_URL'] = settings.INTERNAL_API_URL
-            env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
 
         # Create a directory for ControlPath sockets that is unique to each
@@ -2100,8 +2098,6 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
-        env['REST_API_URL'] = settings.INTERNAL_API_URL
-        env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
 

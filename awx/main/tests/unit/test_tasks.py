@@ -202,13 +202,16 @@ class TestJobExecution:
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
-            mock.patch.object(Job, 'inventory', mock.Mock(
-                pk=1,
-                get_script_data=lambda *args, **kw: self.INVENTORY_DATA,
-                spec_set=['pk', 'get_script_data']
-            )),
-            mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect)
+            mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect),
         ]
+        for cls in (Job, AdHocCommand):
+            self.patches.append(
+                mock.patch.object(cls, 'inventory', mock.Mock(
+                    pk=1,
+                    get_script_data=lambda *args, **kw: self.INVENTORY_DATA,
+                    spec_set=['pk', 'get_script_data']
+                ))
+            )
         for p in self.patches:
             p.start()
 
@@ -352,7 +355,6 @@ class TestAdhocRun(TestJobExecution):
         return AdHocCommand(
             pk=1,
             created=datetime.utcnow(),
-            inventory=Inventory(pk=1),
             status='new',
             cancel_flag=False,
             verbosity=3,
@@ -813,7 +815,7 @@ class TestJobCredentials(TestJobExecution):
             inputs=inputs
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
-        self.instance.extra_credentials.add(credential)
+        self.instance.credentials.add(credential)
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
