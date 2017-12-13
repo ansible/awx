@@ -2181,8 +2181,8 @@ class CredentialSerializer(BaseSerializer):
                 'insights_inventories',
                 'inventorysources',
                 'inventoryupdates',
-                'jobs',
-                'jobtemplates',
+                'unifiedjobs',
+                'unifiedjobtemplates',
                 'projects',
                 'projectupdates',
                 'workflowjobnodes'
