@@ -2443,7 +2443,8 @@ class InventoryScriptView(RetrieveAPIView):
             host = get_object_or_404(obj.hosts, **hosts_q)
             return Response(host.variables_dict)
         return Response(obj.get_script_data(
-            hostvars=bool(request.query_params.get('hostvars', '')),
+            hostvars=hostvars,
+            towervars=towervars,
             show_all=show_all
         ))
 
