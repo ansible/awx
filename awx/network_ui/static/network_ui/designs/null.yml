@@ -1,5 +1,5 @@
 finite_state_machine_id: 114
-name: fsm
+name: null_fsm
 states:
 - id: 1
   label: Start
