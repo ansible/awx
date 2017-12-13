@@ -33,7 +33,9 @@ TEST_STDOUTS.append({
 def test_cases(project):
     ret = []
     for e in TEST_STDOUTS:
-        e['project'] = ProjectUpdate(project=project)
+        pu = ProjectUpdate(project=project)
+        pu.save()
+        e['project'] = pu
         e['project'].result_stdout_text = e['text']
         e['project'].save()
         ret.append(e)
