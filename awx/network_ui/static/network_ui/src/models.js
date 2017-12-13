@@ -289,7 +289,7 @@ Link.prototype.plength = function (x, y) {
     return util.pDistance(x, y, x1, y1, x2, y2);
 };
 
-function ActionIcon(name, x, y, r, callback) {
+function ActionIcon(name, x, y, r, callback, enabled) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -297,7 +297,8 @@ function ActionIcon(name, x, y, r, callback) {
     this.callback = callback;
     this.is_pressed = false;
     this.mouse_over = false;
-    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+    this.enabled = enabled;
+    this.fsm = new fsm.FSMController(this, enabled ? button.Start : button.Disabled, null, name+'button_fsm');
 }
 exports.ActionIcon = ActionIcon;
 
@@ -319,6 +320,7 @@ function Button(name, x, y, width, height, callback) {
     this.callback = callback;
     this.is_pressed = false;
     this.mouse_over = false;
+    this.enabled = true;
     this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
 }
 exports.Button = Button;
@@ -346,6 +348,7 @@ function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callb
     this.toggle_callback = toggle_callback;
     this.untoggle_callback = untoggle_callback;
     this.mouse_over = false;
+    this.enabled = true;
     this.fsm = new fsm.FSMController(this, button.Start, null, name+'toggle_button_fsm');
 }
 inherits(ToggleButton, Button);

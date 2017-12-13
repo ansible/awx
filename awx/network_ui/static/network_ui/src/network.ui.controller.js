@@ -122,17 +122,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.group_controller = new fsm.FSMController($scope, group.Start, $scope.stream_controller, 'group_fsm');
   $scope.rack_controller = new fsm.FSMController($scope, rack_fsm.Disable, $scope.group_controller, 'rack_fsm');
   $scope.site_controller = new fsm.FSMController($scope, site_fsm.Disable, $scope.rack_controller, 'site_fsm');
-<<<<<<< HEAD
-  $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_controller, 'buttons_fsm');
-  $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.buttons_controller, 'time_fsm');
-  $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.time_controller, 'toolbox_fsm');
-=======
-  // $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_controller, 'buttons_fsm');
   $scope.time_controller = new fsm.FSMController($scope, time.Start, $scope.site_controller, 'time_fsm');
   $scope.app_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Disabled, $scope.time_controller, 'toolbox_fsm');
->>>>>>> 5064d9458... committing icons that semi work
   //App Toolbox Setup
-  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, 40, 150, $scope.graph.height - 40);
+  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, 40, 200, $scope.graph.height - 40);
+  $scope.app_toolbox.title_coordinates = {x: 70, y: 70};
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
@@ -191,6 +185,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
   $scope.inventory_toolbox.spacing = 150;
   $scope.inventory_toolbox.enabled = true;
+  $scope.inventory_toolbox.title_coordinates = {x: 60, y: 70};
   $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
   $scope.inventory_toolbox_controller.remove_on_drop = true;
   $scope.inventory_toolbox_controller.debug = true;
@@ -201,7 +196,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Inventory Toolbox Setup
   $scope.rack_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.inventory_toolbox_controller, 'rack_toolbox_fsm');
   //Rack Toolbox Setup
-  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, 40, 150, $scope.graph.height - 40);
+  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, 40, 200, $scope.graph.height - 40);
+  $scope.rack_toolbox.title_coordinates = {x: 80, y: 70};
   $scope.rack_toolbox.spacing = 200;
   $scope.rack_toolbox.enabled = false;
   $scope.rack_toolbox_controller.remove_on_drop = false;
@@ -217,7 +213,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Rack Toolbox Setup
   $scope.site_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.rack_toolbox_controller, 'site_toolbox_fsm');
   //Site Toolbox Setup
-  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, 40, 150, $scope.graph.height - 40);
+  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, 40, 200, $scope.graph.height - 40);
+  $scope.site_toolbox.title_coordinates = {x: 80, y: 70};
   $scope.site_toolbox.spacing = 200;
   $scope.site_toolbox.enabled = false;
   $scope.site_toolbox_controller.remove_on_drop = false;
@@ -232,7 +229,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
   //End Site Toolbox Setup
   $scope.buttons_controller = new fsm.FSMController($scope, buttons.Start, $scope.site_toolbox_controller, 'buttons_fsm');
-  // $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.site_toolbox_controller, 'mode_fsm');
   $scope.mode_controller = new fsm.FSMController($scope, mode_fsm.Start, $scope.buttons_controller, 'mode_fsm');
   $scope.first_controller = $scope.mode_controller;
     var getMouseEventResult = function (mouseEvent) {
@@ -469,7 +465,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       var delta = $event.delta;
       var deltaX = $event.deltaX;
       var deltaY = $event.deltaY;
-      console.log([$event, delta, deltaX, deltaY]);
+      // console.log([$event, delta, deltaX, deltaY]);
       if ($scope.recording) {
           $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
       }
@@ -568,16 +564,23 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Button Event Handlers
     //
-    $scope.onToggleToolboxButton = function (button) {
+    $scope.overall_toolbox_collapsed = false;
+    $scope.onToggleToolboxButtonLeft = function (button) {
         console.log(button.name);
         $scope.first_controller.handle_message("ToggleToolbox", {});
-<<<<<<< HEAD
-=======
+        $scope.action_icons[0].fsm.handle_message("Disable", {});
+        $scope.action_icons[1].fsm.handle_message("Enable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
-        // for feedback, let's make the overall_toolbox_collapsed it's own
-        // directive and move that to the network_ui.html
->>>>>>> 5064d9458... committing icons that semi work
     };
+
+    $scope.onToggleToolboxButtonRight = function (button) {
+        console.log(button.name);
+        $scope.first_controller.handle_message("ToggleToolbox", {});
+        $scope.action_icons[0].fsm.handle_message("Enable", {});
+        $scope.action_icons[1].fsm.handle_message("Disable", {});
+        $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
+    };
+
 
     $scope.onDeployButton = function (button) {
         console.log(button.name);
@@ -674,8 +677,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Icons
     $scope.action_icons = [
-        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButton),
-        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButton)
+        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true),
+        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false)
     ];
 
 

@@ -5,13 +5,13 @@
 <rect class="NetworkUI__toolbox-collapsed"
       x=0
       y=40
-      width=50
+      width=45
       ng-attr-height={{toolbox.height}}>
 </rect>
 <g awx-net-chevron-right-icon
     action-icon="action_icons[1]"
     ng-if="overall_toolbox_collapsed"
-    ng-attr-transform="translate({{action_icons[1].x}}, {{toolbox.height/2}})"></g>
+    ng-attr-transform="translate({{action_icons[1].x}}, {{action_icons[1].y}})"></g>
 </g>
 <!-- end collapsed toolbox -->
 
@@ -22,14 +22,18 @@
       ng-attr-width="{{toolbox.width}}"
       ng-attr-height="{{toolbox.height}}"
       rx=5></rect>
-
+<text
+    class="NetworkUI__toolbox--title"
+    ng-attr-transform="translate({{toolbox.title_coordinates.x}},{{toolbox.title_coordinates.y}})">
+        {{toolbox.name}}
+</text>
 <g awx-net-chevron-left-icon
     action-icon="action_icons[0]"
     ng-if="toolbox.enabled"
-    ng-attr-transform="translate({{toolbox.width - 30}}, {{toolbox.height/2}})"></g>
+    ng-attr-transform="translate({{action_icons[0].x}}, {{action_icons[0].y}})"></g>
 
 <g clip-path="url(#inventory-toolbox-clip-path)">
-<g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y}})">
+<g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y+20}})">
 <g ng-repeat="item in toolbox.items track by $index"
    ng-attr-transform="translate({{toolbox.width/2}},{{$index * toolbox.spacing + toolbox.spacing/2 + toolbox.scroll_offset}})"
    ng-attr-class="{{item.type}}"
