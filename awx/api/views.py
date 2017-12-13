@@ -4586,25 +4586,18 @@ class UnifiedJobStdout(RetrieveAPIView):
                         tablename, related_name = {
                             Job: ('main_jobevent', 'job_id'),
                             AdHocCommand: ('main_adhoccommandevent', 'ad_hoc_command_id'),
-                        }.get(unified_job.__class__, (None, None))
-                        if tablename is None:
-                            # stdout job event reconstruction isn't supported
-                            # for certain job types (such as inventory syncs),
-                            # so just grab the raw stdout from the DB
-                            write_fd.write(unified_job.result_stdout_text)
-                            write_fd.close()
-                        else:
-                            cursor.copy_expert(
-                                "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
-                                    tablename,
-                                    related_name,
-                                    unified_job.id
-                                ),
-                                write_fd
-                            )
-                            write_fd.close()
-                            subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
-                                             shell=True).wait()
+                        }.get(unified_job.__class__, ('main_genericcommandevent', 'unified_job_id'))
+                        cursor.copy_expert(
+                            "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
+                                tablename,
+                                related_name,
+                                unified_job.id
+                            ),
+                            write_fd
+                        )
+                        write_fd.close()
+                        subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
+                                         shell=True).wait()
                     except Exception as e:
                         return Response({"error": _("Error generating stdout download file: {}".format(e))})
             try:

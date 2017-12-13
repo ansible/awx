@@ -12,6 +12,7 @@ from awx.main.models.credential import * # noqa
 from awx.main.models.projects import * # noqa
 from awx.main.models.inventory import * # noqa
 from awx.main.models.jobs import * # noqa
+from awx.main.models.events import * # noqa
 from awx.main.models.ad_hoc_commands import * # noqa
 from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa

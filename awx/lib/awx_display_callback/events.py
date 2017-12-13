@@ -123,6 +123,8 @@ class EventContext(object):
             event_data['job_id'] = int(os.getenv('JOB_ID', '0'))
         if os.getenv('AD_HOC_COMMAND_ID', ''):
             event_data['ad_hoc_command_id'] = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
+        if os.getenv('PROJECT_UPDATE_ID', ''):
+            event_data['project_update_id'] = int(os.getenv('PROJECT_UPDATE_ID', '0'))
         event_data.setdefault('pid', os.getpid())
         event_data.setdefault('uuid', str(uuid.uuid4()))
         event_data.setdefault('created', datetime.datetime.utcnow().isoformat())
@@ -145,7 +147,7 @@ class EventContext(object):
             event_data['res'] = {}
         event_dict = dict(event=event, event_data=event_data)
         for key in event_data.keys():
-            if key in ('job_id', 'ad_hoc_command_id', 'uuid', 'parent_uuid', 'created',):
+            if key in ('job_id', 'ad_hoc_command_id', 'project_update_id', 'uuid', 'parent_uuid', 'created',):
                 event_dict[key] = event_data.pop(key)
             elif key in ('verbosity', 'pid'):
                 event_dict[key] = event_data[key]

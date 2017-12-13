@@ -128,8 +128,17 @@ class CallbackBrokerWorker(ConsumerMixin):
                 logger.error("Exception on worker thread, restarting: " + str(e))
                 continue
             try:
-                if 'job_id' not in body and 'ad_hoc_command_id' not in body:
-                    raise Exception('Payload does not have a job_id or ad_hoc_command_id')
+
+                event_map = {
+                    'job_id': JobEvent,
+                    'ad_hoc_command_id': AdHocCommandEvent,
+                    'project_update_id': ProjectUpdateEvent,
+                    'inventory_update_id': InventoryUpdateEvent,
+                    'system_job_id': SystemJobEvent,
+                }
+
+                if not any([key in body for key in event_map]):
+                    raise Exception('Payload does not have a job identifier')
                 if settings.DEBUG:
                     from pygments import highlight
                     from pygments.lexers import PythonLexer
@@ -140,16 +149,15 @@ class CallbackBrokerWorker(ConsumerMixin):
                     ))
 
                 def _save_event_data():
-                    if 'job_id' in body:
-                        JobEvent.create_from_data(**body)
-                    elif 'ad_hoc_command_id' in body:
-                        AdHocCommandEvent.create_from_data(**body)
+                    for key, cls in event_map.items():
+                        if key in body:
+                            cls.create_from_data(**body)
 
                 job_identifier = 'unknown job'
-                if 'job_id' in body:
-                    job_identifier = body['job_id']
-                elif 'ad_hoc_command_id' in body:
-                    job_identifier = body['ad_hoc_command_id']
+                for key in event_map.keys():
+                    if key in body:
+                        job_identifier = body[key]
+                        break
 
                 retries = 0
                 while retries <= self.MAX_RETRIES:

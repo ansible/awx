@@ -2,16 +2,13 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import logging
 from urlparse import urljoin
 
 # Django
 from django.conf import settings
 from django.db import models
-from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
-from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
@@ -20,11 +17,10 @@ from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
-from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
-__all__ = ['AdHocCommand', 'AdHocCommandEvent']
+__all__ = ['AdHocCommand']
 
 
 class AdHocCommand(UnifiedJob, JobNotificationMixin):
@@ -224,169 +220,3 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "AdHoc Command"
-
-
-class AdHocCommandEvent(CreatedModifiedModel):
-    '''
-    An event/message logged from the ad hoc event callback for each host.
-    '''
-
-    EVENT_TYPES = [
-        # (event, verbose name, failed)
-        ('runner_on_failed', _('Host Failed'), True),
-        ('runner_on_ok', _('Host OK'), False),
-        ('runner_on_unreachable', _('Host Unreachable'), True),
-        # Tower won't see no_hosts (check is done earlier without callback).
-        # ('runner_on_no_hosts', _('No Hosts Matched'), False),
-        # Tower will see skipped (when running in check mode for a module that
-        # does not support check mode).
-        ('runner_on_skipped', _('Host Skipped'), False),
-        # Tower does not support async for ad hoc commands (not used in v2).
-        # ('runner_on_async_poll', _('Host Polling'), False),
-        # ('runner_on_async_ok', _('Host Async OK'), False),
-        # ('runner_on_async_failed', _('Host Async Failure'), True),
-        # Tower does not yet support --diff mode.
-        # ('runner_on_file_diff', _('File Difference'), False),
-
-        # Additional event types for captured stdout not directly related to
-        # runner events.
-        ('debug', _('Debug'), False),
-        ('verbose', _('Verbose'), False),
-        ('deprecated', _('Deprecated'), False),
-        ('warning', _('Warning'), False),
-        ('system_warning', _('System Warning'), False),
-        ('error', _('Error'), False),
-    ]
-    FAILED_EVENTS = [x[0] for x in EVENT_TYPES if x[2]]
-    EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
-
-    class Meta:
-        app_label = 'main'
-        ordering = ('-pk',)
-        index_together = [
-            ('ad_hoc_command', 'event'),
-            ('ad_hoc_command', 'uuid'),
-            ('ad_hoc_command', 'start_line'),
-            ('ad_hoc_command', 'end_line'),
-        ]
-
-    ad_hoc_command = models.ForeignKey(
-        'AdHocCommand',
-        related_name='ad_hoc_command_events',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
-    host = models.ForeignKey(
-        'Host',
-        related_name='ad_hoc_command_events',
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-        editable=False,
-    )
-    host_name = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    event = models.CharField(
-        max_length=100,
-        choices=EVENT_CHOICES,
-    )
-    event_data = JSONField(
-        blank=True,
-        default={},
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    changed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    uuid = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    counter = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    stdout = models.TextField(
-        default='',
-        editable=False,
-    )
-    verbosity = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    start_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    end_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-
-    def get_absolute_url(self, request=None):
-        return reverse('api:ad_hoc_command_event_detail', kwargs={'pk': self.pk}, request=request)
-
-    def __unicode__(self):
-        return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
-
-    def save(self, *args, **kwargs):
-        # If update_fields has been specified, add our field names to it,
-        # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
-        res = self.event_data.get('res', None)
-        if self.event in self.FAILED_EVENTS:
-            if not self.event_data.get('ignore_errors', False):
-                self.failed = True
-                if 'failed' not in update_fields:
-                    update_fields.append('failed')
-        if isinstance(res, dict) and res.get('changed', False):
-            self.changed = True
-            if 'changed' not in update_fields:
-                update_fields.append('changed')
-        self.host_name = self.event_data.get('host', '').strip()
-        if 'host_name' not in update_fields:
-            update_fields.append('host_name')
-        if not self.host_id and self.host_name:
-            host_qs = self.ad_hoc_command.inventory.hosts.filter(name=self.host_name)
-            try:
-                host_id = host_qs.only('id').values_list('id', flat=True)
-                if host_id.exists():
-                    self.host_id = host_id[0]
-                    if 'host_id' not in update_fields:
-                        update_fields.append('host_id')
-            except (IndexError, AttributeError):
-                pass
-        super(AdHocCommandEvent, self).save(*args, **kwargs)
-
-    @classmethod
-    def create_from_data(self, **kwargs):
-        # Convert the datetime for the ad hoc command event's creation
-        # appropriately, and include a time zone for it.
-        #
-        # In the event of any issue, throw it out, and Django will just save
-        # the current time.
-        try:
-            if not isinstance(kwargs['created'], datetime.datetime):
-                kwargs['created'] = parse_datetime(kwargs['created'])
-            if not kwargs['created'].tzinfo:
-                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
-        except (KeyError, ValueError):
-            kwargs.pop('created', None)
-
-        # Sanity check: Don't honor keys that we don't recognize.
-        valid_keys = {'ad_hoc_command_id', 'event', 'event_data', 'created',
-                      'counter', 'uuid', 'stdout', 'start_line', 'end_line',
-                      'verbosity'}
-        for key in kwargs.keys():
-            if key not in valid_keys:
-                kwargs.pop(key)
-
-        return AdHocCommandEvent.objects.create(**kwargs)
