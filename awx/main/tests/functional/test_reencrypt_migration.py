@@ -10,10 +10,6 @@ from django.apps import apps
 
 from awx.main.models import (
     UnifiedJob,
-    Job,
-    JobTemplate,
-    WorkflowJob,
-    WorkflowJobTemplate,
     NotificationTemplate,
     Credential,
 )
@@ -23,11 +19,10 @@ from awx.conf.migrations._reencrypt import encrypt_field
 from awx.main.migrations._reencrypt import (
     _notification_templates,
     _credentials,
-    _unified_jobs,
-    _encrypt_survey_passwords
+    _unified_jobs
 )
 
-from awx.main.utils import decrypt_field, get_encryption_key, decrypt_value
+from awx.main.utils import decrypt_field
 
 
 @pytest.mark.django_db
