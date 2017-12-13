@@ -1,7 +1,7 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
 
-const templateUrl = require('~components/output/stdout.partial.html');
+const templateUrl = require('~components/code/stdout.partial.html');
 
 let $sce;
 let $timeout;
@@ -51,7 +51,6 @@ AtOutputStdoutController.$inject = [
 ];
 
 function render (stdout) {
-    console.log('render');
     const html = $sce.trustAsHtml(parseStdout(stdout));
 
     $timeout(() => {

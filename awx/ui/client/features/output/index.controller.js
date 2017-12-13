@@ -48,13 +48,10 @@ function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, 
     vm.showHostDetails = showHostDetails;
 
     vm.menu = {
-        expand: menuExpand,
-        scrollToBottom: menuScrollToBottom,
-        scrollToTop: menuScrollToTop
-    };
-
-    vm.state = {
-        expand: true
+        top: {
+            expand: menuExpand,
+            isExpanded: false
+        }
     };
 
     $timeout(() => {
@@ -66,20 +63,7 @@ function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, 
 }
 
 function menuExpand () {
-    vm.state.expand = !vm.state.expand;
     vm.toggle(meta.parent);
-}
-
-function menuScrollToBottom () {
-    const container = $('.at-Stdout-container')[0];
-
-    container.scrollTop = container.scrollHeight;
-}
-
-function menuScrollToTop () {
-    const container = $('.at-Stdout-container')[0];
-
-    container.scrollTop = 0;
 }
 
 function parseEvents (events) {
