@@ -1,5 +1,5 @@
 finite_state_machine_id: 6
-name: fsm
+name: group_fsm
 states:
 - id: 11
   label: Disable
