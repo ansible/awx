@@ -209,7 +209,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
             group_children.add(from_group_id)
         return group_children_map
 
-    def get_script_data(self, hostvars=False, show_all=False):
+    def get_script_data(self, hostvars=False, towervars=False, show_all=False):
         if show_all:
             hosts_q = dict()
         else:
@@ -271,6 +271,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
             data['_meta'].setdefault('hostvars', dict())
             for host in self.hosts.filter(**hosts_q):
                 data['_meta']['hostvars'][host.name] = host.variables_dict
+                if towervars:
+                    tower_dict = dict(remote_tower_enabled=str(host.enabled).lower(),
+                                      remote_tower_id=host.id)
+                    data['_meta']['hostvars'][host.name].update(tower_dict)
 
         return data
 

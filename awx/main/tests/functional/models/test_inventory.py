@@ -14,6 +14,28 @@ from awx.main.utils.filters import SmartFilter
 
 
 @pytest.mark.django_db
+class TestInventoryScript:
+
+    def test_hostvars(self, inventory):
+        inventory.hosts.create(name='ahost', variables={"foo": "bar"})
+        assert inventory.get_script_data(
+            hostvars=True
+        )['_meta']['hostvars']['ahost'] == {
+            'foo': 'bar'
+        }
+
+    def test_towervars(self, inventory):
+        host = inventory.hosts.create(name='ahost')
+        assert inventory.get_script_data(
+            hostvars=True,
+            towervars=True
+        )['_meta']['hostvars']['ahost'] == {
+            'remote_tower_enabled': 'true',
+            'remote_tower_id': host.id
+        }
+
+
+@pytest.mark.django_db
 class TestSCMUpdateFeatures:
 
     def test_automatic_project_update_on_create(self, inventory, project):
