@@ -29,13 +29,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.http = $http;
 
   $scope.api_token = '';
-  $scope.disconnected = true;
+  $scope.disconnected = false;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
   //
   $scope.inventory_id = $location.search().inventory_id || 1;
 
+  $scope.initial_messages = [];
   if (!$scope.disconnected) {
   $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
@@ -122,7 +123,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         message.message_id = $scope.message_id_seq();
         var data = messages.serialize(message);
         if (!$scope.disconnected) {
-            $scope.control_socket.send(data);
+            try {
+                $scope.control_socket.send(data);
+            }
+            catch(err) {
+                $scope.initial_messages.push(message);
+            }
         } else {
             console.log(data);
         }
@@ -780,6 +786,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false)
     ];
 
+	$scope.onDownloadTraceButton = function (button) {
+        console.log(button.label);
+        window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
+    };
     // Buttons
     var button_offset = 200;
 
@@ -792,6 +802,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton, $scope),
       new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
       new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
+      new models.Button("DOWNLOAD TRACE", button_offset + 740, 48, 120, 30, $scope.onDownloadTraceButton, $scope),
     ];
 
     var LAYERS_X = 160;
@@ -1284,6 +1295,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.onClientId = function(data) {
         $scope.client_id = data;
+        $scope.send_initial_messages();
     };
 
     $scope.onTopology = function(data) {
@@ -1635,7 +1647,21 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
 	$scope.control_socket.onopen = function() {
-        //Ignore
+        //ignore
+    };
+
+	$scope.send_initial_messages = function() {
+        var i = 0;
+        var messages_to_send = $scope.initial_messages;
+        var message = null;
+        var data = null;
+        $scope.initial_messages = [];
+        for(i = 0; i < messages_to_send.length; i++) {
+            message = messages_to_send[i];
+            message.sender = $scope.client_id;
+            data = messages.serialize(message);
+            $scope.control_socket.send(data);
+        }
 	};
 
 	// Call onopen directly if $scope.control_socket is already open
