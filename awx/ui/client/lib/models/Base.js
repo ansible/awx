@@ -69,7 +69,7 @@ function search (params = {}, config = {}) {
     };
 
     if (typeof params === 'string') {
-        req.url = `?params`;
+        req.url = '?params';
     } else if (Array.isArray(params)) {
         req.url += `?${params.join('&')}`;
     } else {
