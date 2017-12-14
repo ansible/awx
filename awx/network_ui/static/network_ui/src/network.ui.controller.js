@@ -29,7 +29,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.http = $http;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -661,7 +661,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     //
     $scope.onToggleToolboxButtonLeft = function (button) {
         console.log(button.name);
-        $scope.first_controller.handle_message("ToggleToolbox", {});
+        $scope.first_channel.send("ToggleToolbox", {});
         $scope.action_icons[0].fsm.handle_message("Disable", {});
         $scope.action_icons[1].fsm.handle_message("Enable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
@@ -669,7 +669,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.onToggleToolboxButtonRight = function (button) {
         console.log(button.name);
-        $scope.first_controller.handle_message("ToggleToolbox", {});
+        $scope.first_channel.send("ToggleToolbox", {});
         $scope.action_icons[0].fsm.handle_message("Enable", {});
         $scope.action_icons[1].fsm.handle_message("Disable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
@@ -782,8 +782,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Icons
     $scope.action_icons = [
-        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true),
-        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false)
+        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
+        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false, $scope)
     ];
 
 	$scope.onDownloadTraceButton = function (button) {
