@@ -610,5 +610,5 @@ _Placing.prototype.onMouseDown = function (controller) {
 
     controller.changeState(Resize);
 };
-_Placing.prototype.onMouseDown.transitions = ['CornerSelected'];
+_Placing.prototype.onMouseDown.transitions = ['Resize'];
 
