@@ -51,7 +51,7 @@ transitions:
   to_state: Resize
 - from_state: Placing
   label: onMouseDown
-  to_state: CornerSelected
+  to_state: Resize
 - from_state: Ready
   label: onMouseDown
   to_state: CornerSelected
