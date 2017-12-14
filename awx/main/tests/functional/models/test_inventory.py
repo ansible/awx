@@ -36,6 +36,30 @@ class TestInventoryScript:
 
 
 @pytest.mark.django_db
+class TestActiveCount:
+
+    def test_host_active_count(self, organization):
+        inv1 = Inventory.objects.create(name='inv1', organization=organization)
+        inv2 = Inventory.objects.create(name='inv2', organization=organization)
+        assert Host.objects.active_count() == 0
+        inv1.hosts.create(name='host1')
+        inv2.hosts.create(name='host1')
+        assert Host.objects.active_count() == 1
+        inv1.hosts.create(name='host2')
+        assert Host.objects.active_count() == 2
+
+    def test_active_count_minus_tower(self, inventory):
+        inventory.hosts.create(name='locally-managed-host')
+        source = inventory.inventory_sources.create(
+            name='tower-source', source='tower'
+        )
+        source.hosts.create(
+            name='remotely-managed-host', inventory=inventory
+        )
+        assert Host.objects.active_count() == 1
+
+
+@pytest.mark.django_db
 class TestSCMUpdateFeatures:
 
     def test_automatic_project_update_on_create(self, inventory, project):
