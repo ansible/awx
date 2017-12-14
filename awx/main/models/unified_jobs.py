@@ -34,7 +34,7 @@ from django_celery_results.models import TaskResult
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
-    encrypt_value, decrypt_field, _inventory_updates,
+    encrypt_dict, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
     get_type_for_model, parse_yaml_or_json
 )
@@ -349,11 +349,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         # automatically encrypt survey fields
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
             password_list = self.survey_password_variables()
-            for key in kwargs.get('extra_vars', {}):
-                if key in password_list:
-                    kwargs['extra_vars'][key] = encrypt_value(
-                        kwargs['extra_vars'][key]
-                    )
+            encrypt_dict(kwargs.get('extra_vars', {}), password_list)
 
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()

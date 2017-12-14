@@ -9,8 +9,10 @@ from cryptography.hazmat.backends import default_backend
 from django.utils.encoding import smart_str
 
 
-__all__ = ['get_encryption_key', 'encrypt_value', 'encrypt_field',
-           'decrypt_field', 'decrypt_value']
+__all__ = ['get_encryption_key',
+           'encrypt_field', 'decrypt_field',
+           'encrypt_value', 'decrypt_value',
+           'encrypt_dict']
 
 logger = logging.getLogger('awx.main.utils.encryption')
 
@@ -125,3 +127,13 @@ def decrypt_field(instance, field_name, subfield=None):
             exc_info=True
         )
         raise
+
+
+def encrypt_dict(data, fields):
+    '''
+    Encrypts all of the dictionary values in `data` under the keys in `fields`
+    in-place operation on `data`
+    '''
+    encrypt_fields = set(data.keys()).intersection(fields)
+    for key in encrypt_fields:
+        data[key] = encrypt_value(data[key])

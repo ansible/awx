@@ -44,7 +44,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
-    has_model_field_prefetched, extract_ansible_vars)
+    has_model_field_prefetched, extract_ansible_vars, encrypt_dict)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import REPLACE_STR
 
@@ -3140,7 +3140,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         attrs['char_prompts'] = mock_obj.char_prompts
 
         # Insert survey_passwords to track redacted variables
-        # TODO: perform encryption on save
         if 'extra_data' in attrs:
             extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
             if hasattr(ujt, 'survey_password_variables'):
@@ -3150,6 +3149,20 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                         password_dict[key] = REPLACE_STR
                 if not self.instance or password_dict != self.instance.survey_passwords:
                     attrs['survey_passwords'] = password_dict
+                if not isinstance(attrs['extra_data'], dict):
+                    attrs['extra_data'] = parse_yaml_or_json(attrs['extra_data'])
+                encrypt_dict(attrs['extra_data'], password_dict.keys())
+                if self.instance:
+                    db_extra_data = parse_yaml_or_json(self.instance.extra_data)
+                else:
+                    db_extra_data = {}
+                for key in password_dict.keys():
+                    if attrs['extra_data'].get(key, None) == REPLACE_STR:
+                        if key not in db_extra_data:
+                            raise serializers.ValidationError(
+                                _('Provided variable {} has no database value to replace with.').format(key))
+                        else:
+                            attrs['extra_data'][key] = db_extra_data[key]
         return attrs
 
 
