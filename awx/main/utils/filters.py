@@ -15,9 +15,6 @@ from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter']
 
-unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
-unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
-
 
 def string_to_type(t):
     if t == u'true':
@@ -213,6 +210,8 @@ class SmartFilter(object):
         filter_string_raw = filter_string
         filter_string = unicode(filter_string)
 
+        unicode_spaces = [unichr(c) for c in xrange(sys.maxunicode) if unichr(c).isspace()]
+        unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
         atom = CharsNotIn(unicode_spaces_other)
         atom_inside_quotes = CharsNotIn(u'"')
         atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
