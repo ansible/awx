@@ -6,12 +6,12 @@ const INVENTORY_NAME = `inventory-${id}`;
 const MACHINE_CREDENTIAL_NAME = `credential-machine-${id}`;
 const ORGANIZATION_NAME = `organization-${id}`;
 const PROJECT_NAME = `project-${id}`;
-const PROJECT_URL = 'https://github.com/ansible/awx';
-const PROJECT_BRANCH = 'devel';
-const PLAYBOOK_NAME = 'awx/ui/test/e2e/tests/smoke.yml';
+const PROJECT_URL = 'https://github.com/jlaska/ansible-playbooks';
+const PROJECT_BRANCH = 'master';
+const PLAYBOOK_NAME = 'multivault.yml';
 const TEMPLATE_NAME = `template-${id}`;
-const VAULT_CREDENTIAL_NAME = `credential-vault-${id}`;
-const VAULT_CREDENTIAL_PASSWORD = 'VAULT_CREDENTIAL_PASSWORD';
+const VAULT_CREDENTIAL_NAME_1 = `credential-vault-${id}-1`;
+const VAULT_CREDENTIAL_NAME_2 = `credential-vault-${id}-2`;
 
 module.exports = {
     'login to awx': client => {
@@ -153,7 +153,7 @@ module.exports = {
         client.waitForElementVisible('div.spinny');
         client.waitForElementNotVisible('div.spinny');
     },
-    'create vault credential': client => {
+    'create vault credentials': client => {
         const credentials = client.page.credentials();
         const { details } = credentials.section.add.section;
 
@@ -171,9 +171,35 @@ module.exports = {
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Vault');
         details.setValue('@organization', ORGANIZATION_NAME);
-        details.setValue('@name', VAULT_CREDENTIAL_NAME);
+        details.setValue('@name', VAULT_CREDENTIAL_NAME_1);
 
-        details.section.vault.setValue('@vaultPassword', VAULT_CREDENTIAL_PASSWORD);
+        details.section.vault.setValue('@vaultPassword', 'secret1');
+        details.section.vault.setValue('@vaultIdentifier', 'first');
+
+        details.expect.element('@save').enabled;
+        details.click('@save');
+
+        credentials.waitForElementVisible('div.spinny');
+        credentials.waitForElementNotVisible('div.spinny');
+
+        credentials.section.navigation.waitForElementVisible('@credentials');
+        credentials.section.navigation.expect.element('@credentials').enabled;
+        credentials.section.navigation.click('@credentials');
+
+        credentials.waitForElementVisible('div.spinny');
+        credentials.waitForElementNotVisible('div.spinny');
+
+        credentials.section.list.waitForElementVisible('@add');
+        credentials.section.list.expect.element('@add').enabled;
+        credentials.section.list.click('@add');
+
+        details.waitForElementVisible('@save');
+        details.clearAndSelectType('Vault');
+        details.setValue('@organization', ORGANIZATION_NAME);
+        details.setValue('@name', VAULT_CREDENTIAL_NAME_2);
+
+        details.section.vault.setValue('@vaultPassword', 'secret2');
+        details.section.vault.setValue('@vaultIdentifier', 'second');
 
         details.expect.element('@save').enabled;
         details.click('@save');
@@ -217,7 +243,8 @@ module.exports = {
         templates.selectAdd('Job Template');
         templates.selectInventory(INVENTORY_NAME);
         templates.selectProject(PROJECT_NAME);
-        templates.selectVaultCredential(VAULT_CREDENTIAL_NAME);
+        templates.selectVaultCredential(VAULT_CREDENTIAL_NAME_1);
+        templates.selectVaultCredential(VAULT_CREDENTIAL_NAME_2);
         templates.selectMachineCredential(MACHINE_CREDENTIAL_NAME);
         templates.selectPlaybook(PLAYBOOK_NAME);
         templates.sendKeys('label[for="name"] + div input', TEMPLATE_NAME);
@@ -253,7 +280,8 @@ module.exports = {
         templates.click('i[class$="launch"]');
     },
     'verify expected job results': client => {
-        const output = './/span[normalize-space(text())=\'"msg": "Hello World!"\']';
+        const output1 = './/span[normalize-space(text())=\'"first": "First!"\']';
+        const output2 = './/span[normalize-space(text())=\'"second": "Second!"\']';
         const running = 'i[class$="icon-job-running"]';
         const success = 'i[class$="icon-job-successful"]';
 
@@ -265,7 +293,8 @@ module.exports = {
         client.waitForElementVisible(success, 60000);
 
         client.useXpath();
-        client.waitForElementVisible(output, 60000);
+        client.waitForElementVisible(output1, 60000);
+        client.waitForElementVisible(output2, 60000);
         client.useCss();
 
         client.end();

@@ -226,11 +226,10 @@ module.exports = {
                 .waitForElementVisible('div.spinny')
                 .waitForElementNotVisible('div.spinny')
                 .waitForElementNotPresent('multi-credential-modal tbody tr:nth-child(2)')
-                .waitForElementVisible('multi-credential-modal tbody tr:nth-child(1) input[type="radio"]')
-                .click('multi-credential-modal tbody tr:nth-child(1) input[type="radio"]')
+                .waitForElementVisible('multi-credential-modal tbody tr:nth-child(1) input[type="checkbox"]')
+                .click('multi-credential-modal tbody tr:nth-child(1) input[type="checkbox"]')
                 .click('multi-credential-modal button[class*="save"]')
-                .waitForElementVisible('div.spinny')
-                .waitForElementNotVisible('div.spinny');
+                .pause(1000);
 
             return this;
         },
@@ -256,8 +255,7 @@ module.exports = {
                 .waitForElementVisible('multi-credential-modal tbody tr:nth-child(1) input[type="radio"]')
                 .click('multi-credential-modal tbody tr:nth-child(1) input[type="radio"]')
                 .click('multi-credential-modal button[class*="save"]')
-                .waitForElementVisible('div.spinny')
-                .waitForElementNotVisible('div.spinny');
+                .pause(1000);
 
             return this;
         }

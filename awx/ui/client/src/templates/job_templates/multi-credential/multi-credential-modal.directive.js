@@ -95,45 +95,12 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 let extraCredIds = $scope.selectedCredentials.extra.map(cred => cred.id);
                 $scope.credentials.forEach(cred => {
                     cred.checked = (extraCredIds.indexOf(cred.id) > - 1) ? 1 : 0;
-                    // if (cred.credential_type !== $scope.credentialKinds.Machine) {
-                    //    cred.checked = (extraCredIds.indexOf(cred.id) > - 1) ? 1 : 0;
-                    //}
                 });
 
                 $scope.credTags = MultiCredentialService
                     .updateCredentialTags($scope.selectedCredentials,
                         $scope.allCredentialTypeOptions);
             };
-
-            // let updateMachineCredentialList = function() {
-            //     $scope.credentials.forEach(cred => {
-            //         if (cred.credential_type === $scope.credentialKinds.Machine) {
-            //             cred.checked = ($scope.selectedCredentials
-            //                 .machine !== null &&
-            //                 cred.id === $scope.selectedCredentials
-            //                     .machine.id) ? 1 : 0;
-            //         }
-            //     });
-
-            //     $scope.credTags = MultiCredentialService
-            //         .updateCredentialTags($scope.selectedCredentials,
-            //             $scope.allCredentialTypeOptions);
-            // };
-
-            // let updateVaultCredentialList = function() {
-            //     $scope.credentials.forEach(cred => {
-            //         if (cred.credential_type === $scope.credentialKinds.Vault) {
-            //             cred.checked = ($scope.selectedCredentials
-            //                 .vault !== null &&
-            //                 cred.id === $scope.selectedCredentials
-            //                     .vault.id) ? 1 : 0;
-            //         }
-            //     });
-
-            //     $scope.credTags = MultiCredentialService
-            //         .updateCredentialTags($scope.selectedCredentials,
-            //             $scope.allCredentialTypeOptions);
-            // };
 
             let uncheckAllCredentials = function() {
                 $scope.credentials.forEach(cred => {
@@ -200,108 +167,51 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 $scope.$watchCollection('credentials', updateExtraCredentialsList);
 
                 $scope.$watchCollection('selectedCredentials.extra', () => {
-                //$scope.$watchGroup(['credentials', 'selectedCredentials.extra'], () => {
                     if($scope.credentials && $scope.credentials.length > 0) {
                         if($scope.selectedCredentials.extra &&
-                            $scope.selectedCredentials.extra.length > 0){ //&&
-                           // parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
+                            $scope.selectedCredentials.extra.length > 0) {
                             updateExtraCredentialsList();
-                        } else { //if (parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
+                        } else {
                             uncheckAllCredentials();
                         }
                     }
                 });
-
-                // $scope.$watch('selectedCredentials.machine', () => {
-                //     if($scope.selectedCredentials &&
-                //         $scope.selectedCredentials.machine &&
-                //         parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
-                //         updateMachineCredentialList();
-                //     } else {
-                //         uncheckAllCredentials();
-                //     }
-                // });
-
-                // $scope.$watch('selectedCredentials.vault', () => {
-                //     if($scope.selectedCredentials &&
-                //         $scope.selectedCredentials.vault &&
-                //         parseInt($scope.credentialKind) === $scope.credentialKinds.Vault) {
-                //         updateVaultCredentialList();
-                //     } else {
-                //         uncheckAllCredentials();
-                //     }
-                // });
-
-            //     $scope.$watchGroup(['credentials',
-            //         'selectedCredentials.machine',
-            //         'selectedCredentials.vault'], () => {
-            //             if($scope.credentials &&
-            //                 $scope.credentials.length > 0) {
-            //                     if($scope.selectedCredentials &&
-            //                           $scope.selectedCredentials.machine &&
-            //                           parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
-            //                               updateMachineCredentialList();
-            //                     } else if($scope.selectedCredentials &&
-            //                           $scope.selectedCredentials.vault &&
-            //                           parseInt($scope.credentialKind) === $scope.credentialKinds.Vault) {
-            //                               updateVaultCredentialList();
-            //                     } else if($scope.selectedCredentials &&
-            //                           $scope.selectedCredentials.extra &&
-            //                           $scope.selectedCredentials.extra.length > 0 &&
-            //                           parseInt($scope.credentialKind) !== $scope.credentialKinds.Machine) {
-            //                               updateExtraCredentialsList();
-            //                     } else {
-            //                         uncheckAllCredentials();
-            //                     }
-            //             }
-            //     });
             };
 
             $scope.$on('multiCredentialModalLinked', function() {
                 init();
             });
 
+            $scope.toggle_credential = id => {
+                // This is called only when a checkbox input is clicked directly. For clicks anywhere
+                // else on the row or direct radio button clicks, the toggle_row handler is called
+                // instead with a slightly different set of arguments. We normalize those arguments
+                // here and pass them through to the other handler so that the behavior is consistent.
+                const [credential] = $scope.credentials.filter(credential => credential.id === id);
+                return $scope.toggle_row(credential);
+            };
+
             $scope.toggle_row = function(selectedRow) {
-                // if(false) { //if(parseInt($scope.credentialKind) === $scope.credentialKinds.Machine) {
-                //     if($scope.selectedCredentials &&
-                //         $scope.selectedCredentials.machine &&
-                //         $scope.selectedCredentials.machine.id === selectedRow.id) {
-                //         $scope.selectedCredentials.machine = null;
-                //     } else {
-                //         $scope.selectedCredentials.machine = _.cloneDeep(selectedRow);
-                //     }
-                // }else if (false) { //if(parseInt($scope.credentialKind) === $scope.credentialKinds.Vault) {
-                //     if($scope.selectedCredentials &&
-                //         $scope.selectedCredentials.vault &&
-                //         $scope.selectedCredentials.vault.id === selectedRow.id) {
-                //         $scope.selectedCredentials.vault = null;
-                //     } else {
-                //         $scope.selectedCredentials.vault = _.cloneDeep(selectedRow);
-                //     }
-                // } else {
-                    let rowDeselected = false;
-                    for (let i = $scope.selectedCredentials.extra.length - 1; i >= 0; i--) {
-                        if($scope.selectedCredentials.extra[i].id === selectedRow.id) {
+                let rowDeselected = false;
+                for (let i = $scope.selectedCredentials.extra.length - 1; i >= 0; i--) {
+                    if($scope.selectedCredentials.extra[i].id === selectedRow.id) {
+                        $scope.selectedCredentials.extra.splice(i, 1);
+                        rowDeselected = true;
+                    } else if(selectedRow.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
+                        if (selectedRow.credential_type !== $scope.credentialKinds.Vault) {
                             $scope.selectedCredentials.extra.splice(i, 1);
-                            rowDeselected = true;
-                        } else if(selectedRow.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
-                            if (selectedRow.credential_type !== $scope.credentialKinds.Vault) {
-                                $scope.selectedCredentials.extra.splice(i, 1);
-                            }
                         }
                     }
-                    if(!rowDeselected) {
-                        $scope.selectedCredentials.extra
-                            .push(_.cloneDeep(selectedRow));
-                    }
-                // }
+                }
+                if(!rowDeselected) {
+                    $scope.selectedCredentials.extra
+                        .push(_.cloneDeep(selectedRow));
+                }
             };
 
             $scope.selectedCredentialsDirty = function() {
                 if ($scope.originalSelectedCredentials) {
-                    return !($scope.originalSelectedCredentials.machine === null &&
-                        $scope.originalSelectedCredentials.vault === null &&
-                        $scope.originalSelectedCredentials.extra.length === 0) &&
+                    return !($scope.originalSelectedCredentials.extra.length === 0) &&
                         !_.isEqual($scope.selectedCredentials,
                             $scope.originalSelectedCredentials);
                 } else {
