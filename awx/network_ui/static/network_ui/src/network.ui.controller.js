@@ -30,7 +30,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.http = $http;
 
   $scope.api_token = '';
-  $scope.disconnected = false;
+  $scope.disconnected = true;
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
@@ -82,7 +82,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.last_event = null;
   $scope.cursor = {'x':100, 'y': 100, 'hidden': false};
 
-  $scope.debug = {'hidden': false};
+  $scope.debug = {'hidden': true};
   $scope.hide_buttons = false;
   $scope.hide_links = false;
   $scope.hide_interfaces = false;
@@ -95,6 +95,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
   $scope.stream_id_seq = util.natural_numbers(0);
+  $scope.overall_toolbox_collapsed = false;
   $scope.time_pointer = -1;
   $scope.frame = 0;
   $scope.recording = false;
@@ -147,7 +148,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller, 'inventory_toolbox_fsm');
 
   //Inventory Toolbox Setup
-  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 150, $scope.graph.height - 40);
+  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
@@ -564,7 +565,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Button Event Handlers
     //
-    $scope.overall_toolbox_collapsed = false;
     $scope.onToggleToolboxButtonLeft = function (button) {
         console.log(button.name);
         $scope.first_controller.handle_message("ToggleToolbox", {});
@@ -683,16 +683,19 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
 
     // Buttons
+    
+
+    var button_offset = 200;
 
     $scope.buttons = [
-      new models.Button("DEPLOY", 10, 48, 70, 30, $scope.onDeployButton),
-      new models.Button("DESTROY", 90, 48, 80, 30, $scope.onDestroyButton),
-      new models.Button("RECORD", 180, 48, 80, 30, $scope.onRecordButton),
-      new models.Button("EXPORT", 270, 48, 70, 30, $scope.onExportButton),
-      new models.Button("DISCOVER", 350, 48, 80, 30, $scope.onDiscoverButton),
-      new models.Button("LAYOUT", 440, 48, 70, 30, $scope.onLayoutButton),
-      new models.Button("CONFIGURE", 520, 48, 90, 30, $scope.onConfigureButton),
-      new models.Button("EXPORT YAML", 620, 48, 120, 30, $scope.onExportYamlButton),
+      new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton),
+      new models.Button("DESTROY", button_offset + 90, 48, 80, 30, $scope.onDestroyButton),
+      new models.Button("RECORD", button_offset + 180, 48, 80, 30, $scope.onRecordButton),
+      new models.Button("EXPORT", button_offset + 270, 48, 70, 30, $scope.onExportButton),
+      new models.Button("DISCOVER", button_offset + 350, 48, 80, 30, $scope.onDiscoverButton),
+      new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton),
+      new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton),
+      new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton),
     ];
 
     var LAYERS_X = 160;
@@ -719,6 +722,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.layers = [];
 
     $scope.all_buttons = [];
+    $scope.all_buttons.extend($scope.action_icons);
     $scope.all_buttons.extend($scope.buttons);
     $scope.all_buttons.extend($scope.layers);
 
