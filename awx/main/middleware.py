@@ -43,6 +43,8 @@ class TimingMiddleware(threading.local):
             self.prof.enable()
 
     def process_response(self, request, response):
+        if not hasattr(self, 'start_time'):  # some tools may not invoke process_request
+            return response
         total_time = time.time() - self.start_time
         response['X-API-Total-Time'] = '%0.3fs' % total_time
         if settings.AWX_REQUEST_PROFILE:
