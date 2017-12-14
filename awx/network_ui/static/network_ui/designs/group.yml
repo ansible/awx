@@ -1,50 +1,50 @@
-finite_state_machine_id: 6
+diagram_id: 38
 name: group_fsm
 states:
-- id: 11
+- id: 1
   label: Disable
   x: 497
   y: 84
-- id: 1
+- id: 2
   label: Resize
   x: 571
   y: 911
-- id: 2
+- id: 3
   label: Start
   x: 744
   y: 69
-- id: 3
-  label: CornerSelected
-  x: 359
-  y: 682
-- id: 4
+- id: 5
   label: Selected1
   x: 839
   y: 640
-- id: 5
+- id: 6
   label: Selected3
   x: 1528
   y: 360
-- id: 6
+- id: 7
   label: Move
   x: 1297
   y: 786
-- id: 9
+- id: 8
   label: Selected2
   x: 1179
   y: 435
 - id: 10
-  label: Placing
-  x: 410
-  y: 295
-- id: 7
   label: Ready
   x: 733
   y: 304
-- id: 8
+- id: 11
   label: EditLabel
   x: 1130
   y: 112
+- id: 4
+  label: CornerSelected
+  x: 526
+  y: 554
+- id: 9
+  label: Placing
+  x: 299
+  y: 300
 transitions:
 - from_state: CornerSelected
   label: onMouseMove
