@@ -281,14 +281,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.site_controller.delegate_channel = new fsm.Channel($scope.site_controller,
                                                                $scope.rack_controller,
                                                                $scope);
-  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
-                                                               $scope.site_controller,
-                                                               $scope);
-  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
-                                                            $scope.buttons_controller,
-                                                            $scope);
   $scope.app_toolbox_controller.delegate_channel = new fsm.Channel($scope.app_toolbox_controller,
-                                                            $scope.time_controller,
+                                                            $scope.site_controller,
                                                             $scope);
   $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
                                                             $scope.app_toolbox_controller,
@@ -299,8 +293,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.site_toolbox_controller.delegate_channel = new fsm.Channel($scope.site_toolbox_controller,
                                                             $scope.rack_toolbox_controller,
                                                             $scope);
+  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
+                                                               $scope.site_toolbox_controller,
+                                                               $scope);
+  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+                                                            $scope.buttons_controller,
+                                                            $scope);
   $scope.mode_controller.delegate_channel = new fsm.Channel($scope.mode_controller,
-                                                            $scope.site_toolbox_controller,
+                                                            $scope.time_controller,
                                                             $scope);
 
   $scope.first_channel = new fsm.Channel(null,
