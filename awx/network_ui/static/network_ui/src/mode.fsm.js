@@ -68,8 +68,12 @@ _State.prototype.start = function (controller) {
 
 _Start.prototype.start = function (controller) {
 
-    controller.changeState(Rack);
+    controller.scope.app_toolbox_controller.handle_message('Disable', {});
+    controller.scope.inventory_toolbox_controller.handle_message('Disable', {});
+    controller.scope.rack_toolbox_controller.handle_message('Disable', {});
+    controller.scope.site_toolbox_controller.handle_message('Disable', {});
 
+    controller.changeState(Rack);
 };
 _Start.prototype.start.transitions = ['MultiSite'];
 
