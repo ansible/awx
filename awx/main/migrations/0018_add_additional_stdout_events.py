@@ -78,4 +78,8 @@ class Migration(migrations.Migration):
                 'ordering': ('-pk',),
             },
         ),
+        migrations.RemoveField(
+            model_name='unifiedjob',
+            name='result_stdout_file',
+        ),
     ]

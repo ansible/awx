@@ -614,14 +614,12 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 class UnifiedJobSerializer(BaseSerializer):
     show_capabilities = ['start', 'delete']
 
-    result_stdout = serializers.SerializerMethodField()
-
     class Meta:
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
-                  'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'execution_node', 'result_traceback')
+                  'job_cwd', 'job_env', 'job_explanation', 'execution_node',
+                  'result_traceback')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
@@ -702,25 +700,17 @@ class UnifiedJobSerializer(BaseSerializer):
 
         return ret
 
-    def get_result_stdout(self, obj):
-        obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return _("Standard Output too large to display (%(text_size)d bytes), "
-                     "only download supported for sizes over %(supported_size)d bytes") % {
-                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
-        return obj.result_stdout
-
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     class Meta:
-        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-result_stdout')
+        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback')
 
     def get_field_names(self, declared_fields, info):
         field_names = super(UnifiedJobListSerializer, self).get_field_names(declared_fields, info)
         # Meta multiple inheritance and -field_name options don't seem to be
         # taking effect above, so remove the undesired fields here.
-        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'result_stdout'))
+        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback'))
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
@@ -759,14 +749,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     class Meta:
         fields = ('result_stdout',)
-
-    def get_result_stdout(self, obj):
-        obj_size = obj.result_stdout_size
-        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return _("Standard Output too large to display (%(text_size)d bytes), "
-                     "only download supported for sizes over %(supported_size)d bytes") % {
-                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
-        return obj.result_stdout
 
     def get_types(self):
         if type(self) is UnifiedJobStdoutSerializer:
@@ -2966,9 +2948,11 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
 class SystemJobSerializer(UnifiedJobSerializer):
 
+    result_stdout = serializers.SerializerMethodField()
+
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type', 'extra_vars')
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'result_stdout')
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
@@ -2979,6 +2963,9 @@ class SystemJobSerializer(UnifiedJobSerializer):
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:system_job_cancel', kwargs={'pk': obj.pk})
         return res
+
+    def get_result_stdout(self, obj):
+        return obj.result_stdout
 
 
 class SystemJobCancelSerializer(SystemJobSerializer):

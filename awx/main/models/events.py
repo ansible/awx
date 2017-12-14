@@ -326,6 +326,44 @@ class BasePlaybookEvent(CreatedModifiedModel):
     def job_verbosity(self):
         return 0
 
+    def save(self, *args, **kwargs):
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
+        # Update model fields and related objects unless we're only updating
+        # failed/changed flags triggered from a child event.
+        from_parent_update = kwargs.pop('from_parent_update', False)
+        if not from_parent_update:
+            # Update model fields from event data.
+            updated_fields = self._update_from_event_data()
+            for field in updated_fields:
+                if field not in update_fields:
+                    update_fields.append(field)
+
+            # Update host related field from host_name.
+            if hasattr(self, 'job') and not self.host_id and self.host_name:
+                host_qs = self.job.inventory.hosts.filter(name=self.host_name)
+                host_id = host_qs.only('id').values_list('id', flat=True).first()
+                if host_id != self.host_id:
+                    self.host_id = host_id
+                    if 'host_id' not in update_fields:
+                        update_fields.append('host_id')
+        super(BasePlaybookEvent, self).save(*args, **kwargs)
+
+        # Update related objects after this event is saved.
+        if hasattr(self, 'job') and not from_parent_update:
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self._update_hosts()
+            if self.event == 'playbook_on_stats':
+                self._update_parents_failed_and_changed()
+
+                hostnames = self._hostnames()
+                self._update_host_summary_from_stats(hostnames)
+                self.job.inventory.update_computed_fields()
+
+                emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
+
+
 
 class JobEvent(BasePlaybookEvent):
     '''
@@ -465,41 +503,6 @@ class JobEvent(BasePlaybookEvent):
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
 
-    def save(self, *args, **kwargs):
-        # If update_fields has been specified, add our field names to it,
-        # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
-        # Update model fields and related objects unless we're only updating
-        # failed/changed flags triggered from a child event.
-        from_parent_update = kwargs.pop('from_parent_update', False)
-        if not from_parent_update:
-            # Update model fields from event data.
-            updated_fields = self._update_from_event_data()
-            for field in updated_fields:
-                if field not in update_fields:
-                    update_fields.append(field)
-            # Update host related field from host_name.
-            if not self.host_id and self.host_name:
-                host_qs = self.job.inventory.hosts.filter(name=self.host_name)
-                host_id = host_qs.only('id').values_list('id', flat=True).first()
-                if host_id != self.host_id:
-                    self.host_id = host_id
-                    if 'host_id' not in update_fields:
-                        update_fields.append('host_id')
-        super(JobEvent, self).save(*args, **kwargs)
-        # Update related objects after this event is saved.
-        if not from_parent_update:
-            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
-                self._update_hosts()
-            if self.event == 'playbook_on_stats':
-                self._update_parents_failed_and_changed()
-
-                hostnames = self._hostnames()
-                self._update_host_summary_from_stats(hostnames)
-                self.job.inventory.update_computed_fields()
-
-                emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
-
     @property
     def job_verbosity(self):
         return self.job.verbosity
@@ -602,7 +605,7 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 class AdHocCommandEvent(BaseCommandEvent):
 
-    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command', 'event']
+    VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event']
 
     class Meta:
         app_label = 'main'

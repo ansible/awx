@@ -845,25 +845,23 @@ class OutputEventFilter(object):
 
     EVENT_DATA_RE = re.compile(r'\x1b\[K((?:[A-Za-z0-9+/=]+\x1b\[\d+D)+)\x1b\[K')
 
-    def __init__(self, fileobj=None, event_callback=None, raw_callback=None):
-        self._fileobj = fileobj
+    def __init__(self, event_callback):
         self._event_callback = event_callback
         self._event_ct = 0
-        self._raw_callback = raw_callback
         self._counter = 1
         self._start_line = 0
         self._buffer = ''
         self._current_event_data = None
 
-    def __getattr__(self, attr):
-        return getattr(self._fileobj, attr)
+    def flush(self):
+        # pexpect wants to flush the file it writes to, but we're not
+        # actually capturing stdout to a raw file; we're just
+        # implementing a custom `write` method to discover and emit events from
+        # the stdout stream
+        pass
 
     def write(self, data):
-        if self._fileobj:
-            self._fileobj.write(data)
         self._buffer += data
-        if self._raw_callback:
-            self._raw_callback(data)
         while True:
             match = self.EVENT_DATA_RE.search(self._buffer)
             if not match:
@@ -877,8 +875,6 @@ class OutputEventFilter(object):
             self._buffer = self._buffer[match.end():]
 
     def close(self):
-        if self._fileobj:
-            self._fileobj.close()
         if self._buffer:
             self._emit_event(self._buffer)
             self._buffer = ''

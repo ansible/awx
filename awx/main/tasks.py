@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import codecs
 from collections import OrderedDict
 import ConfigParser
 import cStringIO
@@ -17,7 +16,6 @@ import tempfile
 import time
 import traceback
 import urlparse
-import uuid
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -735,17 +733,8 @@ class BaseTask(LogErrorsTask):
 
     def get_stdout_handle(self, instance):
         '''
-        Return an open file object for capturing stdout.
+        Return an virtual file object for capturing stdout and events.
         '''
-        if not os.path.exists(settings.JOBOUTPUT_ROOT):
-            os.makedirs(settings.JOBOUTPUT_ROOT)
-        stdout_filename = os.path.join(
-            settings.JOBOUTPUT_ROOT,
-            "%d-%s.out" % (instance.pk, str(uuid.uuid1()))
-        )
-        stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
-        assert stdout_handle.name == stdout_filename
-
         dispatcher = CallbackQueueDispatcher()
 
         def event_callback(event_data):
@@ -756,7 +745,7 @@ class BaseTask(LogErrorsTask):
                     event_data.update(cache_event)
             dispatcher.dispatch(event_data)
 
-        return OutputEventFilter(stdout_handle, event_callback)
+        return OutputEventFilter(event_callback)
 
     def pre_run_hook(self, instance, **kwargs):
         '''
@@ -838,10 +827,8 @@ class BaseTask(LogErrorsTask):
             if isolated_host is None:
                 stdout_handle = self.get_stdout_handle(instance)
             else:
-                base_handle = super(self.__class__, self).get_stdout_handle(instance)
-                stdout_handle = isolated_manager.IsolatedManager.wrap_stdout_handle(
-                    instance, kwargs['private_data_dir'], base_handle,
-                    event_data_key=self.event_data_key)
+                stdout_handle = isolated_manager.IsolatedManager.get_stdout_handle(
+                    instance, kwargs['private_data_dir'], event_data_key=self.event_data_key)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
                     raise RuntimeError('bubblewrap is not installed')
@@ -858,7 +845,7 @@ class BaseTask(LogErrorsTask):
                 args = run.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
                 safe_args = run.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_handle.name)
+                                         job_cwd=cwd, job_env=safe_env)
 
             expect_passwords = {}
             for k, v in self.get_password_prompts(**kwargs).items():

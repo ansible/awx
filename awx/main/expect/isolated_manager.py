@@ -445,7 +445,7 @@ class IsolatedManager(object):
                         instance.hostname, instance.modified))
 
     @staticmethod
-    def wrap_stdout_handle(instance, private_data_dir, stdout_handle, event_data_key='job_id'):
+    def get_stdout_handle(instance, private_data_dir, event_data_key='job_id'):
         dispatcher = CallbackQueueDispatcher()
 
         def job_event_callback(event_data):
@@ -463,7 +463,7 @@ class IsolatedManager(object):
                             event_data.get('event', ''), event_data['uuid'], instance.id, event_data))
             dispatcher.dispatch(event_data)
 
-        return OutputEventFilter(stdout_handle, job_event_callback)
+        return OutputEventFilter(job_event_callback)
 
     def run(self, instance, host, private_data_dir, proot_temp_dir):
         """

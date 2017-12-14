@@ -2,14 +2,13 @@
 # All Rights Reserved.
 
 # Python
-import codecs
 import json
 import logging
-import re
 import os
-import os.path
+import re
+import subprocess
+import tempfile
 from collections import OrderedDict
-from StringIO import StringIO
 
 # Django
 from django.conf import settings
@@ -42,7 +41,7 @@ from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import JSONField, AskForField
 
-__all__ = ['UnifiedJobTemplate', 'UnifiedJob']
+__all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
@@ -514,6 +513,13 @@ class UnifiedJobDeprecatedStdout(models.Model):
     )
 
 
+class StdoutMaxBytesExceeded(Exception):
+
+    def __init__(self, total, supported):
+        self.total = total
+        self.supported = supported
+
+
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
@@ -642,11 +648,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     ))
-    result_stdout_file = models.TextField( # FilePathfield?
-        blank=True,
-        default='',
-        editable=False,
-    )
     result_traceback = models.TextField(
         blank=True,
         default='',
@@ -822,14 +823,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # Done.
         return result
 
-    def delete(self):
-        if self.result_stdout_file != "":
-            try:
-                os.remove(self.result_stdout_file)
-            except Exception:
-                pass
-        super(UnifiedJob, self).delete()
-
     def copy_unified_job(self, limit=None):
         '''
         Returns saved object, including related fields.
@@ -912,36 +905,48 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         related.result_stdout_text = value
         related.save()
 
-    def result_stdout_raw_handle(self, attempt=0):
+    def result_stdout_raw_handle(self, enforce_max_bytes=True):
         """Return a file-like object containing the standard out of the
         job's result.
         """
-        msg = {
-            'pending': 'Waiting for results...',
-            'missing': 'stdout capture is missing',
-        }
-        if self.result_stdout_text:
-            return StringIO(self.result_stdout_text)
+        if not os.path.exists(settings.JOBOUTPUT_ROOT):
+            os.makedirs(settings.JOBOUTPUT_ROOT)
+        fd = tempfile.NamedTemporaryFile(
+            prefix='{}-{}-'.format(self.model_to_str(), self.pk),
+            suffix='.out',
+            dir=settings.JOBOUTPUT_ROOT
+        )
+        legacy_stdout_text = self.result_stdout_text
+        if legacy_stdout_text:
+            fd.write(legacy_stdout_text)
+            fd.flush()
         else:
-            if not os.path.exists(self.result_stdout_file) or os.stat(self.result_stdout_file).st_size < 1:
-                return StringIO(msg['missing' if self.finished else 'pending'])
+            with connection.cursor() as cursor:
+                tablename = self._meta.db_table
+                related_name = {
+                    'main_job': 'job_id',
+                    'main_adhoccommand': 'ad_hoc_command_id',
+                    'main_projectupdate': 'project_update_id',
+                    'main_inventoryupdate': 'inventory_update_id',
+                    'main_systemjob': 'system_job_id',
+                }[tablename]
+                cursor.copy_expert(
+                    "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
+                        tablename + 'event',
+                        related_name,
+                        self.id
+                    ),
+                    fd
+                )
+                fd.flush()
+            subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(fd.name), shell=True).wait()
 
-            # There is a potential timing issue here, because another
-            # process may be deleting the stdout file after it is written
-            # to the database.
-            #
-            # Therefore, if we get an IOError (which generally means the
-            # file does not exist), reload info from the database and
-            # try again.
-            try:
-                return codecs.open(self.result_stdout_file, "r",
-                                   encoding='utf-8')
-            except IOError:
-                if attempt < 3:
-                    self.result_stdout_text = type(self).objects.get(id=self.id).result_stdout_text
-                    return self.result_stdout_raw_handle(attempt=attempt + 1)
-                else:
-                    return StringIO(msg['missing' if self.finished else 'pending'])
+        if enforce_max_bytes:
+            total_size = os.stat(fd.name).st_size
+            max_supported = settings.STDOUT_MAX_BYTES_DISPLAY
+            if total_size > max_supported:
+                raise StdoutMaxBytesExceeded(total_size, max_supported)
+        return open(fd.name, 'r')
 
     def _escape_ascii(self, content):
         # Remove ANSI escape sequences used to embed event data.
@@ -965,13 +970,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def result_stdout(self):
         return self._result_stdout_raw(escape_ascii=True)
-
-    @property
-    def result_stdout_size(self):
-        try:
-            return os.stat(self.result_stdout_file).st_size
-        except Exception:
-            return len(self.result_stdout)
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
