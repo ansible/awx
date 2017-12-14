@@ -29,17 +29,7 @@
     "lint": "eslint .",
     "dev": "webpack --config build/webpack.development.js --progress",
     "watch": "webpack-dev-server --config build/webpack.watch.js --progress",
-    "production": "webpack --config build/webpack.production.js",
-    "component-test": "./node_modules/.bin/karma start client/test/karma.conf.js",
-    "lint-dev": "./node_modules/.bin/nodemon --exec \"./node_modules/.bin/eslint -c .eslintrc.js .\" --watch \"client/components/**/*.js\"",
-    "component-dev": "./node_modules/.bin/karma start client/test/karma.conf.js --auto-watch --no-single-run"
-  },
-  "optionalDependencies": {
-    "fsevents": "*",
-    "browser-sync": "^2.14.0",
-    "grunt-browser-sync": "^2.2.0",
-    "grunt-contrib-watch": "^1.0.0",
-    "webpack-dev-server": "^1.14.1"
+    "production": "webpack --config build/webpack.production.js"
   },
   "devDependencies": {
     "angular-mocks": "~1.6.6",
