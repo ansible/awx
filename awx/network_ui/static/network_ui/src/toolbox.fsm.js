@@ -196,7 +196,7 @@ _Ready.prototype.onMouseWheel.transitions = ['Scrolling'];
 _Ready.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
     controller.changeState(OffScreen);
-    controller.next_controller.handle_message(msg_type, message);
+    controller.delegate_channel.send(msg_type, message);
 
 };
 _Ready.prototype.onToggleToolbox.transitions = ['OffScreen'];
@@ -256,7 +256,7 @@ _Move.prototype.onMouseMove = function (controller) {
 _OffScreen.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
     controller.changeState(Ready);
-    controller.next_controller.handle_message(msg_type, message);
+    controller.delegate_channel.send(msg_type, message);
 
 };
 _OffScreen.prototype.onToggleToolbox.transitions = ['Ready'];
@@ -298,7 +298,7 @@ _OffScreen2.prototype.start = function (controller) {
 _OffScreen2.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
     controller.changeState(Disabled);
-    controller.next_controller.handle_message(msg_type, message);
+    controller.delegate_channel.send(msg_type, message);
 };
 _OffScreen2.prototype.onToggleToolbox.transitions = ['Disabled'];
 
@@ -327,6 +327,6 @@ _Disabled.prototype.end = function (controller) {
 _Disabled.prototype.onToggleToolbox = function (controller, msg_type, message) {
 
     controller.changeState(OffScreen2);
-    controller.next_controller.handle_message(msg_type, message);
+    controller.delegate_channel.send(msg_type, message);
 };
 _Disabled.prototype.onToggleToolbox.transitions = ['OffScreen2'];

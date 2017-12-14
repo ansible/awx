@@ -289,7 +289,7 @@ Link.prototype.plength = function (x, y) {
     return util.pDistance(x, y, x1, y1, x2, y2);
 };
 
-function ActionIcon(name, x, y, r, callback, enabled) {
+function ActionIcon(name, x, y, r, callback, enabled, tracer) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -298,7 +298,7 @@ function ActionIcon(name, x, y, r, callback, enabled) {
     this.is_pressed = false;
     this.mouse_over = false;
     this.enabled = enabled;
-    this.fsm = new fsm.FSMController(this, enabled ? button.Start : button.Disabled, null, name+'button_fsm');
+    this.fsm = new fsm.FSMController(this, "button_fsm", enabled ? button.Start : button.Disabled, tracer);
 }
 exports.ActionIcon = ActionIcon;
 
@@ -348,12 +348,8 @@ function ToggleButton(name, x, y, width, height, toggle_callback, untoggle_callb
     this.toggle_callback = toggle_callback;
     this.untoggle_callback = untoggle_callback;
     this.mouse_over = false;
-<<<<<<< HEAD
     this.enabled = true;
-    this.fsm = new fsm.FSMController(this, button.Start, null, name+'toggle_button_fsm');
-=======
     this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
->>>>>>> ba91f21e7... Adds channels between FSMs
 }
 inherits(ToggleButton, Button);
 exports.ToggleButton = ToggleButton;
