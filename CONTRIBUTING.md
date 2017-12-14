@@ -217,7 +217,7 @@ If you want to start and use the development environment, you'll first need to b
 (container)# /bootstrap_development.sh
 ```
 
-The above will do all the setup tasks, including running database migrations, so it amy take a couple minutes.
+The above will do all the setup tasks, including running database migrations, so it may take a couple minutes.
     
 Now you can start each service individually, or start all services in a pre-configured tmux session like so:
 
@@ -293,7 +293,7 @@ Fixing bugs, adding translations, and updating the documentation are always appr
 
 ## Submitting Pull Requests
 
-Fixes and Features for AWX will go through the Github pull request process. Submit your pull request (PR) agains the `devel` branch.
+Fixes and Features for AWX will go through the Github pull request process. Submit your pull request (PR) against the `devel` branch.
 
 Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
@@ -312,7 +312,7 @@ It's generally a good idea to discuss features with us first by engaging us in t
 We like to keep our commit history clean, and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase`, rather than
 `git pull`, and `git rebase`, rather than `git merge`.
 
-Sometimes it might take us a while to fully review your PR. We try to keep the `devel` branch in good working order, and so we review requests carefuly. Please be patient.
+Sometimes it might take us a while to fully review your PR. We try to keep the `devel` branch in good working order, and so we review requests carefully. Please be patient.
 
 All submitted PRs will have the linter and unit tests run against them, and the status reported in the PR.
 
