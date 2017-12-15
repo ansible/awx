@@ -10,6 +10,7 @@ from awx.api.views import (
     ProjectUpdateStdout,
     ProjectUpdateScmInventoryUpdates,
     ProjectUpdateNotificationsList,
+    ProjectUpdateEventsList,
 )
 
 
@@ -20,6 +21,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/stdout/$', ProjectUpdateStdout.as_view(), name='project_update_stdout'),
     url(r'^(?P<pk>[0-9]+)/scm_inventory_updates/$', ProjectUpdateScmInventoryUpdates.as_view(), name='project_update_scm_inventory_updates'),
     url(r'^(?P<pk>[0-9]+)/notifications/$', ProjectUpdateNotificationsList.as_view(), name='project_update_notifications_list'),
+    url(r'^(?P<pk>[0-9]+)/events/$', ProjectUpdateEventsList.as_view(), name='project_update_events_list'),
 ]
 
 __all__ = ['urls']

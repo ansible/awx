@@ -1105,6 +1105,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
             cancel = self.reverse('api:project_update_cancel', kwargs={'pk': obj.pk}),
             scm_inventory_updates = self.reverse('api:project_update_scm_inventory_updates', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:project_update_notifications_list', kwargs={'pk': obj.pk}),
+            events = self.reverse('api:project_update_events_list', kwargs={'pk': obj.pk}),
         ))
         return res
 
@@ -1726,6 +1727,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         res.update(dict(
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
+            events = self.reverse('api:inventory_update_events_list', kwargs={'pk': obj.pk}),
         ))
         if obj.source_project_update_id:
             res['source_project_update'] = self.reverse('api:project_update_detail',
@@ -2962,6 +2964,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
             res['notifications'] = self.reverse('api:system_job_notifications_list', kwargs={'pk': obj.pk})
         if obj.can_cancel or True:
             res['cancel'] = self.reverse('api:system_job_cancel', kwargs={'pk': obj.pk})
+        res['events'] = self.reverse('api:system_job_events_list', kwargs={'pk': obj.pk})
         return res
 
     def get_result_stdout(self, obj):
@@ -3415,6 +3418,41 @@ class JobEventWebSocketSerializer(JobEventSerializer):
         return 'job_events'
 
 
+class ProjectUpdateEventSerializer(JobEventSerializer):
+
+    class Meta:
+        model = ProjectUpdateEvent
+        fields = ('*', '-name', '-description', '-job', '-job_id',
+                  '-parent_uuid', '-parent', '-host', 'project_update')
+
+    def get_related(self, obj):
+        res = super(JobEventSerializer, self).get_related(obj)
+        res['project_update'] = self.reverse(
+            'api:project_update_detail', kwargs={'pk': obj.project_update_id}
+        )
+        return res
+
+
+class ProjectUpdateEventWebSocketSerializer(ProjectUpdateEventSerializer):
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    event_name = serializers.CharField(source='event')
+    group_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProjectUpdateEvent
+        fields = ('*', 'event_name', 'group_name',)
+
+    def get_created(self, obj):
+        return obj.created.isoformat()
+
+    def get_modified(self, obj):
+        return obj.modified.isoformat()
+
+    def get_group_name(self, obj):
+        return 'project_update_events'
+
+
 class AdHocCommandEventSerializer(BaseSerializer):
 
     event_display = serializers.CharField(source='get_event_display', read_only=True)
@@ -3472,6 +3510,76 @@ class AdHocCommandEventWebSocketSerializer(AdHocCommandEventSerializer):
 
     def get_group_name(self, obj):
         return 'ad_hoc_command_events'
+
+
+class InventoryUpdateEventSerializer(AdHocCommandEventSerializer):
+
+    class Meta:
+        model = InventoryUpdateEvent
+        fields = ('*', '-name', '-description', '-ad_hoc_command', '-host',
+                  '-host_name', 'inventory_update')
+
+    def get_related(self, obj):
+        res = super(AdHocCommandEventSerializer, self).get_related(obj)
+        res['inventory_update'] = self.reverse(
+            'api:inventory_update_detail', kwargs={'pk': obj.inventory_update_id}
+        )
+        return res
+
+
+class InventoryUpdateEventWebSocketSerializer(InventoryUpdateEventSerializer):
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    event_name = serializers.CharField(source='event')
+    group_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InventoryUpdateEvent
+        fields = ('*', 'event_name', 'group_name',)
+
+    def get_created(self, obj):
+        return obj.created.isoformat()
+
+    def get_modified(self, obj):
+        return obj.modified.isoformat()
+
+    def get_group_name(self, obj):
+        return 'inventory_update_events'
+
+
+class SystemJobEventSerializer(AdHocCommandEventSerializer):
+
+    class Meta:
+        model = SystemJobEvent
+        fields = ('*', '-name', '-description', '-ad_hoc_command', '-host',
+                  '-host_name', 'system_job')
+
+    def get_related(self, obj):
+        res = super(AdHocCommandEventSerializer, self).get_related(obj)
+        res['system_job'] = self.reverse(
+            'api:system_job_detail', kwargs={'pk': obj.system_job_id}
+        )
+        return res
+
+
+class SystemJobEventWebSocketSerializer(SystemJobEventSerializer):
+    created = serializers.SerializerMethodField()
+    modified = serializers.SerializerMethodField()
+    event_name = serializers.CharField(source='event')
+    group_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SystemJobEvent
+        fields = ('*', 'event_name', 'group_name',)
+
+    def get_created(self, obj):
+        return obj.created.isoformat()
+
+    def get_modified(self, obj):
+        return obj.modified.isoformat()
+
+    def get_group_name(self, obj):
+        return 'system_job_events'
 
 
 class JobLaunchSerializer(BaseSerializer):

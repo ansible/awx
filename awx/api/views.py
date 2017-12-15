@@ -1366,6 +1366,45 @@ class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     new_in_13 = True
 
 
+class ProjectUpdateEventsList(SubListAPIView):
+
+    model = ProjectUpdateEvent
+    serializer_class = ProjectUpdateEventSerializer
+    parent_model = ProjectUpdate
+    relationship = 'project_update_events'
+    view_name = _('Project Update Events List')
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        return super(ProjectUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
+
+
+class SystemJobEventsList(SubListAPIView):
+
+    model = SystemJobEvent
+    serializer_class = SystemJobEventSerializer
+    parent_model = SystemJob
+    relationship = 'system_job_events'
+    view_name = _('System Job Events List')
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
+
+
+class InventoryUpdateEventsList(SubListAPIView):
+
+    model = InventoryUpdateEvent
+    serializer_class = InventoryUpdateEventSerializer
+    parent_model = InventoryUpdate
+    relationship = 'inventory_update_events'
+    view_name = _('Inventory Update Events List')
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        return super(InventoryUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
+
+
 class ProjectUpdateCancel(RetrieveAPIView):
 
     model = ProjectUpdate

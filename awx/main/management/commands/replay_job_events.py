@@ -12,11 +12,17 @@ from awx.main.models import (
     UnifiedJob,
     Job,
     AdHocCommand,
+    ProjectUpdate,
+    InventoryUpdate,
+    SystemJob
 )
 from awx.main.consumers import emit_channel_notification
 from awx.api.serializers import (
     JobEventWebSocketSerializer,
     AdHocCommandEventWebSocketSerializer,
+    ProjectUpdateEventWebSocketSerializer,
+    InventoryUpdateEventWebSocketSerializer,
+    SystemJobEventWebSocketSerializer
 )
 
 
@@ -60,7 +66,16 @@ class ReplayJobEvents():
         return self.replay_elapsed().total_seconds() - (self.recording_elapsed(created).total_seconds() * (1.0 / speed))
 
     def get_job_events(self, job):
-        job_events = job.job_events.order_by('created')
+        if type(job) is Job:
+            job_events = job.job_events.order_by('created')
+        elif type(job) is AdHocCommand:
+            job_events = job.ad_hoc_command_events.order_by('created')
+        elif type(job) is ProjectUpdate:
+            job_events = job.project_update_events.order_by('created')
+        elif type(job) is InventoryUpdate:
+            job_events = job.inventory_update_events.order_by('created')
+        elif type(job) is SystemJob:
+            job_events = job.system_job_events.order_by('created')
         if job_events.count() == 0:
             raise RuntimeError("No events for job id {}".format(job.id))
         return job_events
@@ -70,6 +85,12 @@ class ReplayJobEvents():
             return JobEventWebSocketSerializer
         elif type(job) is AdHocCommand:
             return AdHocCommandEventWebSocketSerializer
+        elif type(job) is ProjectUpdate:
+            return ProjectUpdateEventWebSocketSerializer
+        elif type(job) is InventoryUpdate:
+            return InventoryUpdateEventWebSocketSerializer
+        elif type(job) is SystemJob:
+            return SystemJobEventWebSocketSerializer
         else:
             raise RuntimeError("Job is of type {} and replay is not yet supported.".format(type(job)))
             sys.exit(1)

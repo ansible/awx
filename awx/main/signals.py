@@ -24,7 +24,7 @@ from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_gr
 from awx.main.tasks import update_inventory_computed_fields
 from awx.main.fields import is_implicit_parent
 
-from awx.main.consumers import emit_channel_notification
+from awx.main import consumers
 
 from awx.conf.utils import conf_to_dict
 
@@ -48,7 +48,7 @@ def emit_job_event_detail(sender, **kwargs):
     created = kwargs['created']
     if created:
         event_serialized = JobEventWebSocketSerializer(instance).data
-        emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
+        consumers.emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
 
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
@@ -56,7 +56,31 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
     created = kwargs['created']
     if created:
         event_serialized = AdHocCommandEventWebSocketSerializer(instance).data
-        emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+        consumers.emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+
+
+def emit_project_update_event_detail(sender, **kwargs):
+    instance = kwargs['instance']
+    created = kwargs['created']
+    if created:
+        event_serialized = ProjectUpdateEventWebSocketSerializer(instance).data
+        consumers.emit_channel_notification('project_update_events-' + str(instance.project_update_id), event_serialized)
+
+
+def emit_inventory_update_event_detail(sender, **kwargs):
+    instance = kwargs['instance']
+    created = kwargs['created']
+    if created:
+        event_serialized = InventoryUpdateEventWebSocketSerializer(instance).data
+        consumers.emit_channel_notification('inventory_update_events-' + str(instance.inventory_update_id), event_serialized)
+
+
+def emit_system_job_event_detail(sender, **kwargs):
+    instance = kwargs['instance']
+    created = kwargs['created']
+    if created:
+        event_serialized = SystemJobEventWebSocketSerializer(instance).data
+        consumers.emit_channel_notification('system_job_events-' + str(instance.system_job_id), event_serialized)
 
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
@@ -222,6 +246,9 @@ connect_computed_field_signals()
 
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
+post_save.connect(emit_project_update_event_detail, sender=ProjectUpdateEvent)
+post_save.connect(emit_inventory_update_event_detail, sender=InventoryUpdateEvent)
+post_save.connect(emit_system_job_event_detail, sender=SystemJobEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
