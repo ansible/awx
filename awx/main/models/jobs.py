@@ -355,7 +355,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         rejected_data = {}
         accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
             kwargs.get('extra_vars', {}),
-            _exclude_errors=exclude_errors)
+            _exclude_errors=exclude_errors,
+            extra_passwords=kwargs.get('survey_passwords', {}))
         if accepted_vars:
             prompted_data['extra_vars'] = accepted_vars
         if rejected_vars:

@@ -3137,7 +3137,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             raise serializers.ValidationError(errors)
 
         # Model `.save` needs the container dict, not the psuedo fields
-        attrs['char_prompts'] = mock_obj.char_prompts
+        if mock_obj.char_prompts:
+            attrs['char_prompts'] = mock_obj.char_prompts
 
         # Insert survey_passwords to track redacted variables
         if 'extra_data' in attrs:

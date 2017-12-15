@@ -253,7 +253,7 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                    choice_list))
         return errors
 
-    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
+    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
         survey_is_enabled = (self.survey_enabled and self.survey_spec)
         extra_vars = data.copy()
         if errors is None:
@@ -265,8 +265,13 @@ class SurveyJobTemplateMixin(models.Model):
             # Check for data violation of survey rules
             survey_errors = []
             for survey_element in self.survey_spec.get("spec", []):
-                element_errors = self._survey_element_validation(survey_element, data)
                 key = survey_element.get('variable', None)
+                if extra_passwords and key in extra_passwords and data.get(key, None):
+                    element_errors = self._survey_element_validation(survey_element, {
+                        key: decrypt_value(get_encryption_key('value', pk=None), data[key])
+                    })
+                else:
+                    element_errors = self._survey_element_validation(survey_element, data)
 
                 if element_errors:
                     survey_errors += element_errors

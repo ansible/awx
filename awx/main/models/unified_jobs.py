@@ -441,7 +441,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 errors[field_name] = [_("Field is not allowed on launch.")]
         return ({}, kwargs, errors)
 
-    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
+    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
         '''
         If subclasses accept any `variables` or `extra_vars`, they should
         define _accept_or_ignore_variables to place those variables in the accepted dict,
@@ -459,7 +459,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             # SurveyJobTemplateMixin cannot override any methods because of
             # resolution order, forced by how metaclass processes fields,
             # thus the need for hasattr check
-            return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
+            if extra_passwords:
+                return self._accept_or_ignore_variables(
+                    data, errors, _exclude_errors=_exclude_errors, extra_passwords=extra_passwords)
+            else:
+                return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
         elif data:
             errors['extra_vars'] = [
                 _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(
