@@ -519,6 +519,9 @@ def _request(verb):
 
         view, view_args, view_kwargs = resolve(urlparse(url)[2])
         request = getattr(APIRequestFactory(), verb)(url, **kwargs)
+        if isinstance(kwargs.get('cookies', None), dict):
+            for key, value in kwargs['cookies'].items():
+                request.COOKIES[key] = value
         if middleware:
             middleware.process_request(request)
         if user:
@@ -529,7 +532,7 @@ def _request(verb):
             middleware.process_response(request, response)
         if expect:
             if response.status_code != expect:
-                if response.data is not None:
+                if getattr(response, 'data', None):
                     try:
                         data_copy = response.data.copy()
                         # Make translated strings printable
@@ -542,9 +545,9 @@ def _request(verb):
                                 response.data[key] = str(value)
                     except Exception:
                         response.data = data_copy
-                print(response.data)
             assert response.status_code == expect
-        response.render()
+        if response.status_code // 100 != 3:
+            response.render()
         return response
     return rf
 

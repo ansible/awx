@@ -1,16 +1,10 @@
 import json
 import logging
-import urllib
 
-from channels import Group, channel_layers
-from channels.sessions import channel_session
-from channels.handler import AsgiRequest
+from channels import Group
+from channels.auth import channel_session_user_from_http, channel_session_user
 
-from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
-
-from django.contrib.auth.models import User
-from awx.main.models.organization import AuthToken
 
 
 logger = logging.getLogger('awx.main.consumers')
@@ -22,51 +16,29 @@ def discard_groups(message):
             Group(group).discard(message.reply_channel)
 
 
-@channel_session
+@channel_session_user_from_http
 def ws_connect(message):
     message.reply_channel.send({"accept": True})
-
     message.content['method'] = 'FAKE'
-    request = AsgiRequest(message)
-    token = request.COOKIES.get('token', None)
-    if token is not None:
-        token = urllib.unquote(token).strip('"')
-        try:
-            auth_token = AuthToken.objects.get(key=token)
-            if auth_token.in_valid_tokens:
-                message.channel_session['user_id'] = auth_token.user_id
-                message.reply_channel.send({"text": json.dumps({"accept": True, "user": auth_token.user_id})})
-                return None
-        except AuthToken.DoesNotExist:
-            logger.error("auth_token provided was invalid.")
-    message.reply_channel.send({"close": True})
+    if message.user.is_authenticated():
+        message.reply_channel.send(
+            {"text": json.dumps({"accept": True, "user": message.user.id})}
+        )
+    else:
+        logger.error("Request user is not authenticated to use websocket.")
+        message.reply_channel.send({"close": True})
     return None
 
 
-@channel_session
+@channel_session_user
 def ws_disconnect(message):
     discard_groups(message)
 
 
-@channel_session
+@channel_session_user
 def ws_receive(message):
     from awx.main.access import consumer_access
-    channel_layer_settings = channel_layers.configs[message.channel_layer.alias]
-    max_retries = channel_layer_settings.get('RECEIVE_MAX_RETRY', settings.CHANNEL_LAYER_RECEIVE_MAX_RETRY)
-
-    user_id = message.channel_session.get('user_id', None)
-    if user_id is None:
-        retries = message.content.get('connect_retries', 0) + 1
-        message.content['connect_retries'] = retries
-        message.reply_channel.send({"text": json.dumps({"error": "no valid user"})})
-        retries_left = max_retries - retries
-        if retries_left > 0:
-            message.channel_layer.send(message.channel.name, message.content)
-        else:
-            logger.error("No valid user found for websocket.")
-        return None
-
-    user = User.objects.get(pk=user_id)
+    user = message.user
     raw_data = message.content['text']
     data = json.loads(raw_data)
 

@@ -137,3 +137,12 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         if not settings.AUTH_BASIC_ENABLED:
             return
         return super(LoggedBasicAuthentication, self).authenticate_header(request)
+
+
+class SessionAuthentication(authentication.SessionAuthentication):
+
+    def authenticate_header(self, request):
+        return 'Session'
+
+    def enforce_csrf(self, request):
+        return None

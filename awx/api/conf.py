@@ -24,7 +24,24 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
 )
-
+register(
+    'SESSION_COOKIE_AGE',
+    field_class=fields.IntegerField,
+    min_value=60,
+    label=_('Idle Time Force Log Out'),
+    help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+register(
+    'SESSIONS_PER_USER',
+    field_class=fields.IntegerField,
+    min_value=-1,
+    label=_('Maximum number of simultaneous logged in sessions'),
+    help_text=_('Maximum number of simultaneous logged in sessions a user may have. To disable enter -1.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
 register(
     'AUTH_BASIC_ENABLED',
     field_class=fields.BooleanField,
