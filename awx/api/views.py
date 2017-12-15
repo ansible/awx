@@ -4566,7 +4566,6 @@ class UnifiedJobStdout(RetrieveAPIView):
                         renderers.JSONRenderer, DownloadTextRenderer, AnsiDownloadRenderer]
     filter_backends = ()
     new_in_148 = True
-    deprecated = True
 
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
