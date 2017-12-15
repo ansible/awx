@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from cStringIO import StringIO
 import json
 import logging
 import os
@@ -906,21 +907,59 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         related.save()
 
     def result_stdout_raw_handle(self, enforce_max_bytes=True):
-        """Return a file-like object containing the standard out of the
-        job's result.
         """
-        if not os.path.exists(settings.JOBOUTPUT_ROOT):
-            os.makedirs(settings.JOBOUTPUT_ROOT)
-        fd = tempfile.NamedTemporaryFile(
-            prefix='{}-{}-'.format(self.model_to_str(), self.pk),
-            suffix='.out',
-            dir=settings.JOBOUTPUT_ROOT
-        )
+        This method returns a file-like object ready to be read which contains
+        all stdout for the UnifiedJob.
+
+        If the size of the file is greater than
+        `settings.STDOUT_MAX_BYTES_DISPLAY`, a StdoutMaxBytesExceeded exception
+        will be raised.
+        """
+        max_supported = settings.STDOUT_MAX_BYTES_DISPLAY
+
+        if enforce_max_bytes:
+            # If enforce_max_bytes is True, we're not grabbing the whole file,
+            # just the first <settings.STDOUT_MAX_BYTES_DISPLAY> bytes;
+            # in this scenario, it's probably safe to use a StringIO.
+            fd = StringIO()
+        else:
+            # If enforce_max_bytes = False, that means they're downloading
+            # the entire file.  To avoid ballooning memory, let's write the
+            # stdout content to a temporary disk location
+            if not os.path.exists(settings.JOBOUTPUT_ROOT):
+                os.makedirs(settings.JOBOUTPUT_ROOT)
+            fd = tempfile.NamedTemporaryFile(
+                prefix='{}-{}-'.format(self.model_to_str(), self.pk),
+                suffix='.out',
+                dir=settings.JOBOUTPUT_ROOT
+            )
+
+        # Before the addition of event-based stdout, older versions of
+        # awx stored stdout as raw text blobs in a certain database column
+        # (`main_unifiedjob.result_stdout_text`)
+        # For older installs, this data still exists in the database; check for
+        # it and use if it exists
         legacy_stdout_text = self.result_stdout_text
         if legacy_stdout_text:
+            if enforce_max_bytes and len(legacy_stdout_text) > max_supported:
+                raise StdoutMaxBytesExceeded(len(legacy_stdout_text), max_supported)
             fd.write(legacy_stdout_text)
-            fd.flush()
+            if hasattr(fd, 'name'):
+                fd.flush()
+                return open(fd.name, 'r')
+            else:
+                # we just wrote to this StringIO, so rewind it
+                fd.seek(0)
+                return fd
         else:
+            # Note: the code in this block _intentionally_ does not use the
+            # Django ORM because of the potential size (many MB+) of
+            # `main_jobevent.stdout`; we *do not* want to generate queries
+            # here that construct model objects by fetching large gobs of
+            # data (and potentially ballooning memory usage); instead, we
+            # just want to write concatenated values of a certain column
+            # (`stdout`) directly to a file
+
             with connection.cursor() as cursor:
                 tablename = self._meta.db_table
                 related_name = {
@@ -930,6 +969,22 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     'main_inventoryupdate': 'inventory_update_id',
                     'main_systemjob': 'system_job_id',
                 }[tablename]
+
+                if enforce_max_bytes:
+                    # detect the length of all stdout for this UnifiedJob, and
+                    # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
+                    # don't bother actually fetching the data
+                    cursor.execute(
+                        "select sum(length(stdout)) from {} where {}={}".format(
+                            tablename + 'event',
+                            related_name,
+                            self.id
+                        )
+                    )
+                    total_bytes = cursor.fetchone()[0]
+                    if total_bytes > max_supported:
+                        raise StdoutMaxBytesExceeded(total_bytes, max_supported)
+
                 cursor.copy_expert(
                     "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
                         tablename + 'event',
@@ -938,15 +993,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     ),
                     fd
                 )
-                fd.flush()
-            subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(fd.name), shell=True).wait()
 
-        if enforce_max_bytes:
-            total_size = os.stat(fd.name).st_size
-            max_supported = settings.STDOUT_MAX_BYTES_DISPLAY
-            if total_size > max_supported:
-                raise StdoutMaxBytesExceeded(total_size, max_supported)
-        return open(fd.name, 'r')
+                if hasattr(fd, 'name'):
+                    # If we're dealing with a physical file, use `sed` to clean
+                    # up escaped line sequences
+                    fd.flush()
+                    subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(fd.name), shell=True).wait()
+                    return open(fd.name, 'r')
+                else:
+                    # If we're dealing with an in-memory string buffer, use
+                    # string.replace()
+                    fd = StringIO(fd.getvalue().replace('\\r\\n', '\n'))
+                    return fd
 
     def _escape_ascii(self, content):
         # Remove ANSI escape sequences used to embed event data.

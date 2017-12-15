@@ -4624,7 +4624,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
         except StdoutMaxBytesExceeded as e:
             response_message = _(
-                "Standard Output too large to display {text_size} bytes), "
+                "Standard Output too large to display ({text_size} bytes), "
                 "only download supported for sizes over {supported_size} bytes").format(
                     text_size=e.total, supported_size=e.supported
             )
