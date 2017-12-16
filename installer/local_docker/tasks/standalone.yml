@@ -1,0 +1,138 @@
+---
+- name: Activate postgres container
+  docker_container:
+    name: postgres
+    state: started
+    restart_policy: unless-stopped
+    image: postgres:9.6
+    volumes:
+      - "{{ postgres_data_dir }}:/var/lib/postgresql/data:Z"
+    env:
+      POSTGRES_USER: "{{ pg_username }}"
+      POSTGRES_PASSWORD: "{{ pg_password }}"
+      POSTGRES_DB: "{{ pg_database }}"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+  when: pg_hostname is not defined or pg_hostname == ''
+  register: postgres_container_activate
+
+- name: Activate rabbitmq container
+  docker_container:
+    name: rabbitmq
+    state: started
+    restart_policy: unless-stopped
+    image: rabbitmq:3
+    env:
+      RABBITMQ_DEFAULT_VHOST: "awx"
+  register: rabbitmq_container_activate
+
+- name: Activate memcached container
+  docker_container:
+    name: memcached
+    state: started
+    restart_policy: unless-stopped
+    image: memcached:alpine
+
+- name: Wait for postgres and rabbitmq to activate
+  pause:
+    seconds: 15
+  when: postgres_container_activate.changed or rabbitmq_container_activate.changed
+
+- name: Set properties without postgres for awx_web
+  set_fact:
+    pg_hostname_actual: "{{ pg_hostname }}"
+    awx_web_container_links:
+      - rabbitmq
+      - memcached
+  when: pg_hostname is defined
+
+- name: Set properties with postgres for awx_web
+  set_fact:
+    pg_hostname_actual: postgres
+    awx_web_container_links:
+      - rabbitmq
+      - memcached
+      - postgres
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Set properties without postgres for awx_task
+  set_fact:
+    pg_hostname_actual: "{{ pg_hostname }}"
+    awx_task_container_links:
+      - rabbitmq
+      - memcached
+      - awx_web:awxweb
+  when: pg_hostname is defined
+
+- name: Set properties with postgres for awx_task
+  set_fact:
+    pg_hostname_actual: postgres
+    awx_task_container_links:
+      - rabbitmq
+      - memcached
+      - awx_web:awxweb
+      - postgres
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Activate AWX Web Container
+  docker_container:
+    name: awx_web
+    state: started
+    restart_policy: unless-stopped
+    image: "{{ awx_web_docker_actual_image }}"
+    user: root
+    ports:
+      - "{{ host_port }}:8052"
+    links: "{{ awx_web_container_links|list }}"
+    hostname: awxweb
+    dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
+    dns_servers: "{{ awx_alternate_dns_servers.split(',') if awx_alternate_dns_servers is defined else omit }}"
+    env:
+      http_proxy: "{{ http_proxy | default('') }}"
+      https_proxy: "{{ https_proxy | default('') }}"
+      no_proxy: "{{ no_proxy | default('') }}"
+      SECRET_KEY: "{{ awx_secret_key }}"
+      DATABASE_NAME: "{{ pg_database }}"
+      DATABASE_USER: "{{ pg_username }}"
+      DATABASE_PASSWORD: "{{ pg_password }}"
+      DATABASE_PORT: "{{ pg_port }}"
+      DATABASE_HOST: "{{ pg_hostname_actual }}"
+      RABBITMQ_USER: "guest"
+      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_VHOST: "awx"
+      MEMCACHED_HOST: "memcached"
+      MEMCACHED_PORT: "11211"
+      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+
+- name: Activate AWX Task Container
+  docker_container:
+    name: awx_task
+    state: started
+    restart_policy: unless-stopped
+    image: "{{ awx_task_docker_actual_image }}"
+    links: "{{ awx_task_container_links|list }}"
+    user: root
+    hostname: awx
+    dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
+    dns_servers: "{{ awx_alternate_dns_servers.split(',') if awx_alternate_dns_servers is defined else omit }}"
+    env:
+      http_proxy: "{{ http_proxy | default('') }}"
+      https_proxy: "{{ https_proxy | default('') }}"
+      no_proxy: "{{ no_proxy | default('') }}"
+      SECRET_KEY: "{{ awx_secret_key }}"
+      DATABASE_NAME: "{{ pg_database }}"
+      DATABASE_USER: "{{ pg_username }}"
+      DATABASE_PASSWORD: "{{ pg_password }}"
+      DATABASE_HOST: "{{ pg_hostname_actual }}"
+      DATABASE_PORT: "{{ pg_port }}"
+      RABBITMQ_USER: "guest"
+      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_VHOST: "awx"
+      MEMCACHED_HOST: "memcached"
+      MEMCACHED_PORT: "11211"
+      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
