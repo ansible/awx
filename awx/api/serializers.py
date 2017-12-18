@@ -3176,7 +3176,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    exclude_errors = ('required')  # required variables may be provided by WFJT or on launch
+    exclude_errors = ('required',)  # required variables may be provided by WFJT or on launch
 
     class Meta:
         model = WorkflowJobTemplateNode
@@ -3574,7 +3574,7 @@ class JobLaunchSerializer(BaseSerializer):
         template = self.context.get('template')
 
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(
-            _exclude_errors=['prompts', 'required'],  # make several error types non-blocking
+            _exclude_errors=['prompts'],  # make several error types non-blocking
             **attrs)
         self._ignored_fields = rejected
 

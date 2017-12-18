@@ -173,7 +173,7 @@ class SurveyJobTemplateMixin(models.Model):
         create_kwargs['extra_vars'] = json.dumps(extra_vars)
         return create_kwargs
 
-    def _survey_element_validation(self, survey_element, data):
+    def _survey_element_validation(self, survey_element, data, validate_required=True):
         # Don't apply validation to the `$encrypted$` placeholder; the decrypted
         # default (if any) will be validated against instead
         errors = []
@@ -185,11 +185,13 @@ class SurveyJobTemplateMixin(models.Model):
                 password_value == '$encrypted$'
             ):
                 if survey_element.get('default') is None and survey_element['required']:
-                    errors.append("'%s' value missing" % survey_element['variable'])
+                    if validate_required:
+                        errors.append("'%s' value missing" % survey_element['variable'])
                 return errors
 
         if survey_element['variable'] not in data and survey_element['required']:
-            errors.append("'%s' value missing" % survey_element['variable'])
+            if validate_required:
+                errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) not in (str, unicode):
@@ -267,12 +269,14 @@ class SurveyJobTemplateMixin(models.Model):
             for survey_element in self.survey_spec.get("spec", []):
                 key = survey_element.get('variable', None)
                 value = data.get(key, None)
+                validate_required = 'required' not in _exclude_errors
                 if extra_passwords and key in extra_passwords and is_encrypted(value):
                     element_errors = self._survey_element_validation(survey_element, {
                         key: decrypt_value(get_encryption_key('value', pk=None), value)
-                    })
+                    }, validate_required=validate_required)
                 else:
-                    element_errors = self._survey_element_validation(survey_element, data)
+                    element_errors = self._survey_element_validation(
+                        survey_element, data, validate_required=validate_required)
 
                 if element_errors:
                     survey_errors += element_errors
