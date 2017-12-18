@@ -134,16 +134,24 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 });
         }
 
-        return machineCred.concat(extraCreds).concat(vaultCred).map(cred => ({
-            name: cred.name,
-            id: cred.id,
-            postType: cred.postType,
-            readOnly: cred.readOnly ? true : false,
-            kind: typeOpts
-                .filter(type => {
-                    return parseInt(cred.credential_type) === type.value;
-                })[0].name + ":"
-        }));
+        return machineCred.concat(extraCreds).concat(vaultCred).map(cred => {
+            const { name, id, postType, readOnly } = cred;
+            const [type] = typeOpts.filter(type => parseInt(cred.credential_type) === type.value)
+
+            const tagData = {
+                name: cred.name,
+                id: cred.id,
+                postType: cred.postType,
+                readOnly: cred.readOnly ? true : false,
+                kind: `${type.name}`
+            };
+
+            if (type.name === 'Vault') {
+                tagData.vault_id = _.get(cred, 'inputs.vault_id');
+            }
+
+            return tagData;
+        })
     };
 
     // remove credential from structured selected credential data and tag-view
@@ -234,7 +242,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
         //         }));
         // }
 
-        // get extra credentials
+        // get credentials
         if (data.related.credentials) {
             Rest.setUrl(data.related.credentials);
             credDefers.push(Rest.get()
@@ -243,7 +251,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
                 })
                 .catch(({data, status}) => {
                     if (status === 403) {
-                        /* User doesn't have read access to the extra credentials, so use summary_fields */
+                        /* User doesn't have read access to the credentials, so use summary_fields */
                         credentialGetPermissionDenied = true;
                         selectedCredentials.extra = job_template_obj.summary_fields.credentials;
                         _.map(selectedCredentials.extra, (cred) => {

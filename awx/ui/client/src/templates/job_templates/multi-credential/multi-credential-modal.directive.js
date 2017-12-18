@@ -36,9 +36,10 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                         $('#multi-credential-modal').modal('hide');
                     };
 
-                    scope.generateCredentialList = function(inputType = 'radio') {
+                    scope.generateCredentialList = function(inputType = 'radio', list = scope.list) {
+                        console.log(inputType);
                         let html = GenerateList.build({
-                            list: scope.list,
+                            list,
                             input_type: inputType,
                             mode: 'lookup'
                         });
@@ -69,9 +70,9 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                             scope.credentialTypeOptions = credentialTypeOptions;
                             scope.allCredentialTypeOptions = _.cloneDeep(credentialTypeOptions);
 
-                            // We want to hide machine and vault dropdown options if a credential
-                            // has already been selected for those types and the user interacting
-                            // with the form doesn't have the ability to change them
+                            // We want to hide the machine dropdown option if a machine credential
+                            // has already been selected and the user interacting with the form doesn't
+                            // have the ability to change it.
                             for(let i=scope.credentialTypeOptions.length - 1; i >=0; i--) {
                                 if((scope.selectedCredentials.machine &&
                                     scope.selectedCredentials.machine.credential_type_id === scope.credentialTypeOptions[i].value &&
@@ -126,13 +127,13 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 $scope.credential_queryset.credential_type = parseInt($scope.credentialKind);
 
                 qs.search(GetBasePath('credentials'), $scope.credential_default_params)
-                    .then(res => {
-                        $scope.credential_dataset = res.data;
+                    .then(({ data }) => {
+                        $scope.credential_dataset = data;
                         $scope.credentials = $scope.credential_dataset.results;
 
                         if(!$scope.listRendered) {
                             if (newValueIsVault) {
-                                $scope.generateCredentialList('checkbox');
+                                $scope.generateCredentialList('checkbox', $scope.vaultList);
                             } else {
                                 $scope.generateCredentialList();
                             }
@@ -148,9 +149,26 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 $scope.credentials = $scope.credentials || [];
                 $scope.listRendered = false;
 
-                let credList = _.cloneDeep(CredentialList);
+                const credList = _.cloneDeep(CredentialList);
+
                 credList.emptyListText = i18n._('No Credentials Matching This Type Have Been Created');
+
+                const vaultCredList = _.cloneDeep(credList);
+
+                vaultCredList.fields.name.modalColumnClass = 'col-md-6';
+
+                vaultCredList.fields.info = {
+                    label: i18n._('Vault ID'),
+                    ngBind: 'credential.inputs.vault_id',
+                    key: false,
+                    nosort: true,
+                    modalColumnClass: 'col-md-6',
+                    infoHeaderClass: '',
+                    dataPlacement: 'top'
+                };
+
                 $scope.list = credList;
+                $scope.vaultList = vaultCredList;
 
                 $scope.credential_default_params = {
                     order_by: 'name',
@@ -191,21 +209,25 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
                 return $scope.toggle_row(credential);
             };
 
-            $scope.toggle_row = function(selectedRow) {
+            $scope.toggle_row = function(credential) {
                 let rowDeselected = false;
                 for (let i = $scope.selectedCredentials.extra.length - 1; i >= 0; i--) {
-                    if($scope.selectedCredentials.extra[i].id === selectedRow.id) {
+                    if($scope.selectedCredentials.extra[i].id === credential.id) {
                         $scope.selectedCredentials.extra.splice(i, 1);
                         rowDeselected = true;
-                    } else if(selectedRow.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
-                        if (selectedRow.credential_type !== $scope.credentialKinds.Vault) {
+                    } else if(credential.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
+                        if (credential.credential_type !== $scope.credentialKinds.Vault) {
+                            $scope.selectedCredentials.extra.splice(i, 1);
+                        } else if($scope.selectedCredentials.extra[i].inputs.vault_id === credential.inputs.vault_id) {
+                            // remove existing vault credentials if they have the same vault_id as a recently
+                            // toggled vault credential
                             $scope.selectedCredentials.extra.splice(i, 1);
                         }
                     }
                 }
                 if(!rowDeselected) {
                     $scope.selectedCredentials.extra
-                        .push(_.cloneDeep(selectedRow));
+                        .push(_.cloneDeep(credential));
                 }
             };
 

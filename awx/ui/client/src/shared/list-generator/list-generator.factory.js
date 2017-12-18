@@ -552,8 +552,9 @@ export default ['$compile', 'Attr', 'Icon',
 
                     if(list.fields.info) {
                         customClass = list.fields.name.modalColumnClass || '';
+                        const infoHeaderClass = _.get(list.fields.info, 'infoHeaderClass', 'List-tableHeader--info');
                         html += `<th
-                                    class="List-tableHeader--info"
+                                    class="${infoHeaderClass}"
                                     base-path="${list.basePath || list.name}"
                                     collection="${list.name}"
                                     dataset="${list.iterator}_dataset"
