@@ -14,7 +14,7 @@ from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
 from awx.main.utils import parse_yaml_or_json
-from awx.main.utils.encryption import decrypt_value, get_encryption_key
+from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.fields import JSONField, AskForField
 
 
@@ -266,9 +266,10 @@ class SurveyJobTemplateMixin(models.Model):
             survey_errors = []
             for survey_element in self.survey_spec.get("spec", []):
                 key = survey_element.get('variable', None)
-                if extra_passwords and key in extra_passwords and data.get(key, None):
+                value = data.get(key, None)
+                if extra_passwords and key in extra_passwords and is_encrypted(value):
                     element_errors = self._survey_element_validation(survey_element, {
-                        key: decrypt_value(get_encryption_key('value', pk=None), data[key])
+                        key: decrypt_value(get_encryption_key('value', pk=None), value)
                     })
                 else:
                     element_errors = self._survey_element_validation(survey_element, data)

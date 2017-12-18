@@ -3120,25 +3120,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     def validate(self, attrs):
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
-        # Build unsaved version of this config, use it to detect prompts errors
         ujt = None
         if 'unified_job_template' in attrs:
             ujt = attrs['unified_job_template']
         elif self.instance:
             ujt = self.instance.unified_job_template
-        mock_obj = self._build_mock_obj(attrs)
-        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(
-            _exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
-
-        # Launch configs call extra_vars extra_data for historical reasons
-        if 'extra_vars' in errors:
-            errors['extra_data'] = errors.pop('extra_vars')
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        # Model `.save` needs the container dict, not the psuedo fields
-        if mock_obj.char_prompts:
-            attrs['char_prompts'] = mock_obj.char_prompts
 
         # Insert survey_passwords to track redacted variables
         if 'extra_data' in attrs:
@@ -3164,6 +3150,22 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                                 _('Provided variable {} has no database value to replace with.').format(key))
                         else:
                             attrs['extra_data'][key] = db_extra_data[key]
+
+        # Build unsaved version of this config, use it to detect prompts errors
+        mock_obj = self._build_mock_obj(attrs)
+        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(
+            _exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+
+        # Launch configs call extra_vars extra_data for historical reasons
+        if 'extra_vars' in errors:
+            errors['extra_data'] = errors.pop('extra_vars')
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        # Model `.save` needs the container dict, not the psuedo fields
+        if mock_obj.char_prompts:
+            attrs['char_prompts'] = mock_obj.char_prompts
+
         return attrs
 
 

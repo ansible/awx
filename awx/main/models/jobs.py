@@ -893,7 +893,7 @@ class LaunchTimeConfig(BaseModel):
         Hides fields marked as passwords in survey.
         '''
         if self.survey_passwords:
-            extra_data = parse_yaml_or_json(self.extra_data)
+            extra_data = parse_yaml_or_json(self.extra_data).copy()
             for key, value in self.survey_passwords.items():
                 if key in extra_data:
                     extra_data[key] = value

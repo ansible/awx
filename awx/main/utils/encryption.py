@@ -137,3 +137,9 @@ def encrypt_dict(data, fields):
     encrypt_fields = set(data.keys()).intersection(fields)
     for key in encrypt_fields:
         data[key] = encrypt_value(data[key])
+
+
+def is_encrypted(value):
+    if not isinstance(value, six.string_types):
+        return False
+    return value.startswith('$encrypted$') and len(value) > len('$encrypted$')

@@ -197,7 +197,7 @@ class TestWorkflowJobTemplateNodeSerializerSurveyPasswords():
         assert attrs['extra_data']['var1'].startswith('$encrypted$')
         assert len(attrs['extra_data']['var1']) > len('$encrypted$')
 
-    def test_use_db_answer(self, jt):
+    def test_use_db_answer(self, jt, mocker):
         serializer = WorkflowJobTemplateNodeSerializer()
         wfjt = WorkflowJobTemplate(name='fake-wfjt')
         serializer.instance = WorkflowJobTemplateNode(
@@ -205,11 +205,12 @@ class TestWorkflowJobTemplateNodeSerializerSurveyPasswords():
             unified_job_template=jt,
             extra_data={'var1': '$encrypted$foooooo'}
         )
-        attrs = serializer.validate({
-            'unified_job_template': jt,
-            'workflow_job_template': wfjt,
-            'extra_data': {'var1': '$encrypted$'}
-        })
+        with mocker.patch('awx.main.models.mixins.decrypt_value', return_value='foo'):
+            attrs = serializer.validate({
+                'unified_job_template': jt,
+                'workflow_job_template': wfjt,
+                'extra_data': {'var1': '$encrypted$'}
+            })
         assert 'survey_passwords' in attrs
         assert 'var1' in attrs['survey_passwords']
         assert attrs['extra_data']['var1'] == '$encrypted$foooooo'
