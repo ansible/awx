@@ -44,7 +44,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
-    has_model_field_prefetched, extract_ansible_vars)
+    has_model_field_prefetched, extract_ansible_vars, encrypt_dict)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import REPLACE_STR
 
@@ -3120,12 +3120,38 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     def validate(self, attrs):
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
-        # Build unsaved version of this config, use it to detect prompts errors
         ujt = None
         if 'unified_job_template' in attrs:
             ujt = attrs['unified_job_template']
         elif self.instance:
             ujt = self.instance.unified_job_template
+
+        # Insert survey_passwords to track redacted variables
+        if 'extra_data' in attrs:
+            extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
+            if hasattr(ujt, 'survey_password_variables'):
+                password_dict = {}
+                for key in ujt.survey_password_variables():
+                    if key in extra_data:
+                        password_dict[key] = REPLACE_STR
+                if not self.instance or password_dict != self.instance.survey_passwords:
+                    attrs['survey_passwords'] = password_dict
+                if not isinstance(attrs['extra_data'], dict):
+                    attrs['extra_data'] = parse_yaml_or_json(attrs['extra_data'])
+                encrypt_dict(attrs['extra_data'], password_dict.keys())
+                if self.instance:
+                    db_extra_data = parse_yaml_or_json(self.instance.extra_data)
+                else:
+                    db_extra_data = {}
+                for key in password_dict.keys():
+                    if attrs['extra_data'].get(key, None) == REPLACE_STR:
+                        if key not in db_extra_data:
+                            raise serializers.ValidationError(
+                                _('Provided variable {} has no database value to replace with.').format(key))
+                        else:
+                            attrs['extra_data'][key] = db_extra_data[key]
+
+        # Build unsaved version of this config, use it to detect prompts errors
         mock_obj = self._build_mock_obj(attrs)
         accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(
             _exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
@@ -3137,19 +3163,9 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             raise serializers.ValidationError(errors)
 
         # Model `.save` needs the container dict, not the psuedo fields
-        attrs['char_prompts'] = mock_obj.char_prompts
+        if mock_obj.char_prompts:
+            attrs['char_prompts'] = mock_obj.char_prompts
 
-        # Insert survey_passwords to track redacted variables
-        # TODO: perform encryption on save
-        if 'extra_data' in attrs:
-            extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
-            if hasattr(ujt, 'survey_password_variables'):
-                password_dict = {}
-                for key in ujt.survey_password_variables():
-                    if key in extra_data:
-                        password_dict[key] = REPLACE_STR
-                if not self.instance or password_dict != self.instance.survey_passwords:
-                    attrs['survey_passwords'] = password_dict
         return attrs
 
 
@@ -3160,7 +3176,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    exclude_errors = ('required')  # required variables may be provided by WFJT or on launch
+    exclude_errors = ('required',)  # required variables may be provided by WFJT or on launch
 
     class Meta:
         model = WorkflowJobTemplateNode
@@ -3558,7 +3574,7 @@ class JobLaunchSerializer(BaseSerializer):
         template = self.context.get('template')
 
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(
-            _exclude_errors=['prompts', 'required'],  # make several error types non-blocking
+            _exclude_errors=['prompts'],  # make several error types non-blocking
             **attrs)
         self._ignored_fields = rejected
 

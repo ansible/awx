@@ -14,7 +14,7 @@ from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
 from awx.main.utils import parse_yaml_or_json
-from awx.main.utils.encryption import decrypt_value, get_encryption_key
+from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.fields import JSONField, AskForField
 
 
@@ -173,7 +173,7 @@ class SurveyJobTemplateMixin(models.Model):
         create_kwargs['extra_vars'] = json.dumps(extra_vars)
         return create_kwargs
 
-    def _survey_element_validation(self, survey_element, data):
+    def _survey_element_validation(self, survey_element, data, validate_required=True):
         # Don't apply validation to the `$encrypted$` placeholder; the decrypted
         # default (if any) will be validated against instead
         errors = []
@@ -185,11 +185,13 @@ class SurveyJobTemplateMixin(models.Model):
                 password_value == '$encrypted$'
             ):
                 if survey_element.get('default') is None and survey_element['required']:
-                    errors.append("'%s' value missing" % survey_element['variable'])
+                    if validate_required:
+                        errors.append("'%s' value missing" % survey_element['variable'])
                 return errors
 
         if survey_element['variable'] not in data and survey_element['required']:
-            errors.append("'%s' value missing" % survey_element['variable'])
+            if validate_required:
+                errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
                 if type(data[survey_element['variable']]) not in (str, unicode):
@@ -253,7 +255,7 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                    choice_list))
         return errors
 
-    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
+    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
         survey_is_enabled = (self.survey_enabled and self.survey_spec)
         extra_vars = data.copy()
         if errors is None:
@@ -265,8 +267,16 @@ class SurveyJobTemplateMixin(models.Model):
             # Check for data violation of survey rules
             survey_errors = []
             for survey_element in self.survey_spec.get("spec", []):
-                element_errors = self._survey_element_validation(survey_element, data)
                 key = survey_element.get('variable', None)
+                value = data.get(key, None)
+                validate_required = 'required' not in _exclude_errors
+                if extra_passwords and key in extra_passwords and is_encrypted(value):
+                    element_errors = self._survey_element_validation(survey_element, {
+                        key: decrypt_value(get_encryption_key('value', pk=None), value)
+                    }, validate_required=validate_required)
+                else:
+                    element_errors = self._survey_element_validation(
+                        survey_element, data, validate_required=validate_required)
 
                 if element_errors:
                     survey_errors += element_errors

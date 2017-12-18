@@ -34,7 +34,7 @@ from django_celery_results.models import TaskResult
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
-    encrypt_value, decrypt_field, _inventory_updates,
+    encrypt_dict, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
     get_type_for_model, parse_yaml_or_json
 )
@@ -349,11 +349,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         # automatically encrypt survey fields
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
             password_list = self.survey_password_variables()
-            for key in kwargs.get('extra_vars', {}):
-                if key in password_list:
-                    kwargs['extra_vars'][key] = encrypt_value(
-                        kwargs['extra_vars'][key]
-                    )
+            encrypt_dict(kwargs.get('extra_vars', {}), password_list)
 
         unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
@@ -445,7 +441,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 errors[field_name] = [_("Field is not allowed on launch.")]
         return ({}, kwargs, errors)
 
-    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
+    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
         '''
         If subclasses accept any `variables` or `extra_vars`, they should
         define _accept_or_ignore_variables to place those variables in the accepted dict,
@@ -463,7 +459,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             # SurveyJobTemplateMixin cannot override any methods because of
             # resolution order, forced by how metaclass processes fields,
             # thus the need for hasattr check
-            return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
+            if extra_passwords:
+                return self._accept_or_ignore_variables(
+                    data, errors, _exclude_errors=_exclude_errors, extra_passwords=extra_passwords)
+            else:
+                return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
         elif data:
             errors['extra_vars'] = [
                 _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(

@@ -355,7 +355,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         rejected_data = {}
         accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
             kwargs.get('extra_vars', {}),
-            _exclude_errors=exclude_errors)
+            _exclude_errors=exclude_errors,
+            extra_passwords=kwargs.get('survey_passwords', {}))
         if accepted_vars:
             prompted_data['extra_vars'] = accepted_vars
         if rejected_vars:
@@ -892,7 +893,7 @@ class LaunchTimeConfig(BaseModel):
         Hides fields marked as passwords in survey.
         '''
         if self.survey_passwords:
-            extra_data = parse_yaml_or_json(self.extra_data)
+            extra_data = parse_yaml_or_json(self.extra_data).copy()
             for key, value in self.survey_passwords.items():
                 if key in extra_data:
                     extra_data[key] = value
