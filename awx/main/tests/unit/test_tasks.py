@@ -1498,7 +1498,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'rb').read()
+            for i in range(len(args)):
+                if args[i] == '--source':
+                    inventory_file = args[i + 1]
+            inventory_dict = open(inventory_file, 'rb').read()
+            cred_file = yaml.load(inventory_dict)['clouds_yaml_path'][0]
+            shade_config = open(cred_file, 'rb').read()
             assert '\n'.join([
                 'clouds:',
                 '  devstack:',
