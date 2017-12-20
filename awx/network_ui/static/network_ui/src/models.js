@@ -365,6 +365,54 @@ ToggleButton.prototype.toggle = function () {
     }
 };
 
+function ContextMenu(name, x, y, width, height, callback, enabled, buttons) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.callback = callback;
+    this.is_pressed = false;
+    this.mouse_over = false;
+    this.enabled = enabled;
+    this.buttons = buttons;
+    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+}
+exports.ContextMenu = ContextMenu;
+
+
+ContextMenu.prototype.is_selected = function (x, y) {
+
+    return (x > this.x &&
+            x < this.x + this.width &&
+            y > this.y &&
+            y < this.y + this.height);
+
+};
+
+function ContextMenuButton(name, x, y, width, height, callback) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.callback = callback;
+    this.is_pressed = false;
+    this.mouse_over = false;
+    this.enabled = true;
+    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+}
+exports.ContextMenuButton = ContextMenuButton;
+
+
+ContextMenuButton.prototype.is_selected = function (x, y) {
+
+    return (x > this.x &&
+            x < this.x + this.width &&
+            y > this.y &&
+            y < this.y + this.height);
+
+};
 
 function Task(id, name) {
     this.id = id;
