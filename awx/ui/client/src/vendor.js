@@ -18,8 +18,16 @@ global.$ = global.jQuery;
 
 require('jquery-resize');
 require('jquery-ui');
+require('jquery-ui/ui/widgets/button');
+require('jquery-ui/ui/widgets/spinner');
 require('bootstrap');
 require('bootstrap-datepicker');
+
+// jquery-ui and bootstrap both define $.fn.button
+// the code below resolves that namespace clash
+const btn = $.fn.button.noConflict();
+$.fn.btn = btn;
+
 require('select2');
 
 // Standalone libs
