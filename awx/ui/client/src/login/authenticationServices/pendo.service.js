@@ -19,7 +19,6 @@ export default
                     visitor: {
                       id: null,
                       role: null,
-                      email: null
                     },
                     account: {
                       id: null,
@@ -43,24 +42,20 @@ export default
 
             setDetailed: function(options, config) {
                 // Detailed mode
-                    // VisitorId: username+hash of license_key
+                    // VisitorId: userid+hash of license_key
                     // AccountId: hash of license_key from license
-                    // email: contact_email from license OR email from user account
 
-                options.visitor.id = $rootScope.current_user.username + '@' + config.deployment_id;
+                options.visitor.id = $rootScope.current_user.id + '@' + config.deployment_id;
                 options.account.id = config.deployment_id;
-                options.visitor.email = $rootScope.current_user.email;
             },
 
             setAnonymous: function (options) {
                 //Anonymous mode
                     // VisitorId: <some hardcoded id that is the same across all anonymous>
                     // AccountId: <some hardcoded id that is the same across all anonymous>
-                    // email: <blank>
 
                 options.visitor.id = 0;
                 options.account.id = "tower.ansible.com";
-                options.visitor.email = "";
             },
 
             setRole: function(options) {
