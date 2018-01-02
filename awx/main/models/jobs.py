@@ -26,6 +26,7 @@ from rest_framework.exceptions import ParseError
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
+from awx.main.models.events import JobEvent, SystemJobEvent
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -511,6 +512,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
+
+    @property
+    def event_class(self):
+        return JobEvent
 
     @property
     def ask_diff_mode_on_launch(self):
@@ -1164,6 +1169,10 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
+
+    @property
+    def event_class(self):
+        return SystemJobEvent
 
     @property
     def task_impact(self):

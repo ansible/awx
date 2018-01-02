@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
+from awx.main.models.events import AdHocCommandEvent
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 
@@ -122,6 +123,10 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         if self.module_name in ('command', 'shell') and not module_args:
             raise ValidationError(_('No argument passed to %s module.') % self.module_name)
         return module_args
+
+    @property
+    def event_class(self):
+        return AdHocCommandEvent
 
     @property
     def passwords_needed_to_start(self):

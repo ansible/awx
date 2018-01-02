@@ -18,6 +18,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
+from awx.main.models.events import ProjectUpdateEvent
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -484,6 +485,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         websocket_data = super(ProjectUpdate, self).websocket_emit_data()
         websocket_data.update(dict(project_id=self.project.id))
         return websocket_data
+
+    @property
+    def event_class(self):
+        return ProjectUpdateEvent
 
     @property
     def task_impact(self):

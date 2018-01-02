@@ -894,6 +894,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return config
 
     @property
+    def event_class(self):
+        raise NotImplementedError()
+
+    @property
     def result_stdout_text(self):
         related = UnifiedJobDeprecatedStdout.objects.get(pk=self.pk)
         return related.result_stdout_text or ''
@@ -974,16 +978,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     # detect the length of all stdout for this UnifiedJob, and
                     # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
                     # don't bother actually fetching the data
-                    cursor.execute(
-                        "select sum(length(stdout)) from {} where {}={}".format(
-                            tablename + 'event',
-                            related_name,
-                            self.id
-                        )
-                    )
-                    total_bytes = cursor.fetchone()[0]
-                    if total_bytes > max_supported:
-                        raise StdoutMaxBytesExceeded(total_bytes, max_supported)
+                    total = self.event_class.objects.filter(**{related_name: self.id}).aggregate(
+                        total=models.Sum(models.Func(models.F('stdout'), function='LENGTH'))
+                    )['total']
+                    if total > max_supported:
+                        raise StdoutMaxBytesExceeded(total, max_supported)
 
                 cursor.copy_expert(
                     "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
