@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 
 from awx.api.versioning import reverse
-from awx.main.consumers import emit_channel_notification
 from awx.main.fields import JSONField
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields
@@ -360,8 +359,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
                 self.job.inventory.update_computed_fields()
-
-                emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=self.job.id))
 
 
 

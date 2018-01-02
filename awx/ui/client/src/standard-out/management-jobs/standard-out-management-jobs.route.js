@@ -19,7 +19,8 @@ export default {
         jobType: 'system_jobs',
         socket: {
             "groups": {
-                "jobs": ["status_changed"]
+                "jobs": ["status_changed", "summary"],
+                "system_job_events": [],
             }
         }
     }

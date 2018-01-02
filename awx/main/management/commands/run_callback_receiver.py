@@ -25,6 +25,7 @@ from django.core.cache import cache as django_cache
 
 # AWX
 from awx.main.models import * # noqa
+from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -158,6 +159,17 @@ class CallbackBrokerWorker(ConsumerMixin):
                     if key in body:
                         job_identifier = body[key]
                         break
+
+                if body.get('event') == 'EOF':
+                    # EOF events are sent when stdout for the running task is
+                    # closed. don't actually persist them to the database; we
+                    # just use them to report `summary` websocket events as an
+                    # approximation for when a job is "done"
+                    emit_channel_notification(
+                        'jobs-summary',
+                        dict(group_name='jobs', unified_job_id=job_identifier)
+                    )
+                    continue
 
                 retries = 0
                 while retries <= self.MAX_RETRIES:

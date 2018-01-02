@@ -19,7 +19,7 @@ export default {
         jobType: 'ad_hoc_commands',
         socket: {
             "groups": {
-                "jobs": ["status_changed"],
+                "jobs": ["status_changed", "summary"],
                 "ad_hoc_command_events": []
             }
         }

@@ -216,15 +216,14 @@ export default
                         self.unsubscribe(state);
                     }
                     else{
-                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "job_events")){
-                            state.data.socket.groups.job_events = [id];
-                        }
-                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
-                            state.data.socket.groups.ad_hoc_command_events = [id];
-                        }
-                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "workflow_events")){
-                            state.data.socket.groups.workflow_events = [id];
-                        }
+                        ["job_events", "ad_hoc_command_events", "workflow_events",
+                         "project_update_events", "inventory_update_events",
+                         "system_job_events"
+                        ].forEach(function(group) {
+                            if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty(group)){
+                                state.data.socket.groups[group] = [id];
+                            }
+                        });
                         self.subscribe(state);
                     }
                     return true;

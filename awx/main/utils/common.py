@@ -878,8 +878,10 @@ class OutputEventFilter(object):
         if self._buffer:
             self._emit_event(self._buffer)
             self._buffer = ''
+        self._event_callback(dict(event='EOF'))
 
     def _emit_event(self, buffered_stdout, next_event_data=None):
+        next_event_data = next_event_data or {}
         if self._current_event_data:
             event_data = self._current_event_data
             stdout_chunks = [buffered_stdout]
