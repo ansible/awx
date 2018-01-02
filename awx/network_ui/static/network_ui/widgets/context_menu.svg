@@ -1,9 +1,6 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
-<filter id="f3" x="0" y="0" width="102%" height="105%">
-      <!-- <feOffset result="offOut" in="SourceAlpha" dx="5" dy="5"></feOffset>
-      <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3"></feGaussianBlur>
-      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend> -->
+<filter id="shadowFilter" x="0" y="0" width="102%" height="105%">
       <feOffset result="offOut" in="SourceGraphic" dx="20" dy="20" />
       <feColorMatrix result = "matrixOut" in = "offOut" type = "matrix" values = "0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
       <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="10" />
@@ -15,12 +12,12 @@
       ng-attr-width={{contextMenu.width}}
       ng-attr-height={{contextMenu.height}}
       rx=5 ry=5
-      filter="url(#f3)">
+      filter="url(#shadowFilter)">
   </rect>
 
 <g>
-    <g> <!-- buttons -->
+    <g> <!-- context menu buttons -->
     <g ng-repeat="button in contextMenu.buttons">
         <g awx-net--context-menu-button context-menu-button="button" context-menu="contextMenu"></g>
     </g>
-</g> <!-- end buttons -->
+</g> <!-- end context menu buttons -->

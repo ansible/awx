@@ -565,7 +565,20 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Conext Menu
     $scope.onDetailsContextButton = function (button) {
-        console.log(button.name + ' success!');
+        console.log(button.name);
+        if (!$scope.disconnected) {
+            // this will end up being the id of the host the user clicked on
+            let host_id = 1;
+            let url = `/api/v2/hosts/${host_id}/?format=json`;
+            $http.get(url)
+                 .then(function(host) {
+                     $scope.$emit('retrievedHostData', host.data);
+                 })
+                 .catch(function(httpGets) {
+                     console.log(httpGets);
+
+                 });
+         }
 
     };
 
@@ -681,15 +694,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $window.open('/network_ui/topology.yaml?topology_id=' + $scope.topology_id , '_blank');
     };
 
+    // Context Menu Buttons
     $scope.context_menu_buttons = [
         new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton),
         new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton)
     ];
-
-    // $scope.context_menu_buttons = [
-    //     new models.ContextMenuButton("Edit", 1, 5, 160, 26, $scope.onDetailsContextButton),
-    //     new models.ContextMenuButton("Details", 1, 31, 160, 26, $scope.onDetailsContextButton)
-    // ];
 
     // Context Menus
     $scope.context_menus = [
@@ -702,10 +711,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false)
     ];
 
-
     // Buttons
-    
-
     var button_offset = 200;
 
     $scope.buttons = [
