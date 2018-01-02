@@ -1,9 +1,14 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+# Django
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import serializers
+
+# AWX
+from awx.conf import fields
 
 __all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'VerbatimField']
 
@@ -66,3 +71,19 @@ class VerbatimField(serializers.Field):
 
     def to_representation(self, value):
         return value
+
+
+class OAuth2ProviderField(fields.DictField):
+
+    default_error_messages = {
+        'invalid_key_names': _('Invalid key names: {invalid_key_names}'),
+    }
+    valid_key_names = {'ACCESS_TOKEN_EXPIRE_SECONDS', 'AUTHORIZATION_CODE_EXPIRE_SECONDS'}
+    child = fields.IntegerField(min_value=1)
+
+    def to_internal_value(self, data):
+        data = super(OAuth2ProviderField, self).to_internal_value(data)
+        invalid_flags = (set(data.keys()) - self.valid_key_names)
+        if invalid_flags:
+            self.fail('invalid_key_names', invalid_key_names=', '.join(list(invalid_flags)))
+        return data

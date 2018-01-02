@@ -147,6 +147,8 @@ def handle_setting_changes(self, setting_keys):
         if key.startswith('LOG_AGGREGATOR_'):
             restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
             break
+        elif key == 'OAUTH2_PROVIDER':
+            restart_local_services(['uwsgi'])
 
 
 @shared_task(queue='tower', base=LogErrorsTask)

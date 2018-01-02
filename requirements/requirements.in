@@ -16,6 +16,7 @@ django-celery-results==1.0.1
 django-crum==0.7.1
 django-extensions==1.7.8
 django-jsonfield==1.0.1
+django-oauth-toolkit==1.0.0
 django-polymorphic==1.3
 django-pglocks==1.0.2
 django-radius==1.1.0
