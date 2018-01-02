@@ -228,6 +228,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     '''
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials']
+    FIELDS_TO_DISCARD_AT_COPY = ['local_path']
 
     class Meta:
         app_label = 'main'
