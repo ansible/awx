@@ -771,13 +771,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Context Menu Buttons
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton),
-        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton)
+        new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, true, $scope.context_menu_buttons)
+        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, true, $scope.context_menu_buttons, $scope)
     ];
 
     // Icons

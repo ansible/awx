@@ -365,7 +365,7 @@ ToggleButton.prototype.toggle = function () {
     }
 };
 
-function ContextMenu(name, x, y, width, height, callback, enabled, buttons) {
+function ContextMenu(name, x, y, width, height, callback, enabled, buttons, tracer) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -376,7 +376,7 @@ function ContextMenu(name, x, y, width, height, callback, enabled, buttons) {
     this.mouse_over = false;
     this.enabled = enabled;
     this.buttons = buttons;
-    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+    this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
 }
 exports.ContextMenu = ContextMenu;
 
@@ -390,7 +390,7 @@ ContextMenu.prototype.is_selected = function (x, y) {
 
 };
 
-function ContextMenuButton(name, x, y, width, height, callback) {
+function ContextMenuButton(name, x, y, width, height, callback, tracer) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -400,7 +400,7 @@ function ContextMenuButton(name, x, y, width, height, callback) {
     this.is_pressed = false;
     this.mouse_over = false;
     this.enabled = true;
-    this.fsm = new fsm.FSMController(this, button.Start, null, name+'button_fsm');
+    this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
 }
 exports.ContextMenuButton = ContextMenuButton;
 
