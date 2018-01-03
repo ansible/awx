@@ -563,6 +563,25 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 	  $event.preventDefault();
 	};
 
+    // Conext Menu
+    $scope.onDetailsContextButton = function (button) {
+        console.log(button.name);
+        if (!$scope.disconnected) {
+            // this will end up being the id of the host the user clicked on
+            let host_id = 1;
+            let url = `/api/v2/hosts/${host_id}/?format=json`;
+            $http.get(url)
+                 .then(function(host) {
+                     $scope.$emit('retrievedHostData', host.data);
+                 })
+                 .catch(function(httpGets) {
+                     console.log(httpGets);
+
+                 });
+         }
+
+    };
+
     // Button Event Handlers
     //
     $scope.onToggleToolboxButtonLeft = function (button) {
@@ -675,16 +694,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $window.open('/network_ui/topology.yaml?topology_id=' + $scope.topology_id , '_blank');
     };
 
+    // Context Menu Buttons
+    $scope.context_menu_buttons = [
+        new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton),
+        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton)
+    ];
+
+    // Context Menus
+    $scope.context_menus = [
+        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, true, $scope.context_menu_buttons)
+    ];
+
     // Icons
     $scope.action_icons = [
         new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true),
         new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false)
     ];
 
-
     // Buttons
-    
-
     var button_offset = 200;
 
     $scope.buttons = [
@@ -722,6 +749,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.layers = [];
 
     $scope.all_buttons = [];
+    $scope.all_buttons.extend($scope.context_menu_buttons);
     $scope.all_buttons.extend($scope.action_icons);
     $scope.all_buttons.extend($scope.buttons);
     $scope.all_buttons.extend($scope.layers);
