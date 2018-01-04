@@ -260,12 +260,12 @@ models:
     type: AutoField
   - name: from_device
     ref: Device
-    ref_field: from_device
+    ref_field: device_id
     related_name: from_stream
     type: ForeignKey
   - name: to_device
     ref: Device
-    ref_field: to_device
+    ref_field: device_id
     related_name: to_stream
     type: ForeignKey
   - len: 200
@@ -324,16 +324,16 @@ models:
   - name: fsm_trace_id
     pk: true
     type: AutoField
-  - len: 200 
+  - len: 200
     name: fsm_name
     type: CharField
-  - len: 200 
+  - len: 200
     name: from_state
     type: CharField
-  - len: 200 
+  - len: 200
     name: to_state
     type: CharField
-  - len: 200 
+  - len: 200
     name: message_type
     type: CharField
   - name: client
