@@ -1,4 +1,3 @@
-# Copyright (c) 2017 Red Hat, Inc
 from django.db import models
 
 
@@ -13,6 +12,7 @@ class Device(models.Model):
     type = models.CharField(max_length=200,)
     interface_id_seq = models.IntegerField(default=0)
     process_id_seq = models.IntegerField(default=0)
+    host_id = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -168,3 +168,10 @@ class FSMTrace(models.Model):
     client = models.ForeignKey('Client',)
     trace_session_id = models.IntegerField(default=0)
     order = models.IntegerField(default=0)
+
+
+class TopologyInventory(models.Model):
+
+    topology_inventory_id = models.AutoField(primary_key=True,)
+    topology = models.ForeignKey('Topology',)
+    inventory_id = models.IntegerField()

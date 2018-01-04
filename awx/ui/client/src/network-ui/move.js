@@ -76,6 +76,14 @@ var Placing = new _Placing();
 exports.Placing = Placing;
 
 
+function _ContextMenu () {
+    this.name = 'ContextMenu';
+}
+inherits(_ContextMenu, _State);
+var ContextMenu = new _ContextMenu();
+exports.ContextMenu = ContextMenu;
+
+
 _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
@@ -135,7 +143,8 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                                              device.x,
                                                              device.y,
                                                              device.name,
-                                                             device.type));
+                                                             device.type,
+                                                             device.host_id));
         scope.selected_devices.push(device);
         device.selected = true;
         controller.changeState(Placing);
@@ -161,14 +170,16 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                message.device.name,
                                scope.scaledX,
                                scope.scaledY,
-                               message.device.type);
+                               message.device.type,
+                               message.device.host_id);
     scope.devices.push(device);
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,
                                               device.x,
                                               device.y,
                                               device.name,
-                                              device.type));
+                                              device.type,
+                                              device.host_id));
     for (i=0; i < message.device.interfaces.length; i++) {
         intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
         device.interfaces.push(intf);
@@ -331,7 +342,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                                                                                  devices[i].x,
                                                                                  devices[i].y,
                                                                                  devices[i].name,
-                                                                                 devices[i].type));
+                                                                                 devices[i].type,
+                                                                                 devices[i].host_id));
             }
             for (j = 0; j < all_links.length; j++) {
                 if (all_links[j].to_device === devices[i] ||
@@ -457,10 +469,20 @@ _Move.prototype.onMouseDown = function (controller) {
 };
 _Move.prototype.onMouseDown.transitions = ['Selected1'];
 
-_Selected3.prototype.onMouseUp = function (controller) {
-    controller.changeState(EditLabel);
+_Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
+    let context_menu = controller.scope.context_menus[0];
+    context_menu.enabled = true;
+    context_menu.x = $event.x;
+    context_menu.y = $event.y;
+    context_menu.buttons.forEach(function(button, index){
+        button.x = $event.x;
+        let menuPaddingTop = 5;
+        button.y = $event.y + menuPaddingTop + (button.height * index);
+    });
+
+    controller.changeState(ContextMenu);
 };
-_Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
+_Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
 _Selected3.prototype.onTouchEnd = function (controller) {
     controller.changeState(Selected2);
@@ -545,3 +567,21 @@ _Placing.prototype.onMouseMove = function (controller) {
 _Placing.prototype.onMouseMove.transitions = ['Move'];
 
 
+
+
+
+_ContextMenu.prototype.onLabelEdit = function (controller) {
+
+    controller.changeState(EditLabel);
+
+};
+_ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
+
+_ContextMenu.prototype.onMouseDown = function (controller) {
+
+    var item = controller.scope.context_menus[0];
+    item.enabled = false;
+    controller.changeState(Ready);
+
+};
+_ContextMenu.prototype.onMouseDown.transitions = ['Ready'];

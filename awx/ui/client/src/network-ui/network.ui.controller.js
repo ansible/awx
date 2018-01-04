@@ -21,7 +21,8 @@ var messages = require('./messages.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http, $q) {
+var NetworkUIController = function($scope, $document, $location, $window, $http,
+    $q, $state, ProcessErrors) {
 
   window.scope = $scope;
   var i = 0;
@@ -31,16 +32,16 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.api_token = '';
   $scope.disconnected = false;
 
-  $scope.topology_id = $location.search().topology_id || 0;
+  $scope.topology_id = 0;
   // Create a web socket to connect to the backend server
-  //
-  $scope.inventory_id = $location.search().inventory_id || 1;
+
+  $scope.inventory_id = $state.params.inventory_id;
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
-                                                           null,
-                                                           {debug: false, reconnectInterval: 300});
+      $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+                                                         null,
+                                                         {debug: false, reconnectInterval: 300});
   } else {
       $scope.control_socket = {
           on_message: util.noop
@@ -170,42 +171,27 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
 
   $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
-  function add_host (host) {
-      console.log(host);
-      var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
-      device.icon = true;
-      $scope.inventory_toolbox.items.push(device);
-  }
+
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
-      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
-           .then(function(inventory) {
-               console.log(inventory);
-               console.log(inventory.headers());
-
-               var host = null;
-               var i = 0;
-               var httpGets = [];
-               for (i=0; i < inventory.data.results.length;i++) {
-                   host = inventory.data.results[i];
-                   console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
-                   console.log($scope.my_location);
-                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data/?format=json'));
+      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
+           .then(function(response) {
+               let hosts = response.data.results;
+               for(var i = 0; i<hosts.length; i++){
+                   let host = hosts[i];
+                   console.log(host);
+                   host.data = jsyaml.safeLoad(host.variables);
+                   var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
+                   device.icon = true;
+                   $scope.inventory_toolbox.items.push(device);
                }
-               return httpGets;
            })
-           .then(function(httpGets) {
-               console.log(httpGets);
-               $q.all(httpGets).then(function (results) {
-                   var i = 0;
-                   for (i=0; i < results.length; i++) {
-                       add_host(results[i]);
-                   }
-               });
+           .catch(({data, status}) => {
+               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
            });
   }
   $scope.inventory_toolbox.spacing = 150;
@@ -429,7 +415,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         // Do not select links if a device was selected
         if (last_selected_device === null && last_selected_interface === null) {
             for (i = $scope.links.length - 1; i >= 0; i--) {
-                if($scope.links[i].is_selected($scope.scaledX, $scope.scaledY)) {
+                if ($scope.links[i].is_selected($scope.scaledX, $scope.scaledY)) {
                     $scope.links[i].selected = true;
                     $scope.send_control_message(new messages.LinkSelected($scope.client_id, $scope.links[i].id));
                     last_selected_link = $scope.links[i];
@@ -638,27 +624,40 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 	  $event.preventDefault();
 	};
 
-    // Conext Menu
-    $scope.onDetailsContextButton = function (button) {
-        console.log(button.name);
+    $scope.$watchCollection('selected_items', function(){
+        $scope.onDetailsContextButton(false);
+    });
+
+    // Conext Menu Button Handlers
+    $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-            // this will end up being the id of the host the user clicked on
-            let host_id = 1;
-            let url = `/api/v2/hosts/${host_id}/?format=json`;
-            $http.get(url)
-                 .then(function(host) {
-                     $scope.$emit('retrievedHostData', host.data);
-                 })
-                 .catch(function(httpGets) {
-                     console.log(httpGets);
-
-                 });
+            if ($scope.selected_items.length === 1){
+                if ($scope.selected_items[0].host_id === 0){
+                    $scope.$emit('retrievedHostData', {}, panelBoolean !== null ? panelBoolean: true);
+                }
+                if ($scope.selected_items[0].host_id !== 0){
+                    let host_id = $scope.selected_items[0].host_id;
+                    let url = `/api/v2/hosts/${host_id}/`;
+                    $http.get(url)
+                         .then(function(response) {
+                             let host = response.data;
+                             $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
+                             $scope.context_menus[0].enabled = false;
+                         })
+                         .catch(({data, status}) => {
+                             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+                         });
+                }
+            }
          }
+    };
 
+    $scope.onRenameContextButton = function (button) {
+        $scope.context_menus[0].enabled = false;
+        $scope.first_channel.send("LabelEdit", {});
     };
 
     // Button Event Handlers
-    //
     $scope.onToggleToolboxButtonLeft = function (button) {
         console.log(button.name);
         $scope.first_channel.send("ToggleToolbox", {});
@@ -771,13 +770,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Context Menu Buttons
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Rename", 210, 200, 160, 26, $scope.onRenameContextButton, $scope),
         new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, true, $scope.context_menu_buttons, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     // Icons
@@ -976,7 +975,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                        data.name,
                                        data.x,
                                        data.y,
-                                       data.type);
+                                       data.type,
+                                       data.host_id);
         $scope.device_id_seq = util.natural_numbers(data.id);
         $scope.devices.push(device);
     };
@@ -1274,7 +1274,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       data.previous_x,
                                                       data.previous_y,
                                                       data.previous_name,
-                                                      data.previous_type);
+                                                      data.previous_type,
+                                                      data.previous_host_id);
             $scope.create_device(inverted_data);
         }
 
@@ -1306,7 +1307,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
-        $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
     };
 
     $scope.onDeviceSelected = function(data) {
@@ -1474,7 +1474,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                            device.name,
                                            device.x,
                                            device.y,
-                                           device.type);
+                                           device.type,
+                                           device.host_id);
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);
