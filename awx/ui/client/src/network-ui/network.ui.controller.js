@@ -21,7 +21,7 @@ var messages = require('./messages.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http, $q) {
+var NetworkUIController = function($scope, $document, $location, $window, $http, $q, $state) {
 
   window.scope = $scope;
   var i = 0;
@@ -33,8 +33,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
   $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
-  //
-  $scope.inventory_id = $location.search().inventory_id || 1;
+
+  $scope.inventory_id = $state.params.inventory_id;
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
@@ -170,41 +170,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
 
   $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
-  function add_host (host) {
-      console.log(host);
-      var device = new models.Device(0, host.data.name, 0, 0, host.data.type);
-      device.icon = true;
-      $scope.inventory_toolbox.items.push(device);
-  }
+
 
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
-      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/?format=json')
-           .then(function(inventory) {
-               console.log(inventory);
-               console.log(inventory.headers());
-
-               var host = null;
-               var i = 0;
-               var httpGets = [];
-               for (i=0; i < inventory.data.results.length;i++) {
-                   host = inventory.data.results[i];
-                   console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
-                   console.log($scope.my_location);
-                   httpGets.push($http.get('/api/v2/hosts/'+ host.id + '/variable_data/?format=json'));
-               }
-               return httpGets;
-           })
-           .then(function(httpGets) {
-               console.log(httpGets);
-               $q.all(httpGets).then(function (results) {
-                   var i = 0;
-                   for (i=0; i < results.length; i++) {
-                       add_host(results[i]);
-                   }
+      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
+           .then(function(response) {
+               let hosts = response.data.results;
+               hosts.forEach(function(host){
+                   console.log(host);
+                   host.data = jsyaml.safeLoad(host.variables);
+                   var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id);
+                   device.icon = true;
+                   $scope.inventory_toolbox.items.push(device);
                });
            });
   }
@@ -638,27 +619,32 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 	  $event.preventDefault();
 	};
 
-    // Conext Menu
+    // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (button) {
         console.log(button.name);
         if (!$scope.disconnected) {
-            // this will end up being the id of the host the user clicked on
-            let host_id = 1;
-            let url = `/api/v2/hosts/${host_id}/?format=json`;
-            $http.get(url)
-                 .then(function(host) {
-                     $scope.$emit('retrievedHostData', host.data);
-                 })
-                 .catch(function(httpGets) {
-                     console.log(httpGets);
+            if($scope.selected_items.length === 1){
+                let host_id = $scope.selected_items[0].tower_id;
+                let url = `/api/v2/hosts/${host_id}/?format=json`;
+                $http.get(url)
+                     .then(function(host) {
+                         $scope.$emit('retrievedHostData', host.data);
+                         $scope.context_menus[0].enabled = false;
+                     })
+                     .catch(function(error) {
+                         console.log(error);
+                     });
+            }
 
-                 });
          }
+    };
 
+    $scope.onRenameContextButton = function (button) {
+        $scope.context_menus[0].enabled = false;
+        $scope.first_channel.send("LabelEdit", {});
     };
 
     // Button Event Handlers
-    //
     $scope.onToggleToolboxButtonLeft = function (button) {
         console.log(button.name);
         $scope.first_channel.send("ToggleToolbox", {});
@@ -771,13 +757,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Context Menu Buttons
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Edit", 210, 200, 160, 26, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Rename", 210, 200, 160, 26, $scope.onRenameContextButton, $scope),
         new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, true, $scope.context_menu_buttons, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     // Icons

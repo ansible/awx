@@ -4,8 +4,9 @@ var button = require('./button.js');
 var util = require('./util.js');
 var inherits = require('inherits');
 
-function Device(id, name, x, y, type) {
+function Device(id, name, x, y, type, tower_id) {
     this.id = id;
+    this.tower_id = tower_id ? tower_id: null;
     this.name = name;
     this.x = x;
     this.y = y;
@@ -374,9 +375,9 @@ function ContextMenu(name, x, y, width, height, callback, enabled, buttons, trac
     this.callback = callback;
     this.is_pressed = false;
     this.mouse_over = false;
-    this.enabled = enabled;
+    this.enabled = false;
     this.buttons = buttons;
-    this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
+    this.fsm = new fsm.FSMController(this, "button_fsm", enabled ? button.Start : button.Disabled, tracer);
 }
 exports.ContextMenu = ContextMenu;
 
