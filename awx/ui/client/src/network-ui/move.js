@@ -477,10 +477,8 @@ _Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
         button.y = $event.y + menuPaddingTop + (button.height * index);
     });
 
-    // controller.changeState(EditLabel);
     controller.changeState(ContextMenu);
 };
-// _Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
 _Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
 _Selected3.prototype.onTouchEnd = function (controller) {
