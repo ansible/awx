@@ -43,44 +43,35 @@ def get_current_user_or_none():
     return u
 
 
-def emit_job_event_detail(sender, **kwargs):
+def emit_event_detail(serializer, relation, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
     if created:
-        event_serialized = JobEventWebSocketSerializer(instance).data
-        consumers.emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
+        event_serializer = serializer(instance)
+        consumers.emit_channel_notification(
+            '-'.join([event_serializer.get_group_name(instance), str(getattr(instance, relation))]),
+            event_serializer.data
+        )
+
+
+def emit_job_event_detail(sender, **kwargs):
+    emit_event_detail(JobEventWebSocketSerializer, 'job_id', **kwargs)
 
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        event_serialized = AdHocCommandEventWebSocketSerializer(instance).data
-        consumers.emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+    emit_event_detail(AdHocCommandEventWebSocketSerializer, 'ad_hoc_command_id', **kwargs)
 
 
 def emit_project_update_event_detail(sender, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        event_serialized = ProjectUpdateEventWebSocketSerializer(instance).data
-        consumers.emit_channel_notification('project_update_events-' + str(instance.project_update_id), event_serialized)
+    emit_event_detail(ProjectUpdateEventWebSocketSerializer, 'project_update_id', **kwargs)
 
 
 def emit_inventory_update_event_detail(sender, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        event_serialized = InventoryUpdateEventWebSocketSerializer(instance).data
-        consumers.emit_channel_notification('inventory_update_events-' + str(instance.inventory_update_id), event_serialized)
+    emit_event_detail(InventoryUpdateEventWebSocketSerializer, 'inventory_update_id', **kwargs)
 
 
 def emit_system_job_event_detail(sender, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        event_serialized = SystemJobEventWebSocketSerializer(instance).data
-        consumers.emit_channel_notification('system_job_events-' + str(instance.system_job_id), event_serialized)
+    emit_event_detail(SystemJobEventWebSocketSerializer, 'system_job_id', **kwargs)
 
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
