@@ -16,19 +16,22 @@ event group and event type which we later use in our wire protocol to control me
 You can connect to the Tower channels implementation using any standard websocket library but pointing it to `/websocket`. You must
 provide a valid Auth Token in the request URL.
 
-Once you''ve connected you are not subscribed to any event groups. You subscribe by sending a json request that looks like the following:
+Once you've connected, you are not subscribed to any event groups. You subscribe by sending a json request that looks like the following:
 
     'groups': {
             'jobs': ['status_changed', 'summary'],
             'schedules': ['changed'],
             'ad_hoc_command_events': [ids...],
             'job_events': [ids...],
-            'workflow_events': [ids...]
+            'workflow_events': [ids...],
+            'project_update_events': [ids...],
+            'inventory_update_events': [ids...],
+            'system_job_events': [ids...],
             'control': ['limit_reached'],
     }
 
 These map to the event group and event type you are interested in. Sending in a new groups dictionary will clear all of your previously
-subscribed groups before subscribing to the newly requested ones. This is intentional makes the single page navigation much easier since
+subscribed groups before subscribing to the newly requested ones. This is intentional, and makes the single page navigation much easier since
 you only need to care about current subscriptions.
 
 ## Deployment
