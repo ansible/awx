@@ -99,7 +99,6 @@ def run_pexpect(args, cwd, env, logfile,
     password_patterns = expect_passwords.keys()
     password_values = expect_passwords.values()
 
-    logfile_pos = logfile.tell()
     child = pexpect.spawn(
         args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
         encoding='utf-8', echo=False,
@@ -116,8 +115,6 @@ def run_pexpect(args, cwd, env, logfile,
         password = password_values[result_id]
         if password is not None:
             child.sendline(password)
-        if logfile_pos != logfile.tell():
-            logfile_pos = logfile.tell()
             last_stdout_update = time.time()
         if cancelled_callback:
             try:

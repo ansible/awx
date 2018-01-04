@@ -544,7 +544,8 @@ def _request(verb):
                         response.data = data_copy
                 print(response.data)
             assert response.status_code == expect
-        response.render()
+        if hasattr(response, 'render'):
+            response.render()
         return response
     return rf
 

@@ -21,7 +21,8 @@ export default {
         jobType: 'project_updates',
         socket: {
             "groups": {
-                "jobs": ["status_changed"]
+                "jobs": ["status_changed", "summary"],
+                "project_update_events": [],
             }
         },
     }

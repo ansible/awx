@@ -1,4 +1,3 @@
-import cStringIO
 import pytest
 import base64
 import json
@@ -33,8 +32,7 @@ def fake_cache():
 @pytest.fixture
 def wrapped_handle(job_event_callback):
     # Preliminary creation of resources usually done in tasks.py
-    stdout_handle = cStringIO.StringIO()
-    return OutputEventFilter(stdout_handle, job_event_callback)
+    return OutputEventFilter(job_event_callback)
 
 
 @pytest.fixture
@@ -78,15 +76,6 @@ def test_separate_verbose_events(fake_callback, wrapped_handle):
     for event_data in fake_callback:
         assert 'event' in event_data
         assert event_data['event'] == 'verbose'
-
-
-def test_verbose_event_no_markings(fake_callback, wrapped_handle):
-    '''
-    This occurs with jobs that do not have events but still generate
-    and output stream, like system jobs
-    '''
-    wrapped_handle.write('Running tower-manage command \n')
-    assert wrapped_handle._fileobj.getvalue() == 'Running tower-manage command \n'
 
 
 def test_large_data_payload(fake_callback, fake_cache, wrapped_handle):

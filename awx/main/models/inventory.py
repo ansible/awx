@@ -29,6 +29,7 @@ from awx.main.fields import (
 )
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
+from awx.main.models.events import InventoryUpdateEvent
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin, TaskManagerInventoryUpdateMixin
 from awx.main.models.notifications import (
@@ -1589,6 +1590,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return os.path.join(
             self.inventory_source.source_project.get_project_path(check_if_exists=False),
             self.source_path)
+
+    @property
+    def event_class(self):
+        return InventoryUpdateEvent
 
     @property
     def task_impact(self):

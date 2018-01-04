@@ -1987,6 +1987,64 @@ class JobEventAccess(BaseAccess):
         return False
 
 
+class ProjectUpdateEventAccess(BaseAccess):
+    '''
+    I can see project update event records whenever I can access the project update
+    '''
+
+    model = ProjectUpdateEvent
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            Q(project_update__in=ProjectUpdate.accessible_pk_qs(self.user, 'read_role')))
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
+class InventoryUpdateEventAccess(BaseAccess):
+    '''
+    I can see inventory update event records whenever I can access the inventory update
+    '''
+
+    model = InventoryUpdateEvent
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(
+            Q(inventory_update__in=InventoryUpdate.accessible_pk_qs(self.user, 'read_role')))
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
+class SystemJobEventAccess(BaseAccess):
+    '''
+    I can only see manage System Jobs events if I'm a super user
+    '''
+    model = SystemJobEvent
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+
 class UnifiedJobTemplateAccess(BaseAccess):
     '''
     I can see a unified job template whenever I can see the same project,

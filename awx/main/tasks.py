@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import codecs
 from collections import OrderedDict
 import ConfigParser
 import cStringIO
@@ -17,7 +16,6 @@ import tempfile
 import time
 import traceback
 import urlparse
-import uuid
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -498,6 +496,7 @@ def with_path_cleanup(f):
 class BaseTask(LogErrorsTask):
     name = None
     model = None
+    event_model = None
     abstract = True
     cleanup_paths = []
     proot_show_paths = []
@@ -518,17 +517,13 @@ class BaseTask(LogErrorsTask):
                 if updates:
                     update_fields = ['modified']
                     for field, value in updates.items():
-                        if field in ('result_stdout', 'result_traceback'):
+                        if field in ('result_traceback'):
                             for srch, repl in output_replacements:
                                 value = value.replace(srch, repl)
                         setattr(instance, field, value)
                         update_fields.append(field)
                         if field == 'status':
                             update_fields.append('failed')
-                    if 'result_stdout_text' in update_fields:
-                        # result_stdout_text is now deprecated, and is no longer
-                        # an actual Django field (it's a property)
-                        update_fields.remove('result_stdout_text')
                     instance.save(update_fields=update_fields)
                 return instance
         except DatabaseError as e:
@@ -738,14 +733,19 @@ class BaseTask(LogErrorsTask):
 
     def get_stdout_handle(self, instance):
         '''
-        Return an open file object for capturing stdout.
+        Return an virtual file object for capturing stdout and events.
         '''
-        if not os.path.exists(settings.JOBOUTPUT_ROOT):
-            os.makedirs(settings.JOBOUTPUT_ROOT)
-        stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (instance.pk, str(uuid.uuid1())))
-        stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
-        assert stdout_handle.name == stdout_filename
-        return stdout_handle
+        dispatcher = CallbackQueueDispatcher()
+
+        def event_callback(event_data):
+            event_data.setdefault(self.event_data_key, instance.id)
+            if 'uuid' in event_data:
+                cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                if cache_event is not None:
+                    event_data.update(cache_event)
+            dispatcher.dispatch(event_data)
+
+        return OutputEventFilter(event_callback)
 
     def pre_run_hook(self, instance, **kwargs):
         '''
@@ -827,10 +827,8 @@ class BaseTask(LogErrorsTask):
             if isolated_host is None:
                 stdout_handle = self.get_stdout_handle(instance)
             else:
-                base_handle = super(self.__class__, self).get_stdout_handle(instance)
-                stdout_handle = isolated_manager.IsolatedManager.wrap_stdout_handle(
-                    instance, kwargs['private_data_dir'], base_handle,
-                    event_data_key=self.event_data_key)
+                stdout_handle = isolated_manager.IsolatedManager.get_stdout_handle(
+                    instance, kwargs['private_data_dir'], event_data_key=self.event_data_key)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
                     raise RuntimeError('bubblewrap is not installed')
@@ -847,7 +845,7 @@ class BaseTask(LogErrorsTask):
                 args = run.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
                 safe_args = run.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_handle.name)
+                                         job_cwd=cwd, job_env=safe_env)
 
             expect_passwords = {}
             for k, v in self.get_password_prompts(**kwargs).items():
@@ -940,7 +938,8 @@ class RunJob(BaseTask):
 
     name = 'awx.main.tasks.run_job'
     model = Job
-    event_data_key= 'job_id'
+    event_model = JobEvent
+    event_data_key = 'job_id'
 
     def build_private_data(self, job, **kwargs):
         '''
@@ -1207,29 +1206,6 @@ class RunJob(BaseTask):
                 d[re.compile(r'Vault password \({}\):\s*?$'.format(vault_id), re.M)] = k
         return d
 
-    def get_stdout_handle(self, instance):
-        '''
-        Wrap stdout file object to capture events.
-        '''
-        stdout_handle = super(RunJob, self).get_stdout_handle(instance)
-
-        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
-            dispatcher = CallbackQueueDispatcher()
-
-            def job_event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                if 'uuid' in event_data:
-                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
-                    if cache_event is not None:
-                        event_data.update(cache_event)
-                dispatcher.dispatch(event_data)
-        else:
-            def job_event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                JobEvent.create_from_data(**event_data)
-
-        return OutputEventFilter(stdout_handle, job_event_callback)
-
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
@@ -1290,6 +1266,8 @@ class RunProjectUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
+    event_model = ProjectUpdateEvent
+    event_data_key = 'project_update_id'
 
     @property
     def proot_show_paths(self):
@@ -1343,6 +1321,10 @@ class RunProjectUpdate(BaseTask):
         # give ansible a hint about the intended tmpdir to work around issues
         # like https://github.com/ansible/ansible/issues/30064
         env['TMP'] = settings.AWX_PROOT_BASE_PATH
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
+        env['PROJECT_UPDATE_ID'] = str(project_update.pk)
+        env['ANSIBLE_CALLBACK_PLUGINS'] = self.get_path_to('..', 'plugins', 'callback')
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
         return env
 
     def _build_scm_url_extra_vars(self, project_update, **kwargs):
@@ -1480,16 +1462,6 @@ class RunProjectUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
-    def get_stdout_handle(self, instance):
-        stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
-        pk = instance.pk
-
-        def raw_callback(data):
-            instance_actual = self.update_model(pk)
-            result_stdout_text = instance_actual.result_stdout_text + data
-            self.update_model(pk, result_stdout_text=result_stdout_text)
-        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
-
     def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
         project_request_id = '' if self.request.id is None else self.request.id
         scm_revision = project_update.project.scm_revision
@@ -1615,6 +1587,8 @@ class RunInventoryUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_inventory_update'
     model = InventoryUpdate
+    event_model = InventoryUpdateEvent
+    event_data_key = 'inventory_update_id'
 
     def build_private_data(self, inventory_update, **kwargs):
         """
@@ -1986,16 +1960,6 @@ class RunInventoryUpdate(BaseTask):
             args.append('--traceback')
         return args
 
-    def get_stdout_handle(self, instance):
-        stdout_handle = super(RunInventoryUpdate, self).get_stdout_handle(instance)
-        pk = instance.pk
-
-        def raw_callback(data):
-            instance_actual = self.update_model(pk)
-            result_stdout_text = instance_actual.result_stdout_text + data
-            self.update_model(pk, result_stdout_text=result_stdout_text)
-        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
-
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
 
@@ -2042,6 +2006,7 @@ class RunAdHocCommand(BaseTask):
 
     name = 'awx.main.tasks.run_ad_hoc_command'
     model = AdHocCommand
+    event_model = AdHocCommandEvent
     event_data_key = 'ad_hoc_command_id'
 
     def build_private_data(self, ad_hoc_command, **kwargs):
@@ -2199,29 +2164,6 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         return d
 
-    def get_stdout_handle(self, instance):
-        '''
-        Wrap stdout file object to capture events.
-        '''
-        stdout_handle = super(RunAdHocCommand, self).get_stdout_handle(instance)
-
-        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
-            dispatcher = CallbackQueueDispatcher()
-
-            def ad_hoc_command_event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                if 'uuid' in event_data:
-                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
-                    if cache_event is not None:
-                        event_data.update(cache_event)
-                dispatcher.dispatch(event_data)
-        else:
-            def ad_hoc_command_event_callback(event_data):
-                event_data.setdefault(self.event_data_key, instance.id)
-                AdHocCommandEvent.create_from_data(**event_data)
-
-        return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
-
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
@@ -2233,6 +2175,8 @@ class RunSystemJob(BaseTask):
 
     name = 'awx.main.tasks.run_system_job'
     model = SystemJob
+    event_model = SystemJobEvent
+    event_data_key = 'system_job_id'
 
     def build_args(self, system_job, **kwargs):
         args = ['awx-manage', system_job.job_type]
@@ -2258,16 +2202,6 @@ class RunSystemJob(BaseTask):
         except Exception:
             logger.exception("%s Failed to parse system job", system_job.log_format)
         return args
-
-    def get_stdout_handle(self, instance):
-        stdout_handle = super(RunSystemJob, self).get_stdout_handle(instance)
-        pk = instance.pk
-
-        def raw_callback(data):
-            instance_actual = self.update_model(pk)
-            result_stdout_text = instance_actual.result_stdout_text + data
-            self.update_model(pk, result_stdout_text=result_stdout_text)
-        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_env(self, instance, **kwargs):
         env = super(RunSystemJob, self).build_env(instance,
