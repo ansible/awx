@@ -346,6 +346,24 @@ function extend (related, config) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
+function next (related) {
+    related = related || this.resource;
+
+    if (!this.has(`related.${related}.next`)) {
+        return Promise.resolve(null);
+    }
+
+    const req = {
+        method: 'GET',
+        url: this.get(`related.${related}.next`)
+    };
+
+    return $http(req)
+        .then(({ data }) => {
+            console.log(data);
+        });
+}
+
 function normalizePath (resource) {
     const version = '/api/v2/';
 
@@ -523,6 +541,7 @@ function BaseModel (resource, settings) {
     this.isCacheable = isCacheable;
     this.isCreatable = isCreatable;
     this.match = match;
+    this.next = next;
     this.normalizePath = normalizePath;
     this.options = options;
     this.parseRequestConfig = parseRequestConfig;

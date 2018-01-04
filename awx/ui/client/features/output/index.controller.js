@@ -3,6 +3,7 @@ import hasAnsi from 'has-ansi';
 
 let vm;
 let ansi;
+let job;
 let jobEvent;
 let $timeout;
 let $sce;
@@ -27,11 +28,12 @@ const TIME_EVENTS = [
     EVENT_STATS_PLAY
 ];
 
-function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, _$compile_) {
+function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_, _$compile_) {
     $timeout = _$timeout_;
     $sce = _$sce_;
     $compile = _$compile_;
     $scope = _$scope_;
+    job = _job_;
 
     ansi = new Ansi();
     jobEvent = new JobEventModel();
@@ -39,7 +41,9 @@ function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, 
     const events = job.get('related.job_events.results');
     const html = $sce.trustAsHtml(parseEvents(events));
 
-    vm = this || {}; $scope.ns = 'jobs';
+    vm = this || {};
+
+    $scope.ns = 'jobs';
     $scope.jobs = {
         modal: {}
     };
@@ -48,9 +52,13 @@ function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, 
     vm.showHostDetails = showHostDetails;
 
     vm.menu = {
+        scroll,
         top: {
-            expand: menuExpand,
+            expand,
             isExpanded: false
+        },
+        bottom: {
+            next
         }
     };
 
@@ -62,8 +70,25 @@ function JobsIndexController (job, JobEventModel, _$sce_, _$timeout_, _$scope_, 
     });
 }
 
-function menuExpand () {
+function next () {
+    job.next('job_events')
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function expand () {
     vm.toggle(meta.parent);
+}
+
+function scroll (direction) {
+    const container = $('.at-Stdout-container')[0];
+
+    if (direction === 'top') {
+        container.scrollTop = 0;
+    } else {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 function parseEvents (events) {

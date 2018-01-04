@@ -20,8 +20,6 @@ function AtCodeMenuTopController () {
     vm.scroll = () => {
         const container = element.parent().find('.at-Stdout-container')[0];
 
-        console.log(container);
-
         container.scrollTop = 0;
     };
 

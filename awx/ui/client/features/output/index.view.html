@@ -7,12 +7,27 @@
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
-            <at-code-menu-top state="vm.menu.top"></at-code-menu-top>
+            <div class="at-Stdout-menuTop">
+                <div class="pull-left" ng-click="vm.menu.top.expand()">
+                    <i class="at-Stdout-menuIcon fa"
+                       ng-class="{ 'fa-minus': vm.menu.top.isExpanded, 'fa-plus': !vm.menu.top.isExpanded }"></i>
+                </div>
+
+                <div class="pull-right" ng-click="vm.menu.scroll('bottom')">
+                    <i class="at-Stdout-menuIcon fa fa-arrow-down"></i>
+                </div>
+
+                <div class="at-u-clear"></div>
+            </div>
 
             <pre class="at-Stdout-container"><table><thead><tr><th class="at-Stdout-toggle">&nbsp;</th><th class="at-Stdout-line"></th><th class="at-Stdout-event"></th></tr></thead><tbody id="result-table"></tbody></table></pre>
 
             <div class="at-Stdout-menuBottom">
-                <div class="pull-right" ng-click="vm.menu.scrollToTop()">
+                <div class="pull-left" ng-click="vm.menu.bottom.next()">
+                    <i class="at-Stdout-menuIcon fa fa-plus"></i>
+                </div>
+
+                <div class="pull-right" ng-click="vm.menu.scroll('top')">
                     <i class="at-Stdout-menuIcon fa fa-arrow-up"></i>
                 </div>
 
@@ -23,6 +38,6 @@
 
     <at-modal>
         <br />
-        <at-output-stdout state="vm.host"></at-output-stdout>
+        <at-code-stdout state="vm.host"></at-code-stdout>
     </at-modal>
 </div>

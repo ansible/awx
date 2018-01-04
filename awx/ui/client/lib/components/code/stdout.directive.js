@@ -7,11 +7,11 @@ let $sce;
 let $timeout;
 let ansi;
 
-function atOutputStdoutLink (scope, element, attrs, controller) {
+function atCodeStdoutLink (scope, element, attrs, controller) {
     controller.init(scope, element);
 }
 
-function AtOutputStdoutController (_$sce_, _$timeout_) {
+function AtCodeStdoutController (_$sce_, _$timeout_) {
     const vm = this || {};
 
     $timeout = _$timeout_;
@@ -45,7 +45,7 @@ function AtOutputStdoutController (_$sce_, _$timeout_) {
     };
 }
 
-AtOutputStdoutController.$inject = [
+AtCodeStdoutController.$inject = [
     '$sce',
     '$timeout',
 ];
@@ -85,20 +85,21 @@ function createRow (ln, content) {
             <td class="at-Stdout-event">${content}</td>
         </tr>`;
 }
-function atOutputStdout () {
+
+function atCodeStdout () {
     return {
         restrict: 'E',
         transclude: true,
         replace: true,
-        require: 'atOutputStdout',
+        require: 'atCodeStdout',
         templateUrl,
-        controller: AtOutputStdoutController,
+        controller: AtCodeStdoutController,
         controllerAs: 'vm',
-        link: atOutputStdoutLink,
+        link: atCodeStdoutLink,
         scope: {
             state: '=',
         }
     };
 }
 
-export default atOutputStdout;
+export default atCodeStdout;
