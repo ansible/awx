@@ -363,8 +363,9 @@ def handle_work_success(self, result, task_actual):
 
 
 @shared_task(queue='tower', base=LogErrorsTask)
-def handle_work_error(request, exc, traceback, task_id, subtasks=None):
-    logger.debug('Executing error task id %s, subtasks: %s' % (request.id, str(subtasks)))
+def handle_work_error(task_id, *args, **kwargs):
+    subtasks = kwargs.get('subtasks', None)
+    logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
     first_instance = None
     first_instance_type = ''
     if subtasks is not None:
