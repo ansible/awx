@@ -19,6 +19,8 @@ global.$ = global.jQuery;
 require('jquery-resize');
 require('jquery-ui');
 require('jquery-ui/ui/widgets/button');
+require('jquery-ui/ui/widgets/dialog');
+require('jquery-ui/ui/widgets/slider'); 
 require('jquery-ui/ui/widgets/spinner');
 require('bootstrap');
 require('bootstrap-datepicker');
