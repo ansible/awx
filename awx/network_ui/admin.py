@@ -34,9 +34,11 @@ from awx.network_ui.models import ToolboxItem
 
 from awx.network_ui.models import FSMTrace
 
+from awx.network_ui.models import TopologyInventory
+
 
 class DeviceAdmin(admin.ModelAdmin):
-    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq',)
+    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
     raw_id_fields = ('topology',)
 
 
@@ -169,3 +171,11 @@ class FSMTraceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FSMTrace, FSMTraceAdmin)
+
+
+class TopologyInventoryAdmin(admin.ModelAdmin):
+    fields = ('topology', 'inventory_id',)
+    raw_id_fields = ('topology',)
+
+
+admin.site.register(TopologyInventory, TopologyInventoryAdmin)
