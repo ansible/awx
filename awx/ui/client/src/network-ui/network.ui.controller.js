@@ -180,13 +180,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
            .then(function(response) {
                let hosts = response.data.results;
-               hosts.forEach(function(host){
+               for(var i = 0; i<hosts.length; i++){
+                   let host = hosts[i];
                    console.log(host);
                    host.data = jsyaml.safeLoad(host.variables);
                    var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id);
                    device.icon = true;
                    $scope.inventory_toolbox.items.push(device);
-               });
+               }
            });
   }
   $scope.inventory_toolbox.spacing = 150;
