@@ -3646,15 +3646,16 @@ class JobLaunchSerializer(BaseSerializer):
                     id=getattrd(obj, '%s.pk' % field_name, None))
             elif field_name == 'credentials':
                 if self.version > 1:
-                    defaults_dict[field_name] = [
-                        dict(
+                    for cred in obj.credentials.all():
+                        cred_dict = dict(
                             id=cred.id,
                             name=cred.name,
                             credential_type=cred.credential_type.pk,
                             passwords_needed=cred.passwords_needed
                         )
-                        for cred in obj.credentials.all()
-                    ]
+                        if cred.credential_type.managed_by_tower and 'vault_id' in cred.credential_type.defined_fields:
+                            cred_dict['vault_id'] = cred.inputs.get('vault_id') or None
+                        defaults_dict.setdefault(field_name, []).append(cred_dict)
             else:
                 defaults_dict[field_name] = getattr(obj, field_name)
         return defaults_dict
