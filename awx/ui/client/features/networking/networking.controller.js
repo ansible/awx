@@ -19,8 +19,12 @@ function NetworkingController (models, $state, $scope, strings) {
         $state.go('inventories');
     };
 
-    $scope.$on('retrievedHostData', (e, hostData) => {
-        if (!vm.panelIsExpanded) {
+    $scope.$on('closeDetailsPanel', () => {
+        vm.panelIsExpanded = false;
+    });
+
+    $scope.$on('retrievedHostData', (e, hostData, expand) => {
+        if (expand) {
             vm.panelIsExpanded = true;
         }
         $scope.hostDetail = hostData;
