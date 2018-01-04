@@ -153,8 +153,8 @@ models:
   - name: id
     type: IntegerField
   name: Interface
-  x: 600
-  y: 243
+  x: 1157
+  y: 337
 - fields:
   - name: group_id
     pk: true
@@ -349,8 +349,34 @@ models:
   name: FSMTrace
   x: -872
   y: 507
+- fields:
+  - name: topology_inventory_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - name: inventory_id
+    type: IntegerField
+  name: TopologyInventory
+  x: -226
+  y: -19
+- fields:
+  - name: device_host_id
+    pk: true
+    type: AutoField
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  - name: host_id
+    type: IntegerField
+  name: DeviceHost
+  x: 737
+  y: 331
 modules: []
 view:
-  panX: 213.72955551921206
-  panY: 189.44695909464298
-  scaleXY: 0.6900000000000002
+  panX: 213.729555519212
+  panY: 189.446959094643
+  scaleXY: 0.69
