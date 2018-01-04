@@ -31,9 +31,13 @@
 @button-body-pressed: #848992;
 @button-text-pressed: #ffffff;
 @green: #5CB85C;
+@host-green: #449D44;
 @red:  #D9534F;
+@blue: #337AB7;
 @light-toolbox-background: #f6f6f6;
-@icon-background-hover:#337AB7;
+@rack-orange: #F0AD4E;
+@site-orange: #EC971F;
+@icon-background-hover:@blue;
 
 .NetworkUI {
     background-color: @light-toolbox-background;
@@ -114,14 +118,17 @@
 }
 
 .NetworkUI__router {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @green;
+}
+
+.NetworkUI__router--background{
+    fill: @light-background;
 }
 
 .NetworkUI__router--selected {
     stroke: @selected-blue;
     stroke-width: 4;
+    fill:@light-background;
 }
 
 .NetworkUI__router--remote-selected {
@@ -132,16 +139,6 @@
 .NetworkUI__router--selected-conflict {
     stroke: @selected-red;
     stroke-width: 4;
-}
-
-.NetworkUI__router line {
-    stroke: @light-widget-detail;
-    stroke-width: 20;
-}
-
-.NetworkUI__router polygon {
-    fill: @light-widget-detail;
-    stroke: none;
 }
 
 .NetworkUI__router-text {
@@ -156,14 +153,17 @@
 
 
 .NetworkUI__switch {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @blue;
+}
+
+.NetworkUI__switch--background{
+    fill: @light-background;
 }
 
 .NetworkUI__switch--selected {
     stroke: @selected-blue;
     stroke-width: 10;
+    fill:@light-background;
 }
 
 .NetworkUI__switch--remote-selected {
@@ -197,19 +197,15 @@
 }
 
 .NetworkUI__rack {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @rack-orange;
 }
 
-.NetworkUI__rack-background {
+.NetworkUI__rack--background {
     fill: @light-background;
-    stroke: @light-background;
-    stroke-width: 2;
 }
 
 .NetworkUI__rack--selected {
-    fill: @selected-blue;
+    fill: @light-background;
     stroke: @selected-blue;
     stroke-width: 10;
 }
@@ -252,20 +248,33 @@
     stroke-width: 2;
 }
 
+.NetworkUI__site--fill0{
+    fill:@site-orange;
+}
+
+.NetworkUI__site--fill1{
+    fill:none;
+    stroke:@light-background;
+    stroke-width:2;
+    stroke-miterlimit:10;
+}
+
+.NetworkUI__site--fill2{
+    fill:@light-background;
+}
+
 .NetworkUI__site--network {
     fill: @dark-widget-detail;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.NetworkUI__site-background {
+.NetworkUI__site--background {
     fill: @light-background;
-    stroke: @light-background;
-    stroke-width: 2;
 }
 
 .NetworkUI__site--selected {
-    fill: @selected-blue;
+    fill: @light-background;
     stroke: @selected-blue;
     stroke-width: 10;
 }
@@ -411,19 +420,15 @@
 }
 
 .NetworkUI__host {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @host-green;
 }
 
-.NetworkUI__host-background {
+.NetworkUI__host--background {
     fill: @light-background;
-    stroke: @light-background;
-    stroke-width: 2;
 }
 
 .NetworkUI__host--selected {
-    fill: @selected-blue;
+    fill: @light-background;
     stroke: @selected-blue;
     stroke-width: 10;
 }
@@ -746,13 +751,13 @@
 }
 
 .NetworkUI__contextMenuButtonText{
-    fill: @button-text;
+    fill: #333; //@button-text;
     font-family: 'Open Sans';
     font-size: 14px;
 }
 
 .NetworkUI__contextMenuButtonText-hover{
-    fill: @button-text;
+    fill: #333; //@button-text;
     font-family: 'Open Sans';
     font-size: 14px;
 }

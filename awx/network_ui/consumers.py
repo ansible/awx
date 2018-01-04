@@ -9,13 +9,12 @@ from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.models import FSMTrace
-from awx.network_ui.serializers import yaml_serialize_topology
+from awx.network_ui.models import TopologyInventory
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from collections import defaultdict
-from django.conf import settings
 import math
 import random
 import logging
@@ -249,7 +248,18 @@ def parse_topology_id(data):
     return topology_id
 
 
+def parse_inventory_id(data):
+    inventory_id = data.get('inventory_id', ['null'])
+    try:
+        inventory_id = int(inventory_id[0])
+    except ValueError:
+        inventory_id = None
+    if not inventory_id:
+        inventory_id = None
+    return inventory_id
+
 # Persistence
+
 
 class _Persistence(object):
 
@@ -270,7 +280,7 @@ class _Persistence(object):
         message_value = data[1]
         try:
             message_type_id = MessageType.objects.get(name=message_type).pk
-        except ObjectDoesNotExist, e:
+        except ObjectDoesNotExist:
             logger.warning("Unsupported message %s", message_type)
             return
         TopologyHistory(topology_id=topology_id,
@@ -292,11 +302,15 @@ class _Persistence(object):
                                      y='y',
                                      name='name',
                                      type='type',
-                                     id='id'), device)
+                                     id='id',
+                                     host_id='host_id'), device)
+        logger.info("Device %s", device)
+        print ("Device %s" % device)
         d, _ = Device.objects.get_or_create(topology_id=topology_id, id=device['id'], defaults=device)
         d.x = device['x']
         d.y = device['y']
         d.type = device['type']
+        d.host_id = device['host_id']
         d.save()
         (Topology.objects
                  .filter(topology_id=topology_id, device_id_seq__lt=device['id'])
@@ -516,13 +530,13 @@ class _Persistence(object):
             GroupDeviceMap.objects.bulk_create(new_entries)
 
     def onFSMTrace(self, message_value, diagram_id, client_id):
-	FSMTrace(trace_session_id=message_value['trace_id'],
-	     fsm_name=message_value['fsm_name'],
-	     from_state=message_value['from_state'],
-	     to_state=message_value['to_state'],
-	     order=message_value['order'],
-	     client_id=client_id,
-	     message_type=message_value['recv_message_type'] or "none").save()
+        FSMTrace(trace_session_id=message_value['trace_id'],
+                 fsm_name=message_value['fsm_name'],
+                 from_state=message_value['from_state'],
+                 to_state=message_value['to_state'],
+                 order=message_value['order'],
+                 client_id=client_id,
+                 message_type=message_value['recv_message_type'] or "none").save()
 
 
 persistence = _Persistence()
@@ -777,9 +791,19 @@ def ansible_disconnect(message):
 def ws_connect(message):
     # Accept connection
     data = urlparse.parse_qs(message.content['query_string'])
-    topology_id = parse_topology_id(data)
-    topology, created = Topology.objects.get_or_create(
-        topology_id=topology_id, defaults=dict(name="topology", scale=1.0, panX=0, panY=0))
+    inventory_id = parse_inventory_id(data)
+    topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('topology_id', flat=True))
+    print ("topology_ids", topology_ids)
+    topology_id = 0
+    if len(topology_ids) > 0:
+        topology_id = topology_ids[0]
+    print ("topology_id", topology_id)
+    if topology_id:
+        topology = Topology.objects.get(topology_id=topology_id)
+    else:
+        topology = Topology(name="topology", scale=1.0, panX=0, panY=0)
+        topology.save()
+        TopologyInventory(inventory_id=inventory_id, topology_id=topology.topology_id).save()
     topology_id = topology.topology_id
     message.channel_session['topology_id'] = topology_id
     Group("topology-%s" % topology_id).add(message.reply_channel)
@@ -902,6 +926,7 @@ def console_printer(message):
     print message['text']  # pragma: no cover
 
 # Tester channel events
+
 
 @channel_session
 def tester_connect(message):
