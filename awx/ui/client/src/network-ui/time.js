@@ -38,7 +38,6 @@ _Past.prototype.start = function (controller) {
 
 _Past.prototype.onMessage = function(controller, msg_type, message) {
 
-    //console.log(message.data);
     var type_data = JSON.parse(message.data);
     var type = type_data[0];
     var data = type_data[1];
@@ -68,7 +67,6 @@ _Past.prototype.onMessage = function(controller, msg_type, message) {
 
 _Past.prototype.onMultipleMessage = function(controller, msg_type, message) {
         var i = 0;
-        console.log(['MultipleMessage', message]);
         if (message.sender !== controller.scope.client_id) {
             for (i=0; i< message.messages.length; i++) {
                 controller.handle_message(message.messages[i].msg_type, message.messages[i]);
@@ -126,27 +124,11 @@ _Past.prototype.onViewPort = function(controller, msg_type, message) {
         controller.scope.updateScaledXY();
         controller.scope.updatePanAndScale();
 };
-_Past.prototype.onTouchEvent = function(controller, msg_type, message) {
-        if (message.sender === controller.scope.client_id) {
-            return;
-        }
-        message.preventDefault = util.noop;
-        if (message.type === "touchstart") {
-            controller.scope.onTouchStart(message);
-        }
-        if (message.type === "touchend") {
-            controller.scope.onTouchEnd(message);
-        }
-        if (message.type === "touchmove") {
-            controller.scope.onTouchMove(message);
-        }
-};
 _Past.prototype.onMouseEvent = function(controller, msg_type, message) {
         if (message.sender === controller.scope.client_id) {
             return;
         }
         message.preventDefault = util.noop;
-        //console.log(message);
         if (message.type === "mousemove") {
             controller.scope.onMouseMove(message);
         }
@@ -164,7 +146,6 @@ _Past.prototype.onMouseEvent = function(controller, msg_type, message) {
         }
 };
 _Past.prototype.onMouseWheelEvent = function(controller, msg_type, message) {
-        console.log(message);
         if (message.sender === controller.scope.client_id) {
             return;
         }
@@ -177,7 +158,6 @@ _Past.prototype.onKeyEvent = function(controller, msg_type, message) {
             return;
         }
         message.preventDefault = util.noop;
-        //console.log(message);
         if (message.type === "keydown") {
             controller.scope.onKeyDown(message);
         }
@@ -189,7 +169,6 @@ _Past.prototype.onMouseWheel = function (controller, msg_type, message) {
     var delta = message[1];
 
     if ($event.originalEvent.metaKey) {
-        //console.log(delta);
         if (delta < 0) {
             this.undo(controller);
         } else if (delta > 0) {
@@ -204,7 +183,6 @@ _Past.prototype.onMouseWheel.transitions = ['Present'];
 
 _Past.prototype.onKeyDown = function(controller, msg_type, $event) {
 
-    //console.log($event);
 
     if ($event.key === 'z' && $event.metaKey && ! $event.shiftKey) {
         this.undo(controller);
@@ -266,7 +244,6 @@ _Start.prototype.start.transitions = ['Present'];
 
 _Present.prototype.onMessage = function(controller, msg_type, message) {
 
-    //console.log(message.data);
     var type_data = JSON.parse(message.data);
     var type = type_data[0];
     var data = type_data[1];
@@ -293,7 +270,6 @@ _Present.prototype.onMessage = function(controller, msg_type, message) {
 _Present.prototype.onMultipleMessage = function(controller, msg_type, message) {
 
     var i = 0;
-    console.log(['MultipleMessage', message]);
     if (message.sender !== controller.scope.client_id) {
         for (i = 0; i< message.messages.length; i++) {
             controller.handle_message(message.messages[i].msg_type, message.messages[i]);
@@ -303,10 +279,6 @@ _Present.prototype.onMultipleMessage = function(controller, msg_type, message) {
 
 _Present.prototype.onDeviceStatus = function(controller, msg_type, message) {
     controller.scope.onDeviceStatus(message);
-};
-
-_Present.prototype.onTaskStatus = function(controller, msg_type, message) {
-        controller.scope.onTaskStatus(message);
 };
 
 _Present.prototype.onFacts = function(controller, msg_type, message) {
@@ -428,24 +400,6 @@ _Present.prototype.onViewPort = function(controller, msg_type, message) {
         controller.scope.updateScaledXY();
         controller.scope.updatePanAndScale();
 };
-_Present.prototype.onTouchEvent = function(controller, msg_type, message) {
-        if (!controller.scope.replay) {
-            return;
-        }
-        if (message.sender === controller.scope.client_id) {
-            return;
-        }
-        message.preventDefault = util.noop;
-        if (message.type === "touchstart") {
-            controller.scope.onTouchStart(message);
-        }
-        if (message.type === "touchend") {
-            controller.scope.onTouchEnd(message);
-        }
-        if (message.type === "touchmove") {
-            controller.scope.onTouchMove(message);
-        }
-};
 _Present.prototype.onMouseEvent = function(controller, msg_type, message) {
         if (!controller.scope.replay) {
             return;
@@ -454,7 +408,6 @@ _Present.prototype.onMouseEvent = function(controller, msg_type, message) {
             return;
         }
         message.preventDefault = util.noop;
-        //console.log(message);
         if (message.type === "mousemove") {
             controller.scope.onMouseMove(message);
         }
@@ -472,7 +425,6 @@ _Present.prototype.onMouseWheelEvent = function(controller, msg_type, message) {
         if (!controller.scope.replay) {
             return;
         }
-        console.log(message);
         if (message.sender === controller.scope.client_id) {
             return;
         }
@@ -488,7 +440,6 @@ _Present.prototype.onMouseWheelEvent = function(controller, msg_type, message) {
             return;
         }
         message.preventDefault = util.noop;
-        //console.log(message);
         if (message.type === "keydown") {
             controller.scope.onKeyDown(message);
         }
@@ -500,7 +451,6 @@ _Present.prototype.onMouseWheel = function (controller, msg_type, message) {
     var delta = message[1];
 
     if ($event.originalEvent.metaKey) {
-        //console.log(delta);
         if (delta < 0) {
             this.undo(controller);
         }
@@ -513,7 +463,6 @@ _Present.prototype.onMouseWheel.transitions = ['Past'];
 
 _Present.prototype.onKeyDown = function(controller, msg_type, $event) {
 
-    //console.log($event);
 
     if ($event.key === 'z' && $event.metaKey && ! $event.shiftKey) {
         this.undo(controller);
@@ -543,7 +492,6 @@ _Present.prototype.undo = function(controller) {
 
 
 _Present.prototype.onTestCase = function(controller, msg_type, message) {
-    console.log([msg_type, message]);
     if ('runnable' in message[1]) {
         if (!message[1].runnable) {
             return;
@@ -557,6 +505,5 @@ _Present.prototype.onTestCase = function(controller, msg_type, message) {
 };
 
 _Present.prototype.onError = function(controller, msg_type, message) {
-    console.log(["onError", msg_type, message]);
     throw new Error("ServerError: " + message);
 };
