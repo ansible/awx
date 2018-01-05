@@ -1,78 +1,30 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
-
-
-                    <g ng-if="item.moving">
-                    <line ng-attr-x1="{{-50 - 100}}"
-                           ng-attr-y1="0"
-                           ng-attr-x2="{{50 + 100}}"
-                           ng-attr-y2="0"
-                           class="NetworkUI--construction"></line>
-                     <line ng-attr-x1="0"
-                           ng-attr-y1="{{-50 - 100}}"
-                           ng-attr-x2="0"
-                           ng-attr-y2="{{50 + 100}}"
-                           class="NetworkUI--construction"></line>
-                    </g>
-
-                     <g ng-if="!debug.hidden">
-                     <line ng-attr-x1="{{-50 - 10}}"
-                           ng-attr-y1="0"
-                           ng-attr-x2="{{50 + 10}}"
-                           ng-attr-y2="0"
-                           class="NetworkUI--debug"></line>
-                     <line ng-attr-x1="0"
-                           ng-attr-y1="{{-50 - 10}}"
-                           ng-attr-x2="0"
-                           ng-attr-y2="{{50 + 10}}"
-                           class="NetworkUI--debug"></line>
-                     <rect ng-attr-x="{{-50}}"
-                           ng-attr-y="{{-50}}"
-                           ng-attr-width="{{50 * 2}}"
-                           ng-attr-height="{{50 * 2}}"
-                           class="NetworkUI--debug"></rect>
-                     </g>
-                     <g class="NetworkUI__router">
-                    <circle
-                        cx="0"
-                        cy="0"
-                        ng-attr-r="{{50 + 2}}"
-                        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI--hidden'}}">
-                    </circle>
-                    <circle
-                        cx="0"
-                        cy="0"
-                        ng-attr-r="{{50}}">
-                    </circle>
-                    <g transform="rotate(45)">
-                        <line ng-attr-x1="12"
-                              ng-attr-y1="0"
-                              ng-attr-x2="{{50-18}}"
-                              ng-attr-y2="0"/>
-                        <line ng-attr-x1="-12"
-                              ng-attr-y1="0"
-                              ng-attr-x2="{{-50+18}}"
-                              ng-attr-y2="0"/>
-                        <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(0) translate({{50-22}}, -20) scale(2.0)"/>
-                        <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(180) translate({{50-22}}, -20) scale(2.0)"/>
-                        <line ng-attr-x1="0"
-                              ng-attr-y1="17"
-                              ng-attr-x2="0"
-                              ng-attr-y2="{{50-5}}"/>
-                        <line ng-attr-x1="0"
-                              ng-attr-y1="-17"
-                              ng-attr-x2="0"
-                              ng-attr-y2="{{-50+5}}"/>
-                        <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(90) translate(-22, -20) scale(2.0)" />
-                        <polygon points="0 0, 10 10, 0 20" ng-attr-transform="rotate(270) translate(-22, -20) scale(2.0)"/>
-                    </g>
-                     </g>
-                    <g ng-show="item.icon || current_scale > 0.5">
-                    <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
-						  filter="url(#selected)"
-                          text-anchor="middle"
-						  x="0"
-						  y="0"> {{item.name}}</text>
-                    <text class="NetworkUI__router-text" text-anchor="middle" x="0" y="0">{{item.name}}{{item.edit_label?'_':''}}</text>
-                    </g>
-                    
+<svg x="-55px" y="-55px">
+    <circle
+        cx="55"
+        cy="55"
+        ng-attr-r="{{50 + 2}}"
+        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI--hidden'}}">
+    </circle>
+    <path
+    	class="NetworkUI__router"
+    	transform="translate(5,5) scale(2)"
+    	d="M42.7,7.3c-9.8-9.8-25.6-9.8-35.4,0c-9.8,9.8-9.8,25.6,0,35.4c9.8,9.8,25.6,9.8,35.4,0
+    	C52.4,32.9,52.4,17.1,42.7,7.3z M20,12.3l4.2-4.2c0.2-0.2,0.5-0.3,0.8-0.3c0.3,0,0.6,0.1,0.8,0.3l4.2,4.2c0.4,0.4,0.4,1.2,0,1.6
+    	c-0.4,0.4-1.2,0.4-1.6,0l-2.3-2.3v10c0,0.6-0.5,1.1-1.1,1.1c-0.6,0-1.1-0.5-1.1-1.1l0-10L21.6,14c-0.4,0.4-1.2,0.4-1.6,0
+    	C19.5,13.5,19.5,12.8,20,12.3z M15.6,29.8c-0.4-0.4-0.4-1.2,0-1.6l0,0l2.1-2.1l-8.7,0c-0.6,0-1.1-0.5-1.1-1.1c0-0.3,0.1-0.6,0.3-0.8
+    	C8.4,24,8.7,23.8,9,23.8l8.7,0l-2.1-2.1c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l4,4c0.2,0.2,0.3,0.5,0.3,0.8
+    	c0,0.3-0.1,0.6-0.3,0.8l0,0l-4,4C16.8,30.3,16.1,30.3,15.6,29.8z M30,37.7l-4.2,4.2c-0.2,0.2-0.5,0.3-0.8,0.3
+    	c-0.3,0-0.6-0.1-0.8-0.3L20,37.7c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l2.3,2.3l0-10.2c0-0.3,0.1-0.6,0.3-0.8
+    	c0.2-0.2,0.5-0.3,0.8-0.3c0.6,0,1.1,0.5,1.1,1.1l0,10.2l2.3-2.3c0.4-0.4,1.2-0.4,1.6,0C30.5,36.5,30.5,37.2,30,37.7z M41,26.2
+    	l-8.9,0l2.1,2.1c0.4,0.4,0.5,1.2,0,1.6c-0.4,0.4-1.2,0.4-1.6,0l-4-4c-0.2-0.2-0.3-0.5-0.3-0.8c0-0.3,0.1-0.6,0.3-0.8l0,0l4-4
+    	c0.4-0.4,1.2-0.4,1.6,0c0.4,0.4,0.4,1.2,0,1.6l0,0l-2.1,2.1l8.8,0c0.6,0,1.1,0.5,1.1,1.1C42.1,25.6,41.6,26.2,41,26.2z"/>
+    <g ng-show="item.icon || current_scale > 0.5">
+        <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
+              filter="url(#selected)"
+              x="22"
+              y="125"> {{item.name}}</text>
+        <text class="NetworkUI__router-text" x="22" y="125">{{item.name}}{{item.edit_label?'_':''}}</text>
+    </g>
+</svg>
