@@ -50,8 +50,6 @@ _Ready.prototype.onMouseDown = function (controller) {
 };
 _Ready.prototype.onMouseDown.transitions = ['Pressed'];
 
-_Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
-
 _Ready.prototype.start = function (controller) {
 
     controller.scope.enabled = true;
@@ -94,8 +92,6 @@ _Pressed.prototype.onMouseUp = function (controller) {
 
 };
 _Pressed.prototype.onMouseUp.transitions = ['Clicked'];
-
-_Pressed.prototype.onTouchEnd = _Pressed.prototype.onMouseUp;
 
 _Disabled.prototype.onEnable = function (controller) {
 

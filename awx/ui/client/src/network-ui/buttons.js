@@ -52,8 +52,6 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 };
 _Ready.prototype.onMouseDown.transitions = ['ButtonPressed'];
 
-_Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
-
 _Ready.prototype.onMouseMove = function (controller, msg_type, $event) {
 
     if (!controller.scope.hide_buttons) {
@@ -97,4 +95,3 @@ _ButtonPressed.prototype.onMouseUp = function (controller, msg_type, $event) {
 };
 _ButtonPressed.prototype.onMouseUp.transitions = ['Ready'];
 
-_ButtonPressed.prototype.onTouchEnd = _ButtonPressed.prototype.onMouseUp;

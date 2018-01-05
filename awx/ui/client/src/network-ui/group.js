@@ -415,43 +415,6 @@ _Ready.prototype.onNewGroup = function (controller, msg_type, message) {
 };
 _Ready.prototype.onNewGroup.transitions = ['Placing'];
 
-_Ready.prototype.onPasteGroup = function (controller, msg_type, message) {
-
-	var scope = controller.scope;
-    scope.hide_groups = false;
-
-    scope.pressedX = scope.mouseX;
-    scope.pressedY = scope.mouseY;
-    scope.pressedScaledX = scope.scaledX;
-    scope.pressedScaledY = scope.scaledY;
-
-    var group = new models.Group(controller.scope.group_id_seq(),
-                                 message.group.name,
-                                 message.group.type,
-                                 scope.scaledX,
-                                 scope.scaledY,
-                                 scope.scaledX + message.group.x2,
-                                 scope.scaledY + message.group.y2,
-                                 false);
-
-    scope.send_control_message(new messages.GroupCreate(scope.client_id,
-                                                        group.id,
-                                                        group.x1,
-                                                        group.y1,
-                                                        group.x2,
-                                                        group.y2,
-                                                        group.name,
-                                                        group.type));
-
-    scope.groups.push(group);
-    scope.selected_groups.push(group);
-    group.selected = true;
-    controller.changeState(Selected2);
-};
-_Ready.prototype.onPasteGroup.transitions = ['Selected2'];
-
-
-
 _EditLabel.prototype.start = function (controller) {
     controller.scope.selected_groups[0].edit_label = true;
 };
