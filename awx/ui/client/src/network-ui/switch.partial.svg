@@ -24,10 +24,10 @@
     	c-0.6,0-1.1-0.5-1.1-1.1c0-0.6,0.5-1.1,1.1-1.1l11.1,0l-2.3-2.3c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l4.2,4.2
     	c0.2,0.2,0.3,0.5,0.3,0.8C40,29.1,39.9,29.4,39.7,29.6z"/>
         <g ng-show="item.icon || current_scale > 0.5">
-            <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
+            <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__switch-text--selected' : 'NetworkUI--hidden'}}"
                   filter="url(#selected)"
                   x="22"
                   y="125"> {{item.name}}</text>
-            <text class="NetworkUI__router-text" x="22" y="125">{{item.name}}{{item.edit_label?'_':''}}</text>
+            <text class="NetworkUI__switch-text" x="22" y="125">{{item.name}}{{item.edit_label?'_':''}}</text>
     </g>
 </svg>
