@@ -48,7 +48,7 @@ from awx import celery_app
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
-from awx.main.exceptions import AwxTaskError, TaskCancel, TaskError
+from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
@@ -79,7 +79,7 @@ logger = logging.getLogger('awx.main.tasks')
 
 class LogErrorsTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        if isinstance(exc, AwxTaskError):
+        if getattr(exc, 'is_awx_task_error', False):
             # Error caused by user / tracked in job output
             logger.warning(str(exc))
         elif isinstance(self, BaseTask):
@@ -361,8 +361,9 @@ def handle_work_success(self, result, task_actual):
 
 
 @shared_task(queue='tower', base=LogErrorsTask)
-def handle_work_error(request, exc, traceback, task_id, subtasks=None):
-    logger.debug('Executing error task id %s, subtasks: %s' % (request.id, str(subtasks)))
+def handle_work_error(task_id, *args, **kwargs):
+    subtasks = kwargs.get('subtasks', None)
+    logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
     first_instance = None
     first_instance_type = ''
     if subtasks is not None:
@@ -910,9 +911,9 @@ class BaseTask(LogErrorsTask):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
-                raise TaskCancel(instance, rc)
+                raise AwxTaskError.TaskCancel(instance, rc)
             else:
-                raise TaskError(instance, rc)
+                raise AwxTaskError.TaskError(instance, rc)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
