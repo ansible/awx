@@ -31,16 +31,16 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.api_token = '';
   $scope.disconnected = false;
 
-  $scope.topology_id = $location.search().topology_id || 0;
+  $scope.topology_id = 0;
   // Create a web socket to connect to the backend server
 
   $scope.inventory_id = $state.params.inventory_id;
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
-                                                           null,
-                                                           {debug: false, reconnectInterval: 300});
+      $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+                                                         null,
+                                                         {debug: false, reconnectInterval: 300});
   } else {
       $scope.control_socket = {
           on_message: util.noop
@@ -967,7 +967,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                        data.name,
                                        data.x,
                                        data.y,
-                                       data.type);
+                                       data.type,
+                                       data.host_id);
         $scope.device_id_seq = util.natural_numbers(data.id);
         $scope.devices.push(device);
     };
@@ -1265,7 +1266,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       data.previous_x,
                                                       data.previous_y,
                                                       data.previous_name,
-                                                      data.previous_type);
+                                                      data.previous_type,
+                                                      data.previous_host_id);
             $scope.create_device(inverted_data);
         }
 
@@ -1297,7 +1299,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
-        $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
     };
 
     $scope.onDeviceSelected = function(data) {
@@ -1465,7 +1466,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                            device.name,
                                            device.x,
                                            device.y,
-                                           device.type);
+                                           device.type,
+                                           device.host_id);
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);
