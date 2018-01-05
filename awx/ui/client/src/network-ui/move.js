@@ -119,14 +119,6 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                    scope.scaledY,
                                    "switch");
 	}
-    else if (message.type === "rack") {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Rack" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "rack");
-	}
     else if (message.type === "host") {
         id = controller.scope.device_id_seq();
 		device = new models.Device(id,
@@ -225,9 +217,6 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 };
 _Ready.prototype.onMouseDown.transitions = ['Selected1'];
 
-_Ready.prototype.onTouchStart = _Ready.prototype.onMouseDown;
-
-
 _Start.prototype.start = function (controller) {
 
     controller.changeState(Ready);
@@ -302,8 +291,6 @@ _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 };
 _Selected2.prototype.onMouseDown.transitions = ['Ready', 'Selected3'];
 
-_Selected2.prototype.onTouchStart = _Selected2.prototype.onMouseDown;
-
 _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 
     if ($event.keyCode === 8) {
@@ -368,16 +355,12 @@ _Selected1.prototype.onMouseMove = function (controller) {
 };
 _Selected1.prototype.onMouseMove.transitions = ['Move'];
 
-_Selected1.prototype.onTouchMove = _Selected1.prototype.onMouseMove;
-
 _Selected1.prototype.onMouseUp = function (controller) {
 
     controller.changeState(Selected2);
 
 };
 _Selected1.prototype.onMouseUp.transitions = ['Selected2'];
-
-_Selected1.prototype.onTouchEnd = _Selected1.prototype.onMouseUp;
 
 _Selected1.prototype.onMouseDown = util.noop;
 
@@ -389,8 +372,6 @@ _Move.prototype.start = function (controller) {
     for (i = 0; i < devices.length; i++) {
         devices[i].moving = true;
         for (j = 0; j < controller.scope.devices.length; j++) {
-            console.log(Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
-                        Math.pow(devices[i].y - controller.scope.devices[j].y, 2));
             if ((Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
                  Math.pow(devices[i].y - controller.scope.devices[j].y, 2)) < 160000) {
                 controller.scope.devices[j].moving = true;
@@ -451,17 +432,12 @@ _Move.prototype.onMouseMove = function (controller) {
     }
 };
 
-_Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
-
-
 _Move.prototype.onMouseUp = function (controller, msg_type, $event) {
 
     controller.changeState(Selected1);
     controller.handle_message(msg_type, $event);
 };
 _Move.prototype.onMouseUp.transitions = ['Selected1'];
-
-_Move.prototype.onTouchEnd = _Move.prototype.onMouseUp;
 
 _Move.prototype.onMouseDown = function (controller) {
 
@@ -484,19 +460,10 @@ _Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
 };
 _Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
-_Selected3.prototype.onTouchEnd = function (controller) {
-    controller.changeState(Selected2);
-};
-_Selected3.prototype.onTouchEnd.transitions = ['Selected2'];
-
-
 _Selected3.prototype.onMouseMove = function (controller) {
     controller.changeState(Move);
 };
 _Selected3.prototype.onMouseMove.transitions = ['Move'];
-
-_Selected3.prototype.onTouchMove = _Selected3.prototype.onMouseMove;
-
 
 _EditLabel.prototype.start = function (controller) {
     controller.scope.selected_items[0].edit_label = true;

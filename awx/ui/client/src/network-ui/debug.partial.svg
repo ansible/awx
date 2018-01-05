@@ -33,7 +33,6 @@
         <text ng-attr-x="{{graph.right_column}}" y="595" class="NetworkUI__debug-text">Time State: {{time_controller.state.name}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="615" class="NetworkUI__debug-text">Time Pointer: {{time_pointer}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="635" class="NetworkUI__debug-text">History: {{history.length}}</text>
-        <text ng-attr-x="{{graph.right_column}}" y="655" class="NetworkUI__debug-text">Touch Data: {{touch_data.xb}} {{touch_data.yb}} {{touch_data.d}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="675" class="NetworkUI__debug-text">Group State: {{group_controller.state.name}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="695" class="NetworkUI__debug-text">Selected groups: {{selected_groups.length}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="715" class="NetworkUI__debug-text">Hotkeys State: {{hotkeys_controller.state.name}}</text>
