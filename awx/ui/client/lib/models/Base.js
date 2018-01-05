@@ -346,21 +346,53 @@ function extend (related, config) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
-function next (related) {
-    related = related || this.resource;
+function next (related, config = {}) {
+    const url = this.get(`related.${related}.next`);
 
-    if (!this.has(`related.${related}.next`)) {
+    if (!url) {
         return Promise.resolve(null);
     }
 
     const req = {
         method: 'GET',
-        url: this.get(`related.${related}.next`)
+        url
     };
 
     return $http(req)
         .then(({ data }) => {
-            console.log(data);
+            const results = this.get(`related.${related}.results`) || [];
+
+            data.results = results.concat(data.results);
+            this.set('get', `related.${related}`, data);
+
+            if (config.limit < results.length) {
+                console.log(results);
+            }
+        });
+}
+
+function prev (related, config = {}) {
+    const url = this.get(`related.${related}.previous`);
+
+    if (!url) {
+        return Promise.resolve(null);
+    }
+
+    const req = {
+        method: 'GET',
+        url
+    };
+
+    return $http(req)
+        .then(({ data }) => {
+            const results = this.get(`related.${related}.results`) || [];
+
+            data.results = data.results.concat(results);
+            this.set('get', `related.${related}`, data);
+
+            if (config.limit < results.length) {
+                console.log(results);
+            }
         });
 }
 
@@ -545,6 +577,7 @@ function BaseModel (resource, settings) {
     this.normalizePath = normalizePath;
     this.options = options;
     this.parseRequestConfig = parseRequestConfig;
+    this.prev = prev;
     this.request = request;
     this.requestWithCache = requestWithCache;
     this.search = search;

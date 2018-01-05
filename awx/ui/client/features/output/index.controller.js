@@ -5,13 +5,16 @@ let vm;
 let ansi;
 let job;
 let jobEvent;
+let container;
 let $timeout;
 let $sce;
 let $compile;
 let $scope;
 
 const record = {};
-const meta = {};
+const meta = {
+    scroll: {}
+};
 
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
@@ -52,10 +55,13 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
     vm.showHostDetails = showHostDetails;
 
     vm.menu = {
-        scroll,
+        scroll: {
+            display: false,
+            to: scrollTo
+        },
         top: {
             expand,
-            isExpanded: false
+            isExpanded: true
         },
         bottom: {
             next
@@ -64,9 +70,15 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
 
     $timeout(() => {
         const table = $('#result-table');
+        container = $('.at-Stdout-container');
 
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
+
+        meta.scroll.height = container[0].scrollHeight;
+        meta.scroll.buffer = 100;
+
+        container.scroll(onScroll);
     });
 }
 
@@ -78,16 +90,14 @@ function next () {
 }
 
 function expand () {
-    vm.toggle(meta.parent);
+    vm.toggle(meta.parent, true);
 }
 
-function scroll (direction) {
-    const container = $('.at-Stdout-container')[0];
-
+function scrollTo (direction) {
     if (direction === 'top') {
-        container.scrollTop = 0;
+        container[0].scrollTop = 0;
     } else {
-        container.scrollTop = container.scrollHeight;
+        container[0].scrollTop = container[0].scrollHeight;
     }
 }
 
@@ -222,7 +232,7 @@ function createRow (current, ln, content) {
     if (current) {
         if (current.isParent && current.line === ln) {
             id = current.uuid;
-            tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-chevron-down can-toggle"></i></td>`;
+            tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
         }
 
         if (current.isHost) {
@@ -230,7 +240,7 @@ function createRow (current, ln, content) {
         }
 
         if (current.time && current.line === ln) {
-            timestamp = current.time;
+            timestamp = `<span>${current.time}</span>`;
         }
 
         if (current.parents) {
@@ -261,8 +271,11 @@ function createRow (current, ln, content) {
 
 function getTime (created) {
     const date = new Date(created);
+    const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
+    const minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+    const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
 
-    return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    return `${hour}:${minute}:${second}`;
 }
 
 function showHostDetails (id) {
@@ -279,26 +292,63 @@ function showHostDetails (id) {
         });
 }
 
-function toggle (uuid) {
+function toggle (uuid, menu) {
     const lines = $(`.child-of-${uuid}`);
     let icon = $(`#${uuid} .at-Stdout-toggle > i`);
+
+    if (menu || record[uuid].level === 1) {
+        vm.menu.top.isExpanded = !vm.menu.top.isExpanded;
+    }
 
     if (record[uuid].children) {
         icon = icon.add($(`#${record[uuid].children.join(', #')}`).find('.at-Stdout-toggle > i'));
     }
 
-    if (icon.hasClass('fa-chevron-down')) {
-        icon.addClass('fa-chevron-right');
-        icon.removeClass('fa-chevron-down');
+    if (icon.hasClass('fa-angle-down')) {
+        icon.addClass('fa-angle-right');
+        icon.removeClass('fa-angle-down');
 
         lines.addClass('hidden');
     } else {
-        icon.addClass('fa-chevron-down');
-        icon.removeClass('fa-chevron-right');
+        icon.addClass('fa-angle-down');
+        icon.removeClass('fa-angle-right');
 
         lines.removeClass('hidden');
     }
 }
+
+function onScroll () {
+    if (meta.scroll.inProgress) {
+        return;
+    }
+
+    meta.scroll.inProgress = true;
+
+    $timeout(() => {
+        const top = container[0].scrollTop;
+        const bottom = top + meta.scroll.buffer + container[0].offsetHeight;
+
+        meta.scroll.inProgress = false;
+
+        if (top === 0) {
+            vm.menu.scroll.display = false;
+
+            return;
+        }
+
+        vm.menu.scroll.display = true;
+
+        if (bottom >= meta.scroll.height) {
+            // fetch more lines
+        }
+    }, 500);
+}
+
+/*
+ *function approximateLineNumber () {
+ *
+ *}
+ */
 
 JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];
 

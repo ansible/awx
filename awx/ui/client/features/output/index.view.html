@@ -13,7 +13,7 @@
                        ng-class="{ 'fa-minus': vm.menu.top.isExpanded, 'fa-plus': !vm.menu.top.isExpanded }"></i>
                 </div>
 
-                <div class="pull-right" ng-click="vm.menu.scroll('bottom')">
+                <div class="pull-right" ng-click="vm.menu.scroll.to('bottom')">
                     <i class="at-Stdout-menuIcon fa fa-arrow-down"></i>
                 </div>
 
@@ -22,13 +22,10 @@
 
             <pre class="at-Stdout-container"><table><thead><tr><th class="at-Stdout-toggle">&nbsp;</th><th class="at-Stdout-line"></th><th class="at-Stdout-event"></th></tr></thead><tbody id="result-table"></tbody></table></pre>
 
-            <div class="at-Stdout-menuBottom">
-                <div class="pull-left" ng-click="vm.menu.bottom.next()">
-                    <i class="at-Stdout-menuIcon fa fa-plus"></i>
-                </div>
-
-                <div class="pull-right" ng-click="vm.menu.scroll('top')">
-                    <i class="at-Stdout-menuIcon fa fa-arrow-up"></i>
+            <div ng-show="vm.menu.scroll.display" class="at-Stdout-menuBottom">
+                <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.scroll.to('top')">
+                    <p class="pull-left"><i class="fa fa-caret-up"></i></p>
+                    <p class="pull-right">Back to Top</p>
                 </div>
 
                 <div class="at-u-clear"></div>
