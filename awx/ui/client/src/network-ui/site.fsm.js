@@ -138,7 +138,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                   device.x,
                                                   device.y,
                                                   device.name,
-                                                  device.type));
+                                                  device.type,
+                                                  device.host_id));
         for (j=0; j < message.group.devices[i].interfaces.length; j++) {
             intf = new models.Interface(message.group.devices[i].interfaces[j].id, message.group.devices[i].interfaces[j].name);
             intf.device = device;

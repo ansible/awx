@@ -143,7 +143,8 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                                              device.x,
                                                              device.y,
                                                              device.name,
-                                                             device.type));
+                                                             device.type,
+                                                             device.host_id));
         scope.selected_devices.push(device);
         device.selected = true;
         controller.changeState(Placing);
@@ -170,14 +171,15 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledX,
                                scope.scaledY,
                                message.device.type,
-                               message.device.tower_id);
+                               message.device.host_id);
     scope.devices.push(device);
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,
                                               device.x,
                                               device.y,
                                               device.name,
-                                              device.type));
+                                              device.type,
+                                              device.host_id));
     for (i=0; i < message.device.interfaces.length; i++) {
         intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
         device.interfaces.push(intf);
@@ -340,7 +342,8 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
                                                                                  devices[i].x,
                                                                                  devices[i].y,
                                                                                  devices[i].name,
-                                                                                 devices[i].type));
+                                                                                 devices[i].type,
+                                                                                 devices[i].host_id));
             }
             for (j = 0; j < all_links.length; j++) {
                 if (all_links[j].to_device === devices[i] ||

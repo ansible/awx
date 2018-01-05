@@ -4,9 +4,9 @@ var button = require('./button.js');
 var util = require('./util.js');
 var inherits = require('inherits');
 
-function Device(id, name, x, y, type, tower_id) {
+function Device(id, name, x, y, type, host_id) {
     this.id = id;
-    this.tower_id = tower_id ? tower_id: null;
+    this.host_id = host_id ? host_id: 0;
     this.name = name;
     this.x = x;
     this.y = y;
