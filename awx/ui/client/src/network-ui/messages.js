@@ -17,7 +17,7 @@ function DeviceMove(sender, id, x, y, previous_x, previous_y) {
 }
 exports.DeviceMove = DeviceMove;
 
-function DeviceCreate(sender, id, x, y, name, type) {
+function DeviceCreate(sender, id, x, y, name, type, host_id) {
     this.msg_type = "DeviceCreate";
     this.sender = sender;
     this.id = id;
@@ -25,10 +25,11 @@ function DeviceCreate(sender, id, x, y, name, type) {
     this.y = y;
     this.name = name;
     this.type = type;
+    this.host_id = host_id;
 }
 exports.DeviceCreate = DeviceCreate;
 
-function DeviceDestroy(sender, id, previous_x, previous_y, previous_name, previous_type) {
+function DeviceDestroy(sender, id, previous_x, previous_y, previous_name, previous_type, previous_host_id) {
     this.msg_type = "DeviceDestroy";
     this.sender = sender;
     this.id = id;
@@ -36,6 +37,7 @@ function DeviceDestroy(sender, id, previous_x, previous_y, previous_name, previo
     this.previous_y = previous_y;
     this.previous_name = previous_name;
     this.previous_type = previous_type;
+    this.previous_host_id = previous_host_id;
 }
 exports.DeviceDestroy = DeviceDestroy;
 
