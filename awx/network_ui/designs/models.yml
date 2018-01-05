@@ -28,6 +28,9 @@ models:
   - default: 0
     name: process_id_seq
     type: IntegerField
+  - default: 0
+    name: host_id
+    type: IntegerField
   name: Device
   x: 348
   y: 124
@@ -362,19 +365,6 @@ models:
   name: TopologyInventory
   x: -226
   y: -19
-- fields:
-  - name: device_host_id
-    pk: true
-    type: AutoField
-  - name: device
-    ref: Device
-    ref_field: device_id
-    type: ForeignKey
-  - name: host_id
-    type: IntegerField
-  name: DeviceHost
-  x: 737
-  y: 331
 modules: []
 view:
   panX: 213.729555519212
