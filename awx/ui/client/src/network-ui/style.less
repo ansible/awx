@@ -32,8 +32,9 @@
 @button-text-pressed: #ffffff;
 @green: #5CB85C;
 @red:  #D9534F;
+@blue: #337AB7;
 @light-toolbox-background: #f6f6f6;
-@icon-background-hover:#337AB7;
+@icon-background-hover:@blue;
 
 .NetworkUI {
     background-color: @light-toolbox-background;
@@ -114,14 +115,13 @@
 }
 
 .NetworkUI__router {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @green;
 }
 
 .NetworkUI__router--selected {
     stroke: @selected-blue;
     stroke-width: 4;
+    fill:@light-background;
 }
 
 .NetworkUI__router--remote-selected {
@@ -132,16 +132,6 @@
 .NetworkUI__router--selected-conflict {
     stroke: @selected-red;
     stroke-width: 4;
-}
-
-.NetworkUI__router line {
-    stroke: @light-widget-detail;
-    stroke-width: 20;
-}
-
-.NetworkUI__router polygon {
-    fill: @light-widget-detail;
-    stroke: none;
 }
 
 .NetworkUI__router-text {
@@ -156,14 +146,13 @@
 
 
 .NetworkUI__switch {
-    fill: @widget-body;
-    stroke: @dark-widget-detail;
-    stroke-width: 2;
+    fill: @blue;
 }
 
 .NetworkUI__switch--selected {
     stroke: @selected-blue;
     stroke-width: 10;
+    fill:@light-background;
 }
 
 .NetworkUI__switch--remote-selected {
