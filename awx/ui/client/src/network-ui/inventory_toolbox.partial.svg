@@ -63,10 +63,6 @@
         <g awx-net-process> </g>
    </g> <!-- end site -->
 
-   <g ng-switch-when="configuration"> <!-- begin site -->
-        <g awx-net-configuration> </g>
-   </g> <!-- end site -->
-
    <g ng-switch-default> <!-- begin default -->
         <g awx-net-default></g>
    </g> <!-- end default -->
@@ -108,10 +104,6 @@
 
    <g ng-switch-when="process"> <!-- begin site -->
         <g awx-net-process> </g>
-   </g> <!-- end site -->
-
-   <g ng-switch-when="configuration"> <!-- begin site -->
-        <g awx-net-configuration> </g>
    </g> <!-- end site -->
 
    <g ng-switch-default> <!-- begin default -->

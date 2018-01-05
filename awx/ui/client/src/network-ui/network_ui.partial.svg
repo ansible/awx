@@ -9,10 +9,6 @@
          ng-mouseleave="onMouseLeave($event)"
          ng-mousemove="onMouseMove($event)"
          ng-mouseover="onMouseOver($event)"
-         ng-touchstart="onTouchStart($event)"
-         ng-touchmove="onTouchMove($event)"
-         ng-touchend="onTouchEnd($event)"
-         ng-tap="onTap($event)"
          msd-wheel="onMouseWheel($event, $delta, $deltaX, $deltaY)">
         <defs>
 		<filter x="0" y="0" width="1" height="1" id="selected">
@@ -101,14 +97,6 @@
                     <g awx-net-button></g>
                 </g>
             </g> <!-- end buttons -->
-
-            <g> <!-- layers -->
-                <g ng-repeat="layer in layers"
-                   ng-attr-transform="translate({{layer.x}},{{layer.y}})"
-                   class="button">
-                    <g awx-net-layer> </g>
-                </g>
-            </g> <!-- end layers -->
         </g>
         <g awx-net-context-menu
                 context_menu="context_menus[0]"
@@ -118,8 +106,5 @@
         <g awx-net-debug></g>
         <g awx-net-test-results></g>
         <g awx-net-cursor></g>
-        <g ng-repeat="touch in touches">
-            <g awx-net-touch></g>
-        </g>
     </svg>
     </div>

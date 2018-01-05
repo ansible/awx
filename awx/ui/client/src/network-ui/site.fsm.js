@@ -614,5 +614,3 @@ _Move.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledY = controller.scope.scaledY;
 
 };
-
-_Move.prototype.onTouchMove = _Move.prototype.onMouseMove;

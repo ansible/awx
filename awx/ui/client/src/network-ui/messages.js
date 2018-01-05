@@ -213,14 +213,6 @@ function KeyEvent(sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey
 }
 exports.KeyEvent = KeyEvent;
 
-function TouchEvent(sender, type, touches) {
-    this.msg_type = "TouchEvent";
-    this.sender = sender;
-    this.type = type;
-    this.touches = touches;
-}
-exports.TouchEvent = TouchEvent;
-
 function StartRecording(sender, trace_id) {
     this.msg_type = "StartRecording";
     this.sender = sender;
@@ -265,11 +257,6 @@ function NewGroup(type) {
     this.type = type;
 }
 exports.NewGroup = NewGroup;
-
-function PasteGroup(group) {
-    this.group = group;
-}
-exports.PasteGroup = PasteGroup;
 
 function PasteRack(group) {
     this.group = group;
@@ -359,17 +346,6 @@ function GroupMembership(sender, id, members) {
     this.members = members;
 }
 exports.GroupMembership = GroupMembership;
-
-function TableCellEdit(sender, sheet, col, row, old_value, new_value) {
-    this.msg_type = "TableCellEdit";
-    this.sender = sender;
-    this.sheet = sheet;
-    this.col = col;
-    this.row = row;
-    this.old_value = old_value;
-    this.new_value = new_value;
-}
-exports.TableCellEdit = TableCellEdit;
 
 function ProcessCreate(sender, id, name, type, device_id, x, y) {
     this.msg_type = "ProcessCreate";

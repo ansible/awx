@@ -1,4 +1,0 @@
-<!-- Copyright (c) 2017 Red Hat, Inc. -->
-<g ng-attr-transform="translate({{touch.screenX}},{{touch.screenY}})">
-    <circle ng-attr-class="{{touch.hidden && 'NetworkUI--hidden' || 'NetworkUI__touch'}}" cx=0 cy=0 r=40></circle>
-</g>
