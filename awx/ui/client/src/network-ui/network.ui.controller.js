@@ -31,14 +31,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.api_token = '';
   $scope.disconnected = false;
 
-  $scope.topology_id = 0;
+  $scope.topology_id = $location.search().topology_id || 0;
   // Create a web socket to connect to the backend server
 
   $scope.inventory_id = $state.params.inventory_id;
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+  $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?topology_id=" + $scope.topology_id,
                                                            null,
                                                            {debug: false, reconnectInterval: 300});
   } else {
@@ -623,26 +623,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.$watchCollection('selected_items', function(){
         $scope.onDetailsContextButton(false);
     });
+
     // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
             if($scope.selected_items.length === 1){
-<<<<<<< HEAD
                 let host_id = $scope.selected_items[0].host_id;
-                let url = `/api/v2/hosts/${host_id}/?format=json`;
+                let url = `/api/v2/hosts/${host_id}/`;
                 $http.get(url)
-                     .then(function(host) {
-                         $scope.$emit('retrievedHostData', host.data);
+                     .then(function(response) {
+                         let host = response.data;
+                         $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
                          $scope.context_menus[0].enabled = false;
                      })
                      .catch(function(error) {
                          console.log(error);
                      });
-=======
-                let item = $scope.selected_items[0];
-                $scope.$emit('retrievedHostData', item, panelBoolean !== null ? panelBoolean: true);
-                $scope.context_menus[0].enabled = false;
->>>>>>> Auto-close the right hand panel if focus is directed to the canvas.
             }
 
          }
@@ -1269,8 +1265,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       data.previous_x,
                                                       data.previous_y,
                                                       data.previous_name,
-                                                      data.previous_type,
-                                                      data.previous_host_id);
+                                                      data.previous_type);
             $scope.create_device(inverted_data);
         }
 
@@ -1295,8 +1290,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.onTopology = function(data) {
-        console.log("Loading topology");
-        console.log(data);
         $scope.topology_id = data.topology_id;
         $scope.panX = data.panX;
         $scope.panY = data.panX;
@@ -1304,7 +1297,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
-        // $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
+        $location.search({topology_id: data.topology_id, inventory_id: $scope.inventory_id});
     };
 
     $scope.onDeviceSelected = function(data) {
@@ -1424,9 +1417,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.onSnapshot = function (data) {
 
-        console.log("Loading Snapshot");
-        console.log(data);
-
         //Erase the existing state
         $scope.devices = [];
         $scope.links = [];
@@ -1475,8 +1465,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                            device.name,
                                            device.x,
                                            device.y,
-                                           device.type,
-                                           device.host_id);
+                                           device.type);
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);

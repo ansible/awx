@@ -5,7 +5,7 @@
         cx="55"
         cy="55"
         ng-attr-r="{{50 + 2}}"
-        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI--hidden'}}">
+        ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI__router--background'}}">
     </circle>
     <path
     	class="NetworkUI__router"
