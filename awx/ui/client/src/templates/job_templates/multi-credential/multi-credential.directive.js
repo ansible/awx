@@ -1,70 +1,70 @@
 /*************************************************
- * Copyright (c) 2017 Ansible, Inc.
+ * Copyright (c) 2018 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
+const templatePath = 'templates/job_templates/multi-credential/multi-credential';
 
-export default ['templateUrl', '$compile',
-    function(templateUrl, $compile) {
-        return {
-            scope: {
-                credentials: '=',
-                selectedCredentials: '=',
-                prompt: '=',
-                credentialNotPresent: '=',
-                credentialsToPost: '=',
-                fieldIsDisabled: '='
-            },
-            restrict: 'E',
-            templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential'),
-            controller: ['$scope', 'MultiCredentialService',
-                function($scope, MultiCredentialService) {
-                    if (!$scope.selectedCredentials) {
-                        $scope.selectedCredentials = {
-                            machine: null,
-                            vault: null,
-                            extra: []
-                        };
-                    }
+function MultiCredential ($compile, templateUrl) {
+    return {
+        templateUrl: templateUrl(templatePath),
+        require: ['multiCredential'],
+        restrict: 'E',
+        controllerAs: 'vm',
+        scope: {
+            selectedCredentials: '=',
+            prompt: '=',
+            credentialNotPresent: '=',
+            fieldIsDisabled: '=',
+            credentialTypes: '=',
+        },
+        link: (scope, element, attrs, controllers) => {
+            const [controller] = controllers;
 
-                    if (!$scope.credentialsToPost) {
-                        $scope.credentialsToPost = [];
-                    }
+            scope.openModal = () => {
+                const containerElement = $('#content-container');
+                const templateFunction = $compile(`
+                    <multi-credential-modal
+                        credential-types="credentialTypes"
+                        selected-credentials="selectedCredentials">
+                    </multi-credential-modal>`);
+                containerElement.append(templateFunction(scope));
+            };
 
-                    $scope.fieldDirty = false;
+            controller.init(scope);
+        },
+        controller: multiCredentialController,
+    };
+}
 
-                    $scope.$watchGroup(['prompt', 'credentialsToPost'],
-                        function() {
-                            if ($scope.prompt ||
-                                $scope.credentialsToPost.length) {
-                                    $scope.fieldDirty = true;
-                            }
+function multiCredentialController (MultiCredentialService) {
+    const vm = this;
+    const { createTag } = MultiCredentialService;
 
-                            $scope.credentialNotPresent = !$scope.prompt &&
-                                $scope.selectedCredentials.machine === null &&
-                                $scope.selectedCredentials.vault === null;
-                    });
+    let scope;
 
-                    $scope.removeCredential = function(credToRemove) {
-                        [$scope.selectedCredentials,
-                            $scope.credentialsToPost] = MultiCredentialService
-                                .removeCredential(credToRemove, $scope.
-                                    selectedCredentials,
-                                        $scope.credentialsToPost);
-                    };
-                }
-            ],
-            link: function(scope) {
-                scope.openMultiCredentialModal = function() {
-                    $('#content-container')
-                        .append($compile(`
-                            <multi-credential-modal
-                                credentials="credentials"
-                                credentials-to-post="credentialsToPost"
-                                selected-credentials="selectedCredentials">
-                            </multi-credential-modal>`)(scope));
-                };
-            }
-        };
+    vm.init = _scope_ => {
+        scope = _scope_;
+        scope.$watchCollection('selectedCredentials', onSelectedCredentialsChanged);
+    };
+
+    function onSelectedCredentialsChanged (oldValues, newValues) {
+        if (oldValues !== newValues) {
+            scope.fieldDirty = (scope.prompt && scope.selectedCredentials.length > 0);
+            scope.tags = scope.selectedCredentials.map(c => createTag(c, scope.credentialTypes));
+        }
     }
-];
+
+    vm.deselectCredential = ({ id }) => {
+        const index = scope.selectedCredentials.map(c => c.id).indexOf(id);
+
+        if (index > -1) {
+            scope.selectedCredentials.splice(index, 1);
+        }
+    };
+}
+
+MultiCredential.$inject = ['$compile', 'templateUrl'];
+multiCredentialController.$inject = ['MultiCredentialService'];
+
+export default MultiCredential;

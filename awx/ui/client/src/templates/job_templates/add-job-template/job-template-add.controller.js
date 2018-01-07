@@ -48,6 +48,14 @@
                 CallbackHelpInit({ scope: $scope });
 
                 $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
+
+                MultiCredentialService.getCredentialTypes()
+                    .then(({ data }) => {
+                        $scope.multiCredential = {
+                            credentialTypes: data.results,
+                            selectedCredentials: []
+                        };
+                    });
             }
 
             callback = function() {
@@ -328,7 +336,6 @@
                     Rest.setUrl(defaultUrl);
                     Rest.post(data)
                         .then(({data}) => {
-
                             if (data.related && data.related.callback) {
                                 Alert('Callback URL',
                                     `Host callbacks are enabled for this template. The callback URL is:
@@ -346,12 +353,6 @@
                                     'alert-danger', saveCompleted, null, null,
                                     null, true);
                             }
-
-                            MultiCredentialService
-                                .saveExtraCredentials({
-                                    creds: $scope.credentialsToPost,
-                                    url: data.related.credentials
-                                });
 
                             var orgDefer = $q.defer();
                             var associationDefer = $q.defer();
@@ -441,7 +442,9 @@
                                                     });
                                             }
 
-                                            saveCompleted(data.id);
+                                            MultiCredentialService
+                                                .saveRelated(data, $scope.multiCredential.selectedCredentials)
+                                                .then(() => saveCompleted(data.id));
                                         });
                                 });
                             });

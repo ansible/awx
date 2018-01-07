@@ -1,272 +1,251 @@
-export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile', 'CreateSelect2', 'i18n', 'MultiCredentialService', 'credentialTypesLookup',
-    function(templateUrl, Rest, GetBasePath, GenerateList, $compile, CreateSelect2, i18n, MultiCredentialService, credentialTypesLookup) {
+/*************************************************
+ * Copyright (c) 2018 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+function MultiCredentialModal(
+    templateUrl,
+    generateList,
+    $compile,
+    CreateSelect2,
+    i18n,
+    CredentialList
+) {
+    const templatePath = 'templates/job_templates/multi-credential/multi-credential-modal';
+    const emptyListText = i18n._('No Credentials Matching This Type Have Been Created');
+
+    const list = _.cloneDeep(CredentialList);
+    const vaultList = _.cloneDeep(CredentialList);
+
+    list.emptyListText = emptyListText;
+
+    vaultList.emptyListText = emptyListText;
+    vaultList.fields.name.modalColumnClass = 'col-md-6';
+    vaultList.fields.info = {
+        label: i18n._('Vault ID'),
+        ngBind: 'credential.inputs.vault_id',
+        key: false,
+        nosort: true,
+        modalColumnClass: 'col-md-6',
+        infoHeaderClass: '',
+        dataPlacement: 'top',
+    };
+
+    const listHtml = generateList.build({ mode: 'lookup', input_type: 'radio', list });
+    const vaultHtml = generateList.build({ mode: 'lookup', input_type: 'checkbox', list: vaultList });
+
     return {
+        templateUrl: templateUrl(templatePath),
         restrict: 'E',
+        controllerAs: 'vm',
+        require: ['multiCredentialModal'],
         scope: {
-            credentialsToPost: '=',
-            credentials: '=',
-            selectedCredentials: '='
+            credentialTypes: '=',
+            selectedCredentials: '=',
         },
-        templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential-modal'),
+        link: (scope, element, attrs, controllers) => {
+            const compiledList = $compile(listHtml)(scope);
+            const compiledVaultList = $compile(vaultHtml)(scope);
 
-        link: function(scope, element) {
-            credentialTypesLookup()
-                .then(kinds => {
-                    scope.credentialKinds = kinds;
+            const modalBodyElement = $('#multi-credential-modal-body');
+            const modalElement = $('#multi-credential-modal');
 
-                    const machineIsReadOnly = _.get(scope.selectedCredentials, 'machine.readOnly');
-                    const vaultIsReadOnly = _.get(scope.selectedCredentials, 'vault.readOnly');
+            scope.showModal = () => modalElement.modal('show');
+            scope.hideModal = () => modalElement.modal('hide');
 
-                    if (!machineIsReadOnly) {
-                        scope.credentialKind = `${kinds.Machine}`;
-                    } else if (!vaultIsReadOnly) {
-                        scope.credentialKind = `${kinds.Vault}`;
-                    } else {
-                        scope.credentialKind = `${kinds.Network}`;
-                    }
+            scope.createList = () => modalBodyElement.append(compiledList);
+            scope.createVaultList = () => modalBodyElement.append(compiledVaultList);
+            scope.destroyList = () => modalBodyElement.empty();
 
-                    scope.showModal = function() {
-                        scope.modalHidden = false;
-                        $('#multi-credential-modal').modal('show');
-                    };
-
-                    scope.hideModal = function() {
-                        scope.modalHidden = true;
-                        scope.credentialKind = kinds.Machine;
-                        $('#multi-credential-modal').modal('hide');
-                    };
-
-                    scope.generateCredentialList = function(inputType = 'radio', list = scope.list) {
-                        console.log(inputType);
-                        let html = GenerateList.build({
-                            list,
-                            input_type: inputType,
-                            mode: 'lookup'
-                        });
-
-                        $('#multi-credential-modal-body').append($compile(html)(scope));
-                        scope.listRendered = true;
-                    };
-
-                    scope.destroyCredentialList = () => {
-                        $('#multi-credential-modal-body').empty();
-                        scope.listRendered = false;
-                    }
-
-                    $('#multi-credential-modal').on('hidden.bs.modal', function () {
-                        $('#multi-credential-modal').off('hidden.bs.modal');
-                        $(element).remove();
-                    });
-
-                    CreateSelect2({
-                        element: `#multi-credential-kind-select`,
-                        multiple: false,
-                        placeholder: i18n._('Select a credential')
-                    });
-
-                    MultiCredentialService.getCredentialTypes()
-                        .then(({credential_types, credentialTypeOptions}) => {
-                            scope.credential_types = credential_types;
-                            scope.credentialTypeOptions = credentialTypeOptions;
-                            scope.allCredentialTypeOptions = _.cloneDeep(credentialTypeOptions);
-
-                            // We want to hide the machine dropdown option if a machine credential
-                            // has already been selected and the user interacting with the form doesn't
-                            // have the ability to change it.
-                            for(let i=scope.credentialTypeOptions.length - 1; i >=0; i--) {
-                                if((scope.selectedCredentials.machine &&
-                                    scope.selectedCredentials.machine.credential_type_id === scope.credentialTypeOptions[i].value &&
-                                    scope.selectedCredentials.machine.readOnly) ||
-                                    (scope.selectedCredentials.vault &&
-                                    scope.selectedCredentials.vault.credential_type_id === scope.credentialTypeOptions[i].value &&
-                                    scope.selectedCredentials.vault.readOnly)) {
-                                        scope.credentialTypeOptions.splice(i, 1);
-                                }
-                            }
-
-                            scope.$emit('multiCredentialModalLinked');
-                        });
-                });
-        },
-
-        controller: ['$scope', 'CredentialList', 'i18n', 'QuerySet',
-            'GetBasePath', function($scope, CredentialList, i18n, qs,
-            GetBasePath) {
-            let updateExtraCredentialsList = function() {
-                let extraCredIds = $scope.selectedCredentials.extra.map(cred => cred.id);
-                $scope.credentials.forEach(cred => {
-                    cred.checked = (extraCredIds.indexOf(cred.id) > - 1) ? 1 : 0;
-                });
-
-                $scope.credTags = MultiCredentialService
-                    .updateCredentialTags($scope.selectedCredentials,
-                        $scope.allCredentialTypeOptions);
-            };
-
-            let uncheckAllCredentials = function() {
-                $scope.credentials.forEach(cred => {
-                    cred.checked = 0;
-                });
-
-                $scope.credTags = MultiCredentialService
-                    .updateCredentialTags($scope.selectedCredentials,
-                        $scope.allCredentialTypeOptions);
-            };
-
-            const onCredentialKindChanged = (newValue, oldValue) => {
-                const newValueIsVault = (parseInt(newValue) === _.get($scope, 'credentialKinds.Vault'));
-                const oldValueIsVault = (parseInt(oldValue) === _.get($scope, 'credentialKinds.Vault'));
-                const isClosing = ((newValue !== oldValue) && $scope.modalHidden);
-
-                if ((oldValueIsVault || newValueIsVault) && !isClosing) {
-                    $scope.destroyCredentialList();
-                }
-
-                $scope.credential_queryset.page = 1;
-                $scope.credential_default_params.credential_type = parseInt($scope.credentialKind);
-                $scope.credential_queryset.credential_type = parseInt($scope.credentialKind);
-
-                qs.search(GetBasePath('credentials'), $scope.credential_default_params)
-                    .then(({ data }) => {
-                        $scope.credential_dataset = data;
-                        $scope.credentials = $scope.credential_dataset.results;
-
-                        if(!$scope.listRendered) {
-                            if (newValueIsVault) {
-                                $scope.generateCredentialList('checkbox', $scope.vaultList);
-                            } else {
-                                $scope.generateCredentialList();
-                            }
-                            updateExtraCredentialsList();
-                            $scope.showModal();
-                        }
-                    });
-            };
-
-            let init = function() {
-                $scope.originalSelectedCredentials = _.cloneDeep($scope.selectedCredentials);
-                $scope.credential_dataset = [];
-                $scope.credentials = $scope.credentials || [];
-                $scope.listRendered = false;
-
-                const credList = _.cloneDeep(CredentialList);
-
-                credList.emptyListText = i18n._('No Credentials Matching This Type Have Been Created');
-
-                const vaultCredList = _.cloneDeep(credList);
-
-                vaultCredList.fields.name.modalColumnClass = 'col-md-6';
-
-                vaultCredList.fields.info = {
-                    label: i18n._('Vault ID'),
-                    ngBind: 'credential.inputs.vault_id',
-                    key: false,
-                    nosort: true,
-                    modalColumnClass: 'col-md-6',
-                    infoHeaderClass: '',
-                    dataPlacement: 'top'
-                };
-
-                $scope.list = credList;
-                $scope.vaultList = vaultCredList;
-
-                $scope.credential_default_params = {
-                    order_by: 'name',
-                    page_size: 5
-                };
-
-                $scope.credential_queryset = {
-                    order_by: 'name',
-                    page_size: 5
-                };
-
-                $scope.$watch('credentialKind', onCredentialKindChanged);
-
-                $scope.$watchCollection('credentials', updateExtraCredentialsList);
-
-                $scope.$watchCollection('selectedCredentials.extra', () => {
-                    if($scope.credentials && $scope.credentials.length > 0) {
-                        if($scope.selectedCredentials.extra &&
-                            $scope.selectedCredentials.extra.length > 0) {
-                            updateExtraCredentialsList();
-                        } else {
-                            uncheckAllCredentials();
-                        }
-                    }
-                });
-            };
-
-            $scope.$on('multiCredentialModalLinked', function() {
-                init();
+            modalElement.on('hidden.bs.modal', () => {
+                modalElement.off('hidden.bs.modal');
+                $(element).remove();
             });
 
-            $scope.toggle_credential = id => {
-                // This is called only when a checkbox input is clicked directly. For clicks anywhere
-                // else on the row or direct radio button clicks, the toggle_row handler is called
-                // instead with a slightly different set of arguments. We normalize those arguments
-                // here and pass them through to the other handler so that the behavior is consistent.
-                const [credential] = $scope.credentials.filter(credential => credential.id === id);
-                return $scope.toggle_row(credential);
-            };
+            CreateSelect2({
+                placeholder: i18n._('Select a credential'),
+                element: '#multi-credential-kind-select',
+                multiple: false,
+            });
 
-            $scope.toggle_row = function(credential) {
-                let rowDeselected = false;
-                for (let i = $scope.selectedCredentials.extra.length - 1; i >= 0; i--) {
-                    if($scope.selectedCredentials.extra[i].id === credential.id) {
-                        $scope.selectedCredentials.extra.splice(i, 1);
-                        rowDeselected = true;
-                    } else if(credential.credential_type === $scope.selectedCredentials.extra[i].credential_type) {
-                        if (credential.credential_type !== $scope.credentialKinds.Vault) {
-                            $scope.selectedCredentials.extra.splice(i, 1);
-                        } else if($scope.selectedCredentials.extra[i].inputs.vault_id === credential.inputs.vault_id) {
-                            // remove existing vault credentials if they have the same vault_id as a recently
-                            // toggled vault credential
-                            $scope.selectedCredentials.extra.splice(i, 1);
-                        }
-                    }
-                }
-                if(!rowDeselected) {
-                    $scope.selectedCredentials.extra
-                        .push(_.cloneDeep(credential));
-                }
-            };
-
-            $scope.selectedCredentialsDirty = function() {
-                if ($scope.originalSelectedCredentials) {
-                    return !($scope.originalSelectedCredentials.extra.length === 0) &&
-                        !_.isEqual($scope.selectedCredentials,
-                            $scope.originalSelectedCredentials);
-                } else {
-                    return false;
-                }
-            };
-
-            $scope.revertToDefaultCredentials = function() {
-                $scope.selectedCredentials = _.cloneDeep($scope.originalSelectedCredentials);
-            };
-
-            $scope.removeCredential = function(credToRemove) {
-                [$scope.selectedCredentials,
-                    $scope.credTags] = MultiCredentialService
-                        .removeCredential(credToRemove,
-                            $scope.selectedCredentials, $scope.credTags);
-
-                if ($scope.credentials
-                    .filter(cred => cred.id === credToRemove).length) {
-                        uncheckAllCredentials();
-                }
-            };
-
-            $scope.cancelForm = function() {
-                $scope.selectedCredentials = $scope.originalSelectedCredentials;
-                $scope.credTags = $scope.credentialsToPost;
-                $scope.hideModal();
-            };
-
-            $scope.saveForm = function() {
-                $scope.credentialsToPost = $scope.credTags;
-                $scope.hideModal();
-            };
-        }]
+            scope.list = list;
+            controllers[0].init(scope);
+        },
+        controller: ['GetBasePath', 'QuerySet', 'MultiCredentialService',
+            multiCredentialModalController],
     };
-}];
+}
+
+function multiCredentialModalController(GetBasePath, qs, MultiCredentialService) {
+    const vm = this;
+    const { createTag, isReadOnly } = MultiCredentialService;
+
+    const types = {};
+    const unwatch = [];
+
+    let scope;
+
+    vm.init = _scope_ => {
+        scope = _scope_;
+        scope.modalSelectedCredentials = _.cloneDeep(scope.selectedCredentials);
+
+        scope.credentialTypes.forEach(({ name, id }) => types[name] = id);
+
+        scope.toggle_row = vm.toggle_row;
+        scope.toggle_credential = vm.toggle_credential;
+
+        scope.credential_default_params = { order_by: 'name', page_size: 5 };
+        scope.credential_queryset = { order_by: 'name', page_size: 5 };
+        scope.credential_dataset = { results: [], count: 0 };
+        scope.credentials = scope.credential_dataset.results;
+
+        scope.credentialType = `${types.Vault}`;
+        scope.displayedCredentialTypes = scope.credentialTypes;
+
+        const watchType = scope.$watch('credentialType', (newValue, oldValue) => {
+            if (newValue !== oldValue) {
+                fetchCredentials(parseInt(newValue));
+            }
+        });
+        scope.$watchCollection('modalSelectedCredentials', updateListView);
+        scope.$watchCollection('modalSelectedCredentials', updateTagView);
+        scope.$watchCollection('modalSelectedCredentials', updateDisplayedCredentialTypes);
+        scope.$watchCollection('credentials', updateListView);
+
+        unwatch.push(watchType);
+
+        fetchCredentials(parseInt(scope.credentialType))
+            .then(scope.showModal);
+    };
+
+    function updateTagView () {
+        scope.tags = scope.modalSelectedCredentials
+            .map(c => createTag(c, scope.credentialTypes));
+    }
+
+    function updateListView () {
+        scope.credentials.forEach(credential => {
+            const index = scope.modalSelectedCredentials
+                .map(({ id }) => id)
+                .indexOf(credential.id);
+
+            if (index > -1) {
+                credential.checked = 1;
+            } else {
+                credential.checked = 0;
+            }
+        });
+    }
+
+    function updateDisplayedCredentialTypes() {
+        const displayedCredentialTypes = _.cloneDeep(scope.credentialTypes);
+
+        scope.modalSelectedCredentials.forEach(credential => {
+            const credentialTypeId = credential.credential_type || credential.credential_type_id;
+
+            if(isReadOnly(credential) && credentialTypeId !== types.Vault) {
+                const index = displayedCredentialTypes
+                    .map(t => t.id).indexOf(credential.credential_type);
+
+                if (index > -1) {
+                    displayedCredentialTypes.splice(index, 1);
+                }
+            }
+        });
+
+        scope.displayedCredentialTypes = displayedCredentialTypes;
+    }
+
+    function fetchCredentials (credentialType) {
+        const endpoint = GetBasePath('credentials');
+
+        scope.credential_queryset.page = 1;
+        scope.credential_default_params.credential_type = credentialType;
+        scope.credential_queryset.credential_type = credentialType;
+
+        return qs.search(endpoint, scope.credential_default_params)
+            .then(({ data }) => {
+                const results = data.results.filter(c => !isReadOnly(c));
+                const readOnlyCount = data.results.length - results.length;
+
+                data.results = results;
+                data.count = data.count - readOnlyCount;
+
+                scope.credential_dataset = data;
+                scope.credentials = data.results;
+
+                scope.destroyList();
+
+                if (credentialType === types.Vault) {
+                    scope.createVaultList();
+                } else {
+                    scope.createList();
+                }
+            });
+    }
+
+    vm.revertSelectedCredentials = () => {
+        scope.modalSelectedCredentials = _.cloneDeep(scope.selectedCredentials);
+    };
+
+    vm.removeCredential = id => {
+        const index = scope.modalSelectedCredentials.map(c => c.id).indexOf(id);
+        const isSelected = index > -1;
+
+        if (isSelected) {
+            scope.modalSelectedCredentials.splice(index, 1);
+            return;
+        }
+    };
+
+    vm.toggle_credential = id => {
+        // This is called only when a checkbox input is clicked directly. Clicks anywhere else on
+        // the row or direct radio button clicks invoke the toggle_row handler instead with a
+        // different set of arguments. We normalize those arguments here and pass them through to
+        // the other function so that the behavior is consistent.
+        const credential = scope.credentials.find(c => c.id === id);
+        scope.toggle_row(credential);
+    };
+
+    vm.toggle_row = credential => {
+        const index = scope.modalSelectedCredentials.map(c => c.id).indexOf(credential.id);
+        const isSelected = index > -1;
+
+        if (isSelected) {
+            scope.modalSelectedCredentials.splice(index, 1);
+            return;
+        }
+
+        if (credential.credential_type === types.Vault) {
+            scope.modalSelectedCredentials = scope.modalSelectedCredentials
+                .filter(({ inputs }) => inputs.vault_id !== credential.inputs.vault_id)
+                .concat([credential]);
+        } else {
+            scope.modalSelectedCredentials = scope.modalSelectedCredentials
+                .filter(({ credential_type }) => credential_type !== credential.credential_type)
+                .concat([credential]);
+        }
+    };
+
+    vm.cancelForm = () => {
+        unwatch.forEach(cb => cb());
+        scope.hideModal();
+    };
+
+    vm.saveForm = () => {
+        scope.selectedCredentials = _.cloneDeep(scope.modalSelectedCredentials);
+        unwatch.forEach(cb => cb());
+        scope.hideModal();
+    };
+}
+
+MultiCredentialModal.$inject = [
+    'templateUrl',
+    'generateList',
+    '$compile',
+    'CreateSelect2',
+    'i18n',
+    'CredentialList',
+];
+
+export default MultiCredentialModal;
