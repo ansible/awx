@@ -175,3 +175,20 @@ class TopologyInventory(models.Model):
     topology_inventory_id = models.AutoField(primary_key=True,)
     topology = models.ForeignKey('Topology',)
     inventory_id = models.IntegerField()
+
+
+class EventTrace(models.Model):
+
+    event_trace_id = models.AutoField(primary_key=True,)
+    client = models.ForeignKey('Client',)
+    trace_session_id = models.IntegerField(default=0)
+    event_data = models.TextField()
+    message_id = models.IntegerField()
+
+
+class Coverage(models.Model):
+
+    coverage_id = models.AutoField(primary_key=True,)
+    client = models.ForeignKey('Client',)
+    trace_session_id = models.IntegerField()
+    coverage_data = models.TextField()
