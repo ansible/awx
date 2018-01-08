@@ -176,23 +176,25 @@ function MultipleMessage(sender, messages) {
 }
 exports.MultipleMessage = MultipleMessage;
 
-function Coverage(sender, coverage) {
+function Coverage(sender, coverage, trace_id) {
     this.msg_type = "Coverage";
     this.sender = sender;
     this.coverage = coverage;
+    this.trace_id = trace_id;
 }
 exports.Coverage = Coverage;
 
-function MouseEvent(sender, x, y, type) {
+function MouseEvent(sender, x, y, type, trace_id) {
     this.msg_type = "MouseEvent";
     this.sender = sender;
     this.x = x;
     this.y = y;
     this.type = type;
+    this.trace_id = trace_id;
 }
 exports.MouseEvent = MouseEvent;
 
-function MouseWheelEvent(sender, delta, deltaX, deltaY, type, metaKey) {
+function MouseWheelEvent(sender, delta, deltaX, deltaY, type, metaKey, trace_id) {
     this.msg_type = "MouseWheelEvent";
     this.sender = sender;
     this.delta = delta;
@@ -200,10 +202,11 @@ function MouseWheelEvent(sender, delta, deltaX, deltaY, type, metaKey) {
     this.deltaY = deltaY;
     this.type = type;
     this.originalEvent = {metaKey: metaKey};
+    this.trace_id = trace_id;
 }
 exports.MouseWheelEvent = MouseWheelEvent;
 
-function KeyEvent(sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey) {
+function KeyEvent(sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey, trace_id) {
     this.msg_type = "KeyEvent";
     this.sender = sender;
     this.key = key;
@@ -213,6 +216,7 @@ function KeyEvent(sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey
     this.shiftKey = shiftKey;
     this.ctrlKey = ctrlKey;
     this.metaKey = metaKey;
+    this.trace_id = trace_id;
 }
 exports.KeyEvent = KeyEvent;
 
@@ -224,24 +228,27 @@ function TouchEvent(sender, type, touches) {
 }
 exports.TouchEvent = TouchEvent;
 
-function StartRecording(sender) {
+function StartRecording(sender, trace_id) {
     this.msg_type = "StartRecording";
     this.sender = sender;
+    this.trace_id = trace_id;
 }
 exports.StartRecording = StartRecording;
 
-function StopRecording(sender) {
+function StopRecording(sender, trace_id) {
     this.msg_type = "StopRecording";
     this.sender = sender;
+    this.trace_id = trace_id;
 }
 exports.StopRecording = StopRecording;
 
-function ViewPort(sender, scale, panX, panY) {
+function ViewPort(sender, scale, panX, panY, trace_id) {
     this.msg_type = "ViewPort";
     this.sender = sender;
     this.scale = scale;
     this.panX = panX;
     this.panY = panY;
+    this.trace_id = trace_id;
 }
 exports.ViewPort = ViewPort;
 
