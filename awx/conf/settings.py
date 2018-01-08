@@ -14,6 +14,7 @@ from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.db import ProgrammingError, OperationalError
+from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.fields import empty, SkipField
@@ -230,7 +231,8 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['cache'] = EncryptedCacheProxy(cache, registry)
         self.__dict__['registry'] = registry
 
-    def _get_supported_settings(self):
+    @cached_property
+    def all_supported_settings(self):
         return self.registry.get_registered_settings()
 
     def _preload_cache(self):
@@ -382,7 +384,7 @@ class SettingsWrapper(UserSettingsHolder):
 
     def __getattr__(self, name):
         value = empty
-        if name in self._get_supported_settings():
+        if name in self.all_supported_settings:
             with _log_database_error():
                 value = self._get_local(name)
         if value is not empty:
@@ -414,7 +416,7 @@ class SettingsWrapper(UserSettingsHolder):
             # post_save handler will delete from cache when changed.
 
     def __setattr__(self, name, value):
-        if name in self._get_supported_settings():
+        if name in self.all_supported_settings:
             with _log_database_error():
                 self._set_local(name, value)
         else:
@@ -430,7 +432,7 @@ class SettingsWrapper(UserSettingsHolder):
             # pre_delete handler will delete from cache.
 
     def __delattr__(self, name):
-        if name in self._get_supported_settings():
+        if name in self.all_supported_settings:
             with _log_database_error():
                 self._del_local(name)
         else:
@@ -440,7 +442,7 @@ class SettingsWrapper(UserSettingsHolder):
         keys = []
         with _log_database_error():
             for setting in Setting.objects.filter(
-                    key__in=self._get_supported_settings(), user__isnull=True):
+                    key__in=self.all_supported_settings, user__isnull=True):
                 # Skip returning settings that have been overridden but are
                 # considered to be "not set".
                 if setting.value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
@@ -454,7 +456,7 @@ class SettingsWrapper(UserSettingsHolder):
 
     def is_overridden(self, setting):
         set_locally = False
-        if setting in self._get_supported_settings():
+        if setting in self.all_supported_settings:
             with _log_database_error():
                 set_locally = Setting.objects.filter(key=setting, user__isnull=True).exists()
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
