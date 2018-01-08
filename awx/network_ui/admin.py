@@ -36,6 +36,20 @@ from awx.network_ui.models import FSMTrace
 
 from awx.network_ui.models import TopologyInventory
 
+from awx.network_ui.models import EventTrace
+
+from awx.network_ui.models import Coverage
+
+from awx.network_ui.models import TopologySnapshot
+
+from awx.network_ui.models import TestCase
+
+from awx.network_ui.models import Result
+
+from awx.network_ui.models import CodeUnderTest
+
+from awx.network_ui.models import TestResult
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
@@ -179,3 +193,59 @@ class TopologyInventoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TopologyInventory, TopologyInventoryAdmin)
+
+
+class EventTraceAdmin(admin.ModelAdmin):
+    fields = ('client', 'trace_session_id', 'event_data', 'message_id',)
+    raw_id_fields = ('client',)
+
+
+admin.site.register(EventTrace, EventTraceAdmin)
+
+
+class CoverageAdmin(admin.ModelAdmin):
+    fields = ('coverage_data', 'test_result',)
+    raw_id_fields = ('test_result',)
+
+
+admin.site.register(Coverage, CoverageAdmin)
+
+
+class TopologySnapshotAdmin(admin.ModelAdmin):
+    fields = ('client', 'topology_id', 'trace_session_id', 'snapshot_data', 'order',)
+    raw_id_fields = ('client', 'snapshot_data',)
+
+
+admin.site.register(TopologySnapshot, TopologySnapshotAdmin)
+
+
+class TestCaseAdmin(admin.ModelAdmin):
+    fields = ('name', 'test_case_data',)
+    raw_id_fields = ('name',)
+
+
+admin.site.register(TestCase, TestCaseAdmin)
+
+
+class ResultAdmin(admin.ModelAdmin):
+    fields = ('name',)
+    raw_id_fields = ()
+
+
+admin.site.register(Result, ResultAdmin)
+
+
+class CodeUnderTestAdmin(admin.ModelAdmin):
+    fields = ('version_x', 'version_y', 'version_z', 'commits_since', 'commit_hash',)
+    raw_id_fields = ('code_under_test_id',)
+
+
+admin.site.register(CodeUnderTest, CodeUnderTestAdmin)
+
+
+class TestResultAdmin(admin.ModelAdmin):
+    fields = ('test_case', 'result', 'code_under_test', 'time', 'id', 'client',)
+    raw_id_fields = ('test_case', 'result', 'code_under_test', 'client',)
+
+
+admin.site.register(TestResult, TestResultAdmin)

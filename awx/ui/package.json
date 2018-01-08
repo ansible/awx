@@ -61,6 +61,7 @@
     "html-loader": "^0.5.1",
     "html-webpack-harddisk-plugin": "^0.1.0",
     "html-webpack-plugin": "^2.30.1",
+    "istanbul-instrumenter-loader": "^3.0.0",
     "jasmine-core": "^2.5.2",
     "jshint": "^2.9.4",
     "jshint-stylish": "^2.2.0",

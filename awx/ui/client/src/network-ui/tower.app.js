@@ -2,7 +2,7 @@
 
 var angular = require('angular');
 
-var tower = angular.module('tower', ['tablesUI', 'networkUI', 'ui.router']);
+var tower = angular.module('tower', ['networkUI', 'ui.router']);
 
 tower.config(function($stateProvider, $urlRouterProvider) {
 
