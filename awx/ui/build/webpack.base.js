@@ -60,6 +60,17 @@ const base = {
         rules: [
             {
                 test: /\.js$/,
+                use: {
+                    loader: 'istanbul-instrumenter-loader',
+                    options: { esModules: true }
+                },
+                enforce: 'pre',
+                include: [
+                    /src\/network-ui\//
+                ]
+            },
+            {
+                test: /\.js$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
