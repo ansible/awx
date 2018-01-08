@@ -117,7 +117,9 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.trace_id = $scope.trace_id_seq();
 
     $scope.send_trace_message = function (message) {
-        console.log(message);
+        if (!$scope.recording) {
+            return;
+        }
         message.sender = $scope.client_id;
         message.trace_id = $scope.trace_id;
         message.message_id = $scope.message_id_seq();
@@ -460,7 +462,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.onMouseDown = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseDown', $event);
@@ -471,7 +473,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.onMouseUp = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseUp', $event);
@@ -482,7 +484,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.onMouseLeave = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseLeaveResult = getMouseEventResult($event);
       $scope.cursor.hidden = true;
@@ -492,7 +494,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.onMouseMove = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       //var coords = getCrossBrowserElementCoords($event);
       $scope.cursor.hidden = false;
@@ -509,7 +511,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.onMouseOver = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type));
+          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseOverResult = getMouseEventResult($event);
       $scope.cursor.hidden = false;
@@ -525,7 +527,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       var deltaY = $event.deltaY;
       // console.log([$event, delta, deltaX, deltaY]);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey));
+          $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseWheel', [$event, delta, deltaX, deltaY]);
@@ -541,7 +543,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                               $event.altKey,
                                                               $event.shiftKey,
                                                               $event.ctrlKey,
-                                                              $event.metaKey));
+                                                              $event.metaKey,
+                                                              $scope.trace_id));
         }
         $scope.last_event = $event;
         $scope.last_key = $event.key;
@@ -682,14 +685,16 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         console.log(button.name);
         $scope.recording = ! $scope.recording;
         if ($scope.recording) {
+            $scope.trace_id = $scope.trace_id_seq();
             $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
-                                                                     [new messages.StartRecording($scope.client_id),
+                                                                     [new messages.StartRecording($scope.client_id, $scope.trace_id),
                                                                       new messages.ViewPort($scope.client_id,
                                                                                             $scope.current_scale,
                                                                                             $scope.panX,
-                                                                                            $scope.panY)]));
+                                                                                            $scope.panY,
+                                                                                            $scope.trace_id)]));
         } else {
-            $scope.send_control_message(new messages.StopRecording($scope.client_id));
+            $scope.send_control_message(new messages.StopRecording($scope.client_id, $scope.trace_id));
         }
     };
 
@@ -1629,7 +1634,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.send_coverage = function () {
         console.log("Sending coverage");
         if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
-            $scope.send_control_message(new messages.Coverage($scope.client_id, window.__coverage__));
+            $scope.send_control_message(new messages.Coverage($scope.client_id, window.__coverage__, $scope.trace_id));
         }
     };
 

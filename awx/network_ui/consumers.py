@@ -919,7 +919,8 @@ def ws_message(message):
 
 @channel_session
 def ws_disconnect(message):
-    Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
+    if 'topology_id' in message.channel_session:
+        Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
 
 
 def console_printer(message):
