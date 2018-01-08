@@ -150,6 +150,22 @@ def setup_inventory_groups(inventory, group_factory):
 
 
 @pytest.mark.django_db
+def test_inventory_update_name(inventory, inventory_source):
+    iu = inventory_source.update()
+    assert inventory_source.name != inventory.name
+    assert iu.name == inventory.name + ' - ' + inventory_source.name
+
+
+@pytest.mark.django_db
+def test_inventory_update_excessively_long_name(inventory, inventory_source):
+    inventory.name = 'a' * 400  # field max length 512
+    inventory_source.name = 'b' * 400
+    iu = inventory_source.update()
+    assert inventory_source.name != inventory.name
+    assert iu.name.startswith(inventory.name)
+
+
+@pytest.mark.django_db
 class TestHostManager:
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart',
