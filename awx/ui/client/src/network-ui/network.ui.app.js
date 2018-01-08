@@ -33,6 +33,7 @@ var inventoryToolboxClipPath = require('./inventory.toolbox.clip.path.directive.
 var statusLight = require('./status.light.directive.js');
 var taskStatus = require('./task.status.directive.js');
 var debug = require('./debug.directive.js');
+var test_results = require('./test_results.directive.js');
 var awxNetworkUI = require('./network.ui.directive.js');
 
 var networkUI = angular.module('networkUI', [
@@ -70,6 +71,7 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetInventoryToolboxClipPath', inventoryToolboxClipPath.inventoryToolboxClipPath)
     .directive('awxNetStatusLight', statusLight.statusLight)
     .directive('awxNetTaskStatus', taskStatus.taskStatus)
+    .directive('awxNetTestResults', test_results.test_results)
     .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
 
 exports.networkUI = networkUI;

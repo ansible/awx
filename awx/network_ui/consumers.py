@@ -8,8 +8,9 @@ from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
-from awx.network_ui.models import FSMTrace
+from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
+from awx.network_ui.models import TestCase, TestResult, CodeUnderTest, Result
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,14 +19,14 @@ from collections import defaultdict
 import math
 import random
 import logging
+from django.utils.dateparse import parse_datetime
+
 
 from awx.network_ui.utils import transform_dict
 import dpath.util
 from pprint import pformat
 
-import os
 import json
-import time
 # Connected to websocket.connect
 
 HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
@@ -43,6 +44,10 @@ SPACING = 200
 RACK_SPACING = 50
 
 logger = logging.getLogger("awx.network_ui.consumers")
+
+class NetworkUIException(Exception):
+
+    pass
 
 
 def circular_layout(topology_id):
@@ -281,7 +286,7 @@ class _Persistence(object):
         try:
             message_type_id = MessageType.objects.get(name=message_type).pk
         except ObjectDoesNotExist:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported message %s: no message type", message_type)
             return
         TopologyHistory(topology_id=topology_id,
                         client_id=client_id,
@@ -290,9 +295,19 @@ class _Persistence(object):
                         message_data=message['text']).save()
         handler = self.get_handler(message_type)
         if handler is not None:
-            handler(message_value, topology_id, client_id)
+            try:
+                handler(message_value, topology_id, client_id)
+            except NetworkUIException, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", str(e)])})
+                raise
+            except Exception, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
+                raise
+            except BaseException, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
+                raise
         else:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported message %s: no handler", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -454,12 +469,44 @@ class _Persistence(object):
         # grid_layout(topology_id)
         tier_layout(topology_id)
 
+
     def onCoverageRequest(self, coverage, topology_id, client_id):
         pass
 
+    def onTestResult(self, test_result, topology_id, client_id):
+        xyz, _, rest = test_result['code_under_test'].partition('-')
+        commits_since, _, commit_hash = rest.partition('-')
+        commit_hash = commit_hash.strip('g')
+        
+        print (xyz)
+        print (commits_since)
+        print (commit_hash)
+
+        x, y, z = [int(i) for i in xyz.split('.')]
+
+        print (x, y, z)
+
+        code_under_test, _ = CodeUnderTest.objects.get_or_create(version_x=x,
+                                                                 version_y=y,
+                                                                 version_z=z,
+                                                                 commits_since=int(commits_since),
+                                                                 commit_hash=commit_hash)
+
+        print (code_under_test)
+
+        tr = TestResult(id=test_result['id'],
+                        result_id=Result.objects.get(name=test_result['result']).pk,
+                        test_case_id=TestCase.objects.get(name=test_result['name']).pk,
+                        code_under_test_id=code_under_test.pk,
+                        client_id=client_id,
+                        time=parse_datetime(test_result['date']))
+        tr.save()
+        print (tr.pk)
+
+
     def onCoverage(self, coverage, topology_id, client_id):
-        with open(os.path.abspath("coverage/coverage{0}.json".format(int(time.time()))), "w") as f:
-            f.write(json.dumps(coverage['coverage']))
+        Coverage(test_result_id=TestResult.objects.get(id=coverage['result_id'], client_id=client_id).pk,
+                 coverage_data=json.dumps(coverage['coverage'])).save()
 
     def onStartRecording(self, recording, topology_id, client_id):
         pass
@@ -469,9 +516,10 @@ class _Persistence(object):
 
     def write_event(self, event, topology_id, client_id):
         if event.get('save', True):
-            with open(os.path.abspath("recording/recording_{0}.log".format(topology_id)), "a") as f:
-                f.write(json.dumps(event))
-                f.write("\n")
+            EventTrace(trace_session_id=event['trace_id'],
+                       event_data=json.dumps(event),
+                       message_id=event['message_id'],
+                       client_id=client_id).save()
 
     onViewPort = write_event
     onMouseEvent = write_event
@@ -538,6 +586,13 @@ class _Persistence(object):
                  client_id=client_id,
                  message_type=message_value['recv_message_type'] or "none").save()
 
+    def onSnapshot(self, snapshot, topology_id, client_id):
+        TopologySnapshot(trace_session_id=snapshot['trace_id'],
+                         snapshot_data=json.dumps(snapshot),
+                         order=snapshot['order'],
+                         client_id=client_id,
+                         topology_id=topology_id).save()
+
 
 persistence = _Persistence()
 
@@ -554,7 +609,7 @@ class _UndoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            logger.warnding("Unsupported undo message %s", message_type)
+            logger.warning("Unsupported undo message %s", message_type)
 
     def onSnapshot(self, snapshot, topology_id, client_id):
         pass
@@ -648,7 +703,7 @@ class _Discovery(object):
         if handler is not None:
             handler(message_value, topology_id)
         else:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported discovery message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -810,6 +865,7 @@ def ws_connect(message):
     client = Client()
     client.save()
     message.channel_session['client_id'] = client.pk
+    Group("client-%s" % client.pk).add(message.reply_channel)
     message.reply_channel.send({"text": json.dumps(["id", client.pk])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
     topology_data = transform_dict(dict(topology_id='topology_id',
@@ -825,6 +881,7 @@ def ws_connect(message):
     send_snapshot(message.reply_channel, topology_id)
     send_history(message.reply_channel, topology_id)
     send_toolboxes(message.reply_channel)
+    send_tests(message.reply_channel)
 
 
 def send_toolboxes(channel):
@@ -832,6 +889,11 @@ def send_toolboxes(channel):
         item = dict(toolbox_name=toolbox_item['toolbox__name'],
                     data=toolbox_item['data'])
         channel.send({"text": json.dumps(["ToolboxItem", item])})
+
+
+def send_tests(channel):
+    for name, test_case_data in TestCase.objects.all().values_list('name', 'test_case_data'):
+        channel.send({"text": json.dumps(["TestCase", [name, json.loads(test_case_data)]])})
 
 
 def send_snapshot(channel, topology_id):
@@ -919,7 +981,8 @@ def ws_message(message):
 
 @channel_session
 def ws_disconnect(message):
-    Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
+    if 'topology_id' in message.channel_session:
+        Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
 
 
 def console_printer(message):
