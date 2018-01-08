@@ -365,6 +365,24 @@ models:
   name: TopologyInventory
   x: -226
   y: -19
+- fields:
+  - name: event_trace_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - name: event_data
+    type: TextField
+  - name: message_id
+    type: IntegerField
+  name: EventTrace
+  x: -1087
+  y: 202
 modules: []
 view:
   panX: 213.729555519212
