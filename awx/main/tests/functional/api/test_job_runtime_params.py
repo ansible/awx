@@ -403,6 +403,22 @@ def test_job_launch_fails_with_missing_multivault_password(machine_credential, v
 
     url = reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk})
     resp = get(url, rando, expect=200)
+
+    assert {
+        'credential_type': vault_cred_first.credential_type_id,
+        'passwords_needed': ['vault_password.abc'],
+        'vault_id': u'abc',
+        'name': u'Vault #1',
+        'id': vault_cred_first.id
+    } in resp.data['defaults']['credentials']
+    assert {
+        'credential_type': vault_cred_second.credential_type_id,
+        'passwords_needed': ['vault_password.xyz'],
+        'vault_id': u'xyz',
+        'name': u'Vault #2',
+        'id': vault_cred_second.id
+    } in resp.data['defaults']['credentials']
+
     assert resp.data['passwords_needed_to_start'] == ['vault_password.abc', 'vault_password.xyz']
     assert sum([
         cred['passwords_needed'] for cred in resp.data['defaults']['credentials']
