@@ -896,7 +896,7 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = ('*',)
+        fields = ('*', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
@@ -984,7 +984,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'scm_revision',) + \
+                  'scm_update_cache_timeout', 'scm_revision', 'custom_virtualenv',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
 
@@ -2530,7 +2530,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         fields = ('*', 'host_config_key', 'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous')
+                  'allow_simultaneous', 'custom_virtualenv')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)

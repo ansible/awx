@@ -34,7 +34,7 @@ from awx.main.models.notifications import (
 )
 from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin, CustomVirtualEnvMixin
 from awx.main.fields import JSONField, AskForField
 
 
@@ -215,7 +215,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -508,6 +508,18 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
+
+    @property
+    def ansible_virtualenv_path(self):
+        # the order here enforces precedence (it matters)
+        for virtualenv in (
+            self.job_template.custom_virtualenv,
+            self.project.custom_virtualenv,
+            self.project.organization.custom_virtualenv
+        ):
+            if virtualenv:
+                return virtualenv
+        return settings.ANSIBLE_VENV_PATH
 
     @property
     def event_class(self):

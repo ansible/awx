@@ -24,7 +24,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin
 from awx.main.utils import update_scm_url
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
@@ -223,7 +223,7 @@ class ProjectOptions(models.Model):
         return proj_path + '.lock'
 
 
-class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''

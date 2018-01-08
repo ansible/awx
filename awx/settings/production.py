@@ -4,6 +4,7 @@
 # Production settings for AWX project.
 
 # Python
+import os
 import copy
 import errno
 import sys
@@ -43,10 +44,11 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
 # Ansible base virtualenv paths and enablement
-ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
+BASE_VENV_PATH = "/var/lib/awx/venv"
+ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
 
 # Tower base virtualenv paths and enablement
-AWX_VENV_PATH = "/var/lib/awx/venv/awx"
+AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
 AWX_ISOLATED_USERNAME = 'awx'
 

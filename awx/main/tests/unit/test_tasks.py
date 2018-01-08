@@ -8,6 +8,7 @@ import re
 import shutil
 import tempfile
 
+from backports.tempfile import TemporaryDirectory
 import fcntl
 import mock
 import pytest
@@ -204,6 +205,7 @@ class TestJobExecution:
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
+            mock.patch.object(Job, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH),
             mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect),
         ]
         for cls in (Job, AdHocCommand):
@@ -347,6 +349,35 @@ class TestGenericRun(TestJobExecution):
         call_args, _ = self.run_pexpect.call_args_list[0]
         args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
+
+    def test_valid_custom_virtualenv(self):
+        with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as tempdir:
+            os.makedirs(os.path.join(tempdir, 'lib'))
+            os.makedirs(os.path.join(tempdir, 'bin', 'activate'))
+            venv_patch = mock.patch.object(Job, 'ansible_virtualenv_path', tempdir)
+            self.patches.append(venv_patch)
+            venv_patch.start()
+
+            self.task.run(self.pk)
+
+            assert self.run_pexpect.call_count == 1
+            call_args, _ = self.run_pexpect.call_args_list[0]
+            args, cwd, env, stdout = call_args
+
+            assert env['PATH'].startswith(os.path.join(tempdir, 'bin'))
+            assert env['VIRTUAL_ENV'] == tempdir
+            for path in (settings.ANSIBLE_VENV_PATH, tempdir):
+                assert '--ro-bind {} {}'.format(path, path) in ' '.join(args)
+
+    def test_invalid_custom_virtualenv(self):
+        venv_patch = mock.patch.object(Job, 'ansible_virtualenv_path', '/venv/missing')
+        self.patches.append(venv_patch)
+        venv_patch.start()
+
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+            tb = self.task.update_model.call_args[-1]['result_traceback']
+            assert 'a valid Python virtualenv does not exist at /venv/missing' in tb
 
 
 class TestAdhocRun(TestJobExecution):
