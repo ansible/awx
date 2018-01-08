@@ -36,6 +36,10 @@ from awx.network_ui.models import FSMTrace
 
 from awx.network_ui.models import TopologyInventory
 
+from awx.network_ui.models import EventTrace
+
+from awx.network_ui.models import Coverage
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
@@ -179,3 +183,19 @@ class TopologyInventoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TopologyInventory, TopologyInventoryAdmin)
+
+
+class EventTraceAdmin(admin.ModelAdmin):
+    fields = ('client', 'trace_session_id', 'event_data', 'message_id',)
+    raw_id_fields = ('client',)
+
+
+admin.site.register(EventTrace, EventTraceAdmin)
+
+
+class CoverageAdmin(admin.ModelAdmin):
+    fields = ('client', 'trace_session_id', 'coverage_data',)
+    raw_id_fields = ('client',)
+
+
+admin.site.register(Coverage, CoverageAdmin)
