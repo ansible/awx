@@ -316,15 +316,16 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'extra_vars', 'labels', 'survey_passwords',
-                'schedule', 'launch_type', 'allow_simultaneous']
+        return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels']
+        )
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
         base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
         base_list.remove('labels')
-        return (base_list +
-                ['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization'])
+        return (base_list |
+                set(['survey_spec', 'survey_enabled', 'ask_variables_on_launch', 'organization']))
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_detail', kwargs={'pk': self.pk}, request=request)
