@@ -1,0 +1,5 @@
+<form action="/network_ui/upload_test" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">Upload Test</button>
+</form>

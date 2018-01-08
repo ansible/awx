@@ -116,6 +116,7 @@
                 ng-attr-transform="translate({{context_menus[0].x}}, {{context_menus[0].y}})">
         </g>
         <g awx-net-debug></g>
+        <g awx-net-test-results></g>
         <g awx-net-cursor></g>
         <g ng-repeat="touch in touches">
             <g awx-net-touch></g>

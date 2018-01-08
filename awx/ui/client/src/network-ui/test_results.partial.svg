@@ -1,0 +1,14 @@
+<g ng-if="test_results.length > 0">
+<g ng-attr-transform="translate({{graph.width - 300}}, {{graph.height-500}})">
+<rect class="NetworkUI__test_results" width="280" height="480" x="0" y="0">
+</rect>
+<g transform="translate(20, 20)">
+<text class="NetworkUI__text">Test Results {{version}}</text>
+<g ng-repeat="result in test_results track by $index">
+<g ng-attr-transform="translate(0, {{$index * 20 + 20}})">
+<text class="NetworkUI__text">{{result.name}} - {{result.result}}</text>
+</g>
+<g>
+</g>
+</g>
+</g>
