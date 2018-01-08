@@ -383,6 +383,21 @@ models:
   name: EventTrace
   x: -1087
   y: 202
+- fields:
+  - name: coverage_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - name: trace_session_id
+    type: IntegerField
+  - name: coverage_data
+    type: TextField
+  name: Coverage
+  x: -1068
+  y: -4
 modules: []
 view:
   panX: 213.729555519212
