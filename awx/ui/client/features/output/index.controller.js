@@ -79,20 +79,29 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
         meta.scroll.buffer = 100;
         meta.next = job.get('related.job_events.next');
         meta.prev = job.get('related.job_events.previous');
-        meta.cursor = job.get('related.job_events.results').length - 1;
+        meta.cursor = job.get('related.job_events.results').length;
 
         container.scroll(onScroll);
     });
 }
 
 function next () {
-    job.next('job_events')
+    job.next({ related: 'job_events', limit: 5 })
         .then(() => {
             meta.next = job.get('related.job_events.next');
             meta.prev = job.get('related.job_events.previous');
 
-            console.log(job.get('related.job_events.results'));
+            append();
         });
+}
+
+function append () {
+    const events = job.get('related.job_events.results').slice(meta.cursor);
+    const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
+    const table = $('#result-table');
+
+    table.append(rows);
+    $compile(rows.contents())($scope);
 }
 
 function expand () {
@@ -141,13 +150,13 @@ function parseLine (event) {
         ln++;
 
         const isLastLine = i === lines.length - 1;
-        let append = createRow(current, ln, line);
+        let row = createRow(current, ln, line);
 
         if (current && current.isTruncated && isLastLine) {
-            append += createRow(current);
+            row += createRow(current);
         }
 
-        return `${html}${append}`;
+        return `${html}${row}`;
     }, '');
 }
 
@@ -349,12 +358,6 @@ function onScroll () {
         }
     }, 500);
 }
-
-/*
- *function approximateLineNumber () {
- *
- *}
- */
 
 JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];
 

@@ -104,6 +104,10 @@ function httpGet (config = {}) {
 
     if (config.params) {
         req.params = config.params;
+
+        if (config.params.page_size) {
+            this.pageSize = config.params.page_size;
+        }
     }
 
     if (typeof config.resource === 'object') {
@@ -330,6 +334,10 @@ function has (method, keys) {
 function extend (related, config) {
     const req = this.parseRequestConfig('GET', config);
 
+    if (config.params.page_size) {
+        this.pageSize = config.params.page_size;
+    }
+
     if (this.has(req.method, `related.${related}`)) {
         req.url = this.get(`related.${related}`);
 
@@ -346,8 +354,17 @@ function extend (related, config) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
-function next (related, config = {}) {
-    const url = this.get(`related.${related}.next`);
+function next (config = {}) {
+    let url;
+    let results;
+
+    if (config.related) {
+        url = this.get(`related.${config.related}.next`);
+        results = this.get(`related.${config.related}.results`) || [];
+    } else {
+        url = this.get('next');
+        results = this.get('results');
+    }
 
     if (!url) {
         return Promise.resolve(null);
@@ -360,13 +377,18 @@ function next (related, config = {}) {
 
     return $http(req)
         .then(({ data }) => {
-            const results = this.get(`related.${related}.results`) || [];
+            results = results || [];
 
             data.results = results.concat(data.results);
-            this.set('get', `related.${related}`, data);
 
-            if (config.limit < results.length) {
-                console.log(results);
+            if ((config.limit * this.pageSize) < data.results.length) {
+                data.results.splice(-config.limit * this.pageSize);
+            }
+
+            if (config.related) {
+                this.set('get', `related.${config.related}`, data);
+            } else {
+                this.set('get', data);
             }
         });
 }
