@@ -453,3 +453,15 @@ function ChannelTrace(from_fsm, to_fsm, sent_message_type) {
     this.sent_message_type = sent_message_type;
 }
 exports.ChannelTrace = ChannelTrace;
+
+function Snapshot(sender, devices, links, groups, streams, order, trace_id) {
+    this.msg_type = 'Snapshot';
+    this.sender = 0;
+    this.devices = devices;
+    this.links = links;
+    this.groups = groups;
+    this.streams = streams;
+    this.order = order;
+    this.trace_id = trace_id;
+}
+exports.Snapshot = Snapshot;
