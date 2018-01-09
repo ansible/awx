@@ -692,9 +692,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                                                             $scope.current_scale,
                                                                                             $scope.panX,
                                                                                             $scope.panY,
+                                                                                            $scope.trace_id),
+                                                                      new messages.Snapshot($scope.client_id,
+                                                                                            $scope.devices,
+                                                                                            $scope.links,
+                                                                                            $scope.groups,
+                                                                                            $scope.streams,
+                                                                                            0,
                                                                                             $scope.trace_id)]));
         } else {
-            $scope.send_control_message(new messages.StopRecording($scope.client_id, $scope.trace_id));
+            $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
+                                                                     [new messages.Snapshot($scope.client_id,
+                                                                                            $scope.devices,
+                                                                                            $scope.links,
+                                                                                            $scope.groups,
+                                                                                            $scope.streams,
+                                                                                            1,
+                                                                                            $scope.trace_id),
+                                                                      new messages.StopRecording($scope.client_id, $scope.trace_id)]));
         }
     };
 

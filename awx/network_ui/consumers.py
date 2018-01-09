@@ -8,7 +8,7 @@ from awx.network_ui.models import GroupDevice as GroupDeviceMap
 from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
-from awx.network_ui.models import FSMTrace
+from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
@@ -23,9 +23,7 @@ from awx.network_ui.utils import transform_dict
 import dpath.util
 from pprint import pformat
 
-import os
 import json
-import time
 # Connected to websocket.connect
 
 HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
@@ -458,8 +456,9 @@ class _Persistence(object):
         pass
 
     def onCoverage(self, coverage, topology_id, client_id):
-        with open(os.path.abspath("coverage/coverage{0}.json".format(int(time.time()))), "w") as f:
-            f.write(json.dumps(coverage['coverage']))
+        Coverage(trace_session_id=coverage['trace_id'],
+                 client_id=client_id,
+                 coverage_data=json.dumps(coverage['coverage']))
 
     def onStartRecording(self, recording, topology_id, client_id):
         pass
@@ -469,9 +468,10 @@ class _Persistence(object):
 
     def write_event(self, event, topology_id, client_id):
         if event.get('save', True):
-            with open(os.path.abspath("recording/recording_{0}.log".format(topology_id)), "a") as f:
-                f.write(json.dumps(event))
-                f.write("\n")
+            EventTrace(trace_session_id=event['trace_id'],
+                       event_data=json.dumps(event),
+                       message_id=event['message_id'],
+                       client_id=client_id).save()
 
     onViewPort = write_event
     onMouseEvent = write_event
@@ -537,6 +537,13 @@ class _Persistence(object):
                  order=message_value['order'],
                  client_id=client_id,
                  message_type=message_value['recv_message_type'] or "none").save()
+
+    def onSnapshot(self, snapshot, topology_id, client_id):
+        TopologySnapshot(trace_session_id=snapshot['trace_id'],
+                         snapshot_data=json.dumps(snapshot),
+                         order=snapshot['order'],
+                         client_id=client_id,
+                         topology_id=topology_id).save()
 
 
 persistence = _Persistence()
