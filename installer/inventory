@@ -26,6 +26,11 @@ awx_secret_key=awxsecret
 # openshift_user=developer
 # awx_node_port=30083
 
+# Kubernetes Install
+# kubernetes_context=test-cluster
+# awx_kubernetes_namespace=awx
+# awx_node_port=30083
+
 # Standalone Docker Install
 postgres_data_dir=/tmp/pgdocker
 host_port=80

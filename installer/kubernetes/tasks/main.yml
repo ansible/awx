@@ -1,27 +1,23 @@
 ---
-- name: Authenticate with OpenShift
-  shell: "oc login {{ openshift_host }} -u {{ openshift_user }} -p {{ openshift_password }}"
+- name: Set the Kubernetes Context
+  shell: "kubectl config set-context {{ kubernetes_context }}"
 
-- name: Get Project Detail
-  shell: "oc get project {{ awx_openshift_project }}"
-  register: project_details
+- name: Get Namespace Detail
+  shell: "kubectl get namespace {{ awx_kubernetes_namespace }}"
+  register: namespace_details
   ignore_errors: yes
 
 - name: Get Postgres Service Detail
-  shell: "oc describe svc postgresql -n {{ awx_openshift_project }}"
+  shell: "kubectl describe svc awx-postgresql -n {{ awx_kubernetes_namespace }}"
   register: postgres_svc_details
   ignore_errors: yes
   when: "pg_hostname is not defined or pg_hostname == ''"
 
-- name: Create AWX Openshift Project
-  shell: "oc new-project {{ awx_openshift_project }}"
-  when: project_details.rc != 0
+- name: Create AWX Kubernetes Project
+  shell: "kubectl create namespace {{ awx_kubernetes_namespace }}"
+  when: namespace_details.rc != 0
 
-# This might could/should be optional based on certain circumstances
-- name: Mark Openshift User as Admin
-  shell: "oc adm policy add-role-to-user admin {{ openshift_user }} -n {{ awx_openshift_project }}"
-
-# TODO: This is duplicated in the kubernetes role, probably needs to be moved to the image_build role
+# TODO: This is duplicated in the openshift role, probably needs to be moved to the image_build role
 - name: Manage AWX Container Images
   block:
     - name: Get docker registry password from oc if needed
@@ -69,60 +65,61 @@
       when: docker_registry is defined
       delegate_to: localhost
 
-    # Note this is the one bit that is Openshift specific
-    - name: Enable image stream lookups for awx images
-      shell: "oc set image-lookup --all -n {{ awx_openshift_project }}"
-
     - name: Set full web image path
       set_fact:
-        awx_web_openshift_image: "{{ awx_web_image }}:{{ awx_version }}"
-      when: awx_web_openshift_image is not defined
+        awx_web_kubernetes_image: "{{ awx_web_image }}:{{ awx_version }}"
+      when: awx_web_kubernetes_image is not defined
 
     - name: Set full task image path
       set_fact:
-        awx_task_openshift_image: "{{ awx_task_image }}:{{ awx_version }}"
-      when: awx_task_openshift_image is not defined
+        awx_task_kubernetes_image: "{{ awx_task_image }}:{{ awx_version }}"
+      when: awx_task_kubernetes_image is not defined
   when: dockerhub_base is not defined
 
 - name: Set DockerHub Image Paths
   set_fact:
-    awx_web_openshift_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
-    awx_task_openshift_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
+    awx_web_kubernetes_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
+    awx_task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
   when: dockerhub_base is defined
 
 - name: Deploy and Activate Postgres
-  shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
+  shell: "helm install --name awx --namespace {{ awx_kubernetes_namespace }} --set postgresUser={{ pg_username }},postgresPassword={{ pg_password }},postgresDatabase={{ pg_database }},persistence.size={{ pg_volume_capacity|default('5')}}Gi stable/postgresql"
   when: (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
-  register: openshift_pg_activate
+  register: kubernetes_pg_activate
+
+- name: Set postgresql hostname to helm package service
+  set_fact:
+    pg_hostname: awx-postgresql
+  when: pg_hostname is not defined or pg_hostname == ''
 
 - name: Wait for Postgres to activate
   pause:
-    seconds: 15
-  when: openshift_pg_activate|changed
+    seconds: 60
+  when: kubernetes_pg_activate|changed
 
-- name: Set openshift base path
+- name: Set kubernetes base path
   set_fact:
-    openshift_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/awx-config"
+    kubernetes_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/awx-config"
 
 - name: Ensure directory exists
   file:
-    path: "{{ openshift_base_path  }}"
+    path: "{{ kubernetes_base_path }}"
     state: directory
 
-- name: Template Openshift AWX Config
+- name: Template Kubernetes AWX Config
   template:
     src: configmap.yml.j2
-    dest: "{{ openshift_base_path }}/configmap.yml"
+    dest: "{{ kubernetes_base_path }}/configmap.yml"
     mode: '0600'
 
-- name: Template Openshift AWX Deployment
+- name: Template Kubernetes AWX Deployment
   template:
     src: deployment.yml.j2
-    dest: "{{ openshift_base_path }}/deployment.yml"
+    dest: "{{ kubernetes_base_path }}/deployment.yml"
     mode: '0600'
 
 - name: Apply Configmap
-  shell: "oc apply -f {{ openshift_base_path }}/configmap.yml"
+  shell: "kubectl apply -f {{ kubernetes_base_path }}/configmap.yml"
 
 - name: Apply Deployment
-  shell: "oc apply -f {{ openshift_base_path }}/deployment.yml"
+  shell: "kubectl apply -f {{ kubernetes_base_path }}/deployment.yml"

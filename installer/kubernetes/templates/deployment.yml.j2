@@ -1,0 +1,92 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: awx
+  namespace: {{ awx_kubernetes_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: awx-web-deploy
+        service: django
+    spec:
+      containers:
+        - name: awx-web
+          image: {{ awx_web_kubernetes_image }}
+          ports:
+            - containerPort: 8052
+          volumeMounts:
+            - mountPath: /etc/tower
+              name: awx-application-config
+        - name: awx-celery
+          image: {{ awx_task_kubernetes_image }}
+          volumeMounts:
+            - mountPath: /etc/tower
+              name: awx-application-config
+          env:
+            - name: DATABASE_USER
+              value: {{ pg_username }}
+            - name: DATABASE_NAME
+              value: {{ pg_database }}
+            - name: DATABASE_HOST
+              value: {{ pg_hostname|default('postgresql') }}
+            - name: DATABASE_PORT
+              value: ({{ pg_port|default('5432') }})
+            - name: DATABASE_PASSWORD
+              value: {{ pg_password }}
+            - name: AWX_ADMIN_USER
+              value: {{ default_admin_user|default('admin') }}
+            - name: AWX_ADMIN_PASSWORD
+              value: {{ default_admin_password|default('password') }}
+        - name: awx-rabbit
+          image: rabbitmq:3
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: secretb
+            - name: RABBITMQ_NODENAME
+              value: rabbitmq
+            - name: RABBITMQ_DEFAULT_USER
+              value: awx
+            - name: RABBITMQ_DEFAULT_PASS
+              value: abcdefg
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: awx
+        - name: awx-memcached
+          image: memcached
+      volumes:
+        - name: awx-application-config
+          configMap:
+            name: awx-config
+            items:
+              - key: awx_settings
+                path: settings.py
+              - key: secret_key
+                path: SECRET_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_kubernetes_namespace }}
+  labels:
+    name: awx-web-svc
+spec:
+  type: "NodePort"
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8052
+  selector:
+    name: awx-web-deploy
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_kubernetes_namespace }}
+spec:
+  backend:
+    serviceName: awx-web-svc
+    servicePort: 80
