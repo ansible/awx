@@ -414,6 +414,8 @@ models:
     ref: TopologySnapshot
     ref_field: snapshot_data
     type: TextField
+  - name: order
+    type: IntegerField
   name: TopologySnapshot
   x: -1123
   y: -277
