@@ -77,6 +77,9 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
 
         meta.scroll.height = container[0].scrollHeight;
         meta.scroll.buffer = 100;
+        meta.next = job.get('related.job_events.next');
+        meta.prev = job.get('related.job_events.previous');
+        meta.cursor = job.get('related.job_events.results').length - 1;
 
         container.scroll(onScroll);
     });
@@ -84,8 +87,11 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
 
 function next () {
     job.next('job_events')
-        .then(data => {
-            console.log(data);
+        .then(() => {
+            meta.next = job.get('related.job_events.next');
+            meta.prev = job.get('related.job_events.previous');
+
+            console.log(job.get('related.job_events.results'));
         });
 }
 
@@ -338,8 +344,8 @@ function onScroll () {
 
         vm.menu.scroll.display = true;
 
-        if (bottom >= meta.scroll.height) {
-            // fetch more lines
+        if (bottom >= meta.scroll.height && meta.next) {
+            next();
         }
     }, 500);
 }
