@@ -186,27 +186,30 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
     if team_map.get('saml_attr') is None:
         return
 
-    attr_values = kwargs.get('response', {}).get('attributes', {}).get(team_map['saml_attr'], [])
+    saml_team_names = set(kwargs
+                          .get('response', {})
+                          .get('attributes', {})
+                          .get(team_map['saml_attr'], []))
 
     team_ids = []
-    for team_name in attr_values:
-        for team_name_map in team_map.get('team_org_map', []):
-            if team_name_map.get('team', '') == team_name:
-                if multiple_orgs:
-                    if not team_name_map.get('organization', ''):
-                        # Settings field validation should prevent this.
-                        logger.error("organization name invalid for team {}".format(team_name))
-                        continue
-                    org = Organization.objects.get_or_create(name=team_name_map['organization'])[0]
-                else:
-                    try:
-                        org = Organization.objects.order_by('pk')[0]
-                    except IndexError:
-                        continue
-                team = Team.objects.get_or_create(name=team_name, organization=org)[0]
+    for team_name_map in team_map.get('team_org_map', []):
+        team_name = team_name_map.get('team', '')
+        if team_name in saml_team_names:
+            if multiple_orgs:
+                if not team_name_map.get('organization', ''):
+                    # Settings field validation should prevent this.
+                    logger.error("organization name invalid for team {}".format(team_name))
+                    continue
+                org = Organization.objects.get_or_create(name=team_name_map['organization'])[0]
+            else:
+                try:
+                    org = Organization.objects.order_by('pk')[0]
+                except IndexError:
+                    continue
+            team = Team.objects.get_or_create(name=team_name, organization=org)[0]
 
-                team_ids.append(team.id)
-                team.member_role.members.add(user)
+            team_ids.append(team.id)
+            team.member_role.members.add(user)
 
     if team_map.get('remove', True):
         [t.member_role.members.remove(user) for t in 
