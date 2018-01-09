@@ -13,24 +13,30 @@ This document provides a guide for installing AWX.
   - [Choose a deployment platform](#choose-a-deployment-platform)
   - [Official vs Building Images](#official-vs-building-images)
 - [OpenShift](#openshift)
-  - [Prerequisites](#prerequisites)
+  - [Prerequisites](#prerequisites-1)
     - [Deploying to Minishift](#deploying-to-minishift)
   - [Pre-build steps](#pre-build-steps)
   - [PostgreSQL](#postgresql)
   - [Start the build](#start-the-build)
   - [Post build](#post-build)
   - [Accessing AWX](#accessing-awx)
-- [Docker](#docker)
+- [Kubernetes](#kubernetes)
   - [Prerequisites](#prerequisites-2)
   - [Pre-build steps](#pre-build-steps-1)
+  - [Start the build](#start-the-build-1)
+  - [Accessingm AWX](#accessing-awx-1)
+  - [SSL Termination](#ssl-termination)
+- [Docker](#docker)
+  - [Prerequisites](#prerequisites-3)
+  - [Pre-build steps](#pre-build-steps-2)
     - [Deploying to a remote host](#deploying-to-a-remote-host)
     - [Inventory variables](#inventory-variables)
       - [Docker registry](#docker-registry)
       - [PostgreSQL](#postgresql-1)
       - [Proxy settings](#proxy-settings)
-  - [Start the build](#start-the-build-1)
+  - [Start the build](#start-the-build-2)
   - [Post build](#post-build-1)
-  - [Accessing AWX](#accessing-awx-1)
+  - [Accessing AWX](#accessing-awx-2)
 
 ## Getting started
 
@@ -63,7 +69,7 @@ The system that runs the AWX service will need to satisfy the following requirem
 - At leasts 4GB of memory
 - At least 2 cpu cores
 - At least 20GB of space
-- Running Docker or Openshift
+- Running Docker, Openshift, or Kubernetes
 
 ### AWX Tunables
 
@@ -75,7 +81,7 @@ We currently support running AWX as a containerized application using Docker ima
 
 The [installer](./installer) directory contains an [inventory](./installer/inventory) file, and a playbook, [install.yml](./installer/install.yml). You'll begin by setting variables in the inventory file according to the platform you wish to use, and then you'll start the image build and deployment process by running the playbook.
 
-In the sections below, you'll find deployment details and instructions for each platform. To deploy to Docker, view the [Docker section](#docker), and for OpenShift, view the [OpenShift section](#openshift).
+In the sections below, you'll find deployment details and instructions for each platform. To deploy to Docker, view the [Docker section](#docker), for OpenShift, view the [OpenShift section](#openshift), for Kubernetes, view the [Kubernetes section](#kubernetes).
 
 ### Official vs Building Images
 
@@ -144,7 +150,7 @@ Before starting the build process, review the [inventory](./installer/inventory)
 *docker_registry*
 
 > IP address and port, or URL, for accessing a registry that the OpenShift cluster can access. Defaults to *172.30.1.1:5000*, the internal registry delivered with Minishift. This is not needed if you are using official hosted images.
-n
+
 *docker_registry_repository*
 
 > Namespace to use when pushing and pulling images to and from the registry. Generally this will match the project name. It defaults to *awx*. This is not needed if you are using official hosted images.
@@ -270,6 +276,83 @@ awx-web-svc   awx-web-svc-awx.192.168.64.2.nip.io             awx-web-svc   http
 The above example is taken from a Minishift instance. From a web browser, use `https` to access the `HOST/PORT` value from your environment. Using the above example, the URL to access the server would be [https://awx-web-svc-awx.192.168.64.2.nip.io](https://awx-web-svc-awx.192.168.64.2.nip.io).
 
 Once you access the AWX server, you will be prompted with a login dialog. The default administrator username is `admin`, and the password is `password`.
+
+## Kubernetes
+
+### Prerequisites
+
+A Kubernetes deployment will require you to have access to a Kubernetes cluster as well as the following tools:
+
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [helm](https://docs.helm.sh/using_helm/#quickstart-guide)
+
+The installation program will reference `kubectl` directly. `helm` is only necessary if you are letting the installer configure PostgreSQL for you.
+
+### Pre-build steps
+
+Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section uncommenting when necessary. Make sure the openshift and standalone docker sections are commented out:
+
+*kubernetes_context*
+
+> Prior to running the installer, make sure you've configured the context for the cluster you'll be installing to. This is how the installer knows which cluster to connect to and what authentication to use
+
+*awx_kubernetes_namespace*
+
+> Name of the Kubernetes namespace where the AWX resources will be installed. This will be created if it doesn't exist
+
+*awx_node_port*
+
+> The web server port running inside the AWX pod.
+
+*docker_registry_*
+
+> These settings should be used if building your own base images. You'll need access to an external registry and are responsible for making sure your kube cluster can talk to it and use it. If these are undefined and the dockerhub_ configuration settings are uncommented then the images will be pulled from dockerhub instead
+
+### Start the build
+
+After making changes to the `inventory` file use `ansible-playbook` to begin the install
+
+```bash
+$ ansible-playbook -i inventory install.yml
+```
+
+### Post build
+
+After the playbook run completes, check the status of the deployment by running `kubectl get pods --namespace awx` (replace awx with the namespace you used):
+
+```bash
+# View the running pods, it may take a few minutes for everything to be marked in the Running state
+$ kubectl get pods --namespace awx
+NAME                             READY     STATUS    RESTARTS   AGE
+awx-2558692395-2r8ss             4/4       Running   0          29s
+awx-postgresql-355348841-kltkn   1/1       Running   0          1m
+```
+
+### Accessing AWX
+
+The AWX web interface is running in the AWX pod behind the `awx-web-svc` service:
+
+```bash
+# View available services
+$ kubectl get svc --namespace awx
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+awx-postgresql   ClusterIP   10.7.250.208   <none>        5432/TCP       2m
+awx-web-svc      NodePort    10.7.241.35    <none>        80:30177/TCP   1m
+```
+
+The deployment process creates an `Ingress` named `awx-web-svc` also. Some kubernetes cloud providers will automatically handle routing configuration when an Ingress is created others may require that you more explicitly configure it. You can see what kubernetes knows about things with:
+
+```bash
+ kubectl get ing --namespace awx
+NAME          HOSTS     ADDRESS          PORTS     AGE
+awx-web-svc   *         35.227.x.y   80        3m
+```
+
+If your provider is able to allocate an IP Address from the Ingress controller then you can navigate to the address and access the AWX interface. For some providers it can take a few minutes to allocate and make this accessible. For other providers it may require you to manually intervene.
+
+### SSL Termination
+
+Unlike Openshift's `Route`. the Kubernetes `Ingress` doesn't yet handle SSL termination. As such the default configuration will only expose AWX through HTTP on port 80. You are responsible for configuring SSL support until support is added (either to Kubernetes or AWX itself).
 
 ## Docker
 
