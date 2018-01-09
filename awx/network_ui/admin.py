@@ -40,6 +40,8 @@ from awx.network_ui.models import EventTrace
 
 from awx.network_ui.models import Coverage
 
+from awx.network_ui.models import TopologySnapshot
+
 
 class DeviceAdmin(admin.ModelAdmin):
     fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
@@ -199,3 +201,11 @@ class CoverageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Coverage, CoverageAdmin)
+
+
+class TopologySnapshotAdmin(admin.ModelAdmin):
+    fields = ('client', 'topology_id', 'trace_session_id', 'snapshot_data', 'order',)
+    raw_id_fields = ('client', 'snapshot_data',)
+
+
+admin.site.register(TopologySnapshot, TopologySnapshotAdmin)

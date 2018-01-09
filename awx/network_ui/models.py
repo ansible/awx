@@ -192,3 +192,13 @@ class Coverage(models.Model):
     client = models.ForeignKey('Client',)
     trace_session_id = models.IntegerField()
     coverage_data = models.TextField()
+
+
+class TopologySnapshot(models.Model):
+
+    topology_snapshot_id = models.AutoField(primary_key=True,)
+    client = models.ForeignKey('Client',)
+    topology_id = models.IntegerField()
+    trace_session_id = models.IntegerField()
+    snapshot_data = models.TextField('TopologySnapshot',)
+    order = models.IntegerField()
