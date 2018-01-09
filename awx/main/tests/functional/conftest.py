@@ -73,7 +73,8 @@ def user():
         try:
             user = User.objects.get(username=name)
         except User.DoesNotExist:
-            user = User(username=name, is_superuser=is_superuser, password=name)
+            user = User(username=name, is_superuser=is_superuser)
+            user.set_password(name)
             user.save()
         return user
     return u

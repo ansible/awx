@@ -1,0 +1,163 @@
+
+dn: dc=ansible,dc=com
+dc: ansible
+description: My wonderful company as much text as you want to place
+ in this line up to 32K continuation data for the line above must
+ have &lt;CR> or &lt;CR>&lt;LF> i.e. ENTER work
+ on both Windows and *nix system - new line MUST begin with ONE SPACE
+objectClass: dcObject
+objectClass: organization
+o: ansible.com
+
+# groups
+
+dn: ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+# group: Superusers
+
+dn: cn=superusers,ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: superusers
+member: cn=super_user1,ou=people,dc=ansible,dc=com
+
+# group: Engineering
+
+dn: cn=engineering,ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: engineering
+member: cn=eng_admin1,ou=people,dc=ansible,dc=com
+member: cn=eng_user1,ou=people,dc=ansible,dc=com
+member: cn=eng_user2,ou=people,dc=ansible,dc=com
+
+dn: cn=engineering_admins,ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: engineering_admins
+member: cn=eng_admin1,ou=people,dc=ansible,dc=com
+
+# group: Sales
+
+dn: cn=sales,ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: sales
+member: cn=sales_user1,ou=people,dc=ansible,dc=com
+member: cn=sales_user2,ou=people,dc=ansible,dc=com
+
+# group: IT
+
+dn: cn=it,ou=groups,dc=ansible,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: it
+member: cn=it_user1,ou=people,dc=ansible,dc=com
+member: cn=it_user2,ou=people,dc=ansible,dc=com
+
+
+# users
+
+dn: ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+# users - superusers
+
+dn: cn=super_user1,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: super_user1
+sn: User 1
+givenName: Super
+mail: super_user1@ansible.com
+userPassword: password
+
+# users - engineering
+
+dn: cn=eng_user1,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: eng_user1
+sn: User 1
+givenName: Engineering
+mail: eng_user1@ansible.com
+userPassword: password
+
+dn: cn=eng_user2,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: eng_user2
+sn: User 2
+givenName: Engineering
+mail: eng_user2@ansible.com
+userPassword: password
+
+dn: cn=eng_admin1,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: eng_admin1
+sn: Admin 1
+givenName: Engineering
+mail: eng_admin1@ansible.com
+userPassword: password
+
+# users - IT
+
+dn: cn=it_user1,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: it_user1
+sn: Technology User 1
+givenName: Information
+mail: it_user1@ansible.com
+userPassword: password
+
+dn: cn=it_user2,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: it_user2
+sn: Technology User 2
+givenName: Information
+mail: it_user2@ansible.com
+userPassword: password
+
+# users - Sales
+
+dn: cn=sales_user1,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: sales_user1
+sn: Person 1
+givenName: Sales
+mail: sales_user1@ansible.com
+userPassword: password
+
+dn: cn=sales_user2,ou=people,dc=ansible,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: sales_user2
+sn: Person 2
+givenName: Sales
+mail: sales_user2@ansible.com
+userPassword: password

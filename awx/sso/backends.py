@@ -133,6 +133,26 @@ class LDAPBackend(BaseLDAPBackend):
         return set()
 
 
+class LDAPBackend1(LDAPBackend):
+    settings_prefix = 'AUTH_LDAP_1_'
+
+
+class LDAPBackend2(LDAPBackend):
+    settings_prefix = 'AUTH_LDAP_2_'
+
+
+class LDAPBackend3(LDAPBackend):
+    settings_prefix = 'AUTH_LDAP_3_'
+
+
+class LDAPBackend4(LDAPBackend):
+    settings_prefix = 'AUTH_LDAP_4_'
+
+
+class LDAPBackend5(LDAPBackend):
+    settings_prefix = 'AUTH_LDAP_5_'
+
+
 def _decorate_enterprise_user(user, provider):
     user.set_unusable_password()
     user.save()

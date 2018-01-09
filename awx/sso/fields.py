@@ -31,6 +31,21 @@ class AuthenticationBackendsField(fields.StringListField):
         ('awx.sso.backends.LDAPBackend', [
             'AUTH_LDAP_SERVER_URI',
         ]),
+        ('awx.sso.backends.LDAPBackend1', [
+            'AUTH_LDAP_1_SERVER_URI',
+        ]),
+        ('awx.sso.backends.LDAPBackend2', [
+            'AUTH_LDAP_2_SERVER_URI',
+        ]),
+        ('awx.sso.backends.LDAPBackend3', [
+            'AUTH_LDAP_3_SERVER_URI',
+        ]),
+        ('awx.sso.backends.LDAPBackend4', [
+            'AUTH_LDAP_4_SERVER_URI',
+        ]),
+        ('awx.sso.backends.LDAPBackend5', [
+            'AUTH_LDAP_5_SERVER_URI',
+        ]),
         ('awx.sso.backends.RADIUSBackend', [
             'RADIUS_SERVER',
         ]),
@@ -70,6 +85,11 @@ class AuthenticationBackendsField(fields.StringListField):
 
     REQUIRED_BACKEND_FEATURE = {
         'awx.sso.backends.LDAPBackend': 'ldap',
+        'awx.sso.backends.LDAPBackend1': 'ldap',
+        'awx.sso.backends.LDAPBackend2': 'ldap',
+        'awx.sso.backends.LDAPBackend3': 'ldap',
+        'awx.sso.backends.LDAPBackend4': 'ldap',
+        'awx.sso.backends.LDAPBackend5': 'ldap',
         'awx.sso.backends.RADIUSBackend': 'enterprise_auth',
         'awx.sso.backends.SAMLAuth': 'enterprise_auth',
     }

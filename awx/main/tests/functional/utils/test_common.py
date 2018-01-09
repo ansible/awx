@@ -20,7 +20,7 @@ def test_model_to_dict_user(alice):
     output_dict = model_to_dict(alice)
     assert output_dict['username'] == username
     assert output_dict['password'] == 'hidden'
-    assert alice.username == password
+    assert alice.username == username
     assert alice.password == password
 
 
