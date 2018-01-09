@@ -102,8 +102,8 @@ models:
     pk: true
     type: AutoField
   name: Client
-  x: -510
-  y: 141
+  x: -518
+  y: 138
 - fields:
   - name: topology_history_id
     pk: true
@@ -398,6 +398,25 @@ models:
   name: Coverage
   x: -1068
   y: -4
+- fields:
+  - name: topology_snapshot_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - name: topology_id
+    type: IntegerField
+  - name: trace_session_id
+    type: IntegerField
+  - name: snapshot_data
+    ref: TopologySnapshot
+    ref_field: snapshot_data
+    type: TextField
+  name: TopologySnapshot
+  x: -1123
+  y: -277
 modules: []
 view:
   panX: 213.729555519212
