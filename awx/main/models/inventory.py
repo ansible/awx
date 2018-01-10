@@ -8,6 +8,7 @@ import re
 import copy
 from urlparse import urljoin
 import os.path
+import six
 
 # Django
 from django.conf import settings
@@ -1447,7 +1448,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             if '_eager_fields' not in kwargs:
                 kwargs['_eager_fields'] = {}
             if 'name' not in kwargs['_eager_fields']:
-                name = '{} - {}'.format(self.inventory.name, self.name)
+                name = six.text_type('{} - {}').format(self.inventory.name, self.name)
                 name_field = self._meta.get_field('name')
                 if len(name) > name_field.max_length:
                     name = name[:name_field.max_length]
