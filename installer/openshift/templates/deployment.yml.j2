@@ -77,7 +77,6 @@ spec:
   ports:
     - name: http
       port: 8052
-      nodePort: {{ awx_node_port }}
   selector:
     name: awx-web-deploy
 ---
