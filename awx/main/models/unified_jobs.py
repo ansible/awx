@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Python
-from cStringIO import StringIO
+from StringIO import StringIO
 import json
 import logging
 import os
@@ -1013,7 +1013,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return content
 
     def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
-        content = self.result_stdout_raw_handle().read()
+        content = self.result_stdout_raw_handle().read().decode('utf-8')
         if redact_sensitive:
             content = UriCleaner.remove_sensitive(content)
         if escape_ascii:
@@ -1029,13 +1029,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return self._result_stdout_raw(escape_ascii=True)
 
     def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
-        return_buffer = u""
+        return_buffer = StringIO()
         if end_line is not None:
             end_line = int(end_line)
         stdout_lines = self.result_stdout_raw_handle().readlines()
         absolute_end = len(stdout_lines)
         for line in stdout_lines[int(start_line):end_line]:
-            return_buffer += line
+            return_buffer.write(line)
         if int(start_line) < 0:
             start_actual = len(stdout_lines) + int(start_line)
             end_actual = len(stdout_lines)
@@ -1046,6 +1046,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             else:
                 end_actual = len(stdout_lines)
 
+        return_buffer = return_buffer.getvalue().decode('utf-8')
         if redact_sensitive:
             return_buffer = UriCleaner.remove_sensitive(return_buffer)
         if escape_ascii:
