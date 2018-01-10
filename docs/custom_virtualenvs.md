@@ -43,7 +43,34 @@ can be found using `pip freeze`:
 One important item to keep in mind is that in a clustered awx installation,
 you need to ensure that the same custom virtualenv exists on _every_ local file
 system at `/var/lib/awx/venv/`.  For container-based deployments, this likely
-means building these steps into your own custom image building workflow.
+means building these steps into your own custom image building workflow, e.g.,
+
+```diff
+diff --git a/Makefile b/Makefile
+index aa8b304..eb05f91 100644
+--- a/Makefile
++++ b/Makefile
+@@ -164,6 +164,10 @@ requirements_ansible_dev:
+        $(VENV_BASE)/ansible/bin/pip install pytest mock; \
+    fi
+ 
++requirements_custom:
++	virtualenv $(VENV_BASE)/my-custom-env
++	$(VENV_BASE)/my-custom-env/bin/pip install python-memcached psutil
++
+ requirements_isolated:
+    if [ ! -d "$(VENV_BASE)/awx" ]; then \
+        virtualenv --system-site-packages $(VENV_BASE)/awx && \
+diff --git a/installer/image_build/templates/Dockerfile.j2 b/installer/image_build/templates/Dockerfile.j2
+index d69e2c9..a08bae5 100644
+--- a/installer/image_build/templates/Dockerfile.j2
++++ b/installer/image_build/templates/Dockerfile.j2
+@@ -34,6 +34,7 @@ RUN yum -y install epel-release && \
+     pip install virtualenv supervisor && \
+     VENV_BASE=/var/lib/awx/venv make requirements_ansible && \
+     VENV_BASE=/var/lib/awx/venv make requirements_awx && \
++    VENV_BASE=/var/lib/awx/venv make requirements_custom && \
+```
 
 Assigning Custom Virtualenvs
 ============================
