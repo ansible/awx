@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re
 import shutil
 import tempfile
@@ -40,7 +42,7 @@ def sqlite_copy_expert(request):
                     InventoryUpdateEvent, SystemJobEvent):
             if cls._meta.db_table == tablename:
                 for event in cls.objects.order_by('start_line').all():
-                    fd.write(event.stdout)
+                    fd.write(event.stdout.encode('utf-8'))
 
     setattr(SQLiteCursorWrapper, 'copy_expert', write_stdout)
     request.addfinalizer(lambda: shutil.rmtree(path))
@@ -229,3 +231,23 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
 
     response = get(url + '?format={}'.format(fmt + '_download'), user=admin, expect=200)
     assert response.content == large_stdout
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('Parent, Child, relation, view', [
+    [Job, JobEvent, 'job', 'api:job_stdout'],
+    [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],
+    [_mk_project_update, ProjectUpdateEvent, 'project_update', 'api:project_update_stdout'],
+    [_mk_inventory_update, InventoryUpdateEvent, 'inventory_update', 'api:inventory_update_stdout'],
+])
+@pytest.mark.parametrize('fmt', ['txt', 'ansi', 'txt_download', 'ansi_download'])
+def test_text_with_unicode_stdout(sqlite_copy_expert, Parent, Child, relation,
+                                  view, get, admin, fmt):
+    job = Parent()
+    job.save()
+    for i in range(3):
+        Child(**{relation: job, 'stdout': u'オ{}\n'.format(i), 'start_line': i}).save()
+    url = reverse(view, kwargs={'pk': job.pk}) + '?format=' + fmt
+
+    response = get(url, user=admin, expect=200)
+    assert response.content.splitlines() == ['オ%d' % i for i in range(3)]
