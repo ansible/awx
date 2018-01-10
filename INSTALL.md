@@ -341,14 +341,14 @@ The deployment process creates an `Ingress` named `awx-web-svc` also. Some kuber
 ```bash
  kubectl get ing --namespace awx
 NAME          HOSTS     ADDRESS          PORTS     AGE
-awx-web-svc   *         35.227.x.y   80        3m
+awx-web-svc   *         35.227.x.y       80        3m
 ```
 
 If your provider is able to allocate an IP Address from the Ingress controller then you can navigate to the address and access the AWX interface. For some providers it can take a few minutes to allocate and make this accessible. For other providers it may require you to manually intervene.
 
 ### SSL Termination
 
-Unlike Openshift's `Route`. the Kubernetes `Ingress` doesn't yet handle SSL termination. As such the default configuration will only expose AWX through HTTP on port 80. You are responsible for configuring SSL support until support is added (either to Kubernetes or AWX itself).
+Unlike Openshift's `Route` the Kubernetes `Ingress` doesn't yet handle SSL termination. As such the default configuration will only expose AWX through HTTP on port 80. You are responsible for configuring SSL support until support is added (either to Kubernetes or AWX itself).
 
 ## Docker
 
