@@ -133,10 +133,6 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Name of the OpenShift project that will be created, and used as the namespace for the AWX app. Defaults to *awx*.
 
-*awx_node_port*
-
-> The web server port running inside the AWX pod. Defaults to *30083*.
-
 *openshift_user*
 
 > Username of the OpenShift user that will create the project, and deploy the application. Defaults to *developer*.

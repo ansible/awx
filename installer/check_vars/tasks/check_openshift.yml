@@ -18,12 +18,6 @@
     - openshift_password is defined and openshift_password != ''
     msg: "Set the value of 'openshift_password' in the inventory file."
 
-- name: awx_node_port should be defined
-  assert:
-    that:
-    - awx_node_port is defined and awx_node_port != ''
-    msg: "Set the value of 'awx_node_port' in the inventory file."
-
 - name: docker_registry should be defined if not using dockerhub
   assert:
     that:
