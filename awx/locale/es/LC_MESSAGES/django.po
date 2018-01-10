@@ -13,15 +13,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-30 20:23+0000\n"
-"PO-Revision-Date: 2017-09-01 06:52+0000\n"
-"Last-Translator: edrh01 <ed.rh01@oceantranslations.com>\n"
+"PO-Revision-Date: 2018-01-10 18:47+0000\n"
+"Last-Translator: cmeyersadmin <cmeyers@ansible.com>\n"
 "Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Zanata 4.3.2\n"
+"X-Generator: Pootle 2.8\n"
+"X-POOTLE-MTIME: 1515610077.607821\n"
 
 #: awx/api/authentication.py:67
 msgid "This is prepended. Invalid token header. Some credentials provided. This is appended."
@@ -245,7 +246,7 @@ msgstr ""
 
 #: awx/api/serializers.py:1201
 msgid "Smart inventories must specify host_filter"
-msgstr ""
+msgstr "put some spanish in here."
 
 #: awx/api/serializers.py:1303
 #, python-format
