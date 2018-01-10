@@ -300,10 +300,6 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Name of the Kubernetes namespace where the AWX resources will be installed. This will be created if it doesn't exist
 
-*awx_node_port*
-
-> The web server port running inside the AWX pod.
-
 *docker_registry_*
 
 > These settings should be used if building your own base images. You'll need access to an external registry and are responsible for making sure your kube cluster can talk to it and use it. If these are undefined and the dockerhub_ configuration settings are uncommented then the images will be pulled from dockerhub instead
