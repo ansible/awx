@@ -7,8 +7,8 @@
 function AnsibleFacts($scope, Facts, ParseTypeChange, ParseVariableString) {
 
     function init() {
-        $scope.facts = ParseVariableString(Facts.data);
-        let rows = (_.isEmpty(Facts.data)) ? 6 : 20;
+        $scope.facts = ParseVariableString(Facts);
+        let rows = (_.isEmpty(Facts)) ? 6 : 20;
         $("#host_facts").attr("rows", rows);
         $scope.parseType = 'yaml';
         ParseTypeChange({
