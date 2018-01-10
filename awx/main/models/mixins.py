@@ -1,26 +1,29 @@
 # Python
+import os
 import json
 from copy import copy, deepcopy
 
 # Django
+from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ValidationError
 
 # AWX
 from awx.main.models.base import prevent_search
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
-from awx.main.utils import parse_yaml_or_json
+from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.fields import JSONField, AskForField
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
            'TaskManagerUnifiedJobMixin', 'TaskManagerJobMixin', 'TaskManagerProjectUpdateMixin',
-           'TaskManagerInventoryUpdateMixin',]
+           'TaskManagerInventoryUpdateMixin', 'CustomVirtualEnvMixin']
 
 
 class ResourceMixin(models.Model):
@@ -416,3 +419,23 @@ class TaskManagerProjectUpdateMixin(TaskManagerUpdateOnLaunchMixin):
 class TaskManagerInventoryUpdateMixin(TaskManagerUpdateOnLaunchMixin):
     class Meta:
         abstract = True
+
+
+class CustomVirtualEnvMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    custom_virtualenv = models.CharField(
+        blank=True,
+        null=True,
+        default=None,
+        max_length=100
+    )
+
+    def clean_custom_virtualenv(self):
+        value = self.custom_virtualenv
+        if value and os.path.join(value, '') not in get_custom_venv_choices():
+            raise ValidationError(
+                _('{} is not a valid virtualenv in {}').format(value, settings.BASE_VENV_PATH)
+            )
+        return os.path.join(value or '', '')

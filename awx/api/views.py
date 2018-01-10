@@ -315,6 +315,7 @@ class ApiV1ConfigView(APIView):
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
+                custom_virtualenvs = get_custom_venv_choices(),
             ))
 
         return Response(data)

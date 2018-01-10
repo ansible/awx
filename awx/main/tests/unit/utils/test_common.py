@@ -8,6 +8,8 @@ from uuid import uuid4
 import json
 import yaml
 
+from backports.tempfile import TemporaryDirectory
+from django.conf import settings
 from django.core.cache import cache
 
 from rest_framework.exceptions import ParseError
@@ -136,7 +138,7 @@ def test_memoize_delete(memoized_function):
     assert memoized_function('john', 'smith') == 'smith'
     assert memoized_function('john', 'smith') == 'smith'
     assert memoized_function.calls['john'] == 1
-    
+
     assert cache.get('myfunction') == {u'john-smith': 'smith'}
 
     common.memoize_delete('myfunction')
@@ -164,3 +166,11 @@ def test_extract_ansible_vars():
     redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
     assert var_list == set(['ansible_connetion_setting'])
     assert redacted == {"foobar": "baz"}
+
+
+def test_get_custom_venv_choices():
+    assert common.get_custom_venv_choices() == []
+
+    with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as temp_dir:
+        os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
+        assert common.get_custom_venv_choices() == [os.path.join(temp_dir, '')]

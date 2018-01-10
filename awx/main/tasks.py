@@ -626,10 +626,16 @@ class BaseTask(LogErrorsTask):
             '': '',
         }
 
-    def add_ansible_venv(self, env, add_awx_lib=True):
-        env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-        env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-        venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+    def add_ansible_venv(self, venv_path, env, add_awx_lib=True):
+        env['VIRTUAL_ENV'] = venv_path
+        env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
+        venv_libdir = os.path.join(venv_path, "lib")
+
+        if not os.path.exists(venv_libdir):
+            raise RuntimeError(
+                'a valid Python virtualenv does not exist at {}'.format(venv_path)
+            )
+
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
         if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
             env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
@@ -802,6 +808,8 @@ class BaseTask(LogErrorsTask):
             kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             kwargs['proot_show_paths'] = self.proot_show_paths
+            if getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH) != settings.ANSIBLE_VENV_PATH:
+                kwargs['proot_custom_virtualenv'] = instance.ansible_virtualenv_path
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
@@ -1021,7 +1029,7 @@ class RunJob(BaseTask):
             plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
-        env = self.add_ansible_venv(env, add_awx_lib=kwargs.get('isolated', False))
+        env = self.add_ansible_venv(job.ansible_virtualenv_path, env, add_awx_lib=kwargs.get('isolated', False))
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -1314,7 +1322,7 @@ class RunProjectUpdate(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
-        env = self.add_ansible_venv(env)
+        env = self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
@@ -2055,7 +2063,7 @@ class RunAdHocCommand(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, **kwargs)
-        env = self.add_ansible_venv(env)
+        env = self.add_ansible_venv(settings.ANSIBLE_VENV_PATH, env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)

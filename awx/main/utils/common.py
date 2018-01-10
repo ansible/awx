@@ -47,7 +47,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError',]
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -756,9 +756,11 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd]
     for venv in (
         settings.ANSIBLE_VENV_PATH,
-        settings.AWX_VENV_PATH
+        settings.AWX_VENV_PATH,
+        kwargs.get('proot_custom_virtualenv')
     ):
-        new_args.extend(['--ro-bind', venv, venv])
+        if venv:
+            new_args.extend(['--ro-bind', venv, venv])
     show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     show_paths.extend(kwargs.get('proot_show_paths', []))
     for path in sorted(set(show_paths)):
@@ -836,6 +838,21 @@ def set_current_apps(apps):
 def get_current_apps():
     global current_apps
     return current_apps
+
+
+def get_custom_venv_choices():
+    from django.conf import settings
+    custom_venv_path = settings.BASE_VENV_PATH
+    if os.path.exists(custom_venv_path):
+        return [
+            os.path.join(custom_venv_path, x.decode('utf-8'), '')
+            for x in os.listdir(custom_venv_path)
+            if x not in ('awx', 'ansible') and
+            os.path.isdir(os.path.join(custom_venv_path, x)) and
+            os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
+        ]
+    else:
+        return []
 
 
 class OutputEventFilter(object):

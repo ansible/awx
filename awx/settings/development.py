@@ -4,6 +4,7 @@
 # Development settings for AWX project.
 
 # Python
+import os
 import socket
 import copy
 import sys
@@ -123,8 +124,9 @@ for setting in dir(this_module):
 include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
-ANSIBLE_VENV_PATH = "/venv/ansible"
-AWX_VENV_PATH = "/venv/awx"
+BASE_VENV_PATH = "/venv/"
+ANSIBLE_VENV_PATH = os.path.join(BASE_VENV_PATH, "ansible")
+AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
