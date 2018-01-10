@@ -3,26 +3,22 @@ from django.core.management.base import BaseCommand
 from awx.network_ui.models import Topology, Device, Link, Interface
 
 from collections import defaultdict
-
-
-def natural_numbers():
-    i = 1
-    while True:
-        yield i
-        i += 1
+from .util import natural_numbers
 
 
 class Command(BaseCommand):
-    help = '''Creates a 2 tier clos topology with n nodes in the 1st tier and m nodes
-            in the 2nd tier and h hosts per pair of switches'''
+    help = '''Adds a 2 tier clos topology with n nodes in the 1st tier and m nodes
+            in the 2nd tier and h hosts per pair of switches to the topology with id `id`'''
 
     def add_arguments(self, parser):
+        parser.add_argument('id', type=int)
         parser.add_argument('n', type=int)
         parser.add_argument('m', type=int)
         parser.add_argument('h', type=int)
 
     def handle(self, *args, **options):
 
+        topology_id = options['id']
         n = options['n']
         m = options['m']
         h = options['h']
@@ -30,15 +26,15 @@ class Command(BaseCommand):
         print "n", n
         print "m", m
 
-        topology = Topology(name="test_{0}".format(n), scale=1.0, panX=0, panY=0)
-        topology.save()
+        topology = Topology.objects.get(pk=topology_id)
 
         devices = []
         hosts_per_leaf = []
         leaves = []
         spines = []
 
-        id_seq = natural_numbers()
+        id_seq = natural_numbers(topology.device_id_seq)
+        link_id_seq = natural_numbers(topology.link_id_seq)
 
         tier2 = 100
         tier1 = 500
@@ -106,7 +102,8 @@ class Command(BaseCommand):
                 link = Link(from_device=devices[leaf.id],
                             to_device=devices[spine.id],
                             from_interface=from_interface,
-                            to_interface=to_interface)
+                            to_interface=to_interface,
+                            id=next(link_id_seq))
                 links.append(link)
         for i, hosts in enumerate(hosts_per_leaf):
             leaf1 = leaves[2 * i]
@@ -125,7 +122,8 @@ class Command(BaseCommand):
                 link = Link(from_device=devices[leaf1.id],
                             to_device=devices[host.id],
                             from_interface=from_interface,
-                            to_interface=to_interface)
+                            to_interface=to_interface,
+                            id=next(link_id_seq))
                 links.append(link)
                 from_interface = Interface(device=devices[leaf2.id],
                                            name="swp" + str(len(interfaces[leaf2.id]) + 1),
@@ -140,9 +138,14 @@ class Command(BaseCommand):
                 link = Link(from_device=devices[leaf2.id],
                             to_device=devices[host.id],
                             from_interface=from_interface,
-                            to_interface=to_interface)
+                            to_interface=to_interface,
+                            id=next(link_id_seq))
                 links.append(link)
 
         Link.objects.bulk_create(links)
+
+        topology.device_id_seq = next(id_seq)
+        topology.link_id_seq = next(link_id_seq)
+        topology.save()
 
         print "Topology: ", topology.pk
