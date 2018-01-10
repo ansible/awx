@@ -97,7 +97,6 @@ angular
         users.name,
         projects.name,
         scheduler.name,
-        instanceGroups.name,
 
         'Utilities',
         'templates',
@@ -105,6 +104,7 @@ angular
         'AWDirectives',
         'features',
 
+        instanceGroups,
         atFeatures,
         atLibComponents,
         atLibModels,
@@ -314,6 +314,21 @@ angular
                         }
                     }
                     activateTab();
+                });
+
+                $transitions.onCreate({}, function(trans) {
+                    console.log('$onCreate ' +trans.to().name);
+                });
+
+                $transitions.onBefore({}, function(trans) {
+                    console.log('$onBefore ' +trans.to().name);
+                });
+                $transitions.onError({}, function(trans) {
+
+                    console.log('$onError ' +trans.to().name);
+                });
+                $transitions.onExit({}, function(trans) {
+                    console.log('$onExit ' +trans.to().name);
                 });
 
                 $transitions.onSuccess({}, function(trans) {

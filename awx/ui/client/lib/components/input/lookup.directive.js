@@ -118,6 +118,16 @@ function AtInputLookupController (baseInputController, $q, $state) {
 
         vm.searchAfterDebounce();
     };
+
+    vm.removeTag = (i) => {
+        let list;
+        if (!i.id) {
+            list = _.remove(scope.state._value, i);
+        } else {
+            list = _.remove(scope.state._value, i.id);
+        }
+        scope.state._value = list;
+    };
 }
 
 AtInputLookupController.$inject = [

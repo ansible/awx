@@ -129,6 +129,10 @@ function httpPost (config = {}) {
         data: config.data
     };
 
+    if (config.url) {
+        req.url = `${this.path}${config.url}`;
+    }
+
     return $http(req)
         .then(res => {
             this.model.GET = res.data;
@@ -323,7 +327,7 @@ function has (method, keys) {
     return value !== undefined && value !== null;
 }
 
-function extend (method, related) {
+function extend (method, related, config = {}) {
     if (!related) {
         related = method;
         method = 'GET';
@@ -336,6 +340,8 @@ function extend (method, related) {
             method,
             url: this.get(`related.${related}`)
         };
+
+        Object.assign(req, config);
 
         return $http(req)
             .then(({ data }) => {

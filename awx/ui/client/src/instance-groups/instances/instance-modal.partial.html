@@ -1,0 +1,55 @@
+<div id="instance-modal" class="modal-dialog">
+    <at-panel on-dismiss="instanceGroups.instances">
+        <at-panel-heading>
+            {{ vm.panelTitle }} | {{ vm.instanceGroupName}}
+        </at-panel-heading>
+        <multi-select-preview selected-rows='vm.selectedRows' available-rows='vm.instances'></multi-select-preview>
+        <at-panel-body
+            style="margin: 20px 0">
+            <div class="at-List-toolbar">
+                <smart-search
+                    class="at-List-search"
+                    django-model="instances"
+                    base-path="instances"
+                    iterator="instance"
+                    list="list"
+                    dataset="vm.instances"
+                    collection="collection"
+                    search-tags="searchTags">
+                </smart-search>
+            </div>
+            <at-list results='vm.instances'>
+                <at-row ng-repeat="instance in vm.instances"
+                    ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
+
+                    <input type="checkbox"
+                        style="margin-right: 20px"
+                        ng-class="{ 'at-Input--rejected': state.rejected }"
+                        ng-model="instance.isSelected"
+                        ng-checked="instance.isSelected"
+                        ng-attr-tabindex="{{ tab || undefined }}"
+                        ng-disabled="state._disabled" />
+
+                    <div class="at-Row-items" style="flex: 1">
+                        <at-row-item
+                            header-value="{{ instance.hostname }}"
+                            header-tag="{{ vm.instanceTypes[instance.type] }}"></at-row-item>
+                        </at-row-item>
+                    </div>
+                </at-row>
+
+            </at-list>
+            <div class="pull-right" style="margin-top:20px">
+                <button class="btn at-ButtonHollow--default"
+                    style="margin-right:10px"
+                    ng-click="$state.go('instanceGroups.instances')">
+                    {{:: vm.strings.get('CANCEL') }}
+                </button>
+                <button class="btn at-Button--success"
+                    ng-click="vm.submit()">
+                    {{:: vm.strings.get('SAVE') }}
+                </button>
+            </div>
+        </at-panel-body>
+    </at-panel>
+</div>

@@ -86,12 +86,26 @@
     border-top: @at-border-default-width solid @at-color-list-border;
 }
 
+.at-Row--rowLayout {
+    display: flex;
+    flex-direction: row;
+
+    .at-RowItem {
+        margin-right: @at-space-4x;
+
+        &-label {
+            width: auto;
+        }
+    }
+}
+
 .at-Row-actions {
     display: flex;
 }
 
 .at-Row-items {
     align-self: flex-start;
+    flex: 1;
 }
 
 .at-RowItem {
@@ -101,6 +115,7 @@
 }
 
 .at-RowItem--isHeader {
+    color: @at-color-body-text;
     margin-bottom: @at-margin-bottom-list-header;
     line-height: @at-line-height-list-row-item-header;
 }
@@ -146,8 +161,26 @@
 
 .at-RowItem-label {
     text-transform: uppercase;
+    width: auto;
     width: @at-width-list-row-item-label;
     color: @at-color-list-row-item-label;
+    font-size: @at-font-size;
+}
+
+.at-RowItem-value {
+    font-size: @at-font-size-3x;
+}
+
+.at-RowItem-badge {
+    background-color: @at-gray-848992;
+    border-radius: @at-border-radius;
+    color: @at-white;
+    font-size: 11px;
+    font-weight: normal;
+    height: 14px;
+    line-height: 10px;
+    margin: 0 10px;
+    padding: 2px 10px;
 }
 
 .at-RowAction {
@@ -178,6 +211,11 @@
 
 .at-RowAction--danger:hover {
     background-color: @at-color-list-row-action-hover-danger;
+}
+
+.at-Row .at-Row-checkbox {
+    align-self: start;
+    margin: 2px 20px 0 0;
 }
 
 @media screen and (max-width: @at-breakpoint-compact-list) {

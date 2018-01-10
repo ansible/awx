@@ -21,6 +21,7 @@
 }
 
 .at-mixin-Button () {
+    border-radius: @at-border-radius;
     height: @at-height-input;
     padding: @at-padding-button-vertical @at-padding-button-horizontal;
     font-size: @at-font-size-body;
@@ -101,4 +102,22 @@
 
 .at-mixin-FontFixedWidth () {
     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.at-mixin-sliderTrack() {
+    background: @at-color-input-slider-track;
+    cursor: pointer;
+    height: 1px;
+    width: 100%;
+}
+
+.at-mixin-sliderThumb() {
+    -webkit-appearance: none;
+    background: @at-color-input-slider-thumb;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    height: 16px;
+    margin-top: -7px;
+    width: 16px;
 }
