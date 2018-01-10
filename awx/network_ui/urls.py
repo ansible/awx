@@ -8,6 +8,7 @@ import awx.network_ui.routing
 app_name = 'network_ui'
 urlpatterns = [
     url(r'^download_trace$', views.download_trace, name='download_trace'),
+    url(r'^download_recording$', views.download_recording, name='download_recording'),
     url(r'^topology.json$', views.json_topology_data, name='json_topology_data'),
     url(r'^topology.yaml$', views.yaml_topology_data, name='json_topology_data'),
     url(r'^$', views.index, name='index'),

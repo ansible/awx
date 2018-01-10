@@ -36,8 +36,12 @@ Device.prototype.toJSON = function () {
             x: this.x,
             y: this.y,
             type: this.type,
-            interfaces: this.interfaces,
-            processes: this.processes};
+            interfaces: this.interfaces.map(function (x) {
+                return x.toJSON();
+            }),
+            processes: this.processes.map(function (x) {
+                return x.toJSON();
+            })};
 };
 
 Device.prototype.is_selected = function (x, y) {
@@ -725,6 +729,11 @@ function Process(id, name, type, x, y) {
     this.device = null;
 }
 exports.Process = Process;
+
+Process.prototype.toJSON = function () {
+    return {id: this.id,
+            name: this.name};
+}
 
 function Stream(id, from_device, to_device, label) {
     this.id = id;
