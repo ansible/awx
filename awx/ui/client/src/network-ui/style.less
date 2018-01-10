@@ -35,7 +35,8 @@
 @red:  #D9534F;
 @blue: #337AB7;
 @light-toolbox-background: #f6f6f6;
-@orange: #F0AD4E;
+@rack-orange: #F0AD4E;
+@site-orange: #EC971F;
 @icon-background-hover:@blue;
 
 .NetworkUI {
@@ -196,7 +197,7 @@
 }
 
 .NetworkUI__rack {
-    fill: @orange;
+    fill: @rack-orange;
 }
 
 .NetworkUI__rack--background {
@@ -247,20 +248,33 @@
     stroke-width: 2;
 }
 
+.NetworkUI__site--fill0{
+    fill:@site-orange;
+}
+
+.NetworkUI__site--fill1{
+    fill:none;
+    stroke:@light-background;
+    stroke-width:2;
+    stroke-miterlimit:10;
+}
+
+.NetworkUI__site--fill2{
+    fill:@light-background;
+}
+
 .NetworkUI__site--network {
     fill: @dark-widget-detail;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
-.NetworkUI__site-background {
+.NetworkUI__site--background {
     fill: @light-background;
-    stroke: @light-background;
-    stroke-width: 2;
 }
 
 .NetworkUI__site--selected {
-    fill: @selected-blue;
+    fill: @light-background;
     stroke: @selected-blue;
     stroke-width: 10;
 }
