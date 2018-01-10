@@ -16,6 +16,7 @@ const meta = {
     scroll: {}
 };
 
+const SCROLL_BUFFER = 250;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -75,8 +76,6 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
 
-        meta.scroll.height = container[0].scrollHeight;
-        meta.scroll.buffer = 100;
         meta.next = job.get('related.job_events.next');
         meta.prev = job.get('related.job_events.previous');
         meta.cursor = job.get('related.job_events.results').length;
@@ -86,17 +85,17 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
 }
 
 function next () {
-    job.next({ related: 'job_events', limit: 5 })
-        .then(() => {
+    job.next({ related: 'job_events' })
+        .then(cursor => {
             meta.next = job.get('related.job_events.next');
             meta.prev = job.get('related.job_events.previous');
 
-            append();
+            append(cursor);
         });
 }
 
-function append () {
-    const events = job.get('related.job_events.results').slice(meta.cursor);
+function append (cursor) {
+    const events = job.get('related.job_events.results').slice(cursor);
     const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
     const table = $('#result-table');
 
@@ -175,10 +174,6 @@ function createRecord (ln, lines, event) {
         isTruncated: (event.end_line - event.start_line) > lines.length,
         isHost: typeof event.host === 'number'
     };
-
-    if (info.isHost) {
-        console.log(event);
-    }
 
     if (event.parent_uuid) {
         info.parents = getParentEvents(event.parent_uuid);
@@ -341,7 +336,7 @@ function onScroll () {
 
     $timeout(() => {
         const top = container[0].scrollTop;
-        const bottom = top + meta.scroll.buffer + container[0].offsetHeight;
+        const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
 
         meta.scroll.inProgress = false;
 
@@ -353,10 +348,10 @@ function onScroll () {
 
         vm.menu.scroll.display = true;
 
-        if (bottom >= meta.scroll.height && meta.next) {
+        if (bottom >= container[0].scrollHeight && meta.next) {
             next();
         }
-    }, 500);
+    }, 250);
 }
 
 JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];

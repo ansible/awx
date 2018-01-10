@@ -107,6 +107,8 @@ function httpGet (config = {}) {
 
         if (config.params.page_size) {
             this.pageSize = config.params.page_size;
+            this.pageLimit = config.pageLimit || false;
+            this.pageCache = config.pageCache || false;
         }
     }
 
@@ -336,6 +338,8 @@ function extend (related, config) {
 
     if (config.params.page_size) {
         this.pageSize = config.params.page_size;
+        this.pageLimit = config.pageLimit || false;
+        this.pageCache = config.pageCache || false;
     }
 
     if (this.has(req.method, `related.${related}`)) {
@@ -377,12 +381,19 @@ function next (config = {}) {
 
     return $http(req)
         .then(({ data }) => {
-            results = results || [];
+            let cursor = 0;
 
-            data.results = results.concat(data.results);
+            if (this.pageCache) {
+                results = results || [];
+                data.results = results.concat(data.results);
+                cursor = results.length;
 
-            if ((config.limit * this.pageSize) < data.results.length) {
-                data.results.splice(-config.limit * this.pageSize);
+                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
+                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
+
+                    data.results.splice(0, removeCount);
+                    cursor -= removeCount;
+                }
             }
 
             if (config.related) {
@@ -390,31 +401,8 @@ function next (config = {}) {
             } else {
                 this.set('get', data);
             }
-        });
-}
 
-function prev (related, config = {}) {
-    const url = this.get(`related.${related}.previous`);
-
-    if (!url) {
-        return Promise.resolve(null);
-    }
-
-    const req = {
-        method: 'GET',
-        url
-    };
-
-    return $http(req)
-        .then(({ data }) => {
-            const results = this.get(`related.${related}.results`) || [];
-
-            data.results = data.results.concat(results);
-            this.set('get', `related.${related}`, data);
-
-            if (config.limit < results.length) {
-                console.log(results);
-            }
+            return cursor <= 0 ? 0 : cursor;
         });
 }
 
@@ -599,7 +587,6 @@ function BaseModel (resource, settings) {
     this.normalizePath = normalizePath;
     this.options = options;
     this.parseRequestConfig = parseRequestConfig;
-    this.prev = prev;
     this.request = request;
     this.requestWithCache = requestWithCache;
     this.search = search;

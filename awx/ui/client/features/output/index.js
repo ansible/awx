@@ -34,10 +34,12 @@ function JobsRun ($stateExtender, strings) {
 
                 return new Jobs('get', id)
                     .then(job => job.extend('job_events', {
+                        pageCache: true,
+                        pageLimit: 2,
                         params: {
-                            page_size: 13,
+                            page_size: 25,
                             order_by: 'start_line'
-                        }
+                        },
                     }));
             }]
         }
