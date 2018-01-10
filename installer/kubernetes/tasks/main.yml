@@ -20,16 +20,6 @@
 # TODO: This is duplicated in the openshift role, probably needs to be moved to the image_build role
 - name: Manage AWX Container Images
   block:
-    - name: Get docker registry password from oc if needed
-      block:
-        - name: Set docker registry password
-          shell: oc whoami -t
-          register: docker_registry_password_shell
-        - name: Set docker registry password
-          set_fact:
-            docker_registry_password: "{{ docker_registry_password_shell.stdout }}"
-      when: docker_registry_password is not defined
-
     - name: Authenticate with Docker registry
       docker_login:
         registry: "{{ docker_registry }}"
