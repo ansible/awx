@@ -21,6 +21,7 @@
 - name: Mark Openshift User as Admin
   shell: "oc adm policy add-role-to-user admin {{ openshift_user }} -n {{ awx_openshift_project }}"
 
+# TODO: This is duplicated in the kubernetes role, probably needs to be moved to the image_build role
 - name: Manage AWX Container Images
   block:
     - name: Get docker registry password from oc if needed
@@ -55,7 +56,7 @@
       when: docker_registry is defined
       delegate_to: localhost
 
-    - name: Wait for openshift
+    - name: Wait for the registry to settle
       pause:
         seconds: 10
 
@@ -68,6 +69,7 @@
       when: docker_registry is defined
       delegate_to: localhost
 
+    # Note this is the one bit that is Openshift specific
     - name: Enable image stream lookups for awx images
       shell: "oc set image-lookup --all -n {{ awx_openshift_project }}"
 
