@@ -1,5 +1,4 @@
 import base64
-import cStringIO
 import codecs
 import StringIO
 import json
@@ -143,7 +142,7 @@ class IsolatedManager(object):
 
         # if an ssh private key fifo exists, read its contents and delete it
         if self.ssh_key_path:
-            buff = cStringIO.StringIO()
+            buff = StringIO.StringIO()
             with open(self.ssh_key_path, 'r') as fifo:
                 for line in fifo:
                     buff.write(line)
@@ -183,7 +182,7 @@ class IsolatedManager(object):
             job_timeout=settings.AWX_ISOLATED_LAUNCH_TIMEOUT,
             pexpect_timeout=5
         )
-        output = buff.getvalue()
+        output = buff.getvalue().encode('utf-8')
         playbook_logger.info('Isolated job {} dispatch:\n{}'.format(self.instance.id, output))
         if status != 'successful':
             self.stdout_handle.write(output)
@@ -283,7 +282,7 @@ class IsolatedManager(object):
         status = 'failed'
         output = ''
         rc = None
-        buff = cStringIO.StringIO()
+        buff = StringIO.StringIO()
         last_check = time.time()
         seek = 0
         job_timeout = remaining = self.job_timeout
@@ -304,7 +303,7 @@ class IsolatedManager(object):
                 time.sleep(1)
                 continue
 
-            buff = cStringIO.StringIO()
+            buff = StringIO.StringIO()
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
             status, rc = IsolatedManager.run_pexpect(
                 args, self.awx_playbook_path(), self.management_env, buff,
@@ -314,7 +313,7 @@ class IsolatedManager(object):
                 pexpect_timeout=5,
                 proot_cmd=self.proot_cmd
             )
-            output = buff.getvalue()
+            output = buff.getvalue().encode('utf-8')
             playbook_logger.info('Isolated job {} check:\n{}'.format(self.instance.id, output))
 
             path = self.path_to('artifacts', 'stdout')
@@ -356,14 +355,14 @@ class IsolatedManager(object):
         }
         args = self._build_args('clean_isolated.yml', '%s,' % self.host, extra_vars)
         logger.debug('Cleaning up job {} on isolated host with `clean_isolated.yml` playbook.'.format(self.instance.id))
-        buff = cStringIO.StringIO()
+        buff = StringIO.StringIO()
         timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.management_env, buff,
             idle_timeout=timeout, job_timeout=timeout,
             pexpect_timeout=5
         )
-        output = buff.getvalue()
+        output = buff.getvalue().encode('utf-8')
         playbook_logger.info('Isolated job {} cleanup:\n{}'.format(self.instance.id, output))
 
         if status != 'successful':
@@ -406,14 +405,14 @@ class IsolatedManager(object):
         env = cls._base_management_env()
         env['ANSIBLE_STDOUT_CALLBACK'] = 'json'
 
-        buff = cStringIO.StringIO()
+        buff = StringIO.StringIO()
         timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         status, rc = IsolatedManager.run_pexpect(
             args, cls.awx_playbook_path(), env, buff,
             idle_timeout=timeout, job_timeout=timeout,
             pexpect_timeout=5
         )
-        output = buff.getvalue()
+        output = buff.getvalue().encode('utf-8')
         buff.close()
 
         try:
