@@ -801,6 +801,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         console.log(button.label);
         window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
+
+	$scope.onDownloadRecordingButton = function (button) {
+        console.log(button.label);
+        window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
+    };
     // Buttons
     var button_offset = 200;
 
@@ -814,6 +819,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
       new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
       new models.Button("DOWNLOAD TRACE", button_offset + 750, 48, 150, 30, $scope.onDownloadTraceButton, $scope),
+      new models.Button("DOWNLOAD RECORDING", button_offset + 910, 48, 150, 30, $scope.onDownloadRecordingButton, $scope),
     ];
 
     var LAYERS_X = 160;
