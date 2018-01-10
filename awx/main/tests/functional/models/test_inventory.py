@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 import mock
+import six
 
 from django.core.exceptions import ValidationError
 
@@ -154,6 +157,14 @@ def test_inventory_update_name(inventory, inventory_source):
     iu = inventory_source.update()
     assert inventory_source.name != inventory.name
     assert iu.name == inventory.name + ' - ' + inventory_source.name
+
+
+@pytest.mark.django_db
+def test_inventory_name_with_unicode(inventory, inventory_source):
+    inventory.name = six.u('オオオ')
+    inventory.save()
+    iu = inventory_source.update()
+    assert iu.name.startswith(inventory.name)
 
 
 @pytest.mark.django_db
