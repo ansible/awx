@@ -5,7 +5,7 @@ Security Assertion Markup Language, or SAML, is an open standard for exchanging 
 Please see the Tower documentation as well as Ansible blog posts for basic SAML configuration.
 
 # Configure SAML for Team and Organization Membership
-AWX can be configured to look for particular attributes that contain AWX Team and Organization membership to associate with users when the login to AWX. The attribute names are defined in AWX settings. Specifically, the authentication settings tab and SAML sub category fields *SAML Team Map* and *SAML Organization Attribute Mapping*. The meaning and usefulness of these settings is best motivated through example.
+AWX can be configured to look for particular attributes that contain AWX Team and Organization membership to associate with users when they login to AWX. The attribute names are defined in AWX settings. Specifically, the authentication settings tab and SAML sub category fields *SAML Team Map* and *SAML Organization Attribute Mapping*. The meaning and usefulness of these settings is best motivated through example.
 
 **Example SAML Organization Attribute Mapping**
 Below is an example SAML attribute that embeds user organization membership in the attribute *member-of*.
