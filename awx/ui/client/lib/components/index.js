@@ -16,6 +16,10 @@ import inputText from '~components/input/text.directive';
 import inputTextarea from '~components/input/textarea.directive';
 import inputTextareaSecret from '~components/input/textarea-secret.directive';
 import layout from '~components/layout/layout.directive';
+import list from '~components/list/list.directive';
+import row from '~components/list/row.directive';
+import rowItem from '~components/list/row-item.directive';
+import rowAction from '~components/list/row-action.directive';
 import modal from '~components/modal/modal.directive';
 import panel from '~components/panel/panel.directive';
 import panelBody from '~components/panel/body.directive';
@@ -54,6 +58,10 @@ angular
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)
     .directive('atLayout', layout)
+    .directive('atList', list)
+    .directive('atRow', row)
+    .directive('atRowItem', rowItem)
+    .directive('atRowAction', rowAction)
     .directive('atModal', modal)
     .directive('atPanel', panel)
     .directive('atPanelBody', panelBody)

@@ -1,0 +1,7 @@
+<div class="at-List">
+    <div class="at-List-container" ng-hide="results.length === 0" ng-transclude>
+    </div>
+    <div class="at-List--empty" ng-show="results.length === 0">
+        {{ emptyListReason || vm.strings.get("list.DEFAULT_EMPTY_LIST") }}
+    </div>
+</div>

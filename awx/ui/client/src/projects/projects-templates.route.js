@@ -16,6 +16,10 @@ export default {
         label: N_("JOB TEMPLATES")
     },
     views: {
+        // TODO: this controller was removed and replaced
+        // with the new features/templates controller
+        // this view should be updated with the new
+        // expanded list
         'related': {
             templateProvider: function(FormDefinition, GenerateForm) {
                 let html = GenerateForm.buildCollection({

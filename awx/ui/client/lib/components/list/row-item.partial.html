@@ -1,0 +1,38 @@
+<div class="at-RowItem" ng-class="{'at-RowItem--isHeader': headerValue}"
+    ng-show="headerValue || value || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
+        <div class="at-RowItem-header" ng-if="headerValue && headerLink">
+            <a ng-href="{{ headerLink }}">{{ headerValue }}</a>
+        </div>
+        <div class="at-RowItem-header" ng-if="headerValue && !headerLink">
+            {{ headerValue }}
+        </div>
+        <div class="at-RowItem-tag at-RowItem-tag--header" ng-if="headerTag">
+            {{ headerTag }}
+        </div>
+        <div class="at-RowItem-label" ng-if="labelValue">
+            {{ labelValue }}
+        </div>
+        <div class="at-RowItem-value" ng-if="value && valueLink">
+            <a ng-href="{{ valueLink }}">{{ value }}</a>
+        </div>
+        <div class="at-RowItem-value" ng-if="value && !valueLink"
+            ng-bind-html="value">
+        </div>
+        <aw-smart-status jobs="smartStatus.summary_fields.recent_jobs"
+            template-type="smartStatus.type" ng-if="smartStatus">
+        </aw-smart-status>
+        <div class="at-RowItem-tagContainer" ng-if="tagValues && tagValues.length">
+            <div ng-repeat="tag in tagValues" class="at-RowItem-tag at-RowItem-tag--primary">
+                <span ng-switch="tag.kind" class="at-RowItem-tagIcon"
+                    ng-if="tagsAreCreds">
+                    <span class="fa fa-cloud" ng-switch-when="cloud"></span>
+                    <span class="fa fa-info" ng-switch-when="insights"></span>
+                    <span class="fa fa-sitemap" ng-switch-when="net"></span>
+                    <span class="fa fa-code-fork" ng-switch-when="scm"></span>
+                    <span class="fa fa-key" ng-switch-when="ssh"></span>
+                    <span class="fa fa-archive" ng-switch-when="vault"></span>
+                </span>
+                {{ tag.name }}
+            </div>
+        </div>
+</div>

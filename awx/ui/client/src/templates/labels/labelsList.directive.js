@@ -16,6 +16,7 @@ export default
                 templateUrl: templateUrl('templates/labels/labelsList'),
                 link: function(scope, element, attrs) {
                     scope.showDelete = attrs.showDelete === 'true';
+                    scope.isRowItem = attrs.isRowItem === 'true';
                     scope.seeMoreInactive = true;
 
                     var getNext = function(data, arr, resolve) {
@@ -91,18 +92,23 @@ export default
                         });
                     };
 
-                    scope.$watchCollection(scope.$parent.list.iterator, function() {
-                        // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
-                        // array will get set initially and then never be updated as labels are removed
-                        if (scope[scope.$parent.list.iterator].summary_fields.labels){
-                            scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results.slice(0, 5);
-                            scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
-                        }
-                        else{
-                            scope.labels = null;
-                            scope.count = null;
-                        }
-                    });
+                    if (scope.$parent.$parent.template) {
+                        scope.labels = scope.$parent.$parent.template.summary_fields.labels.results.slice(0, 5);
+                        scope.count = scope.$parent.$parent.template.summary_fields.labels.count;
+                    } else {
+                        scope.$watchCollection(scope.$parent.list.iterator, function() {
+                            // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
+                            // array will get set initially and then never be updated as labels are removed
+                            if (scope[scope.$parent.list.iterator].summary_fields.labels){
+                                scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results.slice(0, 5);
+                                scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
+                            }
+                            else{
+                                scope.labels = null;
+                                scope.count = null;
+                            }
+                        });
+                    }
 
                 }
             };

@@ -1,0 +1,191 @@
+.at-List {
+    margin-top: @at-margin-top-list;
+}
+
+.at-List--empty {
+    margin-top: @at-margin-top-list;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: @at-height-list-empty;
+    border-radius: @at-border-radius;
+    border: @at-border-default-width solid @at-color-list-empty-border;
+    background-color: @at-color-list-empty-background;
+    color: @at-color-list-empty;
+    text-transform: uppercase;
+    text-align: center;
+    padding: @at-padding-list-empty;
+}
+
+.at-List-toolbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom: @at-margin-bottom-list-toolbar;
+}
+
+.at-List-search {
+    flex: auto;
+}
+
+.at-List-toolbarAction {
+    margin-left: @at-margin-left-toolbar-action;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: @at-height-toolbar-action;
+    border-radius: @at-border-radius;
+    position: relative;
+}
+
+.at-List-toolbarActionButton {
+    border-radius: @at-border-radius;
+    min-width: 80px;
+}
+
+.at-List-toolbarDropdownCarat {
+    margin-left: @at-margin-left-toolbar-carat;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px dashed;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
+.at-List-toolbarActionDropdownMenu {
+    float: right;
+    right: 0;
+    left: auto;
+}
+
+.at-List-container {
+    border: @at-border-default-width solid @at-color-list-border;
+    border-radius: @at-border-radius;
+}
+
+.at-Row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: @at-padding-list-row;
+}
+
+.at-Row--active {
+    border-left: @at-border-style-list-active-indicator;
+    border-top-left-radius: @at-border-radius;
+    border-top-right-radius: @at-border-radius;
+}
+
+.at-Row ~ .at-Row {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-top: @at-border-default-width solid @at-color-list-border;
+}
+
+.at-Row-actions {
+    display: flex;
+}
+
+.at-Row-items {
+    align-self: flex-start;
+}
+
+.at-RowItem {
+    display: flex;
+    align-items: center;
+    line-height: @at-height-list-row-item;
+}
+
+.at-RowItem--isHeader {
+    margin-bottom: @at-margin-bottom-list-header;
+    line-height: @at-line-height-list-row-item-header;
+}
+
+.at-RowItem--labels {
+    line-height: @at-line-height-list-row-item-labels;
+}
+
+.at-RowItem-header {
+    font-weight: bold;
+}
+
+.at-RowItem-tagContainer {
+    margin-left: @at-margin-left-list-row-item-tag-container;
+}
+
+.at-RowItem-tag {
+    text-transform: uppercase;
+    font-weight: 100;
+    background-color: @at-color-list-row-item-tag-background;
+    border-radius: @at-border-radius;
+    color: @at-color-list-row-item-tag;
+    font-size: @at-font-size-list-row-item-tag;
+    margin-left: @at-margin-left-list-row-item-tag;
+    margin-top: @at-margin-top-list-row-item-tag;
+    padding: @at-padding-list-row-item-tag;
+    line-height: @at-line-height-list-row-item-tag;
+}
+
+.at-RowItem-tag--primary {
+    background: @at-color-list-row-item-tag-primary-background;
+    color: @at-color-list-row-item-tag-primary;
+}
+
+.at-RowItem-tag--header {
+    height: @at-height-list-row-item-tag;
+    line-height: inherit;
+}
+
+.at-RowItem-tagIcon {
+    margin-right: @at-margin-right-list-row-item-tag-icon;
+}
+
+.at-RowItem-label {
+    text-transform: uppercase;
+    width: @at-width-list-row-item-label;
+    color: @at-color-list-row-item-label;
+}
+
+.at-RowAction {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: @at-margin-left-list-row-action;
+    padding: @at-padding-list-row-action;
+    background: @at-color-list-row-action-background;
+    border-radius: @at-border-radius;
+    height: @at-height-list-row-action;
+    width: @at-width-list-row-action;
+
+    i {
+        font-size: @at-font-size-list-row-action-icon;
+        color: @at-color-list-row-action-icon;
+    }
+}
+
+.at-RowAction:hover {
+    background-color: @at-color-list-row-action-hover;
+
+    i {
+        color: @at-color-list-row-action-icon-hover;
+    }
+}
+
+.at-RowAction--danger:hover {
+    background-color: @at-color-list-row-action-hover-danger;
+}
+
+@media screen and (max-width: @at-breakpoint-compact-list) {
+    .at-Row-actions {
+        flex-direction: column;
+    }
+
+    .at-RowAction {
+        margin: @at-margin-list-row-action-mobile;
+    }
+}

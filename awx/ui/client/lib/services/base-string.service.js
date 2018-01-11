@@ -61,9 +61,16 @@ function BaseStringService (namespace) {
     this.SAVE = t.s('SAVE');
     this.OK = t.s('OK');
     this.deleteResource = {
+        HEADER: t.s('Delete'),
         USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),
         CONFIRM: resourceType => t.s('Are you sure you want to delete this {{ resourceType }}?', { resourceType })
     };
+    this.error = {
+        HEADER: t.s('Error!'),
+        CALL: ({ path, status }) => t.s('Call to {{ path }} failed. DELETE returned status: {{ status }}.', { path, status })
+    };
+
+    this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
 
     /**
      * This getter searches the extending class' namespace first for a match then falls back to

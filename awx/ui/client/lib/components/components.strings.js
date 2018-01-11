@@ -88,6 +88,10 @@ function ComponentsStrings (BaseString) {
         ALL: t.s('All'),
         FAILED: t.s('Failed')
     };
+
+    ns.list = {
+        DEFAULT_EMPTY_LIST: t.s('List is empty.')
+    };
 }
 
 ComponentsStrings.$inject = ['BaseStringService'];

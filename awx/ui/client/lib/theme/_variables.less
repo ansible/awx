@@ -14,22 +14,24 @@
  * 1. Colors
  * 2. Typography
  * 3. Layout
+ * 4. Breakpoints
  *
  */
 
 // 1. Colors --------------------------------------------------------------------------------------
 
-@at-gray-light-3x: #fcfcfc;
-@at-gray-light-2-5x: #fafafa;
-@at-gray-light-2x: #f2f2f2;
-@at-gray-light: #ebebeb;
-@at-gray: #e1e1e1;
-@at-gray-dark: #d7d7d7;
-@at-gray-dark-2x: #b7b7b7;
-@at-gray-dark-3x: #A9A9A9;
-@at-gray-dark-4x: #848992;
-@at-gray-dark-5x: #707070;
-@at-gray-dark-6x: #161b1f;
+@at-gray-fc: #fcfcfc;
+@at-gray-fa: #fafafa;
+@at-gray-f2: #f2f2f2;
+@at-gray-f6: #f6f6f6;
+@at-gray-eb: #ebebeb;
+@at-gray-e1: #e1e1e1;
+@at-gray-d7: #d7d7d7;
+@at-gray-b7: #b7b7b7;
+@at-gray-a9: #a9a9a9;
+@at-gray-848992: #848992;
+@at-gray-70: #707070;
+@at-gray-161b1f: #161b1f;
 
 @at-white: #ffffff;
 @at-white-hover: #f2f2f2;
@@ -38,7 +40,7 @@
 @at-blue-hover: #286090;
 
 @at-green: #5cb85c;
-@at-green-hover: #449D44;
+@at-green-hover: #449d44;
 
 @at-orange: #f0ad4e;
 @at-orange-hover: #ec971f;
@@ -66,6 +68,11 @@
 @at-space-2x: 10px;
 @at-space-3x: 15px;
 @at-space-4x: 20px;
+@at-space-5x: 25px;
+
+// 4. Breakpoints ---------------------------------------------------------------------------------
+
+@at-breakpoint-sm: 700px;
 
 /**
  * All variables used in the UI. Use these variables directly during the development of components
@@ -83,6 +90,7 @@
  * 3. Layout
  * 4. Buttons
  * 5. Misc
+ * 6. Breakpoints
  *
  */
 
@@ -106,64 +114,79 @@
 @at-color-success: @at-green;
 @at-color-success-hover: @at-green-hover;
 
-@at-color-disabled: @at-gray-dark;
+@at-color-disabled: @at-gray-d7;
 
-@at-color-body-background-dark: @at-gray-dark-5x;
+@at-color-body-background-dark: @at-gray-70;
 @at-color-body-text-dark: @at-white;
-@at-color-body-background: @at-gray-light-3x;
-@at-color-body-text: @at-gray-dark-5x;
+@at-color-body-background: @at-gray-fc;
+@at-color-body-text: @at-gray-70;
 
-@at-color-button-border-default: @at-gray-dark-2x;
-@at-color-button-text-default: @at-gray-dark-5x;
+@at-color-button-border-default: @at-gray-b7;
+@at-color-button-text-default: @at-gray-70;
 
-@at-color-tab-default-active: @at-gray-dark-4x;
-@at-color-tab-border-default-active: @at-gray-dark-4x;
+@at-color-tab-default-active: @at-gray-848992;
+@at-color-tab-border-default-active: @at-gray-848992;
 @at-color-tab-text-default-active: @at-white;
 
 @at-color-tab-default-disabled: @at-white;
-@at-color-tab-border-default-disabled: @at-gray-dark-2x;
-@at-color-tab-text-default-disabled: @at-gray-dark-5x;
+@at-color-tab-border-default-disabled: @at-gray-b7;
+@at-color-tab-text-default-disabled: @at-gray-70;
 
-@at-color-form-label: @at-gray-dark-5x;
+@at-color-form-label: @at-gray-70;
 
-@at-color-input-background: @at-gray-light-3x;
-@at-color-input-border: @at-gray-dark-2x;
-@at-color-input-button: @at-gray-light-3x;
-@at-color-input-button-hover: @at-gray-light-2x;
-@at-color-input-disabled: @at-gray-light;
+@at-color-input-background: @at-gray-fc;
+@at-color-input-border: @at-gray-b7;
+@at-color-input-button: @at-gray-fc;
+@at-color-input-button-hover: @at-gray-f2;
+@at-color-input-disabled: @at-gray-eb;
 @at-color-input-readonly: @at-color-input-background;
 
 @at-color-input-error: @at-color-error;
 @at-color-input-focus: @at-color-info;
-@at-color-input-hint: @at-gray-dark-4x;
-@at-color-input-icon: @at-gray-dark-2x;
-@at-color-input-placeholder: @at-gray-dark-4x;
-@at-color-input-text: @at-gray-dark-6x;
+@at-color-input-hint: @at-gray-848992;
+@at-color-input-icon: @at-gray-b7;
+@at-color-input-placeholder: @at-gray-848992;
+@at-color-input-text: @at-gray-161b1f;
 
-@at-color-icon-dismiss: @at-gray-dark;
-@at-color-icon-popover: @at-gray-dark-4x;
-@at-color-icon-hover: @at-gray-dark-4x;
+@at-color-icon-dismiss: @at-gray-d7;
+@at-color-icon-popover: @at-gray-848992;
+@at-color-icon-hover: @at-gray-848992;
 
-@at-color-panel-heading: @at-gray-dark-5x;
-@at-color-panel-border: @at-gray-dark-2x;
+@at-color-panel-heading: @at-gray-70;
+@at-color-panel-border: @at-gray-b7;
 
 @at-color-search-key-active: @at-blue;
 
-@at-color-table-header-background: @at-gray-light;
-@at-color-line-separator: @at-gray;
+@at-color-table-header-background: @at-gray-eb;
+@at-color-line-separator: @at-gray-e1;
 
 @at-color-top-nav-background: @at-white;
-@at-color-top-nav-border-bottom: @at-gray-dark-2x;
-@at-color-top-nav-item-text: @at-gray-dark-5x;
-@at-color-top-nav-item-icon: @at-gray-dark-4x;
+@at-color-top-nav-border-bottom: @at-gray-b7;
+@at-color-top-nav-item-text: @at-gray-70;
+@at-color-top-nav-item-icon: @at-gray-848992;
 @at-color-top-nav-item-icon-socket-outline: @at-white;
-@at-color-top-nav-item-background-hover: @at-gray-light-2-5x;
-@at-color-side-nav-background: @at-gray-dark-4x;
+@at-color-top-nav-item-background-hover: @at-gray-fa;
+@at-color-side-nav-background: @at-gray-848992;
 @at-color-side-nav-content: @at-white;
-@at-color-side-nav-item-background-hover: @at-gray-dark-2x;
+@at-color-side-nav-item-background-hover: @at-gray-b7;
 @at-color-side-nav-item-border-hover: @at-white;
-@at-color-footer-background: @at-gray-light-3x;
-@at-color-footer: @at-gray-dark-5x;
+@at-color-footer-background: @at-gray-fc;
+@at-color-footer: @at-gray-70;
+
+@at-color-list-empty-border: @at-gray-d7;
+@at-color-list-empty-background: @at-gray-f6;
+@at-color-list-empty: @at-gray-848992;
+@at-color-list-border: @at-gray-b7;
+@at-color-list-row-item-tag-background: @at-gray-eb;
+@at-color-list-row-item-tag: @at-gray-70;
+@at-color-list-row-item-label: @at-gray-848992;
+@at-color-list-row-action-background: @at-white;
+@at-color-list-row-action-icon: @at-gray-848992;
+@at-color-list-row-action-hover: @at-blue;
+@at-color-list-row-action-hover-danger: @at-red;
+@at-color-list-row-action-icon-hover: @at-white;
+@at-color-list-row-item-tag-primary-background: @at-blue;
+@at-color-list-row-item-tag-primary: @at-white;
 
 // 2. Typography ----------------------------------------------------------------------------------
 
@@ -181,6 +204,9 @@
 @at-font-size-navigation: @at-font-size-3x;
 @at-font-size-table-heading: @at-font-size-3x;
 @at-font-size-menu-icon: @at-font-size-5x;
+@at-font-size-list-row-item-tag: 10px;
+@at-font-size-list-row-action: 19px;
+@at-font-size-list-row-action-icon: 19px;
 
 @at-font-weight-body: @at-font-weight;
 @at-font-weight-heading: @at-font-weight-2x;
@@ -199,6 +225,10 @@
 @at-padding-between-side-nav-icon-text: @at-space-3x;
 @at-padding-footer-right: @at-space-4x;
 @at-padding-footer-bottom: @at-space-4x;
+@at-padding-list-empty: @at-space-2x;
+@at-padding-list-row-item-tag: 0 @at-space-2x;
+@at-padding-list-row-action: 7px;
+@at-padding-list-row: 10px 20px;
 
 @at-margin-input-message: @at-space;
 @at-margin-item-column: @at-space-3x;
@@ -215,6 +245,18 @@
 
 @at-margin-top-search-key: @at-space-2x;
 
+@at-margin-top-list: @at-space-5x;
+@at-margin-bottom-list-toolbar: @at-space-4x;
+@at-margin-left-toolbar-action: @at-space-4x;
+@at-margin-left-toolbar-carat: @at-space;
+@at-margin-bottom-list-header: @at-space;
+@at-margin-left-list-row-item-tag: @at-space-2x;
+@at-margin-top-list-row-item-tag: 2.25px;
+@at-margin-left-list-row-action: @at-space-4x;
+@at-margin-right-list-row-item-tag-icon: 8px;
+@at-margin-left-list-row-item-tag-container: -10px;
+@at-margin-list-row-action-mobile: 10px;
+
 @at-height-divider: @at-margin-panel;
 @at-height-input: 30px;
 @at-height-textarea: 144px;
@@ -226,11 +268,21 @@
 @at-height-side-nav-item-icon: 20px;
 @at-height-side-nav-spacer: 20px;
 @at-height-top-side-nav-makeup: 55px;
+@at-height-list-empty: 200px;
+@at-height-toolbar-action: 30px;
+@at-height-list-row-item: 27px;
+@at-height-list-row-item-tag: 15px;
+@at-height-list-row-action: 30px;
 
 @at-width-input-button-sm: 72px;
 @at-width-input-button-md: 84px;
 @at-width-collapsed-side-nav: 50px;
 @at-width-expanded-side-nav: 200px;
+@at-width-list-row-item-label: 120px;
+@at-width-list-row-action: 30px;
+
+@at-line-height-list-row-item-header: @at-space-3x;
+@at-line-height-list-row-item-labels: 17px;
 
 // 4. Transitions ---------------------------------------------------------------------------------
 
@@ -249,3 +301,10 @@
 @at-z-index-side-nav: 1030;
 @at-z-index-footer: 1020;
 @at-border-default-width: 1px;
+@at-border-style-list-active-indicator: 5px solid @at-color-info;
+@at-line-height-list-row-item-tag: 22px;
+
+// 6. Breakpoints ---------------------------------------------------------------------------------
+
+@at-breakpoint-mobile-layout: @at-breakpoint-sm;
+@at-breakpoint-compact-list: @at-breakpoint-sm;

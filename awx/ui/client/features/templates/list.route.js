@@ -1,15 +1,24 @@
-/*************************************************
- * Copyright (c) 2016 Ansible, Inc.
- *
- * All Rights Reserved
- *************************************************/
+import ListController from './list-templates.controller';
+const listTemplate = require('~features/templates/list.view.html');
+import { N_ } from '../../src/i18n';
 
- import { N_ } from '../../i18n';
+function TemplatesResolve (UnifiedJobTemplate) {
+    return new UnifiedJobTemplate(['get', 'options']);
+}
+
+TemplatesResolve.$inject = [
+    'UnifiedJobTemplateModel'
+];
 
 export default {
     name: 'templates',
     route: '/templates',
     ncyBreadcrumb: {
+        // TODO: this would be best done with our
+        // strings file pattern, but it's not possible to
+        // get a handle on this route within a DI based
+        // on the state tree generation as present in
+        // src/templates currently
         label: N_("TEMPLATES")
     },
     data: {
@@ -32,18 +41,13 @@ export default {
     searchPrefix: 'template',
     views: {
         '@': {
-            controller: 'TemplatesListController',
-            templateProvider: function(TemplateList, generateList) {
-                let html = generateList.build({
-                    list: TemplateList,
-                    mode: 'edit'
-                });
-                html = generateList.wrapPanel(html);
-                return generateList.insertFormView() + html;
-            }
+            controller: ListController,
+            templateUrl: listTemplate,
+            controllerAs: 'vm'
         }
     },
     resolve: {
+        resolvedModels: TemplatesResolve,
         Dataset: ['TemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);

@@ -6,7 +6,6 @@
 
 import templatesService from './templates.service';
 import surveyMaker from './survey-maker/main';
-import templatesList from './list/main';
 import jobTemplates from './job_templates/main';
 import workflowAdd from './workflows/add-workflow/main';
 import workflowEdit from './workflows/edit-workflow/main';
@@ -14,7 +13,6 @@ import labels from './labels/main';
 import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
 import workflowControls from './workflows/workflow-controls/main';
-import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
 import templateCopyService from './copy-template/template-copy.service';
 import WorkflowForm from './workflows.form';
@@ -22,9 +20,10 @@ import CompletedJobsList from './completed-jobs.list';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
 import TemplatesStrings from './templates.strings';
+import listRoute from '~features/templates/list.route.js';
 
 export default
-angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.name, labels.name, workflowAdd.name, workflowEdit.name,
+angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, workflowAdd.name, workflowEdit.name,
         workflowChart.name, workflowMaker.name, workflowControls.name
     ])
     .service('TemplatesService', templatesService)
@@ -32,6 +31,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
     .service('TemplateCopyService', templateCopyService)
     .factory('WorkflowForm', WorkflowForm)
     .factory('CompletedJobsList', CompletedJobsList)
+    // TODO: currently being kept arround for rbac selection, templates within projects and orgs, etc.
     .factory('TemplateList', TemplateList)
     .value('InventorySourcesList', InventorySourcesList)
     .service('TemplatesStrings', TemplatesStrings)
@@ -897,7 +897,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplates.
                         states: _.reduce(generated, (result, definition) => {
                             return result.concat(definition.states);
                         }, [
-                            stateExtender.buildDefinition(templatesListRoute),
+                            stateExtender.buildDefinition(listRoute),
                             stateExtender.buildDefinition(workflowMaker),
                             stateExtender.buildDefinition(inventoryLookup),
                             stateExtender.buildDefinition(credentialLookup)
