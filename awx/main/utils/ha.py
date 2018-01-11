@@ -24,7 +24,7 @@ def _add_remove_celery_worker_queues(app, instance, worker_queues, worker_name):
                 queue['alias'] in settings.AWX_CELERY_QUEUES_STATIC:
             continue
 
-        if queue['name'] not in ig_names | set([instance.hostname]):
+        if queue['name'] not in ig_names | set([instance.hostname]) or not instance.enabled:
             app.control.cancel_consumer(queue['name'], reply=True, destination=[worker_name])
             removed_queues.append(queue['name'])
 
@@ -43,7 +43,6 @@ def update_celery_worker_routes(instance, conf):
         'awx.main.tasks.purge_old_stdout_files',
     ]
     routes_updated = {}
-
     # Instance is, effectively, a controller node
     if instance.is_controller():
         tasks.append('awx.main.tasks.awx_isolated_heartbeat')

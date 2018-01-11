@@ -1,8 +1,10 @@
-from awx.main.models import Job, Instance
-from django.test.utils import override_settings
 import pytest
-
+import mock
 import json
+
+from awx.main.models import Job, Instance
+from awx.main.tasks import cluster_node_heartbeat
+from django.test.utils import override_settings
 
 
 @pytest.mark.django_db
@@ -17,13 +19,19 @@ def test_orphan_unified_job_creation(instance, inventory):
 
 
 @pytest.mark.django_db
+@mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2,8))
+@mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000,62))
+@mock.patch('awx.main.tasks.handle_ha_toplogy_changes.apply_async', lambda: True)
 def test_job_capacity_and_with_inactive_node():
-    Instance.objects.create(hostname='test-1', capacity=50)
-    assert Instance.objects.total_capacity() == 50
-    Instance.objects.create(hostname='test-2', capacity=50)
-    assert Instance.objects.total_capacity() == 100
-    with override_settings(AWX_ACTIVE_NODE_TIME=0):
-        assert Instance.objects.total_capacity() < 100
+    i = Instance.objects.create(hostname='test-1')
+    i.refresh_capacity()
+    assert i.capacity == 62
+    i.enabled = False
+    i.save()
+    with override_settings(CLUSTER_HOST_ID=i.hostname):
+        cluster_node_heartbeat()
+        i = Instance.objects.get(id=i.id)
+        assert i.capacity == 0
 
 
 @pytest.mark.django_db

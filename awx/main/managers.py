@@ -2,12 +2,9 @@
 # All Rights Reserved.
 
 import sys
-from datetime import timedelta
 import logging
 
 from django.db import models
-from django.utils.timezone import now
-from django.db.models import Sum
 from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter

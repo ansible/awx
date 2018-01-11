@@ -639,9 +639,6 @@ AWX_PROOT_BASE_PATH = "/tmp"
 # Note: This setting may be overridden by database settings.
 AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
-# Time at which an HA node is considered active
-AWX_ACTIVE_NODE_TIME = 7200
-
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
 

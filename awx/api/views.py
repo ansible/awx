@@ -57,7 +57,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications
+from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TokenGetAuthentication
@@ -560,12 +560,26 @@ class InstanceList(ListAPIView):
     new_in_320 = True
 
 
-class InstanceDetail(RetrieveAPIView):
+class InstanceDetail(RetrieveUpdateAPIView):
 
     view_name = _("Instance Detail")
     model = Instance
     serializer_class = InstanceSerializer
     new_in_320 = True
+
+
+    def update(self, request, *args, **kwargs):
+        r = super(InstanceDetail, self).update(request, *args, **kwargs)
+        if status.is_success(r.status_code):
+            obj = self.get_object()
+            if obj.enabled:
+                obj.refresh_capacity()
+            else:
+                obj.capacity = 0
+            obj.save()
+            handle_ha_toplogy_changes.apply_async()
+            r.data = InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
+        return r
 
 
 class InstanceUnifiedJobsList(SubListAPIView):

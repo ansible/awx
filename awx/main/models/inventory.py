@@ -1602,7 +1602,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def task_impact(self):
-        return 50
+        return 1
 
     # InventoryUpdate credential required
     # Custom and SCM InventoryUpdate credential not required

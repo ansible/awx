@@ -60,6 +60,7 @@ class TestAddRemoveCeleryWorkerQueues():
                                                    static_queues, _worker_queues, 
                                                    groups, hostname,
                                                    added_expected, removed_expected):
+        added_expected.append('tower_instance_router')
         instance = instance_generator(groups=groups, hostname=hostname)
         worker_queues = worker_queues_generator(_worker_queues)
         with mock.patch('awx.main.utils.ha.settings.AWX_CELERY_QUEUES_STATIC', static_queues):
