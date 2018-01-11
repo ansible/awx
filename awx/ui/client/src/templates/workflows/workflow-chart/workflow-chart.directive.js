@@ -919,9 +919,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                             Rest.setUrl(GetBasePath("unified_jobs") + "?id=" + d.job.id);
                             Rest.get()
-                            .success(function (res) {
-                                if(res.results && res.results.length > 0) {
-                                    goToJobResults(res.results[0].type);
+                            .then(function (res) {
+                                if(res.data.results && res.data.results.length > 0) {
+                                    goToJobResults(res.data.results[0].type);
                                 }
                             })
                             .catch(({data, status}) => {

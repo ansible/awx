@@ -92,7 +92,7 @@ export default ['$stateParams', '$scope', '$rootScope',
         $scope.$on("ReloadOrgListView", function() {
             Rest.setUrl($scope.current_url);
             Rest.get()
-                .success((data) => $scope.organizations = data.results)
+                .then(({data}) => $scope.organizations = data.results)
                 .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: 'Error!',
