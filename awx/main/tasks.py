@@ -707,7 +707,7 @@ class BaseTask(LogErrorsTask):
                     'hostvars': True,
                 }).run(buff)
                 json_data = buff.getvalue().strip()
-                f.write("#! /usr/bin/env python\nprint '''%s'''\n" % json_data)
+                f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
                 os.chmod(path, stat.S_IRUSR | stat.S_IXUSR)
             return path
         else:
