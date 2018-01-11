@@ -10,43 +10,47 @@
     flex: 0 1 auto;
 }
 
-.SmartStatus--success{
-    color: @default-succ;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 0px;
+.SmartStatus-icon {
+    width: 16px;
+    height: 16px;
+
 }
 
-.SmartStatus--failed{
-    color: @default-err;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 0px;
+.SmartStatus-iconDirectionPlaceholder {
+    width: 16px;
+    height: 8px;
+    border: 1px solid #d7d7d7;
+    background: #f2f2f2;
 }
 
-.SmartStatus--failed:before {
-    content: "\f06a";
+.SmartStatus-iconDirectionPlaceholder--bottom {
+    border-bottom: 0;
 }
 
-.SmartStatus--running{
-    color: @default-icon;
-    margin-top: 10px;
-    padding: 0px;
-    .pulsate();
+.SmartStatus-iconDirectionPlaceholder--top {
+    border-top: 0;
 }
 
-.SmartStatus-vertCenter{
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 0px;
+.SmartStatus-iconIndicator {
+    width: 16px;
+    height: 8px;
 }
 
-.SmartStatus-tooltip{
-    text-align: left;
-    max-width: 250px;
-    padding: 10px;
-    line-height: 22px;
+.SmartStatus-iconIndicator--success {
+    background: #5cb85c;
 }
+
+.SmartStatus-iconIndicator--failed {
+    background: #d9534f;
+}
+
+.SmartStatus-iconPlaceholder {
+    height: 15px;
+    width: 15px;
+    border: 1px solid #d7d7d7;
+    background: #f2f2f2;
+}
+
 
 .SmartStatus-tooltip--successful,
 .SmartStatus-tooltip--success{

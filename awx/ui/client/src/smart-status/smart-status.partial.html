@@ -9,13 +9,21 @@
              data-container="body"
              tooltipInnerClass="SmartStatus-tooltip"
              title="">
-                <i class="fa
-                DashboardList-status"
-                ng-class="{'SmartStatus--success icon-job-successful': job.value === 1,
-                    'SmartStatus--failed icon-job-failed': job.value === -1,
-                    'SmartStatus--running icon-job-successful': job.value === 0,
-                    'SmartStatus-vertCenter': singleJobStatus}">
-                </i>
+                <div class="SmartStatus-icon">
+                    <div ng-show="job.value === -1"
+                        class="SmartStatus-iconDirectionPlaceholder SmartStatus-iconDirectionPlaceholder--bottom">
+                    </div>
+                    <div class="SmartStatus-iconIndicator"
+                        ng-class="{'SmartStatus-iconIndicator--success': job.value === 1,
+                            'SmartStatus-iconIndicator--failed': job.value === -1}">
+                    </div>
+                    <div ng-show="job.value === 1"
+                        class="SmartStatus-iconDirectionPlaceholder SmartStatus-iconDirectionPlaceholder--top">
+                    </div>
+                </div>
         </a>
+    </div>
+    <div ng-repeat="n in placeholders track by $index" class='SmartStatus-iconContainer'>
+        <div class="SmartStatus-iconPlaceholder"></div>
     </div>
 </div>

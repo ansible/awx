@@ -247,7 +247,7 @@ module.exports = {
         templates.waitForElementPresent('i[class$="launch"]');
         templates.waitForElementNotPresent('i[class$="launch"]:nth-of-type(2)');
 
-        templates.expect.element('.List-titleBadge').text.equal('1');
+        templates.expect.element('.at-Panel-headingTitleBadge').text.equal('1');
 
         templates.waitForElementVisible('i[class$="launch"]');
         templates.click('i[class$="launch"]');

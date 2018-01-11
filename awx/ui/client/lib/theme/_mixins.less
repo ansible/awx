@@ -45,6 +45,7 @@
 
 .at-mixin-ButtonColor (@background, @color, @hover: '@{background}-hover') {
     background-color: @@background;
+    border-color: @@background;
 
     &, &:hover, &:focus {
         color: @@color;
@@ -52,6 +53,7 @@
 
     &:hover, &:focus {
         background-color: @@hover;
+        border-color: @@hover;
     }
 
     &[disabled] {

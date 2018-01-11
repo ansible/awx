@@ -1,4 +1,4 @@
-<div class="LabelList-tagContainer" ng-repeat="label in labels">
+<div class="LabelList-tagContainer" ng-repeat="label in labels" ng-if="!isRowItem">
     <div class="LabelList-deleteContainer"
         ng-click="deleteLabel(template, label)"
         ng-show="showDelete && template.summary_fields.user_capabilities.edit">
@@ -9,6 +9,25 @@
     </div>
 </div>
 <div class="LabelList-seeMoreLess" ng-show="count > 5 && seeMoreInactive"
-    ng-click="seeMore()">View More</div>
+    ng-click="seeMore()" ng-if="!isRowItem">View More</div>
 <div class="LabelList-seeMoreLess" ng-show="count > 5 && !seeMoreInactive"
-    ng-click="seeLess()">View Less</div>
+    ng-click="seeLess()" ng-if="!isRowItem">View Less</div>
+<div class="at-RowItem at-RowItem--labels" ng-show="count > 0" ng-if="isRowItem">
+        <div class="at-RowItem-label">
+            Labels
+        </div>
+        <div class="LabelList-tagContainer" ng-repeat="label in labels">
+            <div class="LabelList-deleteContainer"
+                ng-click="deleteLabel(template, label)"
+                ng-show="showDelete && template.summary_fields.user_capabilities.edit">
+                <i class="fa fa-times LabelList-tagDelete"></i>
+            </div>
+            <div class="LabelList-tag" ng-class="{'LabelList-tag--deletable' : (showDelete && template.summary_fields.user_capabilities.edit)}">
+                <span class="LabelList-name">{{ label.name }}</span>
+            </div>
+        </div>
+        <div class="LabelList-seeMoreLess" ng-show="count > 5 && seeMoreInactive"
+            ng-click="seeMore()">View More</div>
+        <div class="LabelList-seeMoreLess" ng-show="count > 5 && !seeMoreInactive"
+            ng-click="seeLess()">View Less</div>
+</div>

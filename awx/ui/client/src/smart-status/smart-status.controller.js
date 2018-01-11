@@ -16,7 +16,7 @@ export default ['$scope', '$filter',
             var firstJobStatus;
             var recentJobs = $scope.jobs;
             var detailsBaseUrl;
-  
+
             if(!recentJobs){
                 return;
             }
@@ -74,6 +74,7 @@ export default ['$scope', '$filter',
             $scope.singleJobStatus = singleJobStatus;
 
             $scope.sparkArray = sparkData;
+            $scope.placeholders = new Array(10 - sparkData.length);
         }
         $scope.$watchCollection('jobs', function(){
             init();
