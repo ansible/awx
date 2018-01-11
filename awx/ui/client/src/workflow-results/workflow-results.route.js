@@ -58,13 +58,13 @@ export default {
                                 // Get the workflow nodes
                                 Rest.setUrl(nextUrl);
                                 Rest.get()
-                                    .success(function(nextData) {
-                                        for(var i=0; i<nextData.results.length; i++) {
-                                            allNodes.push(nextData.results[i]);
+                                    .then(function(nextData) {
+                                        for(var i=0; i<nextData.data.results.length; i++) {
+                                            allNodes.push(nextData.data.results[i]);
                                         }
-                                        if(nextData.next) {
+                                        if(nextData.data.next) {
                                             // Get the next page
-                                            getNodes(nextData.next);
+                                            getNodes(nextData.data.next);
                                         }
                                         else {
                                             defer.resolve(allNodes);

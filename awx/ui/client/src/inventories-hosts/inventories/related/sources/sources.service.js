@@ -138,16 +138,16 @@ export default
             this.url = GetBasePath('inventory_sources') + id + '/hosts/';
             Rest.setUrl(this.url);
             return Rest.destroy()
-                .success(this.success.bind(this))
-                .error(this.error.bind(this))
+                .then(this.success.bind(this))
+                .catch(this.error.bind(this))
                 .finally();
         },
         deleteGroups(id) {
             this.url = GetBasePath('inventory_sources') + id + '/groups/';
             Rest.setUrl(this.url);
             return Rest.destroy()
-                .success(this.success.bind(this))
-                .error(this.error.bind(this))
+                .then(this.success.bind(this))
+                .catch(this.error.bind(this))
                 .finally();
         }
     };
