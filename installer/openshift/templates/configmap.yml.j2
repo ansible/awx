@@ -17,6 +17,11 @@ data:
     CLUSTER_HOST_ID = socket.gethostname()
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
     
+    # Token-based authentication performs a hash check on HTTP headers expected to be consistent, including the remote host IP.
+    # The default OpenShift router exposes the remote host IP via the X-Forwarded-For header.
+    # You might have to change this setting if you use an additional reverse proxy in front of OpenShift.
+    REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
+
     CELERY_TASK_QUEUES += (Queue(CLUSTER_HOST_ID, Exchange(CLUSTER_HOST_ID), routing_key=CLUSTER_HOST_ID),)
     CELERY_TASK_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
     CELERY_TASK_ROUTES['awx.main.tasks.purge_old_stdout_files'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
