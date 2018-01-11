@@ -277,7 +277,8 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
 
 
 @pytest.mark.django_db
-def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jobtemplate):
+@pytest.mark.parametrize('from_workflow', [True, False])
+def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jobtemplate, from_workflow):
     deploy_jobtemplate.extra_vars = '{"job_template_var": 3}'
     deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.ask_variables_on_launch = True
@@ -289,12 +290,20 @@ def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jo
     assert validated, serializer.errors
 
     kv['credentials'] = [machine_credential]  # conversion to internal value
+    if from_workflow:
+        kv['_eager_fields'] = {'launch_type': 'workflow'}
     job_obj = deploy_jobtemplate.create_unified_job(**kv)
 
     final_job_extra_vars = yaml.load(job_obj.extra_vars)
     assert 'job_launch_var' in final_job_extra_vars
     assert 'job_template_var' in final_job_extra_vars
-    assert set([cred.pk for cred in job_obj.credentials.all()]) == set([machine_credential.id, credential.id])
+
+    if from_workflow:
+        # jobs launched from workflow "merge" with what's already on the JT (in this case, `credential.id`)
+        assert set([cred.pk for cred in job_obj.credentials.all()]) == set([machine_credential.id, credential.id])
+    else:
+        # non-workflow JT launches use the explicit set of credentials provided at launch time
+        assert set([cred.pk for cred in job_obj.credentials.all()]) == set([machine_credential.id])
 
 
 @pytest.mark.django_db
@@ -368,6 +377,64 @@ def test_job_launch_fails_with_missing_vault_password(machine_credential, vault_
         expect=400
     )
     assert response.data['passwords_needed_to_start'] == ['vault_password']
+
+
+@pytest.mark.django_db
+def test_job_launch_with_explicit_credentials(vault_credential, deploy_jobtemplate, get, post, admin):
+    vault_cred = Credential(
+        name='Vault #1',
+        credential_type=vault_credential.credential_type,
+        inputs={
+            'vault_password': 'abc-pass',
+            'vault_id': 'abc'
+        }
+    )
+    vault_cred.save()
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.save()
+
+    url = reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk})
+    launch_kwargs = {'credentials': [vault_cred.pk]}
+    resp = post(url, launch_kwargs, admin, expect=201)
+    assert Job.objects.get(pk=resp.data['id']).credentials.count() == 1
+
+
+@pytest.mark.django_db
+def test_job_launch_with_explicit_prompted_password(vault_credential, deploy_jobtemplate,
+                                                    get, post, admin):
+    vault_cred_first = Credential(
+        name='Vault #1',
+        credential_type=vault_credential.credential_type,
+        inputs={
+            'vault_password': 'ASK',
+            'vault_id': 'abc'
+        }
+    )
+    vault_cred_first.save()
+    vault_cred_second = Credential(
+        name='Vault #2',
+        credential_type=vault_credential.credential_type,
+        inputs={
+            'vault_password': 'ASK',
+            'vault_id': 'xyz'
+        }
+    )
+    vault_cred_second.save()
+    deploy_jobtemplate.credentials.add(vault_cred_first)
+    deploy_jobtemplate.ask_credential_on_launch = True
+    deploy_jobtemplate.save()
+
+    url = reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk})
+    launch_kwargs = {
+        'credentials': [vault_cred_second.pk],
+        'credential_passwords': {'vault_password.xyz': 'vault-me-2'}
+    }
+    with mock.patch.object(Job, 'signal_start') as signal_start:
+        resp = post(url, launch_kwargs, admin, expect=201)
+        signal_start.assert_called_with(**{
+            'vault_password.xyz': 'vault-me-2'
+        })
+        assert Job.objects.get(pk=resp.data['id']).credentials.count() == 1
 
 
 @pytest.mark.django_db
@@ -494,7 +561,9 @@ def test_job_launch_pass_with_prompted_vault_password(machine_credential, vault_
 
 
 @pytest.mark.django_db
-def test_job_launch_JT_with_credentials(machine_credential, credential, net_credential, deploy_jobtemplate):
+@pytest.mark.parametrize('from_workflow', [True, False])
+def test_job_launch_JT_with_credentials(machine_credential, credential, net_credential, deploy_jobtemplate,
+                                        from_workflow):
     deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.save()
 
@@ -503,14 +572,19 @@ def test_job_launch_JT_with_credentials(machine_credential, credential, net_cred
     validated = serializer.is_valid()
     assert validated, serializer.errors
 
+    expected_credential_length = 2
     kv['credentials'] = [credential, net_credential, machine_credential]  # convert to internal value
     prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(
         _exclude_errors=['required', 'prompts'], **kv)
+    if from_workflow:
+        expected_credential_length = 3
+        prompted_fields['_eager_fields'] = {'launch_type': 'workflow'}
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
 
     creds = job_obj.credentials.all()
-    assert len(creds) == 3
-    assert credential in creds
+    assert len(creds) == expected_credential_length
+    if from_workflow:
+        assert credential in creds
     assert net_credential in creds
     assert machine_credential in creds
 
