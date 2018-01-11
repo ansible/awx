@@ -123,7 +123,7 @@ module.exports = {
             return this;
         },
         selectAdd (name) {
-            this.clickWhenEnabled('button span[class="List-dropdownCarat"]');
+            this.clickWhenEnabled('button span[class="at-List-toolbarDropdownCarat"]');
 
             this.api
                 .useXpath()
