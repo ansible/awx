@@ -1,0 +1,78 @@
+
+dn: dc=example,dc=com
+dc: example
+description: My wonderful company as much text as you want to place
+ in this line up to 32K continuation data for the line above must
+ have &lt;CR> or &lt;CR>&lt;LF> i.e. ENTER work
+ on both Windows and *nix system - new line MUST begin with ONE SPACE
+objectClass: dcObject
+objectClass: organization
+o: example.com
+
+# groups
+
+dn: ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+# group: Superusers
+
+dn: cn=superusers,ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: superusers
+member: cn=super_user1,ou=people,dc=example,dc=com
+
+# group: Sales
+
+dn: cn=sales,ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: sales
+member: cn=sales_user1,ou=people,dc=example,dc=com
+member: cn=sales_user2,ou=people,dc=example,dc=com
+
+# users
+
+dn: ou=people,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+# users - superusers
+
+dn: cn=super_user1,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: super_user1
+sn: User 1
+givenName: Super
+mail: super_user1@example.com
+userPassword: password
+
+# users - Sales
+
+dn: cn=sales_user1,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: sales_user1
+sn: Person 1
+givenName: Sales
+mail: sales_user1@example.com
+userPassword: password
+
+dn: cn=sales_user2,ou=people,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: sales_user2
+sn: Person 2
+givenName: Sales
+mail: sales_user2@example.com
+userPassword: password
