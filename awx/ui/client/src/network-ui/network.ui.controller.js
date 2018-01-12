@@ -15,6 +15,7 @@ var stream_fsm = require('./stream.fsm.js');
 var group = require('./group.js');
 var buttons = require('./buttons.js');
 var time = require('./time.js');
+var test_fsm = require('./test.fsm.js');
 var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
@@ -108,6 +109,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.groups = [];
   $scope.processes = [];
   $scope.configurations = [];
+  $scope.tests = [];
+  $scope.current_tests = [];
+  $scope.current_test = null;
+  $scope.testing = false;
+  $scope.test_events = [];
+  $scope.test_results = [];
   $scope.streams = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
@@ -150,6 +157,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.site_controller = new fsm.FSMController($scope, "site_fsm", site_fsm.Disable, $scope);
   $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
   $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
+  $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
   $scope.app_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
 
   //App Toolbox Setup
@@ -290,9 +298,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.mode_controller.delegate_channel = new fsm.Channel($scope.mode_controller,
                                                             $scope.time_controller,
                                                             $scope);
+  $scope.test_controller.delegate_channel = new fsm.Channel($scope.test_controller,
+                                                            $scope.mode_controller,
+                                                            $scope);
+
 
   $scope.first_channel = new fsm.Channel(null,
-                                         $scope.mode_controller,
+                                         $scope.test_controller,
                                          $scope);
 
     var getMouseEventResult = function (mouseEvent) {
@@ -535,7 +547,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseWheel', [$event, delta, deltaX, deltaY]);
-      event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onKeyDown = function ($event) {
@@ -656,6 +668,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.onRenameContextButton = function (button) {
+        console.log(button.name);
         $scope.context_menus[0].enabled = false;
         $scope.first_channel.send("LabelEdit", {});
     };
@@ -814,6 +827,21 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         console.log(button.label);
         window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
+
+	$scope.onUploadTestButton = function (button) {
+        console.log(button.name);
+        window.open("/network_ui/upload_test", "_top");
+    };
+
+	$scope.onRunTestsButton = function (button) {
+        console.log(button.name);
+
+        $scope.test_results = [];
+        $scope.current_tests = $scope.tests.slice();
+        $scope.first_channel.send("EnableTest", new messages.EnableTest());
+        $scope.first_channel.send("StartTest", new messages.StartTest());
+    };
+
     // Buttons
     var button_offset = 200;
 
@@ -827,7 +855,9 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
       new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
       new models.Button("DOWNLOAD TRACE", button_offset + 750, 48, 150, 30, $scope.onDownloadTraceButton, $scope),
-      new models.Button("DOWNLOAD RECORDING", button_offset + 910, 48, 150, 30, $scope.onDownloadRecordingButton, $scope),
+      new models.Button("DOWNLOAD RECORDING", button_offset + 910, 48, 170, 30, $scope.onDownloadRecordingButton, $scope),
+      new models.Button("UPLOAD TEST", button_offset + 10, 88, 100, 30, $scope.onUploadTestButton, $scope),
+      new models.Button("RUN TESTS", button_offset + 120, 88, 100, 30, $scope.onRunTestsButton, $scope),
     ];
 
     var LAYERS_X = 160;
@@ -1455,6 +1485,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         //Erase the existing state
         $scope.devices = [];
         $scope.links = [];
+        $scope.groups = [];
+        $scope.streams = [];
 
         var device_map = {};
         var device_interface_map = {};
@@ -1769,6 +1801,17 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             map.set(key, stream.offset + 1);
         }
     };
+
+    setInterval( function () {
+        var test_event = null;
+        if ($scope.test_events.length  > 0) {
+            test_event = $scope.test_events.shift();
+            console.log(test_event);
+            test_event.sender = 0;
+            $scope.first_channel.send(test_event.msg_type, test_event);
+        }
+        $scope.$apply();
+    }, 10);
 };
 
 exports.NetworkUIController = NetworkUIController;
