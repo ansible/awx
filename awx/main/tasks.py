@@ -812,6 +812,15 @@ class BaseTask(LogErrorsTask):
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
+
+            # Fetch "cached" fact data from prior runs and put on the disk
+            # where ansible expects to find it
+            if getattr(instance, 'use_fact_cache', False) and not kwargs.get('isolated'):
+                instance.start_job_fact_cache(
+                    os.path.join(kwargs['private_data_dir']),
+                    kwargs.setdefault('fact_modification_times', {})
+                )
+
             # May have to serialize the value
             kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
@@ -1032,10 +1041,8 @@ class RunJob(BaseTask):
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.use_fact_cache and not kwargs.get('isolated'):
             env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
-            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
-            env['ANSIBLE_CACHE_PLUGIN'] = "awx"
-            env['ANSIBLE_CACHE_PLUGIN_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
-            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
+            env['ANSIBLE_CACHE_PLUGIN'] = "jsonfile"
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = os.path.join(kwargs['private_data_dir'], 'facts')
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
@@ -1286,14 +1293,14 @@ class RunJob(BaseTask):
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
 
-        if job.use_fact_cache and not kwargs.get('isolated'):
-            job.start_job_fact_cache()
-
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
         if job.use_fact_cache and not kwargs.get('isolated'):
-            job.finish_job_fact_cache()
+            job.finish_job_fact_cache(
+                kwargs['private_data_dir'],
+                kwargs['fact_modification_times']
+            )
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:

@@ -331,6 +331,23 @@ class TestGenericRun(TestJobExecution):
         args, cwd, env, stdout = call_args
         assert env['FOO'] == 'BAR'
 
+    def test_fact_cache_usage(self):
+        self.instance.use_fact_cache = True
+
+        start_mock = mock.Mock()
+        patch = mock.patch.object(Job, 'start_job_fact_cache', start_mock)
+        self.patches.append(patch)
+        patch.start()
+
+        self.task.run(self.pk)
+        call_args, _ = self.run_pexpect.call_args_list[0]
+        args, cwd, env, stdout = call_args
+        start_mock.assert_called_once()
+        tmpdir, _ = start_mock.call_args[0]
+
+        assert env['ANSIBLE_CACHE_PLUGIN'] == 'jsonfile'
+        assert env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] == os.path.join(tmpdir, 'facts')
+
 
 class TestAdhocRun(TestJobExecution):
 
