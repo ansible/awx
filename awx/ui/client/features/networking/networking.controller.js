@@ -7,7 +7,7 @@ function NetworkingController (models, $state, $scope, strings) {
 
     vm.strings = strings;
     vm.panelTitle = `${strings.get('state.BREADCRUMB_LABEL')} | ${inventory.name}`;
-    vm.hostDetail = false;
+    vm.hostDetail = {};
 
     vm.panelIsExpanded = false;
 
@@ -23,14 +23,14 @@ function NetworkingController (models, $state, $scope, strings) {
         vm.panelIsExpanded = false;
     });
 
-    $scope.$on('retrievedHostData', (e, hostData, expand) => {
+    $scope.$on('showDetails', (e, data, expand) => {
         if (expand) {
             vm.panelIsExpanded = true;
         }
-        if (_.isEmpty(hostData)) {
-            $scope.hostDetail = false;
+        if (!_.has(data, 'host_id')) {
+            $scope.item = data;
         } else {
-            $scope.hostDetail = hostData;
+            $scope.item = data;
         }
     });
 }
