@@ -26,73 +26,84 @@
         </div>
     </div>
 </div>
+
+
 <div class="Networking-panels">
     <div class="Networking-leftPanel">
         <awx-network-ui></awx-network-ui>
     </div>
+
+
     <div class="Networking-rightPanel" ng-show="vm.panelIsExpanded">
-        <!-- VIEW LAYERS -->
 
-        <!--beginning of header-->
-        <div class="Networking-panelHeader">
-            <div class="JobResults-panelHeaderText" translate="">DETAILS</div>
-
-            <!-- LEFT PANE HEADER ACTIONS -->
-            <!-- <div> -->
-
-                <!-- RELAUNCH ACTION -->
-                <!-- <button class="List-actionButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title="">
-                    <i class="icon-launch"></i>
-                </button> -->
-
-                <!-- CANCEL ACTION -->
-                <!-- <button class="List-actionButton                                 List-actionButton--delete ng-hide" data-placement="top" ng-click="cancelJob()" ng-show="job_status == 'running' ||
-                        job_status=='pending' " aw-tool-tip="Cancel" data-original-title="" title="">
-                    <i class="fa fa-minus-circle"></i>
-                </button> -->
-
-                <!-- DELETE ACTION -->
-                <!-- <button class="List-actionButton
-                        List-actionButton--delete" data-placement="top" ng-click="deleteJob()" ng-hide="job_status == 'running' ||
-                        job_status == 'pending' || !job.summary_fields.user_capabilities.delete" aw-tool-tip="Delete" data-original-title="" title="">
-                    <i class="fa fa-trash-o"></i>
-                </button>
-            </div> -->
+        <div ng-if="hostDetail===false">
+            NO HOST DETAIL
         </div>
-        <!--end of header-->
-        <!--beginning of name row -->
-        <div class="JobResults-resultRow">
-            <label class="JobResults-resultRowLabel" translate="">Name</label>
-             <div class="JobResults-resultRowText">
-                 {{hostDetail.name}}
+
+
+        <div ng-if="hostDetail!==false">
+            <!--beginning of header-->
+            <div class="Networking-panelHeader">
+                <div class="JobResults-panelHeaderText" translate="">
+                    DETAILS
+                </div>
+            </div>
+            <!--end of header-->
+
+            <!--beginning of name row -->
+            <div class="JobResults-resultRow">
+                <label class="JobResults-resultRowLabel" translate="">
+                    Name
+                </label>
+                 <div class="JobResults-resultRowText">
+                     {{hostDetail.name}}
+                 </div>
              </div>
+             <!--end of name row -->
+
+             <!-- beginning of extra variable row -->
+             <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="hostDetail.variables">
+                 <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
+                     <span translate>
+                         Extra Variables
+                     </span>
+                     <i class="JobResults-extraVarsHelp fa fa-question-circle"
+                         aw-tool-tip="{{'Read only view of extra variables added to the job template.' | translate}}"
+                         data-placement="top">
+                     </i>
+                 </label>
+                 <textarea
+                     rows="6"
+                     ng-model="hostDetail.variables"
+                     name="variables"
+                     class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
+                     id="pre-formatted-variables"
+                     disabled="disabled">
+                 </textarea>
+             </div>
+             <!-- end of extra variable row -->
          </div>
-         <!--end of name row -->
-
-         <!-- beginning of extra variable row -->
-         <div class="JobResults-resultRow
-             JobResults-resultRow--variables"
-             ng-show="hostDetail.variables">
-             <label class="JobResults-resultRowLabel
-                 JobResults-resultRowLabel--fullWidth">
-                 <span translate> Extra Variables </span>
-                 <i class="JobResults-extraVarsHelp fa fa-question-circle"
-                     aw-tool-tip="{{'Read only view of extra variables added to the job template.' | translate}}"
-                     data-placement="top">
-                 </i>
-             </label>
-             <textarea
-                 rows="6"
-                 ng-model="hostDetail.variables"
-                 name="variables"
-                 class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
-                 id="pre-formatted-variables"
-                 disabled="disabled">
-             </textarea>
-         </div>
-         <!-- end of extra variable row -->
-
-    </div><!--end of Networking-rightPanel -->
+     </div>
+</div>
+<!--end of Networking-rightPanel -->
 
 
+
+<div id="alert-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-hide="disableButtons" data-target="#alert-modal" data-dismiss="modal" class="modal" aria-hidden="true"><i class="fa fa-times-circle"></i></button>
+                <h3 id="alertHeader" ng-bind="alertHeader"></h3>
+            </div>
+            <div class="modal-body">
+                <div id="alert-modal-msg" class="alert" ng-bind-html="alertBody"></div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" id="alert_ok_btn" class="btn btn-default" translate>OK</a>
+            </div>
+        </div>
+        <!-- modal-content -->
+    </div>
+    <!-- modal-dialog -->
 </div>
