@@ -479,6 +479,13 @@ models:
     type: ForeignKey
   - name: time
     type: DateTimeField
+  - default: 0
+    name: id
+    type: IntegerField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
   name: TestResult
   x: -1336
   y: -49
