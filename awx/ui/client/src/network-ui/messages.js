@@ -176,13 +176,6 @@ function MultipleMessage(sender, messages) {
 }
 exports.MultipleMessage = MultipleMessage;
 
-function Coverage(sender, coverage, trace_id) {
-    this.msg_type = "Coverage";
-    this.sender = sender;
-    this.coverage = coverage;
-    this.trace_id = trace_id;
-}
-exports.Coverage = Coverage;
 
 function MouseEvent(sender, x, y, type, trace_id) {
     this.msg_type = "MouseEvent";
@@ -485,3 +478,22 @@ function TestCompleted() {
     this.msg_type = "TestCompleted";
 }
 exports.TestCompleted = TestCompleted;
+
+function TestResult(sender, id, name, result, date, code_under_test) {
+    this.msg_type = "TestResult";
+    this.sender = sender;
+    this.id = id;
+    this.name = name;
+    this.result = result;
+    this.date = date;
+    this.code_under_test = code_under_test;
+}
+exports.TestResult = TestResult;
+
+function Coverage(sender, coverage, result_id) {
+    this.msg_type = "Coverage";
+    this.sender = sender;
+    this.coverage = coverage;
+    this.result_id = result_id;
+}
+exports.Coverage = Coverage;

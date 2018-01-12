@@ -10,7 +10,7 @@ from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
-from awx.network_ui.models import TestCase
+from awx.network_ui.models import TestCase, TestResult, CodeUnderTest, Result
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
@@ -19,6 +19,8 @@ from collections import defaultdict
 import math
 import random
 import logging
+from django.utils.dateparse import parse_datetime
+
 
 from awx.network_ui.utils import transform_dict
 import dpath.util
@@ -280,7 +282,7 @@ class _Persistence(object):
         try:
             message_type_id = MessageType.objects.get(name=message_type).pk
         except ObjectDoesNotExist:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported message %s: no message type", message_type)
             return
         TopologyHistory(topology_id=topology_id,
                         client_id=client_id,
@@ -291,7 +293,7 @@ class _Persistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported message %s: no handler", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -453,13 +455,44 @@ class _Persistence(object):
         # grid_layout(topology_id)
         tier_layout(topology_id)
 
+
     def onCoverageRequest(self, coverage, topology_id, client_id):
         pass
 
+    def onTestResult(self, test_result, topology_id, client_id):
+        xyz, _, rest = test_result['code_under_test'].partition('-')
+        commits_since, _, commit_hash = rest.partition('-')
+        commit_hash = commit_hash.strip('g')
+        
+        print (xyz)
+        print (commits_since)
+        print (commit_hash)
+
+        x, y, z = [int(i) for i in xyz.split('.')]
+
+        print (x, y, z)
+
+        code_under_test, _ = CodeUnderTest.objects.get_or_create(version_x=x,
+                                                                 version_y=y,
+                                                                 version_z=z,
+                                                                 commits_since=int(commits_since),
+                                                                 commit_hash=commit_hash)
+
+        print (code_under_test)
+
+        tr = TestResult(id=test_result['id'],
+                        result_id=Result.objects.get(name=test_result['result']).pk,
+                        test_case_id=TestCase.objects.get(name=test_result['name']).pk,
+                        code_under_test_id=code_under_test.pk,
+                        client_id=client_id,
+                        time=parse_datetime(test_result['date']))
+        tr.save()
+        print (tr.pk)
+
+
     def onCoverage(self, coverage, topology_id, client_id):
-        Coverage(trace_session_id=coverage['trace_id'],
-                 client_id=client_id,
-                 coverage_data=json.dumps(coverage['coverage']))
+        Coverage(test_result_id=TestResult.objects.get(id=coverage['result_id'], client_id=client_id).pk,
+                 coverage_data=json.dumps(coverage['coverage'])).save()
 
     def onStartRecording(self, recording, topology_id, client_id):
         pass
@@ -656,7 +689,7 @@ class _Discovery(object):
         if handler is not None:
             handler(message_value, topology_id)
         else:
-            logger.warning("Unsupported message %s", message_type)
+            logger.warning("Unsupported discovery message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)

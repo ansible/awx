@@ -78,10 +78,25 @@ _Running.prototype.onTestCompleted.transitions = ['Reporting'];
 
 _Reporting.prototype.start = function (controller) {
 
+    var test_result = null;
     controller.scope.replay = false;
     controller.scope.disconnected = false;
     controller.scope.recording = false;
-    controller.scope.test_results.push(new models.TestResult(controller.scope.current_test.name, "passed"));
+    test_result = new models.TestResult(controller.scope.test_result_id_seq(),
+                                        controller.scope.current_test.name,
+                                        "passed",
+                                        new Date().toISOString(),
+                                        controller.scope.version);
+    controller.scope.test_results.push(test_result);
+    controller.scope.send_control_message(new messages.TestResult(controller.scope.client_id,
+                                                                  test_result.id,
+                                                                  test_result.name,
+                                                                  test_result.result,
+                                                                  test_result.date,
+                                                                  test_result.code_under_test));
+    if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
+        controller.scope.send_control_message(new messages.Coverage(controller.scope.client_id, window.__coverage__, test_result.id));
+    }
     controller.changeState(Ready);
 };
 _Reporting.prototype.start.transitions = ['Ready'];

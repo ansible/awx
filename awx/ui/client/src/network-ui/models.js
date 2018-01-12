@@ -938,8 +938,11 @@ function Test(name, event_trace, fsm_trace, pre_test_snapshot, post_test_snapsho
 }
 exports.Test = Test;
 
-function TestResult(name, result) {
+function TestResult(id, name, result, date, code_under_test) {
+    this.id = id;
     this.name = name;
     this.result = result;
+    this.date = date;
+    this.code_under_test = code_under_test;
 }
 exports.TestResult = TestResult;
