@@ -1,7 +1,8 @@
 # Copyright (c) 2017 Red Hat, Inc
 from django.shortcuts import render
 from django import forms
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse, HttpResponseRedirect
+from django.core.exceptions import ObjectDoesNotExist
 import yaml
 
 import json
@@ -9,6 +10,7 @@ import json
 
 # Create your views here.
 from .models import Topology, FSMTrace, EventTrace, TopologySnapshot
+from .models import TestCase
 from .serializers import topology_data
 
 
@@ -92,3 +94,35 @@ def download_recording(request):
         return response
     else:
         return HttpResponse(form.errors)
+
+
+def tests(request):
+    tests = TestCase.objects.all().values('test_case_id', 'name')
+    return render(request, 'network_ui/tests.html', dict(tests=tests))
+
+
+def create_test(name, data):
+    try:
+        test_case = TestCase.objects.get(name=name)
+        test_case.test_case_data=json.dumps(data)
+        test_case.save()
+    except ObjectDoesNotExist:
+        TestCase(name=name, test_case_data=json.dumps(data)).save()
+
+
+class UploadTestForm(forms.Form):
+    name = forms.CharField()
+    file = forms.FileField()
+
+
+def upload_test(request):
+    if request.method == 'POST':
+        form = UploadTestForm(request.POST, request.FILES)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            data = json.loads(request.FILES['file'].read())
+            create_test(name, data)
+            return HttpResponseRedirect('/network_ui/tests')
+    else:
+        form = UploadTestForm()
+    return render(request, 'network_ui/upload_test.html', {'form': form})

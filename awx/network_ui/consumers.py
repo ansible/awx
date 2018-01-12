@@ -10,6 +10,7 @@ from awx.network_ui.models import Process, Stream
 from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
+from awx.network_ui.models import TestCase
 from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
@@ -561,7 +562,7 @@ class _UndoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            logger.warnding("Unsupported undo message %s", message_type)
+            logger.warning("Unsupported undo message %s", message_type)
 
     def onSnapshot(self, snapshot, topology_id, client_id):
         pass
@@ -832,6 +833,7 @@ def ws_connect(message):
     send_snapshot(message.reply_channel, topology_id)
     send_history(message.reply_channel, topology_id)
     send_toolboxes(message.reply_channel)
+    send_tests(message.reply_channel)
 
 
 def send_toolboxes(channel):
@@ -839,6 +841,11 @@ def send_toolboxes(channel):
         item = dict(toolbox_name=toolbox_item['toolbox__name'],
                     data=toolbox_item['data'])
         channel.send({"text": json.dumps(["ToolboxItem", item])})
+
+
+def send_tests(channel):
+    for name, test_case_data in TestCase.objects.all().values_list('name', 'test_case_data'):
+        channel.send({"text": json.dumps(["TestCase", [name, json.loads(test_case_data)]])})
 
 
 def send_snapshot(channel, topology_id):

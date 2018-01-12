@@ -733,7 +733,7 @@ exports.Process = Process;
 Process.prototype.toJSON = function () {
     return {id: this.id,
             name: this.name};
-}
+};
 
 function Stream(id, from_device, to_device, label) {
     this.id = id;
@@ -928,3 +928,18 @@ Stream.prototype.start_arc_angle_rad = function () {
 Stream.prototype.start_arc_angle = function () {
     return this.start_arc_angle_rad() * 180 / Math.PI;
 };
+
+function Test(name, event_trace, fsm_trace, pre_test_snapshot, post_test_snapshot) {
+    this.name = name;
+    this.event_trace = event_trace;
+    this.fsm_trace = fsm_trace;
+    this.pre_test_snapshot = pre_test_snapshot;
+    this.post_test_snapshot = post_test_snapshot;
+}
+exports.Test = Test;
+
+function TestResult(name, result) {
+    this.name = name;
+    this.result = result;
+}
+exports.TestResult = TestResult;

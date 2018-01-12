@@ -3,6 +3,7 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var messages = require('./messages.js');
 var util = require('./util.js');
+var models = require('./models.js');
 
 function _State () {
 }
@@ -538,4 +539,14 @@ _Present.prototype.undo = function(controller) {
         controller.scope.undo(type_data);
         controller.changeState(Past);
     }
+};
+
+
+_Present.prototype.onTestCase = function(controller, msg_type, message) {
+    console.log([msg_type, message]);
+    controller.scope.tests.push(new models.Test(message[0],
+                                                message[1].event_trace,
+                                                message[1].fsm_trace,
+                                                message[1].snapshots[0],
+                                                message[1].snapshots[1]));
 };

@@ -465,3 +465,23 @@ function Snapshot(sender, devices, links, groups, streams, order, trace_id) {
     this.trace_id = trace_id;
 }
 exports.Snapshot = Snapshot;
+
+function EnableTest() {
+    this.msg_type = "EnableTest";
+}
+exports.EnableTest = EnableTest;
+
+function DisableTest() {
+    this.msg_type = "DisableTest";
+}
+exports.DisableTest = DisableTest;
+
+function StartTest() {
+    this.msg_type = "StartTest";
+}
+exports.StartTest = StartTest;
+
+function TestCompleted() {
+    this.msg_type = "TestCompleted";
+}
+exports.TestCompleted = TestCompleted;
