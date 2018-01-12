@@ -23,7 +23,7 @@ var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
 var NetworkUIController = function($scope, $document, $location, $window, $http,
-    $q, $state, ProcessErrors) {
+    $q, $state, ProcessErrors, ConfigService) {
 
   window.scope = $scope;
   var i = 0;
@@ -97,6 +97,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
   $scope.stream_id_seq = util.natural_numbers(0);
+  $scope.test_result_id_seq = util.natural_numbers(0);
   $scope.overall_toolbox_collapsed = false;
   $scope.time_pointer = -1;
   $scope.frame = 0;
@@ -113,6 +114,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.current_tests = [];
   $scope.current_test = null;
   $scope.testing = false;
+  $scope.version = null;
   $scope.test_events = [];
   $scope.test_results = [];
   $scope.streams = [];
@@ -1692,12 +1694,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
     };
 
-    $scope.send_coverage = function () {
-        console.log("Sending coverage");
-        if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
-            $scope.send_control_message(new messages.Coverage($scope.client_id, window.__coverage__, $scope.trace_id));
-        }
-    };
 
 
     $scope.control_socket.onmessage = function(message) {
@@ -1812,6 +1808,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
         $scope.$apply();
     }, 10);
+
+    ConfigService
+		.getConfig()
+        .then(function(config){
+            $scope.version = config.version;
+        });
 };
 
 exports.NetworkUIController = NetworkUIController;
