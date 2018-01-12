@@ -1217,6 +1217,7 @@ class RunJob(BaseTask):
         for method in PRIVILEGE_ESCALATION_METHODS:
             d[re.compile(r'%s password.*:\s*?$' % (method[0]), re.M)] = 'become_password'
             d[re.compile(r'%s password.*:\s*?$' % (method[0].upper()), re.M)] = 'become_password'
+        d[re.compile(r'BECOME password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
