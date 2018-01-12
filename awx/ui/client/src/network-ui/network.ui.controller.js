@@ -21,7 +21,8 @@ var messages = require('./messages.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http, $q, $state) {
+var NetworkUIController = function($scope, $document, $location, $window, $http,
+    $q, $state, ProcessErrors) {
 
   window.scope = $scope;
   var i = 0;
@@ -190,6 +191,9 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                    device.icon = true;
                    $scope.inventory_toolbox.items.push(device);
                }
+           })
+           .catch(({data, status}) => {
+               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
            });
   }
   $scope.inventory_toolbox.spacing = 150;
@@ -413,7 +417,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         // Do not select links if a device was selected
         if (last_selected_device === null && last_selected_interface === null) {
             for (i = $scope.links.length - 1; i >= 0; i--) {
-                if($scope.links[i].is_selected($scope.scaledX, $scope.scaledY)) {
+                if ($scope.links[i].is_selected($scope.scaledX, $scope.scaledY)) {
                     $scope.links[i].selected = true;
                     $scope.send_control_message(new messages.LinkSelected($scope.client_id, $scope.links[i].id));
                     last_selected_link = $scope.links[i];
@@ -630,20 +634,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-            if($scope.selected_items.length === 1){
-                let host_id = $scope.selected_items[0].host_id;
-                let url = `/api/v2/hosts/${host_id}/`;
-                $http.get(url)
-                     .then(function(response) {
-                         let host = response.data;
-                         $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
-                         $scope.context_menus[0].enabled = false;
-                     })
-                     .catch(function(error) {
-                         console.log(error);
-                     });
+            if ($scope.selected_items.length === 1){
+                if ($scope.selected_items[0].host_id === 0){
+                    $scope.$emit('retrievedHostData', {}, panelBoolean !== null ? panelBoolean: true);
+                }
+                if ($scope.selected_items[0].host_id !== 0){
+                    let host_id = $scope.selected_items[0].host_id;
+                    let url = `/api/v2/hosts/${host_id}/`;
+                    $http.get(url)
+                         .then(function(response) {
+                             let host = response.data;
+                             $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
+                             $scope.context_menus[0].enabled = false;
+                         })
+                         .catch(({data, status}) => {
+                             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+                         });
+                }
             }
-
          }
     };
 
