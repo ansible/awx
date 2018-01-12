@@ -1,7 +1,7 @@
 messages:
     - {msg_type: DeviceMove, fields: [msg_type, sender, id, x, y, previous_x, previous_y]}
-    - {msg_type: DeviceCreate, fields: [msg_type, sender, id, x, y, name, type]}
-    - {msg_type: DeviceDestroy, fields: [msg_type, sender, id, previous_x, previous_y, previous_name, previous_type]}
+    - {msg_type: DeviceCreate, fields: [msg_type, sender, id, x, y, name, type, host_id]}
+    - {msg_type: DeviceDestroy, fields: [msg_type, sender, id, previous_x, previous_y, previous_name, previous_type, previous_host_id]}
     - {msg_type: DeviceLabelEdit, fields: [msg_type, sender, id, name, previous_name]}
     - {msg_type: DeviceSelected, fields: [msg_type, sender, id]}
     - {msg_type: DeviceUnSelected, fields: [msg_type, sender, id]}
@@ -19,14 +19,13 @@ messages:
     - {msg_type: Discover, fields: [msg_type, sender]}
     - {msg_type: Layout, fields: [msg_type, sender]}
     - {msg_type: MultipleMessage, fields: [msg_type, sender, messages]}
-    - {msg_type: Coverage, fields: [msg_type, sender, coverage]}
-    - {msg_type: MouseEvent, fields: [msg_type, sender, x, y, type]}
-    - {msg_type: MouseWheelEvent, fields: [msg_type, sender, delta, deltaX, deltaY, type, originalEvent]}
-    - {msg_type: KeyEvent, fields: [msg_type, sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey]}
+    - {msg_type: MouseEvent, fields: [msg_type, sender, x, y, type, trace_id]}
+    - {msg_type: MouseWheelEvent, fields: [msg_type, sender, delta, deltaX, deltaY, type, originalEvent, trace_id]}
+    - {msg_type: KeyEvent, fields: [msg_type, sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey, trace_id]}
     - {msg_type: TouchEvent, fields: [msg_type, sender, type, touches]}
-    - {msg_type: StartRecording, fields: [msg_type, sender]}
-    - {msg_type: StopRecording, fields: [msg_type, sender]}
-    - {msg_type: ViewPort, fields: [msg_type, sender, scale, panX, panY]}
+    - {msg_type: StartRecording, fields: [msg_type, sender, trace_id]}
+    - {msg_type: StopRecording, fields: [msg_type, sender, trace_id]}
+    - {msg_type: ViewPort, fields: [msg_type, sender, scale, panX, panY, trace_id]}
     - {msg_type: CopySite, fields: [msg_type, site]}
     - {msg_type: GroupMove, fields: [msg_type, sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2]}
     - {msg_type: GroupCreate, fields: [msg_type, sender, id, x1, y1, x2, y2, name, type]}
@@ -44,4 +43,11 @@ messages:
     - {msg_type: StreamUnSelected, fields: [msg_type, sender, id]}
     - {msg_type: FSMTrace, fields: [msg_type, order, sender, trace_id, fsm_name, from_state, to_state, recv_message_type]}
     - {msg_type: ChannelTrace, fields: [msg_type, sender, trace_id, from_fsm, to_fsm, sent_message_type]}
+    - {msg_type: Snapshot, fields: [msg_type, sender, devices, links, groups, streams, order, trace_id]}
+    - {msg_type: EnableTest, fields: [msg_type]}
+    - {msg_type: DisableTest, fields: [msg_type]}
+    - {msg_type: StartTest, fields: [msg_type]}
+    - {msg_type: TestCompleted, fields: [msg_type]}
+    - {msg_type: TestResult, fields: [msg_type, sender, id, name, result, date, code_under_test]}
+    - {msg_type: Coverage, fields: [msg_type, sender, coverage, result_id]}
 
