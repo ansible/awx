@@ -233,3 +233,5 @@ class TestResult(models.Model):
     result = models.ForeignKey('Result',)
     code_under_test = models.ForeignKey('CodeUnderTest',)
     time = models.DateTimeField()
+    id = models.IntegerField(default=0)
+    client = models.ForeignKey('Client',)

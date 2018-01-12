@@ -244,8 +244,8 @@ admin.site.register(CodeUnderTest, CodeUnderTestAdmin)
 
 
 class TestResultAdmin(admin.ModelAdmin):
-    fields = ('test_case', 'result', 'code_under_test', 'time',)
-    raw_id_fields = ('test_case', 'result', 'code_under_test',)
+    fields = ('test_case', 'result', 'code_under_test', 'time', 'id', 'client',)
+    raw_id_fields = ('test_case', 'result', 'code_under_test', 'client',)
 
 
 admin.site.register(TestResult, TestResultAdmin)
