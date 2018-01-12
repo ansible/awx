@@ -588,7 +588,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         if (!$scope.disconnected) {
             if ($scope.selected_items.length === 1){
                 if ($scope.selected_items[0].host_id === 0){
-                    $scope.$emit('retrievedHostData', {}, panelBoolean !== null ? panelBoolean: true);
+                    let host = $scope.selected_items[0];
+                    $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
                 if ($scope.selected_items[0].host_id !== 0){
                     let host_id = $scope.selected_items[0].host_id;
@@ -596,13 +597,19 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                     $http.get(url)
                          .then(function(response) {
                              let host = response.data;
-                             $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
+                             host.host_id = host.id;
+                             $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                              $scope.context_menus[0].enabled = false;
                          })
                          .catch(({data, status}) => {
                              ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
                          });
                 }
+            }
+            else if ($scope.selected_groups.length === 1){
+                let group = $scope.selected_groups[0];
+                $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
             }
          }
     };
