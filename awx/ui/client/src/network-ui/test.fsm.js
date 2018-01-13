@@ -88,6 +88,7 @@ _Reporting.prototype.start = function (controller) {
                                         new Date().toISOString(),
                                         controller.scope.version);
     controller.scope.test_results.push(test_result);
+    console.log(["Reporting test", test_result.name, test_result.id]);
     controller.scope.send_control_message(new messages.TestResult(controller.scope.client_id,
                                                                   test_result.id,
                                                                   test_result.name,
@@ -95,11 +96,12 @@ _Reporting.prototype.start = function (controller) {
                                                                   test_result.date,
                                                                   test_result.code_under_test));
     if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
+        console.log(["Reporting coverage", test_result.name, test_result.id]);
         controller.scope.send_control_message(new messages.Coverage(controller.scope.client_id, window.__coverage__, test_result.id));
     }
-    controller.changeState(Ready);
+    controller.changeState(Loading);
 };
-_Reporting.prototype.start.transitions = ['Ready'];
+_Reporting.prototype.start.transitions = ['Loading'];
 
 
 _Loading.prototype.start = function (controller) {
@@ -114,6 +116,7 @@ _Loading.prototype.start = function (controller) {
         controller.scope.disconnected = true;
         controller.scope.test_events = controller.scope.current_test.event_trace.slice();
         controller.scope.test_events.push(new messages.TestCompleted());
+        controller.scope.reset_coverage();
         controller.changeState(Running);
     }
 };
@@ -129,16 +132,20 @@ _Ready.prototype.onDisableTest.transitions = ['Disabled'];
 
 _Ready.prototype.start = function (controller) {
 
+    var load_id = controller.scope.test_result_id_seq();
+
+    console.log(["Reporting Load", load_id]);
+    controller.scope.send_control_message(new messages.TestResult(controller.scope.client_id,
+                                                                  load_id,
+                                                                  "Load",
+                                                                  "passed",
+                                                                  new Date().toISOString(),
+                                                                  controller.scope.version));
+    if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
+        console.log(["Reporting Load Coverage", load_id]);
+        controller.scope.send_control_message(new messages.Coverage(controller.scope.client_id, window.__coverage__, load_id));
+    }
+
     controller.changeState(Loading);
 };
 _Ready.prototype.start.transitions = ['Loading'];
-
-
-
-_Reporting.prototype.onTestReported = function (controller) {
-
-    controller.changeState(Ready);
-
-};
-_Reporting.prototype.onTestReported.transitions = ['Ready'];
-
