@@ -10,7 +10,7 @@ import json
 
 # Create your views here.
 from .models import Topology, FSMTrace, EventTrace, TopologySnapshot
-from .models import TestCase
+from .models import TestCase, TestResult, Coverage
 from .serializers import topology_data
 
 
@@ -97,8 +97,10 @@ def download_recording(request):
 
 
 def tests(request):
-    tests = TestCase.objects.all().values('test_case_id', 'name')
-    return render(request, 'network_ui/tests.html', dict(tests=tests))
+    tests = list(TestCase.objects.all().values('test_case_id', 'name'))
+    for x in tests:
+        x['coverage'] = "/network_ui/download_coverage/{0}".format(x['test_case_id'])
+    return JsonResponse(dict(tests=tests))
 
 
 def create_test(name, data):
@@ -126,3 +128,11 @@ def upload_test(request):
     else:
         form = UploadTestForm()
     return render(request, 'network_ui/upload_test.html', {'form': form})
+
+
+def download_coverage(request, pk):
+    latest_tr = TestResult.objects.filter(test_case_id=pk).order_by('-time')[0]
+    coverage = Coverage.objects.get(test_result_id=latest_tr.pk)
+    response = HttpResponse(coverage.coverage_data,
+                            content_type="application/json")
+    return response
