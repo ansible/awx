@@ -14,6 +14,7 @@ import logging
 import sys
 import os
 import requests
+import subprocess
 
 logger = logging.getLogger('coverage_report')
 
@@ -43,6 +44,13 @@ def main(args=None):
             os.mkdir(test['name'])
         with open(test['name'] + "/coverage.json", 'w') as f:
             f.write(requests.get(server + test['coverage'], verify=False).text)
+
+
+    for test in tests['tests']:
+        subprocess.Popen('istanbul report html', shell=True, cwd=test['name']).wait()
+
+
+    subprocess.Popen('istanbul report html', shell=True).wait()
 
 
     return 0
