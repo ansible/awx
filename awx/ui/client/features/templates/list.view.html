@@ -98,6 +98,9 @@
                     <at-row-action icon="icon-launch" ng-click="vm.submitJob(template)"
                         ng-show="template.summary_fields.user_capabilities.start">
                     </at-row-action>
+                    <at-row-action icon="fa-calendar" ng-click="vm.scheduleJob(template)"
+                        ng-show="template.summary_fields.user_capabilities.schedule">
+                    </at-row-action>
                     <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
                         ng-show="template.summary_fields.user_capabilities.copy">
                     </at-row-action>

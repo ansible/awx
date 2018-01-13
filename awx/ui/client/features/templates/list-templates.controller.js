@@ -1,4 +1,4 @@
-function ListTemplatesController (model, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors) {
+function ListTemplatesController (model, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors, TemplateCopyService) {
     const vm = this || {}
     const unifiedJobTemplate = model;
 
@@ -112,8 +112,149 @@ function ListTemplatesController (model, strings, $state, $scope, rbacUiControlS
         }
     };
 
-    // TODO: implement copy function
+    vm.scheduleJob = (template) => {
+        if(template) {
+            if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+                $state.go('jobTemplateSchedules', {id: template.id});
+            }
+            else if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                $state.go('workflowJobTemplateSchedules', {id: template.id});
+            }
+            else {
+                // Something went wrong  Let the user know that we're unable to redirect to schedule because we don't know
+                // what type of job template this is
+                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while routing to schedule.');
+            }
+        }
+        else {
+            Alert('Error: Unable to schedule job', 'Template parameter is missing');
+        }
+    };
+
     vm.copyTemplate = function(template) {
+
+        if(template) {
+            if(template.type && template.type === 'job_template') {
+                Wait('start');
+                TemplateCopyService.get(template.id)
+                 .then(function(response){
+                        TemplateCopyService.set(response.data.results)
+                        .then(function(results){
+                            Wait('stop');
+                            if(results.type && results.type === 'job_template') {
+                                $state.go('templates.editJobTemplate', {job_template_id: results.id}, {reload: true});
+                            }
+                        })
+                        .catch(({data, status}) => {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Call failed. Return status: ' + status
+                            });
+                        });
+                    })
+                .catch(({data, status}) => {
+                    ProcessErrors($scope, data, status, null, {hdr: 'Error!',
+                    msg: 'Call failed. Return status: '+ status});
+                });
+            }
+            else if(template.type && template.type === 'workflow_job_template') {
+                TemplateCopyService.getWorkflowCopy(template.id)
+                .then(function(result) {
+
+                    if(result.data.can_copy) {
+                        if(result.data.can_copy_without_user_input) {
+                            // Go ahead and copy the workflow - the user has full priveleges on all the resources
+                            TemplateCopyService.copyWorkflow(template.id)
+                            .then(function(result) {
+                                $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: result.data.id}, {reload: true});
+                            })
+                            .catch(function (response) {
+                                Wait('stop');
+                                ProcessErrors($scope, response.data, response.status, null, { hdr: 'Error!',
+                                    msg: 'Call to copy workflow job template failed. Return status: ' + response.status + '.'});
+                            });
+                        }
+                        else {
+
+                            let bodyHtml = `
+                                <div class="Prompt-bodyQuery">
+                                    You do not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and will result in an incomplete workflow.
+                                </div>
+                                <div class="Prompt-bodyTarget">`;
+
+                                    // List the unified job templates user can not access
+                                    if (result.data.templates_unable_to_copy.length > 0) {
+                                        bodyHtml += '<div>Unified Job Templates that can not be copied<ul>';
+                                        _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
+                                            if(ujt) {
+                                                bodyHtml += '<li>' + ujt + '</li>';
+                                            }
+                                        });
+                                        bodyHtml += '</ul></div>';
+                                    }
+                                    // List the prompted inventories user can not access
+                                    if (result.data.inventories_unable_to_copy.length > 0) {
+                                        bodyHtml += '<div>Node prompted inventories that can not be copied<ul>';
+                                        _.forOwn(result.data.inventories_unable_to_copy, function(inv) {
+                                            if(inv) {
+                                                bodyHtml += '<li>' + inv + '</li>';
+                                            }
+                                        });
+                                        bodyHtml += '</ul></div>';
+                                    }
+                                    // List the prompted credentials user can not access
+                                    if (result.data.credentials_unable_to_copy.length > 0) {
+                                        bodyHtml += '<div>Node prompted credentials that can not be copied<ul>';
+                                        _.forOwn(result.data.credentials_unable_to_copy, function(cred) {
+                                            if(cred) {
+                                                bodyHtml += '<li>' + cred + '</li>';
+                                            }
+                                        });
+                                        bodyHtml += '</ul></div>';
+                                    }
+
+                                bodyHtml += '</div>';
+
+
+                            Prompt({
+                                hdr: 'Copy Workflow',
+                                body: bodyHtml,
+                                action: function() {
+                                    $('#prompt-modal').modal('hide');
+                                    Wait('start');
+                                    TemplateCopyService.copyWorkflow(template.id)
+                                    .then(function(result) {
+                                        Wait('stop');
+                                        $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: result.data.id}, {reload: true});
+                                    }, function (data) {
+                                        Wait('stop');
+                                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                            msg: 'Call to copy template failed. POST returned status: ' + status });
+                                    });
+                                },
+                                actionText: 'COPY',
+                                class: 'Modal-primaryButton'
+                            });
+                        }
+                    }
+                    else {
+                        Alert('Error: Unable to copy workflow job template', 'You do not have permission to perform this action.');
+                    }
+                }, function (data) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to copy template failed. GET returned status: ' + status });
+                });
+            }
+            else {
+                // Something went wrong - Let the user know that we're unable to copy because we don't know
+                // what type of job template this is
+                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while copying.');
+            }
+        }
+        else {
+            Alert('Error: Unable to copy job', 'Template parameter is missing');
+        }
     };
 
     vm.deleteTemplate = function(template) {
@@ -139,7 +280,7 @@ function ListTemplatesController (model, strings, $state, $scope, rbacUiControlS
                 })
                 .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, null, {
-                        hdr: string.get('error.HEADER'),
+                        hdr: strings.get('error.HEADER'),
                         msg: strings.get('error.CALL', {path: "" + unifiedJobTemplate.path + template.id, status})
                     });
                 })
@@ -172,7 +313,8 @@ ListTemplatesController.$inject = [
     'InitiatePlaybookRun',
     'Prompt',
     'Wait',
-    'ProcessErrors'
+    'ProcessErrors',
+    'TemplateCopyService'
 ];
 
 export default ListTemplatesController;
