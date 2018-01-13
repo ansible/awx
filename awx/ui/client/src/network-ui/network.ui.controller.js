@@ -841,7 +841,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.test_results = [];
         $scope.current_tests = $scope.tests.slice();
         $scope.first_channel.send("EnableTest", new messages.EnableTest());
-        $scope.first_channel.send("StartTest", new messages.StartTest());
     };
 
     // Buttons
@@ -1814,6 +1813,26 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         .then(function(config){
             $scope.version = config.version;
         });
+
+    $scope.reset_coverage = function() {
+        var i = null;
+        var coverage = null;
+        var f = null;
+        if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
+            for (f in window.__coverage__) {
+                coverage = window.__coverage__[f];
+                for (i in coverage.b) {
+                    coverage.b[i] = [0, 0];
+                }
+                for (i in coverage.f) {
+                    coverage.f[i] = 0;
+                }
+                for (i in coverage.s) {
+                    coverage.s[i] = 0;
+                }
+            }
+        }
+    };
 };
 
 exports.NetworkUIController = NetworkUIController;
