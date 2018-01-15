@@ -522,3 +522,8 @@ _Present.prototype.onTestCase = function(controller, msg_type, message) {
                                                 message[1].snapshots[0],
                                                 message[1].snapshots[1]));
 };
+
+_Present.prototype.onError = function(controller, msg_type, message) {
+    console.log(["onError", msg_type, message]);
+    throw new Error("ServerError: " + message);
+};
