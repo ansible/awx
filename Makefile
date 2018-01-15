@@ -12,10 +12,10 @@ MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
-VERSION=$(shell git describe --long)
-VERSION3=$(shell git describe --long | sed 's/\-g.*//')
-VERSION3DOT=$(shell git describe --long | sed 's/\-g.*//' | sed 's/\-/\./')
-RELEASE_VERSION=$(shell git describe --long | sed 's@\([0-9.]\{1,\}\).*@\1@')
+VERSION=$(shell git describe --long --first-parent)
+VERSION3=$(shell git describe --long --first-parent | sed 's/\-g.*//')
+VERSION3DOT=$(shell git describe --long --first-parent | sed 's/\-g.*//' | sed 's/\-/\./')
+RELEASE_VERSION=$(shell git describe --long --first-parent | sed 's@\([0-9.]\{1,\}\).*@\1@')
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
