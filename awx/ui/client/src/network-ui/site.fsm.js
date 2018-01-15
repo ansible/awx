@@ -68,6 +68,13 @@ var Move = new _Move();
 exports.Move = Move;
 
 
+function _ContextMenu () {
+    this.name = 'ContextMenu';
+}
+inherits(_ContextMenu, _State);
+var ContextMenu = new _ContextMenu();
+exports.ContextMenu = ContextMenu;
+
 
 
 _Start.prototype.start = function (controller) {
@@ -408,12 +415,21 @@ _Selected2.prototype.onMouseDown.transitions = ['Selected3', 'Ready'];
 
 
 
-_Selected3.prototype.onMouseUp = function (controller) {
+_Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
+    let context_menu = controller.scope.context_menus[0];
+    context_menu.enabled = true;
+    context_menu.x = $event.x;
+    context_menu.y = $event.y;
+    context_menu.buttons.forEach(function(button, index){
+        button.x = $event.x;
+        let menuPaddingTop = 5;
+        button.y = $event.y + menuPaddingTop + (button.height * index);
+    });
 
-    controller.changeState(EditLabel);
+    controller.changeState(ContextMenu);
 
 };
-_Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
+_Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
 
 _Selected3.prototype.onMouseMove = function (controller) {
@@ -614,3 +630,26 @@ _Move.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledY = controller.scope.scaledY;
 
 };
+<<<<<<< HEAD
+=======
+
+_Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
+
+
+
+_ContextMenu.prototype.onLabelEdit = function (controller) {
+
+    controller.changeState(EditLabel);
+
+};
+_ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
+
+_ContextMenu.prototype.onMouseDown = function (controller) {
+
+    var item = controller.scope.context_menus[0];
+    item.enabled = false;
+    controller.changeState(Ready);
+
+};
+_ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
+>>>>>>> 61e560a83... adding context menu for sites
