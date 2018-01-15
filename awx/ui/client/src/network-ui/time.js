@@ -126,21 +126,6 @@ _Past.prototype.onViewPort = function(controller, msg_type, message) {
         controller.scope.updateScaledXY();
         controller.scope.updatePanAndScale();
 };
-_Past.prototype.onTouchEvent = function(controller, msg_type, message) {
-        if (message.sender === controller.scope.client_id) {
-            return;
-        }
-        message.preventDefault = util.noop;
-        if (message.type === "touchstart") {
-            controller.scope.onTouchStart(message);
-        }
-        if (message.type === "touchend") {
-            controller.scope.onTouchEnd(message);
-        }
-        if (message.type === "touchmove") {
-            controller.scope.onTouchMove(message);
-        }
-};
 _Past.prototype.onMouseEvent = function(controller, msg_type, message) {
         if (message.sender === controller.scope.client_id) {
             return;
@@ -427,24 +412,6 @@ _Present.prototype.onViewPort = function(controller, msg_type, message) {
         controller.scope.panY = message.panY;
         controller.scope.updateScaledXY();
         controller.scope.updatePanAndScale();
-};
-_Present.prototype.onTouchEvent = function(controller, msg_type, message) {
-        if (!controller.scope.replay) {
-            return;
-        }
-        if (message.sender === controller.scope.client_id) {
-            return;
-        }
-        message.preventDefault = util.noop;
-        if (message.type === "touchstart") {
-            controller.scope.onTouchStart(message);
-        }
-        if (message.type === "touchend") {
-            controller.scope.onTouchEnd(message);
-        }
-        if (message.type === "touchmove") {
-            controller.scope.onTouchMove(message);
-        }
 };
 _Present.prototype.onMouseEvent = function(controller, msg_type, message) {
         if (!controller.scope.replay) {

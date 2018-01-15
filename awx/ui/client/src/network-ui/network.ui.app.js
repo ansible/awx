@@ -4,7 +4,6 @@
 var angular = require('angular');
 var NetworkUIController = require('./network.ui.controller.js');
 var cursor = require('./cursor.directive.js');
-var touch = require('./touch.directive.js');
 var router = require('./router.directive.js');
 var switchd = require('./switch.directive.js');
 var host = require('./host.directive.js');
@@ -38,11 +37,9 @@ var awxNetworkUI = require('./network.ui.directive.js');
 
 var networkUI = angular.module('networkUI', [
         'monospaced.mousewheel',
-        'ngTouch'
     ])
     .controller('NetworkUIController', NetworkUIController.NetworkUIController)
     .directive('awxNetCursor', cursor.cursor)
-    .directive('awxNetTouch', touch.touch)
     .directive('awxNetDebug', debug.debug)
     .directive('awxNetRouter', router.router)
     .directive('awxNetSwitch', switchd.switchd)
