@@ -3,6 +3,7 @@ import ldap
 
 # Django
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ValidationError
 
 # Django Auth LDAP
 import django_auth_ldap.config
@@ -640,7 +641,7 @@ class SAMLEnabledIdPsField(fields.DictField):
     child = SAMLIdPField()
 
 
-class SAMLSecurityField(fields.DictField):
+class SAMLSecurityField(BaseDictWithChildField):
 
     child_fields = {
         'nameIdEncrypted': fields.BooleanField(required=False),
@@ -662,4 +663,29 @@ class SAMLSecurityField(fields.DictField):
         'digestAlgorithm': fields.CharField(allow_null=True, required=False),
     }
     allow_unknown_keys = True
+
+
+class SAMLOrgAttrField(BaseDictWithChildField):
+
+    child_fields = {
+        'remove': fields.BooleanField(required=False),
+        'saml_attr': fields.CharField(required=False, allow_null=True),
+    }
+
+
+class SAMLTeamAttrTeamOrgMapField(BaseDictWithChildField):
+
+    child_fields = {
+        'team': fields.CharField(required=True, allow_null=False),
+        'organization': fields.CharField(required=True, allow_null=False),
+    }
+
+
+class SAMLTeamAttrField(BaseDictWithChildField):
+
+    child_fields = {
+        'team_org_map': fields.ListField(required=False, child=SAMLTeamAttrTeamOrgMapField(), allow_null=True),
+        'remove': fields.BooleanField(required=False),
+        'saml_attr': fields.CharField(required=False, allow_null=True),
+    }
 

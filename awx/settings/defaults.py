@@ -498,7 +498,8 @@ else:
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
-SOCIAL_AUTH_PIPELINE = (
+
+_SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
@@ -512,6 +513,14 @@ SOCIAL_AUTH_PIPELINE = (
     'awx.sso.pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
     'awx.sso.pipeline.prevent_inactive_login',
+)
+SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
+    'awx.sso.pipeline.update_user_orgs',
+    'awx.sso.pipeline.update_user_teams',
+)
+SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
+    'awx.sso.pipeline.update_user_orgs_by_saml_attr',
+    'awx.sso.pipeline.update_user_teams_by_saml_attr',
     'awx.sso.pipeline.update_user_orgs',
     'awx.sso.pipeline.update_user_teams',
 )
@@ -558,6 +567,9 @@ SOCIAL_AUTH_SAML_ORG_INFO = {}
 SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
+
+SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
+SOCIAL_AUTH_SAML_TEAM_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.

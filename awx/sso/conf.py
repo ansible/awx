@@ -1164,6 +1164,64 @@ register(
     feature_required='enterprise_auth',
 )
 
+register(
+    'SOCIAL_AUTH_SAML_ORGANIZATION_ATTR',
+    field_class=fields.SAMLOrgAttrField,
+    allow_null=True,
+    default=None,
+    label=_('SAML Organization Attribute Mapping'),
+    help_text=_('Used to translate user organization membership into Tower.'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=collections.OrderedDict([
+        ('saml_attr', 'organization'),
+        ('remove', True),
+    ]),
+    feature_required='enterprise_auth',
+)
+
+register(
+    'SOCIAL_AUTH_SAML_TEAM_ATTR',
+    field_class=fields.SAMLTeamAttrField,
+    allow_null=True,
+    default=None,
+    label=_('SAML Team Map'),
+    help_text=_('Used to translate user team membership into Tower.'),
+    category=_('SAML'),
+    category_slug='saml',
+    placeholder=collections.OrderedDict([
+        ('saml_attr', 'organization'),
+        ('remove', True),
+        ('team_org_map', [
+            collections.OrderedDict([
+                ('team', 'Marketing'),
+                ('organization', 'Red Hat'),
+            ]),
+            collections.OrderedDict([
+                ('team', 'Human Resources'),
+                ('organization', 'Red Hat'),
+            ]),
+            collections.OrderedDict([
+                ('team', 'Engineering'),
+                ('organization', 'Red Hat'),
+            ]),
+            collections.OrderedDict([
+                ('team', 'Engineering'),
+                ('organization', 'Ansible'),
+            ]),
+            collections.OrderedDict([
+                ('team', 'Quality Engineering'),
+                ('organization', 'Ansible'),
+            ]),
+            collections.OrderedDict([
+                ('team', 'Sales'),
+                ('organization', 'Ansible'),
+            ]),
+        ]),
+    ]),
+    feature_required='enterprise_auth',
+)
+
 
 def tacacs_validate(serializer, attrs):
     if not serializer.instance or \

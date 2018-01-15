@@ -3,15 +3,20 @@
 
 # Python
 import re
+import logging
 
 # Python Social Auth
 from social_core.exceptions import AuthException
 
 # Django
 from django.utils.translation import ugettext_lazy as _
+from django.db.models import Q
 
 # Tower
 from awx.conf.license import feature_enabled
+
+
+logger = logging.getLogger('awx.sso.pipeline')
 
 
 class AuthNotFound(AuthException):
@@ -138,3 +143,76 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
         users_expr = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', True))
         _update_m2m_from_expression(user, team.member_role.members, users_expr, remove)
+
+
+def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
+    if not user:
+        return
+    from awx.main.models import Organization
+    from django.conf import settings
+    multiple_orgs = feature_enabled('multiple_organizations')
+    org_map = settings.SOCIAL_AUTH_SAML_ORGANIZATION_ATTR
+    if org_map.get('saml_attr') is None:
+        return
+
+    attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_attr'], [])
+
+    org_ids = []
+
+    for org_name in attr_values:
+        if multiple_orgs:
+            org = Organization.objects.get_or_create(name=org_name)[0]
+        else:
+            try:
+                org = Organization.objects.order_by('pk')[0]
+            except IndexError:
+                continue
+
+        org_ids.append(org.id)
+        org.member_role.members.add(user)
+
+    if org_map.get('remove', True):
+        [o.member_role.members.remove(user) for o in 
+            Organization.objects.filter(Q(member_role__members=user) & ~Q(id__in=org_ids))]
+
+
+def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs):
+    if not user:
+        return
+    from awx.main.models import Organization, Team
+    from django.conf import settings
+    multiple_orgs = feature_enabled('multiple_organizations')
+    team_map = settings.SOCIAL_AUTH_SAML_TEAM_ATTR
+    if team_map.get('saml_attr') is None:
+        return
+
+    saml_team_names = set(kwargs
+                          .get('response', {})
+                          .get('attributes', {})
+                          .get(team_map['saml_attr'], []))
+
+    team_ids = []
+    for team_name_map in team_map.get('team_org_map', []):
+        team_name = team_name_map.get('team', '')
+        if team_name in saml_team_names:
+            if multiple_orgs:
+                if not team_name_map.get('organization', ''):
+                    # Settings field validation should prevent this.
+                    logger.error("organization name invalid for team {}".format(team_name))
+                    continue
+                org = Organization.objects.get_or_create(name=team_name_map['organization'])[0]
+            else:
+                try:
+                    org = Organization.objects.order_by('pk')[0]
+                except IndexError:
+                    continue
+            team = Team.objects.get_or_create(name=team_name, organization=org)[0]
+
+            team_ids.append(team.id)
+            team.member_role.members.add(user)
+
+    if team_map.get('remove', True):
+        [t.member_role.members.remove(user) for t in 
+            Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
+
+
