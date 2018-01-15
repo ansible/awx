@@ -586,13 +586,19 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-            if ($scope.selected_items.length === 1){
-                if ($scope.selected_items[0].host_id === 0){
-                    let host = $scope.selected_items[0];
+
+            // show details for devices
+            if ($scope.selected_devices.length === 1){
+
+                // following block is intended for devices added in the network UI but not in Tower
+                if ($scope.selected_devices[0].host_id === 0){
+                    let host = $scope.selected_devices[0];
                     $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
-                if ($scope.selected_items[0].host_id !== 0){
-                    let host_id = $scope.selected_items[0].host_id;
+
+                // following block is intended for devices that are saved in the API
+                if ($scope.selected_devices[0].host_id !== 0){
+                    let host_id = $scope.selected_devices[0].host_id;
                     let url = `/api/v2/hosts/${host_id}/`;
                     $http.get(url)
                          .then(function(response) {
@@ -606,6 +612,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                          });
                 }
             }
+
+            // show details for interfaces
+            else if($scope.selected_interfaces.length === 1){
+                let selected_interface  = $scope.selected_interfaces[0];
+                $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
+            }
+
+            // show details for links
+            else if($scope.selected_links.length === 1){
+                let link  = $scope.selected_links[0];
+                $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
+            }
+
+            //show details for groups, racks, and sites
             else if ($scope.selected_groups.length === 1){
                 let group = $scope.selected_groups[0];
                 $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);

@@ -630,8 +630,6 @@ _Move.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledY = controller.scope.scaledY;
 
 };
-<<<<<<< HEAD
-=======
 
 _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
 
@@ -652,4 +650,3 @@ _ContextMenu.prototype.onMouseDown = function (controller) {
 
 };
 _ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
->>>>>>> 61e560a83... adding context menu for sites
